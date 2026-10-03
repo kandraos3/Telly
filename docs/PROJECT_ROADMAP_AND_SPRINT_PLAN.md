@@ -23,19 +23,19 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 2 (Weeks 3–4): The Pairwise Duel Engine, Scoring & The Personal Dual-Canon**
-- **Current Active Ticket**: `ALGO-203`: TrueSkill Uncertainty ($\sigma$) Decay & Confidence Tracking
-- **Overall Roadmap Progress**: **23 / 89 Tickets Completed** (25.8%)
+- **Current Active Ticket**: `ALGO-204`: Dual-Canon Media-Type Segregation Rules
+- **Overall Roadmap Progress**: **24 / 89 Tickets Completed** (27.0%)
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos`), Unit Tests (100% pass)
 - **Last Updated**: 2026-10-03
 
 | Sprint | Status | Total Tickets | Completed | Progress |
 | :---: | :---: | :---: | :---: | :--- |
 | **Sprint 1** | 🟢 **Completed** | 19 | 19 | `████████████████████` 100.0% |
-| **Sprint 2** | 🟡 **Active** | 20 | 4 | `████░░░░░░` 20.0% |
+| **Sprint 2** | 🟡 **Active** | 20 | 5 | `█████░░░░░` 25.0% |
 | **Sprint 3** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 4** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 5** | ⚪ Queued | 18 | 0 | `░░░░░░░░░░` 0% |
-| **Total** | | **89** | **23** | **25.8%** |
+| **Total** | | **89** | **24** | **27.0%** |
 
 ---
 
@@ -388,12 +388,12 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.1 (TrueSkill Invariants)
 - **Scope & Objectives**: Track Bayesian ranking confidence $\sigma$ and transition titles between `Provisional` and `Locked`.
 - **Granular Tasks**:
-  - [ ] Create `lib/features/ranking/domain/trueskill_confidence.dart`.
-  - [ ] Implement initial uncertainty $\sigma_0 = 1.20$ for newly inserted titles.
-  - [ ] Apply decay multiplier $\sigma_{t+1} = \max(0.15, \sigma_t \times 0.75)$ on every completed duel involving the title.
-  - [ ] Mark titles with $\sigma < 0.50$ as `RankingStatus.locked` (solid gold badge); otherwise `RankingStatus.provisional` (dashed badge).
+  - [x] Create `lib/features/ranking/domain/trueskill_confidence.dart`.
+  - [x] Implement initial uncertainty $\sigma_0 = 1.20$ for newly inserted titles.
+  - [x] Apply decay multiplier $\sigma_{t+1} = \max(0.15, \sigma_t \times 0.75)$ on every completed duel involving the title.
+  - [x] Mark titles with $\sigma < 0.50$ as `RankingStatus.locked` (solid gold badge); otherwise `RankingStatus.provisional` (dashed badge).
 - **Testing & Verification**:
-  - [ ] Unit test verifying 4 consecutive duels decay $\sigma$ from $1.20 \to 0.38$, transitioning status to `Locked`.
+  - [x] Unit test verifying 4 consecutive duels decay $\sigma$ from $1.20 \to 0.38$, transitioning status to `Locked`.
 - **Dependencies**: None.
 
 #### `ALGO-204`: Dual-Canon Media-Type Segregation Rules
