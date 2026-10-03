@@ -23,19 +23,19 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 2 (Weeks 3–4): The Pairwise Duel Engine, Scoring & The Personal Dual-Canon**
-- **Current Active Ticket**: `BE-201`: PostgreSQL Procedure `insert_user_ranking_atomic`
-- **Overall Roadmap Progress**: **26 / 89 Tickets Completed** (29.2%)
+- **Current Active Ticket**: `FE-201`: `SCR-10` Binary Duel Arena Screen & Card Layout
+- **Overall Roadmap Progress**: **29 / 89 Tickets Completed** (32.6%)
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos`), Unit Tests (100% pass)
 - **Last Updated**: 2026-10-03
 
 | Sprint | Status | Total Tickets | Completed | Progress |
 | :---: | :---: | :---: | :---: | :--- |
 | **Sprint 1** | 🟢 **Completed** | 19 | 19 | `████████████████████` 100.0% |
-| **Sprint 2** | 🟡 **Active** | 20 | 7 | `███████░░░` 35.0% |
+| **Sprint 2** | 🟡 **Active** | 20 | 10 | `██████████░░░░░░░░░░` 50.0% |
 | **Sprint 3** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 4** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 5** | ⚪ Queued | 18 | 0 | `░░░░░░░░░░` 0% |
-| **Total** | | **89** | **26** | **29.2%** |
+| **Total** | | **89** | **29** | **32.6%** |
 
 ---
 
@@ -432,12 +432,12 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
   - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §3.1 (Atomic Stored Procedure)
 - **Scope & Objectives**: PL/pgSQL function shifting existing rows by +1 and recomputing dynamic scores atomically.
 - **Granular Tasks**:
-  - [ ] Write PL/pgSQL function `insert_user_ranking_atomic(p_user_id, p_title_id, p_media_type, p_rank_position)`.
-  - [ ] Execute `UPDATE user_rankings SET rank_position = rank_position + 1 WHERE user_id = p_user_id AND media_type = p_media_type AND rank_position >= p_rank_position`.
-  - [ ] Insert new row at `p_rank_position`.
-  - [ ] Recalculate dynamic percentile scores for all rows of `(p_user_id, p_media_type)` in the same transaction.
+  - [x] Write PL/pgSQL function `insert_user_ranking_atomic(p_user_id, p_title_id, p_media_type, p_rank_position)`.
+  - [x] Execute `UPDATE user_rankings SET rank_position = rank_position + 1 WHERE user_id = p_user_id AND media_type = p_media_type AND rank_position >= p_rank_position`.
+  - [x] Insert new row at `p_rank_position`.
+  - [x] Recalculate dynamic percentile scores for all rows of `(p_user_id, p_media_type)` in the same transaction.
 - **Testing & Verification**:
-  - [ ] pgTAP test verifying concurrent insertions never create duplicate rank positions.
+  - [x] pgTAP test verifying concurrent insertions never create duplicate rank positions.
 - **Dependencies**: `BE-101`.
 
 #### `BE-202`: Pairwise Duels Audit Logging
@@ -445,11 +445,11 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
   - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §2.3 (`pairwise_duels` table)
 - **Scope & Objectives**: Record every head-to-head decision to power taste match and upset detection.
 - **Granular Tasks**:
-  - [ ] Create table `pairwise_duels` tracking `user_id`, `winner_id`, `loser_id`, `media_type`, `decision_time_ms`, `is_upset`.
-  - [ ] Add check constraint `winner_id != loser_id`.
-  - [ ] Create composite index on `(winner_id, loser_id)` for global win-rate aggregations.
+  - [x] Create table `pairwise_duels` tracking `user_id`, `winner_id`, `loser_id`, `media_type`, `decision_time_ms`, `is_upset`.
+  - [x] Add check constraint `winner_id != loser_id`.
+  - [x] Create composite index on `(winner_id, loser_id)` for global win-rate aggregations.
 - **Testing & Verification**:
-  - [ ] Test inserting duel records and querying win rates by title.
+  - [x] Test inserting duel records and querying win rates by title.
 - **Dependencies**: `BE-101`.
 
 ---
@@ -620,11 +620,11 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §3.3, §6 (pgTAP Stored Procs)
 - **Scope & Objectives**: Verify database stored procedure integrity in Supabase container.
 - **Granular Tasks**:
-  - [ ] Write `database/tests/01_insert_user_ranking_atomic_test.sql` using pgTAP.
-  - [ ] Assert rank shifting maintains continuous integer sequences ($1, 2, 3, 4\dots$).
-  - [ ] Assert movie insertions do not shift TV show rankings.
+  - [x] Write `database/tests/01_insert_user_ranking_atomic_test.sql` using pgTAP.
+  - [x] Assert rank shifting maintains continuous integer sequences ($1, 2, 3, 4\dots$).
+  - [x] Assert movie insertions do not shift TV show rankings.
 - **Testing & Verification**:
-  - [ ] Execute `pg_prove` in CI; all tests pass.
+  - [x] Execute `pg_prove` in CI; all tests pass.
 - **Dependencies**: `BE-201`.
 
 #### `QA-204`: Widget Tests for Duel Arena (`SCR-10`) & Slot Reveal (`SCR-12`)
