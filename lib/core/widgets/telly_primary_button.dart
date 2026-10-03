@@ -87,11 +87,15 @@ class _TellyPrimaryButtonState extends State<TellyPrimaryButton> {
                         widget.icon!,
                         const SizedBox(width: 8),
                       ],
-                      Text(
-                        widget.label,
-                        style: TellyTypography.titleMedium(color: textColor).copyWith(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
+                      Flexible(
+                        child: Text(
+                          widget.label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TellyTypography.titleMedium(color: textColor).copyWith(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
                     ],

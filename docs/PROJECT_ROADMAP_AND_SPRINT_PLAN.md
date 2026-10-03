@@ -23,19 +23,19 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 1 (Weeks 1–2): Infrastructure, Auth, Foundation & Data Ingestion**
-- **Current Active Ticket**: `FE-109`: `SCR-03` 50-Title Seed Recognition Grid (Movies, TV, Anime)
-- **Overall Roadmap Progress**: **9 / 81 Tickets Completed** (11.1%)
+- **Current Active Ticket**: `FE-110`: 1-Click AniList & MyAnimeList Profile Importer
+- **Overall Roadmap Progress**: **10 / 81 Tickets Completed** (12.3%)
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos`), Unit Tests (100% pass)
 - **Last Updated**: 2026-10-03
 
 | Sprint | Status | Total Tickets | Completed | Progress |
 | :---: | :---: | :---: | :---: | :--- |
-| **Sprint 1** | 🟡 **Active** | 15 | 9 | `█████████░` 60.0% |
+| **Sprint 1** | 🟡 **Active** | 15 | 10 | `██████████` 66.7% |
 | **Sprint 2** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 3** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 4** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 5** | ⚪ Queued | 18 | 0 | `░░░░░░░░░░` 0% |
-| **Total** | | **81** | **9** | **11.1%** |
+| **Total** | | **81** | **10** | **12.3%** |
 
 ---
 
@@ -248,14 +248,14 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [**`features/01_ONBOARDING_AND_TASTE_SEEDING.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/01_ONBOARDING_AND_TASTE_SEEDING.md) §3 (Seed Matrix)
 - **Scope & Objectives**: 50-poster multi-select grid with category filter chips and dynamic progress counter.
 - **Granular Tasks**:
-  - [ ] Create `lib/features/onboarding/presentation/screens/seed_grid_screen.dart`.
-  - [ ] Implement category filter tabs: `[ All (50) ]`, `[ 🎬 Movies ]`, `[ 📺 TV Series ]`, `[ ⛩️ Anime ]`.
-  - [ ] Render 3-column poster grid using `CachedNetworkImage` with shimmer placeholders.
-  - [ ] Add checkmark badge overlay on selected posters with Phosphor Lime border highlight.
-  - [ ] Render sticky bottom CTA bar displaying `"Select at least 5 titles (X/5 selected)"`, enabling when $X \ge 5$.
+  - [x] Create `lib/features/onboarding/presentation/screens/seed_grid_screen.dart`.
+  - [x] Implement category filter tabs: `[ All (50) ]`, `[ 🎬 Movies ]`, `[ 📺 TV Series ]`, `[ ⛩️ Anime ]`.
+  - [x] Render 3-column poster grid using `CachedNetworkImage` with shimmer placeholders.
+  - [x] Add checkmark badge overlay on selected posters with Phosphor Lime border highlight.
+  - [x] Render sticky bottom CTA bar displaying `"Select at least 5 titles (X/5 selected)"`, enabling when $X \ge 5$.
 - **Testing & Verification**:
-  - [ ] Widget test verifying CTA button remains disabled at 4 items and enables at 5 items.
-  - [ ] Test category filter tab switches grid contents correctly.
+  - [x] Widget test verifying CTA button remains disabled at 4 items and enables at 5 items.
+  - [x] Test category filter tab switches grid contents correctly.
 - **Dependencies**: `FE-104`, `BE-102`.
 
 #### `FE-110`: 1-Click AniList & MyAnimeList Profile Importer
