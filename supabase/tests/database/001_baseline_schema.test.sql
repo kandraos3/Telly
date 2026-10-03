@@ -3,7 +3,7 @@
 BEGIN;
 CREATE EXTENSION IF NOT EXISTS pgtap WITH SCHEMA extensions;
 
-SELECT plan(45);
+SELECT plan(46);
 
 -- 1. Every contract table exists ---------------------------------------------
 SELECT has_table('public', t, format('table %s exists', t))
@@ -11,7 +11,8 @@ FROM unnest(ARRAY[
     'users', 'titles', 'tv_seasons', 'streaming_platforms', 'title_availability',
     'user_streaming_subscriptions', 'user_rankings', 'pairwise_duels', 'user_external_accounts',
     'user_dropped_shows', 'user_watchlist', 'user_muted_titles', 'social_follows', 'user_blocks',
-    'taste_matches', 'squads', 'squad_members', 'activity_logs', 'feed_reactions', 'comments', 'reports'
+    'taste_matches', 'squads', 'squad_members', 'activity_logs', 'feed_reactions', 'comments', 'reports',
+    'applied_mutations'
 ]) AS t;
 
 SELECT hasnt_table('public', 'friendships', 'duplicate friendships table is gone');
@@ -22,7 +23,7 @@ SELECT enum_has_labels('public', 'media_type_enum', ARRAY['movie', 'tv'], 'media
 SELECT col_is_pk('public', 'titles', ARRAY['id', 'media_type'], 'titles keyed by (id, media_type)');
 SELECT col_type_is('public', 'user_rankings', 'media_type', 'media_type_enum', 'user_rankings.media_type uses the enum');
 SELECT has_column('public', 'user_rankings', 'rank_position', 'user_rankings.rank_position exists');
-SELECT has_column('public', 'user_rankings', 'client_mutation_id', 'user_rankings.client_mutation_id exists (I-5)');
+SELECT has_column('public', 'pairwise_duels', 'client_mutation_id', 'pairwise_duels.client_mutation_id exists (I-5)');
 
 -- 3. Seed (BE-102 counts) ------------------------------------------------------
 SELECT is((SELECT count(*)::int FROM public.titles WHERE media_type = 'movie'), 15, '15 movies seeded');

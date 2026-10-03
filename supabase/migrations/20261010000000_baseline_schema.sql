@@ -184,13 +184,21 @@ CREATE TABLE public.user_rankings (
     is_rewatch BOOLEAN NOT NULL DEFAULT FALSE,
     rewatch_count INT NOT NULL DEFAULT 1 CHECK (rewatch_count >= 1),
     venue public.viewing_venue_enum,
-    client_mutation_id UUID UNIQUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     CONSTRAINT uq_user_rankings_title UNIQUE (user_id, title_id, media_type),
     CONSTRAINT uq_user_rankings_position UNIQUE (user_id, media_type, rank_position)
         DEFERRABLE INITIALLY DEFERRED,
     FOREIGN KEY (title_id, media_type) REFERENCES public.titles(id, media_type) ON DELETE CASCADE
+);
+
+-- Idempotency log for offline-queue replay (invariant I-5). One row per applied client mutation;
+-- a replayed client_mutation_id is a no-op. Server-internal: no client policies.
+CREATE TABLE public.applied_mutations (
+    client_mutation_id UUID PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+    kind VARCHAR(30) NOT NULL,
+    applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE public.pairwise_duels (

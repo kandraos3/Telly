@@ -24,7 +24,7 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 6 — Integration, Wiring & Audit Remediation** (planned 2026-10-03; owner decisions D1–D7 recorded in Sprint 6)
-- **Current Active Ticket**: `BE-603` (Concurrency-Safe, Authorized Ranking RPCs) — Sprint 6: 5 / 32 tickets complete
+- **Current Active Ticket**: `BE-604` (Per-Canon Taste Match, Feed, Squad & Account RPCs) — Sprint 6: 6 / 32 tickets complete
 - **Overall Roadmap Progress**: Sprints 1–5 granular tasks after the `DOC-601` honesty reset (2026-10-03): **281 / 431 verified** · **121 un-checked** (each annotated `→ remediated by <Sprint 6 ticket>`) · **29 human-only**. The earlier "89 / 89" claim was overstated.
 - **Human-Only Tasks**: 29 tasks in Sprints 1–5 marked `👤 [TO BE DONE BY HUMAN]` (cloud setup, secrets, store submission, device/CI runs, dashboard verification), plus the Sprint 6 human prerequisites list. These cannot be completed or verified from code.
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (215 / 215 pass — note: many tests are widget/unit-level only; no real E2E or golden tests exist yet)
@@ -435,12 +435,12 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
   - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §3.1 (Atomic Stored Procedure)
 - **Scope & Objectives**: PL/pgSQL function shifting existing rows by +1 and recomputing dynamic scores atomically.
 - **Granular Tasks**:
-  - [ ] Write PL/pgSQL function `insert_user_ranking_atomic(p_user_id, p_title_id, p_media_type, p_rank_position)`. → remediated by `BE-603`
-  - [ ] Execute `UPDATE user_rankings SET rank_position = rank_position + 1 WHERE user_id = p_user_id AND media_type = p_media_type AND rank_position >= p_rank_position`. → remediated by `BE-603`
-  - [ ] Insert new row at `p_rank_position`. → remediated by `BE-603`
-  - [ ] Recalculate dynamic percentile scores for all rows of `(p_user_id, p_media_type)` in the same transaction. → remediated by `BE-603`
+  - [x] Write PL/pgSQL function `insert_user_ranking_atomic(p_user_id, p_title_id, p_media_type, p_rank_position)`. ✅ remediated in `BE-603`
+  - [x] Execute `UPDATE user_rankings SET rank_position = rank_position + 1 WHERE user_id = p_user_id AND media_type = p_media_type AND rank_position >= p_rank_position`. ✅ remediated in `BE-603`
+  - [x] Insert new row at `p_rank_position`. ✅ remediated in `BE-603`
+  - [x] Recalculate dynamic percentile scores for all rows of `(p_user_id, p_media_type)` in the same transaction. ✅ remediated in `BE-603`
 - **Testing & Verification**:
-  - [ ] pgTAP test verifying concurrent insertions never create duplicate rank positions. → remediated by `BE-603`
+  - [x] pgTAP test verifying concurrent insertions never create duplicate rank positions. ✅ remediated in `BE-603`
 - **Dependencies**: `BE-101`.
 
 #### `BE-202`: Pairwise Duels Audit Logging
@@ -673,7 +673,7 @@ Build social connections, the activity feed with real-time upset alert detection
 - **Scope & Objectives**: Detect when a user's duel decision defies platform consensus by $\ge 25\%$.
 - **Granular Tasks**:
   - [x] Create database trigger or function `detect_upset_duel(winner_id, loser_id)`.
-  - [ ] Query platform win rates: if $\text{WinRate}(\text{loser}) - \text{WinRate}(\text{winner}) \ge 0.25$, set `pairwise_duels.is_upset = true`. → remediated by `BE-603`
+  - [x] Query platform win rates: if $\text{WinRate}(\text{loser}) - \text{WinRate}(\text{winner}) \ge 0.25$, set `pairwise_duels.is_upset = true`. ✅ remediated in `BE-603`
   - [ ] Write upset notification event to `activity_logs` with `is_upset: true`. → remediated by `BE-604`
 - **Testing & Verification**:
   - [x] Unit test: Candidate A (20% win rate) beating Candidate B (80% win rate) flags `is_upset = true`.
@@ -1487,15 +1487,15 @@ Turn the library of individually-tested widgets and algorithms into a **wired, r
   - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §3.1
 - **Scope & Objectives**: Fix BE-201's lack of locking, its corrupting re-rank path, and an unflagged authorization hole (`SECURITY DEFINER` trusts a caller-supplied `p_user_id`).
 - **Granular Tasks**:
-  - [ ] `insert_user_ranking_atomic`: derive user from `auth.uid()` (drop `p_user_id`); take `pg_advisory_xact_lock(hashtextextended(user_id::text || media_type, 0))`; `SET search_path = public`.
-  - [ ] Re-rank path: if the title is already ranked, close its old gap before opening the new one, so ranks stay a contiguous `1..N` permutation.
-  - [ ] Score recompute uses $\gamma = 0.82$ + D3 prior in one set-based `UPDATE … FROM (SELECT row_number() …)` (no per-row loop); first title gets $\sigma = 0.50$ (§7.3).
-  - [ ] Accept `p_client_mutation_id`; a replay of an already-applied ID is a no-op that returns the existing row.
-  - [ ] New RPCs: `move_user_ranking(title, media_type, new_rank)` (drag-and-drop `FE-209`), `delete_user_ranking(...)` (closes the gap), `record_pairwise_duels(jsonb)` (batch insert with `is_upset` from `detect_upset_duel`).
-  - [ ] Shared parity fixture `test/fixtures/score_curve_vectors.json` (N ∈ {1,2,3,5,9,10,50,100}) consumed by both Dart unit tests and pgTAP.
+  - [x] `insert_user_ranking_atomic`: derive user from `auth.uid()` (drop `p_user_id`); take `pg_advisory_xact_lock(hashtextextended(user_id::text || media_type, 0))`; `SET search_path = public`.
+  - [x] Re-rank path: if the title is already ranked, close its old gap before opening the new one, so ranks stay a contiguous `1..N` permutation.
+  - [x] Score recompute uses $\gamma = 0.82$ + D3 prior in one set-based `UPDATE … FROM (SELECT row_number() …)` (no per-row loop); first title gets $\sigma = 0.50$ (§7.3).
+  - [x] Accept `p_client_mutation_id`; a replay of an already-applied ID is a no-op that returns the existing row (recorded in a dedicated `applied_mutations` log — a per-row column could not make re-ranks idempotent).
+  - [x] New RPCs: `move_user_ranking(title, media_type, new_rank)` (drag-and-drop `FE-209`), `delete_user_ranking(...)` (closes the gap), `record_pairwise_duels(jsonb)` (batch insert with `is_upset` from `detect_upset_duel`).
+  - [x] Shared parity fixture `test/fixtures/score_curve_vectors.json` (N ∈ {1,2,3,5,9,10,50,100}) consumed by both Dart unit tests and pgTAP.
 - **Testing & Verification**:
-  - [ ] pgTAP: contiguity invariant after insert / re-rank / move / delete; dual-canon isolation (movie insert never shifts tv ranks); idempotent replay; caller cannot write another user's canon; scores equal the fixture vectors to 2 dp.
-  - [ ] Concurrency test: two parallel `psql` sessions inserting into the same canon yield a contiguous permutation (run in CI script).
+  - [x] pgTAP: contiguity invariant after insert / re-rank / move / delete; dual-canon isolation (movie insert never shifts tv ranks); idempotent replay; caller cannot write another user's canon; scores equal the fixture vectors to 2 dp.
+  - [x] Concurrency test: 12 parallel `psql` sessions inserting into the same canon yield a contiguous permutation with correct scores — `supabase/tests/concurrency/ranking_race.sh` (verified to FAIL with the advisory lock disabled; CI wiring in `QA-601`).
 - **Dependencies**: `BE-601`, `BE-602`, `ALGO-601`.
 
 #### `BE-604`: Per-Canon Taste Match, Feed, Squad & Account RPCs

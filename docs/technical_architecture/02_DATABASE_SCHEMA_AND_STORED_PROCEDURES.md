@@ -16,7 +16,7 @@ We achieve this using **PostgreSQL (via Supabase)** for persistent relational st
 | I-2 | **Composite title key.** TMDB IDs collide across movies and TV, so every title reference is the pair `(title_id, media_type)` referencing `titles(id, media_type)`. |
 | I-3 | **Contiguous canon.** For each `(user_id, media_type)`, `rank_position` is exactly the permutation `1..N`. Enforced by RPCs plus `UNIQUE (user_id, media_type, rank_position) DEFERRABLE INITIALLY DEFERRED`. |
 | I-4 | **Server derives identity.** Every client-callable RPC derives the acting user from `auth.uid()`; no RPC accepts a caller-supplied user ID for writes. |
-| I-5 | **Idempotent offline replay.** Mutations sent from the client offline queue carry a `client_mutation_id UUID`; replaying an already-applied ID is a no-op. |
+| I-5 | **Idempotent offline replay.** Mutations sent from the client offline queue carry a `client_mutation_id UUID`, recorded in `applied_mutations` (duels also store it on `pairwise_duels`); replaying an already-applied ID is a no-op. A per-row column would not work: a later move would overwrite it, so replaying the earlier mutation would undo the move. |
 | I-6 | **RLS everywhere.** Row-Level Security is enabled on every table in `public`. |
 
 ---
@@ -48,7 +48,8 @@ Abbreviations: **PK** primary key, **FK** foreign key, **U** unique. All `update
 | `streaming_platforms` | **PK** `id` (`netflix`, `max`, `hulu`, `apple_tv_plus`, `disney_plus`, `prime_video`, `crunchyroll`, `paramount_plus`, `criterion`) | Provider catalog. |
 | `title_availability` | **PK** `id`; **FK** `(title_id, media_type)`, `platform_id`; `country_code`, `monetization_type`, `deep_link_url`, `available_until`, `is_leaving_soon`; **U** `(title_id, media_type, platform_id, country_code, monetization_type)` | Streaming availability cache. |
 | `user_streaming_subscriptions` | **PK** `(user_id, platform_id)` | Household services (`SCR-02`). |
-| `user_rankings` | **PK** `id`; **FK** `(title_id, media_type)`; `user_id`; `rank_position` INT ≥ 1; `calculated_score` NUMERIC(4,2); `rating_uncertainty` NUMERIC(3,2) (σ); `status`, `finale_impact`, `favorite_character`, `review_short` VARCHAR(280), `tags` TEXT[], `watched_with_user_ids` UUID[], `audio_language`, `is_rewatch`, `rewatch_count`, `venue`, `client_mutation_id` UUID **U**; **U** `(user_id, title_id, media_type)`; **U** `(user_id, media_type, rank_position)` DEFERRABLE INITIALLY DEFERRED | The personal Dual-Canon. |
+| `user_rankings` | **PK** `id`; **FK** `(title_id, media_type)`; `user_id`; `rank_position` INT ≥ 1; `calculated_score` NUMERIC(4,2); `rating_uncertainty` NUMERIC(3,2) (σ); `status`, `finale_impact`, `favorite_character`, `review_short` VARCHAR(280), `tags` TEXT[], `watched_with_user_ids` UUID[], `audio_language`, `is_rewatch`, `rewatch_count`, `venue`; **U** `(user_id, title_id, media_type)`; **U** `(user_id, media_type, rank_position)` DEFERRABLE INITIALLY DEFERRED | The personal Dual-Canon. |
+| `applied_mutations` | **PK** `client_mutation_id`; `user_id`, `kind`, `applied_at` | Idempotency log for offline replay (I-5); server-internal, no client access. |
 | `pairwise_duels` | **PK** `id`; `user_id`; `winner_title_id`, `loser_title_id`, `media_type` (both FKs share it); `is_upset`, `decision_time_ms`, `client_mutation_id` UUID **U**; `CHECK (winner_title_id <> loser_title_id)` | Audit log powering upsets and win-rates. |
 | `user_external_accounts` | **PK** `id`; **U** `(user_id, service_name)` | Letterboxd / AniList / MAL links. |
 | `user_dropped_shows` | **PK** `id`; **FK** `(title_id, media_type)`; `dropped_at_season`, `dropped_at_episode`, `reason`, `willing_to_revisit`, `notify_on_acclaim`, `notes`; **U** `(user_id, title_id, media_type)` | TV Graveyard (`SCR-18`). |
@@ -115,7 +116,7 @@ All of the following are `SECURITY DEFINER`, `SET search_path = public`. They ta
 | :--- | :--- |
 | `check_handle_available(p_handle TEXT) → BOOLEAN` | Format regex + reserved list + uniqueness (case-insensitive). |
 | `calculate_taste_match_rpc(p_other UUID, p_media_type) → (match_pct INT, mutual_count INT)` | Spearman ρ over mutual titles **within one canon**: re-rank both users' mutual titles $1..k$, $\rho = 1 - \frac{6\sum d^2}{k(k^2-1)}$, shrink $w = k/(k+5)$, $\text{match} = \text{round}(\frac{w\rho + 1}{2}\cdot 100)$; $k < 2 \Rightarrow 50$. Requires `can_view_user(p_other)`. |
-| `detect_upset_duel(p_winner, p_loser, p_media_type) → (is_upset, winner_win_rate, loser_win_rate, delta)` | Upset iff $\text{WinRate}(\text{loser}) - \text{WinRate}(\text{winner}) \ge 0.25$. |
+| `detect_upset_duel(p_winner, p_loser, p_media_type) → (is_upset, winner_consensus, loser_consensus, delta)` | Features/04 §3.2: $\mu$ = mean global percentile $\frac{N-r}{N-1}$ of the title across **other** users' canons (0.5 with no data; a one-title canon counts as 1.0). Upset iff $\mu(\text{loser}) - \mu(\text{winner}) \ge 0.25$. |
 | `get_activity_feed(p_filter TEXT, p_before TIMESTAMPTZ, p_limit INT)` | `following` / `squads` / `global`, keyset-paginated, RLS-filtered. |
 | `calculate_squad_canon(p_squad_id, p_media_type)` | Borda count: member $i$ with $N_i$ titles awards $N_i - r + 1$ points. Members only. |
 | `request_account_deletion()` / `cancel_account_deletion()` / `purge_deleted_accounts()` | 30-day grace period (Trust & Safety §4.1); purge is scheduled with `pg_cron` and only executable by `service_role`. |
