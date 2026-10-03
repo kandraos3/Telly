@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'core/theme/telly_theme.dart';
+import 'core/theme/telly_typography.dart';
 
 class TellyApp extends ConsumerWidget {
   const TellyApp({super.key});
@@ -10,14 +12,13 @@ class TellyApp extends ConsumerWidget {
       title: 'Telly',
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.dark,
-      darkTheme: ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: const Color(0xFF0A0A0C),
-      ),
-      home: const Scaffold(
+      theme: TellyTheme.dark,
+      darkTheme: TellyTheme.dark,
+      home: Scaffold(
         body: Center(
           child: Text(
             'Telly — Your Personal TV Canon',
-            style: TextStyle(color: Colors.white, fontSize: 18),
+            style: TellyTypography.titleMedium(),
           ),
         ),
       ),

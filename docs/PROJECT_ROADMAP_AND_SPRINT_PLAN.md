@@ -23,19 +23,19 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 1 (Weeks 1–2): Infrastructure, Auth, Foundation & Data Ingestion**
-- **Current Active Ticket**: `FE-102`: Theme, Color Palette & Typography Tokens Setup
-- **Overall Roadmap Progress**: **1 / 81 Tickets Completed** (1.2%)
+- **Current Active Ticket**: `FE-103`: Haptic Feedback Engine (`HapticsService`)
+- **Overall Roadmap Progress**: **2 / 81 Tickets Completed** (2.5%)
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos`), Unit Tests (100% pass)
 - **Last Updated**: 2026-10-03
 
 | Sprint | Status | Total Tickets | Completed | Progress |
 | :---: | :---: | :---: | :---: | :--- |
-| **Sprint 1** | 🟡 **Active** | 15 | 1 | `█░░░░░░░░░` 6.7% |
+| **Sprint 1** | 🟡 **Active** | 15 | 2 | `██░░░░░░░░` 13.3% |
 | **Sprint 2** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 3** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 4** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 5** | ⚪ Queued | 18 | 0 | `░░░░░░░░░░` 0% |
-| **Total** | | **81** | **1** | **1.2%** |
+| **Total** | | **81** | **2** | **2.5%** |
 
 ---
 
@@ -136,16 +136,16 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [**`technical_architecture/01_TECH_STACK_AND_LIBRARIES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/01_TECH_STACK_AND_LIBRARIES.md) §2 (Theme Dependencies)
 - **Scope & Objectives**: Codify the *Midnight Cathode* OLED design system into strongly-typed Flutter constants.
 - **Granular Tasks**:
-  - [ ] Create `lib/core/theme/telly_colors.dart`:
+  - [x] Create `lib/core/theme/telly_colors.dart`:
     - Backgrounds: `backgroundPrimary` (`#0A0A0C`), `backgroundSurface` (`#141419`), `backgroundCard` (`#1C1C24`).
     - Accents: `phosphorLime` (`#CCFF00`), `neonCoral` (`#FF3366`), `warmAmber` (`#FFB800`), `electricCyan` (`#00F0FF`).
     - Borders: `borderGlass` (`rgba(255, 255, 255, 0.08)`).
-  - [ ] Add Google Fonts package or local assets for `GT Super Display` (serif headlines) and `Plus Jakarta Sans` (body & numerals).
-  - [ ] Create `lib/core/theme/telly_typography.dart` with `TextStyle` presets (`displayLarge`, `headlineMedium`, `scoreMono`, `bodySmall`).
-  - [ ] Assemble `TellyTheme.dark` into `ThemeData` configuring color schemes, app bars, and scaffold backgrounds.
+  - [x] Add Google Fonts package or local assets for `GT Super Display` (serif headlines) and `Plus Jakarta Sans` (body & numerals).
+  - [x] Create `lib/core/theme/telly_typography.dart` with `TextStyle` presets (`displayLarge`, `headlineMedium`, `scoreMono`, `bodySmall`).
+  - [x] Assemble `TellyTheme.dark` into `ThemeData` configuring color schemes, app bars, and scaffold backgrounds.
 - **Testing & Verification**:
-  - [ ] Unit test verifying color contrast ratios of `phosphorLime` and `neonCoral` against `#0A0A0C` meet WCAG $\ge 4.5:1$.
-  - [ ] Widget test rendering all typography variants in a sandbox screen.
+  - [x] Unit test verifying color contrast ratios of `phosphorLime` and `neonCoral` against `#0A0A0C` meet WCAG $\ge 4.5:1$.
+  - [x] Widget test rendering all typography variants in a sandbox screen.
 - **Dependencies**: `FE-101`.
 
 #### `FE-103`: Haptic Feedback Engine (`HapticsService`)
