@@ -112,6 +112,18 @@ class LocalRankingDao extends DatabaseAccessor<AppDatabase> with _$LocalRankingD
   Future<int> clearCanon(String mediaType) {
     return (delete(localRankings)..where((tbl) => tbl.mediaType.equals(mediaType))).go();
   }
+
+  /// Enqueue a completed pairwise duel to the offline write-ahead log.
+  Future<void> enqueueOfflineDuel(OfflineDuelQueueCompanion duel) {
+    return db.into(db.offlineDuelQueue).insert(duel);
+  }
+
+  /// Get pending offline duels waiting for backend sync.
+  Future<List<OfflineDuelQueueData>> getPendingOfflineDuels() {
+    return (db.select(db.offlineDuelQueue)
+          ..where((tbl) => tbl.syncStatus.equals('PENDING')))
+        .get();
+  }
 }
 
 @DriftAccessor(tables: [CachedTitles])

@@ -92,6 +92,23 @@ class DualCanonService {
     }
   }
 
+  /// Validates that candidate media_type matches all existing media_types.
+  static void validateMediaTypes({
+    required String candidateMediaType,
+    required Iterable<String> existingMediaTypes,
+  }) {
+    final candidateCanon = CanonType.fromMediaType(candidateMediaType);
+    for (final mediaType in existingMediaTypes) {
+      final opponentCanon = CanonType.fromMediaType(mediaType);
+      if (candidateCanon != opponentCanon) {
+        throw CrossCanonDuelException(
+          candidateCanon: candidateCanon,
+          opponentCanon: opponentCanon,
+        );
+      }
+    }
+  }
+
   /// Partitions a mixed collection into segregated Movie and Series lists.
   static ({List<T> movies, List<T> series}) partitionByCanon<T extends HasMediaType>(
     List<T> mixedTitles,

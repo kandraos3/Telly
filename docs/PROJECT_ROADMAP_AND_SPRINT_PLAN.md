@@ -23,19 +23,19 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 2 (Weeks 3–4): The Pairwise Duel Engine, Scoring & The Personal Dual-Canon**
-- **Current Active Ticket**: `ALGO-205`: Riverpod `DuelController` State Machine
-- **Overall Roadmap Progress**: **25 / 89 Tickets Completed** (28.1%)
+- **Current Active Ticket**: `BE-201`: PostgreSQL Procedure `insert_user_ranking_atomic`
+- **Overall Roadmap Progress**: **26 / 89 Tickets Completed** (29.2%)
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos`), Unit Tests (100% pass)
 - **Last Updated**: 2026-10-03
 
 | Sprint | Status | Total Tickets | Completed | Progress |
 | :---: | :---: | :---: | :---: | :--- |
 | **Sprint 1** | 🟢 **Completed** | 19 | 19 | `████████████████████` 100.0% |
-| **Sprint 2** | 🟡 **Active** | 20 | 6 | `██████░░░░` 30.0% |
+| **Sprint 2** | 🟡 **Active** | 20 | 7 | `███████░░░` 35.0% |
 | **Sprint 3** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 4** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 5** | ⚪ Queued | 18 | 0 | `░░░░░░░░░░` 0% |
-| **Total** | | **89** | **25** | **28.1%** |
+| **Total** | | **89** | **26** | **29.2%** |
 
 ---
 
@@ -415,12 +415,12 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
   - [**`design_system/04_USER_INTERACTION_FLOWS_AND_GESTURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/04_USER_INTERACTION_FLOWS_AND_GESTURES.md) §1 (Duel Sequence)
 - **Scope & Objectives**: Reactive Riverpod notifier orchestrating tournament progression, UI events, and persistence.
 - **Granular Tasks**:
-  - [ ] Create `lib/features/ranking/presentation/controllers/duel_controller.dart`.
-  - [ ] Implement states: `DuelInitial`, `DuelActive(candidateA, candidateB, step, totalSteps)`, `DuelResolving`, `DuelComplete(insertedIndex, finalScore)`.
-  - [ ] Handle `vote(winnerId)`: updates binary search bounds, persists duel record to offline queue, advances to next step.
-  - [ ] Handle `skipOrTie()`: steps to $\pm 1$ neighbor without altering bounds irreversibly.
+  - [x] Create `lib/features/ranking/presentation/controllers/duel_controller.dart`.
+  - [x] Implement states: `DuelInitial`, `DuelActive(candidateA, candidateB, step, totalSteps)`, `DuelResolving`, `DuelComplete(insertedIndex, finalScore)`.
+  - [x] Handle `vote(winnerId)`: updates binary search bounds, persists duel record to offline queue, advances to next step.
+  - [x] Handle `skipOrTie()`: steps to $\pm 1$ neighbor without altering bounds irreversibly.
 - **Testing & Verification**:
-  - [ ] State machine unit test stepping through 4 mock duels to `DuelComplete`.
+  - [x] State machine unit test stepping through 4 mock duels to `DuelComplete`.
 - **Dependencies**: `ALGO-201`, `ALGO-204`.
 
 ---
