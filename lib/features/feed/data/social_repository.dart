@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:telly_app/features/feed/data/redis_timeline_fanout_service.dart';
 import 'package:telly_app/features/feed/domain/social_models.dart';
 
 /// Feed tab filters (SCR-05).
@@ -55,12 +54,9 @@ abstract class SocialRepository {
   Future<FollowStatus> getFollowStatus({required String targetUserId});
 }
 
-/// In-memory & reactive implementation of SocialRepository with Redis fanout integration.
+/// In-memory implementation of SocialRepository (replaced by the Supabase-backed repository in FE-607).
 class InMemorySocialRepository implements SocialRepository {
-  final RedisTimelineFanoutService redisService;
-
-  InMemorySocialRepository({RedisTimelineFanoutService? redisService})
-      : redisService = redisService ?? RedisTimelineFanoutService() {
+  InMemorySocialRepository() {
     _seedInitialData();
   }
 

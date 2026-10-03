@@ -328,7 +328,7 @@ CREATE TABLE public.activity_logs (
     is_upset BOOLEAN NOT NULL DEFAULT FALSE,
     upset_delta NUMERIC(5, 4) NOT NULL DEFAULT 0,
     metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp(),  -- distinct within a transaction for stable feed ordering
     FOREIGN KEY (title_id, media_type) REFERENCES public.titles(id, media_type) ON DELETE CASCADE
 );
 

@@ -24,7 +24,7 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 6 — Integration, Wiring & Audit Remediation** (planned 2026-10-03; owner decisions D1–D7 recorded in Sprint 6)
-- **Current Active Ticket**: `BE-604` (Per-Canon Taste Match, Feed, Squad & Account RPCs) — Sprint 6: 6 / 32 tickets complete
+- **Current Active Ticket**: `BE-605` (TMDB Details & Discovery Edge Functions / RPCs) — Sprint 6: 7 / 32 tickets complete
 - **Overall Roadmap Progress**: Sprints 1–5 granular tasks after the `DOC-601` honesty reset (2026-10-03): **281 / 431 verified** · **121 un-checked** (each annotated `→ remediated by <Sprint 6 ticket>`) · **29 human-only**. The earlier "89 / 89" claim was overstated.
 - **Human-Only Tasks**: 29 tasks in Sprints 1–5 marked `👤 [TO BE DONE BY HUMAN]` (cloud setup, secrets, store submission, device/CI runs, dashboard verification), plus the Sprint 6 human prerequisites list. These cannot be completed or verified from code.
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (215 / 215 pass — note: many tests are widget/unit-level only; no real E2E or golden tests exist yet)
@@ -435,7 +435,7 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
   - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §3.1 (Atomic Stored Procedure)
 - **Scope & Objectives**: PL/pgSQL function shifting existing rows by +1 and recomputing dynamic scores atomically.
 - **Granular Tasks**:
-  - [x] Write PL/pgSQL function `insert_user_ranking_atomic(p_user_id, p_title_id, p_media_type, p_rank_position)`. ✅ remediated in `BE-603`
+  - [x] Write PL/pgSQL function `insert_user_ranking_atomic(p_user_id, p_title_id, p_media_type, p_rank_position)`. ✅ remediated in `BE-603` (user now derived from `auth.uid()`; no `p_user_id` parameter — Spec 02 I-4)
   - [x] Execute `UPDATE user_rankings SET rank_position = rank_position + 1 WHERE user_id = p_user_id AND media_type = p_media_type AND rank_position >= p_rank_position`. ✅ remediated in `BE-603`
   - [x] Insert new row at `p_rank_position`. ✅ remediated in `BE-603`
   - [x] Recalculate dynamic percentile scores for all rows of `(p_user_id, p_media_type)` in the same transaction. ✅ remediated in `BE-603`
@@ -673,8 +673,8 @@ Build social connections, the activity feed with real-time upset alert detection
 - **Scope & Objectives**: Detect when a user's duel decision defies platform consensus by $\ge 25\%$.
 - **Granular Tasks**:
   - [x] Create database trigger or function `detect_upset_duel(winner_id, loser_id)`.
-  - [x] Query platform win rates: if $\text{WinRate}(\text{loser}) - \text{WinRate}(\text{winner}) \ge 0.25$, set `pairwise_duels.is_upset = true`. ✅ remediated in `BE-603`
-  - [ ] Write upset notification event to `activity_logs` with `is_upset: true`. → remediated by `BE-604`
+  - [x] Query platform win rates: if $\text{WinRate}(\text{loser}) - \text{WinRate}(\text{winner}) \ge 0.25$, set `pairwise_duels.is_upset = true`. ✅ remediated in `BE-603` (per features/04 §3.2 the consensus measure is the mean global percentile, not win rate; same ≥ 0.25 threshold)
+  - [x] Write upset notification event to `activity_logs` with `is_upset: true`. ✅ remediated in `BE-604`
 - **Testing & Verification**:
   - [x] Unit test: Candidate A (20% win rate) beating Candidate B (80% win rate) flags `is_upset = true`.
 - **Dependencies**: `BE-202`.
@@ -684,11 +684,11 @@ Build social connections, the activity feed with real-time upset alert detection
   - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §4 (Redis Caching Keys)
 - **Scope & Objectives**: Cache user activity feed in Redis ZSETs for $< 50\text{ ms}$ load times.
 - **Granular Tasks**:
-  - [ ] Configure Redis client in Supabase Edge Functions / background worker. → remediated by `BE-604`
-  - [ ] Fanout ranking events to follower timelines: `ZADD feed:timeline:{user_id} {timestamp} {activity_id}`. → remediated by `BE-604`
-  - [ ] Maintain fixed timeline buffer of 500 items per user (`ZREMRANGEBYRANK 0 -501`). → remediated by `BE-604`
+  - [ ] Configure Redis client in Supabase Edge Functions / background worker. → deferred to `BE-701` (Sprint 7 backlog; feed served from Postgres per `BE-604`)
+  - [ ] Fanout ranking events to follower timelines: `ZADD feed:timeline:{user_id} {timestamp} {activity_id}`. → deferred to `BE-701` (Sprint 7 backlog; feed served from Postgres per `BE-604`)
+  - [ ] Maintain fixed timeline buffer of 500 items per user (`ZREMRANGEBYRANK 0 -501`). → deferred to `BE-701` (Sprint 7 backlog; feed served from Postgres per `BE-604`)
 - **Testing & Verification**:
-  - [ ] Benchmark feed query: retrieve top 20 feed items from Redis in $< 20\text{ ms}$. → remediated by `BE-604`
+  - [ ] Benchmark feed query: retrieve top 20 feed items from Redis in $< 20\text{ ms}$. → deferred to `BE-701` (Sprint 7 backlog; feed served from Postgres per `BE-604`)
 - **Dependencies**: `BE-301`.
 
 #### `BE-304`: Squads Database Schema & Borda Count Rank Aggregation RPC
@@ -892,7 +892,7 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
   - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §3.2 (Taste Match RPC)
 - **Scope & Objectives**: PL/pgSQL function computing Spearman Rank Correlation ($\rho$) with Bayesian shrinkage.
 - **Granular Tasks**:
-  - [ ] Write procedure `calculate_taste_match_rpc(p_user_a, p_user_b, p_media_type)`. → remediated by `BE-604`
+  - [x] Write procedure `calculate_taste_match_rpc(p_user_a, p_user_b, p_media_type)`. ✅ remediated in `BE-604`
   - [x] Find mutual titles in both users' canons: $k = |C_A \cap C_B|$.
   - [x] Compute rank differences: $d_i = \text{Rank}_A(i) - \text{Rank}_B(i)$.
   - [x] Calculate correlation: $\rho = 1.0 - \frac{6 \sum d_i^2}{k(k^2 - 1)}$.
@@ -912,7 +912,7 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
   - [x] Create Supabase Edge Function `functions/streaming-availability/index.ts`.
   - [x] Query JustWatch / Watchmode API by TMDB ID and ISO country code (e.g., `US`).
   - [x] Extract subscription availability (`flatrate`) vs purchase (`rent`/`buy`).
-  - [ ] Store in Redis: `SET title:availability:{tmdb_id}:{country} {json} EX 86400`. → remediated by `BE-604`
+  - [ ] Store in Redis: `SET title:availability:{tmdb_id}:{country} {json} EX 86400`. → deferred to `BE-701` (Sprint 7 backlog; feed served from Postgres per `BE-604`)
 - **Testing & Verification**:
   - [ ] Test query for *Severance* returns Apple TV+ with valid web and deep link URLs. → remediated by `BE-605`
 - **Dependencies**: `BE-101`.
@@ -1299,7 +1299,7 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 - **Scope & Objectives**: Satisfy Apple Guideline 1.2 (User Generated Content) and mandatory self-service account deletion.
 - **Granular Tasks**:
   - [ ] Implement self-service "Delete Account" button in `SCR-20` Settings with confirmation dialog. → remediated by `LEGAL-601`
-  - [ ] Queue account for 30-day soft deletion, revoking sessions and scrubbing user data permanently. → remediated by `BE-604`
+  - [x] Queue account for 30-day soft deletion, revoking sessions and scrubbing user data permanently. ✅ remediated in `BE-604`
   - [ ] Include 1-tap user blocking and reporting on all user-generated comments. → remediated by `FE-607`
 - **Testing & Verification**:
   - [ ] Test account deletion marks profile `is_deleted: true` and logs user out immediately. → remediated by `LEGAL-601`
@@ -1505,14 +1505,14 @@ Turn the library of individually-tested widgets and algorithms into a **wired, r
   - [**`adjacent_systems/05_TRUST_SAFETY_MODERATION_AND_ADMIN.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/adjacent_systems/05_TRUST_SAFETY_MODERATION_AND_ADMIN.md) §2, §4.1
 - **Scope & Objectives**: Provide every server contract the Flutter repositories call (audit C3).
 - **Granular Tasks**:
-  - [ ] `calculate_taste_match_rpc(p_other, p_media_type)`: join on `(title_id, media_type)` (the current version joins across canons), `auth.uid()` as user A, respects `can_view_user`.
-  - [ ] `get_activity_feed(p_filter 'following'|'squads'|'global', p_cursor, p_limit)` with keyset pagination; `AFTER INSERT` trigger on `user_rankings` writes `RANKING_CREATED` / `UPSET_ALERT` rows to `activity_logs`.
-  - [ ] `calculate_squad_canon(p_squad_id, p_media_type)` ported to `titles`.
-  - [ ] `request_account_deletion()` (sets `is_deleted`, `deletion_requested_at`, revokes sessions) + `purge_deleted_accounts()` scheduled with `pg_cron` at 30 days.
-  - [ ] `submit_report(target_type, target_id, reason, notes)` and `block_user(p_user)`.
-  - [ ] Redis fan-out (DB spec §4) is **deferred**: feed is served from Postgres via `get_activity_feed`; `RedisTimelineFanoutService` is removed from `lib/` and a Sprint 7 ticket is opened for Upstash-backed caching.
+  - [x] `calculate_taste_match_rpc(p_other, p_media_type)`: join on `(title_id, media_type)` (the current version joins across canons), `auth.uid()` as user A, respects `can_view_user`.
+  - [x] `get_activity_feed(p_filter 'following'|'squads'|'global', p_cursor, p_limit)` with keyset pagination; `AFTER INSERT` trigger on `user_rankings` writes `RANKING_CREATED` / `UPSET_ALERT` rows to `activity_logs`.
+  - [x] `calculate_squad_canon(p_squad_id, p_media_type)` ported to `titles`.
+  - [x] `request_account_deletion()` (sets `is_deleted`, `deletion_requested_at`, revokes sessions) + `purge_deleted_accounts()` scheduled with `pg_cron` at 30 days.
+  - [x] `submit_report(target_type, target_id, reason, notes)` and `block_user(p_user)`.
+  - [x] Redis fan-out (DB spec §4) is **deferred**: feed is served from Postgres via `get_activity_feed`; `RedisTimelineFanoutService` is removed from `lib/` and a Sprint 7 ticket is opened for Upstash-backed caching.
 - **Testing & Verification**:
-  - [ ] pgTAP: taste match equals the Dart `SpearmanTasteMatchCalculator` on shared fixtures and ignores cross-canon overlap; feed respects RLS; deletion purge removes PII after 30 days (time-travel via parameter).
+  - [x] pgTAP (`005_social_and_account_rpcs.test.sql`, 21 assertions): taste match re-ranks mutual titles and ignores cross-canon overlap (shared Dart↔SQL fixture parity deferred to `QA-607`); feed respects RLS; deletion purge removes PII after 30 days (time-travel via parameter).
 - **Dependencies**: `BE-602`, `BE-603`.
 
 #### `BE-605`: TMDB Details & Discovery Edge Functions / RPCs
@@ -1894,6 +1894,21 @@ QA-602 … QA-607 (after their deps) → QA-608
 - Configure Apple / Google OAuth and Twilio Verify in Supabase Auth; enable `pg_cron`.
 - Host Privacy Policy / Terms pages and supply their URLs.
 - Upload keystore, App Store Connect app record, branch protection rules, physical-device perf runs, store submission.
+
+---
+
+## 📅 Sprint 7 Backlog (Unscheduled)
+
+#### `BE-701`: Redis (Upstash) Feed & Taste-Match Caching
+- **Spec Reference**:
+  - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §5 (Redis key design)
+- **Scope & Objectives**: Add caching only once measured `get_activity_feed` / taste-match latency exceeds budget. Opened by `BE-604`, which removed the in-memory `RedisTimelineFanoutService` stand-in.
+- **Granular Tasks**:
+  - [ ] Measure p95 latency of `get_activity_feed` and `calculate_taste_match_rpc` on staging data.
+  - [ ] If over budget: Upstash Redis from an edge function, keys per Spec 02 §5, invalidated by `activity_logs` / `user_rankings` writes.
+- **Testing & Verification**:
+  - [ ] Cache-hit and invalidation tests; feed results identical with and without the cache.
+- **Dependencies**: `BE-604`.
 
 ---
 
