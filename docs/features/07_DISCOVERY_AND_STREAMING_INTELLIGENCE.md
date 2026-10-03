@@ -128,6 +128,8 @@ One of the most valuable utility features is keeping users from missing out on c
 
 ## 6. Data Model & Cache Architecture
 
+> **Schema note:** SQL in this document is illustrative. The normative contract is [Spec 02](../technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) (table `titles` keyed by `(id, media_type)`, `media_type_enum ('movie','tv')`, `rank_position`), and the executable source is `supabase/migrations/`.
+
 ```sql
 -- Streaming Providers Master Table
 CREATE TABLE streaming_platforms (
@@ -141,7 +143,7 @@ CREATE TABLE streaming_platforms (
 -- Show Availability Table (Updated daily via JustWatch webhook / cron)
 CREATE TABLE show_streaming_availability (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    show_id INT REFERENCES tv_shows(id) ON DELETE CASCADE,
+    show_id INT REFERENCES titles(id) ON DELETE CASCADE,
     platform_id VARCHAR(50) REFERENCES streaming_platforms(id) ON DELETE CASCADE,
     country_code VARCHAR(2) NOT NULL DEFAULT 'US',
     monetization_type VARCHAR(20) NOT NULL, -- 'FLATRATE', 'FREE', 'RENT', 'BUY'

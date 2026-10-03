@@ -144,11 +144,13 @@ Each dropped show has a quick binary state:
 
 ## 5. Data Model & Database Contracts
 
+> **Schema note:** SQL in this document is illustrative. The normative contract is [Spec 02](../technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) (table `titles` keyed by `(id, media_type)`, `media_type_enum ('movie','tv')`, `rank_position`), and the executable source is `supabase/migrations/`.
+
 ```sql
 -- Seasons Table (Cached from TMDB)
 CREATE TABLE tv_seasons (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    show_id INT REFERENCES tv_shows(id) ON DELETE CASCADE,
+    show_id INT REFERENCES titles(id) ON DELETE CASCADE,
     season_number INT NOT NULL,
     title VARCHAR(100),
     episode_count INT NOT NULL,
@@ -174,7 +176,7 @@ CREATE TABLE user_season_rankings (
 CREATE TABLE user_dropped_shows (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    show_id INT REFERENCES tv_shows(id) ON DELETE CASCADE,
+    show_id INT REFERENCES titles(id) ON DELETE CASCADE,
     stopped_at_season INT NOT NULL,
     stopped_at_episode INT,
     drop_reason VARCHAR(64) NOT NULL,

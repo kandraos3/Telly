@@ -163,15 +163,15 @@ class TournamentDuel {
   "streaming_providers": ["netflix", "max", "apple_tv_plus"],
   "referral_code": "jordan_prestige",
   "ranked_items": [
-    { "tmdb_id": 157336, "media_type": "MOVIE",     "rank": 1 },  // Interstellar
-    { "tmdb_id": 496243, "media_type": "MOVIE",     "rank": 2 },  // Parasite
-    { "tmdb_id": 110492, "media_type": "TV_SERIES", "rank": 1 },  // Severance
-    { "tmdb_id": 76331,  "media_type": "TV_SERIES", "rank": 2 },  // Succession
-    { "tmdb_id": 1429,   "media_type": "TV_SERIES", "rank": 3 }   // Attack on Titan
+    { "tmdb_id": 157336, "media_type": "movie",     "rank": 1 },  // Interstellar
+    { "tmdb_id": 496243, "media_type": "movie",     "rank": 2 },  // Parasite
+    { "tmdb_id": 110492, "media_type": "tv", "rank": 1 },  // Severance
+    { "tmdb_id": 76331,  "media_type": "tv", "rank": 2 },  // Succession
+    { "tmdb_id": 1429,   "media_type": "tv", "rank": 3 }   // Attack on Titan
   ],
   "duel_history": [
-    { "winner_id": 157336, "loser_id": 496243, "media_type": "MOVIE" },
-    { "winner_id": 110492, "loser_id": 76331,  "media_type": "TV_SERIES" }
+    { "winner_id": 157336, "loser_id": 496243, "media_type": "movie" },
+    { "winner_id": 110492, "loser_id": 76331,  "media_type": "tv" }
   ]
 }
 ```

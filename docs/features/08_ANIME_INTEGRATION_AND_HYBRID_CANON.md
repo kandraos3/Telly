@@ -111,7 +111,8 @@ Anime franchises are notoriously fragmented. Telly introduces the **Franchise Ro
 
 - **User Control:** Users can toggle on their profile:
   - `[✓] Roll up multi-season anime into single franchise entries`
-- **Franchise Representative:** When rolled up, the overall score is computed from the user's primary series duel, with a dropdown showing season-by-season grades.
+- **Franchise Representative:** When rolled up, the franchise entry takes the **rank and score of the user's primary series ranking** (the parent franchise entry they dueled). Scores are never averaged across seasons. A dropdown shows the season-by-season grades.
+- **Fallback:** If the user ranked only individual seasons (no primary series entry), the franchise entry takes the rank and score of their **highest-ranked season**.
 
 ---
 
@@ -184,9 +185,11 @@ In the **Discover Hub (`SCR-07`)**, a dedicated **"Seasonal Anime Battleground"*
 
 ## 8. Database Schema Updates: Anime & Multi-Source Support
 
+> **Schema note:** SQL in this document is illustrative. The normative contract is [Spec 02](../technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) (table `titles` keyed by `(id, media_type)`, `media_type_enum ('movie','tv')`, `rank_position`), and the executable source is `supabase/migrations/`.
+
 ```sql
--- Add AniList and MAL ID Mapping to tv_shows
-ALTER TABLE public.tv_shows 
+-- Add AniList and MAL ID Mapping to titles
+ALTER TABLE public.titles 
 ADD COLUMN IF NOT EXISTS anilist_id INT UNIQUE,
 ADD COLUMN IF NOT EXISTS mal_id INT,
 ADD COLUMN IF NOT EXISTS anime_studio VARCHAR(100),

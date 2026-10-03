@@ -86,8 +86,8 @@ When a user finishes or rates a show:
 
 ### 3.2 Dynamic Score Mapping
 Rather than storing fixed user-entered numbers, Telly derives a dynamic 0.0–10.0 score based on **percentile distribution**:
-$$\text{Score}(r) = 10.0 - 9.0 \times \left(\frac{r - 1}{N - 1}\right)^\gamma$$
-*(where $r$ is the item's rank from 1 to $N$, and $\gamma$ is a curvature constant, typically $\approx 0.85$, creating a natural prestige curve where elite shows hold 9.0+ while mid-tier titles spread between 6.0 and 8.0).*
+$$\text{Score}(r) = 1.0 + 9.0 \times \left(\frac{N - r}{N - 1}\right)^{\gamma}, \quad \gamma = 0.82$$
+*(where $r$ is the item's rank from 1 to $N$. The canonical definition, including the small-canon prior for $N < 10$, is Feature Spec 02 §3.3.)*
 - **Why this works**: As the user adds more shows over months and years, their personal leaderboard remains internally consistent, rational, and immune to score inflation.
 
 ### 3.3 The "Series vs. Season" Dilemma (The Downfall & Anthology Problem)
@@ -264,6 +264,8 @@ graph TD
 
 ### 6.2 Relational Data Model (PostgreSQL Schema)
 
+> **Schema note:** SQL in this document is illustrative. The normative contract is [Spec 02](technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) (table `titles` keyed by `(id, media_type)`, `media_type_enum ('movie','tv')`, `rank_position`), and the executable source is `supabase/migrations/`.
+
 ```sql
 -- Users Table
 CREATE TABLE users (
@@ -276,7 +278,7 @@ CREATE TABLE users (
 );
 
 -- Media Cache Table (TMDB Movies, TV Series & Anime)
-CREATE TABLE tv_shows (
+CREATE TABLE titles (
     id INTEGER PRIMARY KEY, -- TMDB ID
     title VARCHAR(255) NOT NULL,
     original_network VARCHAR(100),
@@ -288,7 +290,7 @@ CREATE TABLE tv_shows (
     backdrop_path TEXT,
     overview TEXT,
     genres TEXT[],
-    media_type VARCHAR(20) DEFAULT 'TV_SERIES', -- 'TV_SERIES', 'MOVIE', 'ANIME_SERIES', 'ANIME_MOVIE'
+    media_type VARCHAR(20) DEFAULT 'tv', -- 'movie' | 'tv' (anime flagged via is_anime)
     runtime_minutes INT,
     director VARCHAR(150),
     theatrical_release_date DATE
@@ -298,9 +300,9 @@ CREATE TABLE tv_shows (
 CREATE TABLE user_rankings (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    show_id INT REFERENCES tv_shows(id) ON DELETE CASCADE,
-    media_type VARCHAR(20) NOT NULL DEFAULT 'TV_SERIES', -- Enforces dual canon
-    rank_order INT NOT NULL, -- 1 = User's #1 in that media canon
+    show_id INT REFERENCES titles(id) ON DELETE CASCADE,
+    media_type VARCHAR(20) NOT NULL DEFAULT 'tv', -- Enforces dual canon
+    rank_position INT NOT NULL, -- 1 = User's #1 in that media canon
     calculated_score NUMERIC(4, 2) NOT NULL, -- e.g. 9.45
     status VARCHAR(20) NOT NULL DEFAULT 'COMPLETED', -- 'COMPLETED', 'WATCHING', 'DROPPED'
     dropped_at_season INT,
@@ -319,9 +321,9 @@ CREATE TABLE user_rankings (
 CREATE TABLE pairwise_duels (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    winner_show_id INT REFERENCES tv_shows(id),
-    loser_show_id INT REFERENCES tv_shows(id),
-    media_type VARCHAR(20) DEFAULT 'TV_SERIES', -- Movies duel movies; series duel series
+    winner_show_id INT REFERENCES titles(id),
+    loser_show_id INT REFERENCES titles(id),
+    media_type VARCHAR(20) DEFAULT 'tv', -- Movies duel movies; series duel series
     is_upset BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -350,7 +352,7 @@ CREATE TABLE taste_matches (
 -- User Watchlist / Queue
 CREATE TABLE user_watchlist (
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    show_id INT REFERENCES tv_shows(id) ON DELETE CASCADE,
+    show_id INT REFERENCES titles(id) ON DELETE CASCADE,
     priority INT DEFAULT 0,
     added_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     PRIMARY KEY (user_id, show_id)

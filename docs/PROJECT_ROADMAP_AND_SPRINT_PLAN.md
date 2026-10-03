@@ -24,7 +24,7 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 6 — Integration, Wiring & Audit Remediation** (planned 2026-10-03; owner decisions D1–D7 recorded in Sprint 6)
-- **Current Active Ticket**: `DOC-602` (Spec Reconciliation) — Sprint 6: 1 / 32 tickets complete
+- **Current Active Ticket**: `BE-601` (Consolidated Clean Baseline Schema) — Sprint 6: 2 / 32 tickets complete
 - **Overall Roadmap Progress**: Sprints 1–5 granular tasks after the `DOC-601` honesty reset (2026-10-03): **281 / 431 verified** · **121 un-checked** (each annotated `→ remediated by <Sprint 6 ticket>`) · **29 human-only**. The earlier "89 / 89" claim was overstated.
 - **Human-Only Tasks**: 29 tasks in Sprints 1–5 marked `👤 [TO BE DONE BY HUMAN]` (cloud setup, secrets, store submission, device/CI runs, dashboard verification), plus the Sprint 6 human prerequisites list. These cannot be completed or verified from code.
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (215 / 215 pass — note: many tests are widget/unit-level only; no real E2E or golden tests exist yet)
@@ -1429,12 +1429,12 @@ Turn the library of individually-tested widgets and algorithms into a **wired, r
   - [**`design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md) §2.2
 - **Scope & Objectives**: Remove contradictions between spec documents before code is changed to match them.
 - **Granular Tasks**:
-  - [ ] features/02 §3.3: write the exact $N<10$ prior formula ($\alpha = N/10$, $\text{prior}(r) = \max(1, 10 - 0.5(r-1))$, $\text{score} = \alpha\cdot\text{raw} + (1-\alpha)\cdot\text{prior}$) and recompute the example table: its scores are hand-rounded and disagree with the formula (true values: 10.00 / 9.70 / 8.94 / 7.37 / 5.28 / 2.37), and its "Display Tier" column must use the style guide §2.2 tiers.
-  - [ ] features/02 §6.1, features/05 §3.1, DB spec §2–§3: replace `'MOVIE'`/`'TV_SERIES'` and `tv_shows` with `'movie'`/`'tv'` and `titles`; point readers to `supabase/migrations/` as the executable source.
-  - [ ] Replace `docs/database/migrations/01_initial_schema.sql` with a README pointer to `supabase/migrations/` (one schema source).
-  - [ ] features/08 §4: state the rollup score rule from D6 explicitly.
+  - [x] features/02 §3.3: write the exact $N<10$ prior formula ($\alpha = N/10$, $\text{prior}(r) = \max(1, 10 - 0.5(r-1))$, $\text{score} = \alpha\cdot\text{raw} + (1-\alpha)\cdot\text{prior}$) and recompute the example table: its scores are hand-rounded and disagree with the formula (true values: 10.00 / 9.70 / 8.94 / 7.37 / 5.28 / 2.37), and its "Display Tier" column must use the style guide §2.2 tiers.
+  - [x] features/02 §6.1, features/05 §3.1, DB spec §2–§3: replace `'MOVIE'`/`'TV_SERIES'` and `tv_shows` with `'movie'`/`'tv'` and `titles`; point readers to `supabase/migrations/` as the executable source.
+  - [x] Replace `docs/database/migrations/01_initial_schema.sql` with a README pointer to `supabase/migrations/` (one schema source).
+  - [x] features/08 §4: state the rollup score rule from D6 explicitly.
 - **Testing & Verification**:
-  - [ ] `grep -rn "TV_SERIES\|tv_shows\|1\.15" docs/` returns no normative hits.
+  - [x] `grep -rn "TV_SERIES\|tv_shows\|1\.15" docs/` returns no normative hits.
 - **Dependencies**: `DOC-601`.
 
 ---

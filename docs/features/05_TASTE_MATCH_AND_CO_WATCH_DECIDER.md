@@ -39,8 +39,9 @@ User A's Canon                 User B's Canon
 ### 2.1 The Spearman Rank Correlation Algorithm
 Let $K = S_A \cap S_B$ be the set of $k$ mutual titles ranked by both User $A$ and User $B$ within a designated media canon ($K_{\text{movies}}$ or $K_{\text{series}}$).
 For each title $i \in K$:
-- $R_A(i)$ is the rank of title $i$ in User $A$'s canon.
-- $R_B(i)$ is the rank of title $i$ in User $B$'s canon.
+- $R_A(i)$ is the rank of title $i$ **among the $k$ mutual titles** in User $A$'s canon (mutual titles re-ranked $1..k$ in canon order).
+- $R_B(i)$ is the rank of title $i$ among the $k$ mutual titles in User $B$'s canon.
+- Re-ranking is required: the Spearman formula is only bounded to $[-1, 1]$ when both rank vectors are permutations of $1..k$. Raw canon positions (e.g. #5 vs #80) must never be used directly.
 - $d_i = R_A(i) - R_B(i)$ is the rank difference.
 
 The raw rank correlation coefficient is:
@@ -102,8 +103,8 @@ $$C = \text{Watchlist}_A \cup \text{Watchlist}_B \cup \text{HighRatedNotSeen}$$
 
 For each candidate title $s \in C$:
 1. **Media & Runtime Filter:**
-   - If *Movie Night* selected: $s$ must be `media_type = 'MOVIE'` and match the selected runtime budget (e.g., $< 90$ min).
-   - If *Series* selected: $s$ must be `media_type = 'TV_SERIES'`.
+   - If *Movie Night* selected: $s$ must be `media_type = 'movie'` and match the selected runtime budget (e.g., $< 90$ min).
+   - If *Series* selected: $s$ must be `media_type = 'tv'`.
 2. **Streaming Filter:** Must be available on at least one shared service between all participants.
 3. **Scoring Function:**
    $$\text{Score}(s) = w_1 \cdot \text{InBothWatchlists}(s) + w_2 \cdot \text{TasteMatch}(A, B) \cdot \text{UserRating}(s) + w_3 \cdot \text{PopularityFactor}(s)$$

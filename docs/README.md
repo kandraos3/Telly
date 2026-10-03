@@ -109,8 +109,8 @@ The project is fully equipped with turnkey, executable code assets, schemas, and
 | :--- | :--- | :--- |
 | **Sprint Plan** | [**`PROJECT_ROADMAP_AND_SPRINT_PLAN.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/PROJECT_ROADMAP_AND_SPRINT_PLAN.md) | 10-week, 5-sprint engineering roadmap with ticket breakdowns and acceptance criteria. |
 | **Env Template** | [**`.env.example`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/.env.example) | Complete template for Supabase, TMDB, JustWatch, Twilio, Sentry, and OneSignal keys. |
-| **DB Migration** | [**`01_initial_schema.sql`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/database/migrations/01_initial_schema.sql) | Standalone executable SQL migration (all tables, RLS policies, indexes, and stored procedures). |
-| **Seed Data** | [**`top_50_shows_seed.sql`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/database/seeds/top_50_shows_seed.sql) | 50 real shows with accurate TMDB IDs, genres, and streaming services for immediate testing. |
+| **DB Migrations** | [**`supabase/migrations/`**](file:///c:/Users/karla/Desktop/SeriesBeli/supabase/migrations/) | Executable schema, RLS policies, indexes and stored procedures (single source of truth; contract in TA-02). |
+| **Seed Data** | [**`supabase/seed.sql`**](file:///c:/Users/karla/Desktop/SeriesBeli/supabase/seed.sql) | 50 real shows with accurate TMDB IDs, genres, and streaming services for immediate testing. |
 | **Privacy Policy**| [**`PRIVACY_POLICY.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/legal/PRIVACY_POLICY.md) | App Store and Google Play compliant GDPR & CCPA privacy policy. |
 | **Terms (EULA)** | [**`TERMS_OF_SERVICE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/legal/TERMS_OF_SERVICE.md) | EULA with Apple Guideline 1.2 User-Generated Content and spoiler-masking rules. |
 

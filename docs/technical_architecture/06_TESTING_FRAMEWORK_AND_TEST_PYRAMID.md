@@ -128,6 +128,8 @@ Widget tests verify rendering, user interaction, animation frames, and accessibi
 ### 3.3 Database Stored Procedures & RLS Security Tests (`pgTAP`)
 Executed against an isolated local Supabase PostgreSQL container via `supabase test db`:
 
+> **Schema note:** SQL in this document is illustrative. The normative contract is [Spec 02](02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) (table `titles` keyed by `(id, media_type)`, `media_type_enum ('movie','tv')`, `rank_position`), and the executable source is `supabase/migrations/`.
+
 ```sql
 -- pgTAP Test Suite: tests/database/01_atomic_ranking_test.sql
 BEGIN;
@@ -142,7 +144,7 @@ SELECT lives_ok(
     $$ SELECT insert_user_ranking_atomic(
         '00000000-0000-0000-0000-000000000001'::uuid, 157336, 1, 
         'COMPLETED'::watch_status_enum, 'STILL_AIRING'::finale_impact_enum, 
-        'Masterpiece', ARRAY['#PeakSciFi'], 'Cooper', 'MOVIE'::media_type_enum, false, 'THEATRICAL_IMAX'::viewing_venue_enum
+        'Masterpiece', ARRAY['#PeakSciFi'], 'Cooper', 'movie'::media_type_enum, false, 'THEATRICAL_IMAX'::viewing_venue_enum
     ) $$,
     'First movie ranking inserted successfully'
 );
@@ -160,14 +162,14 @@ SELECT lives_ok(
     $$ SELECT insert_user_ranking_atomic(
         '00000000-0000-0000-0000-000000000001'::uuid, 496243, 1, 
         'COMPLETED'::watch_status_enum, 'STILL_AIRING'::finale_impact_enum, 
-        'Genre peak', ARRAY['#Thriller'], 'Ki-taek', 'MOVIE'::media_type_enum, false, 'HOME'::viewing_venue_enum
+        'Genre peak', ARRAY['#Thriller'], 'Ki-taek', 'movie'::media_type_enum, false, 'HOME'::viewing_venue_enum
     ) $$,
     'Second movie inserted at rank 1'
 );
 
 -- 5. Assert previous #1 was shifted to rank 2
 SELECT results_eq(
-    $$ SELECT rank_order FROM public.user_rankings 
+    $$ SELECT rank_position FROM public.user_rankings 
        WHERE user_id = '00000000-0000-0000-0000-000000000001'::uuid AND show_id = 157336 $$,
     $$ VALUES (2) $$,
     'Previous rank 1 must shift to rank 2'
@@ -177,7 +179,7 @@ SELECT results_eq(
 SET ROLE authenticated;
 SET request.jwt.claim.sub = '00000000-0000-0000-0000-000000000002';
 SELECT throws_ok(
-    $$ UPDATE public.user_rankings SET rank_order = 99 WHERE user_id = '00000000-0000-0000-0000-000000000001'::uuid $$,
+    $$ UPDATE public.user_rankings SET rank_position = 99 WHERE user_id = '00000000-0000-0000-0000-000000000001'::uuid $$,
     'RLS must block foreign user updates'
 );
 
@@ -298,7 +300,7 @@ void main() {
           title: 'Existing Show #$i',
           rankOrder: i + 1,
           calculatedScore: 10.0 - (i * 0.9),
-          mediaType: 'MOVIE',
+          mediaType: 'movie',
         ),
       );
     });

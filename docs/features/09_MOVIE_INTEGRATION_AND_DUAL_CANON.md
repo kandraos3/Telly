@@ -182,27 +182,29 @@ In the Profile Tab (`SCR-14`), tapping **Stats** on the Movie Canon displays ded
 
 ## 7. Database Contracts: Unified Media Architecture
 
+> **Schema note:** SQL in this document is illustrative. The normative contract is [Spec 02](../technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) (table `titles` keyed by `(id, media_type)`, `media_type_enum ('movie','tv')`, `rank_position`), and the executable source is `supabase/migrations/`.
+
 ```sql
 -- Create Media Type Enum
-CREATE TYPE public.media_type_enum AS ENUM ('MOVIE', 'TV_SERIES');
+CREATE TYPE public.media_type_enum AS ENUM ('movie', 'tv');
 CREATE TYPE public.viewing_venue_enum AS ENUM ('HOME', 'THEATER', 'IMAX', 'OTHER');
 
--- Alter tv_shows into unified media_items (or add polymorphic support)
-ALTER TABLE public.tv_shows 
-ADD COLUMN IF NOT EXISTS media_type media_type_enum DEFAULT 'TV_SERIES',
+-- Alter titles into unified media_items (or add polymorphic support)
+ALTER TABLE public.titles 
+ADD COLUMN IF NOT EXISTS media_type media_type_enum DEFAULT 'tv',
 ADD COLUMN IF NOT EXISTS runtime_minutes INT,
 ADD COLUMN IF NOT EXISTS director VARCHAR(100),
 ADD COLUMN IF NOT EXISTS theatrical_release_date DATE;
 
 -- Alter user_rankings to support dual canons
 ALTER TABLE public.user_rankings
-ADD COLUMN IF NOT EXISTS media_type media_type_enum DEFAULT 'TV_SERIES',
-ADD COLUMN IF NOT EXISTS rank_order_medium INT, -- Rank within its medium (Movie #1 or TV #1)
+ADD COLUMN IF NOT EXISTS media_type media_type_enum DEFAULT 'tv',
+ADD COLUMN IF NOT EXISTS rank_position_medium INT, -- Rank within its medium (Movie #1 or TV #1)
 ADD COLUMN IF NOT EXISTS is_rewatch BOOLEAN DEFAULT FALSE,
 ADD COLUMN IF NOT EXISTS rewatch_count INT DEFAULT 1,
 ADD COLUMN IF NOT EXISTS venue viewing_venue_enum DEFAULT 'HOME';
 
 -- Indexing for Segregated Speed
-CREATE INDEX idx_user_rankings_medium_rank ON public.user_rankings(user_id, media_type, rank_order_medium ASC);
-CREATE INDEX idx_media_director ON public.tv_shows(director);
+CREATE INDEX idx_user_rankings_medium_rank ON public.user_rankings(user_id, media_type, rank_position_medium ASC);
+CREATE INDEX idx_media_director ON public.titles(director);
 ```

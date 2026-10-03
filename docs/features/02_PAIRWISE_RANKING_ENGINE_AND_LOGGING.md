@@ -97,14 +97,19 @@ $$\text{Calculated Score}(r) = 1.0 + 9.0 \times \left(\text{Percentile}(r)\right
 
 | Rank Position in 100 Shows | Percentile | Score ($\gamma = 0.82$) | Display Tier |
 | :--- | :--- | :--- | :--- |
-| **#1** (e.g. *Succession*) | 1.000 | **10.00** | God Tier |
-| **#5** | 0.959 | **9.69** | God Tier |
-| **#15** | 0.858 | **8.93** | Prestige Tier |
-| **#35** | 0.656 | **7.41** | Great Tier |
-| **#60** | 0.404 | **5.30** | Good / Mid |
-| **#90** | 0.101 | **2.38** | Disappointment |
+| **#1** (e.g. *Succession*) | 1.000 | **10.00** | 👑 God Tier |
+| **#5** | 0.960 | **9.70** | 👑 God Tier |
+| **#15** | 0.859 | **8.94** | ✨ Prestige Tier |
+| **#35** | 0.657 | **7.37** | 🍿 Good / Fun |
+| **#60** | 0.404 | **5.28** | 💀 Dropped / DNF band |
+| **#90** | 0.101 | **2.37** | 💀 Dropped / DNF band |
 
-*Note: For users with fewer than 10 shows, an empirical Bayesian prior is blended to prevent a user's 3rd show from unfairly receiving a 1.0 score.*
+*Display tiers follow the canonical thresholds in the Style Guide §2.2 (God ≥ 9.20, Prestige ≥ 8.50, Great ≥ 7.80, Good ≥ 7.00, Mid ≥ 5.50, Dropped < 5.50).*
+
+**Small-canon Bayesian prior ($N < 10$).** To prevent a user's 3rd show from unfairly receiving a 1.00, the raw curve is blended with a gentle step-down prior:
+$$\alpha = \frac{N}{10}, \qquad \text{prior}(r) = \max\left(1.0,\; 10.0 - 0.5\,(r - 1)\right)$$
+$$\text{Score}(r) = \alpha \cdot \left(1.0 + 9.0 \cdot \text{Percentile}(r)^{0.82}\right) + (1 - \alpha) \cdot \text{prior}(r)$$
+For $N = 1$ the score is exactly $10.00$; for $N \ge 10$ the pure curve applies. Scores are rounded to 2 decimals. Client (Dart `ScoreCurveCalculator`) and server (`insert_user_ranking_atomic`) must produce identical values (shared fixture `test/fixtures/score_curve_vectors.json`).
 
 ---
 
@@ -169,68 +174,13 @@ Once the rank is established, the user is presented with the **Editorial Details
 ## 6. Database Contracts & PostgreSQL RPC
 
 ### 6.1 RPC: Insert Title and Rebalance Specific Media Canon
-To ensure ACID compliance and instantaneous re-indexing, ranking insertion is executed via a PostgreSQL stored procedure isolated by `media_type`:
+Ranking insertion is executed server-side by `insert_user_ranking_atomic`, isolated by `media_type` (`'movie'` / `'tv'`). The normative signature, locking, re-rank, scoring and idempotency rules live in [**Spec 02 §3.2**](../technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md). The executable SQL lives in `supabase/migrations/`.
 
-```sql
-CREATE OR REPLACE FUNCTION insert_user_ranking_atomic(
-    p_user_id UUID,
-    p_show_id INT,
-    p_target_rank INT,
-    p_status watch_status_enum,
-    p_finale_impact finale_impact_enum,
-    p_review VARCHAR,
-    p_tags TEXT[],
-    p_character VARCHAR,
-    p_media_type media_type_enum DEFAULT 'TV_SERIES',
-    p_is_rewatch BOOLEAN DEFAULT FALSE,
-    p_venue viewing_venue_enum DEFAULT 'HOME'
-) RETURNS VOID AS $$
-DECLARE
-    v_total_items INT;
-    r RECORD;
-    v_percentile NUMERIC;
-    v_score NUMERIC;
-BEGIN
-    -- 1. Shift existing ranks for this specific media canon
-    UPDATE public.user_rankings
-    SET rank_order = rank_order + 1
-    WHERE user_id = p_user_id 
-      AND media_type = p_media_type 
-      AND rank_order >= p_target_rank;
-
-    -- 2. Insert new ranking into designated canon
-    INSERT INTO public.user_rankings (
-        user_id, show_id, rank_order, calculated_score,
-        status, finale_impact, review_short, tags, favorite_character,
-        media_type, is_rewatch, venue, updated_at
-    ) VALUES (
-        p_user_id, p_show_id, p_target_rank, 10.00,
-        p_status, p_finale_impact, p_review, p_tags, p_character,
-        p_media_type, p_is_rewatch, p_venue, NOW()
-    );
-
-    -- 3. Recalculate dynamic scores across this media canon
-    SELECT COUNT(*) INTO v_total_items 
-    FROM public.user_rankings 
-    WHERE user_id = p_user_id AND media_type = p_media_type;
-
-    FOR r IN SELECT id, rank_order FROM public.user_rankings 
-             WHERE user_id = p_user_id AND media_type = p_media_type 
-             ORDER BY rank_order LOOP
-        IF v_total_items = 1 THEN
-            v_score := 10.00;
-        ELSE
-            v_percentile := (v_total_items - r.rank_order)::NUMERIC / (v_total_items - 1)::NUMERIC;
-            v_score := ROUND(1.0 + 9.0 * POWER(v_percentile, 0.82), 2);
-        END IF;
-
-        UPDATE public.user_rankings
-        SET calculated_score = v_score
-        WHERE id = r.id;
-    END LOOP;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-```
+Contract summary:
+- The acting user is derived from `auth.uid()`.
+- The call shifts rows `>= p_target_rank` in the **same** `(user, media_type)` canon by +1 and inserts the title. If the title is already ranked, it moves it instead (closing its old gap first).
+- It then recomputes every score in that canon with the §3.3 curve (γ = 0.82 plus the small-canon prior).
+- It is serialized per `(user, media_type)` with an advisory lock, and is idempotent on `p_client_mutation_id`.
 
 ---
 
