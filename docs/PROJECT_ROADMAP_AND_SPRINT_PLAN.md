@@ -23,19 +23,19 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 1 (Weeks 1–2): Infrastructure, Auth, Foundation & Data Ingestion**
-- **Current Active Ticket**: `FE-103`: Haptic Feedback Engine (`HapticsService`)
-- **Overall Roadmap Progress**: **2 / 81 Tickets Completed** (2.5%)
+- **Current Active Ticket**: `FE-104`: Core Component Primitives (Buttons, Sheets, Badges)
+- **Overall Roadmap Progress**: **3 / 81 Tickets Completed** (3.7%)
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos`), Unit Tests (100% pass)
 - **Last Updated**: 2026-10-03
 
 | Sprint | Status | Total Tickets | Completed | Progress |
 | :---: | :---: | :---: | :---: | :--- |
-| **Sprint 1** | 🟡 **Active** | 15 | 2 | `██░░░░░░░░` 13.3% |
+| **Sprint 1** | 🟡 **Active** | 15 | 3 | `███░░░░░░░` 20.0% |
 | **Sprint 2** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 3** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 4** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 5** | ⚪ Queued | 18 | 0 | `░░░░░░░░░░` 0% |
-| **Total** | | **81** | **2** | **2.5%** |
+| **Total** | | **81** | **3** | **3.7%** |
 
 ---
 
@@ -153,14 +153,14 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [**`design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md) §5 (Haptic Sensations)
 - **Scope & Objectives**: Build central haptic abstraction delivering customized tactile feedback.
 - **Granular Tasks**:
-  - [ ] Create `lib/core/services/haptics_service.dart`.
-  - [ ] Implement `duelWinner()` $\to$ `HapticFeedback.mediumImpact()`.
-  - [ ] Implement `duelSelectCandidate()` $\to$ `HapticFeedback.selectionClick()`.
-  - [ ] Implement `upsetAlertTriggered()` $\to$ double `HapticFeedback.heavyImpact()` pulse.
-  - [ ] Implement `scoreReveal()` $\to$ sequential light haptic vibration.
-  - [ ] Provide toggle in Riverpod user preferences to disable haptics globally.
+  - [x] Create `lib/core/services/haptics_service.dart`.
+  - [x] Implement `duelWinner()` $\to$ `HapticFeedback.mediumImpact()`.
+  - [x] Implement `duelSelectCandidate()` $\to$ `HapticFeedback.selectionClick()`.
+  - [x] Implement `upsetAlertTriggered()` $\to$ double `HapticFeedback.heavyImpact()` pulse.
+  - [x] Implement `scoreReveal()` $\to$ sequential light haptic vibration.
+  - [x] Provide toggle in Riverpod user preferences to disable haptics globally.
 - **Testing & Verification**:
-  - [ ] Unit test verifying `HapticsService` respects user `haptics_enabled: false` setting.
+  - [x] Unit test verifying `HapticsService` respects user `haptics_enabled: false` setting.
 - **Dependencies**: `FE-101`.
 
 #### `FE-104`: Core Component Primitives (Buttons, Sheets, Badges)
