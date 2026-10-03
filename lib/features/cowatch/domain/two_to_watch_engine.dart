@@ -3,6 +3,8 @@
 /// and `docs/features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md` §5.
 library two_to_watch_engine;
 
+import '../../ranking/domain/canon_tier.dart';
+
 enum CoWatchFormat {
   movieNight('Movie Night', 'movie'),
   series('Start a Series', 'tv');
@@ -39,7 +41,7 @@ class CoWatchCandidate {
   final List<String> vibeTags;
   final bool inWatchlistA;
   final bool inWatchlistB;
-  final double? ratingA; // God tier if > 9.0
+  final double? ratingA; // God Tier when CanonTier.fromScore(...) == CanonTier.god
   final double? ratingB;
   final double communityScore;
   final String overview;
@@ -132,9 +134,10 @@ class TwoToWatchEngine {
         reasons.add('Saved on watchlist');
       }
 
-      // +35 points if one user rated it God Tier (> 9.0) and other hasn't seen
-      final isGodTierA = c.ratingA != null && c.ratingA! >= 9.0 && c.ratingB == null;
-      final isGodTierB = c.ratingB != null && c.ratingB! >= 9.0 && c.ratingA == null;
+      // +35 points if one user rated it God Tier and the other hasn't seen it.
+      // God Tier uses the single canonical threshold (CanonTier, style guide §2.2).
+      final isGodTierA = c.ratingA != null && CanonTier.fromScore(c.ratingA!) == CanonTier.god && c.ratingB == null;
+      final isGodTierB = c.ratingB != null && CanonTier.fromScore(c.ratingB!) == CanonTier.god && c.ratingA == null;
       if (isGodTierA) {
         score += 35.0;
         reasons.add('You rated it ★${c.ratingA!.toStringAsFixed(1)} (God Tier)');

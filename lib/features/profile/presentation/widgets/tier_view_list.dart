@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
+import '../../../ranking/domain/canon_tier.dart';
 import '../../../ranking/domain/franchise_rollup_service.dart';
+import '../../../ranking/presentation/widgets/canon_tier_style.dart';
 
 /// Mode 2: Tier View grouping personal canon into recognized cultural tiers.
 /// Conforms to `docs/features/06_PROFILE_THE_CANON_AND_STATS.md` §3.2.
@@ -29,27 +31,15 @@ class TierViewList extends StatelessWidget {
       );
     }
 
-    final godTier = entries.where((e) => e.calculatedScore >= 9.20).toList();
-    final prestigeTier = entries.where((e) => e.calculatedScore >= 8.50 && e.calculatedScore < 9.20).toList();
-    final greatTier = entries.where((e) => e.calculatedScore >= 7.80 && e.calculatedScore < 8.50).toList();
-    final goodTier = entries.where((e) => e.calculatedScore >= 7.00 && e.calculatedScore < 7.80).toList();
-    final midTier = entries.where((e) => e.calculatedScore >= 5.50 && e.calculatedScore < 7.00).toList();
-    final droppedTier = entries.where((e) => e.calculatedScore < 5.50).toList();
+    final grouped = <CanonTier, List<CanonEntry>>{};
+    for (final entry in entries) {
+      grouped.putIfAbsent(CanonTier.fromScore(entry.calculatedScore), () => []).add(entry);
+    }
 
     return Column(
       children: [
-        if (godTier.isNotEmpty)
-          _buildTierGroup('👑 GOD TIER (9.20 – 10.00)', godTier, TellyColors.warmAmber),
-        if (prestigeTier.isNotEmpty)
-          _buildTierGroup('✨ PRESTIGE TIER (8.50 – 9.19)', prestigeTier, TellyColors.electricViolet),
-        if (greatTier.isNotEmpty)
-          _buildTierGroup('🔥 GREAT TIER (7.80 – 8.49)', greatTier, TellyColors.phosphorLime),
-        if (goodTier.isNotEmpty)
-          _buildTierGroup('⚡ GOOD TIER (7.00 – 7.79)', goodTier, TellyColors.electricCyan),
-        if (midTier.isNotEmpty)
-          _buildTierGroup('MID / FILLER (5.50 – 6.99)', midTier, TellyColors.textSecondary),
-        if (droppedTier.isNotEmpty)
-          _buildTierGroup('💀 DROPPED / DNF (< 5.50)', droppedTier, TellyColors.neonCoral),
+        for (final tier in CanonTier.values)
+          if (grouped[tier] != null) _buildTierGroup(tier.headerLabel, grouped[tier]!, tier.accent),
       ],
     );
   }

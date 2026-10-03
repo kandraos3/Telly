@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:io';
 import 'dart:math' as math;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:telly_app/features/ranking/domain/score_curve_calculator.dart';
@@ -63,18 +65,53 @@ void main() {
       }
     });
 
-    test('CanonTier classification maps accurately to score tiers', () {
-      expect(CanonTier.fromScore(10.00), equals(CanonTier.godTier));
-      expect(CanonTier.fromScore(9.24), equals(CanonTier.godTier));
-      expect(CanonTier.fromScore(8.50), equals(CanonTier.prestigeTier));
-      expect(CanonTier.fromScore(7.41), equals(CanonTier.greatTier));
-      expect(CanonTier.fromScore(5.30), equals(CanonTier.goodMidTier));
-      expect(CanonTier.fromScore(2.38), equals(CanonTier.disappointment));
-      expect(CanonTier.fromScore(1.00), equals(CanonTier.disappointment));
+    test('features/02 §3.3 table: exact gamma = 0.82 values for N = 100', () {
+      const expected = {1: 10.00, 5: 9.70, 15: 8.94, 35: 7.37, 60: 5.28, 90: 2.37};
+      expected.forEach((rank, score) {
+        expect(ScoreCurveCalculator.calculateRoundedScore(rank, 100), score, reason: 'rank #$rank');
+      });
+      expect(ScoreCurveCalculator.defaultExponent, 0.82);
+    });
 
-      // Check helper on calculator
-      expect(ScoreCurveCalculator.getTier(1, 100), equals(CanonTier.godTier));
-      expect(ScoreCurveCalculator.getTier(100, 100), equals(CanonTier.disappointment));
+    test('N < 10 prior matches the spec formula exactly', () {
+      // N = 3, r = 2: alpha = 0.3, raw = 1 + 9 * 0.5^0.82, prior = 9.5
+      final raw = 1 + 9 * math.pow(0.5, 0.82);
+      expect(ScoreCurveCalculator.calculateScore(2, 3), closeTo(0.3 * raw + 0.7 * 9.5, 1e-12));
+    });
+
+    test('matches the shared Dart/SQL fixture test/fixtures/score_curve_vectors.json', () {
+      final fixture = jsonDecode(File('test/fixtures/score_curve_vectors.json').readAsStringSync()) as Map<String, dynamic>;
+      final vectors = (fixture['vectors'] as List).cast<Map<String, dynamic>>();
+      expect(vectors, hasLength(180));
+      for (final v in vectors) {
+        expect(
+          ScoreCurveCalculator.calculateRoundedScore(v['rank'] as int, v['n'] as int),
+          (v['score'] as num).toDouble(),
+          reason: 'N=${v['n']} rank=${v['rank']}',
+        );
+      }
+    });
+
+    test('CanonTier uses style guide §2.2 thresholds with inclusive lower bounds', () {
+      expect(CanonTier.fromScore(10.00), CanonTier.god);
+      expect(CanonTier.fromScore(9.20), CanonTier.god);
+      expect(CanonTier.fromScore(9.19), CanonTier.prestige);
+      expect(CanonTier.fromScore(8.50), CanonTier.prestige);
+      expect(CanonTier.fromScore(8.49), CanonTier.great);
+      expect(CanonTier.fromScore(7.80), CanonTier.great);
+      expect(CanonTier.fromScore(7.79), CanonTier.good);
+      expect(CanonTier.fromScore(7.00), CanonTier.good);
+      expect(CanonTier.fromScore(6.99), CanonTier.mid);
+      expect(CanonTier.fromScore(5.50), CanonTier.mid);
+      expect(CanonTier.fromScore(5.49), CanonTier.dropped);
+      expect(CanonTier.fromScore(1.00), CanonTier.dropped);
+      // Floating-point noise around a boundary resolves at display precision.
+      expect(CanonTier.fromScore(9.199999999), CanonTier.god);
+
+      expect(CanonTier.prestige.rangeLabel, '8.50 – 9.19');
+      expect(CanonTier.dropped.rangeLabel, '< 5.50');
+      expect(ScoreCurveCalculator.getTier(1, 100), CanonTier.god);
+      expect(ScoreCurveCalculator.getTier(100, 100), CanonTier.dropped);
     });
 
     test('Property-based testing: 10,000 generated datasets obey invariants', () {

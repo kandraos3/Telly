@@ -19,6 +19,9 @@ class TellyNeonBadge extends StatelessWidget {
   final bool enableGlow;
   final EdgeInsetsGeometry padding;
 
+  /// Overrides the variant color (e.g. canon tier accents).
+  final Color? color;
+
   const TellyNeonBadge({
     super.key,
     required this.label,
@@ -26,6 +29,7 @@ class TellyNeonBadge extends StatelessWidget {
     this.variant = TellyBadgeVariant.winner,
     this.enableGlow = true,
     this.padding = const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+    this.color,
   });
 
   factory TellyNeonBadge.upset({Key? key, String label = 'UPSET', Widget? icon}) =>
@@ -53,6 +57,7 @@ class TellyNeonBadge extends StatelessWidget {
       );
 
   Color _badgeColor() {
+    if (color != null) return color!;
     switch (variant) {
       case TellyBadgeVariant.upset:
         return TellyColors.neonCoral;

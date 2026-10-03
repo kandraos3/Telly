@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/services/haptics_service.dart';
 import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
-import '../../../../core/widgets/telly_neon_badge.dart';
 import '../../../../core/widgets/telly_primary_button.dart';
 import '../../domain/canon_type.dart';
 import '../../domain/score_curve_calculator.dart';
+import '../widgets/canon_tier_style.dart';
 
 /// SCR-12 Celebration Slot Reveal Modal with Number Ticker.
 /// Conforms to:
@@ -450,35 +450,6 @@ class _SlotRevealModalState extends ConsumerState<SlotRevealModal>
   }
 
   Widget _buildTierBadge(CanonTier tier) {
-    switch (tier) {
-      case CanonTier.godTier:
-        return TellyNeonBadge.godTier(
-          key: const Key('slot_reveal_tier_badge'),
-          label: '👑 GOD TIER',
-        );
-      case CanonTier.prestigeTier:
-        return const TellyNeonBadge(
-          key: Key('slot_reveal_tier_badge'),
-          label: '✨ PRESTIGE TIER',
-          variant: TellyBadgeVariant.tasteMatch,
-        );
-      case CanonTier.greatTier:
-        return const TellyNeonBadge(
-          key: Key('slot_reveal_tier_badge'),
-          label: '🔥 GREAT TIER',
-          variant: TellyBadgeVariant.winner,
-        );
-      case CanonTier.goodMidTier:
-        return const TellyNeonBadge(
-          key: Key('slot_reveal_tier_badge'),
-          label: '⚡ GOOD TIER',
-          variant: TellyBadgeVariant.neutral,
-        );
-      case CanonTier.disappointment:
-        return TellyNeonBadge.upset(
-          key: const Key('slot_reveal_tier_badge'),
-          label: 'MID / FILLER',
-        );
-    }
+    return CanonTierBadge(key: const Key('slot_reveal_tier_badge'), tier: tier);
   }
 }

@@ -24,7 +24,7 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 6 — Integration, Wiring & Audit Remediation** (planned 2026-10-03; owner decisions D1–D7 recorded in Sprint 6)
-- **Current Active Ticket**: `ALGO-601` (Score Curve γ = 0.82 + Single Tier Definition) — Sprint 6: 4 / 32 tickets complete
+- **Current Active Ticket**: `BE-603` (Concurrency-Safe, Authorized Ranking RPCs) — Sprint 6: 5 / 32 tickets complete
 - **Overall Roadmap Progress**: Sprints 1–5 granular tasks after the `DOC-601` honesty reset (2026-10-03): **281 / 431 verified** · **121 un-checked** (each annotated `→ remediated by <Sprint 6 ticket>`) · **29 human-only**. The earlier "89 / 89" claim was overstated.
 - **Human-Only Tasks**: 29 tasks in Sprints 1–5 marked `👤 [TO BE DONE BY HUMAN]` (cloud setup, secrets, store submission, device/CI runs, dashboard verification), plus the Sprint 6 human prerequisites list. These cannot be completed or verified from code.
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (215 / 215 pass — note: many tests are widget/unit-level only; no real E2E or golden tests exist yet)
@@ -59,12 +59,12 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 - **Granular Tasks**:
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Create Supabase project (`telly-backend-prod`) in US-East / EU-Central.
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Execute `01_initial_schema.sql` migration creating core tables: `users`, `titles`, `user_rankings`, `pairwise_duels`, `user_watchlist`, `social_follows`, `squads`, `squad_members`, `comments`, `reports`.
-  - [ ] Verify `media_type` enum (`'movie'`, `'tv'`) and indexes on `(user_id, media_type, rank_position)`. → remediated by `BE-601`
-  - [ ] Enable PostgreSQL Row-Level Security (RLS) policies on all tables. → remediated by `BE-602`
+  - [x] Verify `media_type` enum (`'movie'`, `'tv'`) and indexes on `(user_id, media_type, rank_position)`. ✅ remediated in `BE-601`
+  - [x] Enable PostgreSQL Row-Level Security (RLS) policies on all tables. ✅ remediated in `BE-602`
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Verify connection strings and configure Supabase Service Role keys in `.env`.
 - **Testing & Verification**:
   - [ ] Run verification script to assert 9 tables, 14 indexes, and 18 RLS policies are active. → remediated by `QA-601`
-  - [ ] Verify non-authenticated client cannot bypass RLS on `user_rankings`. → remediated by `BE-602`
+  - [x] Verify non-authenticated client cannot bypass RLS on `user_rankings`. ✅ remediated in `BE-602`
 - **Dependencies**: None.
 
 #### `BE-102`: Top 50 Seed Ingestion & Streaming Platform Setup
@@ -74,12 +74,12 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 - **Scope & Objectives**: Populate the initial recognition dataset with top movies, series, and anime.
 - **Granular Tasks**:
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Execute `top_50_shows_seed.sql` into the `titles` table.
-  - [ ] Verify 20 prestige TV series (*Succession*, *The Bear*, *Severance*), 15 anime classics (*Attack on Titan*, *Frieren*, *Death Note*), and 15 films (*The Dark Knight*, *Parasite*, *Spirited Away*) are seeded. → remediated by `BE-601`
-  - [ ] Verify `streaming_services` JSONB payloads contain valid IDs (`netflix`, `max`, `hulu`, `apple_tv`, `crunchyroll`, `prime_video`). → remediated by `BE-601`
-  - [ ] Create database trigger updating `titles.updated_at` automatically on modification. → remediated by `BE-601`
+  - [x] Verify 20 prestige TV series (*Succession*, *The Bear*, *Severance*), 15 anime classics (*Attack on Titan*, *Frieren*, *Death Note*), and 15 films (*The Dark Knight*, *Parasite*, *Spirited Away*) are seeded. ✅ remediated in `BE-601`
+  - [ ] Verify `streaming_services` JSONB payloads contain valid IDs (`netflix`, `max`, `hulu`, `apple_tv`, `crunchyroll`, `prime_video`). → remediated by `BE-605` (column exists since `BE-601`; seed leaves it empty until availability sync populates it)
+  - [x] Create database trigger updating `titles.updated_at` automatically on modification. ✅ remediated in `BE-601`
 - **Testing & Verification**:
-  - [ ] Query `SELECT COUNT(*) FROM titles WHERE media_type = 'movie'` returns 15. → remediated by `BE-601`
-  - [ ] Query `SELECT COUNT(*) FROM titles WHERE media_type = 'tv'` returns 35. → remediated by `BE-601`
+  - [x] Query `SELECT COUNT(*) FROM titles WHERE media_type = 'movie'` returns 15. ✅ remediated in `BE-601`
+  - [x] Query `SELECT COUNT(*) FROM titles WHERE media_type = 'tv'` returns 35. ✅ remediated in `BE-601`
 - **Dependencies**: `BE-101`.
 
 #### `BE-103`: Supabase GoTrue Auth & Twilio SMS Gateway Integration
@@ -91,7 +91,7 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Configure Sign in with Apple in Supabase Dashboard with Apple Service ID and private key.
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Configure Google OAuth Client ID & Secret for iOS and Android.
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Configure Twilio Verify Service SID and Auth Token in Supabase Phone Auth settings.
-  - [ ] Create Postgres trigger `on_auth_user_created` to automatically insert a skeleton profile into `public.users`. → remediated by `BE-601`
+  - [x] Create Postgres trigger `on_auth_user_created` to automatically insert a skeleton profile into `public.users`. ✅ remediated in `BE-601`
 - **Testing & Verification**:
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Send test SMS OTP to staging test numbers; verify 6-digit code delivery.
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Test token issuance and JWT claims including `sub` and `aud`.
@@ -378,7 +378,7 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
 - **Granular Tasks**:
   - [x] Create `lib/features/ranking/domain/score_curve_calculator.dart`.
   - [x] Implement formula: $\text{Score}(r, N) = 1.00 + 9.00 \times \left(1.0 - \frac{r - 1}{N - 1}\right)^p$.
-  - [ ] Apply power exponent $\gamma = 0.82$ per features/02 §3.3 (code currently uses 1.15). → remediated by `ALGO-601`
+  - [x] Apply power exponent $\gamma = 0.82$ per features/02 §3.3. ✅ remediated in `ALGO-601`
   - [x] Implement Bayesian smoothing prior for profiles with $N < 10$ ranked titles.
 - **Testing & Verification**:
   - [x] Verify $\text{Score}(1, N) == 10.00$ and $\text{Score}(N, N) == 1.00$ for all $N > 1$.
@@ -558,7 +558,7 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
 - **Scope & Objectives**: Implement 3 distinct visual presentations of the user's ranked list.
 - **Granular Tasks**:
   - [x] Mode 1: **Ranked List** — numbered rows (#1, #2), poster thumbnail, dynamic score pill, and MVP badge.
-  - [ ] Mode 2: **Tier View** — grouped buckets per style guide §2.2: God (≥9.20), Prestige (8.50–9.19), Great (7.80–8.49), Good (7.00–7.79), Mid (5.50–6.99), Dropped (<5.50). → remediated by `ALGO-601`
+  - [x] Mode 2: **Tier View** — grouped buckets per style guide §2.2: God (≥9.20), Prestige (8.50–9.19), Great (7.80–8.49), Good (7.00–7.79), Mid (5.50–6.99), Dropped (<5.50). ✅ remediated in `ALGO-601`
   - [x] Mode 3: **3x3 Poster Grid** — aesthetic Instagram-style grid showing user's top 9 titles without text clutter.
   - [x] Add view switcher icon row in the sub-header.
 - **Testing & Verification**:
@@ -661,9 +661,9 @@ Build social connections, the activity feed with real-time upset alert detection
   - [x] Create `social_follows` table with `follower_id`, `following_id`, `status` (`pending`, `accepted`).
   - [x] Add unique index on `(follower_id, following_id)`.
   - [x] Create `activity_logs` table recording ranking events, comments, and queue additions.
-  - [ ] Write RLS policies ensuring private accounts require follow approval before exposing activity. → remediated by `BE-602`
+  - [x] Write RLS policies ensuring private accounts require follow approval before exposing activity. ✅ remediated in `BE-602`
 - **Testing & Verification**:
-  - [ ] Verify private account activities are hidden from unapproved users. → remediated by `BE-602`
+  - [x] Verify private account activities are hidden from unapproved users. ✅ remediated in `BE-602`
 - **Dependencies**: `BE-101`.
 
 #### `BE-302`: Upset Engine Algorithmic Detection ($\mu_{\text{diff}} \ge 0.25$)
@@ -870,7 +870,7 @@ Build social connections, the activity feed with real-time upset alert detection
 - **Scope & Objectives**: Verify database security rules and follow isolation.
 - **Granular Tasks**:
   - [ ] Write `database/tests/02_social_follows_rls_test.sql`. → remediated by `QA-601`
-  - [ ] Verify private user rankings cannot be selected by non-followers. → remediated by `BE-602`
+  - [x] Verify private user rankings cannot be selected by non-followers. ✅ remediated in `BE-602`
 - **Testing & Verification**:
   - [ ] pgTAP suite passes in Supabase local test container. → remediated by `QA-601`
 - **Dependencies**: `BE-301`.
@@ -1590,11 +1590,11 @@ Turn the library of individually-tested widgets and algorithms into a **wired, r
   - [**`design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md) §2.2
 - **Scope & Objectives**: Fix the exponent mismatch and collapse three tier definitions into one.
 - **Granular Tasks**:
-  - [ ] `ScoreCurveCalculator.defaultExponent = 0.82`; prior per D3.
-  - [ ] `CanonTier` → six style-guide tiers (`god`, `prestige`, `great`, `good`, `mid`, `dropped`) with thresholds and gradient tokens from `TellyColors`; delete the other tier definitions (`SentimentBracket` score comments, `TwoToWatchEngine` `>= 9.0`, feed `culturalTier` strings) and route them through `CanonTier.fromScore`.
-  - [ ] `SentimentBracket`: align with `SCR-09` (4 cards) and features/02 §3.1 bounds; document how "Disappointed" maps.
+  - [x] `ScoreCurveCalculator.defaultExponent = 0.82`; prior per D3.
+  - [x] `CanonTier` → six style-guide tiers (`god`, `prestige`, `great`, `good`, `mid`, `dropped`) with thresholds and gradient tokens from `TellyColors`; delete the other tier definitions (`SentimentBracket` score comments, `TwoToWatchEngine` `>= 9.0`, feed `culturalTier` strings) and route them through `CanonTier.fromScore`.
+  - [x] `SentimentBracket`: align with `SCR-09` (4 cards) and features/02 §3.1 bounds; document how "Disappointed" maps.
 - **Testing & Verification**:
-  - [ ] Unit tests: exact $\gamma = 0.82$ values for N = 100 (#1 → 10.00, #5 → 9.70, #15 → 8.94, #35 → 7.37, #60 → 5.28, #90 → 2.37 — matching the corrected spec table from `DOC-602`); monotonicity; parity with `score_curve_vectors.json`; tier boundaries at 9.20/8.50/7.80/7.00/5.50 inclusive.
+  - [x] Unit tests: exact $\gamma = 0.82$ values for N = 100 (#1 → 10.00, #5 → 9.70, #15 → 8.94, #35 → 7.37, #60 → 5.28, #90 → 2.37 — matching the corrected spec table from `DOC-602`); monotonicity; parity with `score_curve_vectors.json`; tier boundaries at 9.20/8.50/7.80/7.00/5.50 inclusive.
 - **Dependencies**: `DOC-602`.
 
 #### `ALGO-602`: Franchise Rollup via Primary Series Duel
