@@ -63,7 +63,7 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [x] Enable PostgreSQL Row-Level Security (RLS) policies on all tables. ✅ remediated in `BE-602`
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Verify connection strings and configure Supabase Service Role keys in `.env`.
 - **Testing & Verification**:
-  - [x] Run verification script to assert 9 tables, 14 indexes, and 18 RLS policies are active. ✅ remediated in `QA-601`
+  - [x] Run verification script to assert 9 tables, 14 indexes, and 18 RLS policies are active. ✅ remediated in `QA-601` (actual baseline: 23 tables, RLS on every table — asserted in pgTAP 001/002)
   - [x] Verify non-authenticated client cannot bypass RLS on `user_rankings`. ✅ remediated in `BE-602`
 - **Dependencies**: None.
 
@@ -452,7 +452,7 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
   - [x] Add check constraint `winner_id != loser_id`.
   - [x] Create composite index on `(winner_id, loser_id)` for global win-rate aggregations.
 - **Testing & Verification**:
-  - [x] Test inserting duel records and querying win rates by title. ✅ remediated in `QA-601`
+  - [x] Test inserting duel records and querying win rates by title. ✅ remediated in `QA-601` (win-rate RPC superseded by consensus-percentile upset detection per features/04 §3.2; duel inserts tested in pgTAP 004)
 - **Dependencies**: `BE-101`.
 
 ---
@@ -900,7 +900,7 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
     $$\rho_{\text{shrunk}} = \frac{k}{k + k_0} \cdot \rho + \frac{k_0}{k + k_0} \cdot \mu_0$$
   - [x] Normalize to percentage: $\text{Match} \% = \text{round}\left(\frac{\rho_{\text{shrunk}} + 1.0}{2.0} \times 100\right)$.
 - **Testing & Verification**:
-  - [x] pgTAP test verifying identical rankings yield $100\%$; completely reversed rankings yield $0\%$. ✅ remediated in `QA-601`
+  - [x] pgTAP test verifying identical rankings yield $100\%$; completely reversed rankings yield $0\%$. ✅ remediated in `QA-601` (spec shrinkage W=k/(k+5) makes 100% unreachable; pgTAP 005 asserts the spec value, e.g. 72% for 4 identical mutual titles)
 - **Dependencies**: `BE-101`, `BE-201`.
 
 #### `BE-402`: JustWatch / Watchmode Real-Time Availability Scraper & Redis Cache
@@ -1099,7 +1099,7 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
 - **Granular Tasks**:
   - [x] Write `database/tests/03_taste_match_rpc_test.sql`. ✅ remediated in `QA-601`
 - **Testing & Verification**:
-  - [x] pgTAP suite runs in Supabase container; latency under 15ms. ✅ remediated in `QA-601`
+  - [ ] pgTAP suite runs in Supabase container; latency under 15ms. → suite runs (`QA-601`); latency not yet measured → `BE-701`
 - **Dependencies**: `BE-401`.
 
 ---
