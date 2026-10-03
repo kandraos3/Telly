@@ -26,6 +26,11 @@ class HapticsService {
     PlatformHaptics platform = const PlatformHaptics(),
   }) : _platform = platform;
 
+  static Future<void> lightImpact() => HapticFeedback.lightImpact();
+  static Future<void> mediumImpact() => HapticFeedback.mediumImpact();
+  static Future<void> heavyImpact() => HapticFeedback.heavyImpact();
+  static Future<void> selectionClick() => HapticFeedback.selectionClick();
+
   /// Tactile feedback when selecting the winner in a pairwise duel.
   Future<void> duelWinner() async {
     if (!enabled) return;

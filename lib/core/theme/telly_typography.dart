@@ -70,6 +70,33 @@ abstract class TellyTypography {
         color: color,
       );
 
+  static TextStyle headlineSmall({Color color = TellyColors.textPrimary}) =>
+      GoogleFonts.plusJakartaSans(
+        fontSize: 16,
+        height: 22 / 16,
+        fontWeight: FontWeight.w700,
+        letterSpacing: -0.01 * 16,
+        color: color,
+      );
+
+  static TextStyle labelLarge({Color color = TellyColors.textPrimary}) =>
+      GoogleFonts.plusJakartaSans(
+        fontSize: 14,
+        height: 18 / 14,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.01 * 14,
+        color: color,
+      );
+
+  static TextStyle labelMedium({Color color = TellyColors.textPrimary}) =>
+      GoogleFonts.plusJakartaSans(
+        fontSize: 12,
+        height: 16 / 12,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.01 * 12,
+        color: color,
+      );
+
   static TextStyle labelSmall({Color color = TellyColors.textPrimary}) =>
       GoogleFonts.plusJakartaSans(
         fontSize: 11,
@@ -78,6 +105,9 @@ abstract class TellyTypography {
         letterSpacing: 0.01 * 11,
         color: color,
       );
+
+  static TextStyle monoDigits({Color color = TellyColors.phosphorLime}) =>
+      scoreMono(color: color);
 
   // Tabular Figures for Live Decimal Scores (e.g. 9.85, 7.40)
   static TextStyle scoreHero({Color color = TellyColors.phosphorLime}) =>

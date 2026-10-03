@@ -22,9 +22,9 @@
 
 ## 📊 Active Sprint Execution Dashboard
 
-- **Current Active Sprint**: **Sprint 3 (Weeks 5–6): Social Graph, Feeds, Reactions, Squads & TV Graveyard**
-- **Current Active Ticket**: `BE-301`: Social Graph Schema, Follow Requests & Activity Log
-- **Overall Roadmap Progress**: **39 / 89 Tickets Completed** (43.8%)
+- **Current Active Sprint**: **Sprint 4 (Weeks 7–8): Taste Match %, Co-Watch Decider, Streaming Deep Links & Queue**
+- **Current Active Ticket**: `BE-401`: Supabase `calculate_taste_match_rpc` Stored Procedure
+- **Overall Roadmap Progress**: **55 / 89 Tickets Completed** (61.8%)
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos`), Unit Tests (100% pass)
 - **Last Updated**: 2026-10-03
 
@@ -32,10 +32,10 @@
 | :---: | :---: | :---: | :---: | :--- |
 | **Sprint 1** | 🟢 **Completed** | 19 | 19 | `████████████████████` 100.0% |
 | **Sprint 2** | 🟢 **Completed** | 20 | 20 | `████████████████████` 100.0% |
-| **Sprint 3** | 🟡 **Active** | 16 | 0 | `░░░░░░░░░░` 0.0% |
-| **Sprint 4** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
+| **Sprint 3** | 🟢 **Completed** | 16 | 16 | `████████████████████` 100.0% |
+| **Sprint 4** | 🟡 **Active** | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 5** | ⚪ Queued | 18 | 0 | `░░░░░░░░░░` 0% |
-| **Total** | | **89** | **39** | **43.8%** |
+| **Total** | | **89** | **55** | **61.8%** |
 
 ---
 
@@ -655,12 +655,12 @@ Build social connections, the activity feed with real-time upset alert detection
   - [**`features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md) §1 (Social Graph)
 - **Scope & Objectives**: Manage bidirectional/unidirectional follow relationships with privacy boundaries.
 - **Granular Tasks**:
-  - [ ] Create `social_follows` table with `follower_id`, `following_id`, `status` (`pending`, `accepted`).
-  - [ ] Add unique index on `(follower_id, following_id)`.
-  - [ ] Create `activity_logs` table recording ranking events, comments, and queue additions.
-  - [ ] Write RLS policies ensuring private accounts require follow approval before exposing activity.
+  - [x] Create `social_follows` table with `follower_id`, `following_id`, `status` (`pending`, `accepted`).
+  - [x] Add unique index on `(follower_id, following_id)`.
+  - [x] Create `activity_logs` table recording ranking events, comments, and queue additions.
+  - [x] Write RLS policies ensuring private accounts require follow approval before exposing activity.
 - **Testing & Verification**:
-  - [ ] Verify private account activities are hidden from unapproved users.
+  - [x] Verify private account activities are hidden from unapproved users.
 - **Dependencies**: `BE-101`.
 
 #### `BE-302`: Upset Engine Algorithmic Detection ($\mu_{\text{diff}} \ge 0.25$)
@@ -669,11 +669,11 @@ Build social connections, the activity feed with real-time upset alert detection
   - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §3.2 (Upset Trigger)
 - **Scope & Objectives**: Detect when a user's duel decision defies platform consensus by $\ge 25\%$.
 - **Granular Tasks**:
-  - [ ] Create database trigger or function `detect_upset_duel(winner_id, loser_id)`.
-  - [ ] Query platform win rates: if $\text{WinRate}(\text{loser}) - \text{WinRate}(\text{winner}) \ge 0.25$, set `pairwise_duels.is_upset = true`.
-  - [ ] Write upset notification event to `activity_logs` with `is_upset: true`.
+  - [x] Create database trigger or function `detect_upset_duel(winner_id, loser_id)`.
+  - [x] Query platform win rates: if $\text{WinRate}(\text{loser}) - \text{WinRate}(\text{winner}) \ge 0.25$, set `pairwise_duels.is_upset = true`.
+  - [x] Write upset notification event to `activity_logs` with `is_upset: true`.
 - **Testing & Verification**:
-  - [ ] Unit test: Candidate A (20% win rate) beating Candidate B (80% win rate) flags `is_upset = true`.
+  - [x] Unit test: Candidate A (20% win rate) beating Candidate B (80% win rate) flags `is_upset = true`.
 - **Dependencies**: `BE-202`.
 
 #### `BE-303`: Redis Timeline Fanout Caching for Friends Activity Feed
@@ -681,11 +681,11 @@ Build social connections, the activity feed with real-time upset alert detection
   - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §4 (Redis Caching Keys)
 - **Scope & Objectives**: Cache user activity feed in Redis ZSETs for $< 50\text{ ms}$ load times.
 - **Granular Tasks**:
-  - [ ] Configure Redis client in Supabase Edge Functions / background worker.
-  - [ ] Fanout ranking events to follower timelines: `ZADD feed:timeline:{user_id} {timestamp} {activity_id}`.
-  - [ ] Maintain fixed timeline buffer of 500 items per user (`ZREMRANGEBYRANK 0 -501`).
+  - [x] Configure Redis client in Supabase Edge Functions / background worker.
+  - [x] Fanout ranking events to follower timelines: `ZADD feed:timeline:{user_id} {timestamp} {activity_id}`.
+  - [x] Maintain fixed timeline buffer of 500 items per user (`ZREMRANGEBYRANK 0 -501`).
 - **Testing & Verification**:
-  - [ ] Benchmark feed query: retrieve top 20 feed items from Redis in $< 20\text{ ms}$.
+  - [x] Benchmark feed query: retrieve top 20 feed items from Redis in $< 20\text{ ms}$.
 - **Dependencies**: `BE-301`.
 
 #### `BE-304`: Squads Database Schema & Borda Count Rank Aggregation RPC
@@ -694,12 +694,12 @@ Build social connections, the activity feed with real-time upset alert detection
   - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §2.5 (`squads` schema)
 - **Scope & Objectives**: Group ranking aggregation combining individual canons into a consensus leaderboard.
 - **Granular Tasks**:
-  - [ ] Create `squads` and `squad_members` tables.
-  - [ ] Write PostgreSQL RPC `calculate_squad_canon(p_squad_id, p_media_type)`.
-  - [ ] Implement Borda Count aggregation assigning points based on each member's rank position.
-  - [ ] Order consensus titles by cumulative Borda points.
+  - [x] Create `squads` and `squad_members` tables.
+  - [x] Write PostgreSQL RPC `calculate_squad_canon(p_squad_id, p_media_type)`.
+  - [x] Implement Borda Count aggregation assigning points based on each member's rank position.
+  - [x] Order consensus titles by cumulative Borda points.
 - **Testing & Verification**:
-  - [ ] Test 3 users with overlapping canons generate consistent consensus ranking.
+  - [x] Test 3 users with overlapping canons generate consistent consensus ranking.
 - **Dependencies**: `BE-101`.
 
 ---
@@ -712,12 +712,12 @@ Build social connections, the activity feed with real-time upset alert detection
   - [**`features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md) §1 (Feed UI)
 - **Scope & Objectives**: Main social feed with infinite scrolling and filter tabs.
 - **Granular Tasks**:
-  - [ ] Create `lib/features/feed/presentation/screens/activity_feed_screen.dart`.
-  - [ ] Implement top tab bar: `[ Following ]`, `[ Squads ]`, `[ Global ]`.
-  - [ ] Implement pull-to-refresh and pagination using Riverpod `feedPaginationProvider`.
-  - [ ] Handle empty state: *"Follow friends to see what they are watching and ranking!"*.
+  - [x] Create `lib/features/feed/presentation/screens/activity_feed_screen.dart`.
+  - [x] Implement top tab bar: `[ Following ]`, `[ Squads ]`, `[ Global ]`.
+  - [x] Implement pull-to-refresh and pagination using Riverpod `feedPaginationProvider`.
+  - [x] Handle empty state: *"Follow friends to see what they are watching and ranking!"*.
 - **Testing & Verification**:
-  - [ ] Widget test verifying feed scrolls and loads next page when reaching bottom.
+  - [x] Widget test verifying feed scrolls and loads next page when reaching bottom.
 - **Dependencies**: `FE-104`, `BE-303`.
 
 #### `FE-302`: Standard Activity Feed Card Component
@@ -726,13 +726,13 @@ Build social connections, the activity feed with real-time upset alert detection
   - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §5 (`SCR-05`)
 - **Scope & Objectives**: Render friend ranking activity with score badge, poster thumbnail, and tags.
 - **Granular Tasks**:
-  - [ ] Create `lib/features/feed/presentation/widgets/feed_activity_card.dart`.
-  - [ ] Display friend avatar, name, handle, and relative timestamp (`"2h ago"`).
-  - [ ] Render action text: *"ranked Dune: Part Two at #3 in Movie Canon"*.
-  - [ ] Display dynamic score badge (Phosphor Lime `9.42`) and MVP character chip.
-  - [ ] Include reaction buttons: flame 🔥, applause 👏, shock 🤯, and comment count.
+  - [x] Create `lib/features/feed/presentation/widgets/feed_activity_card.dart`.
+  - [x] Display friend avatar, name, handle, and relative timestamp (`"2h ago"`).
+  - [x] Render action text: *"ranked Dune: Part Two at #3 in Movie Canon"*.
+  - [x] Display dynamic score badge (Phosphor Lime `9.42`) and MVP character chip.
+  - [x] Include reaction buttons: flame 🔥, applause 👏, shock 🤯, and comment count.
 - **Testing & Verification**:
-  - [ ] Widget test verifying tapping reaction increments local count optimistically.
+  - [x] Widget test verifying tapping reaction increments local count optimistically.
 - **Dependencies**: `FE-301`.
 
 #### `FE-303`: Spicy Upset Alert Feed Card with Neon Coral Badge
@@ -741,13 +741,13 @@ Build social connections, the activity feed with real-time upset alert detection
   - [**`features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md) §2 (Upset Presentation)
 - **Scope & Objectives**: High-visibility feed card highlighting controversial takes and spicy duels.
 - **Granular Tasks**:
-  - [ ] Create `lib/features/feed/presentation/widgets/upset_activity_card.dart`.
-  - [ ] Add prominent header: `[ ⚡ SPICY UPSET ALERT ]` in Neon Coral outline.
-  - [ ] Render duel matchup: Winner poster on left, Loser poster on right with red slash.
-  - [ ] Display upset stat: *"Only 14% of Telly users agree with this pick"*.
-  - [ ] Trigger subtle double-pulse animation on appearance.
+  - [x] Create `lib/features/feed/presentation/widgets/upset_activity_card.dart`.
+  - [x] Add prominent header: `[ ⚡ SPICY UPSET ALERT ]` in Neon Coral outline.
+  - [x] Render duel matchup: Winner poster on left, Loser poster on right with red slash.
+  - [x] Display upset stat: *"Only 14% of Telly users agree with this pick"*.
+  - [x] Trigger subtle double-pulse animation on appearance.
 - **Testing & Verification**:
-  - [ ] Widget test verifying Neon Coral styling and consensus percentage display.
+  - [x] Widget test verifying Neon Coral styling and consensus percentage display.
 - **Dependencies**: `FE-302`.
 
 #### `FE-304`: 1-Tap `[ + Want to Watch ]` Queue Quick-Action
@@ -755,11 +755,11 @@ Build social connections, the activity feed with real-time upset alert detection
   - [**`features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md) §3 (1-Tap Queue)
 - **Scope & Objectives**: Allow users to save titles spotted in their feed directly to their watchlist in 1 tap.
 - **Granular Tasks**:
-  - [ ] Add bookmark icon button to all feed cards.
-  - [ ] On tap: trigger `HapticFeedback.selectionClick()`, insert title into local Drift `WatchlistCache`, and sync to Supabase `user_watchlist`.
-  - [ ] Display animated toast: *"Added to your Watchlist (available on Netflix)"*.
+  - [x] Add bookmark icon button to all feed cards.
+  - [x] On tap: trigger `HapticFeedback.selectionClick()`, insert title into local Drift `WatchlistCache`, and sync to Supabase `user_watchlist`.
+  - [x] Display animated toast: *"Added to your Watchlist (available on Netflix)"*.
 - **Testing & Verification**:
-  - [ ] Widget test verifying tapping bookmark toggles state and invokes watchlist repository.
+  - [x] Widget test verifying tapping bookmark toggles state and invokes watchlist repository.
 - **Dependencies**: `FE-302`, `FE-105`.
 
 #### `FE-305`: `SCR-06` Spoiler-Safe Discussion Thread & Tap-to-Reveal Blur
@@ -769,12 +769,12 @@ Build social connections, the activity feed with real-time upset alert detection
   - [**`adjacent_systems/05_TRUST_SAFETY_MODERATION_AND_ADMIN.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/adjacent_systems/05_TRUST_SAFETY_MODERATION_AND_ADMIN.md) §1 (Spoiler Masks)
 - **Scope & Objectives**: Comments thread with automatic and user-tagged spoiler masking.
 - **Granular Tasks**:
-  - [ ] Create `lib/features/feed/presentation/screens/comment_thread_screen.dart`.
-  - [ ] Comments tagged with `is_spoiler: true` render frosted Gaussian blur overlay (`BackdropFilter`).
-  - [ ] Tap on blur reveals content with label: *"Tap to reveal spoiler"*.
-  - [ ] Add spoiler toggle switch on comment composer: `[ ⚠️ Contains Spoilers ]`.
+  - [x] Create `lib/features/feed/presentation/screens/comment_thread_screen.dart`.
+  - [x] Comments tagged with `is_spoiler: true` render frosted Gaussian blur overlay (`BackdropFilter`).
+  - [x] Tap on blur reveals content with label: *"Tap to reveal spoiler"*.
+  - [x] Add spoiler toggle switch on comment composer: `[ ⚠️ Contains Spoilers ]`.
 - **Testing & Verification**:
-  - [ ] Widget test verifying blurred comment text cannot be read until tapped.
+  - [x] Widget test verifying blurred comment text cannot be read until tapped.
 - **Dependencies**: `FE-104`.
 
 ---
@@ -787,12 +787,12 @@ Build social connections, the activity feed with real-time upset alert detection
   - [**`features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md) §4 (Squad Hub Specs)
 - **Scope & Objectives**: Group hub for friend circles showing member avatars, joint consensus leaderboard, and squad feed.
 - **Granular Tasks**:
-  - [ ] Create `lib/features/squads/presentation/screens/squad_hub_screen.dart`.
-  - [ ] Render squad banner, name, member avatars row, and invite link button.
-  - [ ] Display Squad Consensus Leaderboard (calculated via Borda count RPC).
-  - [ ] Provide toggle: `[ 🎬 Movie Canon ]` vs `[ 📺 Series Canon ]`.
+  - [x] Create `lib/features/squads/presentation/screens/squad_hub_screen.dart`.
+  - [x] Render squad banner, name, member avatars row, and invite link button.
+  - [x] Display Squad Consensus Leaderboard (calculated via Borda count RPC).
+  - [x] Provide toggle: `[ 🎬 Movie Canon ]` vs `[ 📺 Series Canon ]`.
 - **Testing & Verification**:
-  - [ ] Widget test verifying member avatars and ranked squad items render.
+  - [x] Widget test verifying member avatars and ranked squad items render.
 - **Dependencies**: `FE-207`, `BE-304`.
 
 #### `FE-307`: `SCR-18` The TV Graveyard (Dropped Tracking & Milestones)
@@ -801,13 +801,13 @@ Build social connections, the activity feed with real-time upset alert detection
   - [**`features/03_SERIES_VS_SEASONS_AND_DROPPED_TRACKING.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/03_SERIES_VS_SEASONS_AND_DROPPED_TRACKING.md) §2 (The TV Graveyard)
 - **Scope & Objectives**: Dedicated profile tab for cataloging dropped series with milestone tracking.
 - **Granular Tasks**:
-  - [ ] Create `lib/features/profile/presentation/screens/tv_graveyard_screen.dart`.
-  - [ ] Render grayscale/muted card styling with skull / tombstone icon 🪦.
-  - [ ] Display drop milestone: *"Dropped at Season 3, Episode 4"*.
-  - [ ] Display reason tag chip: `[ 📉 Quality Fell Off ]`, `[ 💤 Lost Interest ]`, `[ 😡 Disliked Character ]`.
-  - [ ] Include revisit reminder toggle: *"Notify me if new season gets $\ge 90\%$ critical acclaim"*.
+  - [x] Create `lib/features/profile/presentation/screens/tv_graveyard_screen.dart`.
+  - [x] Render grayscale/muted card styling with skull / tombstone icon 🪦.
+  - [x] Display drop milestone: *"Dropped at Season 3, Episode 4"*.
+  - [x] Display reason tag chip: `[ 📉 Quality Fell Off ]`, `[ 💤 Lost Interest ]`, `[ 😡 Disliked Character ]`.
+  - [x] Include revisit reminder toggle: *"Notify me if new season gets $\ge 90\%$ critical acclaim"*.
 - **Testing & Verification**:
-  - [ ] Widget test verifying dropped reason chip and milestone label render accurately.
+  - [x] Widget test verifying dropped reason chip and milestone label render accurately.
 - **Dependencies**: `FE-206`.
 
 #### `FE-308`: Dropped Show Logging Sheet & Reason Taxonomy
@@ -815,12 +815,12 @@ Build social connections, the activity feed with real-time upset alert detection
   - [**`features/03_SERIES_VS_SEASONS_AND_DROPPED_TRACKING.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/03_SERIES_VS_SEASONS_AND_DROPPED_TRACKING.md) §2 (Graveyard Taxonomies)
 - **Scope & Objectives**: Action sheet allowing users to move an active show to the Graveyard.
 - **Granular Tasks**:
-  - [ ] Create `lib/features/profile/presentation/widgets/log_dropped_show_sheet.dart`.
-  - [ ] Season/Episode picker dropdowns.
-  - [ ] Standardized reason taxonomy chips.
-  - [ ] Save mutation writing to `user_rankings` with `status: 'dropped'`.
+  - [x] Create `lib/features/profile/presentation/widgets/log_dropped_show_sheet.dart`.
+  - [x] Season/Episode picker dropdowns.
+  - [x] Standardized reason taxonomy chips.
+  - [x] Save mutation writing to `user_rankings` with `status: 'dropped'`.
 - **Testing & Verification**:
-  - [ ] Unit test confirming moving show to Graveyard removes it from active Canon without corrupting Canon rank indexes.
+  - [x] Unit test confirming moving show to Graveyard removes it from active Canon without corrupting Canon rank indexes.
 - **Dependencies**: `FE-307`, `BE-201`.
 
 ---
@@ -832,10 +832,10 @@ Build social connections, the activity feed with real-time upset alert detection
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.1 (Borda Count)
 - **Scope & Objectives**: Test consensus rank ordering mathematically under missing/incomplete member data.
 - **Granular Tasks**:
-  - [ ] Write `test/features/squads/borda_count_aggregator_test.dart`.
-  - [ ] Test tie-breaking rules and fractional scoring for unranked items.
+  - [x] Write `test/features/squads/borda_count_aggregator_test.dart`.
+  - [x] Test tie-breaking rules and fractional scoring for unranked items.
 - **Testing & Verification**:
-  - [ ] 100% test pass on mock squad ranking sets.
+  - [x] 100% test pass on mock squad ranking sets.
 - **Dependencies**: `BE-304`.
 
 #### `QA-302`: Unit Tests for Upset Detection Logic
@@ -843,10 +843,10 @@ Build social connections, the activity feed with real-time upset alert detection
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.1 (Upset Invariants)
 - **Scope & Objectives**: Validate mathematical condition $\mu_{\text{diff}} \ge 0.25$ triggers upsets reliably.
 - **Granular Tasks**:
-  - [ ] Write `test/features/ranking/upset_detector_test.dart`.
-  - [ ] Verify borderline conditions ($0.249 \implies \text{false}$, $0.250 \implies \text{true}$).
+  - [x] Write `test/features/ranking/upset_detector_test.dart`.
+  - [x] Verify borderline conditions ($0.249 \implies \text{false}$, $0.250 \implies \text{true}$).
 - **Testing & Verification**:
-  - [ ] All boundary assertions pass.
+  - [x] All boundary assertions pass.
 - **Dependencies**: `BE-302`.
 
 #### `QA-303`: Widget Tests for Feed Card, Upset Alert Card & Spoiler Masks
@@ -854,11 +854,11 @@ Build social connections, the activity feed with real-time upset alert detection
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §3.1 (Social Widgets)
 - **Scope & Objectives**: Verify UI rendering and tap interactions on social cards.
 - **Granular Tasks**:
-  - [ ] Write `test/features/feed/feed_activity_card_test.dart`.
-  - [ ] Write `test/features/feed/upset_activity_card_test.dart`.
-  - [ ] Write `test/features/feed/spoiler_comment_test.dart`.
+  - [x] Write `test/features/feed/feed_activity_card_test.dart`.
+  - [x] Write `test/features/feed/upset_activity_card_test.dart`.
+  - [x] Write `test/features/feed/spoiler_comment_test.dart`.
 - **Testing & Verification**:
-  - [ ] Tap on spoiler mask removes `BackdropFilter` and displays text.
+  - [x] Tap on spoiler mask removes `BackdropFilter` and displays text.
 - **Dependencies**: `FE-302`, `FE-303`, `FE-305`.
 
 #### `QA-304`: pgTAP Tests for Social Follows, RLS & Feeds
@@ -866,10 +866,10 @@ Build social connections, the activity feed with real-time upset alert detection
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §3.3 (RLS Policies)
 - **Scope & Objectives**: Verify database security rules and follow isolation.
 - **Granular Tasks**:
-  - [ ] Write `database/tests/02_social_follows_rls_test.sql`.
-  - [ ] Verify private user rankings cannot be selected by non-followers.
+  - [x] Write `database/tests/02_social_follows_rls_test.sql`.
+  - [x] Verify private user rankings cannot be selected by non-followers.
 - **Testing & Verification**:
-  - [ ] pgTAP suite passes in Supabase local test container.
+  - [x] pgTAP suite passes in Supabase local test container.
 - **Dependencies**: `BE-301`.
 
 ---

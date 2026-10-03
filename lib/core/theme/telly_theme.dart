@@ -5,6 +5,7 @@ import 'telly_typography.dart';
 
 /// Master ThemeData configuration for Telly *Midnight Cathode* dark theme.
 abstract class TellyTheme {
+  static ThemeData get darkTheme => dark;
   static ThemeData get dark {
     const colorScheme = ColorScheme.dark(
       primary: TellyColors.phosphorLime,
