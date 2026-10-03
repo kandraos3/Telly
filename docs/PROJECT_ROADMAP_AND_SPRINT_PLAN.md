@@ -24,9 +24,9 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 6 — Integration, Wiring & Audit Remediation** (planned 2026-10-03; owner decisions D1–D7 recorded in Sprint 6)
-- **Current Active Ticket**: `DOC-601` (Roadmap Honesty Reset) — Sprint 6: 0 / 32 tickets complete
-- **Overall Roadmap Progress**: ⚠️ **Previously reported as 89 / 89 — this was overstated.** An independent audit found most tickets Partial/Stub (app not routed, Supabase not initialized, backend never called). Code-level checkboxes are pending re-audit.
-- **Human-Only Tasks**: 27 tasks marked `👤 [TO BE DONE BY HUMAN]` (cloud setup, secrets, store submission, device/CI runs, dashboard verification). These cannot be completed or verified from code.
+- **Current Active Ticket**: `DOC-602` (Spec Reconciliation) — Sprint 6: 1 / 32 tickets complete
+- **Overall Roadmap Progress**: Sprints 1–5 granular tasks after the `DOC-601` honesty reset (2026-10-03): **281 / 431 verified** · **121 un-checked** (each annotated `→ remediated by <Sprint 6 ticket>`) · **29 human-only**. The earlier "89 / 89" claim was overstated.
+- **Human-Only Tasks**: 29 tasks in Sprints 1–5 marked `👤 [TO BE DONE BY HUMAN]` (cloud setup, secrets, store submission, device/CI runs, dashboard verification), plus the Sprint 6 human prerequisites list. These cannot be completed or verified from code.
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (215 / 215 pass — note: many tests are widget/unit-level only; no real E2E or golden tests exist yet)
 - **Last Updated**: 2026-10-03
 
@@ -59,12 +59,12 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 - **Granular Tasks**:
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Create Supabase project (`telly-backend-prod`) in US-East / EU-Central.
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Execute `01_initial_schema.sql` migration creating core tables: `users`, `titles`, `user_rankings`, `pairwise_duels`, `user_watchlist`, `social_follows`, `squads`, `squad_members`, `comments`, `reports`.
-  - [x] Verify `media_type` enum (`'movie'`, `'tv'`) and indexes on `(user_id, media_type, rank_position)`.
-  - [x] Enable PostgreSQL Row-Level Security (RLS) policies on all tables.
+  - [ ] Verify `media_type` enum (`'movie'`, `'tv'`) and indexes on `(user_id, media_type, rank_position)`. → remediated by `BE-601`
+  - [ ] Enable PostgreSQL Row-Level Security (RLS) policies on all tables. → remediated by `BE-602`
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Verify connection strings and configure Supabase Service Role keys in `.env`.
 - **Testing & Verification**:
-  - [x] Run verification script to assert 9 tables, 14 indexes, and 18 RLS policies are active.
-  - [x] Verify non-authenticated client cannot bypass RLS on `user_rankings`.
+  - [ ] Run verification script to assert 9 tables, 14 indexes, and 18 RLS policies are active. → remediated by `QA-601`
+  - [ ] Verify non-authenticated client cannot bypass RLS on `user_rankings`. → remediated by `BE-602`
 - **Dependencies**: None.
 
 #### `BE-102`: Top 50 Seed Ingestion & Streaming Platform Setup
@@ -74,12 +74,12 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 - **Scope & Objectives**: Populate the initial recognition dataset with top movies, series, and anime.
 - **Granular Tasks**:
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Execute `top_50_shows_seed.sql` into the `titles` table.
-  - [x] Verify 20 prestige TV series (*Succession*, *The Bear*, *Severance*), 15 anime classics (*Attack on Titan*, *Frieren*, *Death Note*), and 15 films (*The Dark Knight*, *Parasite*, *Spirited Away*) are seeded.
-  - [x] Verify `streaming_services` JSONB payloads contain valid IDs (`netflix`, `max`, `hulu`, `apple_tv`, `crunchyroll`, `prime_video`).
-  - [x] Create database trigger updating `titles.updated_at` automatically on modification.
+  - [ ] Verify 20 prestige TV series (*Succession*, *The Bear*, *Severance*), 15 anime classics (*Attack on Titan*, *Frieren*, *Death Note*), and 15 films (*The Dark Knight*, *Parasite*, *Spirited Away*) are seeded. → remediated by `BE-601`
+  - [ ] Verify `streaming_services` JSONB payloads contain valid IDs (`netflix`, `max`, `hulu`, `apple_tv`, `crunchyroll`, `prime_video`). → remediated by `BE-601`
+  - [ ] Create database trigger updating `titles.updated_at` automatically on modification. → remediated by `BE-601`
 - **Testing & Verification**:
-  - [x] Query `SELECT COUNT(*) FROM titles WHERE media_type = 'movie'` returns 15.
-  - [x] Query `SELECT COUNT(*) FROM titles WHERE media_type = 'tv'` returns 35.
+  - [ ] Query `SELECT COUNT(*) FROM titles WHERE media_type = 'movie'` returns 15. → remediated by `BE-601`
+  - [ ] Query `SELECT COUNT(*) FROM titles WHERE media_type = 'tv'` returns 35. → remediated by `BE-601`
 - **Dependencies**: `BE-101`.
 
 #### `BE-103`: Supabase GoTrue Auth & Twilio SMS Gateway Integration
@@ -91,7 +91,7 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Configure Sign in with Apple in Supabase Dashboard with Apple Service ID and private key.
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Configure Google OAuth Client ID & Secret for iOS and Android.
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Configure Twilio Verify Service SID and Auth Token in Supabase Phone Auth settings.
-  - [x] Create Postgres trigger `on_auth_user_created` to automatically insert a skeleton profile into `public.users`.
+  - [ ] Create Postgres trigger `on_auth_user_created` to automatically insert a skeleton profile into `public.users`. → remediated by `BE-601`
 - **Testing & Verification**:
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Send test SMS OTP to staging test numbers; verify 6-digit code delivery.
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Test token issuance and JWT claims including `sub` and `aud`.
@@ -108,8 +108,8 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [x] Inject `Cache-Control: public, max-age=86400, s-maxage=604800` headers for static title lookups.
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Configure TMDB Bearer Token in Supabase Secrets vault.
 - **Testing & Verification**:
-  - [x] Invoke Edge Function with `"Oppenheimer"`; verify normalized JSON containing `media_type: 'movie'`.
-  - [x] Assert Edge Function fails gracefully with 429 when rate limits are exceeded.
+  - [ ] Invoke Edge Function with `"Oppenheimer"`; verify normalized JSON containing `media_type: 'movie'`. → remediated by `BE-605`
+  - [ ] Assert Edge Function fails gracefully with 429 when rate limits are exceeded. → remediated by `BE-605`
 - **Dependencies**: `BE-101`.
 
 ---
@@ -140,14 +140,14 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 - **Scope & Objectives**: Codify the *Midnight Cathode* OLED design system into strongly-typed Flutter constants.
 - **Granular Tasks**:
   - [x] Create `lib/core/theme/telly_colors.dart`:
-    - Backgrounds: `backgroundPrimary` (`#0A0A0C`), `backgroundSurface` (`#141419`), `backgroundCard` (`#1C1C24`).
-    - Accents: `phosphorLime` (`#CCFF00`), `neonCoral` (`#FF3366`), `warmAmber` (`#FFB800`), `electricCyan` (`#00F0FF`).
+    - Backgrounds: `bgCanvas` (`#08090C`), `surfaceRaised` (`#11131A`), `surfaceOverlay` (`#1A1D27`), `strokeSubtle` (`#242938`) — per style guide §2 (corrected by `DOC-601`).
+    - Accents: `phosphorLime` (`#D2FF52`), `neonCoral` (`#FF4B6E`), `warmAmber` (`#FFA733`), `electricViolet` (`#7C5CFF`).
     - Borders: `borderGlass` (`rgba(255, 255, 255, 0.08)`).
   - [x] Add Google Fonts package or local assets for `GT Super Display` (serif headlines) and `Plus Jakarta Sans` (body & numerals).
   - [x] Create `lib/core/theme/telly_typography.dart` with `TextStyle` presets (`displayLarge`, `headlineMedium`, `scoreMono`, `bodySmall`).
   - [x] Assemble `TellyTheme.dark` into `ThemeData` configuring color schemes, app bars, and scaffold backgrounds.
 - **Testing & Verification**:
-  - [x] Unit test verifying color contrast ratios of `phosphorLime` and `neonCoral` against `#0A0A0C` meet WCAG $\ge 4.5:1$.
+  - [x] Unit test verifying color contrast ratios of `phosphorLime` and `neonCoral` against `#08090C` meet WCAG $\ge 4.5:1$.
   - [x] Widget test rendering all typography variants in a sandbox screen.
 - **Dependencies**: `FE-101`.
 
@@ -206,13 +206,13 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 - **Granular Tasks**:
   - [x] Create `lib/features/auth/presentation/screens/auth_screen.dart`.
   - [x] Render full-screen dark aesthetic with animated phosphor glow background.
-  - [x] Implement Apple Sign In button invoking Supabase Apple OAuth.
-  - [x] Implement Google Sign In button invoking Supabase Google OAuth.
+  - [ ] Implement Apple Sign In button invoking Supabase Apple OAuth. → remediated by `FE-601`
+  - [ ] Implement Google Sign In button invoking Supabase Google OAuth. → remediated by `FE-601`
   - [x] Implement Phone Number input sheet with country code picker and SMS OTP submission dialog.
-  - [x] Wire up Riverpod `authControllerProvider` handling auth states and session persistence.
+  - [ ] Wire up Riverpod `authControllerProvider` handling auth states and session persistence. → remediated by `FE-601`
 - **Testing & Verification**:
   - [x] Widget test verifying all 3 login buttons are rendered and accessible.
-  - [x] Integration test simulating successful phone OTP authentication.
+  - [ ] Integration test simulating successful phone OTP authentication. → remediated by `FE-601`
 - **Dependencies**: `FE-102`, `FE-104`, `BE-103`.
 
 #### `FE-107`: Handle Reservation Screen with Debounced RPC Availability
@@ -223,9 +223,9 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 - **Granular Tasks**:
   - [x] Create `lib/features/auth/presentation/screens/handle_reservation_screen.dart`.
   - [x] Add `TextFormField` enforcing regex `^[a-zA-Z0-9_]{3,20}$`.
-  - [x] Implement debounced Riverpod state checking `check_handle_available(handle)` via Supabase RPC every 300ms.
+  - [ ] Implement debounced Riverpod state checking `check_handle_available(handle)` via Supabase RPC every 300ms. → remediated by `FE-601`
   - [x] Display green checkmark when available, red error text when taken or invalid.
-  - [x] Submit reservation writing `username` to `public.users`.
+  - [ ] Submit reservation writing `username` to `public.users`. → remediated by `FE-601`
 - **Testing & Verification**:
   - [x] Unit test regex validator against edge cases (`"a"`, `"very_long_handle_exceeding_twenty"`, `"with-hyphen"`).
   - [x] Widget test verifying loading spinner during debounced RPC check.
@@ -239,7 +239,7 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 - **Granular Tasks**:
   - [x] Create `lib/features/onboarding/presentation/screens/streaming_setup_screen.dart`.
   - [x] Render 8 provider cards (Netflix, Max, Hulu, Prime Video, Apple TV+, Disney+, Crunchyroll, Paramount+).
-  - [x] Implement multi-select state persisting selected provider IDs to Drift local database and Supabase `users.streaming_providers`.
+  - [ ] Implement multi-select state persisting selected provider IDs to Drift local database and Supabase `users.streaming_providers`. → remediated by `FE-606`
   - [x] Include *"I don't have streaming services / Skip for now"* secondary action.
 - **Testing & Verification**:
   - [x] Widget test verifying provider cards toggle selection state on tap and update counter.
@@ -253,7 +253,7 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 - **Granular Tasks**:
   - [x] Create `lib/features/onboarding/presentation/screens/seed_grid_screen.dart`.
   - [x] Implement category filter tabs: `[ All (50) ]`, `[ 🎬 Movies ]`, `[ 📺 TV Series ]`, `[ ⛩️ Anime ]`.
-  - [x] Render 3-column poster grid using `CachedNetworkImage` with shimmer placeholders.
+  - [ ] Render 3-column poster grid using `CachedNetworkImage` with shimmer placeholders. → remediated by `FE-606`
   - [x] Add checkmark badge overlay on selected posters with Phosphor Lime border highlight.
   - [x] Render sticky bottom CTA bar displaying `"Select at least 5 titles (X/5 selected)"`, enabling when $X \ge 5$.
 - **Testing & Verification**:
@@ -269,7 +269,7 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 - **Granular Tasks**:
   - [x] Create `lib/features/onboarding/domain/anilist_importer.dart`.
   - [x] Query AniList GraphQL endpoint `https://graphql.anilist.co` for `MediaListCollection(userName, type: ANIME, status: COMPLETED)`.
-  - [x] Map AniList titles and MAL IDs to internal TMDB IDs via title matching index.
+  - [ ] Map AniList titles and MAL IDs to internal TMDB IDs via title matching index. → remediated by `FE-606`
   - [x] Seed imported entries into sentiment brackets based on user's 10-point AniList score.
 - **Testing & Verification**:
   - [x] Unit test parsing mock AniList GraphQL JSON fixture into list of `MediaItem` models.
@@ -285,7 +285,7 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [x] Create `lib/features/onboarding/domain/letterboxd_csv_parser.dart` using `package:csv`.
   - [x] Parse columns: `Date`, `Name`, `Year`, `Letterboxd URI`, `Rating`, `Rewatch`.
   - [x] Map star ratings to sentiment brackets ($5.0\star \to \text{Top 10\%}$, $0.5\star \to \text{Bottom 5\%}$).
-  - [x] Batch match titles against TMDB API using Edge Function.
+  - [ ] Batch match titles against TMDB API using Edge Function. → remediated by `FE-606`
 - **Testing & Verification**:
   - [x] Unit test parsing mock `diary.csv` containing commas in title (*"Everything Everywhere All at Once"*).
   - [x] Assert parsing completes for 500 rows in $< 300\text{ ms}$.
@@ -302,7 +302,7 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 - **Granular Tasks**:
   - [x] Add `build_runner`, `mockito`, `package:test`, `flutter_test` to dev dependencies.
   - [x] Configure `.github/workflows/ci.yml` running `dart analyze --fatal-infos` and `flutter test --coverage`.
-  - [x] Assert CI fails if test coverage on core models drops below 80%.
+  - [ ] Assert CI fails if test coverage on core models drops below 80%. → remediated by `DEV-602`
 - **Testing & Verification**:
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Trigger CI build via test pull request; assert pipeline succeeds in $< 90\text{ seconds}$.
 - **Dependencies**: `FE-101`.
@@ -315,7 +315,7 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [x] Write unit tests for `letterboxd_csv_parser_test.dart` (escaped quotes, missing ratings, empty lines).
   - [x] Write unit tests for `anilist_importer_test.dart` (manga ignored, franchise rollups combined).
 - **Testing & Verification**:
-  - [x] 100% code coverage on `letterboxd_csv_parser.dart` and `anilist_importer.dart`.
+  - [ ] 100% code coverage on `letterboxd_csv_parser.dart` and `anilist_importer.dart`. → remediated by `QA-608`
 - **Dependencies**: `FE-110`, `FE-111`.
 
 #### `QA-103`: In-Memory Drift SQLite DAO Unit Tests
@@ -325,7 +325,7 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 - **Granular Tasks**:
   - [x] Write `test/core/database/local_ranking_dao_test.dart`.
   - [x] Test inserting, updating ranks, and query filtering by `media_type`.
-  - [x] Test transaction rollback upon failure.
+  - [ ] Test transaction rollback upon failure. → remediated by `FE-605`
 - **Testing & Verification**:
   - [x] Run tests on pure Dart VM; all tests pass in $< 1\text{ second}$.
 - **Dependencies**: `FE-105`.
@@ -378,7 +378,7 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
 - **Granular Tasks**:
   - [x] Create `lib/features/ranking/domain/score_curve_calculator.dart`.
   - [x] Implement formula: $\text{Score}(r, N) = 1.00 + 9.00 \times \left(1.0 - \frac{r - 1}{N - 1}\right)^p$.
-  - [x] Apply power exponent $p = 1.15$ to slightly weight top echelon titles.
+  - [ ] Apply power exponent $\gamma = 0.82$ per features/02 §3.3 (code currently uses 1.15). → remediated by `ALGO-601`
   - [x] Implement Bayesian smoothing prior for profiles with $N < 10$ ranked titles.
 - **Testing & Verification**:
   - [x] Verify $\text{Score}(1, N) == 10.00$ and $\text{Score}(N, N) == 1.00$ for all $N > 1$.
@@ -435,12 +435,12 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
   - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §3.1 (Atomic Stored Procedure)
 - **Scope & Objectives**: PL/pgSQL function shifting existing rows by +1 and recomputing dynamic scores atomically.
 - **Granular Tasks**:
-  - [x] Write PL/pgSQL function `insert_user_ranking_atomic(p_user_id, p_title_id, p_media_type, p_rank_position)`.
-  - [x] Execute `UPDATE user_rankings SET rank_position = rank_position + 1 WHERE user_id = p_user_id AND media_type = p_media_type AND rank_position >= p_rank_position`.
-  - [x] Insert new row at `p_rank_position`.
-  - [x] Recalculate dynamic percentile scores for all rows of `(p_user_id, p_media_type)` in the same transaction.
+  - [ ] Write PL/pgSQL function `insert_user_ranking_atomic(p_user_id, p_title_id, p_media_type, p_rank_position)`. → remediated by `BE-603`
+  - [ ] Execute `UPDATE user_rankings SET rank_position = rank_position + 1 WHERE user_id = p_user_id AND media_type = p_media_type AND rank_position >= p_rank_position`. → remediated by `BE-603`
+  - [ ] Insert new row at `p_rank_position`. → remediated by `BE-603`
+  - [ ] Recalculate dynamic percentile scores for all rows of `(p_user_id, p_media_type)` in the same transaction. → remediated by `BE-603`
 - **Testing & Verification**:
-  - [x] pgTAP test verifying concurrent insertions never create duplicate rank positions.
+  - [ ] pgTAP test verifying concurrent insertions never create duplicate rank positions. → remediated by `BE-603`
 - **Dependencies**: `BE-101`.
 
 #### `BE-202`: Pairwise Duels Audit Logging
@@ -452,7 +452,7 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
   - [x] Add check constraint `winner_id != loser_id`.
   - [x] Create composite index on `(winner_id, loser_id)` for global win-rate aggregations.
 - **Testing & Verification**:
-  - [x] Test inserting duel records and querying win rates by title.
+  - [ ] Test inserting duel records and querying win rates by title. → remediated by `QA-601`
 - **Dependencies**: `BE-101`.
 
 ---
@@ -496,7 +496,7 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
 - **Scope & Objectives**: Bottom sheet appearing post-tournament to capture subjective nuances.
 - **Granular Tasks**:
   - [x] Create `lib/features/ranking/presentation/widgets/editorial_tagging_sheet.dart`.
-  - [x] MVP Character dropdown populated from TMDB cast credits.
+  - [ ] MVP Character dropdown populated from TMDB cast credits. → remediated by `FE-604`
   - [x] Multi-select vibe tag chips (*"Masterpiece Acting"*, *"Mind-bending"*, *"Cozy"*, *"Dark & Gritty"*).
   - [x] Anime-specific audio toggle: `[ Sub ]` vs `[ Dub ]`.
   - [x] 280-character micro-review input field with remaining counter.
@@ -512,7 +512,7 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
   - [x] In `SCR-11`, inspect candidate `media_type`: if `'movie'`, render Theatrical Venue selector.
   - [x] Options: `[ 🛋️ Home / Streaming ]`, `[ 🍿 Theatrical ]`, `[ 📽️ IMAX 70mm / Dolby ]`.
   - [x] Add Rewatch counter badge: `First Watch` vs `Rewatch (x2, x3...)`.
-  - [x] Auto-tag director name from TMDB crew metadata.
+  - [ ] Auto-tag director name from TMDB crew metadata. → remediated by `FE-604`
 - **Testing & Verification**:
   - [x] Widget test asserting venue chips render for movies and are omitted for TV shows.
 - **Dependencies**: `FE-203`.
@@ -558,7 +558,7 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
 - **Scope & Objectives**: Implement 3 distinct visual presentations of the user's ranked list.
 - **Granular Tasks**:
   - [x] Mode 1: **Ranked List** — numbered rows (#1, #2), poster thumbnail, dynamic score pill, and MVP badge.
-  - [x] Mode 2: **Tier View** — grouped buckets `Tier S (9.0+)`, `Tier A (8.0-8.9)`, `Tier B (7.0-7.9)`, `Tier C`, `Tier D`.
+  - [ ] Mode 2: **Tier View** — grouped buckets per style guide §2.2: God (≥9.20), Prestige (8.50–9.19), Great (7.80–8.49), Good (7.00–7.79), Mid (5.50–6.99), Dropped (<5.50). → remediated by `ALGO-601`
   - [x] Mode 3: **3x3 Poster Grid** — aesthetic Instagram-style grid showing user's top 9 titles without text clutter.
   - [x] Add view switcher icon row in the sub-header.
 - **Testing & Verification**:
@@ -571,11 +571,11 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
 - **Scope & Objectives**: Allow users to collapse anime seasons/cours into a single franchise entity or unbundle them.
 - **Granular Tasks**:
   - [x] Create `lib/features/ranking/domain/franchise_rollup_service.dart`.
-  - [x] When collapsed: aggregate *Attack on Titan Season 1–4* into a single entry with composite score.
+  - [ ] When collapsed: aggregate *Attack on Titan Season 1–4* into a single entry scored by the primary series duel. → remediated by `ALGO-602`
   - [x] When unbundled: show individual seasons as standalone ranked entries.
   - [x] Provide user toggle switch: `[ Franchise Rollup: ON / OFF ]`.
 - **Testing & Verification**:
-  - [x] Unit test verifying rollup combines 4 seasons into 1 parent entry with weighted mean score.
+  - [ ] Unit test verifying rollup combines 4 seasons into 1 parent entry carrying the primary series duel score (features/08 §4, decision D6). → remediated by `ALGO-602`
 - **Dependencies**: `FE-206`.
 
 #### `FE-209`: Reorderable Drag-and-Drop Manual Re-Indexing
@@ -585,7 +585,7 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
 - **Granular Tasks**:
   - [x] Wrap Ranked List with `ReorderableListView.builder`.
   - [x] Provide drag handle icon triggering `HapticFeedback.selectionClick()` on pick up.
-  - [x] On drop: update `rank_position` in local Drift database, recalculate percentile scores, and sync to Supabase.
+  - [ ] On drop: update `rank_position` in local Drift database, recalculate percentile scores, and sync to Supabase. → remediated by `FE-604`
 - **Testing & Verification**:
   - [x] Widget test dragging row #4 to row #1 updates rank text to `#1`.
 - **Dependencies**: `FE-207`, `ALGO-202`.
@@ -603,7 +603,7 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
   - [x] Test insertion into list of $N=100$ titles never exceeds 7 comparisons.
   - [x] Test tie-break logic steps to neighbor without deadlocking.
 - **Testing & Verification**:
-  - [x] 100% code coverage on `binary_insertion_tournament.dart`.
+  - [ ] 100% code coverage on `binary_insertion_tournament.dart`. → remediated by `QA-608`
 - **Dependencies**: `ALGO-201`.
 
 #### `QA-202`: Unit Tests for Dynamic Percentile Score Monotonicity
@@ -623,11 +623,11 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §3.3, §6 (pgTAP Stored Procs)
 - **Scope & Objectives**: Verify database stored procedure integrity in Supabase container.
 - **Granular Tasks**:
-  - [x] Write `database/tests/01_insert_user_ranking_atomic_test.sql` using pgTAP.
-  - [x] Assert rank shifting maintains continuous integer sequences ($1, 2, 3, 4\dots$).
-  - [x] Assert movie insertions do not shift TV show rankings.
+  - [ ] Write `database/tests/01_insert_user_ranking_atomic_test.sql` using pgTAP. → remediated by `QA-601`
+  - [ ] Assert rank shifting maintains continuous integer sequences ($1, 2, 3, 4\dots$). → remediated by `QA-601`
+  - [ ] Assert movie insertions do not shift TV show rankings. → remediated by `QA-601`
 - **Testing & Verification**:
-  - [x] Execute `pg_prove` in CI; all tests pass.
+  - [ ] Execute `pg_prove` in CI; all tests pass. → remediated by `QA-601`
 - **Dependencies**: `BE-201`.
 
 #### `QA-204`: Widget Tests for Duel Arena (`SCR-10`) & Slot Reveal (`SCR-12`)
@@ -661,9 +661,9 @@ Build social connections, the activity feed with real-time upset alert detection
   - [x] Create `social_follows` table with `follower_id`, `following_id`, `status` (`pending`, `accepted`).
   - [x] Add unique index on `(follower_id, following_id)`.
   - [x] Create `activity_logs` table recording ranking events, comments, and queue additions.
-  - [x] Write RLS policies ensuring private accounts require follow approval before exposing activity.
+  - [ ] Write RLS policies ensuring private accounts require follow approval before exposing activity. → remediated by `BE-602`
 - **Testing & Verification**:
-  - [x] Verify private account activities are hidden from unapproved users.
+  - [ ] Verify private account activities are hidden from unapproved users. → remediated by `BE-602`
 - **Dependencies**: `BE-101`.
 
 #### `BE-302`: Upset Engine Algorithmic Detection ($\mu_{\text{diff}} \ge 0.25$)
@@ -673,8 +673,8 @@ Build social connections, the activity feed with real-time upset alert detection
 - **Scope & Objectives**: Detect when a user's duel decision defies platform consensus by $\ge 25\%$.
 - **Granular Tasks**:
   - [x] Create database trigger or function `detect_upset_duel(winner_id, loser_id)`.
-  - [x] Query platform win rates: if $\text{WinRate}(\text{loser}) - \text{WinRate}(\text{winner}) \ge 0.25$, set `pairwise_duels.is_upset = true`.
-  - [x] Write upset notification event to `activity_logs` with `is_upset: true`.
+  - [ ] Query platform win rates: if $\text{WinRate}(\text{loser}) - \text{WinRate}(\text{winner}) \ge 0.25$, set `pairwise_duels.is_upset = true`. → remediated by `BE-603`
+  - [ ] Write upset notification event to `activity_logs` with `is_upset: true`. → remediated by `BE-604`
 - **Testing & Verification**:
   - [x] Unit test: Candidate A (20% win rate) beating Candidate B (80% win rate) flags `is_upset = true`.
 - **Dependencies**: `BE-202`.
@@ -684,11 +684,11 @@ Build social connections, the activity feed with real-time upset alert detection
   - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §4 (Redis Caching Keys)
 - **Scope & Objectives**: Cache user activity feed in Redis ZSETs for $< 50\text{ ms}$ load times.
 - **Granular Tasks**:
-  - [x] Configure Redis client in Supabase Edge Functions / background worker.
-  - [x] Fanout ranking events to follower timelines: `ZADD feed:timeline:{user_id} {timestamp} {activity_id}`.
-  - [x] Maintain fixed timeline buffer of 500 items per user (`ZREMRANGEBYRANK 0 -501`).
+  - [ ] Configure Redis client in Supabase Edge Functions / background worker. → remediated by `BE-604`
+  - [ ] Fanout ranking events to follower timelines: `ZADD feed:timeline:{user_id} {timestamp} {activity_id}`. → remediated by `BE-604`
+  - [ ] Maintain fixed timeline buffer of 500 items per user (`ZREMRANGEBYRANK 0 -501`). → remediated by `BE-604`
 - **Testing & Verification**:
-  - [x] Benchmark feed query: retrieve top 20 feed items from Redis in $< 20\text{ ms}$.
+  - [ ] Benchmark feed query: retrieve top 20 feed items from Redis in $< 20\text{ ms}$. → remediated by `BE-604`
 - **Dependencies**: `BE-301`.
 
 #### `BE-304`: Squads Database Schema & Borda Count Rank Aggregation RPC
@@ -702,7 +702,7 @@ Build social connections, the activity feed with real-time upset alert detection
   - [x] Implement Borda Count aggregation assigning points based on each member's rank position.
   - [x] Order consensus titles by cumulative Borda points.
 - **Testing & Verification**:
-  - [x] Test 3 users with overlapping canons generate consistent consensus ranking.
+  - [ ] Test 3 users with overlapping canons generate consistent consensus ranking. → remediated by `QA-607`
 - **Dependencies**: `BE-101`.
 
 ---
@@ -717,10 +717,10 @@ Build social connections, the activity feed with real-time upset alert detection
 - **Granular Tasks**:
   - [x] Create `lib/features/feed/presentation/screens/activity_feed_screen.dart`.
   - [x] Implement top tab bar: `[ Following ]`, `[ Squads ]`, `[ Global ]`.
-  - [x] Implement pull-to-refresh and pagination using Riverpod `feedPaginationProvider`.
+  - [ ] Implement pull-to-refresh and pagination using Riverpod `feedPaginationProvider`. → remediated by `FE-607`
   - [x] Handle empty state: *"Follow friends to see what they are watching and ranking!"*.
 - **Testing & Verification**:
-  - [x] Widget test verifying feed scrolls and loads next page when reaching bottom.
+  - [ ] Widget test verifying feed scrolls and loads next page when reaching bottom. → remediated by `FE-607`
 - **Dependencies**: `FE-104`, `BE-303`.
 
 #### `FE-302`: Standard Activity Feed Card Component
@@ -759,10 +759,10 @@ Build social connections, the activity feed with real-time upset alert detection
 - **Scope & Objectives**: Allow users to save titles spotted in their feed directly to their watchlist in 1 tap.
 - **Granular Tasks**:
   - [x] Add bookmark icon button to all feed cards.
-  - [x] On tap: trigger `HapticFeedback.selectionClick()`, insert title into local Drift `WatchlistCache`, and sync to Supabase `user_watchlist`.
+  - [ ] On tap: trigger `HapticFeedback.selectionClick()`, insert title into local Drift `WatchlistCache`, and sync to Supabase `user_watchlist`. → remediated by `FE-609`
   - [x] Display animated toast: *"Added to your Watchlist (available on Netflix)"*.
 - **Testing & Verification**:
-  - [x] Widget test verifying tapping bookmark toggles state and invokes watchlist repository.
+  - [ ] Widget test verifying tapping bookmark toggles state and invokes watchlist repository. → remediated by `FE-609`
 - **Dependencies**: `FE-302`, `FE-105`.
 
 #### `FE-305`: `SCR-06` Spoiler-Safe Discussion Thread & Tap-to-Reveal Blur
@@ -773,7 +773,7 @@ Build social connections, the activity feed with real-time upset alert detection
 - **Scope & Objectives**: Comments thread with automatic and user-tagged spoiler masking.
 - **Granular Tasks**:
   - [x] Create `lib/features/feed/presentation/screens/comment_thread_screen.dart`.
-  - [x] Comments tagged with `is_spoiler: true` render frosted Gaussian blur overlay (`BackdropFilter`).
+  - [ ] Comments tagged with `is_spoiler: true` render frosted Gaussian blur overlay (`BackdropFilter`). → remediated by `FE-607`
   - [x] Tap on blur reveals content with label: *"Tap to reveal spoiler"*.
   - [x] Add spoiler toggle switch on comment composer: `[ ⚠️ Contains Spoilers ]`.
 - **Testing & Verification**:
@@ -792,7 +792,7 @@ Build social connections, the activity feed with real-time upset alert detection
 - **Granular Tasks**:
   - [x] Create `lib/features/squads/presentation/screens/squad_hub_screen.dart`.
   - [x] Render squad banner, name, member avatars row, and invite link button.
-  - [x] Display Squad Consensus Leaderboard (calculated via Borda count RPC).
+  - [ ] Display Squad Consensus Leaderboard (calculated via Borda count RPC). → remediated by `FE-608`
   - [x] Provide toggle: `[ 🎬 Movie Canon ]` vs `[ 📺 Series Canon ]`.
 - **Testing & Verification**:
   - [x] Widget test verifying member avatars and ranked squad items render.
@@ -821,9 +821,9 @@ Build social connections, the activity feed with real-time upset alert detection
   - [x] Create `lib/features/profile/presentation/widgets/log_dropped_show_sheet.dart`.
   - [x] Season/Episode picker dropdowns.
   - [x] Standardized reason taxonomy chips.
-  - [x] Save mutation writing to `user_rankings` with `status: 'dropped'`.
+  - [ ] Save mutation writing to `user_rankings` with `status: 'dropped'`. → remediated by `FE-608`
 - **Testing & Verification**:
-  - [x] Unit test confirming moving show to Graveyard removes it from active Canon without corrupting Canon rank indexes.
+  - [ ] Unit test confirming moving show to Graveyard removes it from active Canon without corrupting Canon rank indexes. → remediated by `FE-608`
 - **Dependencies**: `FE-307`, `BE-201`.
 
 ---
@@ -861,7 +861,7 @@ Build social connections, the activity feed with real-time upset alert detection
   - [x] Write `test/features/feed/upset_activity_card_test.dart`.
   - [x] Write `test/features/feed/spoiler_comment_test.dart`.
 - **Testing & Verification**:
-  - [x] Tap on spoiler mask removes `BackdropFilter` and displays text.
+  - [ ] Tap on spoiler mask removes `BackdropFilter` and displays text. → remediated by `FE-607`
 - **Dependencies**: `FE-302`, `FE-303`, `FE-305`.
 
 #### `QA-304`: pgTAP Tests for Social Follows, RLS & Feeds
@@ -869,10 +869,10 @@ Build social connections, the activity feed with real-time upset alert detection
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §3.3 (RLS Policies)
 - **Scope & Objectives**: Verify database security rules and follow isolation.
 - **Granular Tasks**:
-  - [x] Write `database/tests/02_social_follows_rls_test.sql`.
-  - [x] Verify private user rankings cannot be selected by non-followers.
+  - [ ] Write `database/tests/02_social_follows_rls_test.sql`. → remediated by `QA-601`
+  - [ ] Verify private user rankings cannot be selected by non-followers. → remediated by `BE-602`
 - **Testing & Verification**:
-  - [x] pgTAP suite passes in Supabase local test container.
+  - [ ] pgTAP suite passes in Supabase local test container. → remediated by `QA-601`
 - **Dependencies**: `BE-301`.
 
 ---
@@ -892,7 +892,7 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
   - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §3.2 (Taste Match RPC)
 - **Scope & Objectives**: PL/pgSQL function computing Spearman Rank Correlation ($\rho$) with Bayesian shrinkage.
 - **Granular Tasks**:
-  - [x] Write procedure `calculate_taste_match_rpc(p_user_a, p_user_b, p_media_type)`.
+  - [ ] Write procedure `calculate_taste_match_rpc(p_user_a, p_user_b, p_media_type)`. → remediated by `BE-604`
   - [x] Find mutual titles in both users' canons: $k = |C_A \cap C_B|$.
   - [x] Compute rank differences: $d_i = \text{Rank}_A(i) - \text{Rank}_B(i)$.
   - [x] Calculate correlation: $\rho = 1.0 - \frac{6 \sum d_i^2}{k(k^2 - 1)}$.
@@ -900,7 +900,7 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
     $$\rho_{\text{shrunk}} = \frac{k}{k + k_0} \cdot \rho + \frac{k_0}{k + k_0} \cdot \mu_0$$
   - [x] Normalize to percentage: $\text{Match} \% = \text{round}\left(\frac{\rho_{\text{shrunk}} + 1.0}{2.0} \times 100\right)$.
 - **Testing & Verification**:
-  - [x] pgTAP test verifying identical rankings yield $100\%$; completely reversed rankings yield $0\%$.
+  - [ ] pgTAP test verifying identical rankings yield $100\%$; completely reversed rankings yield $0\%$. → remediated by `QA-601`
 - **Dependencies**: `BE-101`, `BE-201`.
 
 #### `BE-402`: JustWatch / Watchmode Real-Time Availability Scraper & Redis Cache
@@ -912,9 +912,9 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
   - [x] Create Supabase Edge Function `functions/streaming-availability/index.ts`.
   - [x] Query JustWatch / Watchmode API by TMDB ID and ISO country code (e.g., `US`).
   - [x] Extract subscription availability (`flatrate`) vs purchase (`rent`/`buy`).
-  - [x] Store in Redis: `SET title:availability:{tmdb_id}:{country} {json} EX 86400`.
+  - [ ] Store in Redis: `SET title:availability:{tmdb_id}:{country} {json} EX 86400`. → remediated by `BE-604`
 - **Testing & Verification**:
-  - [x] Test query for *Severance* returns Apple TV+ with valid web and deep link URLs.
+  - [ ] Test query for *Severance* returns Apple TV+ with valid web and deep link URLs. → remediated by `BE-605`
 - **Dependencies**: `BE-101`.
 
 #### `BE-403`: Streaming Provider Regional Catalog Synchronizer
@@ -923,10 +923,10 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
   - [**`adjacent_systems/03_SETTINGS_AND_PREFERENCES_ARCHITECTURE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/adjacent_systems/03_SETTINGS_AND_PREFERENCES_ARCHITECTURE.md) §2 (Streaming Settings)
 - **Scope & Objectives**: Daily cron pipeline refreshing regional streaming catalog changes and expiration alerts.
 - **Granular Tasks**:
-  - [x] Setup daily GitHub Actions / Supabase cron job querying catalog additions and removals.
+  - [ ] Setup daily GitHub Actions / Supabase cron job querying catalog additions and removals. → remediated by `BE-605`
   - [x] Flag titles leaving a provider in $\le 7$ days (`is_leaving_soon: true`).
 - **Testing & Verification**:
-  - [x] Verify titles flagged as leaving soon trigger notification events.
+  - [ ] Verify titles flagged as leaving soon trigger notification events. → remediated by `BE-605`
 - **Dependencies**: `BE-402`.
 
 ---
@@ -987,7 +987,7 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
   - [x] Automatically calculate intersection of streaming providers between both users:
     $$\text{Shared} = \text{Providers}_A \cap \text{Providers}_B$$
   - [x] Display shared provider icons (e.g., Netflix + Max).
-  - [x] Query and rank candidate pool combining both watchlists sorted by joint predicted enjoyment.
+  - [ ] Query and rank candidate pool combining both watchlists sorted by joint predicted enjoyment. → remediated by `FE-610`
 - **Testing & Verification**:
   - [x] Widget test verifying only shared providers appear in active filters.
 - **Dependencies**: `FE-108`, `FE-401`.
@@ -1016,10 +1016,10 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
 - **Granular Tasks**:
   - [x] Build card deck presentation using `flutter_card_swiper`.
   - [x] Swipe right = Want to watch tonight; swipe left = Pass.
-  - [x] Connect WebSocket / Supabase Realtime channel broadcasting user swipes to friend's device.
-  - [x] When both swipe right on same title $\to$ trigger full-screen Match Modal with confetti and stream deep link.
+  - [ ] Connect WebSocket / Supabase Realtime channel broadcasting user swipes to friend's device. → remediated by `FE-610`
+  - [ ] When both swipe right on same title $\to$ trigger full-screen Match Modal with confetti and stream deep link. → remediated by `FE-610`
 - **Testing & Verification**:
-  - [x] Integration test simulating mutual right-swipe triggers match state in $< 100\text{ ms}$.
+  - [ ] Integration test simulating mutual right-swipe triggers match state in $< 100\text{ ms}$. → remediated by `FE-610`
 - **Dependencies**: `FE-404`.
 
 #### `FE-407`: `StreamingDeepLinkFactory` Service
@@ -1032,10 +1032,10 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
   - [x] Implement URI builders:
     - Netflix: `nflx://www.netflix.com/title/{id}`
     - Max: `max://play/{id}`
-    - Hulu: `hulu://play/{id}`
+    - Hulu: `hulu://series/{id}` (features/07 §3.2)
     - Apple TV+: `videos://tv.apple.com/...`
     - Crunchyroll: `crunchyroll://series/{id}`
-    - Prime Video: `primevideo://watch/{id}`
+    - Prime Video: `primevideo://watch?asin={asin}` (features/07 §3.2)
   - [x] Fallback: If native app fails to launch (`canLaunchUrl == false`), open provider web URL in external browser.
 - **Testing & Verification**:
   - [x] Unit tests verifying URI schemes generated accurately for all 6 providers.
@@ -1097,9 +1097,9 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §3.3 (Taste Match pgTAP)
 - **Scope & Objectives**: Verify PostgreSQL PL/pgSQL procedure returns accurate percentages in $< 15\text{ ms}$.
 - **Granular Tasks**:
-  - [x] Write `database/tests/03_taste_match_rpc_test.sql`.
+  - [ ] Write `database/tests/03_taste_match_rpc_test.sql`. → remediated by `QA-601`
 - **Testing & Verification**:
-  - [x] pgTAP suite runs in Supabase container; latency under 15ms.
+  - [ ] pgTAP suite runs in Supabase container; latency under 15ms. → remediated by `QA-601`
 - **Dependencies**: `BE-401`.
 
 ---
@@ -1122,7 +1122,7 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
   - [x] Create `lib/features/sharing/presentation/widgets/story_card_renderer.dart`.
   - [x] Wrap target card in off-screen `RepaintBoundary` with fixed $1080 \times 1920$ dimensions.
   - [x] Convert boundary to PNG byte buffer using `toImage(pixelRatio: 3.0)`.
-  - [x] Invoke native OS sharing sheet via `package:share_plus`.
+  - [ ] Invoke native OS sharing sheet via `package:share_plus`. → remediated by `DEV-601`
 - **Testing & Verification**:
   - [x] Unit test asserting generated image bytes correspond to valid PNG header and $1080 \times 1920$ size.
 - **Dependencies**: `FE-102`.
@@ -1137,7 +1137,7 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
   - [x] Template 2: **Top 9 Series Canon Grid**.
   - [x] Template 3: **Spicy Upset Card** showcasing the user's most controversial duel.
   - [x] Template 4: **Director Affinity Radar** (e.g., Nolan, Villeneuve, Miyazaki).
-  - [x] Export directly to Instagram Stories with 1 tap.
+  - [ ] Export directly to Instagram Stories with 1 tap. → remediated by `DEV-601`
 - **Testing & Verification**:
   - [x] Widget test verifying template carousel switches cards cleanly.
 - **Dependencies**: `FE-501`.
@@ -1149,7 +1149,7 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 - **Scope & Objectives**: High-converting shareable graphic for Letterboxd immigrants.
 - **Granular Tasks**:
   - [x] Generate graphic stating: *"Imported 412 films from Letterboxd to Telly — here is my true #1 ranked movie"*.
-  - [x] Include user's top-ranked movie poster, dynamic score (10.00), and custom QR code deep link.
+  - [ ] Include user's top-ranked movie poster, dynamic score (10.00), and custom QR code deep link. → remediated by `DEV-601`
 - **Testing & Verification**:
   - [x] Test graphic paints correct movie title and poster without rendering overflows.
 - **Dependencies**: `FE-501`, `FE-111`.
@@ -1159,12 +1159,12 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
   - [**`technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md) §3 (Offline Sync Architecture)
 - **Scope & Objectives**: 0ms optimistic UI updates during airplane mode with FIFO queue flushing on reconnect.
 - **Granular Tasks**:
-  - [x] Create `lib/core/network/offline_sync_manager.dart`.
-  - [x] When offline: persist ranking/duel mutations to Drift `OfflineDuelQueue` with pending UUIDs.
+  - [ ] Create `lib/core/network/offline_sync_manager.dart`. → remediated by `FE-605`
+  - [ ] When offline: persist ranking/duel mutations to Drift `OfflineDuelQueue` with pending UUIDs. → remediated by `FE-605`
   - [x] Update local Drift tables immediately for zero perceived latency.
-  - [x] Listen to `connectivity_plus` network transitions: when online, flush queued transactions in sequential FIFO order to Supabase.
+  - [ ] Listen to `connectivity_plus` network transitions: when online, flush queued transactions in sequential FIFO order to Supabase. → remediated by `FE-605`
 - **Testing & Verification**:
-  - [x] Unit test queue: enqueue 3 offline duels $\to$ simulate reconnect $\to$ assert 3 calls executed in FIFO order.
+  - [ ] Unit test queue: enqueue 3 offline duels $\to$ simulate reconnect $\to$ assert 3 calls executed in FIFO order. → remediated by `FE-605`
 - **Dependencies**: `FE-105`.
 
 #### `FE-505`: `SCR-20` Settings Hub & Granular Preferences
@@ -1173,12 +1173,12 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
   - [**`adjacent_systems/03_SETTINGS_AND_PREFERENCES_ARCHITECTURE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/adjacent_systems/03_SETTINGS_AND_PREFERENCES_ARCHITECTURE.md) §1–§4 (Settings Hierarchy)
 - **Scope & Objectives**: Central configuration hub for account, streaming services, push notifications, and storage.
 - **Granular Tasks**:
-  - [x] Account section: Change phone/email, FaceID biometric unlock toggle.
-  - [x] Streaming section: Edit active services and update JustWatch country region.
-  - [x] Notifications matrix: Granular toggles (Upset Alerts, Co-Watch Invites, Friend Activity) + Quiet Hours schedule.
-  - [x] Storage hygiene: Display local cached image size with *"Clear Image Cache"* action.
+  - [ ] Account section: Change phone/email, FaceID biometric unlock toggle. → remediated by `DEV-601`
+  - [ ] Streaming section: Edit active services and update JustWatch country region. → remediated by `FE-608`
+  - [ ] Notifications matrix: Granular toggles (Upset Alerts, Co-Watch Invites, Friend Activity) + Quiet Hours schedule. → remediated by `FE-608`
+  - [ ] Storage hygiene: Display local cached image size with *"Clear Image Cache"* action. → remediated by `FE-608`
 - **Testing & Verification**:
-  - [x] Widget test verifying toggle state changes update SharedPreferences / Drift settings.
+  - [ ] Widget test verifying toggle state changes update SharedPreferences / Drift settings. → remediated by `FE-608`
 - **Dependencies**: `FE-104`.
 
 #### `FE-506`: Self-Service CSV, Notion & Letterboxd Data Exporter
@@ -1189,23 +1189,23 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
   - [x] Create `lib/features/profile/domain/data_exporter.dart`.
   - [x] Format 1: `telly_canon_export.csv` (Rank, Title, Media Type, Score, MVP, Vibe Tags, Date Added).
   - [x] Format 2: `letterboxd_diary_export.csv` (compatible with Letterboxd re-import).
-  - [x] Provide 1-tap download and OS share sheet invocation.
+  - [ ] Provide 1-tap download and OS share sheet invocation. → remediated by `FE-608`
 - **Testing & Verification**:
   - [x] Unit test asserting CSV output matches standard RFC 4180 format.
 - **Dependencies**: `FE-105`.
 
-#### `FE-507`: `SCR-08` Edit Profile Studio, Avatar Cropper & Top 3 Showcase
+#### `FE-507`: Edit Profile Studio, Avatar Cropper & Top 3 Showcase (not a numbered screen — `SCR-08` is Show Detail, see `FE-611`)
 - **Spec Reference**:
   - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §8 (`SCR-08`)
   - [**`adjacent_systems/02_PROFILE_MANAGEMENT_AND_CUSTOMIZATION.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/adjacent_systems/02_PROFILE_MANAGEMENT_AND_CUSTOMIZATION.md) §1–§2 (Profile Studio)
 - **Scope & Objectives**: Profile personalization screen with square avatar cropping and Top 3 title curation.
 - **Granular Tasks**:
-  - [x] Implement avatar upload using `image_picker` and `image_cropper` (1:1 aspect ratio constraint).
+  - [ ] Implement avatar upload using `image_picker` and `image_cropper` (1:1 aspect ratio constraint). → remediated by `FE-608`
   - [x] Bio editor with 160-character ceiling.
   - [x] Top 3 Showcase Selector: Pick 3 crowning titles pinned to top of profile.
   - [x] Privacy Mode Toggle: `[ Public ]` | `[ Friends-Only ]` | `[ Ghost Mode ]`.
 - **Testing & Verification**:
-  - [x] Widget test verifying avatar crop result updates preview state.
+  - [ ] Widget test verifying avatar crop result updates preview state. → remediated by `FE-608`
 - **Dependencies**: `FE-104`.
 
 #### `FE-508`: In-App Spoiler Shield & Report Content Sheets
@@ -1215,9 +1215,9 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 - **Granular Tasks**:
   - [x] Build Proactive Show Mute Sheet: Mute any series or movie (e.g., hide all posts about *House of the Dragon* until watched).
   - [x] Build Content Reporting Bottom Sheet: Options (`Spoiler Unmasked`, `Harassment`, `Spam`, `Inaccurate Metadata`).
-  - [x] Submit reports to Supabase `reports` table for back-office moderation queue.
+  - [ ] Submit reports to Supabase `reports` table for back-office moderation queue. → remediated by `FE-607`
 - **Testing & Verification**:
-  - [x] Test submitting a report creates row in `reports` and hides offending post immediately for current user.
+  - [ ] Test submitting a report creates row in `reports` and hides offending post immediately for current user. → remediated by `FE-607`
 - **Dependencies**: `FE-104`, `BE-101`.
 
 ---
@@ -1232,9 +1232,9 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 - **Granular Tasks**:
   - [x] Configure `.github/workflows/pull_request.yml`.
   - [x] Stage 1: `dart analyze --fatal-infos`.
-  - [x] Stage 2: `flutter test --coverage` (enforcing $\ge 80\%$ project coverage).
-  - [x] Stage 3: pgTAP database stored procedure checks.
-  - [x] Block PR merge automatically if any stage fails.
+  - [ ] Stage 2: `flutter test --coverage` (enforcing $\ge 80\%$ project coverage). → remediated by `DEV-602`
+  - [ ] Stage 3: pgTAP database stored procedure checks. → remediated by `QA-601`
+  - [ ] Block PR merge automatically if any stage fails. → remediated by `DEV-602`
 - **Testing & Verification**:
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Verify workflow passes on clean branch and fails on intentional lint violation.
 - **Dependencies**: `QA-101`.
@@ -1244,8 +1244,8 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
   - [**`technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md) §2 (Fastlane Lanes)
 - **Scope & Objectives**: 1-command build and upload to Apple TestFlight and Google Play Internal Track.
 - **Granular Tasks**:
-  - [x] Configure `ios/fastlane/Fastfile` with lane `beta` (Match code signing, build ipa, upload to TestFlight).
-  - [x] Configure `android/fastlane/Fastfile` with lane `beta` (sign AAB bundle, upload to Play Console).
+  - [ ] Configure `ios/fastlane/Fastfile` with lane `beta` (Match code signing, build ipa, upload to TestFlight). → remediated by `DEV-602`
+  - [ ] Configure `android/fastlane/Fastfile` with lane `beta` (sign AAB bundle, upload to Play Console). → remediated by `DEV-602`
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Store App Store Connect API keys and Android service account JSON in GitHub Secrets.
 - **Testing & Verification**:
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Execute `fastlane beta` dry-run; verify IPA and AAB bundles compile successfully.
@@ -1257,9 +1257,9 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
   - [**`technical_architecture/01_TECH_STACK_AND_LIBRARIES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/01_TECH_STACK_AND_LIBRARIES.md) §2 (Monitoring Libs)
 - **Scope & Objectives**: Real-time crash diagnostics, performance tracing, and product telemetry.
 - **Granular Tasks**:
-  - [x] Initialize `sentry_flutter` in `main.dart` with DSN from `.env`.
-  - [x] Configure automatic breadcrumb capture (navigation routes, network calls, duel votes).
-  - [x] Initialize `posthog_flutter` tracking core product events (`duel_completed`, `upset_alert_shared`, `cowatch_matched`).
+  - [ ] Initialize `sentry_flutter` in `main.dart` with DSN from `.env`. → remediated by `DEV-601`
+  - [ ] Configure automatic breadcrumb capture (navigation routes, network calls, duel votes). → remediated by `DEV-601`
+  - [ ] Initialize `posthog_flutter` tracking core product events (`duel_completed`, `upset_alert_shared`, `cowatch_matched`). → remediated by `DEV-601`
 - **Testing & Verification**:
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Trigger test exception `Sentry.captureException()`; verify error appears in Sentry dashboard.
 - **Dependencies**: `FE-101`.
@@ -1287,7 +1287,7 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 - **Scope & Objectives**: Host compliant legal documentation required for App Store and Google Play approval.
 - **Granular Tasks**:
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Host static markdown/HTML at `https://telly.app/privacy` and `https://telly.app/terms`.
-  - [x] Embed in-app web views in `SCR-20` Settings linking directly to both documents.
+  - [ ] Embed in-app web views in `SCR-20` Settings linking directly to both documents. → remediated by `LEGAL-601`
 - **Testing & Verification**:
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Verify public HTTP 200 response on both URLs.
 - **Dependencies**: None.
@@ -1298,11 +1298,11 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
   - [**`technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md) §4 (App Store Guidelines)
 - **Scope & Objectives**: Satisfy Apple Guideline 1.2 (User Generated Content) and mandatory self-service account deletion.
 - **Granular Tasks**:
-  - [x] Implement self-service "Delete Account" button in `SCR-20` Settings with confirmation dialog.
-  - [x] Queue account for 30-day soft deletion, revoking sessions and scrubbing user data permanently.
-  - [x] Include 1-tap user blocking and reporting on all user-generated comments.
+  - [ ] Implement self-service "Delete Account" button in `SCR-20` Settings with confirmation dialog. → remediated by `LEGAL-601`
+  - [ ] Queue account for 30-day soft deletion, revoking sessions and scrubbing user data permanently. → remediated by `BE-604`
+  - [ ] Include 1-tap user blocking and reporting on all user-generated comments. → remediated by `FE-607`
 - **Testing & Verification**:
-  - [x] Test account deletion marks profile `is_deleted: true` and logs user out immediately.
+  - [ ] Test account deletion marks profile `is_deleted: true` and logs user out immediately. → remediated by `LEGAL-601`
 - **Dependencies**: `FE-505`, `BE-101`.
 
 #### `LEGAL-503`: Production App Store Connect & Google Play Console Submission
@@ -1315,7 +1315,7 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Provide active demo credentials and test OTP phone number for App Reviewers.
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Submit iOS build to Apple Review and Android build to Google Play Review.
 - **Testing & Verification**:
-  - [x] Assert build passes Apple Automated Validation without missing icon/privacy manifest errors.
+  - [ ] 👤 **[TO BE DONE BY HUMAN]** Assert build passes Apple Automated Validation without missing icon/privacy manifest errors (privacy manifest added in `LEGAL-601`).
 - **Dependencies**: `DEV-502`, `LEGAL-501`, `LEGAL-502`.
 
 ---
@@ -1327,10 +1327,10 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §4 (E2E Test Specifications)
 - **Scope & Objectives**: Automate complete user journeys using `package:integration_test`.
 - **Granular Tasks**:
-  - [x] Write `integration_test/cuj_01_onboarding_test.dart` (Onboarding to Initial Canon calibration).
-  - [x] Write `integration_test/cuj_02_logging_movie_test.dart` (Search $\to$ 3 duels $\to$ venue tag $\to$ slot reveal).
-  - [x] Write `integration_test/cuj_03_cowatch_test.dart` (Two-to-Watch filter $\to$ Quick Swipe $\to$ match).
-  - [x] Write `integration_test/cuj_04_offline_wal_test.dart` (Airplane mode duel vote $\to$ reconnect $\to$ WAL sync).
+  - [ ] Write `integration_test/cuj_01_onboarding_test.dart` (Onboarding to Initial Canon calibration). → remediated by `QA-602`
+  - [ ] Write `integration_test/cuj_02_logging_movie_test.dart` (Search $\to$ 3 duels $\to$ venue tag $\to$ slot reveal). → remediated by `QA-602`
+  - [ ] Write `integration_test/cuj_03_cowatch_test.dart` (Two-to-Watch filter $\to$ Quick Swipe $\to$ match). → remediated by `QA-602`
+  - [ ] Write `integration_test/cuj_04_offline_wal_test.dart` (Airplane mode duel vote $\to$ reconnect $\to$ WAL sync). → remediated by `QA-602`
 - **Testing & Verification**:
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Execute `flutter test integration_test/` on CI simulator; all 4 journeys pass in $< 3\text{ minutes}$.
 - **Dependencies**: `FE-106`, `FE-201`, `FE-404`, `FE-504`.
@@ -1341,10 +1341,10 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 - **Scope & Objectives**: Prevent visual regressions across design tokens, dark surfaces, and typography.
 - **Granular Tasks**:
   - [x] Create `test/goldens/screen_goldens_test.dart`.
-  - [x] Capture goldens for `SCR-10` (Duel Arena), `SCR-14` (Dual-Canon Profile), `SCR-05` (Feed Upset Card).
-  - [x] Compare using `matchesGoldenFile()`.
+  - [ ] Capture goldens for `SCR-10` (Duel Arena), `SCR-14` (Dual-Canon Profile), `SCR-05` (Feed Upset Card). → remediated by `QA-603`
+  - [ ] Compare using `matchesGoldenFile()`. → remediated by `QA-603`
 - **Testing & Verification**:
-  - [x] All golden snapshots match pixel-for-pixel on `@2x` and `@3x` retina scales.
+  - [ ] All golden snapshots match pixel-for-pixel on `@2x` and `@3x` retina scales. → remediated by `QA-603`
 - **Dependencies**: `FE-201`, `FE-206`, `FE-303`.
 
 #### `QA-503`: WCAG 2.1 AA Accessibility Automated Semantics Audit
@@ -1353,10 +1353,10 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 - **Scope & Objectives**: Ensure screen reader accessibility and physical touch target sizes.
 - **Granular Tasks**:
   - [x] Write `test/a11y/accessibility_test.dart` using `tester.getSemantics()`.
-  - [x] Assert every tap target is at least $48 \times 48\text{ dp}$.
-  - [x] Assert every interactive icon has a descriptive `semanticsLabel`.
+  - [ ] Assert every tap target is at least $48 \times 48\text{ dp}$. → remediated by `QA-604`
+  - [ ] Assert every interactive icon has a descriptive `semanticsLabel`. → remediated by `QA-604`
 - **Testing & Verification**:
-  - [x] Automated semantics audit passes with zero violations.
+  - [ ] Automated semantics audit passes with zero violations. → remediated by `QA-604`
 - **Dependencies**: `FE-104`.
 
 #### `QA-504`: 60fps/120fps Frame Rate Benchmarking & Jank Regression Profiling
@@ -1364,10 +1364,10 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §5.3 (Frame Rate Profiling)
 - **Scope & Objectives**: Profile rendering pipeline to eliminate dropped frames and memory leaks.
 - **Granular Tasks**:
-  - [x] Write `test_driver/perf_driver.dart` measuring frame rasterization times during rapid feed scrolling and duel card swiping.
-  - [x] Assert 99th percentile frame build time remains $< 16.6\text{ ms}$ (60fps target).
+  - [ ] Write `test_driver/perf_driver.dart` measuring frame rasterization times during rapid feed scrolling and duel card swiping. → remediated by `QA-605`
+  - [ ] Assert 99th percentile frame build time remains $< 16.6\text{ ms}$ (60fps target). → remediated by `QA-605`
 - **Testing & Verification**:
-  - [x] Frame rate benchmark logs zero dropped frames over 500 simulated scroll events.
+  - [ ] Frame rate benchmark logs zero dropped frames over 500 simulated scroll events. → remediated by `QA-605`
 - **Dependencies**: `FE-202`, `FE-301`.
 
 #### `QA-505`: Offline WAL Stress & Network Partitioning Recovery Tests
@@ -1375,10 +1375,10 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §4 (CUJ-04), §2.3 (WAL Storage)
 - **Scope & Objectives**: Verify data consistency during erratic network dropouts and sudden app kills.
 - **Granular Tasks**:
-  - [x] Test simulating 50 offline duel votes followed by process kill and restart.
-  - [x] Assert on restart, Drift WAL transaction queue remains intact and flushes cleanly upon network restore.
+  - [ ] Test simulating 50 offline duel votes followed by process kill and restart. → remediated by `QA-606`
+  - [ ] Assert on restart, Drift WAL transaction queue remains intact and flushes cleanly upon network restore. → remediated by `QA-606`
 - **Testing & Verification**:
-  - [x] Zero lost duels, zero corrupted ranking indices.
+  - [ ] Zero lost duels, zero corrupted ranking indices. → remediated by `QA-606`
 - **Dependencies**: `FE-504`.
 
 ---
@@ -1414,12 +1414,12 @@ Turn the library of individually-tested widgets and algorithms into a **wired, r
   - [**`AGENTS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/AGENTS.md) Rule 5
 - **Scope & Objectives**: Make Sprints 1–5 checkboxes reflect reality so progress accounting is trustworthy again.
 - **Granular Tasks**:
-  - [ ] Un-check every Sprint 1–5 task the audit classed as Partial / Stub / Mislabeled, appending `→ remediated by <TICKET-ID>` to each.
-  - [ ] Convert remaining non-verifiable items (cloud setup, store submission, device runs) to `👤 [TO BE DONE BY HUMAN]`.
-  - [ ] Correct ticket text errors: `FE-102` color hexes (→ style guide §2); `FE-208` rollup method (→ D6); `FE-407` Hulu/Prime URI formats (→ features/07 §3.2: `hulu://series/{id}`, `primevideo://watch?asin={asin}` — code is already correct); `FE-507` mislabels Edit Profile as `SCR-08` (Show Detail is `SCR-08`); `BE-101`/`BE-102` table and enum names (→ D4).
-  - [ ] Reset the dashboard: real completed count, Sprint 6 active, current ticket.
+  - [x] Un-check every Sprint 1–5 task the audit classed as Partial / Stub / Mislabeled, appending `→ remediated by <TICKET-ID>` to each.
+  - [x] Convert remaining non-verifiable items (cloud setup, store submission, device runs) to `👤 [TO BE DONE BY HUMAN]`.
+  - [x] Correct ticket text errors: `FE-102` color hexes (→ style guide §2); `FE-208` rollup method (→ D6); `FE-407` Hulu/Prime URI formats (→ features/07 §3.2: `hulu://series/{id}`, `primevideo://watch?asin={asin}` — code is already correct); `FE-507` mislabels Edit Profile as `SCR-08` (Show Detail is `SCR-08`); `BE-101`/`BE-102` table and enum names (→ D4).
+  - [x] Reset the dashboard: real completed count, Sprint 6 active, current ticket.
 - **Testing & Verification**:
-  - [ ] Peer review: every `[x]` in Sprints 1–5 traceable to a file and a passing test.
+  - [x] Self-review complete (code greps + coverage run); owner peer review still recommended: every `[x]` in Sprints 1–5 traceable to a file and a passing test.
 - **Dependencies**: None.
 
 #### `DOC-602`: Spec Reconciliation (Score Curve, Tiers, Media Type, Schema)
@@ -1872,6 +1872,7 @@ Turn the library of individually-tested widgets and algorithms into a **wired, r
 - **Scope & Objectives**: Finish the Riverpod migration and close the sprint.
 - **Granular Tasks**:
   - [ ] Zero `StateNotifier`, `StateNotifierProvider`, `StateProvider`, `ChangeNotifier` in `lib/`; a CI grep step enforces it.
+  - [ ] Close coverage gaps found by `DOC-601` (measured 2026-10-03: `anilist_importer.dart` 77.7%, `letterboxd_csv_parser.dart` 96.2%, `binary_insertion_tournament.dart` 99.1% — all claimed 100%).
   - [ ] Review every remaining `setState` (UI-only allowed); document the rule in `AGENTS.md`.
   - [ ] Run `dart analyze --fatal-infos`, `flutter test --coverage`, `supabase test db`, `flutter test integration_test`; update the dashboard.
 - **Testing & Verification**:
