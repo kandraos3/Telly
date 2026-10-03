@@ -1,0 +1,211 @@
+# Telly UI/UX Design System: 02 — Component Library & UI Patterns
+
+## 1. Overview & Component Philosophy
+Every component in Telly is designed to feel **cinematic, tactile, and information-dense without feeling crowded**. 
+
+Components prioritize artwork (posters, backdrop stills, network typography) and eliminate extraneous visual noise (no generic star rating bars, no cluttered tables).
+
+---
+
+## 2. Core Navigation Shell Components
+
+### 2.1 The Floating Frosted Bottom Bar
+Rather than a traditional opaque bottom bar anchored to the screen bottom, Telly features a **floating pill navigation bar** suspended 16px above the home indicator:
+- **Surface Material:** Frosted dark acrylic (`#11131A` with 75% opacity, `backdrop-filter: blur(24px)`).
+- **Border:** 1px stroke (`#242938`).
+- **Dimensions:** Height: 64px, Margin: 16px horizontal, Border Radius: 32px.
+- **Items:**
+  1. `Feed` (Home icon)
+  2. `Explore` (Compass icon)
+  3. `Log / Duel` (Center Action — glowing Phosphor Lime hexagon with `+` glyph)
+  4. `Queue` (Bookmark deck icon)
+  5. `The Canon` (Profile / Film strip icon)
+- **Active Tab State:** Icon shifts to Pure White (`#FFFFFF`) with a micro neon phosphor dot beneath it.
+- **Center Action (Log):** Elevated 6px above the bar, background: `#D2FF52`, icon: `#08090C` (Black), surrounded by a soft 12px neon halo.
+
+```
+┌────────────────────────────────────────────────────────┐
+│                      APP CONTENT                       │
+│                                                        │
+│   ┌────────────────────────────────────────────────┐   │
+│   │   [🏠]      [🧭]      [ ⬢+ ]      [📑]      [👤]   │   │
+│   │   Feed    Explore      Log       Queue     Canon   │   │
+│   └────────────────────────────────────────────────┘   │
+└────────────────────────────────────────────────────────┘
+```
+
+### 2.2 Top Header & Context Bar
+- **Height:** 52px (excluding status bar).
+- **Left Slot:** Dynamic context (e.g., Telly logomark, active page title, or back arrow with spring bounce).
+- **Right Slot:** Search pill (`[ 🔍 Search shows or friends ]`) or Action menu (`[ ⚙️ Settings ]`).
+- **Scroll Behavior:** Collapses smoothly into a frosted header on scroll down (`Elevation 2`), expands on scroll to top.
+
+---
+
+## 3. Show Card Patterns
+
+The show card is the fundamental atomic unit of Telly, appearing in 4 distinct visual variants:
+
+### 3.1 Variant A: The Canon List Row (Profile & Leaderboard)
+- **Dimensions:** Full screen width minus 32px padding, 84px height.
+- **Layout:**
+  - `Left:` Numeric Rank Badge (e.g., `#01` in tabular bold).
+  - `Center Left:` 2:3 aspect ratio poster thumbnail (54px width x 81px height, rounded 8px).
+  - `Middle Content:` Show title in SemiBold, release year & network tag (*"Apple TV+ • 2022"*), and 1-line quote of user's hot take.
+  - `Right Slot:` Dynamic Score Pill (e.g., `9.85` in bold tabular digits, colored by tier).
+  - `Far Right:` Subtle drag handle grip (3 horizontal lines) for manual reordering.
+
+```
+┌────────────────────────────────────────────────────────┐
+│ #01  ┌────┐  SUCCESSION (2018–2023)            [ 10.0 ]│
+│      │Post│  HBO • 4 Seasons                   God Tier│
+│      │ er │  "Kendall Roy tragic perfection"      ≡    │
+│      └────┘                                            │
+└────────────────────────────────────────────────────────┘
+```
+
+### 3.2 Variant B: The Social Feed Card (Timeline Activity)
+- **Surface:** `#11131A` card with 16px rounded corners, 1px `#242938` border.
+- **Top Row:** Friend avatar (36px circle), friend display name, username (`@jordan`), relative timestamp (`2h ago`), and right-aligned Upset/Milestone pill.
+- **Body Banner:** High-res cinematic 16:9 backdrop still with dark gradient scrim at bottom.
+- **Card Content Overlay:**
+  - Show poster overlapping the backdrop (48px x 72px).
+  - Title, Network logo, Seasons watched (`"Finished Whole Series"`).
+  - Dynamic Score chip (`9.72`) and Tier badge (`👑 God Tier`).
+  - Short review text: 280-char hot take in high-contrast text (`#C8CAD8`).
+  - Tag chips: `#MindBending`, `#PeakDialogue`, `#FlawlessFinale`.
+- **Bottom Action Bar:**
+  - Left: `[ + Want to Watch ]` 1-tap save button.
+  - Right: Horizontal stack of reaction pills (`[ 🔥 24 ]`, `[ 🤯 8 ]`, `[ 💬 12 ]`).
+
+```
+┌────────────────────────────────────────────────────────┐
+│ (👤) Jordan Miller @jordan • 2h ago       [ 🚨 UPSET ] │
+├────────────────────────────────────────────────────────┤
+│ ┌────────────────────────────────────────────────────┐ │
+│ │ [ Cinematic 16:9 Backdrop with Backdrop Scrim ]    │ │
+│ └────────────────────────────────────────────────────┘ │
+│  ┌────┐  SEVERANCE                                     │
+│  │Post│  Apple TV+ • 2 Seasons • Sci-Fi / Thriller     │
+│  │ er │  Score: 9.72 • 👑 God Tier                     │
+│  └────┘  Ranked #2 all-time (Over Succession)          │
+│                                                        │
+│  "The Season 2 finale made my heart palpitate. The     │
+│   elevator sequence will be studied for decades."      │
+│                                                        │
+│  [#MindBending]  [#FlawlessFinale]                     │
+│                                                        │
+│  [ + Want to Watch ]          [ 🔥 18 ]  [ 🤯 9 ] [💬 7]│
+└────────────────────────────────────────────────────────┘
+```
+
+### 3.3 Variant C: The Smart Queue Item (Watchlist)
+- **Focus:** Where to watch and why it’s in your queue.
+- **Layout:**
+  - Poster thumbnail with quick-action checkmark overlay (*"Mark as Watched"*).
+  - Show title and runtime info (*"1 Season • 8 Episodes • ~45m each"*).
+  - **Social Attribution:** *"Saved from @maya's God Tier"* or *"8.94 Friends Avg (6 friends)"*.
+  - **Streaming Action Button:** Glowing neon pill: `[ ▶ Watch on Max ]` with native app deep-link.
+
+### 3.4 Variant D: The 3x3 Poster Grid Tile
+- **Focus:** Clean, aesthetic, edge-to-edge poster art for Instagram Stories and profile hero.
+- **Layout:** High-resolution vertical 2:3 card, subtle corner radius (8px), rank number embossed in the bottom-left corner with glassmorphic backing.
+
+---
+
+## 4. The Duel Arena Components (The Heart of Telly)
+
+The Duel screen is a distraction-free, full-screen battleground.
+
+```
+┌────────────────────────────────────────────────────────┐
+│ [✕ Cancel]            DUEL 3 OF 5            [Skip ↷]  │
+│                   Progress: [██████░░░░]               │
+├────────────────────────────────────────────────────────┤
+│                                                        │
+│  ┌──────────────────────────────────────────────────┐  │
+│  │  CANDIDATE CARD A                                │  │
+│  │  ┌──────┐  SEVERANCE                             │  │
+│  │  │ [IMG]│  Apple TV+ • 2 Seasons • 2022          │  │
+│  │  └──────┘  "Waffle party peak television"        │  │
+│  │                                                  │  │
+│  │            [ TAP OR SWIPE UP TO PICK ]           │  │
+│  └──────────────────────────────────────────────────┘  │
+│                                                        │
+│                         ━ VS ━                         │
+│                                                        │
+│  ┌──────────────────────────────────────────────────┐  │
+│  │  CANDIDATE CARD B                                │  │
+│  │  ┌──────┐  THE BEAR                              │  │
+│  │  │ [IMG]│  FX / Hulu • 3 Seasons • 2022          │  │
+│  │  └──────┘  Currently your #5 All-Time (9.41)     │  │
+│  │                                                  │  │
+│  │           [ TAP OR SWIPE DOWN TO PICK ]          │  │
+│  └──────────────────────────────────────────────────┘  │
+│                                                        │
+│            [  🤷 Equal / Can't Compare  ]               │
+└────────────────────────────────────────────────────────┘
+```
+
+### 4.1 Duel Arena States & Motion Physics
+1. **Idle State:** Both cards hover with subtle ambient floating animation (1.5px gentle vertical oscillation).
+2. **Selection Gesture:**
+   - Tap Card A: Card A immediately scales to 1.04x, stroke ignites in **Phosphor Lime** (`#D2FF52`), haptic impact triggers.
+   - Card B compresses to 0.96x, dims to 20% opacity, and slides down out of view with a spring dampening curve (`stiffness: 300, damping: 20`).
+3. **Card Transition:** The next comparison card slides in from the right edge with a 200ms ease-out curve.
+4. **"Can't Compare" Action:** Button located at the bottom in neutral muted slate. Tapping it gently rotates both cards 4 degrees and slides in two alternative comparison titles.
+
+---
+
+## 5. Buttons, Chips & Interactive Controls
+
+### 5.1 Primary Glow Button (Phosphor Lime CTA)
+- **Background:** `#D2FF52`.
+- **Text:** `#08090C` (Pure Black), Plus Jakarta Sans Bold, 15px.
+- **Border Radius:** 14px.
+- **Hover/Tap State:** Brightness 1.1x, neon glow expands (`box-shadow: 0 0 24px rgba(210, 255, 82, 0.45)`).
+- **Disabled State:** Background `#242938`, text `#7D8198`, zero glow.
+
+### 5.2 1-Tap Watchlist Save Button
+- **Default State:** Background: `rgba(255, 255, 255, 0.08)`, border: `1px solid #3D4259`, icon: `+`, label: `"Want to Watch"`.
+- **Saved State (Toggled):** Background: `#D2FF52`, text: `#08090C`, icon: `✓`, label: `"In Watchlist"`, accompanied by a light haptic tick.
+
+### 5.3 Reaction Pill
+- **Structure:** Pill shape (height: 32px), surface `#1A1D27`, border: `1px solid #242938`.
+- **Elements:** Emoji glyph + numeric count in tabular bold (`[ 🔥 18 ]`).
+- **User Reacted State:** Border becomes Neon Coral or Phosphor Lime, count increments with spring text flip.
+
+### 5.4 Filter & Tag Chips
+- **Dimensions:** Height 30px, border-radius: 999px (full pill).
+- **Unselected:** `#11131A` background, `#7D8198` text.
+- **Selected:** Electric Violet (`#7C5CFF`) or Phosphor Lime (`#D2FF52`) solid or outline.
+
+---
+
+## 6. Bottom Sheets & Modal Dialogs
+
+All modal dialogs in Telly use an **iOS-native Pan-Down Bottom Sheet** pattern:
+- **Scrim:** `#08090C` with 80% opacity and 16px background blur.
+- **Sheet Radius:** 28px top corners.
+- **Drag Handle:** 40px width, 4px height pill in `#3D4259` at top center.
+- **Dismiss Physics:** Flick down with velocity $> 500\text{px/s}$ or drag past 40% screen height triggers instant dismiss.
+
+---
+
+## 7. State Conventions & System Feedback
+
+### 7.1 Skeleton Loading States
+- Content loading displays dark shimmering gradients (`#11131A` to `#242938` wave animation, 1.4s cycle).
+- Posters, titles, and score pills maintain exact geometric dimensions to prevent Cumulative Layout Shift (CLS = 0).
+
+### 7.2 Empty States with High-Conversion Action
+- **Empty Watchlist:** An illustrated dark TV screen glowing in neon:
+  *"Your queue is empty. Explore friends' God Tiers or discover trending shows."*
+  `[ Explore Discover Feed → ]`
+- **Empty Canon (New User):**
+  *"You haven't ranked any shows yet. Complete a 60-second tournament to build your canon."*
+  `[ Start Quick Tournament → ]`
+
+### 7.3 Offline & Error State
+- Telly operates **Offline-First**. All user rankings, watchlists, and duel choices are cached locally in SQLite.
+- If offline, a discreet top banner displays: `⚡ Offline Mode • Changes will sync when reconnected`.
