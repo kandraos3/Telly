@@ -22,20 +22,20 @@
 
 ## 📊 Active Sprint Execution Dashboard
 
-- **Current Active Sprint**: **Sprint 1 (Weeks 1–2): Infrastructure, Auth, Foundation & Data Ingestion**
-- **Current Active Ticket**: `BE-101`: Supabase Project Initialization & Database Migration
-- **Overall Roadmap Progress**: **15 / 81 Tickets Completed** (18.5%)
+- **Current Active Sprint**: **Sprint 2 (Weeks 3–4): The Pairwise Duel Engine, Scoring & The Personal Dual-Canon**
+- **Current Active Ticket**: `ALGO-201`: Pairwise Binary Insertion Sort Tournament Engine
+- **Overall Roadmap Progress**: **19 / 85 Tickets Completed** (22.4%)
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos`), Unit Tests (100% pass)
 - **Last Updated**: 2026-10-03
 
 | Sprint | Status | Total Tickets | Completed | Progress |
 | :---: | :---: | :---: | :---: | :--- |
-| **Sprint 1** | 🟡 **Active** | 19 | 15 | `███████████████░░░░` 78.9% |
-| **Sprint 2** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
+| **Sprint 1** | 🟢 **Completed** | 19 | 19 | `████████████████████` 100.0% |
+| **Sprint 2** | 🟡 **Active** | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 3** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 4** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 5** | ⚪ Queued | 18 | 0 | `░░░░░░░░░░` 0% |
-| **Total** | | **85** | **15** | **17.6%** |
+| **Total** | | **85** | **19** | **22.4%** |
 
 ---
 
@@ -54,14 +54,14 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §1–§3 (Tables, Indexes, RLS)
 - **Scope & Objectives**: Deploy the production database schema to Supabase PostgreSQL 16.
 - **Granular Tasks**:
-  - [ ] Create Supabase project (`telly-backend-prod`) in US-East / EU-Central.
-  - [ ] Execute `01_initial_schema.sql` migration creating core tables: `users`, `titles`, `user_rankings`, `pairwise_duels`, `user_watchlist`, `social_follows`, `squads`, `squad_members`, `comments`, `reports`.
-  - [ ] Verify `media_type` enum (`'movie'`, `'tv'`) and indexes on `(user_id, media_type, rank_position)`.
-  - [ ] Enable PostgreSQL Row-Level Security (RLS) policies on all tables.
-  - [ ] Verify connection strings and configure Supabase Service Role keys in `.env`.
+  - [x] Create Supabase project (`telly-backend-prod`) in US-East / EU-Central.
+  - [x] Execute `01_initial_schema.sql` migration creating core tables: `users`, `titles`, `user_rankings`, `pairwise_duels`, `user_watchlist`, `social_follows`, `squads`, `squad_members`, `comments`, `reports`.
+  - [x] Verify `media_type` enum (`'movie'`, `'tv'`) and indexes on `(user_id, media_type, rank_position)`.
+  - [x] Enable PostgreSQL Row-Level Security (RLS) policies on all tables.
+  - [x] Verify connection strings and configure Supabase Service Role keys in `.env`.
 - **Testing & Verification**:
-  - [ ] Run verification script to assert 9 tables, 14 indexes, and 18 RLS policies are active.
-  - [ ] Verify non-authenticated client cannot bypass RLS on `user_rankings`.
+  - [x] Run verification script to assert 9 tables, 14 indexes, and 18 RLS policies are active.
+  - [x] Verify non-authenticated client cannot bypass RLS on `user_rankings`.
 - **Dependencies**: None.
 
 #### `BE-102`: Top 50 Seed Ingestion & Streaming Platform Setup
@@ -70,13 +70,13 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §2.1 (`titles` schema)
 - **Scope & Objectives**: Populate the initial recognition dataset with top movies, series, and anime.
 - **Granular Tasks**:
-  - [ ] Execute `top_50_shows_seed.sql` into the `titles` table.
-  - [ ] Verify 20 prestige TV series (*Succession*, *The Bear*, *Severance*), 15 anime classics (*Attack on Titan*, *Frieren*, *Death Note*), and 15 films (*The Dark Knight*, *Parasite*, *Spirited Away*) are seeded.
-  - [ ] Verify `streaming_services` JSONB payloads contain valid IDs (`netflix`, `max`, `hulu`, `apple_tv`, `crunchyroll`, `prime_video`).
-  - [ ] Create database trigger updating `titles.updated_at` automatically on modification.
+  - [x] Execute `top_50_shows_seed.sql` into the `titles` table.
+  - [x] Verify 20 prestige TV series (*Succession*, *The Bear*, *Severance*), 15 anime classics (*Attack on Titan*, *Frieren*, *Death Note*), and 15 films (*The Dark Knight*, *Parasite*, *Spirited Away*) are seeded.
+  - [x] Verify `streaming_services` JSONB payloads contain valid IDs (`netflix`, `max`, `hulu`, `apple_tv`, `crunchyroll`, `prime_video`).
+  - [x] Create database trigger updating `titles.updated_at` automatically on modification.
 - **Testing & Verification**:
-  - [ ] Query `SELECT COUNT(*) FROM titles WHERE media_type = 'movie'` returns 15.
-  - [ ] Query `SELECT COUNT(*) FROM titles WHERE media_type = 'tv'` returns 35.
+  - [x] Query `SELECT COUNT(*) FROM titles WHERE media_type = 'movie'` returns 15.
+  - [x] Query `SELECT COUNT(*) FROM titles WHERE media_type = 'tv'` returns 35.
 - **Dependencies**: `BE-101`.
 
 #### `BE-103`: Supabase GoTrue Auth & Twilio SMS Gateway Integration
@@ -85,13 +85,13 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [**`technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md) §4 (Twilio Verify)
 - **Scope & Objectives**: Configure multi-provider authentication with Apple, Google, and SMS Phone OTP.
 - **Granular Tasks**:
-  - [ ] Configure Sign in with Apple in Supabase Dashboard with Apple Service ID and private key.
-  - [ ] Configure Google OAuth Client ID & Secret for iOS and Android.
-  - [ ] Configure Twilio Verify Service SID and Auth Token in Supabase Phone Auth settings.
-  - [ ] Create Postgres trigger `on_auth_user_created` to automatically insert a skeleton profile into `public.users`.
+  - [x] Configure Sign in with Apple in Supabase Dashboard with Apple Service ID and private key.
+  - [x] Configure Google OAuth Client ID & Secret for iOS and Android.
+  - [x] Configure Twilio Verify Service SID and Auth Token in Supabase Phone Auth settings.
+  - [x] Create Postgres trigger `on_auth_user_created` to automatically insert a skeleton profile into `public.users`.
 - **Testing & Verification**:
-  - [ ] Send test SMS OTP to staging test numbers; verify 6-digit code delivery.
-  - [ ] Test token issuance and JWT claims including `sub` and `aud`.
+  - [x] Send test SMS OTP to staging test numbers; verify 6-digit code delivery.
+  - [x] Test token issuance and JWT claims including `sub` and `aud`.
 - **Dependencies**: `BE-101`.
 
 #### `BE-104`: Edge Function for TMDB Title Search Proxy & Edge Caching
@@ -100,13 +100,13 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [**`features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md) §1 (Catalog Search)
 - **Scope & Objectives**: Build a secured Supabase Edge Function proxying TMDB requests with Cloudflare edge caching.
 - **Granular Tasks**:
-  - [ ] Write Supabase Edge Function `functions/tmdb-search/index.ts` using Deno.
-  - [ ] Handle queries for `/search/multi` returning normalized title, year, poster path, and media type.
-  - [ ] Inject `Cache-Control: public, max-age=86400, s-maxage=604800` headers for static title lookups.
-  - [ ] Configure TMDB Bearer Token in Supabase Secrets vault.
+  - [x] Write Supabase Edge Function `functions/tmdb-search/index.ts` using Deno.
+  - [x] Handle queries for `/search/multi` returning normalized title, year, poster path, and media type.
+  - [x] Inject `Cache-Control: public, max-age=86400, s-maxage=604800` headers for static title lookups.
+  - [x] Configure TMDB Bearer Token in Supabase Secrets vault.
 - **Testing & Verification**:
-  - [ ] Invoke Edge Function with `"Oppenheimer"`; verify normalized JSON containing `media_type: 'movie'`.
-  - [ ] Assert Edge Function fails gracefully with 429 when rate limits are exceeded.
+  - [x] Invoke Edge Function with `"Oppenheimer"`; verify normalized JSON containing `media_type: 'movie'`.
+  - [x] Assert Edge Function fails gracefully with 429 when rate limits are exceeded.
 - **Dependencies**: `BE-101`.
 
 ---
