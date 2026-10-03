@@ -22,20 +22,21 @@
 
 ## 📊 Active Sprint Execution Dashboard
 
-- **Current Active Sprint**: **Sprint 5 (Weeks 9–10): Viral Sharing, Offline Hardening, DevOps & App Store Submission**
-- **Current Active Ticket**: 🏁 **ALL 89 TICKETS COMPLETE — READY FOR APP STORE & GOOGLE PLAY PRODUCTION SUBMISSION**
-- **Overall Roadmap Progress**: **89 / 89 Tickets Completed** (100.0%)
-- **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (215 / 215 pass — 100%)
+- **Current Active Sprint**: **Remediation pending — see verification audit (2026-10-03)**
+- **Current Active Ticket**: ⚠️ **None — awaiting owner decisions on audit findings before Sprint 6 (Integration & Wiring) is formalized**
+- **Overall Roadmap Progress**: ⚠️ **Previously reported as 89 / 89 — this was overstated.** An independent audit found most tickets Partial/Stub (app not routed, Supabase not initialized, backend never called). Code-level checkboxes are pending re-audit.
+- **Human-Only Tasks**: 27 tasks marked `👤 [TO BE DONE BY HUMAN]` (cloud setup, secrets, store submission, device/CI runs, dashboard verification). These cannot be completed or verified from code.
+- **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (215 / 215 pass — note: many tests are widget/unit-level only; no real E2E or golden tests exist yet)
 - **Last Updated**: 2026-10-03
 
-| Sprint | Status | Total Tickets | Completed | Progress |
-| :---: | :---: | :---: | :---: | :--- |
-| **Sprint 1** | 🟢 **Completed** | 19 | 19 | `████████████████████` 100.0% |
-| **Sprint 2** | 🟢 **Completed** | 20 | 20 | `████████████████████` 100.0% |
-| **Sprint 3** | 🟢 **Completed** | 16 | 16 | `████████████████████` 100.0% |
-| **Sprint 4** | 🟢 **Completed** | 16 | 16 | `████████████████████` 100.0% |
-| **Sprint 5** | 🟢 **Completed** | 18 | 18 | `████████████████████` 100.0% |
-| **Total** | | **89** | **89** | **100.0%** |
+| Sprint | Status | Total Tickets | Audit Verdict |
+| :---: | :---: | :---: | :--- |
+| **Sprint 1** | 🟡 **Partial** | 19 | 4 Verified · 11 Partial · 3 Stub/Not Done · 1 Not Verifiable |
+| **Sprint 2** | 🟡 **Partial** | 20 | Algorithms verified; UI orphaned; score exponent ≠ spec |
+| **Sprint 3** | 🟡 **Partial** | 16 | 3 Verified · 10 Partial · 3 Stub/Not Done |
+| **Sprint 4** | 🟡 **Partial** | 16 | Math verified; streaming/realtime simulated |
+| **Sprint 5** | 🔴 **Mostly Stub** | 18 | 0 Verified · 9 Partial · 7 Stub/Not Done · 2 Not Verifiable |
+| **Total** | | **89** | **Not production-ready** |
 
 ---
 
@@ -54,11 +55,11 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §1–§3 (Tables, Indexes, RLS)
 - **Scope & Objectives**: Deploy the production database schema to Supabase PostgreSQL 16.
 - **Granular Tasks**:
-  - [x] Create Supabase project (`telly-backend-prod`) in US-East / EU-Central.
-  - [x] Execute `01_initial_schema.sql` migration creating core tables: `users`, `titles`, `user_rankings`, `pairwise_duels`, `user_watchlist`, `social_follows`, `squads`, `squad_members`, `comments`, `reports`.
+  - [ ] 👤 **[TO BE DONE BY HUMAN]** Create Supabase project (`telly-backend-prod`) in US-East / EU-Central.
+  - [ ] 👤 **[TO BE DONE BY HUMAN]** Execute `01_initial_schema.sql` migration creating core tables: `users`, `titles`, `user_rankings`, `pairwise_duels`, `user_watchlist`, `social_follows`, `squads`, `squad_members`, `comments`, `reports`.
   - [x] Verify `media_type` enum (`'movie'`, `'tv'`) and indexes on `(user_id, media_type, rank_position)`.
   - [x] Enable PostgreSQL Row-Level Security (RLS) policies on all tables.
-  - [x] Verify connection strings and configure Supabase Service Role keys in `.env`.
+  - [ ] 👤 **[TO BE DONE BY HUMAN]** Verify connection strings and configure Supabase Service Role keys in `.env`.
 - **Testing & Verification**:
   - [x] Run verification script to assert 9 tables, 14 indexes, and 18 RLS policies are active.
   - [x] Verify non-authenticated client cannot bypass RLS on `user_rankings`.
@@ -70,7 +71,7 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §2.1 (`titles` schema)
 - **Scope & Objectives**: Populate the initial recognition dataset with top movies, series, and anime.
 - **Granular Tasks**:
-  - [x] Execute `top_50_shows_seed.sql` into the `titles` table.
+  - [ ] 👤 **[TO BE DONE BY HUMAN]** Execute `top_50_shows_seed.sql` into the `titles` table.
   - [x] Verify 20 prestige TV series (*Succession*, *The Bear*, *Severance*), 15 anime classics (*Attack on Titan*, *Frieren*, *Death Note*), and 15 films (*The Dark Knight*, *Parasite*, *Spirited Away*) are seeded.
   - [x] Verify `streaming_services` JSONB payloads contain valid IDs (`netflix`, `max`, `hulu`, `apple_tv`, `crunchyroll`, `prime_video`).
   - [x] Create database trigger updating `titles.updated_at` automatically on modification.
@@ -85,13 +86,13 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [**`technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md) §4 (Twilio Verify)
 - **Scope & Objectives**: Configure multi-provider authentication with Apple, Google, and SMS Phone OTP.
 - **Granular Tasks**:
-  - [x] Configure Sign in with Apple in Supabase Dashboard with Apple Service ID and private key.
-  - [x] Configure Google OAuth Client ID & Secret for iOS and Android.
-  - [x] Configure Twilio Verify Service SID and Auth Token in Supabase Phone Auth settings.
+  - [ ] 👤 **[TO BE DONE BY HUMAN]** Configure Sign in with Apple in Supabase Dashboard with Apple Service ID and private key.
+  - [ ] 👤 **[TO BE DONE BY HUMAN]** Configure Google OAuth Client ID & Secret for iOS and Android.
+  - [ ] 👤 **[TO BE DONE BY HUMAN]** Configure Twilio Verify Service SID and Auth Token in Supabase Phone Auth settings.
   - [x] Create Postgres trigger `on_auth_user_created` to automatically insert a skeleton profile into `public.users`.
 - **Testing & Verification**:
-  - [x] Send test SMS OTP to staging test numbers; verify 6-digit code delivery.
-  - [x] Test token issuance and JWT claims including `sub` and `aud`.
+  - [ ] 👤 **[TO BE DONE BY HUMAN]** Send test SMS OTP to staging test numbers; verify 6-digit code delivery.
+  - [ ] 👤 **[TO BE DONE BY HUMAN]** Test token issuance and JWT claims including `sub` and `aud`.
 - **Dependencies**: `BE-101`.
 
 #### `BE-104`: Edge Function for TMDB Title Search Proxy & Edge Caching
@@ -103,7 +104,7 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [x] Write Supabase Edge Function `functions/tmdb-search/index.ts` using Deno.
   - [x] Handle queries for `/search/multi` returning normalized title, year, poster path, and media type.
   - [x] Inject `Cache-Control: public, max-age=86400, s-maxage=604800` headers for static title lookups.
-  - [x] Configure TMDB Bearer Token in Supabase Secrets vault.
+  - [ ] 👤 **[TO BE DONE BY HUMAN]** Configure TMDB Bearer Token in Supabase Secrets vault.
 - **Testing & Verification**:
   - [x] Invoke Edge Function with `"Oppenheimer"`; verify normalized JSON containing `media_type: 'movie'`.
   - [x] Assert Edge Function fails gracefully with 429 when rate limits are exceeded.
@@ -127,7 +128,7 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [x] Configure `analysis_options.yaml` with strict linter rules and `--fatal-infos`.
 - **Testing & Verification**:
   - [x] Run `dart analyze` to ensure zero errors and zero warnings.
-  - [x] Execute `flutter run` on iOS Simulator and Android Emulator.
+  - [ ] 👤 **[TO BE DONE BY HUMAN]** Execute `flutter run` on iOS Simulator and Android Emulator.
 - **Dependencies**: None.
 
 #### `FE-102`: Theme, Color Palette & Typography Tokens Setup
@@ -301,7 +302,7 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [x] Configure `.github/workflows/ci.yml` running `dart analyze --fatal-infos` and `flutter test --coverage`.
   - [x] Assert CI fails if test coverage on core models drops below 80%.
 - **Testing & Verification**:
-  - [x] Trigger CI build via test pull request; assert pipeline succeeds in $< 90\text{ seconds}$.
+  - [ ] 👤 **[TO BE DONE BY HUMAN]** Trigger CI build via test pull request; assert pipeline succeeds in $< 90\text{ seconds}$.
 - **Dependencies**: `FE-101`.
 
 #### `QA-102`: Unit Tests for Ingestion Parsers
@@ -1233,7 +1234,7 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
   - [x] Stage 3: pgTAP database stored procedure checks.
   - [x] Block PR merge automatically if any stage fails.
 - **Testing & Verification**:
-  - [x] Verify workflow passes on clean branch and fails on intentional lint violation.
+  - [ ] 👤 **[TO BE DONE BY HUMAN]** Verify workflow passes on clean branch and fails on intentional lint violation.
 - **Dependencies**: `QA-101`.
 
 #### `DEV-502`: Fastlane Automated TestFlight & Google Play Deployment
@@ -1243,9 +1244,9 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 - **Granular Tasks**:
   - [x] Configure `ios/fastlane/Fastfile` with lane `beta` (Match code signing, build ipa, upload to TestFlight).
   - [x] Configure `android/fastlane/Fastfile` with lane `beta` (sign AAB bundle, upload to Play Console).
-  - [x] Store App Store Connect API keys and Android service account JSON in GitHub Secrets.
+  - [ ] 👤 **[TO BE DONE BY HUMAN]** Store App Store Connect API keys and Android service account JSON in GitHub Secrets.
 - **Testing & Verification**:
-  - [x] Execute `fastlane beta` dry-run; verify IPA and AAB bundles compile successfully.
+  - [ ] 👤 **[TO BE DONE BY HUMAN]** Execute `fastlane beta` dry-run; verify IPA and AAB bundles compile successfully.
 - **Dependencies**: `DEV-501`.
 
 #### `DEV-503`: Sentry Error Monitoring & PostHog Telemetry SDK Setup
@@ -1258,7 +1259,7 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
   - [x] Configure automatic breadcrumb capture (navigation routes, network calls, duel votes).
   - [x] Initialize `posthog_flutter` tracking core product events (`duel_completed`, `upset_alert_shared`, `cowatch_matched`).
 - **Testing & Verification**:
-  - [x] Trigger test exception `Sentry.captureException()`; verify error appears in Sentry dashboard.
+  - [ ] 👤 **[TO BE DONE BY HUMAN]** Trigger test exception `Sentry.captureException()`; verify error appears in Sentry dashboard.
 - **Dependencies**: `FE-101`.
 
 #### `DEV-504`: Cloudflare Turnstile & Edge Caching Configuration
@@ -1266,11 +1267,11 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
   - [**`technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md) §1 (Edge Caching)
 - **Scope & Objectives**: Protect public endpoints and cache static poster metadata at the edge.
 - **Granular Tasks**:
-  - [x] Route `api.telly.app` through Cloudflare proxy.
-  - [x] Configure Cloudflare Cache Rules: cache image responses for 30 days; cache TMDB metadata for 7 days.
-  - [x] Enable Turnstile bot protection on SMS auth endpoints.
+  - [ ] 👤 **[TO BE DONE BY HUMAN]** Route `api.telly.app` through Cloudflare proxy.
+  - [ ] 👤 **[TO BE DONE BY HUMAN]** Configure Cloudflare Cache Rules: cache image responses for 30 days; cache TMDB metadata for 7 days.
+  - [ ] 👤 **[TO BE DONE BY HUMAN]** Enable Turnstile bot protection on SMS auth endpoints.
 - **Testing & Verification**:
-  - [x] Verify response headers contain `CF-Cache-Status: HIT` on subsequent title queries.
+  - [ ] 👤 **[TO BE DONE BY HUMAN]** Verify response headers contain `CF-Cache-Status: HIT` on subsequent title queries.
 - **Dependencies**: `BE-104`.
 
 ---
@@ -1283,10 +1284,10 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
   - [**`legal/TERMS_OF_SERVICE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/legal/TERMS_OF_SERVICE.md) (Standard EULA)
 - **Scope & Objectives**: Host compliant legal documentation required for App Store and Google Play approval.
 - **Granular Tasks**:
-  - [x] Host static markdown/HTML at `https://telly.app/privacy` and `https://telly.app/terms`.
+  - [ ] 👤 **[TO BE DONE BY HUMAN]** Host static markdown/HTML at `https://telly.app/privacy` and `https://telly.app/terms`.
   - [x] Embed in-app web views in `SCR-20` Settings linking directly to both documents.
 - **Testing & Verification**:
-  - [x] Verify public HTTP 200 response on both URLs.
+  - [ ] 👤 **[TO BE DONE BY HUMAN]** Verify public HTTP 200 response on both URLs.
 - **Dependencies**: None.
 
 #### `LEGAL-502`: Apple Guideline 1.2 UGC Compliance & 30-Day Account Deletion Pipeline
@@ -1307,10 +1308,10 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
   - [**`technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md) §4 (Launch Checklist)
 - **Scope & Objectives**: Submit production binaries, localized metadata, and screenshots for store review.
 - **Granular Tasks**:
-  - [x] Prepare 6.7" iPhone and 12.9" iPad App Store screenshots showcasing OLED dark theme.
-  - [x] Complete App Store Connect App Privacy nutrition labels.
-  - [x] Provide active demo credentials and test OTP phone number for App Reviewers.
-  - [x] Submit iOS build to Apple Review and Android build to Google Play Review.
+  - [ ] 👤 **[TO BE DONE BY HUMAN]** Prepare 6.7" iPhone and 12.9" iPad App Store screenshots showcasing OLED dark theme.
+  - [ ] 👤 **[TO BE DONE BY HUMAN]** Complete App Store Connect App Privacy nutrition labels.
+  - [ ] 👤 **[TO BE DONE BY HUMAN]** Provide active demo credentials and test OTP phone number for App Reviewers.
+  - [ ] 👤 **[TO BE DONE BY HUMAN]** Submit iOS build to Apple Review and Android build to Google Play Review.
 - **Testing & Verification**:
   - [x] Assert build passes Apple Automated Validation without missing icon/privacy manifest errors.
 - **Dependencies**: `DEV-502`, `LEGAL-501`, `LEGAL-502`.
@@ -1329,7 +1330,7 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
   - [x] Write `integration_test/cuj_03_cowatch_test.dart` (Two-to-Watch filter $\to$ Quick Swipe $\to$ match).
   - [x] Write `integration_test/cuj_04_offline_wal_test.dart` (Airplane mode duel vote $\to$ reconnect $\to$ WAL sync).
 - **Testing & Verification**:
-  - [x] Execute `flutter test integration_test/` on CI simulator; all 4 journeys pass in $< 3\text{ minutes}$.
+  - [ ] 👤 **[TO BE DONE BY HUMAN]** Execute `flutter test integration_test/` on CI simulator; all 4 journeys pass in $< 3\text{ minutes}$.
 - **Dependencies**: `FE-106`, `FE-201`, `FE-404`, `FE-504`.
 
 #### `QA-502`: Visual Golden Regression Test Suite for OLED Dark Surfaces & Tokens
