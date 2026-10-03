@@ -30,10 +30,10 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
-      - name: Stage 1: Quality Gate - Static Analysis (Zero Warnings/Lints)
+      - name: "Stage 1: Quality Gate - Static Analysis (Zero Warnings/Lints)"
         run: dart analyze --fatal-infos
 
-      - name: Stage 2: Quality Gate - Test Suite with Coverage
+      - name: "Stage 2: Quality Gate - Test Suite with Coverage"
         run: flutter test --coverage
 
       - name: Check Code Coverage Threshold (>= 80%)
@@ -43,37 +43,50 @@ jobs:
           fi
 
   database-pgtap-verification:
-    name: Supabase PostgreSQL pgTAP Quality Gate
+    name: Supabase pgTAP, RLS & Concurrency Gate (QA-601)
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: supabase/postgres:15.1.1.78
-        env:
-          POSTGRES_PASSWORD: postgrespassword
-          POSTGRES_DB: postgres
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
       - name: Checkout Codebase
         uses: actions/checkout@v4
 
-      - name: Install pgTAP & pg_prove
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libtap-parser-sourcehandler-pgtap-perl postgresql-client
+      - name: Set up Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
 
-      - name: Apply Migrations & Run pgTAP Tests
+      - name: Start local Supabase (migrations + seed)
+        run: supabase start -x studio,imgproxy,vector,logflare,mailpit,realtime,storage-api,edge-runtime
+
+      - name: Reset database from migrations
+        run: supabase db reset
+
+      - name: Run pgTAP suite (fails the build on any failing assertion)
+        run: supabase test db
+
+      - name: Concurrency race test for ranking RPCs
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client
+          bash supabase/tests/concurrency/ranking_race.sh
         env:
-          PGPASSWORD: postgrespassword
-        run: |
-          psql -h localhost -U postgres -d postgres -f database/migrations/01_initial_schema.sql || true
-          psql -h localhost -U postgres -d postgres -f database/migrations/02_sprint3_social_graph_and_activity.sql || true
-          psql -h localhost -U postgres -d postgres -f database/migrations/03_sprint4_taste_match_and_streaming.sql || true
-          echo "pgTAP Database Migration Stage Passed"
+          DB_URL: postgresql://postgres:postgres@127.0.0.1:64322/postgres
 
+  edge-functions:
+    name: Edge Function Unit Tests (Deno)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: supabase/functions
+    steps:
+      - name: Checkout Codebase
+        uses: actions/checkout@v4
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Lint, type-check and test
+        run: |
+          deno lint
+          deno check */index.ts
+          deno test --allow-env tests/

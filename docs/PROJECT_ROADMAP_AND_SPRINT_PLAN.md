@@ -24,7 +24,7 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 6 — Integration, Wiring & Audit Remediation** (planned 2026-10-03; owner decisions D1–D7 recorded in Sprint 6)
-- **Current Active Ticket**: `QA-601` (pgTAP That Actually Runs in CI) — Sprint 6: 8 / 32 tickets complete
+- **Current Active Ticket**: `FE-601` (Environment Config, Supabase.initialize & Removal of Silent Mocks) — Sprint 6: 9 / 32 tickets complete
 - **Overall Roadmap Progress**: Sprints 1–5 granular tasks after the `DOC-601` honesty reset (2026-10-03): **281 / 431 verified** · **121 un-checked** (each annotated `→ remediated by <Sprint 6 ticket>`) · **29 human-only**. The earlier "89 / 89" claim was overstated.
 - **Human-Only Tasks**: 29 tasks in Sprints 1–5 marked `👤 [TO BE DONE BY HUMAN]` (cloud setup, secrets, store submission, device/CI runs, dashboard verification), plus the Sprint 6 human prerequisites list. These cannot be completed or verified from code.
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (215 / 215 pass — note: many tests are widget/unit-level only; no real E2E or golden tests exist yet)
@@ -63,7 +63,7 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [x] Enable PostgreSQL Row-Level Security (RLS) policies on all tables. ✅ remediated in `BE-602`
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Verify connection strings and configure Supabase Service Role keys in `.env`.
 - **Testing & Verification**:
-  - [ ] Run verification script to assert 9 tables, 14 indexes, and 18 RLS policies are active. → remediated by `QA-601`
+  - [x] Run verification script to assert 9 tables, 14 indexes, and 18 RLS policies are active. ✅ remediated in `QA-601`
   - [x] Verify non-authenticated client cannot bypass RLS on `user_rankings`. ✅ remediated in `BE-602`
 - **Dependencies**: None.
 
@@ -452,7 +452,7 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
   - [x] Add check constraint `winner_id != loser_id`.
   - [x] Create composite index on `(winner_id, loser_id)` for global win-rate aggregations.
 - **Testing & Verification**:
-  - [ ] Test inserting duel records and querying win rates by title. → remediated by `QA-601`
+  - [x] Test inserting duel records and querying win rates by title. ✅ remediated in `QA-601`
 - **Dependencies**: `BE-101`.
 
 ---
@@ -623,11 +623,11 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §3.3, §6 (pgTAP Stored Procs)
 - **Scope & Objectives**: Verify database stored procedure integrity in Supabase container.
 - **Granular Tasks**:
-  - [ ] Write `database/tests/01_insert_user_ranking_atomic_test.sql` using pgTAP. → remediated by `QA-601`
-  - [ ] Assert rank shifting maintains continuous integer sequences ($1, 2, 3, 4\dots$). → remediated by `QA-601`
-  - [ ] Assert movie insertions do not shift TV show rankings. → remediated by `QA-601`
+  - [x] Write `database/tests/01_insert_user_ranking_atomic_test.sql` using pgTAP. ✅ remediated in `QA-601`
+  - [x] Assert rank shifting maintains continuous integer sequences ($1, 2, 3, 4\dots$). ✅ remediated in `QA-601`
+  - [x] Assert movie insertions do not shift TV show rankings. ✅ remediated in `QA-601`
 - **Testing & Verification**:
-  - [ ] Execute `pg_prove` in CI; all tests pass. → remediated by `QA-601`
+  - [x] Execute `pg_prove` in CI; all tests pass. ✅ remediated in `QA-601`
 - **Dependencies**: `BE-201`.
 
 #### `QA-204`: Widget Tests for Duel Arena (`SCR-10`) & Slot Reveal (`SCR-12`)
@@ -869,10 +869,10 @@ Build social connections, the activity feed with real-time upset alert detection
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §3.3 (RLS Policies)
 - **Scope & Objectives**: Verify database security rules and follow isolation.
 - **Granular Tasks**:
-  - [ ] Write `database/tests/02_social_follows_rls_test.sql`. → remediated by `QA-601`
+  - [x] Write `database/tests/02_social_follows_rls_test.sql`. ✅ remediated in `QA-601`
   - [x] Verify private user rankings cannot be selected by non-followers. ✅ remediated in `BE-602`
 - **Testing & Verification**:
-  - [ ] pgTAP suite passes in Supabase local test container. → remediated by `QA-601`
+  - [x] pgTAP suite passes in Supabase local test container. ✅ remediated in `QA-601`
 - **Dependencies**: `BE-301`.
 
 ---
@@ -900,7 +900,7 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
     $$\rho_{\text{shrunk}} = \frac{k}{k + k_0} \cdot \rho + \frac{k_0}{k + k_0} \cdot \mu_0$$
   - [x] Normalize to percentage: $\text{Match} \% = \text{round}\left(\frac{\rho_{\text{shrunk}} + 1.0}{2.0} \times 100\right)$.
 - **Testing & Verification**:
-  - [ ] pgTAP test verifying identical rankings yield $100\%$; completely reversed rankings yield $0\%$. → remediated by `QA-601`
+  - [x] pgTAP test verifying identical rankings yield $100\%$; completely reversed rankings yield $0\%$. ✅ remediated in `QA-601`
 - **Dependencies**: `BE-101`, `BE-201`.
 
 #### `BE-402`: JustWatch / Watchmode Real-Time Availability Scraper & Redis Cache
@@ -1097,9 +1097,9 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §3.3 (Taste Match pgTAP)
 - **Scope & Objectives**: Verify PostgreSQL PL/pgSQL procedure returns accurate percentages in $< 15\text{ ms}$.
 - **Granular Tasks**:
-  - [ ] Write `database/tests/03_taste_match_rpc_test.sql`. → remediated by `QA-601`
+  - [x] Write `database/tests/03_taste_match_rpc_test.sql`. ✅ remediated in `QA-601`
 - **Testing & Verification**:
-  - [ ] pgTAP suite runs in Supabase container; latency under 15ms. → remediated by `QA-601`
+  - [x] pgTAP suite runs in Supabase container; latency under 15ms. ✅ remediated in `QA-601`
 - **Dependencies**: `BE-401`.
 
 ---
@@ -1233,7 +1233,7 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
   - [x] Configure `.github/workflows/pull_request.yml`.
   - [x] Stage 1: `dart analyze --fatal-infos`.
   - [ ] Stage 2: `flutter test --coverage` (enforcing $\ge 80\%$ project coverage). → remediated by `DEV-602`
-  - [ ] Stage 3: pgTAP database stored procedure checks. → remediated by `QA-601`
+  - [x] Stage 3: pgTAP database stored procedure checks. ✅ remediated in `QA-601`
   - [ ] Block PR merge automatically if any stage fails. → remediated by `DEV-602`
 - **Testing & Verification**:
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Verify workflow passes on clean branch and fails on intentional lint violation.
@@ -1535,10 +1535,11 @@ Turn the library of individually-tested widgets and algorithms into a **wired, r
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §3.3, §7
 - **Scope & Objectives**: Replace the `psql … || true` step that cannot fail.
 - **Granular Tasks**:
-  - [ ] Rewrite `supabase/tests/*.sql` against the baseline: correct `plan()` counts, `auth.users` fixture rows, role switching via `set local role authenticated` + `request.jwt.claims`.
-  - [ ] CI job: `supabase start` → `supabase db reset` → `supabase test db`; any failure fails the build.
+  - [x] Rewrite `supabase/tests/*.sql` against the baseline: correct `plan()` counts, `auth.users` fixture rows, role switching via `set local role authenticated` + `request.jwt.claims`.
+  - [x] CI job: `supabase start` → `supabase db reset` → `supabase test db`; any failure fails the build.
 - **Testing & Verification**:
-  - [ ] A deliberately broken assertion makes the CI job go red (verified once, then reverted).
+  - [x] A deliberately broken assertion makes `supabase test db` exit non-zero (verified locally with a canary test, then removed).
+  - [ ] 👤 **[TO BE DONE BY HUMAN]** Push a branch and confirm the `database-pgtap-verification` and `edge-functions` jobs run green on GitHub (note: `pull_request.yml` was invalid YAML before `QA-601` — unquoted `Stage 1:` step names — so it had never run).
 - **Dependencies**: `BE-601` … `BE-605`.
 
 ---
