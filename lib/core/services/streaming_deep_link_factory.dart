@@ -26,7 +26,8 @@ class StreamingDeepLinkFactory {
       case 'apple_tv_plus':
       case 'apple_tv':
       case 'appletv':
-        return Uri.parse('videos://tv.apple.com/$countryCode/show/$slug/$externalShowId');
+        return Uri.parse(
+            'videos://tv.apple.com/$countryCode/show/$slug/$externalShowId');
 
       case 'hulu':
         return Uri.parse('hulu://series/$externalShowId');
@@ -41,7 +42,8 @@ class StreamingDeepLinkFactory {
 
       case 'disney_plus':
       case 'disney':
-        return Uri.parse('https://www.disneyplus.com/series/$slug/$externalShowId');
+        return Uri.parse(
+            'https://www.disneyplus.com/series/$slug/$externalShowId');
 
       default:
         return Uri.parse('https://www.google.com/search?q=watch+$slug+online');
@@ -70,7 +72,8 @@ class StreamingDeepLinkFactory {
       case 'apple_tv_plus':
       case 'apple_tv':
       case 'appletv':
-        return Uri.parse('https://tv.apple.com/$countryCode/show/$slug/$externalShowId');
+        return Uri.parse(
+            'https://tv.apple.com/$countryCode/show/$slug/$externalShowId');
 
       case 'hulu':
         return Uri.parse('https://www.hulu.com/series/$externalShowId');
@@ -78,14 +81,16 @@ class StreamingDeepLinkFactory {
       case 'prime_video':
       case 'amazon_prime':
       case 'prime':
-        return Uri.parse('https://www.amazon.com/gp/video/detail/$externalShowId');
+        return Uri.parse(
+            'https://www.amazon.com/gp/video/detail/$externalShowId');
 
       case 'crunchyroll':
         return Uri.parse('https://www.crunchyroll.com/series/$externalShowId');
 
       case 'disney_plus':
       case 'disney':
-        return Uri.parse('https://www.disneyplus.com/series/$slug/$externalShowId');
+        return Uri.parse(
+            'https://www.disneyplus.com/series/$slug/$externalShowId');
 
       default:
         return Uri.parse('https://www.google.com/search?q=watch+$slug+online');

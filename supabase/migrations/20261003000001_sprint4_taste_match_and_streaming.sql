@@ -78,3 +78,4 @@ BEGIN
     RETURN QUERY SELECT final_score, k;
 END;
 $$ LANGUAGE plpgsql STABLE;
+

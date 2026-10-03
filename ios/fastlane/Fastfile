@@ -1,0 +1,48 @@
+# iOS Fastlane Configuration for Telly (DEV-502)
+default_platform(:ios)
+
+platform :ios do
+  desc "Push a new beta build to TestFlight"
+  lane :beta do
+    setup_ci if ENV['CI']
+
+    # Sync certificates and provisioning profiles via Match
+    match(
+      type: "appstore",
+      readonly: is_ci,
+      app_identifier: "app.telly.mobile"
+    )
+
+    # Increment build number based on current TestFlight latest build
+    increment_build_number(
+      build_number: latest_testflight_build_number + 1
+    )
+
+    # Build the iOS .ipa archive
+    build_app(
+      workspace: "Runner.xcworkspace",
+      scheme: "Runner",
+      export_method: "app-store",
+      output_directory: "./build"
+    )
+
+    # Upload binary to TestFlight
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true,
+      distribute_external: false,
+      changelog: "Telly Beta: Pairwise duel tournaments, taste matches and viral share studio."
+    )
+  end
+
+  desc "Submit production release to Apple App Store"
+  lane :release do
+    match(type: "appstore", readonly: true)
+    build_app(workspace: "Runner.xcworkspace", scheme: "Runner")
+    upload_to_app_store(
+      submit_for_review: true,
+      automatic_release: true,
+      phased_release: true
+    )
+  end
+end
+

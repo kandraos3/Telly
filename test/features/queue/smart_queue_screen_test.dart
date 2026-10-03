@@ -82,7 +82,8 @@ void main() {
   }
 
   group('FE-408: SmartQueueScreen Widget Tests (SCR-13)', () {
-    testWidgets('renders segregated Movie and Series tabs with item counts', (tester) async {
+    testWidgets('renders segregated Movie and Series tabs with item counts',
+        (tester) async {
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
 
@@ -96,7 +97,9 @@ void main() {
       expect(find.text('Watch on Max'), findsOneWidget);
     });
 
-    testWidgets('switching to Series tab reveals series items with leaving soon badge', (tester) async {
+    testWidgets(
+        'switching to Series tab reveals series items with leaving soon badge',
+        (tester) async {
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
 
@@ -110,9 +113,11 @@ void main() {
       expect(find.text('Watch on Apple TV+'), findsOneWidget);
     });
 
-    testWidgets('toggling "On My Services" filters out unsubscribed titles', (tester) async {
+    testWidgets('toggling "On My Services" filters out unsubscribed titles',
+        (tester) async {
       // User only subscribes to Apple TV+ (does not have Hulu)
-      await tester.pumpWidget(createTestWidget(userSubscriptions: {'apple_tv_plus'}));
+      await tester
+          .pumpWidget(createTestWidget(userSubscriptions: {'apple_tv_plus'}));
       await tester.pumpAndSettle();
 
       // Switch to Series tab

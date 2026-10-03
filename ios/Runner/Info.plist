@@ -66,5 +66,19 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Telly needs access to your camera to capture custom profile pictures.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Telly needs access to your photo library to select and crop custom profile avatars.</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>nflx</string>
+		<string>max</string>
+		<string>hulu</string>
+		<string>videos</string>
+		<string>crunchyroll</string>
+		<string>primevideo</string>
+		<string>instagram-stories</string>
+	</array>
 </dict>
 </plist>

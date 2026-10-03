@@ -65,7 +65,8 @@ class StreamingAvailabilityService {
   };
 
   /// Returns availability records for a given [showId].
-  Future<List<ShowStreamingAvailability>> getAvailabilityForTitle(int showId) async {
+  Future<List<ShowStreamingAvailability>> getAvailabilityForTitle(
+      int showId) async {
     return _mockAvailability[showId] ??
         [
           const ShowStreamingAvailability(
@@ -79,6 +80,7 @@ class StreamingAvailabilityService {
   }
 }
 
-final streamingAvailabilityServiceProvider = Provider<StreamingAvailabilityService>((ref) {
+final streamingAvailabilityServiceProvider =
+    Provider<StreamingAvailabilityService>((ref) {
   return StreamingAvailabilityService();
 });

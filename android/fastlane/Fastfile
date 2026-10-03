@@ -1,0 +1,35 @@
+# Android Fastlane Configuration for Telly (DEV-502)
+default_platform(:android)
+
+platform :android do
+  desc "Build and upload Android App Bundle (.aab) to Google Play Internal Testing Track"
+  lane :beta do
+    # Build release AAB using Gradle
+    gradle(
+      task: 'bundle',
+      build_type: 'Release',
+      project_dir: './'
+    )
+
+    # Upload AAB to Google Play Console Internal Track
+    upload_to_play_store(
+      track: 'internal',
+      package_name: 'app.telly.mobile',
+      aab: '../build/app/outputs/bundle/release/app-release.aab',
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+  end
+
+  desc "Promote internal track release to Production on Google Play"
+  lane :promote_to_production do
+    upload_to_play_store(
+      track: 'internal',
+      track_promote_to: 'production',
+      package_name: 'app.telly.mobile',
+      rollout: '0.1' # 10% staged rollout
+    )
+  end
+end
+
