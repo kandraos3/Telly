@@ -15,6 +15,7 @@
 │  Sprint 3 (Weeks 5–6): Social Graph, Feeds, Reactions, Squads & TV Graveyard           │
 │  Sprint 4 (Weeks 7–8): Taste Match %, Co-Watch Decider, Streaming Deep Links & Queue   │
 │  Sprint 5 (Weeks 9–10): Viral Story Studio, Offline Sync, DevOps, Testing & Launch     │
+│  Sprint 6 (Weeks 11–13): Integration, Wiring & Audit Remediation                       │
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -22,8 +23,8 @@
 
 ## 📊 Active Sprint Execution Dashboard
 
-- **Current Active Sprint**: **Remediation pending — see verification audit (2026-10-03)**
-- **Current Active Ticket**: ⚠️ **None — awaiting owner decisions on audit findings before Sprint 6 (Integration & Wiring) is formalized**
+- **Current Active Sprint**: **Sprint 6 — Integration, Wiring & Audit Remediation** (planned 2026-10-03; owner decisions D1–D7 recorded in Sprint 6)
+- **Current Active Ticket**: `DOC-601` (Roadmap Honesty Reset) — Sprint 6: 0 / 32 tickets complete
 - **Overall Roadmap Progress**: ⚠️ **Previously reported as 89 / 89 — this was overstated.** An independent audit found most tickets Partial/Stub (app not routed, Supabase not initialized, backend never called). Code-level checkboxes are pending re-audit.
 - **Human-Only Tasks**: 27 tasks marked `👤 [TO BE DONE BY HUMAN]` (cloud setup, secrets, store submission, device/CI runs, dashboard verification). These cannot be completed or verified from code.
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (215 / 215 pass — note: many tests are widget/unit-level only; no real E2E or golden tests exist yet)
@@ -36,7 +37,8 @@
 | **Sprint 3** | 🟡 **Partial** | 16 | 3 Verified · 10 Partial · 3 Stub/Not Done |
 | **Sprint 4** | 🟡 **Partial** | 16 | Math verified; streaming/realtime simulated |
 | **Sprint 5** | 🔴 **Mostly Stub** | 18 | 0 Verified · 9 Partial · 7 Stub/Not Done · 2 Not Verifiable |
-| **Total** | | **89** | **Not production-ready** |
+| **Sprint 6** | ⏳ **Planned** | 32 | Remediation of all audit findings + `SCR-04/07/08/09` |
+| **Total** | | **121** | **Not production-ready** |
 
 ---
 
@@ -1381,6 +1383,519 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 
 ---
 
+## 📅 Sprint 6: Integration, Wiring & Audit Remediation (Weeks 11–13)
+
+### Sprint Objective
+Turn the library of individually-tested widgets and algorithms into a **wired, runnable, spec-conformant app**. Closes every finding in the 2026-10-03 Verification Audit (C1–C6, High gaps, Spec mismatches, Mislabeled tests) and adds the four spec'd screens the original roadmap never ticketed (`SCR-04`, `SCR-07`, `SCR-08`, `SCR-09`).
+
+### Owner Decisions (2026-10-03) — binding for all Sprint 6 tickets
+| # | Decision | Resolution |
+| :---: | :--- | :--- |
+| D1 | Color palette | Style guide §2 is canonical (`#08090C`, `#D2FF52`, `#FF4B6E`, `#FFA733`, `#7C5CFF`) — see `AGENTS.md`. |
+| D2 | Score tiers | Style guide §2.2 is canonical: God `≥9.20`, Prestige `≥8.50`, Great `≥7.80`, Good `≥7.00`, Mid `≥5.50`, Dropped `<5.50`. One Dart definition only. |
+| D3 | Score curve | $\gamma = 0.82$ (features/02 §3.3) **plus** the $N<10$ Bayesian prior, whose exact formula gets written into the spec. Dart and SQL must produce identical values. |
+| D4 | `media_type` | Canonical literals `'movie'` / `'tv'` everywhere (SQL enum, Dart, Drift, JSON). Table is `titles`, not `tv_shows`. |
+| D5 | Migrations | Never applied to any environment, so they are **rewritten as a clean baseline** in `supabase/migrations/` (single source of truth). `database/` is deleted. |
+| D6 | Franchise rollup | Feature spec 08 §4 wins: the rolled-up score is the user's **primary series duel** score; season grades shown as a breakdown. |
+| D7 | Scope | All four missing screens (`SCR-04`, `SCR-07`, `SCR-08`, `SCR-09`) ship in Sprint 6. |
+
+### Cross-Cutting Rules for Every Sprint 6 Ticket
+- **Riverpod migration happens per-feature as it is wired**: any provider touched moves to `Notifier` / `AsyncNotifier` (`NotifierProvider` / `AsyncNotifierProvider`). `setState` is allowed only for ephemeral UI state (animation controllers, focus, hover, text-field drafts); never for business/domain state. `QA-608` sweeps the remainder.
+- **No silent mocks in `lib/`**: in-memory/fake implementations move to `test/fakes/` and are injected via `ProviderScope(overrides: …)`.
+- **Dual-Canon invariant**: every SQL function or Dart query that touches rankings filters by `media_type`. TMDB IDs collide across movies and TV, so every title key is the composite `(tmdb_id, media_type)`.
+
+---
+
+### Track 0: Governance & Spec Reconciliation
+
+#### `DOC-601`: Roadmap Honesty Reset
+- **Spec Reference**:
+  - [**`VERIFICATION_AUDIT_REPORT.md`**](file:///c:/Users/karla/.gemini/antigravity/brain/d1959b07-4292-40ce-b9e6-e71860fc471d/VERIFICATION_AUDIT_REPORT.md) §1–§6
+  - [**`AGENTS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/AGENTS.md) Rule 5
+- **Scope & Objectives**: Make Sprints 1–5 checkboxes reflect reality so progress accounting is trustworthy again.
+- **Granular Tasks**:
+  - [ ] Un-check every Sprint 1–5 task the audit classed as Partial / Stub / Mislabeled, appending `→ remediated by <TICKET-ID>` to each.
+  - [ ] Convert remaining non-verifiable items (cloud setup, store submission, device runs) to `👤 [TO BE DONE BY HUMAN]`.
+  - [ ] Correct ticket text errors: `FE-102` color hexes (→ style guide §2); `FE-208` rollup method (→ D6); `FE-407` Hulu/Prime URI formats (→ features/07 §3.2: `hulu://series/{id}`, `primevideo://watch?asin={asin}` — code is already correct); `FE-507` mislabels Edit Profile as `SCR-08` (Show Detail is `SCR-08`); `BE-101`/`BE-102` table and enum names (→ D4).
+  - [ ] Reset the dashboard: real completed count, Sprint 6 active, current ticket.
+- **Testing & Verification**:
+  - [ ] Peer review: every `[x]` in Sprints 1–5 traceable to a file and a passing test.
+- **Dependencies**: None.
+
+#### `DOC-602`: Spec Reconciliation (Score Curve, Tiers, Media Type, Schema)
+- **Spec Reference**:
+  - [**`features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md) §3.3, §6.1, §7.3
+  - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §2–§3
+  - [**`design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md) §2.2
+- **Scope & Objectives**: Remove contradictions between spec documents before code is changed to match them.
+- **Granular Tasks**:
+  - [ ] features/02 §3.3: write the exact $N<10$ prior formula ($\alpha = N/10$, $\text{prior}(r) = \max(1, 10 - 0.5(r-1))$, $\text{score} = \alpha\cdot\text{raw} + (1-\alpha)\cdot\text{prior}$) and recompute the example table: its scores are hand-rounded and disagree with the formula (true values: 10.00 / 9.70 / 8.94 / 7.37 / 5.28 / 2.37), and its "Display Tier" column must use the style guide §2.2 tiers.
+  - [ ] features/02 §6.1, features/05 §3.1, DB spec §2–§3: replace `'MOVIE'`/`'TV_SERIES'` and `tv_shows` with `'movie'`/`'tv'` and `titles`; point readers to `supabase/migrations/` as the executable source.
+  - [ ] Replace `docs/database/migrations/01_initial_schema.sql` with a README pointer to `supabase/migrations/` (one schema source).
+  - [ ] features/08 §4: state the rollup score rule from D6 explicitly.
+- **Testing & Verification**:
+  - [ ] `grep -rn "TV_SERIES\|tv_shows\|1\.15" docs/` returns no normative hits.
+- **Dependencies**: `DOC-601`.
+
+---
+
+### Track 1: Database Baseline & Backend Contracts
+
+#### `BE-601`: Consolidated Clean Baseline Schema (`titles`, `'movie'/'tv'`, Missing Objects)
+- **Spec Reference**:
+  - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §2
+  - [**`adjacent_systems/01_AUTH_REGISTER_AND_LOGIN_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/adjacent_systems/01_AUTH_REGISTER_AND_LOGIN_FLOWS.md) §2, §6 (Handle rules, auth schema)
+  - [**`adjacent_systems/05_TRUST_SAFETY_MODERATION_AND_ADMIN.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/adjacent_systems/05_TRUST_SAFETY_MODERATION_AND_ADMIN.md) §2, §4 (Reports, deletion)
+  - [**`features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md) §7 (Feed/Squad data model)
+- **Scope & Objectives**: Replace the four drifting migrations with one coherent baseline (audit C4, migration drift, missing SQL objects).
+- **Granular Tasks**:
+  - [ ] Delete `database/` (move pgTAP files to `supabase/tests/`) and the four old files in `supabase/migrations/`.
+  - [ ] `CREATE TYPE media_type_enum AS ENUM ('movie','tv')`; `titles` table with composite PK `(id, media_type)`, `is_anime`, `runtime_minutes`, `popularity`, `streaming_services JSONB`, `updated_at`.
+  - [ ] Re-point every FK (`user_rankings`, `pairwise_duels`, `user_watchlist`, `user_dropped_shows`, `activity_logs`, `show_streaming_availability`, `tv_seasons`) to `(title_id, media_type)`.
+  - [ ] `user_rankings`: `rank_position`, `UNIQUE(user_id, title_id, media_type)`, `UNIQUE(user_id, media_type, rank_position) DEFERRABLE INITIALLY DEFERRED`, index `(user_id, media_type, rank_position)`, `client_mutation_id UUID UNIQUE` (for idempotent WAL replay).
+  - [ ] Social: keep `social_follows` only (drop duplicate `friendships`); unify privacy into `users.visibility_mode` (`PUBLIC`/`FRIENDS_ONLY`/`GHOST`), dropping the parallel `is_private`.
+  - [ ] Add `comments` (with `contains_spoilers`), `feed_reactions`, `reports`, `user_blocks`, `user_streaming_subscriptions`, `activity_logs`, `squads` (+`description`), `squad_members` (+`joined_at`).
+  - [ ] `users`: `is_deleted`, `deletion_requested_at`, `haptics_enabled`/preferences JSONB per settings spec.
+  - [ ] Triggers: `on_auth_user_created` (skeleton `public.users` row), generic `set_updated_at()` on every table with `updated_at`.
+  - [ ] RPC `check_handle_available(p_handle)` enforcing `^[a-z0-9_]{3,20}$` and the reserved-handle list (mirror `kReservedHandles`).
+  - [ ] Rewrite `supabase/seeds/top_50_shows_seed.sql` into `titles` with explicit `media_type` (35 `'tv'`, 15 `'movie'`).
+- **Testing & Verification**:
+  - [ ] `supabase db reset` applies baseline + seed with zero errors on a clean local stack.
+  - [ ] pgTAP: `has_table`/`has_column`/`col_type_is` for every table; seed counts `movie = 15`, `tv = 35`; trigger creates profile row on `auth.users` insert; `check_handle_available` rejects reserved/invalid handles.
+- **Dependencies**: `DOC-602`.
+
+#### `BE-602`: RLS Hardening (Privacy Hole & Forged Follows)
+- **Spec Reference**:
+  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §3.3 (RLS tests)
+  - [**`features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md) §2, §4
+  - [**`adjacent_systems/02_PROFILE_MANAGEMENT_AND_CUSTOMIZATION.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/adjacent_systems/02_PROFILE_MANAGEMENT_AND_CUSTOMIZATION.md) (visibility modes)
+- **Scope & Objectives**: Close audit C6 and enable RLS on every table.
+- **Granular Tasks**:
+  - [ ] Helper `can_view_user(target UUID)`: self, or target `PUBLIC` and not deleted, or `FRIENDS_ONLY` with an accepted follow; never for `GHOST`, and never across a `user_blocks` row.
+  - [ ] `user_rankings`, `activity_logs`, `comments`, `feed_reactions`, `user_dropped_shows`: SELECT via `can_view_user`; writes only own rows.
+  - [ ] `social_follows`: INSERT only as `follower_id = auth.uid()` with status forced by trigger (`pending` if target is non-public, else `accepted`); UPDATE (approve/reject) only by `following_id`; DELETE by either party. No `FOR ALL` policy.
+  - [ ] `titles`/`streaming_platforms`: read-only for `authenticated`; writes only via `service_role` (edge functions).
+  - [ ] `squads`/`squad_members`: visible to members only; membership changes by owner/admin role.
+  - [ ] `reports`: insert-own only, no client SELECT.
+- **Testing & Verification**:
+  - [ ] pgTAP (as `authenticated` with `request.jwt.claims` set): user B cannot read A's rankings when A is `FRIENDS_ONLY` and unfollowed; B cannot insert a follow with `follower_id = A`; B cannot self-approve a `pending` follow; anon cannot read any user table.
+- **Dependencies**: `BE-601`.
+
+#### `BE-603`: Concurrency-Safe, Authorized Ranking RPCs (γ = 0.82)
+- **Spec Reference**:
+  - [**`features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md) §3.3, §6.1, §7.1–§7.3
+  - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §3.1
+- **Scope & Objectives**: Fix BE-201's lack of locking, its corrupting re-rank path, and an unflagged authorization hole (`SECURITY DEFINER` trusts a caller-supplied `p_user_id`).
+- **Granular Tasks**:
+  - [ ] `insert_user_ranking_atomic`: derive user from `auth.uid()` (drop `p_user_id`); take `pg_advisory_xact_lock(hashtextextended(user_id::text || media_type, 0))`; `SET search_path = public`.
+  - [ ] Re-rank path: if the title is already ranked, close its old gap before opening the new one, so ranks stay a contiguous `1..N` permutation.
+  - [ ] Score recompute uses $\gamma = 0.82$ + D3 prior in one set-based `UPDATE … FROM (SELECT row_number() …)` (no per-row loop); first title gets $\sigma = 0.50$ (§7.3).
+  - [ ] Accept `p_client_mutation_id`; a replay of an already-applied ID is a no-op that returns the existing row.
+  - [ ] New RPCs: `move_user_ranking(title, media_type, new_rank)` (drag-and-drop `FE-209`), `delete_user_ranking(...)` (closes the gap), `record_pairwise_duels(jsonb)` (batch insert with `is_upset` from `detect_upset_duel`).
+  - [ ] Shared parity fixture `test/fixtures/score_curve_vectors.json` (N ∈ {1,2,3,5,9,10,50,100}) consumed by both Dart unit tests and pgTAP.
+- **Testing & Verification**:
+  - [ ] pgTAP: contiguity invariant after insert / re-rank / move / delete; dual-canon isolation (movie insert never shifts tv ranks); idempotent replay; caller cannot write another user's canon; scores equal the fixture vectors to 2 dp.
+  - [ ] Concurrency test: two parallel `psql` sessions inserting into the same canon yield a contiguous permutation (run in CI script).
+- **Dependencies**: `BE-601`, `BE-602`, `ALGO-601`.
+
+#### `BE-604`: Per-Canon Taste Match, Feed, Squad & Account RPCs
+- **Spec Reference**:
+  - [**`features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md) §2, §5
+  - [**`features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md) §2–§4, §7
+  - [**`adjacent_systems/05_TRUST_SAFETY_MODERATION_AND_ADMIN.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/adjacent_systems/05_TRUST_SAFETY_MODERATION_AND_ADMIN.md) §2, §4.1
+- **Scope & Objectives**: Provide every server contract the Flutter repositories call (audit C3).
+- **Granular Tasks**:
+  - [ ] `calculate_taste_match_rpc(p_other, p_media_type)`: join on `(title_id, media_type)` (the current version joins across canons), `auth.uid()` as user A, respects `can_view_user`.
+  - [ ] `get_activity_feed(p_filter 'following'|'squads'|'global', p_cursor, p_limit)` with keyset pagination; `AFTER INSERT` trigger on `user_rankings` writes `RANKING_CREATED` / `UPSET_ALERT` rows to `activity_logs`.
+  - [ ] `calculate_squad_canon(p_squad_id, p_media_type)` ported to `titles`.
+  - [ ] `request_account_deletion()` (sets `is_deleted`, `deletion_requested_at`, revokes sessions) + `purge_deleted_accounts()` scheduled with `pg_cron` at 30 days.
+  - [ ] `submit_report(target_type, target_id, reason, notes)` and `block_user(p_user)`.
+  - [ ] Redis fan-out (DB spec §4) is **deferred**: feed is served from Postgres via `get_activity_feed`; `RedisTimelineFanoutService` is removed from `lib/` and a Sprint 7 ticket is opened for Upstash-backed caching.
+- **Testing & Verification**:
+  - [ ] pgTAP: taste match equals the Dart `SpearmanTasteMatchCalculator` on shared fixtures and ignores cross-canon overlap; feed respects RLS; deletion purge removes PII after 30 days (time-travel via parameter).
+- **Dependencies**: `BE-602`, `BE-603`.
+
+#### `BE-605`: TMDB Details & Discovery Edge Functions / RPCs
+- **Spec Reference**:
+  - [**`technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md) §2
+  - [**`features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md) §3, §5
+  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §`SCR-07`, §`SCR-08`
+- **Scope & Objectives**: Back-end data for Explore and Show Detail.
+- **Granular Tasks**:
+  - [ ] Edge function `tmdb-details` (title + seasons + credits + popularity), upserting into `titles` / `tv_seasons` via service role; `Cache-Control` as in `tmdb-search`.
+  - [ ] RPCs: `get_network_battlegrounds()`, `get_friends_binging(p_limit)`, `get_title_social_summary(title, media_type)` (friends who ranked it, community survival rate from `user_dropped_shows`).
+  - [ ] Curated Canons: `curated_canons` table seeded with spec examples ("Stuck the Landing", "Peak 1-Season Miniseries").
+  - [ ] Align `streaming-availability` function output with `StreamingDeepLinkFactory` provider IDs.
+- **Testing & Verification**:
+  - [ ] Deno tests (`deno test`) for both edge functions with a mocked TMDB `fetch`; pgTAP for each RPC.
+- **Dependencies**: `BE-601`.
+
+#### `QA-601`: pgTAP That Actually Runs in CI
+- **Spec Reference**:
+  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §3.3, §7
+- **Scope & Objectives**: Replace the `psql … || true` step that cannot fail.
+- **Granular Tasks**:
+  - [ ] Rewrite `supabase/tests/*.sql` against the baseline: correct `plan()` counts, `auth.users` fixture rows, role switching via `set local role authenticated` + `request.jwt.claims`.
+  - [ ] CI job: `supabase start` → `supabase db reset` → `supabase test db`; any failure fails the build.
+- **Testing & Verification**:
+  - [ ] A deliberately broken assertion makes the CI job go red (verified once, then reverted).
+- **Dependencies**: `BE-601` … `BE-605`.
+
+---
+
+### Track 2: App Foundation (Boot, Config, Navigation)
+
+#### `FE-601`: Environment Config, `Supabase.initialize` & Removal of Silent Mocks
+- **Spec Reference**:
+  - [**`technical_architecture/01_TECH_STACK_AND_LIBRARIES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/01_TECH_STACK_AND_LIBRARIES.md) §2–§3
+  - [**`technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md) §1
+  - [**`adjacent_systems/01_AUTH_REGISTER_AND_LOGIN_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/adjacent_systems/01_AUTH_REGISTER_AND_LOGIN_FLOWS.md) §2–§4
+- **Scope & Objectives**: Close audit C2. The app talks to a real Supabase project, and any OTP no longer passes.
+- **Granular Tasks**:
+  - [ ] `lib/core/config/app_config.dart` reading `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SENTRY_DSN`, `POSTHOG_API_KEY` via `--dart-define-from-file=env/<flavor>.json` (gitignored; `env/example.json` committed). The service-role key never ships in the client.
+  - [ ] `main.dart`: `await Supabase.initialize(...)`; fail fast with a readable error screen if config is missing.
+  - [ ] `supabaseClientProvider`; `SupabaseAuthRepository` requires a client. Delete mock branches (`token.length == 6`, `taken_user`, fake user IDs) from `lib/`; move them to `test/fakes/fake_auth_repository.dart`.
+  - [ ] `checkHandleAvailable` → `check_handle_available` RPC; `completeRegistration` updates the trigger-created row.
+  - [ ] `AuthController` → `AsyncNotifier` driven by `supabase.auth.onAuthStateChange`; session persistence via `flutter_secure_storage`.
+- **Testing & Verification**:
+  - [ ] Unit tests with a mocked `SupabaseClient` (mockito): OTP verify failure returns false; handle RPC result mapped correctly.
+  - [ ] `grep -rn "_test'\|123456\|taken_user" lib/` returns nothing.
+- **Dependencies**: `BE-601`.
+
+#### `FE-602`: GoRouter, Auth/Onboarding Redirects & Floating 5-Tab Shell
+- **Spec Reference**:
+  - [**`design_system/02_COMPONENT_LIBRARY_AND_PATTERNS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/02_COMPONENT_LIBRARY_AND_PATTERNS.md) §2.1–§2.2 (Floating Frosted Bottom Bar, Top Header)
+  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) Screen Directory (`SCR-01` … `SCR-20`)
+  - [**`design_system/04_USER_INTERACTION_FLOWS_AND_GESTURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/04_USER_INTERACTION_FLOWS_AND_GESTURES.md) Flow 1
+- **Scope & Objectives**: Close audit C1. Every screen is reachable from a real launch.
+- **Granular Tasks**:
+  - [ ] `lib/core/router/app_router.dart`: `GoRouter` provider with `refreshListenable` bound to auth state.
+  - [ ] Redirect chain: no session → `SCR-01`; session without handle → Handle Reservation; onboarding incomplete → `SCR-02` → `SCR-03` → `SCR-04`; else `/feed`.
+  - [ ] `StatefulShellRoute.indexedStack` with 5 branches: Feed (`SCR-05`), Explore (`SCR-07`), Log (center action → `SCR-09`), Queue (`SCR-13`), Canon (`SCR-14`).
+  - [ ] `TellyFloatingNavBar` per component spec §2.1: 64px pill, 16px margin, radius 32, `#11131A` @ 75% + blur 24, `#242938` stroke, lime hexagon center action raised 6px with a 12px halo, active white icon + phosphor dot.
+  - [ ] Nested/push routes: `SCR-06`, `SCR-08` (`/title/:mediaType/:id`), `SCR-10`→`SCR-11`→`SCR-12`, `SCR-15` (`/u/:handle`), `SCR-16`, `SCR-17`, `SCR-18`, `SCR-19`, `SCR-20`, Edit Profile.
+  - [ ] Replace the `app.dart` placeholder with `MaterialApp.router`.
+- **Testing & Verification**:
+  - [ ] Widget tests: unauthenticated launch lands on `SCR-01`; authenticated + onboarded launch lands on Feed; each tab switches branch and preserves its stack; deep link `/title/tv/1396` opens `SCR-08`.
+  - [ ] Nav bar widget test asserts spec dimensions and tokens.
+- **Dependencies**: `FE-601`.
+
+---
+
+### Track 3: Core Ranking Loop & Offline-First Sync
+
+#### `ALGO-601`: Score Curve γ = 0.82 + Single Tier Definition
+- **Spec Reference**:
+  - [**`features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md) §3.3, §7.3
+  - [**`design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md) §2.2
+- **Scope & Objectives**: Fix the exponent mismatch and collapse three tier definitions into one.
+- **Granular Tasks**:
+  - [ ] `ScoreCurveCalculator.defaultExponent = 0.82`; prior per D3.
+  - [ ] `CanonTier` → six style-guide tiers (`god`, `prestige`, `great`, `good`, `mid`, `dropped`) with thresholds and gradient tokens from `TellyColors`; delete the other tier definitions (`SentimentBracket` score comments, `TwoToWatchEngine` `>= 9.0`, feed `culturalTier` strings) and route them through `CanonTier.fromScore`.
+  - [ ] `SentimentBracket`: align with `SCR-09` (4 cards) and features/02 §3.1 bounds; document how "Disappointed" maps.
+- **Testing & Verification**:
+  - [ ] Unit tests: exact $\gamma = 0.82$ values for N = 100 (#1 → 10.00, #5 → 9.70, #15 → 8.94, #35 → 7.37, #60 → 5.28, #90 → 2.37 — matching the corrected spec table from `DOC-602`); monotonicity; parity with `score_curve_vectors.json`; tier boundaries at 9.20/8.50/7.80/7.00/5.50 inclusive.
+- **Dependencies**: `DOC-602`.
+
+#### `ALGO-602`: Franchise Rollup via Primary Series Duel
+- **Spec Reference**:
+  - [**`features/08_ANIME_INTEGRATION_AND_HYBRID_CANON.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/08_ANIME_INTEGRATION_AND_HYBRID_CANON.md) §4
+- **Scope & Objectives**: Apply D6.
+- **Granular Tasks**:
+  - [ ] Rolled-up entry takes the rank/score of the franchise's primary series ranking; seasons become a `seasonBreakdown` list for the dropdown.
+  - [ ] Franchises without a primary ranking fall back to the highest-ranked season (documented in spec).
+- **Testing & Verification**:
+  - [ ] Unit tests: 4 AoT seasons + primary → one entry with the primary's score and 4 breakdown rows; the unbundled view is unchanged.
+- **Dependencies**: `ALGO-601`.
+
+#### `FE-603`: `SCR-09` Logging Studio — Title Search, Status & Sentiment Bracket
+- **Spec Reference**:
+  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §`SCR-09`
+  - [**`design_system/04_USER_INTERACTION_FLOWS_AND_GESTURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/04_USER_INTERACTION_FLOWS_AND_GESTURES.md) Flow 1 steps 1–4
+  - [**`features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md) §2 Steps 1–2
+- **Scope & Objectives**: The missing entry point to the duel loop.
+- **Granular Tasks**:
+  - [ ] `TitleRepository`: `search(query)` → `functions.invoke('tmdb-search')`, debounced 150 ms, results cached into Drift `CachedTitles`; offline falls back to `LocalTitleDao.searchTitles`.
+  - [ ] Screen: search → selected title header → status radios (movie: First-Time/Rewatch; series: Finished / Up to Date / Season X / Dropped, where Dropped routes to `LogDroppedShowSheet`) → 4 sentiment cards (lime highlight + check) → `BEGIN PAIRWISE DUELS` CTA.
+  - [ ] `LoggingSessionNotifier` holds the draft (title, status, bracket) and hands it to `SCR-10` via the router.
+- **Testing & Verification**:
+  - [ ] Widget tests: debounce issues one search per 150 ms burst; CTA disabled until title + bracket chosen; a movie selection shows movie statuses only.
+- **Dependencies**: `FE-602`, `ALGO-601`.
+
+#### `FE-604`: `RankingRepository` & Duel Loop Wiring (`SCR-10` → `SCR-11` → `SCR-12`)
+- **Spec Reference**:
+  - [**`technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md) §2–§3
+  - [**`features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md) §2, §5, §7
+- **Scope & Objectives**: Make the duel loop persist locally and remotely.
+- **Granular Tasks**:
+  - [ ] `RankingRepository` (local-first): writes Drift `LocalRankings` + appends a `PendingMutation` (insert / move / delete / duel batch) in **one Drift transaction**, then signals the sync engine.
+  - [ ] `DuelController` → `AutoDisposeFamilyNotifier` keyed by the logging session; reads the canon from `LocalRankingDao`; never mixes canons.
+  - [ ] Editorial sheet (`SCR-11`) persists tags, MVP, review, venue/rewatch to the pending mutation payload; Slot Reveal (`SCR-12`) reads the committed rank/score.
+  - [ ] Profile Canon: `ProfileCanonNotifier` streams from `LocalRankingDao.watchRankingsByCanon` (fixes "profile renders empty"); drag-and-drop (`FE-209`) and "Reset Duels" (§7.2) go through the repository.
+  - [ ] Pull-hydration on login: fetch remote canon into Drift when local is empty or stale.
+- **Testing & Verification**:
+  - [ ] `ProviderContainer` tests: full log flow writes 1 ranking + N duels + 1 pending mutation atomically; profile stream updates after commit; a movie duel never loads tv opponents.
+- **Dependencies**: `FE-603`, `BE-603`.
+
+#### `FE-605`: Drift-Backed Offline WAL & Connectivity Sync Engine
+- **Spec Reference**:
+  - [**`technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md) §3
+  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.3, CUJ-04
+- **Scope & Objectives**: Close audit C5 by replacing the in-memory `OfflineSyncManager`.
+- **Granular Tasks**:
+  - [ ] Drift schema v2: `PendingMutations(id UUID, kind, payload JSON, createdAt, attempts, lastError)` with a `MigrationStrategy` from v1 (existing `OfflineDuelQueue` rows migrated).
+  - [ ] `SyncEngine` (`AsyncNotifier`): FIFO flush via the `BE-603` RPCs, passing `client_mutation_id`; marks `LocalRankings.syncStatus = 'SYNCED'`; exponential backoff; halts on first failure to preserve order.
+  - [ ] Add `connectivity_plus`; flush on offline→online transitions, app resume, and post-login.
+  - [ ] Delete the in-memory `OfflineSyncManager`.
+- **Testing & Verification**:
+  - [ ] Unit tests on file-backed Drift: enqueue 3 → close DB → reopen → flush in FIFO; mid-flush failure leaves the remaining entries intact; replaying a flushed mutation is a server no-op.
+- **Dependencies**: `FE-604`.
+
+#### `FE-606`: Onboarding Persistence + `SCR-04` Onboarding Duel & Canon Reveal
+- **Spec Reference**:
+  - [**`features/01_ONBOARDING_AND_TASTE_SEEDING.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/01_ONBOARDING_AND_TASTE_SEEDING.md) §2 (Screens 2–6), §4
+  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §`SCR-02`–`SCR-04`
+- **Scope & Objectives**: Onboarding produces a real, persisted starter dual canon.
+- **Granular Tasks**:
+  - [ ] `SCR-02` saves to `user_streaming_subscriptions`; `SCR-03` selections feed the tournament.
+  - [ ] `SCR-04`: runs separate movie and series tournaments (5–7 duels total, per spec), reusing `DuelArenaScreen`; celebration screen with confetti, a Top-5 carousel per canon, `[ Add Friends & Finish ]` and `[ Share to Instagram Story ]`.
+  - [ ] Letterboxd CSV and AniList importers persist through `RankingRepository` (bulk insert), not just parse.
+  - [ ] Set an `onboarding_completed` flag consumed by the router redirect.
+- **Testing & Verification**:
+  - [ ] Widget/provider tests: selecting 3 movies + 4 series yields two canons with contiguous ranks; importer of 10 CSV rows creates 10 movie rankings.
+- **Dependencies**: `FE-604`.
+
+---
+
+### Track 4: Social, Discovery, Co-Watch & Queue Wiring
+
+#### `FE-607`: Supabase `SocialRepository` (Feed, Follows, Reactions, Comments, Reports)
+- **Spec Reference**:
+  - [**`features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md) §2, §3, §5
+  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §`SCR-05`, §`SCR-06` (spoiler mask: `blur(8px)` frosted overlay)
+- **Scope & Objectives**: Replace `InMemorySocialRepository` and the mock comments.
+- **Granular Tasks**:
+  - [ ] `SupabaseSocialRepository`: `get_activity_feed` pagination per tab, follow request/approve/unfollow, reactions, comments with `contains_spoilers`, 1-tap queue add.
+  - [ ] Spoiler mask uses a `BackdropFilter` (`sigma 8`) frosted overlay per `SCR-06`; tap toggles reveal/re-blur.
+  - [ ] Report and block sheets call `submit_report` / `block_user`.
+  - [ ] Feed / comment state → `AsyncNotifier`; remove business `setState` from `comment_thread_screen.dart`.
+- **Testing & Verification**:
+  - [ ] Repository tests with a mocked client; widget tests for pagination, spoiler toggle, report submission success/failure.
+- **Dependencies**: `BE-604`, `FE-602`.
+
+#### `FE-608`: Profile, Friend Profile, TV Graveyard, Squads & Settings Wiring
+- **Spec Reference**:
+  - [**`features/06_PROFILE_THE_CANON_AND_STATS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/06_PROFILE_THE_CANON_AND_STATS.md)
+  - [**`features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md) §2, §4
+  - [**`features/03_SERIES_VS_SEASONS_AND_DROPPED_TRACKING.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/03_SERIES_VS_SEASONS_AND_DROPPED_TRACKING.md)
+  - [**`adjacent_systems/03_SETTINGS_AND_PREFERENCES_ARCHITECTURE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/adjacent_systems/03_SETTINGS_AND_PREFERENCES_ARCHITECTURE.md)
+- **Scope & Objectives**: Remove mock data from `SCR-14`, `SCR-15`, `SCR-17`, `SCR-18`, `SCR-20` and Edit Profile.
+- **Granular Tasks**:
+  - [ ] Friend profile: profile + per-canon `calculate_taste_match_rpc` (Movie % vs Series %), agreements/divergences from both canons.
+  - [ ] Graveyard ↔ `user_dropped_shows`; Squads ↔ `squads`/`squad_members` + `calculate_squad_canon`.
+  - [ ] Edit Profile: avatar via `image_picker` → Supabase Storage; Top-3 showcase saved to `pinned_showcase_ids`.
+  - [ ] Settings: preferences persisted (haptics toggle backs `HapticsService`), subscriptions editor, data export via `DataExporter` + `share_plus`.
+  - [ ] Convert remaining `StateProvider`s in these features; move business `setState` out of `edit_profile_studio_screen`, `settings_hub_screen`, `log_dropped_show_sheet`, `squad_hub_screen`, `friend_profile_screen`, `tv_graveyard_screen`.
+- **Testing & Verification**:
+  - [ ] Notifier tests with fake repositories; widget tests asserting loading / error / data states for each screen.
+- **Dependencies**: `FE-604`, `BE-604`.
+
+#### `FE-609`: Smart Queue & Streaming Availability Wiring
+- **Spec Reference**:
+  - [**`features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md) §2–§4
+  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §`SCR-13`
+- **Scope & Objectives**: Replace the mock queue and simulated availability.
+- **Granular Tasks**:
+  - [ ] `WatchlistRepository`: Drift `WatchlistCache` + `user_watchlist`, with offline add/remove through `PendingMutations`.
+  - [ ] `StreamingAvailabilityRepository` → `functions.invoke('streaming-availability')`; "On My Services" toggle uses persisted subscriptions.
+  - [ ] `WatchlistNotifier` (`AsyncNotifier`) replaces `StateNotifier`; remove business `setState`.
+- **Testing & Verification**:
+  - [ ] Provider tests: offline add appears instantly and syncs later; the services filter hides unavailable titles.
+- **Dependencies**: `FE-605`, `BE-605`.
+
+#### `FE-610`: Two-to-Watch Formula Fix + Realtime Quick-Swipe
+- **Spec Reference**:
+  - [**`features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md) §3.1, §3.2, §5.1
+- **Scope & Objectives**: Make the scoring match §3.1 and make Quick-Swipe genuinely two-player.
+- **Granular Tasks**:
+  - [ ] `TwoToWatchEngine`: remove the invented `+20` single-watchlist bonus and quality term; implement $w_1\cdot\text{InBoth}(+50) + w_2\cdot\text{TasteMatch}\cdot\text{UserRating} + w_3\cdot\text{Popularity}$, with God-Tier (+35) via `CanonTier.god` and vibe (+20). Document $w_2$, $w_3$ in spec §3.1.
+  - [ ] Candidate pool = `Watchlist_A ∪ Watchlist_B ∪ HighRatedNotSeen` from an RPC / `co-watch-decider` edge function per §5.1.
+  - [ ] Quick-Swipe via a Supabase Realtime channel `cowatch:<session>`: presence for both players, broadcast swipes, match only when **both** swiped right on the same title.
+- **Testing & Verification**:
+  - [ ] Unit tests reproduce §3.1 worked examples; Realtime logic tested with a fake channel (one-sided swipe ≠ match).
+- **Dependencies**: `FE-608`, `FE-609`.
+
+#### `FE-611`: `SCR-08` Show Detail Page
+- **Spec Reference**:
+  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §`SCR-08`
+  - [**`features/03_SERIES_VS_SEASONS_AND_DROPPED_TRACKING.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/03_SERIES_VS_SEASONS_AND_DROPPED_TRACKING.md)
+- **Scope & Objectives**: New screen, reachable from feed cards, search, canon rows, and deep links.
+- **Granular Tasks**:
+  - [ ] 16:9 backdrop with gradient fade, poster + meta, community score with `CanonTier` badge.
+  - [ ] `STREAMING NOW` → `StreamingDeepLinkFactory`; `YOUR STATUS` (rank/score) + `Re-Duel` → `SCR-10`; bookmark → watchlist.
+  - [ ] Friends who ranked it, seasons accordion, community survival rate (via `BE-605`).
+- **Testing & Verification**:
+  - [ ] Widget tests for ranked vs unranked states, movie (no seasons) vs tv; golden in `QA-603`.
+- **Dependencies**: `BE-605`, `FE-604`, `FE-609`.
+
+#### `FE-612`: `SCR-07` Explore & Discover Hub
+- **Spec Reference**:
+  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §`SCR-07`
+  - [**`features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md) §5
+- **Scope & Objectives**: New Explore tab.
+- **Granular Tasks**:
+  - [ ] Universal search (titles via `TitleRepository`, people/friends via `users`).
+  - [ ] Network Battlegrounds strip + full rankings view; "Friends are currently binging" carousel; Curated Canons cards → tier leaderboard.
+- **Testing & Verification**:
+  - [ ] Widget tests per section with fake repositories (empty / loading / data).
+- **Dependencies**: `BE-605`, `FE-611`.
+
+---
+
+### Track 5: Real SDKs, Compliance & Release Configuration
+
+#### `DEV-601`: Real Observability & Platform SDKs
+- **Spec Reference**:
+  - [**`technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md) §3
+  - [**`technical_architecture/01_TECH_STACK_AND_LIBRARIES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/01_TECH_STACK_AND_LIBRARIES.md) §3
+  - [**`adjacent_systems/04_VIRAL_SHARING_AND_EXPORT_STUDIO.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/adjacent_systems/04_VIRAL_SHARING_AND_EXPORT_STUDIO.md)
+- **Scope & Objectives**: Replace the in-memory "Sentry" and "PostHog" services with real SDKs.
+- **Granular Tasks**:
+  - [ ] Add `sentry_flutter`, `posthog_flutter`, `share_plus`, `image_picker`, `local_auth`, `connectivity_plus`, and `integration_test` (dev).
+  - [ ] `SentryFlutter.init` wraps `runApp` (DSN from config; no-op when absent); `FlutterError.onError` + Drift migration failures reported.
+  - [ ] PostHog behind the existing `TelemetryService` interface with the spec §3.2 event names; no IDFA.
+  - [ ] Story Card / Wrapped share via `share_plus`; biometric quick unlock (auth spec §4.1) via `local_auth` behind a setting.
+- **Testing & Verification**:
+  - [ ] Unit tests with fakes injected via providers; no SDK network calls in `flutter test`.
+- **Dependencies**: `FE-601`.
+
+#### `LEGAL-601`: Store-Compliance Fixes (Deletion, Legal Links, Reports, Privacy Manifest)
+- **Spec Reference**:
+  - [**`adjacent_systems/05_TRUST_SAFETY_MODERATION_AND_ADMIN.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/adjacent_systems/05_TRUST_SAFETY_MODERATION_AND_ADMIN.md) §2, §4.1
+  - [**`technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md) §4
+- **Scope & Objectives**: Close the App Store blockers listed in audit §3.
+- **Granular Tasks**:
+  - [ ] Delete Account: confirmation sheet → `request_account_deletion()` → local wipe (Drift + secure storage) → sign out → `SCR-01`.
+  - [ ] Privacy Policy / Terms rows open configured URLs via `url_launcher`.
+  - [ ] Report flows persist via `submit_report` (done in `FE-607`; verified here end-to-end).
+  - [ ] Add `ios/Runner/PrivacyInfo.xcprivacy` declaring the collected data types and required-reason APIs.
+- **Testing & Verification**:
+  - [ ] Widget test: deletion calls the RPC, clears the local DB, and routes to `SCR-01`; a cancelled confirm does nothing.
+- **Dependencies**: `BE-604`, `FE-608`.
+
+#### `DEV-602`: Bundle IDs, Release Signing & Unified CI Gates
+- **Spec Reference**:
+  - [**`technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md) §2, §4
+  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §7.1
+- **Scope & Objectives**: Make release artifacts consistent and CI enforce the spec gates.
+- **Granular Tasks**:
+  - [ ] Unify identifiers on `app.telly.mobile` (matches Fastlane and `APPLE_SERVICE_ID`): Android `namespace`/`applicationId` (+ Kotlin package move), iOS `PRODUCT_BUNDLE_IDENTIFIER` (Runner + RunnerTests).
+  - [ ] Android release `signingConfig` from gitignored `key.properties`; build fails loudly instead of silently using the debug key.
+  - [ ] Merge `ci.yml` + `pull_request.yml` into one workflow: analyze → unit/widget tests with coverage gates **80% overall** and **90% for `lib/features/ranking/domain/`** (lcov filtered) → pgTAP job (`QA-601`) → `integration_test` job on an Android emulator.
+- **Testing & Verification**:
+  - [ ] `flutter build apk --release` fails without `key.properties` and succeeds with a throwaway keystore locally; CI fails at 79% coverage (verified once).
+  - [ ] 👤 **[TO BE DONE BY HUMAN]** Generate the upload keystore and register `app.telly.mobile` in App Store Connect / Play Console.
+- **Dependencies**: `QA-601`.
+
+---
+
+### Track 6: Honest Quality Assurance
+
+#### `QA-602`: Real `integration_test` E2E for CUJ-01 … CUJ-04
+- **Spec Reference**:
+  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §4.1
+- **Scope & Objectives**: Replace the mislabeled `test/integration/cuj_journeys_test.dart`.
+- **Granular Tasks**:
+  - [ ] `integration_test/cuj_0{1..4}_*.dart` boot `main()` against a local Supabase stack (`supabase start`, seeded test users).
+  - [ ] CUJ-04 toggles connectivity through an injectable `ConnectivityService`, kills/restarts the app process state, and asserts the server canon after reconnect.
+  - [ ] Delete or rename the old domain-only "E2E" file to `test/features/.../*_flow_test.dart`.
+- **Testing & Verification**:
+  - [ ] All four CUJs pass in the CI emulator job.
+  - [ ] 👤 **[TO BE DONE BY HUMAN]** Run once on a physical iOS and Android device.
+- **Dependencies**: `FE-602` … `FE-612`, `DEV-602`.
+
+#### `QA-603`: Real Golden Regression Suite
+- **Spec Reference**:
+  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §5.1
+- **Scope & Objectives**: Real `matchesGoldenFile` baselines.
+- **Granular Tasks**:
+  - [ ] Bundle the font files as assets (no runtime `google_fonts` fetch in tests) so renders are deterministic.
+  - [ ] Goldens for nav bar, `SCR-05` upset card, `SCR-08`, `SCR-10`, `SCR-12`, `SCR-14` (3 view modes) at iPhone 15 Pro / Pixel 8 / iPad Mini sizes; PNGs committed under `test/goldens/goldens/`, generated on CI's Linux image only.
+- **Testing & Verification**:
+  - [ ] Changing a color token breaks at least one golden (verified once).
+- **Dependencies**: `FE-611`, `ALGO-601`.
+
+#### `QA-604`: Accessibility Audit Across All Routed Screens
+- **Spec Reference**:
+  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §5.2
+- **Scope & Objectives**: Extend the single-button check to every screen, with honest naming (automated guideline checks, not "WCAG certified").
+- **Granular Tasks**:
+  - [ ] For each routed screen: `androidTapTargetGuideline`, `iOSTapTargetGuideline`, `labeledTapTargetGuideline`, `textContrastGuideline`.
+- **Testing & Verification**:
+  - [ ] Zero guideline violations across all 20 screens.
+- **Dependencies**: `FE-612`.
+
+#### `QA-605`: Honest Performance Profiling
+- **Spec Reference**:
+  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §5.3
+- **Scope & Objectives**: Replace the fake-async "perf" test with real frame timing.
+- **Granular Tasks**:
+  - [ ] `integration_test/perf_feed_scroll_test.dart` + `perf_duel_swipe_test.dart` using `binding.traceAction` / `watchPerformance`, summarised with `TimelineSummary`.
+  - [ ] Remove `test/perf/frame_budget_test.dart` (or rename it to what it actually tests).
+- **Testing & Verification**:
+  - [ ] 👤 **[TO BE DONE BY HUMAN]** `flutter drive --profile` on a mid-tier Android device: p99 build < 16.6 ms; record numbers in this ticket.
+- **Dependencies**: `QA-602`.
+
+#### `QA-606`: Offline WAL Persistence & Partition Stress
+- **Spec Reference**:
+  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.3, CUJ-04
+- **Scope & Objectives**: Replace the in-memory stress test.
+- **Granular Tasks**:
+  - [ ] File-backed Drift: 50 offline duels + 5 rankings → close DB → reopen → partition mid-flush (fake RPC fails on item 20) → recover → zero loss, FIFO order, contiguous ranks.
+- **Testing & Verification**:
+  - [ ] Test passes 20 consecutive randomized-seed runs.
+- **Dependencies**: `FE-605`.
+
+#### `QA-607`: Dart ↔ SQL Parity Suite
+- **Spec Reference**:
+  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.1, §3.3
+- **Scope & Objectives**: Guarantee the client's optimistic numbers equal the server's.
+- **Granular Tasks**:
+  - [ ] Shared fixtures (`test/fixtures/*.json`) for score curve, Spearman taste match, and Borda squad canon, asserted in Dart tests and loaded into pgTAP.
+- **Testing & Verification**:
+  - [ ] Both suites green on identical fixtures.
+- **Dependencies**: `BE-603`, `BE-604`, `ALGO-601`.
+
+#### `QA-608`: Riverpod Sweep & Sprint 6 Quality Gate
+- **Spec Reference**:
+  - [**`AGENTS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/AGENTS.md) §Design System & Architectural Constraints (3), Rule 4
+- **Scope & Objectives**: Finish the Riverpod migration and close the sprint.
+- **Granular Tasks**:
+  - [ ] Zero `StateNotifier`, `StateNotifierProvider`, `StateProvider`, `ChangeNotifier` in `lib/`; a CI grep step enforces it.
+  - [ ] Review every remaining `setState` (UI-only allowed); document the rule in `AGENTS.md`.
+  - [ ] Run `dart analyze --fatal-infos`, `flutter test --coverage`, `supabase test db`, `flutter test integration_test`; update the dashboard.
+- **Testing & Verification**:
+  - [ ] All gates green; dashboard reflects the true count.
+- **Dependencies**: All Sprint 6 tickets.
+
+### Sprint 6 Execution Order (critical path)
+```
+DOC-601 → DOC-602 → BE-601 → BE-602 → ALGO-601 → BE-603 → BE-604/BE-605 → QA-601
+                                 └→ FE-601 → FE-602 → FE-603 → FE-604 → FE-605 → FE-606
+                                                         ALGO-602 ┘        └→ FE-607 → FE-608 → FE-609 → FE-610 → FE-611 → FE-612
+DEV-601 (after FE-601) · LEGAL-601 (after FE-608) · DEV-602 (after QA-601)
+QA-602 … QA-607 (after their deps) → QA-608
+```
+
+### 👤 Human-Only Prerequisites Unlocked by Sprint 6
+- Create Supabase staging project; `supabase link` + `supabase db push` the baseline; set TMDB / Watchmode secrets.
+- Provide `env/dev.json` + `env/prod.json` (URL, anon key, Sentry DSN, PostHog key).
+- Configure Apple / Google OAuth and Twilio Verify in Supabase Auth; enable `pg_cron`.
+- Host Privacy Policy / Terms pages and supply their URLs.
+- Upload keystore, App Store Connect app record, branch protection rules, physical-device perf runs, store submission.
+
+---
+
 ## 🏆 Sprint Deliverables Summary Matrix
 
 | Sprint | Weeks | Primary Focus | Core Technical Deliverables | Critical Quality Gates |
@@ -1390,6 +1905,7 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 | **Sprint 3** | Weeks 5–6 | **Social Graph & Activity Feeds** | Upset Engine ($\mu_{\text{diff}} \ge 0.25$), `SCR-05` Feed, `SCR-17` Squads, `SCR-18` TV Graveyard | `QA-301`, `QA-304` (Borda count & pgTAP RLS) |
 | **Sprint 4** | Weeks 7–8 | **Taste Match % & Co-Watching** | Spearman correlation RPC, `SCR-16` Two-to-Watch, JustWatch links, `SCR-13` Queue | `QA-401`, `QA-404` (Taste match accuracy & deep links) |
 | **Sprint 5** | Weeks 9–10 | **Viral Studio, DevOps & Launch** | `SCR-19` Wrapped Studio, Offline WAL sync, Fastlane CI/CD, Apple/Google Submission | `QA-501` to `QA-505` (E2E CUJs, Goldens, a11y, 60fps) |
+| **Sprint 6** | Weeks 11–13 | **Integration, Wiring & Remediation** | Clean `titles` baseline + RLS, GoRouter shell, Supabase repositories, Drift WAL + `connectivity_plus`, `SCR-04/07/08/09`, real SDKs, store compliance | `QA-601` to `QA-608` (pgTAP in CI, real E2E/goldens, Dart↔SQL parity) |
 
 ---
 *Roadmap Version: 2.0.0 (Production Breakdown)*  

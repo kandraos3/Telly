@@ -57,12 +57,14 @@ When writing Flutter or Backend code, the agent must honor these non-negotiable 
    - The **Movie Canon** and **Series Canon** are strictly partitioned (`media_type: 'movie'` vs `'tv'`).
    - A film must NEVER duel against a TV show.
    - Dynamic percentile scores ($1.00 - 10.00$) are calculated independently for each canon.
-2. **Visual Tokens (*Midnight Cathode*)**:
-   - True OLED Black: Background `#0A0A0C`, Card Surfaces `#141419` / `#1C1C24`.
-   - Primary Accent: Phosphor Lime (`#CCFF00`).
-   - Upset / Controversy Accent: Neon Coral (`#FF3366`).
-   - Rating / Award Accent: Warm Amber (`#FFB800`).
+2. **Visual Tokens (*Midnight Cathode*)** — canonical source: [`docs/design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md`](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md) §2:
+   - Void Canvas Background `#08090C`, Surface Raised `#11131A`, Surface Overlay `#1A1D27`, Stroke Subtle `#242938`.
+   - Primary Accent: Phosphor Lime (`#D2FF52`).
+   - Upset / Controversy Accent: Neon Coral (`#FF4B6E`).
+   - Rating / Award Accent: Warm Amber (`#FFA733`).
+   - Taste Match Accent: Electric Violet (`#7C5CFF`).
    - Glass Borders: `rgba(255, 255, 255, 0.08)` with subtle backdrop blur.
+   - Score Tiers (style guide §2.2): God `9.20–10.00`, Prestige `8.50–9.19`, Great `7.80–8.49`, Good `7.00–7.79`, Mid `5.50–6.99`, Dropped `< 5.50`.
 3. **State Management**:
    - Use **Riverpod 2.5+** exclusively (`@riverpod` code generation or `NotifierProvider`).
    - Avoid legacy `setState` or mixing multiple state management libraries.
