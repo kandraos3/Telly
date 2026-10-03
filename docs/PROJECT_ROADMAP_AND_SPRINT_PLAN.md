@@ -23,19 +23,19 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 1 (Weeks 1–2): Infrastructure, Auth, Foundation & Data Ingestion**
-- **Current Active Ticket**: `QA-104`: Widget Tests for Auth & Onboarding Screens
-- **Overall Roadmap Progress**: **13 / 81 Tickets Completed** (16.0%)
+- **Current Active Ticket**: `QA-101`: Test Pyramid Setup & CI Analyzer Enforcement
+- **Overall Roadmap Progress**: **14 / 81 Tickets Completed** (17.3%)
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos`), Unit Tests (100% pass)
 - **Last Updated**: 2026-10-03
 
 | Sprint | Status | Total Tickets | Completed | Progress |
 | :---: | :---: | :---: | :---: | :--- |
-| **Sprint 1** | 🟡 **Active** | 15 | 13 | `█████████████` 86.7% |
+| **Sprint 1** | 🟡 **Active** | 15 | 14 | `██████████████` 93.3% |
 | **Sprint 2** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 3** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 4** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 5** | ⚪ Queued | 18 | 0 | `░░░░░░░░░░` 0% |
-| **Total** | | **81** | **13** | **16.0%** |
+| **Total** | | **81** | **14** | **17.3%** |
 
 ---
 
@@ -332,11 +332,11 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §3.1 (Widget Tests)
 - **Scope & Objectives**: Component-level widget testing for `SCR-01`, `SCR-02`, and `SCR-03`.
 - **Granular Tasks**:
-  - [ ] Write `test/features/auth/auth_screen_test.dart`.
-  - [ ] Write `test/features/onboarding/streaming_setup_screen_test.dart`.
-  - [ ] Write `test/features/onboarding/seed_grid_screen_test.dart`.
+  - [x] Write `test/features/auth/auth_screen_test.dart`.
+  - [x] Write `test/features/onboarding/streaming_setup_screen_test.dart`.
+  - [x] Write `test/features/onboarding/seed_grid_screen_test.dart`.
 - **Testing & Verification**:
-  - [ ] Assert tapping 5 cards triggers button enable without UI overflow errors.
+  - [x] Assert tapping 5 cards triggers button enable without UI overflow errors.
 - **Dependencies**: `FE-106`, `FE-108`, `FE-109`.
 
 ---
