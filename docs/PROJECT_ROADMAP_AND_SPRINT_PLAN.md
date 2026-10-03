@@ -24,7 +24,7 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 6 — Integration, Wiring & Audit Remediation** (planned 2026-10-03; owner decisions D1–D7 recorded in Sprint 6)
-- **Current Active Ticket**: `BE-605` (TMDB Details & Discovery Edge Functions / RPCs) — Sprint 6: 7 / 32 tickets complete
+- **Current Active Ticket**: `QA-601` (pgTAP That Actually Runs in CI) — Sprint 6: 8 / 32 tickets complete
 - **Overall Roadmap Progress**: Sprints 1–5 granular tasks after the `DOC-601` honesty reset (2026-10-03): **281 / 431 verified** · **121 un-checked** (each annotated `→ remediated by <Sprint 6 ticket>`) · **29 human-only**. The earlier "89 / 89" claim was overstated.
 - **Human-Only Tasks**: 29 tasks in Sprints 1–5 marked `👤 [TO BE DONE BY HUMAN]` (cloud setup, secrets, store submission, device/CI runs, dashboard verification), plus the Sprint 6 human prerequisites list. These cannot be completed or verified from code.
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (215 / 215 pass — note: many tests are widget/unit-level only; no real E2E or golden tests exist yet)
@@ -75,7 +75,7 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 - **Granular Tasks**:
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Execute `top_50_shows_seed.sql` into the `titles` table.
   - [x] Verify 20 prestige TV series (*Succession*, *The Bear*, *Severance*), 15 anime classics (*Attack on Titan*, *Frieren*, *Death Note*), and 15 films (*The Dark Knight*, *Parasite*, *Spirited Away*) are seeded. ✅ remediated in `BE-601`
-  - [ ] Verify `streaming_services` JSONB payloads contain valid IDs (`netflix`, `max`, `hulu`, `apple_tv`, `crunchyroll`, `prime_video`). → remediated by `BE-605` (column exists since `BE-601`; seed leaves it empty until availability sync populates it)
+  - [x] Verify `streaming_services` JSONB payloads contain valid IDs (`netflix`, `max`, `hulu`, `apple_tv`, `crunchyroll`, `prime_video`). ✅ superseded in `BE-605`: availability is stored per provider/country in `title_availability` with ids constrained by `streaming_platforms` (`netflix`, `max`, `hulu`, `apple_tv_plus`, `crunchyroll`, `prime_video`, …)
   - [x] Create database trigger updating `titles.updated_at` automatically on modification. ✅ remediated in `BE-601`
 - **Testing & Verification**:
   - [x] Query `SELECT COUNT(*) FROM titles WHERE media_type = 'movie'` returns 15. ✅ remediated in `BE-601`
@@ -108,8 +108,8 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [x] Inject `Cache-Control: public, max-age=86400, s-maxage=604800` headers for static title lookups.
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Configure TMDB Bearer Token in Supabase Secrets vault.
 - **Testing & Verification**:
-  - [ ] Invoke Edge Function with `"Oppenheimer"`; verify normalized JSON containing `media_type: 'movie'`. → remediated by `BE-605`
-  - [ ] Assert Edge Function fails gracefully with 429 when rate limits are exceeded. → remediated by `BE-605`
+  - [x] Invoke Edge Function with `"Oppenheimer"`; verify normalized JSON containing `media_type: 'movie'`. ✅ remediated in `BE-605`
+  - [x] Assert Edge Function fails gracefully with 429 when rate limits are exceeded. ✅ remediated in `BE-605`
 - **Dependencies**: `BE-101`.
 
 ---
@@ -914,7 +914,7 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
   - [x] Extract subscription availability (`flatrate`) vs purchase (`rent`/`buy`).
   - [ ] Store in Redis: `SET title:availability:{tmdb_id}:{country} {json} EX 86400`. → deferred to `BE-701` (Sprint 7 backlog; feed served from Postgres per `BE-604`)
 - **Testing & Verification**:
-  - [ ] Test query for *Severance* returns Apple TV+ with valid web and deep link URLs. → remediated by `BE-605`
+  - [x] Test query for *Severance* returns Apple TV+ with valid web and deep link URLs. ✅ remediated in `BE-605`
 - **Dependencies**: `BE-101`.
 
 #### `BE-403`: Streaming Provider Regional Catalog Synchronizer
@@ -923,10 +923,10 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
   - [**`adjacent_systems/03_SETTINGS_AND_PREFERENCES_ARCHITECTURE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/adjacent_systems/03_SETTINGS_AND_PREFERENCES_ARCHITECTURE.md) §2 (Streaming Settings)
 - **Scope & Objectives**: Daily cron pipeline refreshing regional streaming catalog changes and expiration alerts.
 - **Granular Tasks**:
-  - [ ] Setup daily GitHub Actions / Supabase cron job querying catalog additions and removals. → remediated by `BE-605`
+  - [ ] Setup daily GitHub Actions / Supabase cron job querying catalog additions and removals. → partially remediated by `BE-605` (`streaming-catalog-sync` function + daily `pg_cron` flag refresh exist); 👤 **[TO BE DONE BY HUMAN]** schedule a daily POST to `streaming-catalog-sync` with the service-role key (GitHub Actions cron or Supabase scheduled function)
   - [x] Flag titles leaving a provider in $\le 7$ days (`is_leaving_soon: true`).
 - **Testing & Verification**:
-  - [ ] Verify titles flagged as leaving soon trigger notification events. → remediated by `BE-605`
+  - [ ] Verify titles flagged as leaving soon trigger notification events. → deferred to `BE-702` (push notifications are not in Sprint 6 scope; flags are computed by `refresh_leaving_soon_flags`)
 - **Dependencies**: `BE-402`.
 
 ---
@@ -1522,12 +1522,12 @@ Turn the library of individually-tested widgets and algorithms into a **wired, r
   - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §`SCR-07`, §`SCR-08`
 - **Scope & Objectives**: Back-end data for Explore and Show Detail.
 - **Granular Tasks**:
-  - [ ] Edge function `tmdb-details` (title + seasons + credits + popularity), upserting into `titles` / `tv_seasons` via service role; `Cache-Control` as in `tmdb-search`.
-  - [ ] RPCs: `get_network_battlegrounds()`, `get_friends_binging(p_limit)`, `get_title_social_summary(title, media_type)` (friends who ranked it, community survival rate from `user_dropped_shows`).
-  - [ ] Curated Canons: `curated_canons` table seeded with spec examples ("Stuck the Landing", "Peak 1-Season Miniseries").
-  - [ ] Align `streaming-availability` function output with `StreamingDeepLinkFactory` provider IDs.
+  - [x] Edge function `tmdb-details` (title + seasons + credits + popularity), upserting into `titles` / `tv_seasons` via service role; `Cache-Control` as in `tmdb-search`.
+  - [x] RPCs: `get_network_battlegrounds()`, `get_friends_binging(p_limit)`, `get_title_social_summary(title, media_type)` (friends who ranked it, community survival rate from `user_dropped_shows`).
+  - [x] Curated Canons: `curated_canons` table seeded with spec examples ("Stuck the Landing", "Peak 1-Season Miniseries").
+  - [x] Align `streaming-availability` function output with `StreamingDeepLinkFactory` provider IDs.
 - **Testing & Verification**:
-  - [ ] Deno tests (`deno test`) for both edge functions with a mocked TMDB `fetch`; pgTAP for each RPC.
+  - [x] Deno tests (`deno test`) for both edge functions with a mocked TMDB `fetch`; pgTAP for each RPC.
 - **Dependencies**: `BE-601`.
 
 #### `QA-601`: pgTAP That Actually Runs in CI
@@ -1909,6 +1909,18 @@ QA-602 … QA-607 (after their deps) → QA-608
 - **Testing & Verification**:
   - [ ] Cache-hit and invalidation tests; feed results identical with and without the cache.
 - **Dependencies**: `BE-604`.
+
+#### `BE-702`: Push Notification Engine (Upset Alerts, Leaving Soon, Follow Requests)
+- **Spec Reference**:
+  - [**`technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md) §5 (APNs & FCM payloads)
+  - [**`features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md) §4 (Expiration Alerts)
+- **Scope & Objectives**: Deliver push notifications; never ticketed in Sprints 1–5 although `BE-403` assumed it.
+- **Granular Tasks**:
+  - [ ] Device token registration table + FCM/APNs sender edge function honouring the Settings notification matrix and quiet hours.
+  - [ ] Leaving-soon alerts for watchlisted titles with `is_leaving_soon = TRUE`.
+- **Testing & Verification**:
+  - [ ] Payload unit tests; quiet-hours suppression test.
+- **Dependencies**: `BE-605`, `FE-608`.
 
 ---
 

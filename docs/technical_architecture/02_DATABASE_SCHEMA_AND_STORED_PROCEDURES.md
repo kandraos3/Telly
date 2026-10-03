@@ -62,6 +62,7 @@ Abbreviations: **PK** primary key, **FK** foreign key, **U** unique. All `update
 | `activity_logs` | **PK** `id`; `user_id`; `activity_type` (`RANKING_CREATED`, `UPSET_ALERT`, `SHOW_DROPPED`, `QUEUE_ADDED`, `COMMENT_POSTED`); `title_id`, `media_type`, `ranking_id`, `target_user_id`, `is_upset`, `upset_delta`, `metadata` JSONB, `created_at` | Feed source. |
 | `feed_reactions` | **PK** `id`; **FK** `activity_id`; **U** `(activity_id, user_id, reaction_type)` | Reactions. |
 | `comments` | **PK** `id`; **FK** `activity_id`; `user_id`; `body` VARCHAR(500); `contains_spoilers`; `is_hidden` | Spoiler-safe threads (`SCR-06`). |
+| `curated_canons` | **PK** `slug`; `title`, `subtitle`, `emoji`, `media_type`, `items` JSONB `[{title_id, media_type}]`, `sort_order` | Editorial collections (`SCR-07`); read-only for clients. |
 | `reports` | **PK** `id`; `reporter_id`; `target_type`, `target_id` TEXT, `reason`, `notes`, `status` (`OPEN`/`ACTIONED`/`DISMISSED`), `created_at` | Apple 1.2 moderation queue. |
 
 ### 2.3 Indexes
@@ -121,6 +122,20 @@ All of the following are `SECURITY DEFINER`, `SET search_path = public`. They ta
 | `calculate_squad_canon(p_squad_id, p_media_type)` | Borda count: member $i$ with $N_i$ titles awards $N_i - r + 1$ points. Members only. |
 | `request_account_deletion()` / `cancel_account_deletion()` / `purge_deleted_accounts()` | 30-day grace period (Trust & Safety §4.1); purge is scheduled with `pg_cron` and only executable by `service_role`. |
 | `submit_report(p_target_type, p_target_id, p_reason, p_notes)` / `block_user(p_user)` | Moderation. |
+| `get_network_battlegrounds(p_media_type, p_min_rankings, p_limit)` | Average score per `original_network` across all non-deleted users (aggregate only). |
+| `get_friends_binging(p_limit, p_days)` | Titles accepted followees ranked or queued recently; SECURITY INVOKER (RLS applies). |
+| `get_title_social_summary(p_title_id, p_media_type) → JSONB` | `SCR-08`: my rank/score/σ, visible followees who ranked it, community average, survival rate (completed / watching / dropped, most common drop point). |
+| `stale_watchlist_titles(p_older_than_hours, p_limit)` / `refresh_leaving_soon_flags(p_today)` | `service_role` only; used by the `streaming-catalog-sync` edge function and a daily `pg_cron` job. |
+
+### 3.5 Edge Functions (Deno, `supabase/functions/`)
+Each function keeps its logic in `handler.ts` (dependencies injected) with a thin `index.ts`; tests live in `supabase/functions/tests/`.
+
+| Function | Behaviour |
+| :--- | :--- |
+| `tmdb-search?query=` | TMDB `/search/multi`, movie/tv only, `is_anime` heuristic (Animation + JP); upserts results into `titles` so they can be ranked immediately. |
+| `tmdb-details?id=&media_type=` | TMDB details + credits; upserts `titles` + `tv_seasons` (season 0 specials skipped); returns cast, creators, director, seasons. |
+| `streaming-availability?tmdb_id=&media_type=&country=` | `title_availability` cache (< 24 h) → Watchmode (native `ios_url`/`android_url`, when `WATCHMODE_API_KEY` is set) → TMDB watch providers (JustWatch data). Provider names/ids map to `streaming_platforms.id`. |
+| `streaming-catalog-sync` (POST, service-role bearer) | Refreshes stale availability for watchlisted titles, then `refresh_leaving_soon_flags()`. |
 
 ### 3.4 Triggers
 - `on_auth_user_created` (AFTER INSERT ON `auth.users`) → inserts the skeleton `public.users` row.

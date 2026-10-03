@@ -1,9 +1,9 @@
-// Supabase Edge Function: TMDB search proxy (BE-104 / BE-605). Logic lives in handler.ts for testability.
+// Supabase Edge Function: TMDB title details (BE-605). Logic lives in handler.ts for testability.
 import { supabaseCatalogStore } from "../_shared/db.ts";
-import { handleSearch } from "./handler.ts";
+import { handleDetails } from "./handler.ts";
 
 Deno.serve((req) =>
-  handleSearch(req, {
+  handleDetails(req, {
     fetch,
     tmdbToken: Deno.env.get("TMDB_ACCESS_TOKEN") ?? Deno.env.get("TMDB_API_KEY"),
     store: supabaseCatalogStore(),
