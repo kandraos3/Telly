@@ -22,20 +22,20 @@
 
 ## 📊 Active Sprint Execution Dashboard
 
-- **Current Active Sprint**: **Sprint 2 (Weeks 3–4): The Pairwise Duel Engine, Scoring & The Personal Dual-Canon**
-- **Current Active Ticket**: `FE-206`: `SCR-14` Dual-Canon Profile Header & Segmented Pill Switcher
-- **Overall Roadmap Progress**: **35 / 89 Tickets Completed** (39.3%)
+- **Current Active Sprint**: **Sprint 3 (Weeks 5–6): Social Graph, Feeds, Reactions, Squads & TV Graveyard**
+- **Current Active Ticket**: `BE-301`: Social Graph Schema, Follow Requests & Activity Log
+- **Overall Roadmap Progress**: **39 / 89 Tickets Completed** (43.8%)
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos`), Unit Tests (100% pass)
 - **Last Updated**: 2026-10-03
 
 | Sprint | Status | Total Tickets | Completed | Progress |
 | :---: | :---: | :---: | :---: | :--- |
 | **Sprint 1** | 🟢 **Completed** | 19 | 19 | `████████████████████` 100.0% |
-| **Sprint 2** | 🟡 **Active** | 20 | 16 | `████████████████░░░░` 80.0% |
-| **Sprint 3** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
+| **Sprint 2** | 🟢 **Completed** | 20 | 20 | `████████████████████` 100.0% |
+| **Sprint 3** | 🟡 **Active** | 16 | 0 | `░░░░░░░░░░` 0.0% |
 | **Sprint 4** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 5** | ⚪ Queued | 18 | 0 | `░░░░░░░░░░` 0% |
-| **Total** | | **89** | **35** | **39.3%** |
+| **Total** | | **89** | **39** | **43.8%** |
 
 ---
 
@@ -540,12 +540,12 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
   - [**`features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md) §2 (Dual-Canon Switcher)
 - **Scope & Objectives**: Profile screen featuring prominent segmented pill switching between Movie Canon and Series Canon.
 - **Granular Tasks**:
-  - [ ] Create `lib/features/profile/presentation/screens/dual_canon_profile_screen.dart`.
-  - [ ] Build segmented control: `[ 🎬 Movie Canon (42) ]` | `[ 📺 Series & Anime (58) ]`.
-  - [ ] Render profile avatar, handle, bio, and Top 3 Showcase row.
-  - [ ] Wire switcher to Riverpod `selectedCanonProvider` to filter displayed list instantly.
+  - [x] Create `lib/features/profile/presentation/screens/dual_canon_profile_screen.dart`.
+  - [x] Build segmented control: `[ 🎬 Movie Canon (42) ]` | `[ 📺 Series & Anime (58) ]`.
+  - [x] Render profile avatar, handle, bio, and Top 3 Showcase row.
+  - [x] Wire switcher to Riverpod `selectedCanonProvider` to filter displayed list instantly.
 - **Testing & Verification**:
-  - [ ] Widget test asserting tapping "Movie Canon" updates list to movie items only.
+  - [x] Widget test asserting tapping "Movie Canon" updates list to movie items only.
 - **Dependencies**: `FE-104`.
 
 #### `FE-207`: Three Canon View Modes (Ranked List, Tier View, 3x3 Grid)
@@ -554,12 +554,12 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
   - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §14 (`SCR-14`)
 - **Scope & Objectives**: Implement 3 distinct visual presentations of the user's ranked list.
 - **Granular Tasks**:
-  - [ ] Mode 1: **Ranked List** — numbered rows (#1, #2), poster thumbnail, dynamic score pill, and MVP badge.
-  - [ ] Mode 2: **Tier View** — grouped buckets `Tier S (9.0+)`, `Tier A (8.0-8.9)`, `Tier B (7.0-7.9)`, `Tier C`, `Tier D`.
-  - [ ] Mode 3: **3x3 Poster Grid** — aesthetic Instagram-style grid showing user's top 9 titles without text clutter.
-  - [ ] Add view switcher icon row in the sub-header.
+  - [x] Mode 1: **Ranked List** — numbered rows (#1, #2), poster thumbnail, dynamic score pill, and MVP badge.
+  - [x] Mode 2: **Tier View** — grouped buckets `Tier S (9.0+)`, `Tier A (8.0-8.9)`, `Tier B (7.0-7.9)`, `Tier C`, `Tier D`.
+  - [x] Mode 3: **3x3 Poster Grid** — aesthetic Instagram-style grid showing user's top 9 titles without text clutter.
+  - [x] Add view switcher icon row in the sub-header.
 - **Testing & Verification**:
-  - [ ] Widget test verifying view mode switcher renders correct layout widget for each mode.
+  - [x] Widget test verifying view mode switcher renders correct layout widget for each mode.
 - **Dependencies**: `FE-206`.
 
 #### `FE-208`: Anime Franchise Rollup Aggregator & Unbundle Toggle
@@ -567,12 +567,12 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
   - [**`features/08_ANIME_INTEGRATION_AND_HYBRID_CANON.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/08_ANIME_INTEGRATION_AND_HYBRID_CANON.md) §2 (Franchise Rollup)
 - **Scope & Objectives**: Allow users to collapse anime seasons/cours into a single franchise entity or unbundle them.
 - **Granular Tasks**:
-  - [ ] Create `lib/features/ranking/domain/franchise_rollup_service.dart`.
-  - [ ] When collapsed: aggregate *Attack on Titan Season 1–4* into a single entry with composite score.
-  - [ ] When unbundled: show individual seasons as standalone ranked entries.
-  - [ ] Provide user toggle switch: `[ Franchise Rollup: ON / OFF ]`.
+  - [x] Create `lib/features/ranking/domain/franchise_rollup_service.dart`.
+  - [x] When collapsed: aggregate *Attack on Titan Season 1–4* into a single entry with composite score.
+  - [x] When unbundled: show individual seasons as standalone ranked entries.
+  - [x] Provide user toggle switch: `[ Franchise Rollup: ON / OFF ]`.
 - **Testing & Verification**:
-  - [ ] Unit test verifying rollup combines 4 seasons into 1 parent entry with weighted mean score.
+  - [x] Unit test verifying rollup combines 4 seasons into 1 parent entry with weighted mean score.
 - **Dependencies**: `FE-206`.
 
 #### `FE-209`: Reorderable Drag-and-Drop Manual Re-Indexing
@@ -580,11 +580,11 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
   - [**`design_system/04_USER_INTERACTION_FLOWS_AND_GESTURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/04_USER_INTERACTION_FLOWS_AND_GESTURES.md) §3 (Canon Reordering)
 - **Scope & Objectives**: Allow users to manually drag titles to new positions with live score recalculation.
 - **Granular Tasks**:
-  - [ ] Wrap Ranked List with `ReorderableListView.builder`.
-  - [ ] Provide drag handle icon triggering `HapticFeedback.selectionClick()` on pick up.
-  - [ ] On drop: update `rank_position` in local Drift database, recalculate percentile scores, and sync to Supabase.
+  - [x] Wrap Ranked List with `ReorderableListView.builder`.
+  - [x] Provide drag handle icon triggering `HapticFeedback.selectionClick()` on pick up.
+  - [x] On drop: update `rank_position` in local Drift database, recalculate percentile scores, and sync to Supabase.
 - **Testing & Verification**:
-  - [ ] Widget test dragging row #4 to row #1 updates rank text to `#1`.
+  - [x] Widget test dragging row #4 to row #1 updates rank text to `#1`.
 - **Dependencies**: `FE-207`, `ALGO-202`.
 
 ---
