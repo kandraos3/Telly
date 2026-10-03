@@ -23,19 +23,19 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 1 (Weeks 1–2): Infrastructure, Auth, Foundation & Data Ingestion**
-- **Current Active Ticket**: `FE-111`: 1-Click Letterboxd CSV Importer Parser
-- **Overall Roadmap Progress**: **11 / 81 Tickets Completed** (13.6%)
+- **Current Active Ticket**: `QA-102`: Unit Tests for Ingestion Parsers
+- **Overall Roadmap Progress**: **12 / 81 Tickets Completed** (14.8%)
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos`), Unit Tests (100% pass)
 - **Last Updated**: 2026-10-03
 
 | Sprint | Status | Total Tickets | Completed | Progress |
 | :---: | :---: | :---: | :---: | :--- |
-| **Sprint 1** | 🟡 **Active** | 15 | 11 | `███████████` 73.3% |
+| **Sprint 1** | 🟡 **Active** | 15 | 12 | `████████████` 80.0% |
 | **Sprint 2** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 3** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 4** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 5** | ⚪ Queued | 18 | 0 | `░░░░░░░░░░` 0% |
-| **Total** | | **81** | **11** | **13.6%** |
+| **Total** | | **81** | **12** | **14.8%** |
 
 ---
 
@@ -279,13 +279,13 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.2 (CSV Ingestion)
 - **Scope & Objectives**: Parse uploaded Letterboxd `diary.csv` files and populate the Movie Canon.
 - **Granular Tasks**:
-  - [ ] Create `lib/features/onboarding/domain/letterboxd_csv_parser.dart` using `package:csv`.
-  - [ ] Parse columns: `Date`, `Name`, `Year`, `Letterboxd URI`, `Rating`, `Rewatch`.
-  - [ ] Map star ratings to sentiment brackets ($5.0\star \to \text{Top 10\%}$, $0.5\star \to \text{Bottom 5\%}$).
-  - [ ] Batch match titles against TMDB API using Edge Function.
+  - [x] Create `lib/features/onboarding/domain/letterboxd_csv_parser.dart` using `package:csv`.
+  - [x] Parse columns: `Date`, `Name`, `Year`, `Letterboxd URI`, `Rating`, `Rewatch`.
+  - [x] Map star ratings to sentiment brackets ($5.0\star \to \text{Top 10\%}$, $0.5\star \to \text{Bottom 5\%}$).
+  - [x] Batch match titles against TMDB API using Edge Function.
 - **Testing & Verification**:
-  - [ ] Unit test parsing mock `diary.csv` containing commas in title (*"Everything Everywhere All at Once"*).
-  - [ ] Assert parsing completes for 500 rows in $< 300\text{ ms}$.
+  - [x] Unit test parsing mock `diary.csv` containing commas in title (*"Everything Everywhere All at Once"*).
+  - [x] Assert parsing completes for 500 rows in $< 300\text{ ms}$.
 - **Dependencies**: `FE-105`, `BE-104`.
 
 ---
