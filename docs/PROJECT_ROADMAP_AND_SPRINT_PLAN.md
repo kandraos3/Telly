@@ -31,8 +31,8 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 
 #### `BE-101`: Supabase Project Initialization & Database Migration
 - **Spec Reference**: 
-  - [**`database/migrations/01_initial_schema.sql`**](file:///c:/Users/karla/Desktop/SeriesBeli/database/migrations/01_initial_schema.sql) (Complete executable SQL schema)
-  - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §1–§3 (Tables, Indexes, RLS)
+  - [**`database/migrations/01_initial_schema.sql`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/database/migrations/01_initial_schema.sql) (Complete executable SQL schema)
+  - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §1–§3 (Tables, Indexes, RLS)
 - **Scope & Objectives**: Deploy the production database schema to Supabase PostgreSQL 16.
 - **Granular Tasks**:
   - [ ] Create Supabase project (`telly-backend-prod`) in US-East / EU-Central.
@@ -47,8 +47,8 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 
 #### `BE-102`: Top 50 Seed Ingestion & Streaming Platform Setup
 - **Spec Reference**:
-  - [**`database/seeds/top_50_shows_seed.sql`**](file:///c:/Users/karla/Desktop/SeriesBeli/database/seeds/top_50_shows_seed.sql) (Seed dataset)
-  - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §2.1 (`titles` schema)
+  - [**`database/seeds/top_50_shows_seed.sql`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/database/seeds/top_50_shows_seed.sql) (Seed dataset)
+  - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §2.1 (`titles` schema)
 - **Scope & Objectives**: Populate the initial recognition dataset with top movies, series, and anime.
 - **Granular Tasks**:
   - [ ] Execute `top_50_shows_seed.sql` into the `titles` table.
@@ -62,8 +62,8 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 
 #### `BE-103`: Supabase GoTrue Auth & Twilio SMS Gateway Integration
 - **Spec Reference**:
-  - [**`adjacent_systems/01_AUTH_REGISTER_AND_LOGIN_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/adjacent_systems/01_AUTH_REGISTER_AND_LOGIN_FLOWS.md) §1–§3 (Social Auth & SMS OTP)
-  - [**`technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md) §4 (Twilio Verify)
+  - [**`adjacent_systems/01_AUTH_REGISTER_AND_LOGIN_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/adjacent_systems/01_AUTH_REGISTER_AND_LOGIN_FLOWS.md) §1–§3 (Social Auth & SMS OTP)
+  - [**`technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md) §4 (Twilio Verify)
 - **Scope & Objectives**: Configure multi-provider authentication with Apple, Google, and SMS Phone OTP.
 - **Granular Tasks**:
   - [ ] Configure Sign in with Apple in Supabase Dashboard with Apple Service ID and private key.
@@ -77,8 +77,8 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 
 #### `BE-104`: Edge Function for TMDB Title Search Proxy & Edge Caching
 - **Spec Reference**:
-  - [**`technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md) §1 (TMDB Integration)
-  - [**`features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md) §1 (Catalog Search)
+  - [**`technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md) §1 (TMDB Integration)
+  - [**`features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md) §1 (Catalog Search)
 - **Scope & Objectives**: Build a secured Supabase Edge Function proxying TMDB requests with Cloudflare edge caching.
 - **Granular Tasks**:
   - [ ] Write Supabase Edge Function `functions/tmdb-search/index.ts` using Deno.
@@ -96,8 +96,8 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 
 #### `FE-101`: Flutter 3.24+ Shell & Feature-First Directory Architecture
 - **Spec Reference**:
-  - [**`technical_architecture/01_TECH_STACK_AND_LIBRARIES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/01_TECH_STACK_AND_LIBRARIES.md) §1 (Flutter & Dart versions)
-  - [**`technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md) §1 (Folder Structure)
+  - [**`technical_architecture/01_TECH_STACK_AND_LIBRARIES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/01_TECH_STACK_AND_LIBRARIES.md) §1 (Flutter & Dart versions)
+  - [**`technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md) §1 (Folder Structure)
 - **Scope & Objectives**: Initialize Flutter 3.24+ / Dart 3.5+ project structured strictly by feature slices.
 - **Granular Tasks**:
   - [ ] Initialize Flutter project: `flutter create --org com.telly.app telly_client`.
@@ -113,8 +113,8 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 
 #### `FE-102`: Theme, Color Palette & Typography Tokens Setup
 - **Spec Reference**:
-  - [**`design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md) §2–§4 (Palette, Typography)
-  - [**`technical_architecture/01_TECH_STACK_AND_LIBRARIES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/01_TECH_STACK_AND_LIBRARIES.md) §2 (Theme Dependencies)
+  - [**`design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md) §2–§4 (Palette, Typography)
+  - [**`technical_architecture/01_TECH_STACK_AND_LIBRARIES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/01_TECH_STACK_AND_LIBRARIES.md) §2 (Theme Dependencies)
 - **Scope & Objectives**: Codify the *Midnight Cathode* OLED design system into strongly-typed Flutter constants.
 - **Granular Tasks**:
   - [ ] Create `lib/core/theme/telly_colors.dart`:
@@ -131,7 +131,7 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 
 #### `FE-103`: Haptic Feedback Engine (`HapticsService`)
 - **Spec Reference**:
-  - [**`design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md) §5 (Haptic Sensations)
+  - [**`design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md) §5 (Haptic Sensations)
 - **Scope & Objectives**: Build central haptic abstraction delivering customized tactile feedback.
 - **Granular Tasks**:
   - [ ] Create `lib/core/services/haptics_service.dart`.
@@ -146,7 +146,7 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 
 #### `FE-104`: Core Component Primitives (Buttons, Sheets, Badges)
 - **Spec Reference**:
-  - [**`design_system/02_COMPONENT_LIBRARY_AND_PATTERNS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/design_system/02_COMPONENT_LIBRARY_AND_PATTERNS.md) §1–§5 (Component Library)
+  - [**`design_system/02_COMPONENT_LIBRARY_AND_PATTERNS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/02_COMPONENT_LIBRARY_AND_PATTERNS.md) §1–§5 (Component Library)
 - **Scope & Objectives**: Implement reusable atomic UI components matching the design specification.
 - **Granular Tasks**:
   - [ ] Build `TellyPrimaryButton`: 52dp height, Phosphor Lime fill, black bold text, 12dp rounded corners.
@@ -159,8 +159,8 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 
 #### `FE-105`: Local Drift SQLite Database & Repositories Setup
 - **Spec Reference**:
-  - [**`technical_architecture/01_TECH_STACK_AND_LIBRARIES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/01_TECH_STACK_AND_LIBRARIES.md) §2 (Drift ORM)
-  - [**`technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md) §3 (Drift SQLite Tables)
+  - [**`technical_architecture/01_TECH_STACK_AND_LIBRARIES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/01_TECH_STACK_AND_LIBRARIES.md) §2 (Drift ORM)
+  - [**`technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md) §3 (Drift SQLite Tables)
 - **Scope & Objectives**: Implement offline-first local storage with Drift SQLite ORM.
 - **Granular Tasks**:
   - [ ] Create `lib/core/database/database.dart` defining Drift tables: `CachedTitles`, `LocalRankings`, `OfflineDuelQueue`, `WatchlistCache`.
@@ -178,8 +178,8 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 
 #### `FE-106`: `SCR-01` Splash & Social / Phone Auth Screen
 - **Spec Reference**:
-  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §1 (`SCR-01`)
-  - [**`adjacent_systems/01_AUTH_REGISTER_AND_LOGIN_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/adjacent_systems/01_AUTH_REGISTER_AND_LOGIN_FLOWS.md) §1 (Auth UI Wireframe)
+  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §1 (`SCR-01`)
+  - [**`adjacent_systems/01_AUTH_REGISTER_AND_LOGIN_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/adjacent_systems/01_AUTH_REGISTER_AND_LOGIN_FLOWS.md) §1 (Auth UI Wireframe)
 - **Scope & Objectives**: Build the landing screen offering Apple, Google, and SMS Phone OTP sign-in.
 - **Granular Tasks**:
   - [ ] Create `lib/features/auth/presentation/screens/auth_screen.dart`.
@@ -195,8 +195,8 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 
 #### `FE-107`: Handle Reservation Screen with Debounced RPC Availability
 - **Spec Reference**:
-  - [**`adjacent_systems/01_AUTH_REGISTER_AND_LOGIN_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/adjacent_systems/01_AUTH_REGISTER_AND_LOGIN_FLOWS.md) §2 (Handle Reservation)
-  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §1 (`SCR-01`)
+  - [**`adjacent_systems/01_AUTH_REGISTER_AND_LOGIN_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/adjacent_systems/01_AUTH_REGISTER_AND_LOGIN_FLOWS.md) §2 (Handle Reservation)
+  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §1 (`SCR-01`)
 - **Scope & Objectives**: Allow new users to claim an `@handle` with real-time uniqueness validation.
 - **Granular Tasks**:
   - [ ] Create `lib/features/auth/presentation/screens/handle_reservation_screen.dart`.
@@ -211,8 +211,8 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 
 #### `FE-108`: `SCR-02` Streaming Provider Household Setup
 - **Spec Reference**:
-  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §2 (`SCR-02`)
-  - [**`features/01_ONBOARDING_AND_TASTE_SEEDING.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/01_ONBOARDING_AND_TASTE_SEEDING.md) §2 (Provider Grid)
+  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §2 (`SCR-02`)
+  - [**`features/01_ONBOARDING_AND_TASTE_SEEDING.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/01_ONBOARDING_AND_TASTE_SEEDING.md) §2 (Provider Grid)
 - **Scope & Objectives**: Allow users to select active streaming subscriptions with 1-tap card toggles.
 - **Granular Tasks**:
   - [ ] Create `lib/features/onboarding/presentation/screens/streaming_setup_screen.dart`.
@@ -225,8 +225,8 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 
 #### `FE-109`: `SCR-03` 50-Title Seed Recognition Grid (Movies, TV, Anime)
 - **Spec Reference**:
-  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §3 (`SCR-03`)
-  - [**`features/01_ONBOARDING_AND_TASTE_SEEDING.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/01_ONBOARDING_AND_TASTE_SEEDING.md) §3 (Seed Matrix)
+  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §3 (`SCR-03`)
+  - [**`features/01_ONBOARDING_AND_TASTE_SEEDING.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/01_ONBOARDING_AND_TASTE_SEEDING.md) §3 (Seed Matrix)
 - **Scope & Objectives**: 50-poster multi-select grid with category filter chips and dynamic progress counter.
 - **Granular Tasks**:
   - [ ] Create `lib/features/onboarding/presentation/screens/seed_grid_screen.dart`.
@@ -241,8 +241,8 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 
 #### `FE-110`: 1-Click AniList & MyAnimeList Profile Importer
 - **Spec Reference**:
-  - [**`features/08_ANIME_INTEGRATION_AND_HYBRID_CANON.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/08_ANIME_INTEGRATION_AND_HYBRID_CANON.md) §1 (AniList Sync)
-  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.2 (GraphQL Deserializer)
+  - [**`features/08_ANIME_INTEGRATION_AND_HYBRID_CANON.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/08_ANIME_INTEGRATION_AND_HYBRID_CANON.md) §1 (AniList Sync)
+  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.2 (GraphQL Deserializer)
 - **Scope & Objectives**: Automatically pull user's completed anime list via public GraphQL/REST APIs without passwords.
 - **Granular Tasks**:
   - [ ] Create `lib/features/onboarding/domain/anilist_importer.dart`.
@@ -256,8 +256,8 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 
 #### `FE-111`: 1-Click Letterboxd CSV Importer Parser
 - **Spec Reference**:
-  - [**`features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md) §4 (Letterboxd Importer)
-  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.2 (CSV Ingestion)
+  - [**`features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md) §4 (Letterboxd Importer)
+  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.2 (CSV Ingestion)
 - **Scope & Objectives**: Parse uploaded Letterboxd `diary.csv` files and populate the Movie Canon.
 - **Granular Tasks**:
   - [ ] Create `lib/features/onboarding/domain/letterboxd_csv_parser.dart` using `package:csv`.
@@ -275,7 +275,7 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 
 #### `QA-101`: Test Pyramid Setup & CI Analyzer Enforcement
 - **Spec Reference**:
-  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §1, §7 (Test Pyramid & CI Gates)
+  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §1, §7 (Test Pyramid & CI Gates)
 - **Scope & Objectives**: Configure automated test harness, mock generators, and GitHub Actions PR checks.
 - **Granular Tasks**:
   - [ ] Add `build_runner`, `mockito`, `package:test`, `flutter_test` to dev dependencies.
@@ -287,7 +287,7 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 
 #### `QA-102`: Unit Tests for Ingestion Parsers
 - **Spec Reference**:
-  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.2 (Parsers)
+  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.2 (Parsers)
 - **Scope & Objectives**: Test edge cases and data resiliency in Letterboxd and AniList parsing code.
 - **Granular Tasks**:
   - [ ] Write unit tests for `letterboxd_csv_parser_test.dart` (escaped quotes, missing ratings, empty lines).
@@ -298,7 +298,7 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 
 #### `QA-103`: In-Memory Drift SQLite DAO Unit Tests
 - **Spec Reference**:
-  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.3 (Drift DAOs)
+  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.3 (Drift DAOs)
 - **Scope & Objectives**: Test offline table CRUD and reactive stream emission using in-memory SQLite.
 - **Granular Tasks**:
   - [ ] Write `test/core/database/local_ranking_dao_test.dart`.
@@ -310,7 +310,7 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 
 #### `QA-104`: Widget Tests for Auth & Onboarding Screens
 - **Spec Reference**:
-  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §3.1 (Widget Tests)
+  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §3.1 (Widget Tests)
 - **Scope & Objectives**: Component-level widget testing for `SCR-01`, `SCR-02`, and `SCR-03`.
 - **Granular Tasks**:
   - [ ] Write `test/features/auth/auth_screen_test.dart`.
@@ -333,8 +333,8 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
 
 #### `ALGO-201`: Binary Insertion Sort Domain Logic & Boundary Handlers
 - **Spec Reference**:
-  - [**`features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md) §1 (The Beli Duel Mechanic)
-  - [**`technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md) §2 (Duel Engine Algorithm)
+  - [**`features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md) §1 (The Beli Duel Mechanic)
+  - [**`technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md) §2 (Duel Engine Algorithm)
 - **Scope & Objectives**: Pure Dart implementation of binary insertion sort with logarithmic bounds ($\mathcal{O}(\log_2 N)$).
 - **Granular Tasks**:
   - [ ] Create `lib/features/ranking/domain/binary_insertion_tournament.dart`.
@@ -350,8 +350,8 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
 
 #### `ALGO-202`: Dynamic Percentile Score Curve Calculator ($0.0 - 10.0$)
 - **Spec Reference**:
-  - [**`features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md) §2 (Score Formula)
-  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.1 (Dynamic Score Curve)
+  - [**`features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md) §2 (Score Formula)
+  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.1 (Dynamic Score Curve)
 - **Scope & Objectives**: Mathematical formula mapping rank positions $1 \dots N$ to a normalized $0.00 - 10.00$ decimal score.
 - **Granular Tasks**:
   - [ ] Create `lib/features/ranking/domain/score_curve_calculator.dart`.
@@ -365,8 +365,8 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
 
 #### `ALGO-203`: TrueSkill Uncertainty ($\sigma$) Decay & Confidence Tracking
 - **Spec Reference**:
-  - [**`features/08_ANIME_INTEGRATION_AND_HYBRID_CANON.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/08_ANIME_INTEGRATION_AND_HYBRID_CANON.md) §3 (TrueSkill & Confidence)
-  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.1 (TrueSkill Invariants)
+  - [**`features/08_ANIME_INTEGRATION_AND_HYBRID_CANON.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/08_ANIME_INTEGRATION_AND_HYBRID_CANON.md) §3 (TrueSkill & Confidence)
+  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.1 (TrueSkill Invariants)
 - **Scope & Objectives**: Track Bayesian ranking confidence $\sigma$ and transition titles between `Provisional` and `Locked`.
 - **Granular Tasks**:
   - [ ] Create `lib/features/ranking/domain/trueskill_confidence.dart`.
@@ -379,7 +379,7 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
 
 #### `ALGO-204`: Dual-Canon Media-Type Segregation Rules
 - **Spec Reference**:
-  - [**`features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md) §2 (Dual-Canon Architecture)
+  - [**`features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md) §2 (Dual-Canon Architecture)
 - **Scope & Objectives**: Strictly segregate Movie duels and scores from Series/Anime duels to prevent apples-to-oranges comparisons.
 - **Granular Tasks**:
   - [ ] Create `lib/features/ranking/domain/canon_type.dart` enum: `movie`, `series`.
@@ -392,8 +392,8 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
 
 #### `ALGO-205`: Riverpod `DuelController` State Machine
 - **Spec Reference**:
-  - [**`technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md) §2 (Duel State Machine)
-  - [**`design_system/04_USER_INTERACTION_FLOWS_AND_GESTURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/design_system/04_USER_INTERACTION_FLOWS_AND_GESTURES.md) §1 (Duel Sequence)
+  - [**`technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md) §2 (Duel State Machine)
+  - [**`design_system/04_USER_INTERACTION_FLOWS_AND_GESTURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/04_USER_INTERACTION_FLOWS_AND_GESTURES.md) §1 (Duel Sequence)
 - **Scope & Objectives**: Reactive Riverpod notifier orchestrating tournament progression, UI events, and persistence.
 - **Granular Tasks**:
   - [ ] Create `lib/features/ranking/presentation/controllers/duel_controller.dart`.
@@ -410,7 +410,7 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
 
 #### `BE-201`: PostgreSQL Procedure `insert_user_ranking_atomic`
 - **Spec Reference**:
-  - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §3.1 (Atomic Stored Procedure)
+  - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §3.1 (Atomic Stored Procedure)
 - **Scope & Objectives**: PL/pgSQL function shifting existing rows by +1 and recomputing dynamic scores atomically.
 - **Granular Tasks**:
   - [ ] Write PL/pgSQL function `insert_user_ranking_atomic(p_user_id, p_title_id, p_media_type, p_rank_position)`.
@@ -423,7 +423,7 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
 
 #### `BE-202`: Pairwise Duels Audit Logging
 - **Spec Reference**:
-  - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §2.3 (`pairwise_duels` table)
+  - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §2.3 (`pairwise_duels` table)
 - **Scope & Objectives**: Record every head-to-head decision to power taste match and upset detection.
 - **Granular Tasks**:
   - [ ] Create table `pairwise_duels` tracking `user_id`, `winner_id`, `loser_id`, `media_type`, `decision_time_ms`, `is_upset`.
@@ -439,8 +439,8 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
 
 #### `FE-201`: `SCR-10` Binary Duel Arena Screen & Card Layout
 - **Spec Reference**:
-  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §10 (`SCR-10`)
-  - [**`design_system/02_COMPONENT_LIBRARY_AND_PATTERNS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/design_system/02_COMPONENT_LIBRARY_AND_PATTERNS.md) §4 (Duel Arena Card Physics)
+  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §10 (`SCR-10`)
+  - [**`design_system/02_COMPONENT_LIBRARY_AND_PATTERNS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/02_COMPONENT_LIBRARY_AND_PATTERNS.md) §4 (Duel Arena Card Physics)
 - **Scope & Objectives**: Render the duel cards with poster images, title, release year, runtime, and central `VS` badge.
 - **Granular Tasks**:
   - [ ] Create `lib/features/ranking/presentation/screens/duel_arena_screen.dart`.
@@ -454,8 +454,8 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
 
 #### `FE-202`: Card Swipe Gestures, Spring Physics & Winner Transitions
 - **Spec Reference**:
-  - [**`design_system/04_USER_INTERACTION_FLOWS_AND_GESTURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/design_system/04_USER_INTERACTION_FLOWS_AND_GESTURES.md) §1 (Duel Gestures)
-  - [**`design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md) §5 (Haptic Sensations)
+  - [**`design_system/04_USER_INTERACTION_FLOWS_AND_GESTURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/04_USER_INTERACTION_FLOWS_AND_GESTURES.md) §1 (Duel Gestures)
+  - [**`design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md) §5 (Haptic Sensations)
 - **Scope & Objectives**: Implement fluid 60fps swipe/tap card interactions with physics spring-back.
 - **Granular Tasks**:
   - [ ] Wrap Duel Cards with `GestureDetector` and `AnimatedBuilder`.
@@ -469,8 +469,8 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
 
 #### `FE-203`: `SCR-11` Editorial Tagging Modal (MVP Character, Vibe Tags, Sub/Dub)
 - **Spec Reference**:
-  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §11 (`SCR-11`)
-  - [**`features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md) §3 (Editorial Tagging)
+  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §11 (`SCR-11`)
+  - [**`features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md) §3 (Editorial Tagging)
 - **Scope & Objectives**: Bottom sheet appearing post-tournament to capture subjective nuances.
 - **Granular Tasks**:
   - [ ] Create `lib/features/ranking/presentation/widgets/editorial_tagging_sheet.dart`.
@@ -484,7 +484,7 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
 
 #### `FE-204`: Movie-Specific Logging Tags in `SCR-11` (Cinema Venue, Rewatch Flag)
 - **Spec Reference**:
-  - [**`features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md) §3 (Theatrical Tracking)
+  - [**`features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md) §3 (Theatrical Tracking)
 - **Scope & Objectives**: Dynamically display cinema venue options and rewatch counters when logging a film.
 - **Granular Tasks**:
   - [ ] In `SCR-11`, inspect candidate `media_type`: if `'movie'`, render Theatrical Venue selector.
@@ -497,8 +497,8 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
 
 #### `FE-205`: `SCR-12` Celebration Slot Reveal Modal with Number Ticker
 - **Spec Reference**:
-  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §12 (`SCR-12`)
-  - [**`features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md) §4 (Slot Reveal)
+  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §12 (`SCR-12`)
+  - [**`features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md) §4 (Slot Reveal)
 - **Scope & Objectives**: Full-screen celebration screen revealing new title rank position and dynamic score.
 - **Granular Tasks**:
   - [ ] Create `lib/features/ranking/presentation/screens/slot_reveal_modal.dart`.
@@ -516,9 +516,9 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
 
 #### `FE-206`: `SCR-14` Dual-Canon Profile Header & Segmented Pill Switcher
 - **Spec Reference**:
-  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §14 (`SCR-14`)
-  - [**`features/06_PROFILE_THE_CANON_AND_STATS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/06_PROFILE_THE_CANON_AND_STATS.md) §1 (Profile Header)
-  - [**`features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md) §2 (Dual-Canon Switcher)
+  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §14 (`SCR-14`)
+  - [**`features/06_PROFILE_THE_CANON_AND_STATS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/06_PROFILE_THE_CANON_AND_STATS.md) §1 (Profile Header)
+  - [**`features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md) §2 (Dual-Canon Switcher)
 - **Scope & Objectives**: Profile screen featuring prominent segmented pill switching between Movie Canon and Series Canon.
 - **Granular Tasks**:
   - [ ] Create `lib/features/profile/presentation/screens/dual_canon_profile_screen.dart`.
@@ -531,8 +531,8 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
 
 #### `FE-207`: Three Canon View Modes (Ranked List, Tier View, 3x3 Grid)
 - **Spec Reference**:
-  - [**`features/06_PROFILE_THE_CANON_AND_STATS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/06_PROFILE_THE_CANON_AND_STATS.md) §2 (Multi-View Canon)
-  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §14 (`SCR-14`)
+  - [**`features/06_PROFILE_THE_CANON_AND_STATS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/06_PROFILE_THE_CANON_AND_STATS.md) §2 (Multi-View Canon)
+  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §14 (`SCR-14`)
 - **Scope & Objectives**: Implement 3 distinct visual presentations of the user's ranked list.
 - **Granular Tasks**:
   - [ ] Mode 1: **Ranked List** — numbered rows (#1, #2), poster thumbnail, dynamic score pill, and MVP badge.
@@ -545,7 +545,7 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
 
 #### `FE-208`: Anime Franchise Rollup Aggregator & Unbundle Toggle
 - **Spec Reference**:
-  - [**`features/08_ANIME_INTEGRATION_AND_HYBRID_CANON.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/08_ANIME_INTEGRATION_AND_HYBRID_CANON.md) §2 (Franchise Rollup)
+  - [**`features/08_ANIME_INTEGRATION_AND_HYBRID_CANON.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/08_ANIME_INTEGRATION_AND_HYBRID_CANON.md) §2 (Franchise Rollup)
 - **Scope & Objectives**: Allow users to collapse anime seasons/cours into a single franchise entity or unbundle them.
 - **Granular Tasks**:
   - [ ] Create `lib/features/ranking/domain/franchise_rollup_service.dart`.
@@ -558,7 +558,7 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
 
 #### `FE-209`: Reorderable Drag-and-Drop Manual Re-Indexing
 - **Spec Reference**:
-  - [**`design_system/04_USER_INTERACTION_FLOWS_AND_GESTURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/design_system/04_USER_INTERACTION_FLOWS_AND_GESTURES.md) §3 (Canon Reordering)
+  - [**`design_system/04_USER_INTERACTION_FLOWS_AND_GESTURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/04_USER_INTERACTION_FLOWS_AND_GESTURES.md) §3 (Canon Reordering)
 - **Scope & Objectives**: Allow users to manually drag titles to new positions with live score recalculation.
 - **Granular Tasks**:
   - [ ] Wrap Ranked List with `ReorderableListView.builder`.
@@ -574,7 +574,7 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
 
 #### `QA-201`: Unit Tests for Binary Insertion Sort Tournament Algorithm
 - **Spec Reference**:
-  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.1 (Tournament Invariants)
+  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.1 (Tournament Invariants)
 - **Scope & Objectives**: Stress test binary insertion sort across edge cases and large lists.
 - **Granular Tasks**:
   - [ ] Write `test/features/ranking/binary_insertion_tournament_test.dart`.
@@ -586,7 +586,7 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
 
 #### `QA-202`: Unit Tests for Dynamic Percentile Score Monotonicity
 - **Spec Reference**:
-  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.1 (Score Monotonicity)
+  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.1 (Score Monotonicity)
 - **Scope & Objectives**: Mathematically verify scoring curve invariants.
 - **Granular Tasks**:
   - [ ] Write `test/features/ranking/score_curve_calculator_test.dart`.
@@ -598,7 +598,7 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
 
 #### `QA-203`: pgTAP Test Suite for `insert_user_ranking_atomic`
 - **Spec Reference**:
-  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §3.3, §6 (pgTAP Stored Procs)
+  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §3.3, §6 (pgTAP Stored Procs)
 - **Scope & Objectives**: Verify database stored procedure integrity in Supabase container.
 - **Granular Tasks**:
   - [ ] Write `database/tests/01_insert_user_ranking_atomic_test.sql` using pgTAP.
@@ -610,7 +610,7 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
 
 #### `QA-204`: Widget Tests for Duel Arena (`SCR-10`) & Slot Reveal (`SCR-12`)
 - **Spec Reference**:
-  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §3.1 (Duel Arena Widget Test)
+  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §3.1 (Duel Arena Widget Test)
 - **Scope & Objectives**: Test card rendering, swipe callbacks, and animations.
 - **Granular Tasks**:
   - [ ] Write `test/features/ranking/duel_arena_screen_test.dart`.
@@ -632,8 +632,8 @@ Build social connections, the activity feed with real-time upset alert detection
 
 #### `BE-301`: Social Graph Schema, Follow Requests & Activity Log
 - **Spec Reference**:
-  - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §2.4 (`social_follows` table)
-  - [**`features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md) §1 (Social Graph)
+  - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §2.4 (`social_follows` table)
+  - [**`features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md) §1 (Social Graph)
 - **Scope & Objectives**: Manage bidirectional/unidirectional follow relationships with privacy boundaries.
 - **Granular Tasks**:
   - [ ] Create `social_follows` table with `follower_id`, `following_id`, `status` (`pending`, `accepted`).
@@ -646,8 +646,8 @@ Build social connections, the activity feed with real-time upset alert detection
 
 #### `BE-302`: Upset Engine Algorithmic Detection ($\mu_{\text{diff}} \ge 0.25$)
 - **Spec Reference**:
-  - [**`features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md) §2 (Upset Engine)
-  - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §3.2 (Upset Trigger)
+  - [**`features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md) §2 (Upset Engine)
+  - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §3.2 (Upset Trigger)
 - **Scope & Objectives**: Detect when a user's duel decision defies platform consensus by $\ge 25\%$.
 - **Granular Tasks**:
   - [ ] Create database trigger or function `detect_upset_duel(winner_id, loser_id)`.
@@ -659,7 +659,7 @@ Build social connections, the activity feed with real-time upset alert detection
 
 #### `BE-303`: Redis Timeline Fanout Caching for Friends Activity Feed
 - **Spec Reference**:
-  - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §4 (Redis Caching Keys)
+  - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §4 (Redis Caching Keys)
 - **Scope & Objectives**: Cache user activity feed in Redis ZSETs for $< 50\text{ ms}$ load times.
 - **Granular Tasks**:
   - [ ] Configure Redis client in Supabase Edge Functions / background worker.
@@ -671,8 +671,8 @@ Build social connections, the activity feed with real-time upset alert detection
 
 #### `BE-304`: Squads Database Schema & Borda Count Rank Aggregation RPC
 - **Spec Reference**:
-  - [**`features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md) §4 (Squad Leaderboards)
-  - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §2.5 (`squads` schema)
+  - [**`features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md) §4 (Squad Leaderboards)
+  - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §2.5 (`squads` schema)
 - **Scope & Objectives**: Group ranking aggregation combining individual canons into a consensus leaderboard.
 - **Granular Tasks**:
   - [ ] Create `squads` and `squad_members` tables.
@@ -689,8 +689,8 @@ Build social connections, the activity feed with real-time upset alert detection
 
 #### `FE-301`: `SCR-05` Activity Feed Screen with Tabs (`Following`, `Squads`, `Global`)
 - **Spec Reference**:
-  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §5 (`SCR-05`)
-  - [**`features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md) §1 (Feed UI)
+  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §5 (`SCR-05`)
+  - [**`features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md) §1 (Feed UI)
 - **Scope & Objectives**: Main social feed with infinite scrolling and filter tabs.
 - **Granular Tasks**:
   - [ ] Create `lib/features/feed/presentation/screens/activity_feed_screen.dart`.
@@ -703,8 +703,8 @@ Build social connections, the activity feed with real-time upset alert detection
 
 #### `FE-302`: Standard Activity Feed Card Component
 - **Spec Reference**:
-  - [**`design_system/02_COMPONENT_LIBRARY_AND_PATTERNS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/design_system/02_COMPONENT_LIBRARY_AND_PATTERNS.md) §3.2 (Feed Card)
-  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §5 (`SCR-05`)
+  - [**`design_system/02_COMPONENT_LIBRARY_AND_PATTERNS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/02_COMPONENT_LIBRARY_AND_PATTERNS.md) §3.2 (Feed Card)
+  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §5 (`SCR-05`)
 - **Scope & Objectives**: Render friend ranking activity with score badge, poster thumbnail, and tags.
 - **Granular Tasks**:
   - [ ] Create `lib/features/feed/presentation/widgets/feed_activity_card.dart`.
@@ -718,8 +718,8 @@ Build social connections, the activity feed with real-time upset alert detection
 
 #### `FE-303`: Spicy Upset Alert Feed Card with Neon Coral Badge
 - **Spec Reference**:
-  - [**`design_system/02_COMPONENT_LIBRARY_AND_PATTERNS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/design_system/02_COMPONENT_LIBRARY_AND_PATTERNS.md) §3.2 (Upset Card)
-  - [**`features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md) §2 (Upset Presentation)
+  - [**`design_system/02_COMPONENT_LIBRARY_AND_PATTERNS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/02_COMPONENT_LIBRARY_AND_PATTERNS.md) §3.2 (Upset Card)
+  - [**`features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md) §2 (Upset Presentation)
 - **Scope & Objectives**: High-visibility feed card highlighting controversial takes and spicy duels.
 - **Granular Tasks**:
   - [ ] Create `lib/features/feed/presentation/widgets/upset_activity_card.dart`.
@@ -733,7 +733,7 @@ Build social connections, the activity feed with real-time upset alert detection
 
 #### `FE-304`: 1-Tap `[ + Want to Watch ]` Queue Quick-Action
 - **Spec Reference**:
-  - [**`features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md) §3 (1-Tap Queue)
+  - [**`features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md) §3 (1-Tap Queue)
 - **Scope & Objectives**: Allow users to save titles spotted in their feed directly to their watchlist in 1 tap.
 - **Granular Tasks**:
   - [ ] Add bookmark icon button to all feed cards.
@@ -745,9 +745,9 @@ Build social connections, the activity feed with real-time upset alert detection
 
 #### `FE-305`: `SCR-06` Spoiler-Safe Discussion Thread & Tap-to-Reveal Blur
 - **Spec Reference**:
-  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §6 (`SCR-06`)
-  - [**`features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md) §3 (Spoiler Safe Comments)
-  - [**`adjacent_systems/05_TRUST_SAFETY_MODERATION_AND_ADMIN.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/adjacent_systems/05_TRUST_SAFETY_MODERATION_AND_ADMIN.md) §1 (Spoiler Masks)
+  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §6 (`SCR-06`)
+  - [**`features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md) §3 (Spoiler Safe Comments)
+  - [**`adjacent_systems/05_TRUST_SAFETY_MODERATION_AND_ADMIN.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/adjacent_systems/05_TRUST_SAFETY_MODERATION_AND_ADMIN.md) §1 (Spoiler Masks)
 - **Scope & Objectives**: Comments thread with automatic and user-tagged spoiler masking.
 - **Granular Tasks**:
   - [ ] Create `lib/features/feed/presentation/screens/comment_thread_screen.dart`.
@@ -764,8 +764,8 @@ Build social connections, the activity feed with real-time upset alert detection
 
 #### `FE-306`: `SCR-17` Squads Hub with Shared Canon & Activity
 - **Spec Reference**:
-  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §17 (`SCR-17`)
-  - [**`features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md) §4 (Squad Hub Specs)
+  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §17 (`SCR-17`)
+  - [**`features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md) §4 (Squad Hub Specs)
 - **Scope & Objectives**: Group hub for friend circles showing member avatars, joint consensus leaderboard, and squad feed.
 - **Granular Tasks**:
   - [ ] Create `lib/features/squads/presentation/screens/squad_hub_screen.dart`.
@@ -778,8 +778,8 @@ Build social connections, the activity feed with real-time upset alert detection
 
 #### `FE-307`: `SCR-18` The TV Graveyard (Dropped Tracking & Milestones)
 - **Spec Reference**:
-  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §18 (`SCR-18`)
-  - [**`features/03_SERIES_VS_SEASONS_AND_DROPPED_TRACKING.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/03_SERIES_VS_SEASONS_AND_DROPPED_TRACKING.md) §2 (The TV Graveyard)
+  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §18 (`SCR-18`)
+  - [**`features/03_SERIES_VS_SEASONS_AND_DROPPED_TRACKING.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/03_SERIES_VS_SEASONS_AND_DROPPED_TRACKING.md) §2 (The TV Graveyard)
 - **Scope & Objectives**: Dedicated profile tab for cataloging dropped series with milestone tracking.
 - **Granular Tasks**:
   - [ ] Create `lib/features/profile/presentation/screens/tv_graveyard_screen.dart`.
@@ -793,7 +793,7 @@ Build social connections, the activity feed with real-time upset alert detection
 
 #### `FE-308`: Dropped Show Logging Sheet & Reason Taxonomy
 - **Spec Reference**:
-  - [**`features/03_SERIES_VS_SEASONS_AND_DROPPED_TRACKING.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/03_SERIES_VS_SEASONS_AND_DROPPED_TRACKING.md) §2 (Graveyard Taxonomies)
+  - [**`features/03_SERIES_VS_SEASONS_AND_DROPPED_TRACKING.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/03_SERIES_VS_SEASONS_AND_DROPPED_TRACKING.md) §2 (Graveyard Taxonomies)
 - **Scope & Objectives**: Action sheet allowing users to move an active show to the Graveyard.
 - **Granular Tasks**:
   - [ ] Create `lib/features/profile/presentation/widgets/log_dropped_show_sheet.dart`.
@@ -810,7 +810,7 @@ Build social connections, the activity feed with real-time upset alert detection
 
 #### `QA-301`: Algorithmic Unit Tests for Borda Count Consensus Aggregator
 - **Spec Reference**:
-  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.1 (Borda Count)
+  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.1 (Borda Count)
 - **Scope & Objectives**: Test consensus rank ordering mathematically under missing/incomplete member data.
 - **Granular Tasks**:
   - [ ] Write `test/features/squads/borda_count_aggregator_test.dart`.
@@ -821,7 +821,7 @@ Build social connections, the activity feed with real-time upset alert detection
 
 #### `QA-302`: Unit Tests for Upset Detection Logic
 - **Spec Reference**:
-  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.1 (Upset Invariants)
+  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.1 (Upset Invariants)
 - **Scope & Objectives**: Validate mathematical condition $\mu_{\text{diff}} \ge 0.25$ triggers upsets reliably.
 - **Granular Tasks**:
   - [ ] Write `test/features/ranking/upset_detector_test.dart`.
@@ -832,7 +832,7 @@ Build social connections, the activity feed with real-time upset alert detection
 
 #### `QA-303`: Widget Tests for Feed Card, Upset Alert Card & Spoiler Masks
 - **Spec Reference**:
-  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §3.1 (Social Widgets)
+  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §3.1 (Social Widgets)
 - **Scope & Objectives**: Verify UI rendering and tap interactions on social cards.
 - **Granular Tasks**:
   - [ ] Write `test/features/feed/feed_activity_card_test.dart`.
@@ -844,7 +844,7 @@ Build social connections, the activity feed with real-time upset alert detection
 
 #### `QA-304`: pgTAP Tests for Social Follows, RLS & Feeds
 - **Spec Reference**:
-  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §3.3 (RLS Policies)
+  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §3.3 (RLS Policies)
 - **Scope & Objectives**: Verify database security rules and follow isolation.
 - **Granular Tasks**:
   - [ ] Write `database/tests/02_social_follows_rls_test.sql`.
@@ -866,8 +866,8 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
 
 #### `BE-401`: Supabase `calculate_taste_match_rpc` Stored Procedure
 - **Spec Reference**:
-  - [**`features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md) §1 (Spearman Rank Math)
-  - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §3.2 (Taste Match RPC)
+  - [**`features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md) §1 (Spearman Rank Math)
+  - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §3.2 (Taste Match RPC)
 - **Scope & Objectives**: PL/pgSQL function computing Spearman Rank Correlation ($\rho$) with Bayesian shrinkage.
 - **Granular Tasks**:
   - [ ] Write procedure `calculate_taste_match_rpc(p_user_a, p_user_b, p_media_type)`.
@@ -883,8 +883,8 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
 
 #### `BE-402`: JustWatch / Watchmode Real-Time Availability Scraper & Redis Cache
 - **Spec Reference**:
-  - [**`technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md) §2 (JustWatch Pipeline)
-  - [**`features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md) §2 (Streaming Availability)
+  - [**`technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md) §2 (JustWatch Pipeline)
+  - [**`features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md) §2 (Streaming Availability)
 - **Scope & Objectives**: Fetch streaming availability per title and cache in Redis with 24-hour TTL.
 - **Granular Tasks**:
   - [ ] Create Supabase Edge Function `functions/streaming-availability/index.ts`.
@@ -897,8 +897,8 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
 
 #### `BE-403`: Streaming Provider Regional Catalog Synchronizer
 - **Spec Reference**:
-  - [**`technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md) §2 (Catalog Updates)
-  - [**`adjacent_systems/03_SETTINGS_AND_PREFERENCES_ARCHITECTURE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/adjacent_systems/03_SETTINGS_AND_PREFERENCES_ARCHITECTURE.md) §2 (Streaming Settings)
+  - [**`technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md) §2 (Catalog Updates)
+  - [**`adjacent_systems/03_SETTINGS_AND_PREFERENCES_ARCHITECTURE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/adjacent_systems/03_SETTINGS_AND_PREFERENCES_ARCHITECTURE.md) §2 (Streaming Settings)
 - **Scope & Objectives**: Daily cron pipeline refreshing regional streaming catalog changes and expiration alerts.
 - **Granular Tasks**:
   - [ ] Setup daily GitHub Actions / Supabase cron job querying catalog additions and removals.
@@ -913,8 +913,8 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
 
 #### `FE-401`: `SCR-15` Friend Profile & Taste Comparison View
 - **Spec Reference**:
-  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §15 (`SCR-15`)
-  - [**`features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md) §2 (Comparison UI)
+  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §15 (`SCR-15`)
+  - [**`features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md) §2 (Comparison UI)
 - **Scope & Objectives**: Dedicated friend profile view prominently showcasing mutual taste compatibility.
 - **Granular Tasks**:
   - [ ] Create `lib/features/profile/presentation/screens/friend_profile_screen.dart`.
@@ -927,8 +927,8 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
 
 #### `FE-402`: Dual Taste Match Breakdown Widgets (Movie Match % vs Series Match %)
 - **Spec Reference**:
-  - [**`features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md) §5 (Dual Taste Match)
-  - [**`features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md) §2 (Sub-scores)
+  - [**`features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md) §5 (Dual Taste Match)
+  - [**`features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md) §2 (Sub-scores)
 - **Scope & Objectives**: Break down taste compatibility into Movie Taste Match % and Series Taste Match %.
 - **Granular Tasks**:
   - [ ] Build sub-card displaying dual score pills:
@@ -941,7 +941,7 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
 
 #### `FE-403`: Mutual Agreements & Disagreements Breakdown Row
 - **Spec Reference**:
-  - [**`features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md) §2 (Agreements / Clashes)
+  - [**`features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md) §2 (Agreements / Clashes)
 - **Scope & Objectives**: Highlight the exact titles two friends agree on most and argue about most.
 - **Granular Tasks**:
   - [ ] Render *"Where You Agree"* row (both have in Top 5, e.g., *Succession*).
@@ -957,8 +957,8 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
 
 #### `FE-404`: `SCR-16` "Two-to-Watch" Co-Watching Decider Hub
 - **Spec Reference**:
-  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §16 (`SCR-16`)
-  - [**`features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md) §3 (Decider Engine)
+  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §16 (`SCR-16`)
+  - [**`features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md) §3 (Decider Engine)
 - **Scope & Objectives**: The couch decider screen combining shared subscriptions, watchlists, and candidate rankings.
 - **Granular Tasks**:
   - [ ] Create `lib/features/cowatch/presentation/screens/two_to_watch_screen.dart`.
@@ -972,8 +972,8 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
 
 #### `FE-405`: Format Toggle (`[ 🎬 Movie Night ]` vs `[ 📺 Series ]`) & Runtime Budget Filters
 - **Spec Reference**:
-  - [**`features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md) §5 (Movie Night Decider)
-  - [**`features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md) §3 (Filters)
+  - [**`features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md) §5 (Movie Night Decider)
+  - [**`features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md) §3 (Filters)
 - **Scope & Objectives**: Quick filter pills to constrain co-watching candidates by format and available time.
 - **Granular Tasks**:
   - [ ] Format Segmented Control: `[ 🎬 Movie Night ]` | `[ 📺 TV Series ]`.
@@ -988,8 +988,8 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
 
 #### `FE-406`: Mutual Quick-Swipe Mini-Game Card Swiper
 - **Spec Reference**:
-  - [**`features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md) §3 (Quick Swipe Mode)
-  - [**`design_system/04_USER_INTERACTION_FLOWS_AND_GESTURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/design_system/04_USER_INTERACTION_FLOWS_AND_GESTURES.md) §2 (Co-Watch Gestures)
+  - [**`features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md) §3 (Quick Swipe Mode)
+  - [**`design_system/04_USER_INTERACTION_FLOWS_AND_GESTURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/04_USER_INTERACTION_FLOWS_AND_GESTURES.md) §2 (Co-Watch Gestures)
 - **Scope & Objectives**: 15-second simultaneous card swiping session that resolves on first mutual right-swipe.
 - **Granular Tasks**:
   - [ ] Build card deck presentation using `flutter_card_swiper`.
@@ -1002,8 +1002,8 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
 
 #### `FE-407`: `StreamingDeepLinkFactory` Service
 - **Spec Reference**:
-  - [**`technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md) §3 (Deep Links)
-  - [**`features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md) §2 (App Linking)
+  - [**`technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md) §3 (Deep Links)
+  - [**`features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md) §2 (App Linking)
 - **Scope & Objectives**: Generate native URI schemes launching directly into installed streaming apps.
 - **Granular Tasks**:
   - [ ] Create `lib/core/services/streaming_deep_link_factory.dart`.
@@ -1021,8 +1021,8 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
 
 #### `FE-408`: `SCR-13` Smart Queue Screen with Dual Watchlists
 - **Spec Reference**:
-  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §13 (`SCR-13`)
-  - [**`features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md) §1 (Smart Watchlist)
+  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §13 (`SCR-13`)
+  - [**`features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md) §1 (Smart Watchlist)
 - **Scope & Objectives**: Universal queue with segregated Movie/Series watchlists and streaming filters.
 - **Granular Tasks**:
   - [ ] Create `lib/features/queue/presentation/screens/smart_queue_screen.dart`.
@@ -1039,7 +1039,7 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
 
 #### `QA-401`: Mathematical Unit Tests for Spearman Rank Correlation ($\rho$) & Bayesian Shrinkage
 - **Spec Reference**:
-  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.1 (Correlation Invariants)
+  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.1 (Correlation Invariants)
 - **Scope & Objectives**: Test Spearman correlation formulas, low-sample shrinkage, and score stability.
 - **Granular Tasks**:
   - [ ] Write `test/features/cowatch/spearman_correlation_test.dart`.
@@ -1051,7 +1051,7 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
 
 #### `QA-402`: Unit Tests for `StreamingDeepLinkFactory`
 - **Spec Reference**:
-  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.1 (Deep Links)
+  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.1 (Deep Links)
 - **Scope & Objectives**: Test URI construction and web fallback routes.
 - **Granular Tasks**:
   - [ ] Write `test/core/services/streaming_deep_link_factory_test.dart`.
@@ -1061,7 +1061,7 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
 
 #### `QA-403`: Integration Tests for "Two-to-Watch" Joint Candidate Scoring
 - **Spec Reference**:
-  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §3.2 (Integration Tests)
+  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §3.2 (Integration Tests)
 - **Scope & Objectives**: Test candidate pool assembly and joint score calculation across two mock users.
 - **Granular Tasks**:
   - [ ] Write `test/features/cowatch/two_to_watch_engine_test.dart`.
@@ -1072,7 +1072,7 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
 
 #### `QA-404`: pgTAP Tests for `calculate_taste_match_rpc`
 - **Spec Reference**:
-  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §3.3 (Taste Match pgTAP)
+  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §3.3 (Taste Match pgTAP)
 - **Scope & Objectives**: Verify PostgreSQL PL/pgSQL procedure returns accurate percentages in $< 15\text{ ms}$.
 - **Granular Tasks**:
   - [ ] Write `database/tests/03_taste_match_rpc_test.sql`.
@@ -1093,8 +1093,8 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 
 #### `FE-501`: `StoryCardRenderer` Off-Screen 1080x1920 9:16 Graphic Generator
 - **Spec Reference**:
-  - [**`adjacent_systems/04_VIRAL_SHARING_AND_EXPORT_STUDIO.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/adjacent_systems/04_VIRAL_SHARING_AND_EXPORT_STUDIO.md) §1 (Story Generator)
-  - [**`technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md) §4 (Story Card Renderer)
+  - [**`adjacent_systems/04_VIRAL_SHARING_AND_EXPORT_STUDIO.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/adjacent_systems/04_VIRAL_SHARING_AND_EXPORT_STUDIO.md) §1 (Story Generator)
+  - [**`technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md) §4 (Story Card Renderer)
 - **Scope & Objectives**: Render pixel-perfect 1080x1920 Instagram/TikTok story images off-screen without blocking UI.
 - **Granular Tasks**:
   - [ ] Create `lib/features/sharing/presentation/widgets/story_card_renderer.dart`.
@@ -1107,8 +1107,8 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 
 #### `FE-502`: `SCR-19` Telly Wrapped Studio (Top 9 Grids & Annual Recaps)
 - **Spec Reference**:
-  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §19 (`SCR-19`)
-  - [**`adjacent_systems/04_VIRAL_SHARING_AND_EXPORT_STUDIO.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/adjacent_systems/04_VIRAL_SHARING_AND_EXPORT_STUDIO.md) §2 (Story Templates)
+  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §19 (`SCR-19`)
+  - [**`adjacent_systems/04_VIRAL_SHARING_AND_EXPORT_STUDIO.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/adjacent_systems/04_VIRAL_SHARING_AND_EXPORT_STUDIO.md) §2 (Story Templates)
 - **Scope & Objectives**: Studio screen offering aesthetic templates for social sharing.
 - **Granular Tasks**:
   - [ ] Template 1: **Top 9 Movie Canon Grid** with aesthetic poster tiles and scores.
@@ -1122,8 +1122,8 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 
 #### `FE-503`: Letterboxd Migration Celebration Card Generator
 - **Spec Reference**:
-  - [**`features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md) §4 (Celebration Card)
-  - [**`adjacent_systems/04_VIRAL_SHARING_AND_EXPORT_STUDIO.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/adjacent_systems/04_VIRAL_SHARING_AND_EXPORT_STUDIO.md) §2 (Viral Templates)
+  - [**`features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md) §4 (Celebration Card)
+  - [**`adjacent_systems/04_VIRAL_SHARING_AND_EXPORT_STUDIO.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/adjacent_systems/04_VIRAL_SHARING_AND_EXPORT_STUDIO.md) §2 (Viral Templates)
 - **Scope & Objectives**: High-converting shareable graphic for Letterboxd immigrants.
 - **Granular Tasks**:
   - [ ] Generate graphic stating: *"Imported 412 films from Letterboxd to Telly — here is my true #1 ranked movie"*.
@@ -1134,7 +1134,7 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 
 #### `FE-504`: Drift SQLite Offline Write-Ahead Log (WAL) & Auto-Sync Engine
 - **Spec Reference**:
-  - [**`technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md) §3 (Offline Sync Architecture)
+  - [**`technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md) §3 (Offline Sync Architecture)
 - **Scope & Objectives**: 0ms optimistic UI updates during airplane mode with FIFO queue flushing on reconnect.
 - **Granular Tasks**:
   - [ ] Create `lib/core/network/offline_sync_manager.dart`.
@@ -1147,8 +1147,8 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 
 #### `FE-505`: `SCR-20` Settings Hub & Granular Preferences
 - **Spec Reference**:
-  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §20 (`SCR-20`)
-  - [**`adjacent_systems/03_SETTINGS_AND_PREFERENCES_ARCHITECTURE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/adjacent_systems/03_SETTINGS_AND_PREFERENCES_ARCHITECTURE.md) §1–§4 (Settings Hierarchy)
+  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §20 (`SCR-20`)
+  - [**`adjacent_systems/03_SETTINGS_AND_PREFERENCES_ARCHITECTURE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/adjacent_systems/03_SETTINGS_AND_PREFERENCES_ARCHITECTURE.md) §1–§4 (Settings Hierarchy)
 - **Scope & Objectives**: Central configuration hub for account, streaming services, push notifications, and storage.
 - **Granular Tasks**:
   - [ ] Account section: Change phone/email, FaceID biometric unlock toggle.
@@ -1161,7 +1161,7 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 
 #### `FE-506`: Self-Service CSV, Notion & Letterboxd Data Exporter
 - **Spec Reference**:
-  - [**`adjacent_systems/04_VIRAL_SHARING_AND_EXPORT_STUDIO.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/adjacent_systems/04_VIRAL_SHARING_AND_EXPORT_STUDIO.md) §4 (Data Portability)
+  - [**`adjacent_systems/04_VIRAL_SHARING_AND_EXPORT_STUDIO.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/adjacent_systems/04_VIRAL_SHARING_AND_EXPORT_STUDIO.md) §4 (Data Portability)
 - **Scope & Objectives**: GDPR-compliant full data export in CSV, Notion-compatible schema, and Letterboxd format.
 - **Granular Tasks**:
   - [ ] Create `lib/features/profile/domain/data_exporter.dart`.
@@ -1174,8 +1174,8 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 
 #### `FE-507`: `SCR-08` Edit Profile Studio, Avatar Cropper & Top 3 Showcase
 - **Spec Reference**:
-  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §8 (`SCR-08`)
-  - [**`adjacent_systems/02_PROFILE_MANAGEMENT_AND_CUSTOMIZATION.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/adjacent_systems/02_PROFILE_MANAGEMENT_AND_CUSTOMIZATION.md) §1–§2 (Profile Studio)
+  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §8 (`SCR-08`)
+  - [**`adjacent_systems/02_PROFILE_MANAGEMENT_AND_CUSTOMIZATION.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/adjacent_systems/02_PROFILE_MANAGEMENT_AND_CUSTOMIZATION.md) §1–§2 (Profile Studio)
 - **Scope & Objectives**: Profile personalization screen with square avatar cropping and Top 3 title curation.
 - **Granular Tasks**:
   - [ ] Implement avatar upload using `image_picker` and `image_cropper` (1:1 aspect ratio constraint).
@@ -1188,7 +1188,7 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 
 #### `FE-508`: In-App Spoiler Shield & Report Content Sheets
 - **Spec Reference**:
-  - [**`adjacent_systems/05_TRUST_SAFETY_MODERATION_AND_ADMIN.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/adjacent_systems/05_TRUST_SAFETY_MODERATION_AND_ADMIN.md) §1–§2 (Trust & Safety)
+  - [**`adjacent_systems/05_TRUST_SAFETY_MODERATION_AND_ADMIN.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/adjacent_systems/05_TRUST_SAFETY_MODERATION_AND_ADMIN.md) §1–§2 (Trust & Safety)
 - **Scope & Objectives**: Apple Guideline 1.2 compliant user reporting and proactive show muting shields.
 - **Granular Tasks**:
   - [ ] Build Proactive Show Mute Sheet: Mute any series or movie (e.g., hide all posts about *House of the Dragon* until watched).
@@ -1204,8 +1204,8 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 
 #### `DEV-501`: GitHub Actions CI/CD Pipeline Configuration
 - **Spec Reference**:
-  - [**`technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md) §2 (CI/CD Pipelines)
-  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §7 (Quality Gates)
+  - [**`technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md) §2 (CI/CD Pipelines)
+  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §7 (Quality Gates)
 - **Scope & Objectives**: Automate linting, unit testing, widget testing, and build artifact creation on every pull request.
 - **Granular Tasks**:
   - [ ] Configure `.github/workflows/pull_request.yml`.
@@ -1219,7 +1219,7 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 
 #### `DEV-502`: Fastlane Automated TestFlight & Google Play Deployment
 - **Spec Reference**:
-  - [**`technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md) §2 (Fastlane Lanes)
+  - [**`technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md) §2 (Fastlane Lanes)
 - **Scope & Objectives**: 1-command build and upload to Apple TestFlight and Google Play Internal Track.
 - **Granular Tasks**:
   - [ ] Configure `ios/fastlane/Fastfile` with lane `beta` (Match code signing, build ipa, upload to TestFlight).
@@ -1231,8 +1231,8 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 
 #### `DEV-503`: Sentry Error Monitoring & PostHog Telemetry SDK Setup
 - **Spec Reference**:
-  - [**`technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md) §3 (Observability)
-  - [**`technical_architecture/01_TECH_STACK_AND_LIBRARIES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/01_TECH_STACK_AND_LIBRARIES.md) §2 (Monitoring Libs)
+  - [**`technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md) §3 (Observability)
+  - [**`technical_architecture/01_TECH_STACK_AND_LIBRARIES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/01_TECH_STACK_AND_LIBRARIES.md) §2 (Monitoring Libs)
 - **Scope & Objectives**: Real-time crash diagnostics, performance tracing, and product telemetry.
 - **Granular Tasks**:
   - [ ] Initialize `sentry_flutter` in `main.dart` with DSN from `.env`.
@@ -1244,7 +1244,7 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 
 #### `DEV-504`: Cloudflare Turnstile & Edge Caching Configuration
 - **Spec Reference**:
-  - [**`technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md) §1 (Edge Caching)
+  - [**`technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md) §1 (Edge Caching)
 - **Scope & Objectives**: Protect public endpoints and cache static poster metadata at the edge.
 - **Granular Tasks**:
   - [ ] Route `api.telly.app` through Cloudflare proxy.
@@ -1260,8 +1260,8 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 
 #### `LEGAL-501`: Deploy Live Privacy Policy & EULA Web Endpoints
 - **Spec Reference**:
-  - [**`legal/PRIVACY_POLICY.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/legal/PRIVACY_POLICY.md) (Full Privacy Policy)
-  - [**`legal/TERMS_OF_SERVICE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/legal/TERMS_OF_SERVICE.md) (Standard EULA)
+  - [**`legal/PRIVACY_POLICY.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/legal/PRIVACY_POLICY.md) (Full Privacy Policy)
+  - [**`legal/TERMS_OF_SERVICE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/legal/TERMS_OF_SERVICE.md) (Standard EULA)
 - **Scope & Objectives**: Host compliant legal documentation required for App Store and Google Play approval.
 - **Granular Tasks**:
   - [ ] Host static markdown/HTML at `https://telly.app/privacy` and `https://telly.app/terms`.
@@ -1272,8 +1272,8 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 
 #### `LEGAL-502`: Apple Guideline 1.2 UGC Compliance & 30-Day Account Deletion Pipeline
 - **Spec Reference**:
-  - [**`adjacent_systems/05_TRUST_SAFETY_MODERATION_AND_ADMIN.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/adjacent_systems/05_TRUST_SAFETY_MODERATION_AND_ADMIN.md) §5 (Account Deletion & UGC)
-  - [**`technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md) §4 (App Store Guidelines)
+  - [**`adjacent_systems/05_TRUST_SAFETY_MODERATION_AND_ADMIN.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/adjacent_systems/05_TRUST_SAFETY_MODERATION_AND_ADMIN.md) §5 (Account Deletion & UGC)
+  - [**`technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md) §4 (App Store Guidelines)
 - **Scope & Objectives**: Satisfy Apple Guideline 1.2 (User Generated Content) and mandatory self-service account deletion.
 - **Granular Tasks**:
   - [ ] Implement self-service "Delete Account" button in `SCR-20` Settings with confirmation dialog.
@@ -1285,7 +1285,7 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 
 #### `LEGAL-503`: Production App Store Connect & Google Play Console Submission
 - **Spec Reference**:
-  - [**`technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md) §4 (Launch Checklist)
+  - [**`technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md) §4 (Launch Checklist)
 - **Scope & Objectives**: Submit production binaries, localized metadata, and screenshots for store review.
 - **Granular Tasks**:
   - [ ] Prepare 6.7" iPhone and 12.9" iPad App Store screenshots showcasing OLED dark theme.
@@ -1302,7 +1302,7 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 
 #### `QA-501`: End-to-End Test Suite for All 4 Critical User Journeys (CUJ-01 to CUJ-04)
 - **Spec Reference**:
-  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §4 (E2E Test Specifications)
+  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §4 (E2E Test Specifications)
 - **Scope & Objectives**: Automate complete user journeys using `package:integration_test`.
 - **Granular Tasks**:
   - [ ] Write `integration_test/cuj_01_onboarding_test.dart` (Onboarding to Initial Canon calibration).
@@ -1315,7 +1315,7 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 
 #### `QA-502`: Visual Golden Regression Test Suite for OLED Dark Surfaces & Tokens
 - **Spec Reference**:
-  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §5.1 (Golden Tests)
+  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §5.1 (Golden Tests)
 - **Scope & Objectives**: Prevent visual regressions across design tokens, dark surfaces, and typography.
 - **Granular Tasks**:
   - [ ] Create `test/goldens/screen_goldens_test.dart`.
@@ -1327,7 +1327,7 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 
 #### `QA-503`: WCAG 2.1 AA Accessibility Automated Semantics Audit
 - **Spec Reference**:
-  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §5.2 (Accessibility Audit)
+  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §5.2 (Accessibility Audit)
 - **Scope & Objectives**: Ensure screen reader accessibility and physical touch target sizes.
 - **Granular Tasks**:
   - [ ] Write `test/a11y/accessibility_test.dart` using `tester.getSemantics()`.
@@ -1339,7 +1339,7 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 
 #### `QA-504`: 60fps/120fps Frame Rate Benchmarking & Jank Regression Profiling
 - **Spec Reference**:
-  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §5.3 (Frame Rate Profiling)
+  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §5.3 (Frame Rate Profiling)
 - **Scope & Objectives**: Profile rendering pipeline to eliminate dropped frames and memory leaks.
 - **Granular Tasks**:
   - [ ] Write `test_driver/perf_driver.dart` measuring frame rasterization times during rapid feed scrolling and duel card swiping.
@@ -1350,7 +1350,7 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 
 #### `QA-505`: Offline WAL Stress & Network Partitioning Recovery Tests
 - **Spec Reference**:
-  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §4 (CUJ-04), §2.3 (WAL Storage)
+  - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §4 (CUJ-04), §2.3 (WAL Storage)
 - **Scope & Objectives**: Verify data consistency during erratic network dropouts and sudden app kills.
 - **Granular Tasks**:
   - [ ] Test simulating 50 offline duel votes followed by process kill and restart.
