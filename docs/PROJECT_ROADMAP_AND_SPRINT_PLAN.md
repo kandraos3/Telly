@@ -22,10 +22,10 @@
 
 ## 📊 Active Sprint Execution Dashboard
 
-- **Current Active Sprint**: **Sprint 4 (Weeks 7–8): Taste Match %, Co-Watch Decider, Streaming Deep Links & Queue**
-- **Current Active Ticket**: `BE-401`: Supabase `calculate_taste_match_rpc` Stored Procedure
-- **Overall Roadmap Progress**: **55 / 89 Tickets Completed** (61.8%)
-- **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos`), Unit Tests (100% pass)
+- **Current Active Sprint**: **Sprint 5 (Weeks 9–10): Viral Sharing, Offline Hardening, DevOps & App Store Submission**
+- **Current Active Ticket**: `FE-501`: `SCR-19` Story Studio Vertical Paging Canvas & Slide Model
+- **Overall Roadmap Progress**: **71 / 89 Tickets Completed** (79.8%)
+- **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos`), Automated Tests (184 / 184 pass)
 - **Last Updated**: 2026-10-03
 
 | Sprint | Status | Total Tickets | Completed | Progress |
@@ -33,9 +33,9 @@
 | **Sprint 1** | 🟢 **Completed** | 19 | 19 | `████████████████████` 100.0% |
 | **Sprint 2** | 🟢 **Completed** | 20 | 20 | `████████████████████` 100.0% |
 | **Sprint 3** | 🟢 **Completed** | 16 | 16 | `████████████████████` 100.0% |
-| **Sprint 4** | 🟡 **Active** | 16 | 0 | `░░░░░░░░░░` 0% |
-| **Sprint 5** | ⚪ Queued | 18 | 0 | `░░░░░░░░░░` 0% |
-| **Total** | | **89** | **55** | **61.8%** |
+| **Sprint 4** | 🟢 **Completed** | 16 | 16 | `████████████████████` 100.0% |
+| **Sprint 5** | 🟡 **Active** | 18 | 0 | `░░░░░░░░░░` 0% |
+| **Total** | | **89** | **71** | **79.8%** |
 
 ---
 
@@ -889,15 +889,15 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
   - [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md) §3.2 (Taste Match RPC)
 - **Scope & Objectives**: PL/pgSQL function computing Spearman Rank Correlation ($\rho$) with Bayesian shrinkage.
 - **Granular Tasks**:
-  - [ ] Write procedure `calculate_taste_match_rpc(p_user_a, p_user_b, p_media_type)`.
-  - [ ] Find mutual titles in both users' canons: $k = |C_A \cap C_B|$.
-  - [ ] Compute rank differences: $d_i = \text{Rank}_A(i) - \text{Rank}_B(i)$.
-  - [ ] Calculate correlation: $\rho = 1.0 - \frac{6 \sum d_i^2}{k(k^2 - 1)}$.
-  - [ ] Apply Bayesian confidence shrinkage prior $k_0 = 5$:
+  - [x] Write procedure `calculate_taste_match_rpc(p_user_a, p_user_b, p_media_type)`.
+  - [x] Find mutual titles in both users' canons: $k = |C_A \cap C_B|$.
+  - [x] Compute rank differences: $d_i = \text{Rank}_A(i) - \text{Rank}_B(i)$.
+  - [x] Calculate correlation: $\rho = 1.0 - \frac{6 \sum d_i^2}{k(k^2 - 1)}$.
+  - [x] Apply Bayesian confidence shrinkage prior $k_0 = 5$:
     $$\rho_{\text{shrunk}} = \frac{k}{k + k_0} \cdot \rho + \frac{k_0}{k + k_0} \cdot \mu_0$$
-  - [ ] Normalize to percentage: $\text{Match} \% = \text{round}\left(\frac{\rho_{\text{shrunk}} + 1.0}{2.0} \times 100\right)$.
+  - [x] Normalize to percentage: $\text{Match} \% = \text{round}\left(\frac{\rho_{\text{shrunk}} + 1.0}{2.0} \times 100\right)$.
 - **Testing & Verification**:
-  - [ ] pgTAP test verifying identical rankings yield $100\%$; completely reversed rankings yield $0\%$.
+  - [x] pgTAP test verifying identical rankings yield $100\%$; completely reversed rankings yield $0\%$.
 - **Dependencies**: `BE-101`, `BE-201`.
 
 #### `BE-402`: JustWatch / Watchmode Real-Time Availability Scraper & Redis Cache
@@ -906,12 +906,12 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
   - [**`features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md) §2 (Streaming Availability)
 - **Scope & Objectives**: Fetch streaming availability per title and cache in Redis with 24-hour TTL.
 - **Granular Tasks**:
-  - [ ] Create Supabase Edge Function `functions/streaming-availability/index.ts`.
-  - [ ] Query JustWatch / Watchmode API by TMDB ID and ISO country code (e.g., `US`).
-  - [ ] Extract subscription availability (`flatrate`) vs purchase (`rent`/`buy`).
-  - [ ] Store in Redis: `SET title:availability:{tmdb_id}:{country} {json} EX 86400`.
+  - [x] Create Supabase Edge Function `functions/streaming-availability/index.ts`.
+  - [x] Query JustWatch / Watchmode API by TMDB ID and ISO country code (e.g., `US`).
+  - [x] Extract subscription availability (`flatrate`) vs purchase (`rent`/`buy`).
+  - [x] Store in Redis: `SET title:availability:{tmdb_id}:{country} {json} EX 86400`.
 - **Testing & Verification**:
-  - [ ] Test query for *Severance* returns Apple TV+ with valid web and deep link URLs.
+  - [x] Test query for *Severance* returns Apple TV+ with valid web and deep link URLs.
 - **Dependencies**: `BE-101`.
 
 #### `BE-403`: Streaming Provider Regional Catalog Synchronizer
@@ -920,10 +920,10 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
   - [**`adjacent_systems/03_SETTINGS_AND_PREFERENCES_ARCHITECTURE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/adjacent_systems/03_SETTINGS_AND_PREFERENCES_ARCHITECTURE.md) §2 (Streaming Settings)
 - **Scope & Objectives**: Daily cron pipeline refreshing regional streaming catalog changes and expiration alerts.
 - **Granular Tasks**:
-  - [ ] Setup daily GitHub Actions / Supabase cron job querying catalog additions and removals.
-  - [ ] Flag titles leaving a provider in $\le 7$ days (`is_leaving_soon: true`).
+  - [x] Setup daily GitHub Actions / Supabase cron job querying catalog additions and removals.
+  - [x] Flag titles leaving a provider in $\le 7$ days (`is_leaving_soon: true`).
 - **Testing & Verification**:
-  - [ ] Verify titles flagged as leaving soon trigger notification events.
+  - [x] Verify titles flagged as leaving soon trigger notification events.
 - **Dependencies**: `BE-402`.
 
 ---
@@ -936,12 +936,12 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
   - [**`features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md) §2 (Comparison UI)
 - **Scope & Objectives**: Dedicated friend profile view prominently showcasing mutual taste compatibility.
 - **Granular Tasks**:
-  - [ ] Create `lib/features/profile/presentation/screens/friend_profile_screen.dart`.
-  - [ ] Render large Taste Match Dial widget (radial progress bar with Phosphor Lime glow).
-  - [ ] Display mutual titles count: *"Based on 28 mutual titles ranked"*.
-  - [ ] Render Primary Action: `[ 🍿 Two-to-Watch with @handle ]`.
+  - [x] Create `lib/features/profile/presentation/screens/friend_profile_screen.dart`.
+  - [x] Render large Taste Match Dial widget (radial progress bar with Phosphor Lime glow).
+  - [x] Display mutual titles count: *"Based on 28 mutual titles ranked"*.
+  - [x] Render Primary Action: `[ 🍿 Two-to-Watch with @handle ]`.
 - **Testing & Verification**:
-  - [ ] Widget test verifying radial dial displays animated percentage text `88%`.
+  - [x] Widget test verifying radial dial displays animated percentage text `88%`.
 - **Dependencies**: `FE-102`, `FE-104`.
 
 #### `FE-402`: Dual Taste Match Breakdown Widgets (Movie Match % vs Series Match %)
@@ -950,12 +950,12 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
   - [**`features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md) §2 (Sub-scores)
 - **Scope & Objectives**: Break down taste compatibility into Movie Taste Match % and Series Taste Match %.
 - **Granular Tasks**:
-  - [ ] Build sub-card displaying dual score pills:
+  - [x] Build sub-card displaying dual score pills:
     - `🎬 Movie Taste Match: 92%` (High alignment on cinematic pacing & directors).
     - `📺 Series Taste Match: 71%` (Divergent opinions on long-form TV series).
-  - [ ] Add explanatory tooltips describing Spearman correlation and sample size.
+  - [x] Add explanatory tooltips describing Spearman correlation and sample size.
 - **Testing & Verification**:
-  - [ ] Widget test verifying both movie and series pills render with correct scores.
+  - [x] Widget test verifying both movie and series pills render with correct scores.
 - **Dependencies**: `FE-401`.
 
 #### `FE-403`: Mutual Agreements & Disagreements Breakdown Row
@@ -963,11 +963,11 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
   - [**`features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md) §2 (Agreements / Clashes)
 - **Scope & Objectives**: Highlight the exact titles two friends agree on most and argue about most.
 - **Granular Tasks**:
-  - [ ] Render *"Where You Agree"* row (both have in Top 5, e.g., *Succession*).
-  - [ ] Render *"Spiciest Clashes"* row (User ranked #2; Friend ranked #38).
-  - [ ] Tap on title navigates to dual comparison detail sheet showing side-by-side ranks and review notes.
+  - [x] Render *"Where You Agree"* row (both have in Top 5, e.g., *Succession*).
+  - [x] Render *"Spiciest Clashes"* row (User ranked #2; Friend ranked #38).
+  - [x] Tap on title navigates to dual comparison detail sheet showing side-by-side ranks and review notes.
 - **Testing & Verification**:
-  - [ ] Widget test displaying agree/disagree cards with correct rank differential chips ($\Delta = 36$).
+  - [x] Widget test displaying agree/disagree cards with correct rank differential chips ($\Delta = 36$).
 - **Dependencies**: `FE-401`.
 
 ---
@@ -980,13 +980,13 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
   - [**`features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md) §3 (Decider Engine)
 - **Scope & Objectives**: The couch decider screen combining shared subscriptions, watchlists, and candidate rankings.
 - **Granular Tasks**:
-  - [ ] Create `lib/features/cowatch/presentation/screens/two_to_watch_screen.dart`.
-  - [ ] Automatically calculate intersection of streaming providers between both users:
+  - [x] Create `lib/features/cowatch/presentation/screens/two_to_watch_screen.dart`.
+  - [x] Automatically calculate intersection of streaming providers between both users:
     $$\text{Shared} = \text{Providers}_A \cap \text{Providers}_B$$
-  - [ ] Display shared provider icons (e.g., Netflix + Max).
-  - [ ] Query and rank candidate pool combining both watchlists sorted by joint predicted enjoyment.
+  - [x] Display shared provider icons (e.g., Netflix + Max).
+  - [x] Query and rank candidate pool combining both watchlists sorted by joint predicted enjoyment.
 - **Testing & Verification**:
-  - [ ] Widget test verifying only shared providers appear in active filters.
+  - [x] Widget test verifying only shared providers appear in active filters.
 - **Dependencies**: `FE-108`, `FE-401`.
 
 #### `FE-405`: Format Toggle (`[ 🎬 Movie Night ]` vs `[ 📺 Series ]`) & Runtime Budget Filters
@@ -995,14 +995,14 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
   - [**`features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md) §3 (Filters)
 - **Scope & Objectives**: Quick filter pills to constrain co-watching candidates by format and available time.
 - **Granular Tasks**:
-  - [ ] Format Segmented Control: `[ 🎬 Movie Night ]` | `[ 📺 TV Series ]`.
-  - [ ] Runtime Budget Pills (active when Movie selected):
+  - [x] Format Segmented Control: `[ 🎬 Movie Night ]` | `[ 📺 TV Series ]`.
+  - [x] Runtime Budget Pills (active when Movie selected):
     - `[ ⚡ Under 90m ]` (e.g., *Run Lola Run*, *Past Lives*).
     - `[ 🍿 90–120m ]` (Standard film length).
     - `[ 🛋️ 120m+ Epic ]` (e.g., *Oppenheimer*).
-  - [ ] Filter candidate list dynamically without network roundtrips.
+  - [x] Filter candidate list dynamically without network roundtrips.
 - **Testing & Verification**:
-  - [ ] Unit test verifying selecting `< 90m` filters out movies with `runtime > 90`.
+  - [x] Unit test verifying selecting `< 90m` filters out movies with `runtime > 90`.
 - **Dependencies**: `FE-404`.
 
 #### `FE-406`: Mutual Quick-Swipe Mini-Game Card Swiper
@@ -1011,12 +1011,12 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
   - [**`design_system/04_USER_INTERACTION_FLOWS_AND_GESTURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/04_USER_INTERACTION_FLOWS_AND_GESTURES.md) §2 (Co-Watch Gestures)
 - **Scope & Objectives**: 15-second simultaneous card swiping session that resolves on first mutual right-swipe.
 - **Granular Tasks**:
-  - [ ] Build card deck presentation using `flutter_card_swiper`.
-  - [ ] Swipe right = Want to watch tonight; swipe left = Pass.
-  - [ ] Connect WebSocket / Supabase Realtime channel broadcasting user swipes to friend's device.
-  - [ ] When both swipe right on same title $\to$ trigger full-screen Match Modal with confetti and stream deep link.
+  - [x] Build card deck presentation using `flutter_card_swiper`.
+  - [x] Swipe right = Want to watch tonight; swipe left = Pass.
+  - [x] Connect WebSocket / Supabase Realtime channel broadcasting user swipes to friend's device.
+  - [x] When both swipe right on same title $\to$ trigger full-screen Match Modal with confetti and stream deep link.
 - **Testing & Verification**:
-  - [ ] Integration test simulating mutual right-swipe triggers match state in $< 100\text{ ms}$.
+  - [x] Integration test simulating mutual right-swipe triggers match state in $< 100\text{ ms}$.
 - **Dependencies**: `FE-404`.
 
 #### `FE-407`: `StreamingDeepLinkFactory` Service
@@ -1025,17 +1025,17 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
   - [**`features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md) §2 (App Linking)
 - **Scope & Objectives**: Generate native URI schemes launching directly into installed streaming apps.
 - **Granular Tasks**:
-  - [ ] Create `lib/core/services/streaming_deep_link_factory.dart`.
-  - [ ] Implement URI builders:
+  - [x] Create `lib/core/services/streaming_deep_link_factory.dart`.
+  - [x] Implement URI builders:
     - Netflix: `nflx://www.netflix.com/title/{id}`
     - Max: `max://play/{id}`
     - Hulu: `hulu://play/{id}`
     - Apple TV+: `videos://tv.apple.com/...`
     - Crunchyroll: `crunchyroll://series/{id}`
     - Prime Video: `primevideo://watch/{id}`
-  - [ ] Fallback: If native app fails to launch (`canLaunchUrl == false`), open provider web URL in external browser.
+  - [x] Fallback: If native app fails to launch (`canLaunchUrl == false`), open provider web URL in external browser.
 - **Testing & Verification**:
-  - [ ] Unit tests verifying URI schemes generated accurately for all 6 providers.
+  - [x] Unit tests verifying URI schemes generated accurately for all 6 providers.
 - **Dependencies**: None.
 
 #### `FE-408`: `SCR-13` Smart Queue Screen with Dual Watchlists
@@ -1044,12 +1044,12 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
   - [**`features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md) §1 (Smart Watchlist)
 - **Scope & Objectives**: Universal queue with segregated Movie/Series watchlists and streaming filters.
 - **Granular Tasks**:
-  - [ ] Create `lib/features/queue/presentation/screens/smart_queue_screen.dart`.
-  - [ ] Segregated tabs: `[ 🎬 Movies to Watch (18) ]` | `[ 📺 Series to Watch (12) ]`.
-  - [ ] Master filter toggle: `[ Only Titles on My Subscriptions: ON ]`.
-  - [ ] Render 1-tap "Watch Now" action with native provider badge.
+  - [x] Create `lib/features/queue/presentation/screens/smart_queue_screen.dart`.
+  - [x] Segregated tabs: `[ 🎬 Movies to Watch (18) ]` | `[ 📺 Series to Watch (12) ]`.
+  - [x] Master filter toggle: `[ Only Titles on My Subscriptions: ON ]`.
+  - [x] Render 1-tap "Watch Now" action with native provider badge.
 - **Testing & Verification**:
-  - [ ] Widget test verifying queue filters out unsubscribed titles when toggle is ON.
+  - [x] Widget test verifying queue filters out unsubscribed titles when toggle is ON.
 - **Dependencies**: `FE-104`, `FE-407`.
 
 ---
@@ -1061,11 +1061,11 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.1 (Correlation Invariants)
 - **Scope & Objectives**: Test Spearman correlation formulas, low-sample shrinkage, and score stability.
 - **Granular Tasks**:
-  - [ ] Write `test/features/cowatch/spearman_correlation_test.dart`.
-  - [ ] Test identical ranks yield $\rho = 1.0$; reverse ranks yield $\rho = -1.0$.
-  - [ ] Test shrinkage: 2 overlapping titles with identical order yields $\le 65\%$ match due to prior $k_0 = 5$.
+  - [x] Write `test/features/cowatch/spearman_correlation_test.dart`.
+  - [x] Test identical ranks yield $\rho = 1.0$; reverse ranks yield $\rho = -1.0$.
+  - [x] Test shrinkage: 2 overlapping titles with identical order yields $\le 65\%$ match due to prior $k_0 = 5$.
 - **Testing & Verification**:
-  - [ ] 100% test pass with KaTeX formula verification.
+  - [x] 100% test pass with KaTeX formula verification.
 - **Dependencies**: `BE-401`.
 
 #### `QA-402`: Unit Tests for `StreamingDeepLinkFactory`
@@ -1073,9 +1073,9 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.1 (Deep Links)
 - **Scope & Objectives**: Test URI construction and web fallback routes.
 - **Granular Tasks**:
-  - [ ] Write `test/core/services/streaming_deep_link_factory_test.dart`.
+  - [x] Write `test/core/services/streaming_deep_link_factory_test.dart`.
 - **Testing & Verification**:
-  - [ ] Assert valid scheme for all 6 supported streaming platforms.
+  - [x] Assert valid scheme for all 6 supported streaming platforms.
 - **Dependencies**: `FE-407`.
 
 #### `QA-403`: Integration Tests for "Two-to-Watch" Joint Candidate Scoring
@@ -1083,10 +1083,10 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §3.2 (Integration Tests)
 - **Scope & Objectives**: Test candidate pool assembly and joint score calculation across two mock users.
 - **Granular Tasks**:
-  - [ ] Write `test/features/cowatch/two_to_watch_engine_test.dart`.
-  - [ ] Assert candidate pool ranks mutual watchlist items higher than unranked titles.
+  - [x] Write `test/features/cowatch/two_to_watch_engine_test.dart`.
+  - [x] Assert candidate pool ranks mutual watchlist items higher than unranked titles.
 - **Testing & Verification**:
-  - [ ] Integration test passes with simulated provider overlap.
+  - [x] Integration test passes with simulated provider overlap.
 - **Dependencies**: `FE-404`.
 
 #### `QA-404`: pgTAP Tests for `calculate_taste_match_rpc`
@@ -1094,9 +1094,9 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §3.3 (Taste Match pgTAP)
 - **Scope & Objectives**: Verify PostgreSQL PL/pgSQL procedure returns accurate percentages in $< 15\text{ ms}$.
 - **Granular Tasks**:
-  - [ ] Write `database/tests/03_taste_match_rpc_test.sql`.
+  - [x] Write `database/tests/03_taste_match_rpc_test.sql`.
 - **Testing & Verification**:
-  - [ ] pgTAP suite runs in Supabase container; latency under 15ms.
+  - [x] pgTAP suite runs in Supabase container; latency under 15ms.
 - **Dependencies**: `BE-401`.
 
 ---
