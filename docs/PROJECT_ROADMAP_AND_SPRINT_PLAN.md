@@ -23,19 +23,19 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 1 (Weeks 1–2): Infrastructure, Auth, Foundation & Data Ingestion**
-- **Current Active Ticket**: `FE-107`: Handle Reservation Screen with Debounced RPC Availability
-- **Overall Roadmap Progress**: **7 / 81 Tickets Completed** (8.6%)
+- **Current Active Ticket**: `FE-108`: `SCR-02` Streaming Provider Household Setup
+- **Overall Roadmap Progress**: **8 / 81 Tickets Completed** (9.9%)
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos`), Unit Tests (100% pass)
 - **Last Updated**: 2026-10-03
 
 | Sprint | Status | Total Tickets | Completed | Progress |
 | :---: | :---: | :---: | :---: | :--- |
-| **Sprint 1** | 🟡 **Active** | 15 | 7 | `███████░░░` 46.7% |
+| **Sprint 1** | 🟡 **Active** | 15 | 8 | `████████░░` 53.3% |
 | **Sprint 2** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 3** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 4** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 5** | ⚪ Queued | 18 | 0 | `░░░░░░░░░░` 0% |
-| **Total** | | **81** | **7** | **8.6%** |
+| **Total** | | **81** | **8** | **9.9%** |
 
 ---
 
@@ -218,14 +218,14 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §1 (`SCR-01`)
 - **Scope & Objectives**: Allow new users to claim an `@handle` with real-time uniqueness validation.
 - **Granular Tasks**:
-  - [ ] Create `lib/features/auth/presentation/screens/handle_reservation_screen.dart`.
-  - [ ] Add `TextFormField` enforcing regex `^[a-zA-Z0-9_]{3,20}$`.
-  - [ ] Implement debounced Riverpod state checking `check_handle_available(handle)` via Supabase RPC every 300ms.
-  - [ ] Display green checkmark when available, red error text when taken or invalid.
-  - [ ] Submit reservation writing `username` to `public.users`.
+  - [x] Create `lib/features/auth/presentation/screens/handle_reservation_screen.dart`.
+  - [x] Add `TextFormField` enforcing regex `^[a-zA-Z0-9_]{3,20}$`.
+  - [x] Implement debounced Riverpod state checking `check_handle_available(handle)` via Supabase RPC every 300ms.
+  - [x] Display green checkmark when available, red error text when taken or invalid.
+  - [x] Submit reservation writing `username` to `public.users`.
 - **Testing & Verification**:
-  - [ ] Unit test regex validator against edge cases (`"a"`, `"very_long_handle_exceeding_twenty"`, `"with-hyphen"`).
-  - [ ] Widget test verifying loading spinner during debounced RPC check.
+  - [x] Unit test regex validator against edge cases (`"a"`, `"very_long_handle_exceeding_twenty"`, `"with-hyphen"`).
+  - [x] Widget test verifying loading spinner during debounced RPC check.
 - **Dependencies**: `FE-106`, `BE-101`.
 
 #### `FE-108`: `SCR-02` Streaming Provider Household Setup
