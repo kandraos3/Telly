@@ -23,19 +23,19 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 1 (Weeks 1–2): Infrastructure, Auth, Foundation & Data Ingestion**
-- **Current Active Ticket**: `FE-106`: `SCR-01` Splash & Social / Phone Auth Screen
-- **Overall Roadmap Progress**: **6 / 81 Tickets Completed** (7.4%)
+- **Current Active Ticket**: `FE-107`: Handle Reservation Screen with Debounced RPC Availability
+- **Overall Roadmap Progress**: **7 / 81 Tickets Completed** (8.6%)
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos`), Unit Tests (100% pass)
 - **Last Updated**: 2026-10-03
 
 | Sprint | Status | Total Tickets | Completed | Progress |
 | :---: | :---: | :---: | :---: | :--- |
-| **Sprint 1** | 🟡 **Active** | 15 | 6 | `██████░░░░` 40.0% |
+| **Sprint 1** | 🟡 **Active** | 15 | 7 | `███████░░░` 46.7% |
 | **Sprint 2** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 3** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 4** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 5** | ⚪ Queued | 18 | 0 | `░░░░░░░░░░` 0% |
-| **Total** | | **81** | **6** | **7.4%** |
+| **Total** | | **81** | **7** | **8.6%** |
 
 ---
 
@@ -201,15 +201,15 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [**`adjacent_systems/01_AUTH_REGISTER_AND_LOGIN_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/adjacent_systems/01_AUTH_REGISTER_AND_LOGIN_FLOWS.md) §1 (Auth UI Wireframe)
 - **Scope & Objectives**: Build the landing screen offering Apple, Google, and SMS Phone OTP sign-in.
 - **Granular Tasks**:
-  - [ ] Create `lib/features/auth/presentation/screens/auth_screen.dart`.
-  - [ ] Render full-screen dark aesthetic with animated phosphor glow background.
-  - [ ] Implement Apple Sign In button invoking Supabase Apple OAuth.
-  - [ ] Implement Google Sign In button invoking Supabase Google OAuth.
-  - [ ] Implement Phone Number input sheet with country code picker and SMS OTP submission dialog.
-  - [ ] Wire up Riverpod `authControllerProvider` handling auth states and session persistence.
+  - [x] Create `lib/features/auth/presentation/screens/auth_screen.dart`.
+  - [x] Render full-screen dark aesthetic with animated phosphor glow background.
+  - [x] Implement Apple Sign In button invoking Supabase Apple OAuth.
+  - [x] Implement Google Sign In button invoking Supabase Google OAuth.
+  - [x] Implement Phone Number input sheet with country code picker and SMS OTP submission dialog.
+  - [x] Wire up Riverpod `authControllerProvider` handling auth states and session persistence.
 - **Testing & Verification**:
-  - [ ] Widget test verifying all 3 login buttons are rendered and accessible.
-  - [ ] Integration test simulating successful phone OTP authentication.
+  - [x] Widget test verifying all 3 login buttons are rendered and accessible.
+  - [x] Integration test simulating successful phone OTP authentication.
 - **Dependencies**: `FE-102`, `FE-104`, `BE-103`.
 
 #### `FE-107`: Handle Reservation Screen with Debounced RPC Availability

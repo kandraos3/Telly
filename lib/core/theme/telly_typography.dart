@@ -70,6 +70,15 @@ abstract class TellyTypography {
         color: color,
       );
 
+  static TextStyle labelSmall({Color color = TellyColors.textPrimary}) =>
+      GoogleFonts.plusJakartaSans(
+        fontSize: 11,
+        height: 14 / 11,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.01 * 11,
+        color: color,
+      );
+
   // Tabular Figures for Live Decimal Scores (e.g. 9.85, 7.40)
   static TextStyle scoreHero({Color color = TellyColors.phosphorLime}) =>
       GoogleFonts.plusJakartaSans(
