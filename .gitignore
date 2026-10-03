@@ -31,3 +31,8 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Local tooling output
+coverage/
+supabase/.temp/
+supabase/.branches/

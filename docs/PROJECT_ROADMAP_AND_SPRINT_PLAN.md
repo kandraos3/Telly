@@ -24,7 +24,7 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 6 — Integration, Wiring & Audit Remediation** (planned 2026-10-03; owner decisions D1–D7 recorded in Sprint 6)
-- **Current Active Ticket**: `BE-601` (Consolidated Clean Baseline Schema) — Sprint 6: 2 / 32 tickets complete
+- **Current Active Ticket**: `BE-602` (RLS Hardening) — Sprint 6: 3 / 32 tickets complete
 - **Overall Roadmap Progress**: Sprints 1–5 granular tasks after the `DOC-601` honesty reset (2026-10-03): **281 / 431 verified** · **121 un-checked** (each annotated `→ remediated by <Sprint 6 ticket>`) · **29 human-only**. The earlier "89 / 89" claim was overstated.
 - **Human-Only Tasks**: 29 tasks in Sprints 1–5 marked `👤 [TO BE DONE BY HUMAN]` (cloud setup, secrets, store submission, device/CI runs, dashboard verification), plus the Sprint 6 human prerequisites list. These cannot be completed or verified from code.
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (215 / 215 pass — note: many tests are widget/unit-level only; no real E2E or golden tests exist yet)
@@ -1449,19 +1449,19 @@ Turn the library of individually-tested widgets and algorithms into a **wired, r
   - [**`features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md) §7 (Feed/Squad data model)
 - **Scope & Objectives**: Replace the four drifting migrations with one coherent baseline (audit C4, migration drift, missing SQL objects).
 - **Granular Tasks**:
-  - [ ] Delete `database/` (move pgTAP files to `supabase/tests/`) and the four old files in `supabase/migrations/`.
-  - [ ] `CREATE TYPE media_type_enum AS ENUM ('movie','tv')`; `titles` table with composite PK `(id, media_type)`, `is_anime`, `runtime_minutes`, `popularity`, `streaming_services JSONB`, `updated_at`.
-  - [ ] Re-point every FK (`user_rankings`, `pairwise_duels`, `user_watchlist`, `user_dropped_shows`, `activity_logs`, `show_streaming_availability`, `tv_seasons`) to `(title_id, media_type)`.
-  - [ ] `user_rankings`: `rank_position`, `UNIQUE(user_id, title_id, media_type)`, `UNIQUE(user_id, media_type, rank_position) DEFERRABLE INITIALLY DEFERRED`, index `(user_id, media_type, rank_position)`, `client_mutation_id UUID UNIQUE` (for idempotent WAL replay).
-  - [ ] Social: keep `social_follows` only (drop duplicate `friendships`); unify privacy into `users.visibility_mode` (`PUBLIC`/`FRIENDS_ONLY`/`GHOST`), dropping the parallel `is_private`.
-  - [ ] Add `comments` (with `contains_spoilers`), `feed_reactions`, `reports`, `user_blocks`, `user_streaming_subscriptions`, `activity_logs`, `squads` (+`description`), `squad_members` (+`joined_at`).
-  - [ ] `users`: `is_deleted`, `deletion_requested_at`, `haptics_enabled`/preferences JSONB per settings spec.
-  - [ ] Triggers: `on_auth_user_created` (skeleton `public.users` row), generic `set_updated_at()` on every table with `updated_at`.
-  - [ ] RPC `check_handle_available(p_handle)` enforcing `^[a-z0-9_]{3,20}$` and the reserved-handle list (mirror `kReservedHandles`).
-  - [ ] Rewrite `supabase/seeds/top_50_shows_seed.sql` into `titles` with explicit `media_type` (35 `'tv'`, 15 `'movie'`).
+  - [x] Delete `database/` and the four old files in `supabase/migrations/` (old pgTAP files were invalid against the new schema and are rewritten under `supabase/tests/database/`).
+  - [x] `CREATE TYPE media_type_enum AS ENUM ('movie','tv')`; `titles` table with composite PK `(id, media_type)`, `is_anime`, `runtime_minutes`, `popularity`, `streaming_services JSONB`, `updated_at`.
+  - [x] Re-point every FK (`user_rankings`, `pairwise_duels`, `user_watchlist`, `user_dropped_shows`, `activity_logs`, `show_streaming_availability`, `tv_seasons`) to `(title_id, media_type)`.
+  - [x] `user_rankings`: `rank_position`, `UNIQUE(user_id, title_id, media_type)`, `UNIQUE(user_id, media_type, rank_position) DEFERRABLE INITIALLY DEFERRED`, index `(user_id, media_type, rank_position)`, `client_mutation_id UUID UNIQUE` (for idempotent WAL replay).
+  - [x] Social: keep `social_follows` only (drop duplicate `friendships`); unify privacy into `users.visibility_mode` (`PUBLIC`/`FRIENDS_ONLY`/`GHOST`), dropping the parallel `is_private`.
+  - [x] Add `comments` (with `contains_spoilers`), `feed_reactions`, `reports`, `user_blocks`, `user_streaming_subscriptions`, `activity_logs`, `squads` (+`description`), `squad_members` (+`joined_at`).
+  - [x] `users`: `is_deleted`, `deletion_requested_at`, `haptics_enabled`/preferences JSONB per settings spec.
+  - [x] Triggers: `on_auth_user_created` (skeleton `public.users` row), generic `set_updated_at()` on every table with `updated_at`.
+  - [x] RPC `check_handle_available(p_handle)` enforcing `^[a-z0-9_]{3,20}$` and the reserved-handle list (mirror `kReservedHandles`).
+  - [x] Rewrite the seed as `supabase/seed.sql` into `titles` (generated from `kTop50SeedTitles`; old SQL seed had only 44 titles) with explicit `media_type` (35 `'tv'`, 15 `'movie'`).
 - **Testing & Verification**:
-  - [ ] `supabase db reset` applies baseline + seed with zero errors on a clean local stack.
-  - [ ] pgTAP: `has_table`/`has_column`/`col_type_is` for every table; seed counts `movie = 15`, `tv = 35`; trigger creates profile row on `auth.users` insert; `check_handle_available` rejects reserved/invalid handles.
+  - [x] `supabase db reset` applies baseline + seed with zero errors on a clean local stack (local ports moved to 643xx — Windows reserves 54252–54351).
+  - [x] pgTAP: `has_table`/`has_column`/`col_type_is` for every table; seed counts `movie = 15`, `tv = 35`; trigger creates profile row on `auth.users` insert; `check_handle_available` rejects reserved/invalid handles. → `supabase/tests/database/001_baseline_schema.test.sql` (45/45 pass); Dart parity: `test/features/onboarding/seed_sql_parity_test.dart`.
 - **Dependencies**: `DOC-602`.
 
 #### `BE-602`: RLS Hardening (Privacy Hole & Forged Follows)
