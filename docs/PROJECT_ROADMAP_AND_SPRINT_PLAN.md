@@ -23,19 +23,19 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 1 (Weeks 1–2): Infrastructure, Auth, Foundation & Data Ingestion**
-- **Current Active Ticket**: `QA-102`: Unit Tests for Ingestion Parsers
-- **Overall Roadmap Progress**: **12 / 81 Tickets Completed** (14.8%)
+- **Current Active Ticket**: `QA-104`: Widget Tests for Auth & Onboarding Screens
+- **Overall Roadmap Progress**: **13 / 81 Tickets Completed** (16.0%)
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos`), Unit Tests (100% pass)
 - **Last Updated**: 2026-10-03
 
 | Sprint | Status | Total Tickets | Completed | Progress |
 | :---: | :---: | :---: | :---: | :--- |
-| **Sprint 1** | 🟡 **Active** | 15 | 12 | `████████████` 80.0% |
+| **Sprint 1** | 🟡 **Active** | 15 | 13 | `█████████████` 86.7% |
 | **Sprint 2** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 3** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 4** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 5** | ⚪ Queued | 18 | 0 | `░░░░░░░░░░` 0% |
-| **Total** | | **81** | **12** | **14.8%** |
+| **Total** | | **81** | **13** | **16.0%** |
 
 ---
 
@@ -309,10 +309,10 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.2 (Parsers)
 - **Scope & Objectives**: Test edge cases and data resiliency in Letterboxd and AniList parsing code.
 - **Granular Tasks**:
-  - [ ] Write unit tests for `letterboxd_csv_parser_test.dart` (escaped quotes, missing ratings, empty lines).
-  - [ ] Write unit tests for `anilist_importer_test.dart` (manga ignored, franchise rollups combined).
+  - [x] Write unit tests for `letterboxd_csv_parser_test.dart` (escaped quotes, missing ratings, empty lines).
+  - [x] Write unit tests for `anilist_importer_test.dart` (manga ignored, franchise rollups combined).
 - **Testing & Verification**:
-  - [ ] 100% code coverage on `letterboxd_csv_parser.dart` and `anilist_importer.dart`.
+  - [x] 100% code coverage on `letterboxd_csv_parser.dart` and `anilist_importer.dart`.
 - **Dependencies**: `FE-110`, `FE-111`.
 
 #### `QA-103`: In-Memory Drift SQLite DAO Unit Tests
