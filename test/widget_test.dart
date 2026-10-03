@@ -13,3 +13,4 @@ void main() {
     expect(find.text('Telly — Your Personal TV Canon'), findsOneWidget);
   });
 }
+

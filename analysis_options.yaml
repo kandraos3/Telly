@@ -21,3 +21,4 @@ linter:
     prefer_final_locals: true
     unnecessary_this: true
     use_key_in_widget_constructors: true
+

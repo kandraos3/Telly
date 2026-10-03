@@ -52,3 +52,4 @@ abstract class TellyColors {
   static const Color tierDroppedStart = Color(0xFFF87171);
   static const Color tierDroppedEnd = Color(0xFFDC2626);
 }
+

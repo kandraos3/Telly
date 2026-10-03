@@ -23,19 +23,19 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 1 (Weeks 1–2): Infrastructure, Auth, Foundation & Data Ingestion**
-- **Current Active Ticket**: `FE-105`: Local Drift SQLite Database & Repositories Setup
-- **Overall Roadmap Progress**: **4 / 81 Tickets Completed** (4.9%)
+- **Current Active Ticket**: `FE-106`: `SCR-01` Splash & Social / Phone Auth Screen
+- **Overall Roadmap Progress**: **6 / 81 Tickets Completed** (7.4%)
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos`), Unit Tests (100% pass)
 - **Last Updated**: 2026-10-03
 
 | Sprint | Status | Total Tickets | Completed | Progress |
 | :---: | :---: | :---: | :---: | :--- |
-| **Sprint 1** | 🟡 **Active** | 15 | 4 | `████░░░░░░` 26.7% |
+| **Sprint 1** | 🟡 **Active** | 15 | 6 | `██████░░░░` 40.0% |
 | **Sprint 2** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 3** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 4** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 5** | ⚪ Queued | 18 | 0 | `░░░░░░░░░░` 0% |
-| **Total** | | **81** | **4** | **4.9%** |
+| **Total** | | **81** | **6** | **7.4%** |
 
 ---
 
@@ -182,13 +182,13 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [**`technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md) §3 (Drift SQLite Tables)
 - **Scope & Objectives**: Implement offline-first local storage with Drift SQLite ORM.
 - **Granular Tasks**:
-  - [ ] Create `lib/core/database/database.dart` defining Drift tables: `CachedTitles`, `LocalRankings`, `OfflineDuelQueue`, `WatchlistCache`.
-  - [ ] Configure `build_runner` and generate `.g.dart` schema files.
-  - [ ] Implement `LocalTitleDao` and `LocalRankingDao` with reactive `Stream` watchers.
-  - [ ] Configure in-memory database setup for automated test environments (`NativeDatabase.memory()`).
+  - [x] Create `lib/core/database/database.dart` defining Drift tables: `CachedTitles`, `LocalRankings`, `OfflineDuelQueue`, `WatchlistCache`.
+  - [x] Configure `build_runner` and generate `.g.dart` schema files.
+  - [x] Implement `LocalTitleDao` and `LocalRankingDao` with reactive `Stream` watchers.
+  - [x] Configure in-memory database setup for automated test environments (`NativeDatabase.memory()`).
 - **Testing & Verification**:
-  - [ ] Execute `dart run build_runner build --delete-conflicting-outputs`.
-  - [ ] Unit tests for `LocalRankingDao` verifying CRUD and stream emissions.
+  - [x] Execute `dart run build_runner build --delete-conflicting-outputs`.
+  - [x] Unit tests for `LocalRankingDao` verifying CRUD and stream emissions.
 - **Dependencies**: `FE-101`.
 
 ---
@@ -320,11 +320,11 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.3 (Drift DAOs)
 - **Scope & Objectives**: Test offline table CRUD and reactive stream emission using in-memory SQLite.
 - **Granular Tasks**:
-  - [ ] Write `test/core/database/local_ranking_dao_test.dart`.
-  - [ ] Test inserting, updating ranks, and query filtering by `media_type`.
-  - [ ] Test transaction rollback upon failure.
+  - [x] Write `test/core/database/local_ranking_dao_test.dart`.
+  - [x] Test inserting, updating ranks, and query filtering by `media_type`.
+  - [x] Test transaction rollback upon failure.
 - **Testing & Verification**:
-  - [ ] Run tests on pure Dart VM; all tests pass in $< 1\text{ second}$.
+  - [x] Run tests on pure Dart VM; all tests pass in $< 1\text{ second}$.
 - **Dependencies**: `FE-105`.
 
 #### `QA-104`: Widget Tests for Auth & Onboarding Screens

@@ -77,3 +77,4 @@ final hapticsServiceProvider = Provider<HapticsService>((ref) {
   final enabled = ref.watch(hapticsEnabledProvider);
   return HapticsService(enabled: enabled);
 });
+

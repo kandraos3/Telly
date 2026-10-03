@@ -99,3 +99,4 @@ abstract class TellyTypography {
         color: color,
       );
 }
+
