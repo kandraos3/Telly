@@ -20,6 +20,25 @@
 
 ---
 
+## 📊 Active Sprint Execution Dashboard
+
+- **Current Active Sprint**: **Sprint 1 (Weeks 1–2): Infrastructure, Auth, Foundation & Data Ingestion**
+- **Current Active Ticket**: None (Ready to start `BE-101` / `FE-101`)
+- **Overall Roadmap Progress**: **0 / 81 Tickets Completed** (0%)
+- **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos`), Unit Tests (100% pass)
+- **Last Updated**: 2026-10-03
+
+| Sprint | Status | Total Tickets | Completed | Progress |
+| :---: | :---: | :---: | :---: | :--- |
+| **Sprint 1** | 🟡 **Active** | 15 | 0 | `░░░░░░░░░░` 0% |
+| **Sprint 2** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
+| **Sprint 3** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
+| **Sprint 4** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
+| **Sprint 5** | ⚪ Queued | 18 | 0 | `░░░░░░░░░░` 0% |
+| **Total** | | **81** | **0** | **0%** |
+
+---
+
 ## 📅 Sprint 1: Infrastructure, Auth, Foundation & Data Ingestion (Weeks 1–2)
 
 ### Sprint Objective
