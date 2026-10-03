@@ -23,19 +23,19 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 2 (Weeks 3–4): The Pairwise Duel Engine, Scoring & The Personal Dual-Canon**
-- **Current Active Ticket**: `ALGO-204`: Dual-Canon Media-Type Segregation Rules
-- **Overall Roadmap Progress**: **24 / 89 Tickets Completed** (27.0%)
+- **Current Active Ticket**: `ALGO-205`: Riverpod `DuelController` State Machine
+- **Overall Roadmap Progress**: **25 / 89 Tickets Completed** (28.1%)
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos`), Unit Tests (100% pass)
 - **Last Updated**: 2026-10-03
 
 | Sprint | Status | Total Tickets | Completed | Progress |
 | :---: | :---: | :---: | :---: | :--- |
 | **Sprint 1** | 🟢 **Completed** | 19 | 19 | `████████████████████` 100.0% |
-| **Sprint 2** | 🟡 **Active** | 20 | 5 | `█████░░░░░` 25.0% |
+| **Sprint 2** | 🟡 **Active** | 20 | 6 | `██████░░░░` 30.0% |
 | **Sprint 3** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 4** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 5** | ⚪ Queued | 18 | 0 | `░░░░░░░░░░` 0% |
-| **Total** | | **89** | **24** | **27.0%** |
+| **Total** | | **89** | **25** | **28.1%** |
 
 ---
 
@@ -401,12 +401,12 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
   - [**`features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md) §2 (Dual-Canon Architecture)
 - **Scope & Objectives**: Strictly segregate Movie duels and scores from Series/Anime duels to prevent apples-to-oranges comparisons.
 - **Granular Tasks**:
-  - [ ] Create `lib/features/ranking/domain/canon_type.dart` enum: `movie`, `series`.
-  - [ ] Enforce tournament partition: Candidate of type `movie` is matched ONLY against titles in the user's Movie Canon.
-  - [ ] Enforce tournament partition: Candidate of type `tv` (including anime) is matched ONLY against Series Canon.
-  - [ ] Ensure distinct percentile rank lists and distinct score curves for movies and series.
+  - [x] Create `lib/features/ranking/domain/canon_type.dart` enum: `movie`, `series`.
+  - [x] Enforce tournament partition: Candidate of type `movie` is matched ONLY against titles in the user's Movie Canon.
+  - [x] Enforce tournament partition: Candidate of type `tv` (including anime) is matched ONLY against Series Canon.
+  - [x] Ensure distinct percentile rank lists and distinct score curves for movies and series.
 - **Testing & Verification**:
-  - [ ] Unit test asserting inserting *The Dark Knight* never pairs it with *Breaking Bad* in any duel step.
+  - [x] Unit test asserting inserting *The Dark Knight* never pairs it with *Breaking Bad* in any duel step.
 - **Dependencies**: `ALGO-201`.
 
 #### `ALGO-205`: Riverpod `DuelController` State Machine
