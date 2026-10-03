@@ -23,19 +23,19 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 1 (Weeks 1–2): Infrastructure, Auth, Foundation & Data Ingestion**
-- **Current Active Ticket**: `FE-108`: `SCR-02` Streaming Provider Household Setup
-- **Overall Roadmap Progress**: **8 / 81 Tickets Completed** (9.9%)
+- **Current Active Ticket**: `FE-109`: `SCR-03` 50-Title Seed Recognition Grid (Movies, TV, Anime)
+- **Overall Roadmap Progress**: **9 / 81 Tickets Completed** (11.1%)
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos`), Unit Tests (100% pass)
 - **Last Updated**: 2026-10-03
 
 | Sprint | Status | Total Tickets | Completed | Progress |
 | :---: | :---: | :---: | :---: | :--- |
-| **Sprint 1** | 🟡 **Active** | 15 | 8 | `████████░░` 53.3% |
+| **Sprint 1** | 🟡 **Active** | 15 | 9 | `█████████░` 60.0% |
 | **Sprint 2** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 3** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 4** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 5** | ⚪ Queued | 18 | 0 | `░░░░░░░░░░` 0% |
-| **Total** | | **81** | **8** | **9.9%** |
+| **Total** | | **81** | **9** | **11.1%** |
 
 ---
 
@@ -234,12 +234,12 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [**`features/01_ONBOARDING_AND_TASTE_SEEDING.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/01_ONBOARDING_AND_TASTE_SEEDING.md) §2 (Provider Grid)
 - **Scope & Objectives**: Allow users to select active streaming subscriptions with 1-tap card toggles.
 - **Granular Tasks**:
-  - [ ] Create `lib/features/onboarding/presentation/screens/streaming_setup_screen.dart`.
-  - [ ] Render 8 provider cards (Netflix, Max, Hulu, Prime Video, Apple TV+, Disney+, Crunchyroll, Paramount+).
-  - [ ] Implement multi-select state persisting selected provider IDs to Drift local database and Supabase `users.streaming_providers`.
-  - [ ] Include *"I don't have streaming services / Skip for now"* secondary action.
+  - [x] Create `lib/features/onboarding/presentation/screens/streaming_setup_screen.dart`.
+  - [x] Render 8 provider cards (Netflix, Max, Hulu, Prime Video, Apple TV+, Disney+, Crunchyroll, Paramount+).
+  - [x] Implement multi-select state persisting selected provider IDs to Drift local database and Supabase `users.streaming_providers`.
+  - [x] Include *"I don't have streaming services / Skip for now"* secondary action.
 - **Testing & Verification**:
-  - [ ] Widget test verifying provider cards toggle selection state on tap and update counter.
+  - [x] Widget test verifying provider cards toggle selection state on tap and update counter.
 - **Dependencies**: `FE-104`, `FE-105`.
 
 #### `FE-109`: `SCR-03` 50-Title Seed Recognition Grid (Movies, TV, Anime)
