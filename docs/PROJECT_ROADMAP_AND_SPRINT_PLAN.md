@@ -23,19 +23,19 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 1 (Weeks 1–2): Infrastructure, Auth, Foundation & Data Ingestion**
-- **Current Active Ticket**: `FE-110`: 1-Click AniList & MyAnimeList Profile Importer
-- **Overall Roadmap Progress**: **10 / 81 Tickets Completed** (12.3%)
+- **Current Active Ticket**: `FE-111`: 1-Click Letterboxd CSV Importer Parser
+- **Overall Roadmap Progress**: **11 / 81 Tickets Completed** (13.6%)
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos`), Unit Tests (100% pass)
 - **Last Updated**: 2026-10-03
 
 | Sprint | Status | Total Tickets | Completed | Progress |
 | :---: | :---: | :---: | :---: | :--- |
-| **Sprint 1** | 🟡 **Active** | 15 | 10 | `██████████` 66.7% |
+| **Sprint 1** | 🟡 **Active** | 15 | 11 | `███████████` 73.3% |
 | **Sprint 2** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 3** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 4** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 5** | ⚪ Queued | 18 | 0 | `░░░░░░░░░░` 0% |
-| **Total** | | **81** | **10** | **12.3%** |
+| **Total** | | **81** | **11** | **13.6%** |
 
 ---
 
@@ -264,13 +264,13 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.2 (GraphQL Deserializer)
 - **Scope & Objectives**: Automatically pull user's completed anime list via public GraphQL/REST APIs without passwords.
 - **Granular Tasks**:
-  - [ ] Create `lib/features/onboarding/domain/anilist_importer.dart`.
-  - [ ] Query AniList GraphQL endpoint `https://graphql.anilist.co` for `MediaListCollection(userName, type: ANIME, status: COMPLETED)`.
-  - [ ] Map AniList titles and MAL IDs to internal TMDB IDs via title matching index.
-  - [ ] Seed imported entries into sentiment brackets based on user's 10-point AniList score.
+  - [x] Create `lib/features/onboarding/domain/anilist_importer.dart`.
+  - [x] Query AniList GraphQL endpoint `https://graphql.anilist.co` for `MediaListCollection(userName, type: ANIME, status: COMPLETED)`.
+  - [x] Map AniList titles and MAL IDs to internal TMDB IDs via title matching index.
+  - [x] Seed imported entries into sentiment brackets based on user's 10-point AniList score.
 - **Testing & Verification**:
-  - [ ] Unit test parsing mock AniList GraphQL JSON fixture into list of `MediaItem` models.
-  - [ ] Handle 404 User Not Found gracefully with an in-app error snackbar.
+  - [x] Unit test parsing mock AniList GraphQL JSON fixture into list of `MediaItem` models.
+  - [x] Handle 404 User Not Found gracefully with an in-app error snackbar.
 - **Dependencies**: `FE-105`.
 
 #### `FE-111`: 1-Click Letterboxd CSV Importer Parser
