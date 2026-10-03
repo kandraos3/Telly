@@ -23,19 +23,19 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 2 (Weeks 3–4): The Pairwise Duel Engine, Scoring & The Personal Dual-Canon**
-- **Current Active Ticket**: `FE-201`: `SCR-10` Binary Duel Arena Screen & Card Layout
-- **Overall Roadmap Progress**: **29 / 89 Tickets Completed** (32.6%)
+- **Current Active Ticket**: `FE-203`: `SCR-11` Editorial Tagging Modal (MVP Character, Vibe Tags, Sub/Dub)
+- **Overall Roadmap Progress**: **31 / 89 Tickets Completed** (34.8%)
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos`), Unit Tests (100% pass)
 - **Last Updated**: 2026-10-03
 
 | Sprint | Status | Total Tickets | Completed | Progress |
 | :---: | :---: | :---: | :---: | :--- |
 | **Sprint 1** | 🟢 **Completed** | 19 | 19 | `████████████████████` 100.0% |
-| **Sprint 2** | 🟡 **Active** | 20 | 10 | `██████████░░░░░░░░░░` 50.0% |
+| **Sprint 2** | 🟡 **Active** | 20 | 12 | `████████████░░░░░░░░` 60.0% |
 | **Sprint 3** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 4** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 5** | ⚪ Queued | 18 | 0 | `░░░░░░░░░░` 0% |
-| **Total** | | **89** | **29** | **32.6%** |
+| **Total** | | **89** | **31** | **34.8%** |
 
 ---
 
@@ -462,13 +462,13 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
   - [**`design_system/02_COMPONENT_LIBRARY_AND_PATTERNS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/02_COMPONENT_LIBRARY_AND_PATTERNS.md) §4 (Duel Arena Card Physics)
 - **Scope & Objectives**: Render the duel cards with poster images, title, release year, runtime, and central `VS` badge.
 - **Granular Tasks**:
-  - [ ] Create `lib/features/ranking/presentation/screens/duel_arena_screen.dart`.
-  - [ ] Build top status bar: `"DUEL 2 OF 4"`, step indicator dots, and close button.
-  - [ ] Build upper Candidate Card A and lower Candidate Card B with 2:3 aspect ratio posters and glass gradients.
-  - [ ] Place central glowing `━ VS ━` badge over the boundary between cards.
-  - [ ] Add bottom secondary button: *"Can't Compare / Equal"*.
+  - [x] Create `lib/features/ranking/presentation/screens/duel_arena_screen.dart`.
+  - [x] Build top status bar: `"DUEL 2 OF 4"`, step indicator dots, and close button.
+  - [x] Build upper Candidate Card A and lower Candidate Card B with 2:3 aspect ratio posters and glass gradients.
+  - [x] Place central glowing `━ VS ━` badge over the boundary between cards.
+  - [x] Add bottom secondary button: *"Can't Compare / Equal"*.
 - **Testing & Verification**:
-  - [ ] Widget test verifying Candidate A, Candidate B, and VS badge are visible and mounted.
+  - [x] Widget test verifying Candidate A, Candidate B, and VS badge are visible and mounted.
 - **Dependencies**: `FE-102`, `FE-104`.
 
 #### `FE-202`: Card Swipe Gestures, Spring Physics & Winner Transitions
@@ -477,13 +477,13 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
   - [**`design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md) §5 (Haptic Sensations)
 - **Scope & Objectives**: Implement fluid 60fps swipe/tap card interactions with physics spring-back.
 - **Granular Tasks**:
-  - [ ] Wrap Duel Cards with `GestureDetector` and `AnimatedBuilder`.
-  - [ ] Tap on Card: scale winner to 1.04x with Phosphor Lime glow; fade loser downward with opacity $0.0$.
-  - [ ] Vertical drag gestures: drag up to select Candidate A ($> 100\text{ dp}$ threshold); drag down for Candidate B.
-  - [ ] Trigger `HapticsService.duelWinner()` on vote confirmation.
-  - [ ] Reset positions with spring physics curve `Curves.elasticOut` if drag cancelled.
+  - [x] Wrap Duel Cards with `GestureDetector` and `AnimatedBuilder`.
+  - [x] Tap on Card: scale winner to 1.04x with Phosphor Lime glow; fade loser downward with opacity $0.0$.
+  - [x] Vertical drag gestures: drag up to select Candidate A ($> 100\text{ dp}$ threshold); drag down for Candidate B.
+  - [x] Trigger `HapticsService.duelWinner()` on vote confirmation.
+  - [x] Reset positions with spring physics curve `Curves.elasticOut` if drag cancelled.
 - **Testing & Verification**:
-  - [ ] Widget test asserting swipe $> 100\text{ dp}$ calls `vote()` callback; swipe $< 50\text{ dp}$ snaps back.
+  - [x] Widget test asserting swipe $> 100\text{ dp}$ calls `vote()` callback; swipe $< 50\text{ dp}$ snaps back.
 - **Dependencies**: `FE-201`, `FE-103`.
 
 #### `FE-203`: `SCR-11` Editorial Tagging Modal (MVP Character, Vibe Tags, Sub/Dub)
