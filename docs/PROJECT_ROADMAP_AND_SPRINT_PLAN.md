@@ -23,19 +23,19 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 2 (Weeks 3–4): The Pairwise Duel Engine, Scoring & The Personal Dual-Canon**
-- **Current Active Ticket**: `ALGO-201`: Pairwise Binary Insertion Sort Tournament Engine
-- **Overall Roadmap Progress**: **19 / 85 Tickets Completed** (22.4%)
+- **Current Active Ticket**: `ALGO-202`: Dynamic Percentile Score Curve Calculator ($0.0 - 10.0$)
+- **Overall Roadmap Progress**: **21 / 85 Tickets Completed** (24.7%)
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos`), Unit Tests (100% pass)
 - **Last Updated**: 2026-10-03
 
 | Sprint | Status | Total Tickets | Completed | Progress |
 | :---: | :---: | :---: | :---: | :--- |
 | **Sprint 1** | 🟢 **Completed** | 19 | 19 | `████████████████████` 100.0% |
-| **Sprint 2** | 🟡 **Active** | 16 | 0 | `░░░░░░░░░░` 0% |
+| **Sprint 2** | 🟡 **Active** | 20 | 2 | `██░░░░░░░░` 10.0% |
 | **Sprint 3** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 4** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 5** | ⚪ Queued | 18 | 0 | `░░░░░░░░░░` 0% |
-| **Total** | | **85** | **19** | **22.4%** |
+| **Total** | | **89** | **21** | **23.6%** |
 
 ---
 
@@ -356,15 +356,15 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
   - [**`technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md) §2 (Duel Engine Algorithm)
 - **Scope & Objectives**: Pure Dart implementation of binary insertion sort with logarithmic bounds ($\mathcal{O}(\log_2 N)$).
 - **Granular Tasks**:
-  - [ ] Create `lib/features/ranking/domain/binary_insertion_tournament.dart`.
-  - [ ] Implement `BinaryInsertionTournament<T>` taking existing sorted list and new candidate item.
-  - [ ] Implement `low`, `high`, `mid = (low + high) ~/ 2` index pointer calculations.
-  - [ ] Handle sentiment bracket seeding (`seedBracket`) to narrow search bounds before starting duels.
-  - [ ] Implement `onCandidateWins()` moving `low = mid + 1` and `onOpponentWins()` moving `high = mid - 1`.
-  - [ ] Handle termination when `low > high`, returning exact insertion slot index.
+  - [x] Create `lib/features/ranking/domain/binary_insertion_tournament.dart`.
+  - [x] Implement `BinaryInsertionTournament<T>` taking existing sorted list and new candidate item.
+  - [x] Implement `low`, `high`, `mid = (low + high) ~/ 2` index pointer calculations.
+  - [x] Handle sentiment bracket seeding (`seedBracket`) to narrow search bounds before starting duels.
+  - [x] Implement `onCandidateWins()` moving search window to higher rank half and `onOpponentWins()` moving to lower rank half.
+  - [x] Handle termination when `low > high`, returning exact insertion slot index.
 - **Testing & Verification**:
-  - [ ] Test insertion into 100-item list requires $\le 7$ comparisons.
-  - [ ] Test insertion into list of size 0 requires 0 comparisons; size 1 requires 1 comparison.
+  - [x] Test insertion into 100-item list requires $\le 7$ comparisons.
+  - [x] Test insertion into list of size 0 requires 0 comparisons; size 1 requires 1 comparison.
 - **Dependencies**: None.
 
 #### `ALGO-202`: Dynamic Percentile Score Curve Calculator ($0.0 - 10.0$)
@@ -596,11 +596,11 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.1 (Tournament Invariants)
 - **Scope & Objectives**: Stress test binary insertion sort across edge cases and large lists.
 - **Granular Tasks**:
-  - [ ] Write `test/features/ranking/binary_insertion_tournament_test.dart`.
-  - [ ] Test insertion into list of $N=100$ titles never exceeds 7 comparisons.
-  - [ ] Test tie-break logic steps to neighbor without deadlocking.
+  - [x] Write `test/features/ranking/binary_insertion_tournament_test.dart`.
+  - [x] Test insertion into list of $N=100$ titles never exceeds 7 comparisons.
+  - [x] Test tie-break logic steps to neighbor without deadlocking.
 - **Testing & Verification**:
-  - [ ] 100% code coverage on `binary_insertion_tournament.dart`.
+  - [x] 100% code coverage on `binary_insertion_tournament.dart`.
 - **Dependencies**: `ALGO-201`.
 
 #### `QA-202`: Unit Tests for Dynamic Percentile Score Monotonicity
