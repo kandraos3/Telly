@@ -17,6 +17,7 @@ Thumbs.db
 .idea/
 *.sublime-project
 *.sublime-workspace
+*.iml
 
 # Flutter / Dart build artifacts (for future mobile app build)
 .dart_tool/

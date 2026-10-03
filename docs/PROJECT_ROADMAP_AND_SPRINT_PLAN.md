@@ -23,19 +23,19 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 1 (Weeks 1–2): Infrastructure, Auth, Foundation & Data Ingestion**
-- **Current Active Ticket**: None (Ready to start `BE-101` / `FE-101`)
-- **Overall Roadmap Progress**: **0 / 81 Tickets Completed** (0%)
+- **Current Active Ticket**: `FE-102`: Theme, Color Palette & Typography Tokens Setup
+- **Overall Roadmap Progress**: **1 / 81 Tickets Completed** (1.2%)
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos`), Unit Tests (100% pass)
 - **Last Updated**: 2026-10-03
 
 | Sprint | Status | Total Tickets | Completed | Progress |
 | :---: | :---: | :---: | :---: | :--- |
-| **Sprint 1** | 🟡 **Active** | 15 | 0 | `░░░░░░░░░░` 0% |
+| **Sprint 1** | 🟡 **Active** | 15 | 1 | `█░░░░░░░░░` 6.7% |
 | **Sprint 2** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 3** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 4** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 5** | ⚪ Queued | 18 | 0 | `░░░░░░░░░░` 0% |
-| **Total** | | **81** | **0** | **0%** |
+| **Total** | | **81** | **1** | **1.2%** |
 
 ---
 
@@ -119,15 +119,15 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [**`technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md) §1 (Folder Structure)
 - **Scope & Objectives**: Initialize Flutter 3.24+ / Dart 3.5+ project structured strictly by feature slices.
 - **Granular Tasks**:
-  - [ ] Initialize Flutter project: `flutter create --org com.telly.app telly_client`.
-  - [ ] Configure `pubspec.yaml` with core dependencies: `flutter_riverpod`, `drift`, `supabase_flutter`, `go_router`, `flutter_animate`.
-  - [ ] Setup folder structure:
+  - [x] Initialize Flutter project: `flutter create --org com.telly.app telly_client`.
+  - [x] Configure `pubspec.yaml` with core dependencies: `flutter_riverpod`, `drift`, `supabase_flutter`, `go_router`, `flutter_animate`.
+  - [x] Setup folder structure:
     `lib/core/` (network, theme, utils, error),
     `lib/features/auth/`, `lib/features/onboarding/`, `lib/features/ranking/`, `lib/features/feed/`, `lib/features/profile/`, `lib/features/cowatch/`.
-  - [ ] Configure `analysis_options.yaml` with strict linter rules and `--fatal-infos`.
+  - [x] Configure `analysis_options.yaml` with strict linter rules and `--fatal-infos`.
 - **Testing & Verification**:
-  - [ ] Run `dart analyze` to ensure zero errors and zero warnings.
-  - [ ] Execute `flutter run` on iOS Simulator and Android Emulator.
+  - [x] Run `dart analyze` to ensure zero errors and zero warnings.
+  - [x] Execute `flutter run` on iOS Simulator and Android Emulator.
 - **Dependencies**: None.
 
 #### `FE-102`: Theme, Color Palette & Typography Tokens Setup

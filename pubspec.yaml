@@ -1,0 +1,61 @@
+name: telly_app
+description: "The Beli for Television — Pairwise Ranking and Social Discovery"
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+
+  # --- Architecture & State Management ---
+  flutter_riverpod: ^2.5.1
+  riverpod_annotation: ^2.3.5
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
+
+  # --- Routing & Deep Linking ---
+  go_router: ^14.2.7
+
+  # --- Networking & API ---
+  dio: ^5.7.0
+  dio_smart_retry: ^6.0.0
+  graphql_flutter: ^5.1.2
+  supabase_flutter: ^2.6.0
+
+  # --- Local Persistence & Offline-First (Drift SQLite) ---
+  drift: ^2.20.1
+  sqlite3_flutter_libs: ^0.5.24
+  path_provider: ^2.1.4
+  path: ^1.9.0
+  flutter_secure_storage: ^9.2.2
+
+  # --- UI, Animations & Card Duel Physics ---
+  flutter_animate: ^4.5.0
+  flutter_card_swiper: ^7.0.0
+  reorderables: ^0.6.0
+  shimmer: ^3.0.0
+  cached_network_image: ^3.4.0
+  google_fonts: ^6.2.1
+
+  # --- Utilities, Media & Ingestion ---
+  intl: ^0.19.0
+  uuid: ^4.5.1
+  url_launcher: ^6.3.0
+  csv: ^6.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  build_runner: ^2.4.12
+  riverpod_generator: ^2.4.2
+  drift_dev: ^2.20.1
+  freezed: ^2.5.7
+  json_serializable: ^6.8.0
+
+flutter:
+  uses-material-design: true
