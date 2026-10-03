@@ -3,58 +3,49 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:telly_app/core/widgets/telly_primary_button.dart';
 import 'package:telly_app/features/auth/data/auth_repository.dart';
+
+import '../../fakes/fake_auth_repository.dart';
 import 'package:telly_app/features/auth/presentation/screens/handle_reservation_screen.dart';
 import 'package:telly_app/features/onboarding/presentation/screens/streaming_setup_screen.dart';
 
 void main() {
-  group('Handle Validation & Reservation Unit Tests (FE-107)', () {
-    final repo = DefaultAuthRepository();
-
-    test('valid handles pass regex and uniqueness check', () async {
-      expect(await repo.checkHandleAvailable('jordan'), isTrue);
-      expect(await repo.checkHandleAvailable('cinephile_99'), isTrue);
-      expect(await repo.checkHandleAvailable('film_fanatic'), isTrue);
-      expect(await repo.checkHandleAvailable('tv_buff_1'), isTrue);
+  group('HandleRules (auth spec §3 Username Validation Rules)', () {
+    test('valid handles pass', () {
+      for (final h in ['jordan', 'cinephile_99', 'film_fanatic', 'tv_buff_1']) {
+        expect(HandleRules.validate(h), isNull, reason: h);
+      }
     });
 
-    test('short handles (< 3 characters) are rejected', () async {
-      expect(await repo.checkHandleAvailable('a'), isFalse);
-      expect(await repo.checkHandleAvailable('ab'), isFalse);
-      expect(await repo.checkHandleAvailable(''), isFalse);
+    test('input is normalized to lowercase', () {
+      expect(HandleRules.normalize('  Jordan_K '), 'jordan_k');
+      expect(HandleRules.validate('Jordan_K'), isNull);
     });
 
-    test('long handles (> 20 characters) are rejected', () async {
-      expect(
-        await repo.checkHandleAvailable('very_long_handle_exceeding_twenty'),
-        isFalse,
-      );
+    test('short and long handles are rejected', () {
+      expect(HandleRules.validate('ab'), 'Handle must be at least 3 characters');
+      expect(HandleRules.validate('very_long_handle_exceeding_twenty'), 'Handle cannot exceed 20 characters');
     });
 
-    test('handles with invalid characters are rejected', () async {
-      expect(await repo.checkHandleAvailable('with-hyphen'), isFalse);
-      expect(await repo.checkHandleAvailable('has space'), isFalse);
-      expect(await repo.checkHandleAvailable('name!exclamation'), isFalse);
-      expect(await repo.checkHandleAvailable('user@domain'), isFalse);
+    test('invalid characters and double underscores are rejected', () {
+      for (final h in ['with-hyphen', 'has space', 'name!exclamation', 'user@domain']) {
+        expect(HandleRules.validate(h), 'Only letters, numbers, and underscores are allowed', reason: h);
+      }
+      expect(HandleRules.validate('a__b'), 'Underscores cannot be doubled');
     });
 
-    test('reserved platform handles are rejected', () async {
-      expect(await repo.checkHandleAvailable('admin'), isFalse);
-      expect(await repo.checkHandleAvailable('telly'), isFalse);
-      expect(await repo.checkHandleAvailable('netflix'), isFalse);
-      expect(await repo.checkHandleAvailable('hbo'), isFalse);
-      expect(await repo.checkHandleAvailable('apple'), isFalse);
-    });
-
-    test('already claimed handles are rejected', () async {
-      expect(await repo.checkHandleAvailable('taken_user'), isFalse);
+    test('reserved platform handles are rejected', () {
+      for (final h in ['admin', 'telly', 'netflix', 'hbo', 'apple']) {
+        expect(HandleRules.validate(h), '@$h is reserved');
+      }
     });
   });
 
   group('HandleReservationScreen Widget & Flow Tests (FE-107)', () {
     testWidgets('renders screen headers and text fields', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
+        ProviderScope(
+          overrides: [authRepositoryProvider.overrideWithValue(FakeAuthRepository())],
+          child: const MaterialApp(
             home: HandleReservationScreen(),
           ),
         ),
@@ -68,8 +59,9 @@ void main() {
 
     testWidgets('entering invalid short handle shows error and disables submit', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
+        ProviderScope(
+          overrides: [authRepositoryProvider.overrideWithValue(FakeAuthRepository())],
+          child: const MaterialApp(
             home: HandleReservationScreen(),
           ),
         ),
@@ -89,7 +81,7 @@ void main() {
     });
 
     testWidgets('entering available handle shows checkmark and enables submit button', (tester) async {
-      final fakeRepo = DefaultAuthRepository();
+      final fakeRepo = FakeAuthRepository();
 
       await tester.pumpWidget(
         ProviderScope(
@@ -104,7 +96,7 @@ void main() {
 
       final usernameField = find.widgetWithText(TextField, 'jordan');
       await tester.enterText(usernameField, 'cinelover');
-      // Wait for 300ms debounce timer
+      // Auth spec §3: 200 ms debounce
       await tester.pump(const Duration(milliseconds: 350));
       await tester.pumpAndSettle();
 
@@ -124,7 +116,7 @@ void main() {
     });
 
     testWidgets('entering taken handle shows taken error text', (tester) async {
-      final fakeRepo = DefaultAuthRepository();
+      final fakeRepo = FakeAuthRepository();
 
       await tester.pumpWidget(
         ProviderScope(

@@ -79,7 +79,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   ] else ...[
                     TellyTextField(
                       controller: _otpController,
-                      hintText: '123456',
+                      hintText: '••••••',
                       labelText: '6-Digit SMS Code',
                       keyboardType: TextInputType.number,
                       prefixIcon: const Icon(Icons.lock_clock_outlined, color: TellyColors.textTertiary),
@@ -99,11 +99,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                         final success = await ref
                             .read(authControllerProvider.notifier)
                             .verifyOtp(_otpController.text.trim());
-                        if (sheetContext.mounted) {
+                        // On success the session stream flips state to authenticated and the
+                        // listener in build() navigates; only the sheet is closed here.
+                        if (success && sheetContext.mounted) {
                           Navigator.of(sheetContext).pop();
-                        }
-                        if (success && mounted) {
-                          _navigateToHandleReservation();
                         }
                       },
                     ),
@@ -126,7 +125,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   @override
   Widget build(BuildContext context) {
     ref.listen<AuthState>(authControllerProvider, (prev, next) {
-      if (next.status == AuthStepStatus.authenticated && mounted) {
+      if (next.isSignedIn && prev?.isSignedIn != true && mounted) {
         _navigateToHandleReservation();
       }
     });

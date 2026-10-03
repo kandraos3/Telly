@@ -1,8 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../data/auth_repository.dart';
 import '../../domain/user_profile.dart';
 
 enum AuthStepStatus {
+  /// Waiting for the first session event (cold start / restored session).
+  initializing,
   unauthenticated,
   authenticating,
   awaitingOtp,
@@ -23,6 +28,9 @@ class AuthState {
     this.errorMessage,
   });
 
+  bool get isSignedIn => status == AuthStepStatus.authenticated;
+
+  /// `errorMessage` is cleared unless explicitly provided.
   AuthState copyWith({
     AuthStepStatus? status,
     UserProfile? user,
@@ -38,54 +46,67 @@ class AuthState {
   }
 }
 
-class AuthController extends StateNotifier<AuthState> {
-  final AuthRepository _repository;
+/// Auth state machine driven by the Supabase session stream (FE-601).
+/// Sign-in methods only start flows; the authenticated state always comes from the session.
+class AuthController extends Notifier<AuthState> {
+  AuthRepository get _repository => ref.read(authRepositoryProvider);
 
-  AuthController(this._repository) : super(const AuthState());
+  @override
+  AuthState build() {
+    final subscription = ref.watch(authRepositoryProvider).watchSignedInUserId().listen(_onSessionChanged);
+    ref.onDispose(subscription.cancel);
+    return const AuthState(status: AuthStepStatus.initializing);
+  }
 
-  Future<void> signInWithApple() async {
-    state = state.copyWith(status: AuthStepStatus.authenticating, errorMessage: null);
+  Future<void> _onSessionChanged(String? userId) async {
+    if (userId == null) {
+      // Only reset when leaving a signed-in/initial state; a signed-out event must not
+      // wipe an in-progress OTP flow (phone number, awaitingOtp).
+      if (state.isSignedIn || state.status == AuthStepStatus.initializing) {
+        state = const AuthState(status: AuthStepStatus.unauthenticated);
+      }
+      return;
+    }
     try {
-      await _repository.signInWithApple();
-      state = state.copyWith(
+      final profile = await _repository.fetchCurrentProfile();
+      state = AuthState(status: AuthStepStatus.authenticated, user: profile);
+    } catch (_) {
+      state = const AuthState(
         status: AuthStepStatus.authenticated,
-        user: _repository.currentUser,
-      );
-    } catch (e) {
-      state = state.copyWith(
-        status: AuthStepStatus.error,
-        errorMessage: 'Apple sign in failed. Please try again.',
+        errorMessage: 'Signed in, but your profile could not be loaded.',
       );
     }
   }
 
-  Future<void> signInWithGoogle() async {
-    state = state.copyWith(status: AuthStepStatus.authenticating, errorMessage: null);
+  /// Re-reads the profile row (e.g. after onboarding marks it complete).
+  Future<void> refreshProfile() => _onSessionChanged(_repository.currentUserId);
+
+  Future<void> signInWithApple() =>
+      _startOAuth(_repository.signInWithApple, 'Apple sign in failed. Please try again.');
+
+  Future<void> signInWithGoogle() =>
+      _startOAuth(_repository.signInWithGoogle, 'Google sign in failed. Please try again.');
+
+  Future<void> _startOAuth(Future<void> Function() launch, String failure) async {
+    state = state.copyWith(status: AuthStepStatus.authenticating);
     try {
-      await _repository.signInWithGoogle();
-      state = state.copyWith(
-        status: AuthStepStatus.authenticated,
-        user: _repository.currentUser,
-      );
-    } catch (e) {
-      state = state.copyWith(
-        status: AuthStepStatus.error,
-        errorMessage: 'Google sign in failed. Please try again.',
-      );
+      await launch();
+      // The browser flow continues outside the app; the session stream completes sign-in.
+      if (state.status == AuthStepStatus.authenticating) {
+        state = state.copyWith(status: AuthStepStatus.unauthenticated);
+      }
+    } catch (_) {
+      state = state.copyWith(status: AuthStepStatus.error, errorMessage: failure);
     }
   }
 
   Future<void> requestPhoneOtp(String phoneNumber) async {
-    final cleanPhone = phoneNumber.replaceAll(RegExp(r'\s+'), '');
-    state = state.copyWith(
-      status: AuthStepStatus.authenticating,
-      phoneNumber: cleanPhone,
-      errorMessage: null,
-    );
+    final cleanPhone = phoneNumber.replaceAll(RegExp(r'[\s()-]'), '');
+    state = state.copyWith(status: AuthStepStatus.authenticating, phoneNumber: cleanPhone);
     try {
       await _repository.sendPhoneOtp(cleanPhone);
       state = state.copyWith(status: AuthStepStatus.awaitingOtp);
-    } catch (e) {
+    } catch (_) {
       state = state.copyWith(
         status: AuthStepStatus.error,
         errorMessage: 'Failed to send SMS verification code.',
@@ -97,23 +118,17 @@ class AuthController extends StateNotifier<AuthState> {
     final phone = state.phoneNumber;
     if (phone == null) return false;
 
-    state = state.copyWith(status: AuthStepStatus.authenticating, errorMessage: null);
+    state = state.copyWith(status: AuthStepStatus.authenticating);
     try {
-      final success = await _repository.verifyPhoneOtp(phone, otpCode);
-      if (success) {
-        state = state.copyWith(
-          status: AuthStepStatus.authenticated,
-          user: _repository.currentUser,
-        );
-        return true;
-      } else {
+      final success = await _repository.verifyPhoneOtp(phone, otpCode.trim());
+      if (!success) {
         state = state.copyWith(
           status: AuthStepStatus.awaitingOtp,
           errorMessage: 'Invalid verification code. Please check and re-enter.',
         );
-        return false;
       }
-    } catch (e) {
+      return success;
+    } catch (_) {
       state = state.copyWith(
         status: AuthStepStatus.awaitingOtp,
         errorMessage: 'Verification failed. Please try again.',
@@ -135,18 +150,16 @@ class AuthController extends StateNotifier<AuthState> {
       );
       state = state.copyWith(user: user);
       return true;
-    } catch (e) {
+    } on HandleTakenException catch (e) {
+      state = state.copyWith(errorMessage: e.toString());
+      return false;
+    } catch (_) {
       state = state.copyWith(errorMessage: 'Failed to save profile.');
       return false;
     }
   }
 
-  Future<void> signOut() async {
-    await _repository.signOut();
-    state = const AuthState();
-  }
+  Future<void> signOut() => _repository.signOut();
 }
 
-final authControllerProvider = StateNotifierProvider<AuthController, AuthState>((ref) {
-  return AuthController(ref.watch(authRepositoryProvider));
-});
+final authControllerProvider = NotifierProvider<AuthController, AuthState>(AuthController.new);
