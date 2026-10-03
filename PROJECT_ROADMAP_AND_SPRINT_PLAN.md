@@ -34,6 +34,7 @@ Establish the backend database, Flutter client shell, authentication pipelines, 
 - [ ] **FE-105:** Build `SCR-03` (50-Title Movie, TV & Anime Recognition Seed Grid) with multi-select counter badge.
 - [ ] **FE-106:** Implement 1-click AniList & MyAnimeList profile importer (fetches completed anime via public username).
 - [ ] **FE-107:** Implement 1-click Letterboxd importer (`diary.csv` upload and public username profile sync).
+- [ ] **QA-101:** Test Pyramid Setup & Ingestion Unit Tests: Configure `flutter_test`, `mockito`, and unit tests for Letterboxd CSV / AniList GraphQL parsers and Drift SQLite DAOs.
 
 ### Acceptance Criteria
 - A new user can sign up with Apple or Phone, select streaming services, tap 8 titles or 1-click import from Letterboxd/AniList, and calibrate their initial dual canons in $< 60\text{ seconds}$.
@@ -57,6 +58,7 @@ Build the core intellectual property of Telly: the binary insertion duel tournam
 - [ ] **FE-206:** Build `SCR-14` (Profile: The Personal Dual-Canon) with toggle between `[ 🎬 Movie Canon ]` and `[ 📺 Series & Anime ]`, plus view modes (*Ranked List*, *Tier View*, *3x3 Poster Grid*).
 - [ ] **FE-207:** Implement Franchise Rollup toggle (collapsing multi-season anime/shows vs unbundling cours).
 - [ ] **FE-208:** Implement smooth drag-and-drop manual re-indexing in the Canon with live score updates.
+- [ ] **QA-201:** Ranking Engine Unit & Widget Tests: Unit test Binary Insertion Sort ($\mathcal{O}(\log_2 N)$), dynamic percentile curve, and TrueSkill decay; widget test `SCR-10` (Duel Arena) swipe gestures and cards.
 
 ### Acceptance Criteria
 - User can finish a 4-duel tournament, insert a movie or series into a 100-title canon in $< 15\text{ seconds}$, and view their updated decimal score on an internally consistent, segregated leaderboard.
@@ -76,6 +78,7 @@ Transform the personal tracking tool into an addictive, competitive social netwo
 - [ ] **FE-304:** Build `SCR-06` (Spoiler-Safe Comment Thread) with frosted Gaussian blur masks (`BackdropFilter`).
 - [ ] **FE-305:** Build `SCR-17` (Squads Hub) with Borda Count consensus leaderboard calculation.
 - [ ] **FE-306:** Build `SCR-18` (The TV Graveyard) for logging dropped shows with reason taxonomies and revisit toggles.
+- [ ] **QA-301:** Social Graph & Database Stored Proc Tests: Setup `pgTAP` suite on Supabase local container for `insert_user_ranking_atomic` and RLS policies; widget test `SCR-05` (Feed Card) and `SCR-06` (Spoiler mask).
 
 ### Acceptance Criteria
 - A user ranking *The Bear* over *Succession* automatically broadcasts an Upset card to their friends' feeds, allowing friends to react, argue in spoiler-masked comments, or save it to their queue in 1 tap.
@@ -95,6 +98,7 @@ Solve couch paralysis with the co-watching decider, calculate friend affinity sc
 - [ ] **FE-403:** Build `SCR-16` ("Two-to-Watch" Co-Watching Decider): format selection (`[ 🎬 Movie Night ]` vs `[ 📺 Series ]`), runtime budget pills (`< 90m`, `90-120m`, `120m+`), and joint candidate scoring.
 - [ ] **FE-404:** Implement the 15-second "Quick Swipe Mode" mutual card-swiping mini-game.
 - [ ] **FE-405:** Build `SCR-13` (Smart Queue) with Dual Watchlists and filter: *"Only Titles on My Subscribed Services"*.
+- [ ] **QA-401:** Taste Match & Co-Watch Integration Tests: Unit test Spearman Rank Correlation ($\rho$) with Bayesian shrinkage ($k_0 = 5$); integration test "Two-to-Watch" streaming provider matching and deep-link generation.
 
 ### Acceptance Criteria
 - Two friends sitting on a couch can launch "Two-to-Watch", toggle "Movie Night (< 2h)", find a mutual high-scoring thriller on their shared Max subscription, and tap to launch the film inside the Max app in $< 30\text{ seconds}$.
@@ -114,6 +118,7 @@ Polish offline resilience, build aesthetic Instagram Story generators, configure
 - [ ] **FE-505:** Implement Letterboxd migration celebration card (*"Imported 412 films to Telly — here is my true #1"*).
 - [ ] **DEV-501:** Set up GitHub Actions CI/CD with Fastlane for automated TestFlight and Google Play distribution.
 - [ ] **DEV-502:** Integrate Sentry crash reporting with user breadcrumbs and PostHog product analytics.
+- [ ] **QA-501:** End-to-End (E2E) Acceptance & Quality Gates: Implement `package:integration_test` for 4 CUJs, visual golden tests, WCAG 2.1 AA a11y audit, and 60fps frame rate benchmarks in CI.
 - [ ] **LEGAL-501:** Deploy live web endpoints for `legal/PRIVACY_POLICY.md` and `legal/TERMS_OF_SERVICE.md`.
 - [ ] **LEGAL-502:** Submit production binary to Apple App Store Connect and Google Play Console.
 

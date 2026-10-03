@@ -64,6 +64,7 @@ Complete engineering specifications for mobile development, database schemas, ex
 | **TA-03** | [**`External APIs & Data Pipelines`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md) | TMDB API v3/v4 integration with Cloudflare edge caching, JustWatch availability scraping, native streaming app deep-linking (`max://`, `nflx://`), and Twilio Verify. |
 | **TA-04** | [**`Client Architecture & Offline Sync`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md) | Feature-first folder structure, Riverpod duel state machine, Drift SQLite offline write-ahead log (WAL), and off-screen 1080x1920 Story Card renderer. |
 | **TA-05** | [**`DevOps, CI/CD & Launch Checklist`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md) | GitHub Actions + Fastlane iOS TestFlight / Google Play deployment pipelines, Sentry crash observability, PostHog telemetry, and App Store review guidelines. |
+| **TA-06** | [**`Testing Framework & Test Pyramid`**](file:///c:/Users/karla/Desktop/SeriesBeli/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) | Quality strategy, classical test pyramid (70% Unit, 20% Integration/Widget, 10% E2E), algorithmic tests (Binary Sort, Spearman Rank, TrueSkill), pgTAP database procedures, and CI/CD quality gates. |
 
 ---
 
