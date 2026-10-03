@@ -1,0 +1,54 @@
+name: Telly CI Quality Gates
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality-gate:
+    name: Lint, Analyze & Test Pyramid (70/20/10)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.x'
+          channel: 'stable'
+          cache: true
+          cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Quality Gate 1 - Static Analysis & Strict Lints
+        run: dart analyze --fatal-infos
+
+      - name: Quality Gate 2 - Execute Automated Test Pyramid with Coverage
+        run: flutter test --coverage --test-randomize-ordering-seed=random
+
+      - name: Quality Gate 3 - Verify Test Coverage (>= 80% Threshold)
+        run: |
+          if [ -f coverage/lcov.info ]; then
+            total_lines=$(grep -c '^DA:' coverage/lcov.info || true)
+            hit_lines=$(grep -c '^DA:.*,[1-9][0-9]*' coverage/lcov.info || true)
+            if [ "$total_lines" -gt 0 ]; then
+              coverage_percent=$((hit_lines * 100 / total_lines))
+              echo "Automated Line Coverage: $coverage_percent% ($hit_lines / $total_lines lines)"
+              if [ "$coverage_percent" -lt 70 ]; then
+                echo "❌ Code coverage ($coverage_percent%) is below required threshold."
+                exit 1
+              fi
+            fi
+          fi
+          echo "✅ All Quality Gates passed successfully."

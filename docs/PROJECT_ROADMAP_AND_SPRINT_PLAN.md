@@ -23,19 +23,19 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 1 (Weeks 1–2): Infrastructure, Auth, Foundation & Data Ingestion**
-- **Current Active Ticket**: `QA-101`: Test Pyramid Setup & CI Analyzer Enforcement
-- **Overall Roadmap Progress**: **14 / 81 Tickets Completed** (17.3%)
+- **Current Active Ticket**: `BE-101`: Supabase Project Initialization & Database Migration
+- **Overall Roadmap Progress**: **15 / 81 Tickets Completed** (18.5%)
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos`), Unit Tests (100% pass)
 - **Last Updated**: 2026-10-03
 
 | Sprint | Status | Total Tickets | Completed | Progress |
 | :---: | :---: | :---: | :---: | :--- |
-| **Sprint 1** | 🟡 **Active** | 15 | 14 | `██████████████` 93.3% |
+| **Sprint 1** | 🟡 **Active** | 19 | 15 | `███████████████░░░░` 78.9% |
 | **Sprint 2** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 3** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 4** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 5** | ⚪ Queued | 18 | 0 | `░░░░░░░░░░` 0% |
-| **Total** | | **81** | **14** | **17.3%** |
+| **Total** | | **85** | **15** | **17.6%** |
 
 ---
 
@@ -297,11 +297,11 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §1, §7 (Test Pyramid & CI Gates)
 - **Scope & Objectives**: Configure automated test harness, mock generators, and GitHub Actions PR checks.
 - **Granular Tasks**:
-  - [ ] Add `build_runner`, `mockito`, `package:test`, `flutter_test` to dev dependencies.
-  - [ ] Configure `.github/workflows/ci.yml` running `dart analyze --fatal-infos` and `flutter test --coverage`.
-  - [ ] Assert CI fails if test coverage on core models drops below 80%.
+  - [x] Add `build_runner`, `mockito`, `package:test`, `flutter_test` to dev dependencies.
+  - [x] Configure `.github/workflows/ci.yml` running `dart analyze --fatal-infos` and `flutter test --coverage`.
+  - [x] Assert CI fails if test coverage on core models drops below 80%.
 - **Testing & Verification**:
-  - [ ] Trigger CI build via test pull request; assert pipeline succeeds in $< 90\text{ seconds}$.
+  - [x] Trigger CI build via test pull request; assert pipeline succeeds in $< 90\text{ seconds}$.
 - **Dependencies**: `FE-101`.
 
 #### `QA-102`: Unit Tests for Ingestion Parsers
