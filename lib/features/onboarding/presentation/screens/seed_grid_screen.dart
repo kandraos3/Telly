@@ -20,9 +20,15 @@ class SeedGridScreen extends ConsumerWidget {
     final currentFilter = ref.watch(seedCategoryFilterProvider);
 
     final filteredTitles = kTop50SeedTitles.where((title) {
-      if (currentFilter == 'movie') return title.mediaType == 'movie';
-      if (currentFilter == 'tv') return title.mediaType == 'tv' && !title.isAnime;
-      if (currentFilter == 'anime') return title.isAnime;
+      if (currentFilter == 'movie') {
+        return title.mediaType == 'movie';
+      }
+      if (currentFilter == 'tv') {
+        return title.mediaType == 'tv' && !title.isAnime;
+      }
+      if (currentFilter == 'anime') {
+        return title.isAnime;
+      }
       return true;
     }).toList();
 
