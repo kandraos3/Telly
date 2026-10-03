@@ -23,19 +23,19 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 1 (Weeks 1–2): Infrastructure, Auth, Foundation & Data Ingestion**
-- **Current Active Ticket**: `FE-104`: Core Component Primitives (Buttons, Sheets, Badges)
-- **Overall Roadmap Progress**: **3 / 81 Tickets Completed** (3.7%)
+- **Current Active Ticket**: `FE-105`: Local Drift SQLite Database & Repositories Setup
+- **Overall Roadmap Progress**: **4 / 81 Tickets Completed** (4.9%)
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos`), Unit Tests (100% pass)
 - **Last Updated**: 2026-10-03
 
 | Sprint | Status | Total Tickets | Completed | Progress |
 | :---: | :---: | :---: | :---: | :--- |
-| **Sprint 1** | 🟡 **Active** | 15 | 3 | `███░░░░░░░` 20.0% |
+| **Sprint 1** | 🟡 **Active** | 15 | 4 | `████░░░░░░` 26.7% |
 | **Sprint 2** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 3** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 4** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 5** | ⚪ Queued | 18 | 0 | `░░░░░░░░░░` 0% |
-| **Total** | | **81** | **3** | **3.7%** |
+| **Total** | | **81** | **4** | **4.9%** |
 
 ---
 
@@ -168,12 +168,12 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [**`design_system/02_COMPONENT_LIBRARY_AND_PATTERNS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/02_COMPONENT_LIBRARY_AND_PATTERNS.md) §1–§5 (Component Library)
 - **Scope & Objectives**: Implement reusable atomic UI components matching the design specification.
 - **Granular Tasks**:
-  - [ ] Build `TellyPrimaryButton`: 52dp height, Phosphor Lime fill, black bold text, 12dp rounded corners.
-  - [ ] Build `TellyFrostedSheet`: `BackdropFilter` with `sigmaX: 20`, `sigmaY: 20`, `rgba(20, 20, 25, 0.85)` surface.
-  - [ ] Build `TellyNeonBadge`: Pill container with glowing outline, supporting `NeonCoral` (Upset) and `PhosphorLime` (Winner).
-  - [ ] Build `TellyTextField`: Dark card fill, border highlight on focus, error state animation.
+  - [x] Build `TellyPrimaryButton`: 52dp height, Phosphor Lime fill, black bold text, 12dp rounded corners.
+  - [x] Build `TellyFrostedSheet`: `BackdropFilter` with `sigmaX: 20`, `sigmaY: 20`, `rgba(20, 20, 25, 0.85)` surface.
+  - [x] Build `TellyNeonBadge`: Pill container with glowing outline, supporting `NeonCoral` (Upset) and `PhosphorLime` (Winner).
+  - [x] Build `TellyTextField`: Dark card fill, border highlight on focus, error state animation.
 - **Testing & Verification**:
-  - [ ] Widget tests for each component checking tap states, disabled states, and color token consistency.
+  - [x] Widget tests for each component checking tap states, disabled states, and color token consistency.
 - **Dependencies**: `FE-102`.
 
 #### `FE-105`: Local Drift SQLite Database & Repositories Setup
