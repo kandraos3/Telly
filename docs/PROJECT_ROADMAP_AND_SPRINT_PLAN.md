@@ -23,19 +23,19 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 2 (Weeks 3–4): The Pairwise Duel Engine, Scoring & The Personal Dual-Canon**
-- **Current Active Ticket**: `ALGO-202`: Dynamic Percentile Score Curve Calculator ($0.0 - 10.0$)
-- **Overall Roadmap Progress**: **21 / 85 Tickets Completed** (24.7%)
+- **Current Active Ticket**: `ALGO-203`: TrueSkill Uncertainty ($\sigma$) Decay & Confidence Tracking
+- **Overall Roadmap Progress**: **23 / 89 Tickets Completed** (25.8%)
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos`), Unit Tests (100% pass)
 - **Last Updated**: 2026-10-03
 
 | Sprint | Status | Total Tickets | Completed | Progress |
 | :---: | :---: | :---: | :---: | :--- |
 | **Sprint 1** | 🟢 **Completed** | 19 | 19 | `████████████████████` 100.0% |
-| **Sprint 2** | 🟡 **Active** | 20 | 2 | `██░░░░░░░░` 10.0% |
+| **Sprint 2** | 🟡 **Active** | 20 | 4 | `████░░░░░░` 20.0% |
 | **Sprint 3** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 4** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 5** | ⚪ Queued | 18 | 0 | `░░░░░░░░░░` 0% |
-| **Total** | | **89** | **21** | **23.6%** |
+| **Total** | | **89** | **23** | **25.8%** |
 
 ---
 
@@ -373,13 +373,13 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.1 (Dynamic Score Curve)
 - **Scope & Objectives**: Mathematical formula mapping rank positions $1 \dots N$ to a normalized $0.00 - 10.00$ decimal score.
 - **Granular Tasks**:
-  - [ ] Create `lib/features/ranking/domain/score_curve_calculator.dart`.
-  - [ ] Implement formula: $\text{Score}(r, N) = 1.00 + 9.00 \times \left(1.0 - \frac{r - 1}{N - 1}\right)^p$.
-  - [ ] Apply power exponent $p = 1.15$ to slightly weight top echelon titles.
-  - [ ] Implement Bayesian smoothing prior for profiles with $N < 10$ ranked titles.
+  - [x] Create `lib/features/ranking/domain/score_curve_calculator.dart`.
+  - [x] Implement formula: $\text{Score}(r, N) = 1.00 + 9.00 \times \left(1.0 - \frac{r - 1}{N - 1}\right)^p$.
+  - [x] Apply power exponent $p = 1.15$ to slightly weight top echelon titles.
+  - [x] Implement Bayesian smoothing prior for profiles with $N < 10$ ranked titles.
 - **Testing & Verification**:
-  - [ ] Verify $\text{Score}(1, N) == 10.00$ and $\text{Score}(N, N) == 1.00$ for all $N > 1$.
-  - [ ] Verify monotonic strictly decreasing property: $\forall i < j, \text{Score}(i, N) \ge \text{Score}(j, N)$.
+  - [x] Verify $\text{Score}(1, N) == 10.00$ and $\text{Score}(N, N) == 1.00$ for all $N > 1$.
+  - [x] Verify monotonic strictly decreasing property: $\forall i < j, \text{Score}(i, N) \ge \text{Score}(j, N)$.
 - **Dependencies**: None.
 
 #### `ALGO-203`: TrueSkill Uncertainty ($\sigma$) Decay & Confidence Tracking
@@ -608,11 +608,11 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.1 (Score Monotonicity)
 - **Scope & Objectives**: Mathematically verify scoring curve invariants.
 - **Granular Tasks**:
-  - [ ] Write `test/features/ranking/score_curve_calculator_test.dart`.
-  - [ ] Assert $\text{Score}(1) = 10.00$ and $\text{Score}(N) = 1.00$ across $N \in [2, 10, 50, 500]$.
-  - [ ] Assert strictly decreasing order: $\text{Score}(i) > \text{Score}(i+1)$.
+  - [x] Write `test/features/ranking/score_curve_calculator_test.dart`.
+  - [x] Assert $\text{Score}(1) = 10.00$ and $\text{Score}(N) = 1.00$ across $N \in [2, 10, 50, 500]$.
+  - [x] Assert strictly decreasing order: $\text{Score}(i) > \text{Score}(i+1)$.
 - **Testing & Verification**:
-  - [ ] Property-based tests passing with 10,000 generated datasets.
+  - [x] Property-based tests passing with 10,000 generated datasets.
 - **Dependencies**: `ALGO-202`.
 
 #### `QA-203`: pgTAP Test Suite for `insert_user_ranking_atomic`
