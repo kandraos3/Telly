@@ -23,19 +23,19 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 2 (Weeks 3–4): The Pairwise Duel Engine, Scoring & The Personal Dual-Canon**
-- **Current Active Ticket**: `FE-203`: `SCR-11` Editorial Tagging Modal (MVP Character, Vibe Tags, Sub/Dub)
-- **Overall Roadmap Progress**: **31 / 89 Tickets Completed** (34.8%)
+- **Current Active Ticket**: `FE-206`: `SCR-14` Dual-Canon Profile Header & Segmented Pill Switcher
+- **Overall Roadmap Progress**: **35 / 89 Tickets Completed** (39.3%)
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos`), Unit Tests (100% pass)
 - **Last Updated**: 2026-10-03
 
 | Sprint | Status | Total Tickets | Completed | Progress |
 | :---: | :---: | :---: | :---: | :--- |
 | **Sprint 1** | 🟢 **Completed** | 19 | 19 | `████████████████████` 100.0% |
-| **Sprint 2** | 🟡 **Active** | 20 | 12 | `████████████░░░░░░░░` 60.0% |
+| **Sprint 2** | 🟡 **Active** | 20 | 16 | `████████████████░░░░` 80.0% |
 | **Sprint 3** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 4** | ⚪ Queued | 16 | 0 | `░░░░░░░░░░` 0% |
 | **Sprint 5** | ⚪ Queued | 18 | 0 | `░░░░░░░░░░` 0% |
-| **Total** | | **89** | **31** | **34.8%** |
+| **Total** | | **89** | **35** | **39.3%** |
 
 ---
 
@@ -492,13 +492,13 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
   - [**`features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md) §3 (Editorial Tagging)
 - **Scope & Objectives**: Bottom sheet appearing post-tournament to capture subjective nuances.
 - **Granular Tasks**:
-  - [ ] Create `lib/features/ranking/presentation/widgets/editorial_tagging_sheet.dart`.
-  - [ ] MVP Character dropdown populated from TMDB cast credits.
-  - [ ] Multi-select vibe tag chips (*"Masterpiece Acting"*, *"Mind-bending"*, *"Cozy"*, *"Dark & Gritty"*).
-  - [ ] Anime-specific audio toggle: `[ Sub ]` vs `[ Dub ]`.
-  - [ ] 280-character micro-review input field with remaining counter.
+  - [x] Create `lib/features/ranking/presentation/widgets/editorial_tagging_sheet.dart`.
+  - [x] MVP Character dropdown populated from TMDB cast credits.
+  - [x] Multi-select vibe tag chips (*"Masterpiece Acting"*, *"Mind-bending"*, *"Cozy"*, *"Dark & Gritty"*).
+  - [x] Anime-specific audio toggle: `[ Sub ]` vs `[ Dub ]`.
+  - [x] 280-character micro-review input field with remaining counter.
 - **Testing & Verification**:
-  - [ ] Widget test verifying selecting 2 vibe tags updates local tagging model.
+  - [x] Widget test verifying selecting 2 vibe tags updates local tagging model.
 - **Dependencies**: `FE-104`.
 
 #### `FE-204`: Movie-Specific Logging Tags in `SCR-11` (Cinema Venue, Rewatch Flag)
@@ -506,12 +506,12 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
   - [**`features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md) §3 (Theatrical Tracking)
 - **Scope & Objectives**: Dynamically display cinema venue options and rewatch counters when logging a film.
 - **Granular Tasks**:
-  - [ ] In `SCR-11`, inspect candidate `media_type`: if `'movie'`, render Theatrical Venue selector.
-  - [ ] Options: `[ 🛋️ Home / Streaming ]`, `[ 🍿 Theatrical ]`, `[ 📽️ IMAX 70mm / Dolby ]`.
-  - [ ] Add Rewatch counter badge: `First Watch` vs `Rewatch (x2, x3...)`.
-  - [ ] Auto-tag director name from TMDB crew metadata.
+  - [x] In `SCR-11`, inspect candidate `media_type`: if `'movie'`, render Theatrical Venue selector.
+  - [x] Options: `[ 🛋️ Home / Streaming ]`, `[ 🍿 Theatrical ]`, `[ 📽️ IMAX 70mm / Dolby ]`.
+  - [x] Add Rewatch counter badge: `First Watch` vs `Rewatch (x2, x3...)`.
+  - [x] Auto-tag director name from TMDB crew metadata.
 - **Testing & Verification**:
-  - [ ] Widget test asserting venue chips render for movies and are omitted for TV shows.
+  - [x] Widget test asserting venue chips render for movies and are omitted for TV shows.
 - **Dependencies**: `FE-203`.
 
 #### `FE-205`: `SCR-12` Celebration Slot Reveal Modal with Number Ticker
@@ -520,13 +520,13 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
   - [**`features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md) §4 (Slot Reveal)
 - **Scope & Objectives**: Full-screen celebration screen revealing new title rank position and dynamic score.
 - **Granular Tasks**:
-  - [ ] Create `lib/features/ranking/presentation/screens/slot_reveal_modal.dart`.
-  - [ ] Animate slot rank reveal: *"#4 of 48 Titles in your Movie Canon"*.
-  - [ ] Animate score counter ticker from `0.00` to target score (e.g., `9.42`) over 1200ms using `Tween<double>`.
-  - [ ] Trigger sequential haptic feedback during number roll.
-  - [ ] Provide primary button: *"View in My Canon"*; secondary: *"Share Story"*.
+  - [x] Create `lib/features/ranking/presentation/screens/slot_reveal_modal.dart`.
+  - [x] Animate slot rank reveal: *"#4 of 48 Titles in your Movie Canon"*.
+  - [x] Animate score counter ticker from `0.00` to target score (e.g., `9.42`) over 1200ms using `Tween<double>`.
+  - [x] Trigger sequential haptic feedback during number roll.
+  - [x] Provide primary button: *"View in My Canon"*; secondary: *"Share Story"*.
 - **Testing & Verification**:
-  - [ ] Widget test verifying animation completes and displays formatted score text `9.42`.
+  - [x] Widget test verifying animation completes and displays formatted score text `9.42`.
 - **Dependencies**: `FE-102`, `FE-103`.
 
 ---
@@ -632,10 +632,10 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §3.1 (Duel Arena Widget Test)
 - **Scope & Objectives**: Test card rendering, swipe callbacks, and animations.
 - **Granular Tasks**:
-  - [ ] Write `test/features/ranking/duel_arena_screen_test.dart`.
-  - [ ] Write `test/features/ranking/slot_reveal_modal_test.dart`.
+  - [x] Write `test/features/ranking/duel_arena_screen_test.dart`.
+  - [x] Write `test/features/ranking/slot_reveal_modal_test.dart`.
 - **Testing & Verification**:
-  - [ ] Assert tapping Candidate A calls `onSelectWinner` with Candidate A ID.
+  - [x] Assert tapping Candidate A calls `onSelectWinner` with Candidate A ID.
 - **Dependencies**: `FE-201`, `FE-205`.
 
 ---
