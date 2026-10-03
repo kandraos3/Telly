@@ -24,7 +24,7 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 6 — Integration, Wiring & Audit Remediation** (planned 2026-10-03; owner decisions D1–D7 recorded in Sprint 6)
-- **Current Active Ticket**: `BE-602` (RLS Hardening) — Sprint 6: 3 / 32 tickets complete
+- **Current Active Ticket**: `ALGO-601` (Score Curve γ = 0.82 + Single Tier Definition) — Sprint 6: 4 / 32 tickets complete
 - **Overall Roadmap Progress**: Sprints 1–5 granular tasks after the `DOC-601` honesty reset (2026-10-03): **281 / 431 verified** · **121 un-checked** (each annotated `→ remediated by <Sprint 6 ticket>`) · **29 human-only**. The earlier "89 / 89" claim was overstated.
 - **Human-Only Tasks**: 29 tasks in Sprints 1–5 marked `👤 [TO BE DONE BY HUMAN]` (cloud setup, secrets, store submission, device/CI runs, dashboard verification), plus the Sprint 6 human prerequisites list. These cannot be completed or verified from code.
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (215 / 215 pass — note: many tests are widget/unit-level only; no real E2E or golden tests exist yet)
@@ -1471,14 +1471,14 @@ Turn the library of individually-tested widgets and algorithms into a **wired, r
   - [**`adjacent_systems/02_PROFILE_MANAGEMENT_AND_CUSTOMIZATION.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/adjacent_systems/02_PROFILE_MANAGEMENT_AND_CUSTOMIZATION.md) (visibility modes)
 - **Scope & Objectives**: Close audit C6 and enable RLS on every table.
 - **Granular Tasks**:
-  - [ ] Helper `can_view_user(target UUID)`: self, or target `PUBLIC` and not deleted, or `FRIENDS_ONLY` with an accepted follow; never for `GHOST`, and never across a `user_blocks` row.
-  - [ ] `user_rankings`, `activity_logs`, `comments`, `feed_reactions`, `user_dropped_shows`: SELECT via `can_view_user`; writes only own rows.
-  - [ ] `social_follows`: INSERT only as `follower_id = auth.uid()` with status forced by trigger (`pending` if target is non-public, else `accepted`); UPDATE (approve/reject) only by `following_id`; DELETE by either party. No `FOR ALL` policy.
-  - [ ] `titles`/`streaming_platforms`: read-only for `authenticated`; writes only via `service_role` (edge functions).
-  - [ ] `squads`/`squad_members`: visible to members only; membership changes by owner/admin role.
-  - [ ] `reports`: insert-own only, no client SELECT.
+  - [x] Helper `can_view_user(target UUID)`: self, or target `PUBLIC` and not deleted, or `FRIENDS_ONLY` with an accepted follow; never for `GHOST`, and never across a `user_blocks` row.
+  - [x] `user_rankings`, `activity_logs`, `comments`, `feed_reactions`, `user_dropped_shows`: SELECT via `can_view_user`; writes only own rows.
+  - [x] `social_follows`: INSERT only as `follower_id = auth.uid()` with status forced by trigger (`pending` if target is non-public, else `accepted`); UPDATE (approve/reject) only by `following_id`; DELETE by either party. No `FOR ALL` policy.
+  - [x] `titles`/`streaming_platforms`: read-only for `authenticated`; writes only via `service_role` (edge functions).
+  - [x] `squads`/`squad_members`: visible to members only; membership changes by owner/admin role.
+  - [x] `reports`: insert-own only, no client SELECT.
 - **Testing & Verification**:
-  - [ ] pgTAP (as `authenticated` with `request.jwt.claims` set): user B cannot read A's rankings when A is `FRIENDS_ONLY` and unfollowed; B cannot insert a follow with `follower_id = A`; B cannot self-approve a `pending` follow; anon cannot read any user table.
+  - [x] pgTAP (as `authenticated` with `request.jwt.claims` set): user B cannot read A's rankings when A is `FRIENDS_ONLY` and unfollowed; B cannot insert a follow with `follower_id = A`; B cannot self-approve a `pending` follow; anon cannot read any user table. → `supabase/tests/database/002_row_level_security.test.sql` (22 assertions incl. blocks, GHOST, squads, column-level write guards).
 - **Dependencies**: `BE-601`.
 
 #### `BE-603`: Concurrency-Safe, Authorized Ranking RPCs (γ = 0.82)
