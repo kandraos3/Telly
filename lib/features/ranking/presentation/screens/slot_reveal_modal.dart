@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/services/haptics_service.dart';
 import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
+import '../../../../core/widgets/poster_image.dart';
 import '../../../../core/widgets/telly_primary_button.dart';
 import '../../domain/canon_type.dart';
 import '../../domain/score_curve_calculator.dart';
@@ -231,22 +232,18 @@ class _SlotRevealModalState extends ConsumerState<SlotRevealModal>
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 // Poster Thumbnail (or Fallback Icon)
-                                if (widget.posterPath != null && widget.posterPath!.isNotEmpty) ...[
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: Image.network(
-                                      widget.posterPath!,
-                                      width: 80,
-                                      height: 120,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) => _buildPosterFallback(),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: SizedBox(
+                                    width: 80,
+                                    height: 120,
+                                    child: PosterImage(
+                                      posterPath: widget.posterPath,
+                                      fallback: _buildPosterFallback(),
                                     ),
                                   ),
-                                  const SizedBox(height: 16),
-                                ] else ...[
-                                  _buildPosterFallback(),
-                                  const SizedBox(height: 16),
-                                ],
+                                ),
+                                const SizedBox(height: 16),
 
                                 // Title Name
                                 Text(

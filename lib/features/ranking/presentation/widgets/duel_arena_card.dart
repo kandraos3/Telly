@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
+import '../../../../core/widgets/poster_image.dart';
 
 /// Card widget representing a duel candidate in SCR-10 Binary Duel Arena.
 /// Conforms to `docs/design_system/02_COMPONENT_LIBRARY_AND_PATTERNS.md` §4
@@ -83,19 +84,13 @@ class DuelArenaCard extends StatelessWidget {
                   // Poster Thumbnail (2:3 aspect ratio)
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Container(
+                    child: SizedBox(
                       width: 72,
                       height: 108,
-                      color: TellyColors.backgroundSurface,
-                      child: posterPath != null && posterPath!.isNotEmpty
-                          ? Image.network(
-                              posterPath!.startsWith('http')
-                                  ? posterPath!
-                                  : 'https://image.tmdb.org/t/p/w300$posterPath',
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => _buildPosterPlaceholder(),
-                            )
-                          : _buildPosterPlaceholder(),
+                      child: PosterImage(
+                        posterPath: posterPath,
+                        fallback: _buildPosterPlaceholder(),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 16),

@@ -14,6 +14,12 @@ abstract final class TmdbImages {
     if (path == null || path.isEmpty) return null;
     return path.startsWith('http') ? path : '$base/$size$path';
   }
+
+  /// Full URL for a TMDB `backdrop_path` (e.g. `/abc.jpg`); passes absolute URLs through.
+  static String? backdrop(String? path, {String size = 'w780'}) {
+    if (path == null || path.isEmpty) return null;
+    return path.startsWith('http') ? path : '$base/$size$path';
+  }
 }
 
 /// Whether posters load from the network. Widget tests override this to false: the

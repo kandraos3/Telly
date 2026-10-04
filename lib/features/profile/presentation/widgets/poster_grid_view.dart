@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
+import '../../../../core/widgets/poster_image.dart';
 import '../../../ranking/domain/franchise_rollup_service.dart';
 
 /// Mode 3: 3x3 Poster Grid showing the user's top 9 titles without text clutter.
@@ -44,13 +45,10 @@ class PosterGridView extends StatelessWidget {
                   children: [
                     Container(
                       color: TellyColors.backgroundCard,
-                      child: item.posterPath != null && item.posterPath!.isNotEmpty
-                          ? Image.network(
-                              item.posterPath!,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => _posterFallback(item),
-                            )
-                          : _posterFallback(item),
+                      child: PosterImage(
+                        posterPath: item.posterPath,
+                        fallback: _posterFallback(item),
+                      ),
                     ),
                     // Rank badge
                     Positioned(

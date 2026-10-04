@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/database/database.dart';
+import '../../../onboarding/data/top_50_seeds.dart';
 import '../../../ranking/data/ranking_repository.dart';
 import '../../../ranking/domain/canon_type.dart';
 import '../../../ranking/domain/franchise_rollup_service.dart';
@@ -100,15 +101,19 @@ class ProfileCanonNotifier extends Notifier<ProfileCanonState> {
     return const ProfileCanonState(isLoading: true);
   }
 
-  static CanonEntry _toEntry(LocalRanking r) => CanonEntry(
-        id: r.showId,
-        title: r.title,
-        mediaType: r.mediaType,
-        rankPosition: r.rankPosition,
-        calculatedScore: r.calculatedScore,
-        posterPath: r.posterPath,
-        mvpCharacter: r.favoriteCharacter,
-      );
+  static CanonEntry _toEntry(LocalRanking r) {
+    final seedPoster = findSeedPoster(r.showId, r.mediaType);
+    final poster = (seedPoster != null && seedPoster.isNotEmpty) ? seedPoster : r.posterPath;
+    return CanonEntry(
+      id: r.showId,
+      title: r.title,
+      mediaType: r.mediaType,
+      rankPosition: r.rankPosition,
+      calculatedScore: r.calculatedScore,
+      posterPath: poster,
+      mvpCharacter: r.favoriteCharacter,
+    );
+  }
 
   /// Moves [titleId] to canon rank [newRank] (drag-and-drop, features/02 §7.3): the list
   /// re-scores immediately, then the repository persists and queues the move.

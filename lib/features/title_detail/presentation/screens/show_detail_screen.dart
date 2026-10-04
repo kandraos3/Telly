@@ -268,7 +268,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
               color: TellyColors.backgroundCardAlt,
               child: title.backdropPath != null
                   ? Image.network(
-                      title.backdropPath!,
+                      TmdbImages.backdrop(title.backdropPath) ?? title.backdropPath!,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => const Center(
                         child: Icon(Icons.movie_outlined, size: 48, color: TellyColors.textTertiary),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
+import '../../../../core/widgets/poster_image.dart';
 import '../../../ranking/domain/franchise_rollup_service.dart';
 
 /// Top 3 Showcase cards for the user's highest ranked titles.
@@ -112,13 +113,10 @@ class TopShowcaseRow extends StatelessWidget {
                     height: 110,
                     width: double.infinity,
                     color: TellyColors.backgroundSurface,
-                    child: item.posterPath != null && item.posterPath!.isNotEmpty
-                        ? Image.network(
-                            item.posterPath!,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => _posterFallback(item),
-                          )
-                        : _posterFallback(item),
+                    child: PosterImage(
+                      posterPath: item.posterPath,
+                      fallback: _posterFallback(item),
+                    ),
                   ),
                 ),
                 Positioned(

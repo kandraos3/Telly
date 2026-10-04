@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
+import '../../../../core/widgets/poster_image.dart';
 import '../../../ranking/domain/franchise_rollup_service.dart';
 
 /// Mode 1: Ranked Canon List with drag-and-drop manual re-indexing.
@@ -81,17 +82,13 @@ class RankedCanonList extends StatelessWidget {
                 // 2. Poster Thumbnail
                 ClipRRect(
                   borderRadius: BorderRadius.circular(6),
-                  child: Container(
+                  child: SizedBox(
                     width: 36,
                     height: 52,
-                    color: TellyColors.backgroundSurface,
-                    child: item.posterPath != null && item.posterPath!.isNotEmpty
-                        ? Image.network(
-                            item.posterPath!,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => _posterFallback(item),
-                          )
-                        : _posterFallback(item),
+                    child: PosterImage(
+                      posterPath: item.posterPath,
+                      fallback: _posterFallback(item),
+                    ),
                   ),
                 ),
 

@@ -73,3 +73,14 @@ const List<SeedTitle> kTop50SeedTitles = [
   SeedTitle(id: 27205, title: 'Inception', mediaType: 'movie', releaseYear: '2010', network: 'Warner Bros', posterPath: '/xlaY2zyzMfkhk0HSC5VUwzoZPU1.jpg', score: 9.55),
 ];
 
+/// Looks up the verified seed poster path for a given [id] and [mediaType].
+String? findSeedPoster(int id, String mediaType) {
+  for (final s in kTop50SeedTitles) {
+    if (s.id == id && s.mediaType == mediaType) {
+      return s.posterPath;
+    }
+  }
+  return null;
+}
+
+

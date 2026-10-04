@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:telly_app/core/services/streaming_deep_link_factory.dart';
 import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/theme/telly_typography.dart';
+import 'package:telly_app/core/widgets/poster_image.dart';
 import 'package:telly_app/core/widgets/telly_neon_badge.dart';
 import 'package:telly_app/features/queue/data/streaming_availability_repository.dart';
 import 'package:telly_app/features/queue/data/streaming_availability_service.dart';
@@ -365,19 +366,25 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Media Type Icon / Poster Box
-                Container(
-                  width: 52,
-                  height: 72,
-                  decoration: BoxDecoration(
-                    color: TellyColors.backgroundCard,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: TellyColors.borderGlass),
-                  ),
-                  child: Center(
-                    child: Icon(
-                      item.mediaType == 'movie' ? Icons.movie_outlined : Icons.tv_outlined,
-                      color: TellyColors.textTertiary,
-                      size: 28,
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    width: 52,
+                    height: 72,
+                    decoration: BoxDecoration(
+                      color: TellyColors.backgroundCard,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: TellyColors.borderGlass),
+                    ),
+                    child: PosterImage(
+                      posterPath: item.posterPath,
+                      fallback: Center(
+                        child: Icon(
+                          item.mediaType == 'movie' ? Icons.movie_outlined : Icons.tv_outlined,
+                          color: TellyColors.textTertiary,
+                          size: 28,
+                        ),
+                      ),
                     ),
                   ),
                 ),
