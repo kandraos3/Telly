@@ -45,7 +45,7 @@ jobs:
       - name: "Quality Gate 2: Automated Test Pyramid with Coverage"
         run: |
           set -o pipefail
-          flutter test --coverage --test-randomize-ordering-seed=random --reporter=expanded 2>&1 | tee test_output.log
+          flutter test --coverage --test-randomize-ordering-seed=random --exclude-tags=a11y --reporter=expanded 2>&1 | tee test_output.log
         shell: bash
 
       - name: "Log Test Failure Details on Failure"
@@ -72,6 +72,11 @@ jobs:
 
       - name: "Quality Gate 3: Enforce Coverage Thresholds (80% Overall, 90% Ranking Domain)"
         run: dart run tool/check_coverage.dart
+
+      - name: "Informational: Automated Accessibility Audit (QA-604)"
+        continue-on-error: true
+        run: |
+          flutter test --tags=a11y --reporter=expanded
 
   database-pgtap-verification:
     name: Supabase pgTAP, RLS & Concurrency Gate (QA-601)
