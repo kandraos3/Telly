@@ -265,33 +265,45 @@ class _MembersRow extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           SizedBox(
-            height: 44,
+            height: 48,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: members.length,
               separatorBuilder: (_, __) => const SizedBox(width: 8),
               itemBuilder: (context, index) {
                 final member = members[index];
-                return InkWell(
-                  onTap: member.username.isEmpty ? null : () => context.push(Routes.profile(member.username)),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 16,
-                        backgroundColor: TellyColors.backgroundCard,
-                        child: Text(
-                          member.displayName.isNotEmpty ? member.displayName[0] : '?',
-                          style: TellyTypography.caption(color: TellyColors.phosphorLime)
-                              .copyWith(fontWeight: FontWeight.bold),
+                return Semantics(
+                  button: true,
+                  label: member.displayName,
+                  child: InkWell(
+                    onTap: member.username.isEmpty ? null : () => context.push(Routes.profile(member.username)),
+                    borderRadius: BorderRadius.circular(24),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            CircleAvatar(
+                              radius: 16,
+                              backgroundColor: TellyColors.backgroundCard,
+                              child: Text(
+                                member.displayName.isNotEmpty ? member.displayName[0] : '?',
+                                style: TellyTypography.caption(color: TellyColors.phosphorLime)
+                                    .copyWith(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              member.displayName,
+                              style: TellyTypography.caption(color: TellyColors.textSecondary)
+                                  .copyWith(fontWeight: FontWeight.w600),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(width: 6),
-                      Text(
-                        member.displayName,
-                        style: TellyTypography.caption(color: TellyColors.textSecondary)
-                            .copyWith(fontWeight: FontWeight.w600),
-                      ),
-                    ],
+                    ),
                   ),
                 );
               },
@@ -468,7 +480,7 @@ class _WatchlistTile extends StatelessWidget {
       title: Text(item.title, style: TellyTypography.bodyLarge(color: TellyColors.textPrimary)),
       subtitle: Text(
         item.everyone ? 'Everyone wants to watch' : '${item.queuedBy} of ${item.memberCount} want to watch',
-        style: TellyTypography.caption(color: item.everyone ? TellyColors.phosphorLime : TellyColors.textTertiary),
+        style: TellyTypography.caption(color: item.everyone ? TellyColors.phosphorLime : TellyColors.textSecondary),
       ),
       onTap: () => context.push(Routes.title(item.mediaType, item.titleId)),
     );

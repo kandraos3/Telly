@@ -53,9 +53,12 @@ jobs:
         run: |
           echo "=== EXTRACTING TEST FAILURES ==="
           if [ -f test_output.log ]; then
-            while IFS= read -r line; do
-              echo "::error title=Test Failure::$line"
-            done < <(grep -E "(\[E\]|EXCEPTION CAUGHT|Failing tests:|Golden comparison diff|Golden \")" test_output.log || true)
+            grep -A 25 -B 1 "EXCEPTION CAUGHT" test_output.log | while IFS= read -r line; do
+              echo "::error title=Test Exception::$line"
+            done
+            grep -E "(\[E\]|Failing tests:|Golden comparison diff|Golden \")" test_output.log | while IFS= read -r line; do
+              echo "::error title=Test Failure Summary::$line"
+            done
             tail -n 120 test_output.log
           fi
         shell: bash

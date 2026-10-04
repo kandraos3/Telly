@@ -96,7 +96,7 @@ class SeedGridScreen extends ConsumerWidget {
                               ),
                               subtitle: Text(
                                 'Upload diary.csv or sync public profile',
-                                style: TellyTypography.caption(color: TellyColors.textTertiary),
+                                style: TellyTypography.caption(color: TellyColors.textSecondary),
                               ),
                               trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: TellyColors.textTertiary),
                               key: const Key('import_letterboxd'),
@@ -120,7 +120,7 @@ class SeedGridScreen extends ConsumerWidget {
                               ),
                               subtitle: Text(
                                 'Instant username sync without password',
-                                style: TellyTypography.caption(color: TellyColors.textTertiary),
+                                style: TellyTypography.caption(color: TellyColors.textSecondary),
                               ),
                               trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: TellyColors.textTertiary),
                               key: const Key('import_anilist'),
@@ -181,66 +181,70 @@ class SeedGridScreen extends ConsumerWidget {
                           final item = filteredTitles[index];
                           final isSelected = selection.selected.contains(seedKey(item));
 
-                          return GestureDetector(
-                            key: ValueKey('seed_card_${item.mediaType}_${item.id}'),
-                            onTap: () => controller.toggle(item),
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 150),
-                              decoration: BoxDecoration(
-                                color: TellyColors.backgroundCard,
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                  color: isSelected ? TellyColors.phosphorLime : TellyColors.strokeSubtle,
-                                  width: isSelected ? 2.0 : 1.0,
+                          return Semantics(
+                            button: true,
+                            label: '${item.title} (${item.releaseYear})',
+                            selected: isSelected,
+                            child: GestureDetector(
+                              key: ValueKey('seed_card_${item.mediaType}_${item.id}'),
+                              onTap: () => controller.toggle(item),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 150),
+                                decoration: BoxDecoration(
+                                  color: TellyColors.backgroundCard,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: isSelected ? TellyColors.phosphorLime : TellyColors.strokeSubtle,
+                                    width: isSelected ? 2.0 : 1.0,
+                                  ),
+                                  boxShadow: isSelected
+                                      ? [
+                                          BoxShadow(
+                                            color: TellyColors.phosphorLime.withValues(alpha: 0.25),
+                                            blurRadius: 8.0,
+                                          ),
+                                        ]
+                                      : null,
                                 ),
-                                boxShadow: isSelected
-                                    ? [
-                                        BoxShadow(
-                                          color: TellyColors.phosphorLime.withValues(alpha: 0.25),
-                                          blurRadius: 8.0,
-                                        ),
-                                      ]
-                                    : null,
-                              ),
-                              clipBehavior: Clip.antiAlias,
-                              child: Stack(
-                                fit: StackFit.expand,
-                                children: [
-                                  // Poster (cached, shimmer while loading); the title card is the fallback.
-                                  PosterImage(
-                                    posterPath: item.posterPath,
-                                    fallback: Container(
-                                      color: TellyColors.backgroundSurface,
-                                      padding: const EdgeInsets.all(6),
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            item.mediaType == 'movie' ? '🎬' : (item.isAnime ? '⛩️' : '📺'),
-                                            style: const TextStyle(fontSize: 22),
-                                          ),
-                                          const SizedBox(height: 6),
-                                          Text(
-                                            item.title,
-                                            textAlign: TextAlign.center,
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TellyTypography.labelSmall().copyWith(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w600,
-                                              fontSize: 11,
+                                clipBehavior: Clip.antiAlias,
+                                child: Stack(
+                                  fit: StackFit.expand,
+                                  children: [
+                                    // Poster (cached, shimmer while loading); the title card is the fallback.
+                                    PosterImage(
+                                      posterPath: item.posterPath,
+                                      fallback: Container(
+                                        color: TellyColors.backgroundSurface,
+                                        padding: const EdgeInsets.all(6),
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              item.mediaType == 'movie' ? '🎬' : (item.isAnime ? '⛩️' : '📺'),
+                                              style: const TextStyle(fontSize: 22),
                                             ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            item.releaseYear,
-                                            style: TellyTypography.caption(color: TellyColors.textTertiary)
-                                                .copyWith(fontSize: 10),
-                                          ),
-                                        ],
+                                            const SizedBox(height: 6),
+                                            Text(
+                                              item.title,
+                                              textAlign: TextAlign.center,
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TellyTypography.labelSmall().copyWith(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 11,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              item.releaseYear,
+                                              style: TellyTypography.caption(color: TellyColors.textSecondary)
+                                                  .copyWith(fontSize: 10),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  ),
 
                                   // Selected checkmark badge overlay
                                   if (isSelected)
@@ -286,7 +290,8 @@ class SeedGridScreen extends ConsumerWidget {
                                 ],
                               ),
                             ),
-                          );
+                          ),
+                        );
                         },
                         childCount: filteredTitles.length,
                       ),
@@ -414,23 +419,30 @@ class _FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onSelected,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? TellyColors.phosphorLime : TellyColors.backgroundCard,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? TellyColors.phosphorLime : TellyColors.strokeSubtle,
+    return Semantics(
+      button: true,
+      label: label,
+      selected: isSelected,
+      child: GestureDetector(
+        onTap: onSelected,
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: isSelected ? TellyColors.phosphorLime : TellyColors.backgroundCard,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isSelected ? TellyColors.phosphorLime : TellyColors.strokeSubtle,
+            ),
           ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? Colors.black : TellyColors.textSecondary,
-            fontSize: 12,
-            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+          child: Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? Colors.black : TellyColors.textSecondary,
+              fontSize: 12,
+              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+            ),
           ),
         ),
       ),

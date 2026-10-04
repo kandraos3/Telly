@@ -486,12 +486,15 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            constraints: const BoxConstraints(minHeight: 52),
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+        child: Semantics(
+          button: true,
+          label: label,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              constraints: const BoxConstraints(minHeight: 52),
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
             decoration: BoxDecoration(
               color: TellyColors.backgroundSurface,
               borderRadius: BorderRadius.circular(12),
@@ -517,8 +520,9 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildStreamingNowSection(TitleDetail title) {
     final providers = title.availabilities;
@@ -606,7 +610,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
           Text(
             'YOUR STATUS',
             style: TellyTypography.labelSmall(
-              color: TellyColors.textTertiary,
+              color: TellyColors.textSecondary,
             ).copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
           ),
           const SizedBox(height: 12),
@@ -1153,44 +1157,48 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
             separatorBuilder: (_, __) => const SizedBox(width: 12),
             itemBuilder: (context, index) {
               final comp = companions[index];
-              return InkWell(
-                onTap: () => context.push(Routes.title(comp.mediaType, comp.id)),
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  width: 110,
-                  decoration: BoxDecoration(
-                    color: TellyColors.backgroundSurface,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: TellyColors.borderGlass),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ClipRRect(
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                        child: SizedBox(
-                          height: 110,
-                          width: double.infinity,
-                          child: PosterImage(
-                            posterPath: comp.posterPath,
-                            fallback: const Center(
-                              child: Icon(Icons.movie_outlined, color: TellyColors.textTertiary),
+              return Semantics(
+                button: true,
+                label: comp.title,
+                child: InkWell(
+                  onTap: () => context.push(Routes.title(comp.mediaType, comp.id)),
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    width: 110,
+                    decoration: BoxDecoration(
+                      color: TellyColors.backgroundSurface,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: TellyColors.borderGlass),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ClipRRect(
+                          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                          child: SizedBox(
+                            height: 110,
+                            width: double.infinity,
+                            child: PosterImage(
+                              posterPath: comp.posterPath,
+                              fallback: const Center(
+                                child: Icon(Icons.movie_outlined, color: TellyColors.textTertiary),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                        child: Text(
-                          comp.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TellyTypography.caption(
-                            color: TellyColors.textPrimary,
-                          ).copyWith(fontWeight: FontWeight.bold),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                          child: Text(
+                            comp.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TellyTypography.caption(
+                              color: TellyColors.textPrimary,
+                            ).copyWith(fontWeight: FontWeight.bold),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               );
@@ -1336,39 +1344,43 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
             ),
             child: Column(
               children: [
-                InkWell(
-                  onTap: () {
-                    setState(() {
-                      if (isExpanded) {
-                        _expandedSeasons.remove(season.seasonNumber);
-                      } else {
-                        _expandedSeasons.add(season.seasonNumber);
-                      }
-                    });
-                  },
-                  borderRadius: BorderRadius.circular(12),
-                  child: Padding(
-                    padding: const EdgeInsets.all(14),
-                    child: Row(
-                      children: [
-                        Icon(
-                          isExpanded ? Icons.arrow_drop_down : Icons.arrow_right,
-                          color: TellyColors.phosphorLime,
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            season.name,
-                            style: TellyTypography.labelLarge(
-                              color: TellyColors.textPrimary,
-                            ).copyWith(fontWeight: FontWeight.w700),
+                Semantics(
+                  button: true,
+                  label: '${season.name}, ${season.episodeCount} Episodes',
+                  child: InkWell(
+                    onTap: () {
+                      setState(() {
+                        if (isExpanded) {
+                          _expandedSeasons.remove(season.seasonNumber);
+                        } else {
+                          _expandedSeasons.add(season.seasonNumber);
+                        }
+                      });
+                    },
+                    borderRadius: BorderRadius.circular(12),
+                    child: Padding(
+                      padding: const EdgeInsets.all(14),
+                      child: Row(
+                        children: [
+                          Icon(
+                            isExpanded ? Icons.arrow_drop_down : Icons.arrow_right,
+                            color: TellyColors.phosphorLime,
                           ),
-                        ),
-                        Text(
-                          '${season.episodeCount} Episodes',
-                          style: TellyTypography.caption(color: TellyColors.textSecondary),
-                        ),
-                      ],
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              season.name,
+                              style: TellyTypography.labelLarge(
+                                color: TellyColors.textPrimary,
+                              ).copyWith(fontWeight: FontWeight.w700),
+                            ),
+                          ),
+                          Text(
+                            '${season.episodeCount} Episodes',
+                            style: TellyTypography.caption(color: TellyColors.textSecondary),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
