@@ -159,6 +159,12 @@ class AuthController extends Notifier<AuthState> {
     }
   }
 
+  /// Marks onboarding complete and reloads the profile so the router leaves the onboarding flow.
+  Future<void> finishOnboarding() async {
+    await _repository.markOnboardingCompleted();
+    await refreshProfile();
+  }
+
   Future<void> signOut() => _repository.signOut();
 }
 

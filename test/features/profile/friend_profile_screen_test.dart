@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:telly_app/core/theme/telly_theme.dart';
 import 'package:telly_app/features/profile/presentation/screens/friend_profile_screen.dart';
 
+import '../../helpers/router_harness.dart';
+
 void main() {
   Widget createTestWidget(Widget child) {
     return ProviderScope(
@@ -97,9 +99,9 @@ void main() {
       expect(find.text('+ Queue'), findsWidgets);
     });
 
-    testWidgets('tapping Two-to-Watch button navigates to TwoToWatchScreen (SCR-16)', (tester) async {
+    testWidgets('tapping Two-to-Watch button pushes /u/:handle/two-to-watch (SCR-16)', (tester) async {
       await tester.pumpWidget(
-        createTestWidget(
+        routerHarness(
           const FriendProfileScreen(
             userId: 'maya-123',
             handle: 'maya',
@@ -113,12 +115,11 @@ void main() {
       final buttonFinder = find.text('🍿 Two-to-Watch with @maya');
       expect(buttonFinder, findsOneWidget);
 
+      await tester.ensureVisible(buttonFinder);
       await tester.tap(buttonFinder);
       await tester.pumpAndSettle();
 
-      // Verify navigated to TwoToWatchScreen
-      expect(find.text('TWO-TO-WATCH'), findsOneWidget);
-      expect(find.text('WHO\'S ON THE COUCH?'), findsOneWidget);
+      expect(find.text('route:/u/maya/two-to-watch'), findsOneWidget);
     });
   });
 }

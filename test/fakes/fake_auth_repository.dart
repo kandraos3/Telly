@@ -93,6 +93,12 @@ class FakeAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<void> markOnboardingCompleted() async {
+    _maybeFail();
+    _profile = _profile?.copyWith(onboardingCompleted: true);
+  }
+
+  @override
   Future<void> signOut() async {
     _userId = null;
     _profile = null;

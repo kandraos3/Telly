@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/router/routes.dart';
+import '../../../../core/router/app_router.dart';
+import 'package:go_router/go_router.dart';
 import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/theme/telly_typography.dart';
 import 'package:telly_app/core/widgets/telly_primary_button.dart';
 import 'package:telly_app/features/cowatch/domain/spearman_taste_match_calculator.dart';
-import 'package:telly_app/features/cowatch/presentation/screens/two_to_watch_screen.dart';
 import 'package:telly_app/features/profile/presentation/widgets/taste_breakdown_section.dart';
 import 'package:telly_app/features/profile/presentation/widgets/taste_match_dial.dart';
 
@@ -133,17 +135,9 @@ class _FriendProfileScreenState extends ConsumerState<FriendProfileScreen> {
   }
 
   void _openTwoToWatch() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (ctx) => TwoToWatchScreen(
-          friendId: widget.userId,
-          friendHandle: widget.handle,
-          friendDisplayName: widget.displayName,
-          matchPercentage: widget.initialMatchPercentage,
-          movieMatchPercentage: widget.movieMatchPercentage,
-          seriesMatchPercentage: widget.seriesMatchPercentage,
-        ),
-      ),
+    context.push(
+      Routes.twoToWatch(widget.handle),
+      extra: FriendRouteArgs(userId: widget.userId, displayName: widget.displayName, avatarUrl: widget.avatarUrl),
     );
   }
 

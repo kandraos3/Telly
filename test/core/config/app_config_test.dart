@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:telly_app/core/config/app_config.dart';
 import 'package:telly_app/core/config/config_error_app.dart';
@@ -25,5 +27,13 @@ void main() {
     await tester.pumpWidget(const ConfigErrorApp(missing: ['SUPABASE_URL']));
     expect(find.text('Telly is not configured'), findsOneWidget);
     expect(find.textContaining('SUPABASE_URL'), findsOneWidget);
+  });
+
+  test('FE-602: the OAuth redirect scheme is registered on Android and iOS', () {
+    final redirect = Uri.parse(AppConfig.fromEnvironment().authRedirectUrl);
+    final manifest = File('android/app/src/main/AndroidManifest.xml').readAsStringSync();
+    expect(manifest, contains('android:scheme="${redirect.scheme}" android:host="${redirect.host}"'));
+    final plist = File('ios/Runner/Info.plist').readAsStringSync();
+    expect(plist, contains('<string>${redirect.scheme}</string>'));
   });
 }

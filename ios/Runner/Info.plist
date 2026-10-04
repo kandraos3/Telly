@@ -80,5 +80,20 @@
 		<string>primevideo</string>
 		<string>instagram-stories</string>
 	</array>
+	<key>FlutterDeepLinkingEnabled</key>
+	<false/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>app.telly.mobile.auth</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>app.telly.mobile</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

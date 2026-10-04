@@ -6,7 +6,6 @@ import 'package:telly_app/features/auth/data/auth_repository.dart';
 
 import '../../fakes/fake_auth_repository.dart';
 import 'package:telly_app/features/auth/presentation/screens/handle_reservation_screen.dart';
-import 'package:telly_app/features/onboarding/presentation/screens/streaming_setup_screen.dart';
 
 void main() {
   group('HandleRules (auth spec §3 Username Validation Rules)', () {
@@ -108,11 +107,12 @@ void main() {
       final button = tester.widget<TellyPrimaryButton>(buttonFinder);
       expect(button.onPressed, isNotNull);
 
-      // Tap submit and verify navigation to StreamingSetupScreen
+      // Submit claims the handle; the router (FE-602) then redirects to SCR-02.
       await tester.tap(buttonFinder);
       await tester.pumpAndSettle();
 
-      expect(find.byType(StreamingSetupScreen), findsOneWidget);
+      expect(fakeRepo.takenHandles, contains('cinelover'));
+      expect(find.textContaining('already taken'), findsNothing);
     });
 
     testWidgets('entering taken handle shows taken error text', (tester) async {

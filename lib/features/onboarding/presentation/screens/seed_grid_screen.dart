@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/router/routes.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
 import '../../../../core/widgets/telly_primary_button.dart';
@@ -310,11 +312,7 @@ class SeedGridScreen extends ConsumerWidget {
                         ? 'BEGIN PAIRWISE DUELS ($count SELECTED) →'
                         : 'SELECT AT LEAST 5 TITLES ($count/5)',
                     onPressed: canContinue
-                        ? () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Onboarding completed! Tournament seeded.')),
-                            );
-                          }
+                        ? () => context.go(Routes.tournament)
                         : null,
                   ),
                 ],

@@ -6,7 +6,6 @@ import '../../../../core/widgets/telly_primary_button.dart';
 import '../../../../core/widgets/telly_text_field.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/handle_reservation_controller.dart';
-import '../../../onboarding/presentation/screens/streaming_setup_screen.dart';
 
 /// Handle reservation (FE-107). Business state lives in [handleReservationProvider];
 /// this widget only owns its text controllers.
@@ -37,16 +36,9 @@ class _HandleReservationScreenState extends ConsumerState<HandleReservationScree
     super.dispose();
   }
 
-  Future<void> _submitHandle() async {
-    final ok = await ref
-        .read(handleReservationProvider.notifier)
-        .submit(displayName: _displayNameController.text);
-    if (ok && mounted) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const StreamingSetupScreen()),
-      );
-    }
-  }
+  /// On success the profile gains a handle and the router redirects to SCR-02 (FE-602).
+  Future<void> _submitHandle() =>
+      ref.read(handleReservationProvider.notifier).submit(displayName: _displayNameController.text);
 
   Widget? _buildSuffixIcon(HandleAvailabilityState availability) {
     switch (availability) {

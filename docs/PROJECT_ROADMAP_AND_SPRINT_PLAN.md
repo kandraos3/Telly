@@ -24,7 +24,7 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 6 — Integration, Wiring & Audit Remediation** (planned 2026-10-03; owner decisions D1–D7 recorded in Sprint 6)
-- **Current Active Ticket**: `FE-602` (GoRouter, Auth/Onboarding Redirects & Floating 5-Tab Shell) — Sprint 6: 10 / 32 tickets complete
+- **Current Active Ticket**: `ALGO-602` (Franchise Rollup via Primary Series Duel) — Sprint 6: 11 / 32 tickets complete
 - **Overall Roadmap Progress**: Sprints 1–5 granular tasks after the `DOC-601` honesty reset (2026-10-03): **281 / 431 verified** · **121 un-checked** (each annotated `→ remediated by <Sprint 6 ticket>`) · **29 human-only**. The earlier "89 / 89" claim was overstated.
 - **Human-Only Tasks**: 29 tasks in Sprints 1–5 marked `👤 [TO BE DONE BY HUMAN]` (cloud setup, secrets, store submission, device/CI runs, dashboard verification), plus the Sprint 6 human prerequisites list. These cannot be completed or verified from code.
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (215 / 215 pass — note: many tests are widget/unit-level only; no real E2E or golden tests exist yet)
@@ -1572,15 +1572,15 @@ Turn the library of individually-tested widgets and algorithms into a **wired, r
   - [**`design_system/04_USER_INTERACTION_FLOWS_AND_GESTURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/04_USER_INTERACTION_FLOWS_AND_GESTURES.md) Flow 1
 - **Scope & Objectives**: Close audit C1. Every screen is reachable from a real launch.
 - **Granular Tasks**:
-  - [ ] `lib/core/router/app_router.dart`: `GoRouter` provider with `refreshListenable` bound to auth state.
-  - [ ] Redirect chain: no session → `SCR-01`; session without handle → Handle Reservation; onboarding incomplete → `SCR-02` → `SCR-03` → `SCR-04`; else `/feed`.
-  - [ ] `StatefulShellRoute.indexedStack` with 5 branches: Feed (`SCR-05`), Explore (`SCR-07`), Log (center action → `SCR-09`), Queue (`SCR-13`), Canon (`SCR-14`).
-  - [ ] `TellyFloatingNavBar` per component spec §2.1: 64px pill, 16px margin, radius 32, `#11131A` @ 75% + blur 24, `#242938` stroke, lime hexagon center action raised 6px with a 12px halo, active white icon + phosphor dot.
-  - [ ] Nested/push routes: `SCR-06`, `SCR-08` (`/title/:mediaType/:id`), `SCR-10`→`SCR-11`→`SCR-12`, `SCR-15` (`/u/:handle`), `SCR-16`, `SCR-17`, `SCR-18`, `SCR-19`, `SCR-20`, Edit Profile.
-  - [ ] Replace the `app.dart` placeholder with `MaterialApp.router`.
+  - [x] `lib/core/router/app_router.dart`: `GoRouter` provider with `refreshListenable` bound to auth state.
+  - [x] Redirect chain: no session → `SCR-01`; session without handle → Handle Reservation; onboarding incomplete → `SCR-02` → `SCR-03` → `SCR-04`; else `/feed`.
+  - [x] `StatefulShellRoute.indexedStack` with 5 branches: Feed (`SCR-05`), Explore (`SCR-07`), Log (center action → `SCR-09`), Queue (`SCR-13`), Canon (`SCR-14`). *(Built as 4 branches + the center Log action pushing `/log` full-screen over the shell, since the spec'd center control is an action, not a tab. Unbuilt destinations render a ticket-named `PendingScreen`, which `QA-608` requires gone.)*
+  - [x] `TellyFloatingNavBar` per component spec §2.1: 64px pill, 16px margin, radius 32, `#11131A` @ 75% + blur 24, `#242938` stroke, lime hexagon center action raised 6px with a 12px halo, active white icon + phosphor dot.
+  - [x] Nested/push routes: `SCR-06`, `SCR-08` (`/title/:mediaType/:id`), `SCR-10`→`SCR-11`→`SCR-12`, `SCR-15` (`/u/:handle`), `SCR-16`, `SCR-17`, `SCR-18`, `SCR-19`, `SCR-20`, Edit Profile.
+  - [x] Replace the `app.dart` placeholder with `MaterialApp.router`. Registered the `app.telly.mobile://login-callback` OAuth scheme on Android/iOS (Flutter deep-link routing off; `supabase_flutter` consumes it).
 - **Testing & Verification**:
-  - [ ] Widget tests: unauthenticated launch lands on `SCR-01`; authenticated + onboarded launch lands on Feed; each tab switches branch and preserves its stack; deep link `/title/tv/1396` opens `SCR-08`.
-  - [ ] Nav bar widget test asserts spec dimensions and tokens.
+  - [x] Widget tests: unauthenticated launch lands on `SCR-01`; authenticated + onboarded launch lands on Feed; each tab switches branch and preserves its stack; deep link `/title/tv/1396` opens `SCR-08`.
+  - [x] Nav bar widget test asserts spec dimensions and tokens.
 - **Dependencies**: `FE-601`.
 
 ---

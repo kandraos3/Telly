@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/router/routes.dart';
+import 'package:go_router/go_router.dart';
 import 'package:telly_app/core/services/haptics_service.dart';
 import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/theme/telly_typography.dart';
 import 'package:telly_app/features/feed/data/social_repository.dart';
 import 'package:telly_app/features/feed/domain/social_models.dart';
-import 'package:telly_app/features/feed/presentation/screens/comment_thread_screen.dart';
 import 'package:telly_app/features/feed/presentation/widgets/feed_activity_card.dart';
 import 'package:telly_app/features/feed/presentation/widgets/upset_activity_card.dart';
 
@@ -23,11 +24,7 @@ class ActivityFeedScreen extends ConsumerStatefulWidget {
 class _ActivityFeedScreenState extends ConsumerState<ActivityFeedScreen> {
   void _openComments(ActivityLog activity) {
     HapticsService.lightImpact();
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => CommentThreadScreen(activity: activity),
-      ),
-    );
+    context.push(Routes.activity(activity.id), extra: activity);
   }
 
   void _handleReactionToggle(ActivityLog activity, FeedReactionType reaction) {

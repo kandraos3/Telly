@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:telly_app/core/widgets/telly_primary_button.dart';
-import 'package:telly_app/features/onboarding/presentation/screens/seed_grid_screen.dart';
 import 'package:telly_app/features/onboarding/presentation/screens/streaming_setup_screen.dart';
+
+import '../../helpers/router_harness.dart';
 
 void main() {
   group('SCR-02 StreamingSetupScreen Widget & Flow Tests (FE-108)', () {
@@ -98,36 +99,28 @@ void main() {
       expect(tester.widget<Checkbox>(checkboxFinder).value, isTrue);
     });
 
-    testWidgets('tapping continue navigates to SeedGridScreen', (tester) async {
+    testWidgets('tapping continue navigates to SCR-03 (/onboarding/seeds)', (tester) async {
       setupMobileViewport(tester);
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: StreamingSetupScreen(),
-          ),
-        ),
+        routerHarness(const StreamingSetupScreen()),
       );
 
       await tester.tap(find.byType(TellyPrimaryButton));
       await tester.pumpAndSettle();
 
-      expect(find.byType(SeedGridScreen), findsOneWidget);
+      expect(find.text('route:/onboarding/seeds'), findsOneWidget);
     });
 
-    testWidgets('tapping skip for now navigates to SeedGridScreen', (tester) async {
+    testWidgets('tapping skip for now navigates to SCR-03 (/onboarding/seeds)', (tester) async {
       setupMobileViewport(tester);
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: StreamingSetupScreen(),
-          ),
-        ),
+        routerHarness(const StreamingSetupScreen()),
       );
 
       await tester.tap(find.textContaining("I don't have streaming services"));
       await tester.pumpAndSettle();
 
-      expect(find.byType(SeedGridScreen), findsOneWidget);
+      expect(find.text('route:/onboarding/seeds'), findsOneWidget);
     });
   });
 }

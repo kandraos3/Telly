@@ -6,7 +6,6 @@ import '../../../../core/widgets/telly_frosted_sheet.dart';
 import '../../../../core/widgets/telly_primary_button.dart';
 import '../../../../core/widgets/telly_text_field.dart';
 import '../controllers/auth_controller.dart';
-import 'handle_reservation_screen.dart';
 
 /// SCR-01: Onboarding Splash & Authentication Screen.
 /// Conforms to `docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md` §1 (`SCR-01`).
@@ -116,20 +115,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     );
   }
 
-  void _navigateToHandleReservation() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const HandleReservationScreen()),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    ref.listen<AuthState>(authControllerProvider, (prev, next) {
-      if (next.isSignedIn && prev?.isSignedIn != true && mounted) {
-        _navigateToHandleReservation();
-      }
-    });
-
     final authState = ref.watch(authControllerProvider);
     final isBusy = authState.status == AuthStepStatus.authenticating;
 

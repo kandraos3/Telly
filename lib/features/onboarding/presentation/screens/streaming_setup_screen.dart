@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/router/routes.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
 import '../../../../core/widgets/telly_primary_button.dart';
-import 'seed_grid_screen.dart';
 
 class StreamingProviderItem {
   final String id;
@@ -58,11 +59,7 @@ class StreamingSetupScreen extends ConsumerWidget {
       ref.read(selectedProvidersProvider.notifier).state = updated;
     }
 
-    void navigateForward() {
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => const SeedGridScreen()),
-      );
-    }
+    void navigateForward() => context.go(Routes.seedGrid);
 
     return Scaffold(
       backgroundColor: TellyColors.backgroundPrimary,

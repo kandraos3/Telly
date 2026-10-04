@@ -5,7 +5,6 @@ import 'package:telly_app/features/auth/data/auth_repository.dart';
 
 import '../../fakes/fake_auth_repository.dart';
 import 'package:telly_app/features/auth/presentation/screens/auth_screen.dart';
-import 'package:telly_app/features/auth/presentation/screens/handle_reservation_screen.dart';
 
 void main() {
   group('SCR-01 AuthScreen Widget & Flow Tests (FE-106)', () {
@@ -87,8 +86,9 @@ void main() {
       await tester.tap(find.text('Verify & Continue'));
       await tester.pumpAndSettle();
 
-      // Navigation to HandleReservationScreen
-      expect(find.byType(HandleReservationScreen), findsOneWidget);
+      // Signed in through the session stream; the router (FE-602) redirects to handle reservation.
+      expect(fakeRepo.currentUserId, 'phone-user');
+      expect(find.text('Enter 6-Digit Code'), findsNothing, reason: 'OTP sheet closes on success');
     });
 
     testWidgets('tapping Apple button triggers signInWithApple and transitions state', (tester) async {
@@ -109,8 +109,8 @@ void main() {
       await tester.tap(find.text('Continue with Apple'));
       await tester.pumpAndSettle();
 
-      // Should transition to HandleReservationScreen upon successful auth
-      expect(find.byType(HandleReservationScreen), findsOneWidget);
+      // Signed in through the session stream; navigation is the router's job (FE-602).
+      expect(fakeRepo.currentUserId, isNotNull);
     });
 
     testWidgets('tapping Google button triggers signInWithGoogle and transitions state', (tester) async {
@@ -131,8 +131,8 @@ void main() {
       await tester.tap(find.text('Continue with Google'));
       await tester.pumpAndSettle();
 
-      // Should transition to HandleReservationScreen upon successful auth
-      expect(find.byType(HandleReservationScreen), findsOneWidget);
+      // Signed in through the session stream; navigation is the router's job (FE-602).
+      expect(fakeRepo.currentUserId, isNotNull);
     });
   });
 }

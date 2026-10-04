@@ -43,6 +43,9 @@ abstract class AuthRepository {
     String? avatarUrl,
   });
 
+  /// Sets `users.onboarding_completed` once SCR-04 finishes (router stops redirecting to onboarding).
+  Future<void> markOnboardingCompleted();
+
   Future<void> signOut();
 }
 
@@ -173,6 +176,13 @@ class SupabaseAuthRepository implements AuthRepository {
       if (e.code == '23505') throw HandleTakenException(handle);
       rethrow;
     }
+  }
+
+  @override
+  Future<void> markOnboardingCompleted() async {
+    final uid = currentUserId;
+    if (uid == null) throw StateError('Not signed in');
+    await _client.from('users').update({'onboarding_completed': true}).eq('id', uid);
   }
 
   @override
