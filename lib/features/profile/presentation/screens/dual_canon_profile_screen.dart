@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../../core/router/routes.dart';
 import '../../../../core/services/haptics_service.dart';
 import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
+import '../../../logging/domain/title_search_result.dart';
 import '../../../ranking/domain/canon_type.dart';
 import '../../../ranking/domain/franchise_rollup_service.dart';
 import '../controllers/profile_controller.dart';
@@ -228,12 +232,16 @@ class DualCanonProfileScreen extends ConsumerWidget {
                 CanonViewMode.rankedList => RankedCanonList(
                     entries: entries,
                     onTapEntry: onTapEntry,
+                    onLongPressEntry: (entry) => _showEntryActions(context, entry),
                     onReorder: (oldIndex, newIndex) {
+                      // Map list indices to canon ranks so this also works on the rolled-up list.
+                      final target = newIndex > oldIndex ? newIndex - 1 : newIndex;
+                      if (target == oldIndex || target >= entries.length) return;
                       ref.read(hapticsServiceProvider).rankSlotTick();
-                      ref.read(profileCanonProvider.notifier).reorder(
+                      ref.read(profileCanonProvider.notifier).moveTitle(
                             canon: selectedCanon,
-                            oldIndex: oldIndex,
-                            newIndex: newIndex,
+                            titleId: entries[oldIndex].id,
+                            newRank: entries[target].rankPosition,
                           );
                     },
                   ),
@@ -252,6 +260,28 @@ class DualCanonProfileScreen extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+
+  /// Row context menu: "Reset Duels for This Show" re-runs the tournament for the title
+  /// (features/02 §7.2); its notes and tags are kept because it is committed as a move.
+  Future<void> _showEntryActions(BuildContext context, CanonEntry entry) async {
+    final reset = await showModalBottomSheet<bool>(
+      context: context,
+      backgroundColor: TellyColors.backgroundCard,
+      builder: (ctx) => SafeArea(
+        child: ListTile(
+          key: const Key('reset_duels_action'),
+          leading: const Icon(Icons.refresh, color: TellyColors.phosphorLime),
+          title: Text('🔄 Reset Duels for This Show', style: TellyTypography.bodyLarge()),
+          onTap: () => Navigator.of(ctx).pop(true),
+        ),
+      ),
+    );
+    if (reset != true || !context.mounted) return;
+    context.push(
+      Routes.log,
+      extra: TitleSearchResult(id: entry.id, mediaType: entry.mediaType, title: entry.title, posterPath: entry.posterPath),
     );
   }
 

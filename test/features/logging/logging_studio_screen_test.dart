@@ -2,30 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:telly_app/core/widgets/telly_primary_button.dart';
 import 'package:telly_app/features/logging/data/title_repository.dart';
-import 'package:telly_app/features/logging/domain/title_search_result.dart';
 import 'package:telly_app/features/logging/presentation/screens/logging_studio_screen.dart';
 
+import '../../fakes/fake_title_repository.dart';
 import '../../helpers/router_harness.dart';
-
-class FakeTitleRepository implements TitleRepository {
-  final queries = <String>[];
-  bool offline = false;
-
-  static const catalog = [
-    TitleSearchResult(id: 136315, mediaType: 'tv', title: 'The Bear', releaseYear: '2022'),
-    TitleSearchResult(id: 27205, mediaType: 'movie', title: 'Inception', releaseYear: '2010'),
-  ];
-
-  @override
-  Future<TitleSearchOutcome> search(String query) async {
-    queries.add(query);
-    final q = query.toLowerCase();
-    return TitleSearchOutcome(
-      catalog.where((t) => t.title.toLowerCase().contains(q)).toList(),
-      fromLocalCache: offline,
-    );
-  }
-}
 
 void main() {
   late FakeTitleRepository repo;

@@ -53,3 +53,24 @@ class TitleSearchOutcome {
 
   const TitleSearchOutcome(this.results, {this.fromLocalCache = false});
 }
+
+/// Credits used by `SCR-11` (MVP dropdown, director auto-tag), from `tmdb-details`.
+class TitleCredits {
+  final String? director;
+
+  /// "Actor as Character" labels in billing order.
+  final List<String> cast;
+
+  const TitleCredits({this.director, this.cast = const []});
+
+  static const empty = TitleCredits();
+
+  factory TitleCredits.fromDetailsJson(Map<String, dynamic> json) => TitleCredits(
+        director: json['director'] as String?,
+        cast: [
+          for (final c in (json['cast'] as List? ?? const []).cast<Map<String, dynamic>>())
+            if ((c['name'] as String? ?? '').isNotEmpty)
+              (c['character'] as String? ?? '').isEmpty ? c['name'] as String : '${c['name']} as ${c['character']}',
+        ],
+      );
+}

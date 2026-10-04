@@ -24,7 +24,7 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 6 — Integration, Wiring & Audit Remediation** (planned 2026-10-03; owner decisions D1–D7 recorded in Sprint 6)
-- **Current Active Ticket**: `FE-604` (RankingRepository & Duel Loop Wiring) — Sprint 6: 13 / 32 tickets complete
+- **Current Active Ticket**: `FE-605` (Drift-Backed Offline WAL & Connectivity Sync Engine) — Sprint 6: 14 / 32 tickets complete
 - **Overall Roadmap Progress**: Sprints 1–5 granular tasks after the `DOC-601` honesty reset (2026-10-03): **281 / 431 verified** · **121 un-checked** (each annotated `→ remediated by <Sprint 6 ticket>`) · **29 human-only**. The earlier "89 / 89" claim was overstated.
 - **Human-Only Tasks**: 29 tasks in Sprints 1–5 marked `👤 [TO BE DONE BY HUMAN]` (cloud setup, secrets, store submission, device/CI runs, dashboard verification), plus the Sprint 6 human prerequisites list. These cannot be completed or verified from code.
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (215 / 215 pass — note: many tests are widget/unit-level only; no real E2E or golden tests exist yet)
@@ -496,7 +496,7 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
 - **Scope & Objectives**: Bottom sheet appearing post-tournament to capture subjective nuances.
 - **Granular Tasks**:
   - [x] Create `lib/features/ranking/presentation/widgets/editorial_tagging_sheet.dart`.
-  - [ ] MVP Character dropdown populated from TMDB cast credits. → remediated by `FE-604`
+  - [x] MVP Character dropdown populated from TMDB cast credits. ✅ remediated in `FE-604`
   - [x] Multi-select vibe tag chips (*"Masterpiece Acting"*, *"Mind-bending"*, *"Cozy"*, *"Dark & Gritty"*).
   - [x] Anime-specific audio toggle: `[ Sub ]` vs `[ Dub ]`.
   - [x] 280-character micro-review input field with remaining counter.
@@ -512,7 +512,7 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
   - [x] In `SCR-11`, inspect candidate `media_type`: if `'movie'`, render Theatrical Venue selector.
   - [x] Options: `[ 🛋️ Home / Streaming ]`, `[ 🍿 Theatrical ]`, `[ 📽️ IMAX 70mm / Dolby ]`.
   - [x] Add Rewatch counter badge: `First Watch` vs `Rewatch (x2, x3...)`.
-  - [ ] Auto-tag director name from TMDB crew metadata. → remediated by `FE-604`
+  - [x] Auto-tag director name from TMDB crew metadata. ✅ remediated in `FE-604`
 - **Testing & Verification**:
   - [x] Widget test asserting venue chips render for movies and are omitted for TV shows.
 - **Dependencies**: `FE-203`.
@@ -585,7 +585,7 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
 - **Granular Tasks**:
   - [x] Wrap Ranked List with `ReorderableListView.builder`.
   - [x] Provide drag handle icon triggering `HapticFeedback.selectionClick()` on pick up.
-  - [ ] On drop: update `rank_position` in local Drift database, recalculate percentile scores, and sync to Supabase. → remediated by `FE-604`
+  - [x] On drop: update `rank_position` in local Drift database, recalculate percentile scores, and sync to Supabase. ✅ remediated in `FE-604`
 - **Testing & Verification**:
   - [x] Widget test dragging row #4 to row #1 updates rank text to `#1`.
 - **Dependencies**: `FE-207`, `ALGO-202`.
@@ -1631,13 +1631,13 @@ Turn the library of individually-tested widgets and algorithms into a **wired, r
   - [**`features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md) §2, §5, §7
 - **Scope & Objectives**: Make the duel loop persist locally and remotely.
 - **Granular Tasks**:
-  - [ ] `RankingRepository` (local-first): writes Drift `LocalRankings` + appends a `PendingMutation` (insert / move / delete / duel batch) in **one Drift transaction**, then signals the sync engine.
-  - [ ] `DuelController` → `AutoDisposeFamilyNotifier` keyed by the logging session; reads the canon from `LocalRankingDao`; never mixes canons.
-  - [ ] Editorial sheet (`SCR-11`) persists tags, MVP, review, venue/rewatch to the pending mutation payload; Slot Reveal (`SCR-12`) reads the committed rank/score.
-  - [ ] Profile Canon: `ProfileCanonNotifier` streams from `LocalRankingDao.watchRankingsByCanon` (fixes "profile renders empty"); drag-and-drop (`FE-209`) and "Reset Duels" (§7.2) go through the repository.
-  - [ ] Pull-hydration on login: fetch remote canon into Drift when local is empty or stale.
+  - [x] `RankingRepository` (local-first): writes Drift `LocalRankings` + appends a `PendingMutation` (insert / move / delete / duel batch) in **one Drift transaction**, then signals the sync engine. *(Done in `RankingRepository`; the Drift v2 `PendingMutations` table + v1→v2 migration were built here because this ticket needs them. A duel session commits as **one** `log_title`/`move` mutation carrying its duels.)*
+  - [x] `DuelController` → `AutoDisposeFamilyNotifier` keyed by the logging session; reads the canon from `LocalRankingDao`; never mixes canons.
+  - [x] Editorial sheet (`SCR-11`) persists tags, MVP, review, venue/rewatch to the pending mutation payload; *(queued as a FIFO `editorial` mutation after the placement, replayed as an UPDATE of the RLS-granted editorial columns; MVP/director come from `tmdb-details` credits)* Slot Reveal (`SCR-12`) reads the committed rank/score.
+  - [x] Profile Canon: `ProfileCanonNotifier` streams from `LocalRankingDao.watchRankingsByCanon` (fixes "profile renders empty"); drag-and-drop (`FE-209`) and "Reset Duels" (§7.2) go through the repository.
+  - [x] Pull-hydration on login: fetch remote canon into Drift when local is empty or stale. *(Rule: replace the local canons with the server's whenever no local mutation is pending; triggered once per signed-in user from `AppShell`.)*
 - **Testing & Verification**:
-  - [ ] `ProviderContainer` tests: full log flow writes 1 ranking + N duels + 1 pending mutation atomically; profile stream updates after commit; a movie duel never loads tv opponents.
+  - [x] `ProviderContainer` tests: full log flow writes 1 ranking + N duels + 1 pending mutation atomically; profile stream updates after commit; a movie duel never loads tv opponents.
 - **Dependencies**: `FE-603`, `BE-603`.
 
 #### `FE-605`: Drift-Backed Offline WAL & Connectivity Sync Engine
@@ -1646,7 +1646,7 @@ Turn the library of individually-tested widgets and algorithms into a **wired, r
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.3, CUJ-04
 - **Scope & Objectives**: Close audit C5 by replacing the in-memory `OfflineSyncManager`.
 - **Granular Tasks**:
-  - [ ] Drift schema v2: `PendingMutations(id UUID, kind, payload JSON, createdAt, attempts, lastError)` with a `MigrationStrategy` from v1 (existing `OfflineDuelQueue` rows migrated).
+  - [x] Drift schema v2: `PendingMutations(id UUID, kind, payload JSON, createdAt, attempts, lastError)` with a `MigrationStrategy` from v1 (existing `OfflineDuelQueue` rows migrated). *(delivered in `FE-604`; `seq` autoincrement gives FIFO order)*
   - [ ] `SyncEngine` (`AsyncNotifier`): FIFO flush via the `BE-603` RPCs, passing `client_mutation_id`; marks `LocalRankings.syncStatus = 'SYNCED'`; exponential backoff; halts on first failure to preserve order.
   - [ ] Add `connectivity_plus`; flush on offline→online transitions, app resume, and post-login.
   - [ ] Delete the in-memory `OfflineSyncManager`.

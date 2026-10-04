@@ -86,5 +86,38 @@ void main() {
       expect((await repo.search('   ')).results, isEmpty);
       expect(calls, 0);
     });
+
+    test('FE-604: fetchCredits maps tmdb-details cast/director and degrades to empty', () async {
+      late http.Request seen;
+      final repo = SupabaseTitleRepository(
+        functions((req) async {
+          seen = req;
+          return http.Response(
+            jsonEncode({
+              'director': 'Christopher Nolan',
+              'cast': [
+                {'name': 'Cillian Murphy', 'character': 'J. Robert Oppenheimer'},
+                {'name': 'Narrator', 'character': ''},
+              ],
+            }),
+            200,
+            headers: {'content-type': 'application/json'},
+            request: req,
+          );
+        }),
+        db.localTitleDao,
+      );
+      final credits = await repo.fetchCredits(872585, 'movie');
+      expect(seen.url.path, endsWith('/tmdb-details'));
+      expect(seen.url.queryParameters, {'id': '872585', 'media_type': 'movie'});
+      expect(credits.director, 'Christopher Nolan');
+      expect(credits.cast, ['Cillian Murphy as J. Robert Oppenheimer', 'Narrator']);
+
+      final offline = SupabaseTitleRepository(
+        functions((req) async => throw http.ClientException('offline')),
+        db.localTitleDao,
+      );
+      expect((await offline.fetchCredits(1, 'tv')).cast, isEmpty);
+    });
   });
 }

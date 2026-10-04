@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/ranking/data/canon_hydration.dart';
 import '../theme/telly_colors.dart';
 import '../widgets/telly_floating_nav_bar.dart';
 import 'routes.dart';
 
 /// Scaffold for the four tab branches with the floating nav bar overlaid (FE-602).
-class AppShell extends StatelessWidget {
+/// Entering the shell also pulls the server canon into Drift (FE-604).
+class AppShell extends ConsumerWidget {
   final StatefulNavigationShell navigationShell;
 
   const AppShell({super.key, required this.navigationShell});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.listen(canonHydrationProvider, (_, __) {});
     return Scaffold(
       backgroundColor: TellyColors.backgroundPrimary,
       extendBody: true,

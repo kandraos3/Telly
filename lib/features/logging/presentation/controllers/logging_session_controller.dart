@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../ranking/data/ranking_repository.dart';
 import '../../../ranking/domain/sentiment_bracket.dart';
+import '../../../ranking/presentation/controllers/duel_controller.dart';
 import '../../data/title_repository.dart';
 import '../../domain/title_search_result.dart';
 import '../../domain/watch_status.dart';
@@ -18,6 +20,9 @@ class LoggingDraft {
   final int seasonNumber;
   final SentimentBracket? bracket;
 
+  /// Set once `SCR-10` commits the placement; read by `SCR-12`.
+  final RankingCommit? commit;
+
   const LoggingDraft({
     this.query = '',
     this.search,
@@ -25,10 +30,25 @@ class LoggingDraft {
     this.status,
     this.seasonNumber = 1,
     this.bracket,
+    this.commit,
   });
 
   /// Duels need a title, a ranked status (dropped shows go to the Graveyard) and a bracket.
   bool get canBeginDuels => title != null && status != null && status != WatchStatus.dropped && bracket != null;
+
+  /// The `SCR-10` input for this draft, or null until [canBeginDuels].
+  DuelRequest? get duelRequest => canBeginDuels
+      ? DuelRequest(
+          candidate: CanonCandidate(
+            titleId: title!.id,
+            mediaType: title!.mediaType,
+            title: title!.title,
+            posterPath: title!.posterPath,
+          ),
+          bracket: bracket!,
+          status: status!,
+        )
+      : null;
 
   LoggingDraft _with({
     String? query,
@@ -45,6 +65,7 @@ class LoggingDraft {
         status: status != null ? status() : this.status,
         seasonNumber: seasonNumber ?? this.seasonNumber,
         bracket: bracket != null ? bracket() : this.bracket,
+        commit: commit,
       );
 }
 
@@ -101,6 +122,16 @@ class LoggingSessionController extends AutoDisposeNotifier<LoggingDraft> {
   }
 
   void setBracket(SentimentBracket bracket) => state = state._with(bracket: () => bracket);
+
+  void recordCommit(RankingCommit commit) => state = LoggingDraft(
+        query: state.query,
+        search: state.search,
+        title: state.title,
+        status: state.status,
+        seasonNumber: state.seasonNumber,
+        bracket: state.bracket,
+        commit: commit,
+      );
 }
 
 final loggingSessionProvider =

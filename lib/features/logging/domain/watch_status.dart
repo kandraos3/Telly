@@ -25,3 +25,14 @@ enum WatchStatus {
 
   static WatchStatus defaultFor(String mediaType) => mediaType == 'movie' ? firstTime : finished;
 }
+
+extension WatchStatusServer on WatchStatus {
+  /// `user_rankings.status` (`watch_status_enum`): partial watches are still WATCHING.
+  String get serverStatus => switch (this) {
+        WatchStatus.upToDate || WatchStatus.season => 'WATCHING',
+        WatchStatus.dropped => 'DROPPED',
+        _ => 'COMPLETED',
+      };
+
+  bool get isRewatch => this == WatchStatus.rewatch;
+}

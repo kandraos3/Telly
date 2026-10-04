@@ -1,6 +1,7 @@
-import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../../core/database/database.dart';
+import '../../../ranking/data/ranking_repository.dart';
 import '../../../ranking/domain/canon_type.dart';
 import '../../../ranking/domain/franchise_rollup_service.dart';
 import '../../../ranking/domain/score_curve_calculator.dart';
@@ -63,94 +64,59 @@ class ProfileCanonState {
   }
 }
 
-/// State notifier managing personal canon data, reordering, and score recalibrations.
-class ProfileCanonNotifier extends StateNotifier<ProfileCanonState> {
-  final LocalRankingDao? _dao;
-
-  ProfileCanonNotifier({
-    LocalRankingDao? dao,
-    List<CanonEntry> initialMovies = const [],
-    List<CanonEntry> initialSeries = const [],
-  })  : _dao = dao,
-        super(ProfileCanonState(
-          movies: initialMovies,
-          series: initialSeries,
-        ));
-
-  /// Update the movie canon list directly.
-  void setMovies(List<CanonEntry> movies) {
-    state = state.copyWith(movies: List.unmodifiable(movies));
+/// The signed-in user's dual canon, streamed from Drift through [RankingRepository]
+/// (FE-604). Writes go through the repository, which also queues them for sync.
+class ProfileCanonNotifier extends Notifier<ProfileCanonState> {
+  @override
+  ProfileCanonState build() {
+    final repository = ref.watch(rankingRepositoryProvider);
+    final subscriptions = [
+      repository.watchCanon('movie').listen(
+            (rows) => state = state.copyWith(movies: List.unmodifiable(rows.map(_toEntry)), isLoading: false),
+          ),
+      repository.watchCanon('tv').listen(
+            (rows) => state = state.copyWith(series: List.unmodifiable(rows.map(_toEntry)), isLoading: false),
+          ),
+    ];
+    ref.onDispose(() {
+      for (final s in subscriptions) {
+        s.cancel();
+      }
+    });
+    return const ProfileCanonState(isLoading: true);
   }
 
-  /// Update the series canon list directly.
-  void setSeries(List<CanonEntry> series) {
-    state = state.copyWith(series: List.unmodifiable(series));
+  static CanonEntry _toEntry(LocalRanking r) => CanonEntry(
+        id: r.showId,
+        title: r.title,
+        mediaType: r.mediaType,
+        rankPosition: r.rankPosition,
+        calculatedScore: r.calculatedScore,
+        posterPath: r.posterPath,
+        mvpCharacter: r.favoriteCharacter,
+      );
+
+  /// Moves [titleId] to canon rank [newRank] (drag-and-drop, features/02 §7.3): the list
+  /// re-scores immediately, then the repository persists and queues the move.
+  Future<void> moveTitle({required CanonType canon, required int titleId, required int newRank}) async {
+    final current = List<CanonEntry>.from(canon == CanonType.movie ? state.movies : state.series);
+    final from = current.indexWhere((e) => e.id == titleId);
+    if (from < 0) return;
+    final item = current.removeAt(from);
+    current.insert((newRank - 1).clamp(0, current.length), item);
+
+    final total = current.length;
+    final rescored = List<CanonEntry>.unmodifiable([
+      for (var i = 0; i < total; i++)
+        current[i].copyWith(
+          rankPosition: i + 1,
+          calculatedScore: ScoreCurveCalculator.calculateRoundedScore(i + 1, total),
+        ),
+    ]);
+    state = canon == CanonType.movie ? state.copyWith(movies: rescored) : state.copyWith(series: rescored);
+
+    await ref.read(rankingRepositoryProvider).move(mediaType: canon.dbValue, titleId: titleId, newRank: newRank);
   }
-
-  /// Re-orders an item from [oldIndex] to [newIndex] within the specified [canon].
-  /// Recalculates dynamic percentile scores deterministically using [ScoreCurveCalculator].
-  Future<void> reorder({
-    required CanonType canon,
-    required int oldIndex,
-    required int newIndex,
-  }) async {
-    final currentList = List<CanonEntry>.from(
-      canon == CanonType.movie ? state.movies : state.series,
-    );
-
-    if (oldIndex < 0 || oldIndex >= currentList.length) return;
-    if (newIndex < 0 || newIndex > currentList.length) return;
-
-    var targetIndex = newIndex;
-    if (oldIndex < targetIndex) {
-      targetIndex -= 1;
-    }
-
-    final item = currentList.removeAt(oldIndex);
-    currentList.insert(targetIndex, item);
-
-    final totalCount = currentList.length;
-
-    // Recalculate dynamic scores for all shifted items
-    final recalculated = <CanonEntry>[];
-    for (int i = 0; i < totalCount; i++) {
-      final rank = i + 1;
-      final score = ScoreCurveCalculator.calculateRoundedScore(rank, totalCount);
-      recalculated.add(currentList[i].copyWith(
-        rankPosition: rank,
-        calculatedScore: score,
-      ));
-    }
-
-    if (canon == CanonType.movie) {
-      state = state.copyWith(movies: List.unmodifiable(recalculated));
-    } else {
-      state = state.copyWith(series: List.unmodifiable(recalculated));
-    }
-
-    // Persist to local Drift database if DAO is available
-    if (_dao != null) {
-      final companions = recalculated.map((e) {
-        return LocalRankingsCompanion.insert(
-          showId: e.id,
-          mediaType: e.mediaType,
-          title: e.title,
-          posterPath: driftValue(e.posterPath),
-          rankPosition: e.rankPosition,
-          calculatedScore: e.calculatedScore,
-          syncStatus: driftValue('PENDING'),
-        );
-      }).toList();
-
-      await _dao.updateBatchRanks(companions);
-    }
-  }
-
-  static driftValue<T>(T? val) => val == null ? const Value.absent() : Value(val);
 }
 
-/// Provider for accessing the [ProfileCanonNotifier].
-final profileCanonProvider =
-    StateNotifierProvider<ProfileCanonNotifier, ProfileCanonState>((ref) {
-  return ProfileCanonNotifier();
-});
+final profileCanonProvider = NotifierProvider<ProfileCanonNotifier, ProfileCanonState>(ProfileCanonNotifier.new);

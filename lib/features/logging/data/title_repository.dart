@@ -10,6 +10,9 @@ import '../domain/title_search_result.dart';
 /// Title search for the Logging Studio (FE-603).
 abstract interface class TitleRepository {
   Future<TitleSearchOutcome> search(String query);
+
+  /// Cast and director for `SCR-11`; [TitleCredits.empty] when unavailable (e.g. offline).
+  Future<TitleCredits> fetchCredits(int id, String mediaType);
 }
 
 /// Searches TMDB through the `tmdb-search` edge function and caches results into Drift
@@ -58,6 +61,21 @@ class SupabaseTitleRepository implements TitleRepository {
     } catch (_) {}
     return TitleSearchOutcome(results);
   }
+
+  @override
+  Future<TitleCredits> fetchCredits(int id, String mediaType) async {
+    try {
+      final response = await _functions
+          .invoke('tmdb-details', method: HttpMethod.get, queryParameters: {'id': '$id', 'media_type': mediaType})
+          .timeout(creditsTimeout);
+      return TitleCredits.fromDetailsJson(response.data as Map<String, dynamic>);
+    } catch (_) {
+      return TitleCredits.empty;
+    }
+  }
+
+  /// Credits only enrich the editorial sheet, so they never hold up the flow for long.
+  static const creditsTimeout = Duration(seconds: 3);
 }
 
 final titleRepositoryProvider = Provider<TitleRepository>(

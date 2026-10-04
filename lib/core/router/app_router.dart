@@ -9,6 +9,8 @@ import '../../features/cowatch/presentation/screens/two_to_watch_screen.dart';
 import '../../features/feed/domain/social_models.dart';
 import '../../features/feed/presentation/screens/activity_feed_screen.dart';
 import '../../features/feed/presentation/screens/comment_thread_screen.dart';
+import '../../features/logging/domain/title_search_result.dart';
+import '../../features/logging/presentation/screens/log_flow_screens.dart';
 import '../../features/logging/presentation/screens/logging_studio_screen.dart';
 import '../../features/onboarding/presentation/screens/seed_grid_screen.dart';
 import '../../features/onboarding/presentation/screens/streaming_setup_screen.dart';
@@ -153,10 +155,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // Logging flow (full-screen; SCR-09 → SCR-10 → SCR-11 sheet → SCR-12)
       GoRoute(
         path: Routes.log,
-        builder: (_, __) => const LoggingStudioScreen(),
+        builder: (_, state) => LoggingStudioScreen(
+          initialTitle: state.extra is TitleSearchResult ? state.extra! as TitleSearchResult : null,
+        ),
         routes: [
-          GoRoute(path: 'duel', builder: (_, __) => const PendingScreen(title: 'Duel Arena', ticket: 'FE-604')),
-          GoRoute(path: 'reveal', builder: (_, __) => const PendingScreen(title: 'Slot Reveal', ticket: 'FE-604')),
+          GoRoute(path: 'duel', builder: (_, __) => const LogDuelScreen()),
+          GoRoute(path: 'reveal', builder: (_, __) => const LogRevealScreen()),
         ],
       ),
 

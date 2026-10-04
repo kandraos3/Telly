@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:telly_app/app.dart';
+import 'package:telly_app/core/database/database.dart';
+import 'package:telly_app/core/database/database_provider.dart';
 import 'package:telly_app/core/router/app_router.dart';
 import 'package:telly_app/core/router/routes.dart';
 import 'package:telly_app/features/auth/data/auth_repository.dart';
@@ -10,9 +12,16 @@ import 'package:telly_app/features/auth/domain/user_profile.dart';
 import 'package:telly_app/features/auth/presentation/screens/auth_screen.dart';
 import 'package:telly_app/features/feed/presentation/screens/activity_feed_screen.dart';
 import 'package:telly_app/features/logging/presentation/screens/logging_studio_screen.dart';
+import 'package:telly_app/features/ranking/data/canon_hydration.dart';
+import 'package:telly_app/features/ranking/data/ranking_repository.dart';
 import 'package:telly_app/features/onboarding/presentation/screens/streaming_setup_screen.dart';
 
 import 'fakes/fake_auth_repository.dart';
+
+class _EmptyRemoteCanon implements RemoteCanonSource {
+  @override
+  Future<List<RemoteRanking>> fetchMyCanon(String userId) async => const [];
+}
 
 void main() {
   final onboarded = UserProfile(
@@ -27,7 +36,13 @@ void main() {
     tester.view.physicalSize = const Size(800, 1400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    final container = ProviderContainer(overrides: [authRepositoryProvider.overrideWithValue(repo)]);
+    final db = AppDatabase.inMemory();
+    addTearDown(db.close);
+    final container = ProviderContainer(overrides: [
+      authRepositoryProvider.overrideWithValue(repo),
+      databaseProvider.overrideWithValue(db),
+      remoteCanonSourceProvider.overrideWithValue(_EmptyRemoteCanon()),
+    ]);
     addTearDown(container.dispose);
     await tester.pumpWidget(UncontrolledProviderScope(container: container, child: const TellyApp()));
     await tester.pumpAndSettle();

@@ -11,11 +11,14 @@ import '../widgets/duel_arena_card.dart';
 /// `docs/design_system/02_COMPONENT_LIBRARY_AND_PATTERNS.md` §4, and
 /// `docs/design_system/04_USER_INTERACTION_FLOWS_AND_GESTURES.md` §1.
 class DuelArenaScreen extends ConsumerStatefulWidget {
+  /// The logging session being placed (FE-604); keys the [duelControllerProvider] family.
+  final DuelRequest request;
   final VoidCallback? onCancel;
-  final VoidCallback? onDuelComplete;
+  final ValueChanged<DuelComplete>? onDuelComplete;
 
   const DuelArenaScreen({
     super.key,
+    required this.request,
     this.onCancel,
     this.onDuelComplete,
   });
@@ -98,7 +101,7 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
 
     if (!mounted) return;
 
-    await ref.read(duelControllerProvider.notifier).voteWinner(winnerId);
+    await ref.read(duelControllerProvider(widget.request).notifier).voteWinner(winnerId);
 
     if (mounted) {
       setState(() {
@@ -110,17 +113,18 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
   Future<void> _handleSkipOrTie() async {
     if (_selectedWinnerId != null) return;
     await ref.read(hapticsServiceProvider).duelSelectCandidate();
-    await ref.read(duelControllerProvider.notifier).skipOrTie();
+    await ref.read(duelControllerProvider(widget.request).notifier).skipOrTie();
   }
 
   @override
   Widget build(BuildContext context) {
-    final duelState = ref.watch(duelControllerProvider);
+    final provider = duelControllerProvider(widget.request);
+    final duelState = ref.watch(provider);
 
     // Listen for completion
-    ref.listen<DuelState>(duelControllerProvider, (previous, next) {
+    ref.listen<DuelState>(provider, (previous, next) {
       if (next is DuelComplete) {
-        widget.onDuelComplete?.call();
+        widget.onDuelComplete?.call(next);
       }
     });
 
@@ -136,6 +140,17 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
             ),
           DuelComplete() => const Center(
               child: Icon(Icons.check_circle, color: TellyColors.phosphorLime, size: 64),
+            ),
+          DuelFailed() => Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Text(
+                  "Couldn't save this ranking. Please try again.",
+                  key: const Key('duel_failed_text'),
+                  textAlign: TextAlign.center,
+                  style: TellyTypography.bodyLarge(),
+                ),
+              ),
             ),
           DuelActive(:final candidate, :final currentOpponent, :final step, :final totalEstimatedSteps) =>
             _buildArenaContent(

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:telly_app/core/database/database.dart';
+import 'package:telly_app/core/database/database_provider.dart';
 import 'package:telly_app/core/services/haptics_service.dart';
 import 'package:telly_app/features/profile/presentation/controllers/profile_controller.dart';
 import 'package:telly_app/features/profile/presentation/screens/dual_canon_profile_screen.dart';
@@ -10,7 +12,21 @@ import 'package:telly_app/features/profile/presentation/widgets/tier_view_list.d
 import 'package:telly_app/features/ranking/domain/canon_type.dart';
 import 'package:telly_app/features/ranking/domain/franchise_rollup_service.dart';
 
+/// Fixed canon for screen tests: these fixtures carry franchise metadata Drift does not store.
+class SeededProfileCanon extends ProfileCanonNotifier {
+  SeededProfileCanon(this.movies, this.series);
+  final List<CanonEntry> movies;
+  final List<CanonEntry> series;
+
+  @override
+  ProfileCanonState build() => ProfileCanonState(movies: movies, series: series);
+}
+
 void main() {
+  late AppDatabase db;
+  setUp(() => db = AppDatabase.inMemory());
+  tearDown(() => db.close());
+
   final sampleMovies = [
     const CanonEntry(
       id: 1,
@@ -101,10 +117,8 @@ void main() {
         selectedCanonProvider.overrideWith((ref) => initialCanon),
         canonViewModeProvider.overrideWith((ref) => initialViewMode),
         franchiseRollupProvider.overrideWith((ref) => initialRollup),
-        profileCanonProvider.overrideWith((ref) => ProfileCanonNotifier(
-              initialMovies: movies ?? sampleMovies,
-              initialSeries: series ?? sampleSeries,
-            )),
+        databaseProvider.overrideWithValue(db),
+        profileCanonProvider.overrideWith(() => SeededProfileCanon(movies ?? sampleMovies, series ?? sampleSeries)),
       ],
       child: const MaterialApp(
         home: DualCanonProfileScreen(),
@@ -245,35 +259,24 @@ void main() {
       expect(find.byKey(const Key('drag_handle_3')), findsOneWidget);
     });
 
-    testWidgets('reordering entries updates ranks and recalculates scores', (tester) async {
+    testWidgets('moving an entry re-ranks and re-scores the list immediately', (tester) async {
       final container = ProviderContainer(
         overrides: [
-          profileCanonProvider.overrideWith((ref) => ProfileCanonNotifier(
-                initialMovies: sampleMovies,
-                initialSeries: sampleSeries,
-              )),
+          databaseProvider.overrideWithValue(db),
+          profileCanonProvider.overrideWith(() => SeededProfileCanon(sampleMovies, sampleSeries)),
         ],
       );
+      addTearDown(container.dispose);
 
-      final notifier = container.read(profileCanonProvider.notifier);
+      // Move Dune (id 3, rank 3) to #1
+      await container.read(profileCanonProvider.notifier).moveTitle(canon: CanonType.movie, titleId: 3, newRank: 1);
 
-      // Reorder Dune (index 2, rank 3) to top (index 0, rank 1)
-      await notifier.reorder(
-        canon: CanonType.movie,
-        oldIndex: 2,
-        newIndex: 0,
-      );
-
-      final state = container.read(profileCanonProvider);
-      final movies = state.movies;
-
+      final movies = container.read(profileCanonProvider).movies;
       expect(movies[0].title, equals('Dune: Part Two'));
       expect(movies[0].rankPosition, equals(1));
       expect(movies[0].calculatedScore, equals(10.00));
-
       expect(movies[1].title, equals('Interstellar'));
       expect(movies[1].rankPosition, equals(2));
-
       expect(movies[2].title, equals('Parasite'));
       expect(movies[2].rankPosition, equals(3));
     });

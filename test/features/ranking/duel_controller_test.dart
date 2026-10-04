@@ -1,224 +1,172 @@
+import 'dart:convert';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:telly_app/core/database/database.dart';
-import 'package:telly_app/features/ranking/domain/canon_type.dart';
+import 'package:telly_app/core/database/database_provider.dart';
+import 'package:telly_app/features/logging/domain/watch_status.dart';
+import 'package:telly_app/features/ranking/data/ranking_repository.dart';
+import 'package:telly_app/features/ranking/domain/editorial_tagging.dart';
+import 'package:telly_app/features/ranking/domain/sentiment_bracket.dart';
 import 'package:telly_app/features/ranking/presentation/controllers/duel_controller.dart';
+
+import '../../helpers/canon_seed.dart';
 
 void main() {
   late AppDatabase db;
-  late LocalRankingDao rankingDao;
-  late DuelController controller;
+  late ProviderContainer container;
 
   setUp(() {
     db = AppDatabase.inMemory();
-    rankingDao = db.localRankingDao;
-    controller = DuelController(rankingDao: rankingDao);
+    container = ProviderContainer(overrides: [databaseProvider.overrideWithValue(db)]);
   });
 
   tearDown(() async {
+    container.dispose();
     await db.close();
   });
 
-  group('ALGO-205: DuelController Riverpod State Machine', () {
-    test('Initial state is DuelInitial', () {
-      expect(controller.state, isA<DuelInitial>());
+  DuelRequest request(int id, String mediaType, {SentimentBracket bracket = SentimentBracket.liked}) => DuelRequest(
+        candidate: CanonCandidate(titleId: id, mediaType: mediaType, title: 'Candidate $id'),
+        bracket: bracket,
+        status: WatchStatus.defaultFor(mediaType),
+      );
+
+  /// Waits until the controller leaves its loading/committing states.
+  Future<DuelState> settle(DuelRequest r) async {
+    for (var i = 0; i < 100; i++) {
+      final s = container.read(duelControllerProvider(r));
+      if (s is! DuelInitial && s is! DuelResolving) return s;
+      await Future<void>.delayed(Duration.zero);
+    }
+    return container.read(duelControllerProvider(r));
+  }
+
+  /// Subscribes (keeping the auto-dispose family alive) and waits for the first duel.
+  Future<DuelState> start(DuelRequest r) {
+    container.listen(duelControllerProvider(r), (_, __) {});
+    return settle(r);
+  }
+
+  DuelController controller(DuelRequest r) => container.read(duelControllerProvider(r).notifier);
+
+  group('FE-604: DuelController + RankingRepository', () {
+    test('first title (N = 0) commits rank #1 / 10.00 with no duels and one pending mutation', () async {
+      final done = await start(request(101, 'tv')) as DuelComplete;
+
+      expect(done.finalRank, 1);
+      expect(done.finalScore, 10.00);
+      final canon = await db.localRankingDao.getRankingsByCanon('tv');
+      expect(canon.single.showId, 101);
+      expect(canon.single.syncStatus, 'PENDING');
+
+      final queue = await db.pendingMutationDao.getAllFifo();
+      expect(queue.single.kind, MutationKind.logTitle);
+      final payload = jsonDecode(queue.single.payload) as Map<String, dynamic>;
+      expect(payload['target_rank'], 1);
+      expect(payload['status'], 'COMPLETED');
+      expect(payload['duels'], isEmpty);
     });
 
-    test('initTournament with empty canon resolves immediately to Rank 1 and Score 10.00', () async {
-      final candidate = LocalRanking(
-        showId: 101,
-        mediaType: 'tv',
-        title: 'Succession',
-        posterPath: null,
-        rankPosition: 0,
-        calculatedScore: 0.0,
-        syncStatus: 'PENDING',
-        updatedAt: DateTime.now(),
-      );
+    test('full log flow writes 1 ranking + N duels in 1 pending mutation atomically', () async {
+      await seedCanon(db, 'tv', [for (var i = 1; i <= 20; i++) 'Show $i']);
+      final r = request(999, 'tv', bracket: SentimentBracket.loved);
+      var state = await start(r);
 
-      await controller.initTournament(
-        candidate: candidate,
-        existingCanon: [],
-      );
-
-      expect(controller.state, isA<DuelComplete>());
-      final complete = controller.state as DuelComplete;
-      expect(complete.finalRank, equals(1));
-      expect(complete.finalScore, equals(10.00));
-      expect(complete.insertedIndex, equals(0));
-      expect(complete.updatedCanon.length, equals(1));
-
-      // Verify persisted to local SQLite
-      final inDb = await rankingDao.getRankingsByCanon('tv');
-      expect(inDb.length, equals(1));
-      expect(inDb.first.showId, equals(101));
-      expect(inDb.first.rankPosition, equals(1));
-    });
-
-    test('initTournament rejects cross-canon pairing with CrossCanonDuelException', () async {
-      final movieCandidate = LocalRanking(
-        showId: 201,
-        mediaType: 'movie',
-        title: 'The Dark Knight',
-        posterPath: null,
-        rankPosition: 0,
-        calculatedScore: 0.0,
-        syncStatus: 'PENDING',
-        updatedAt: DateTime.now(),
-      );
-
-      final seriesItem = LocalRanking(
-        showId: 101,
-        mediaType: 'tv',
-        title: 'Succession',
-        posterPath: null,
-        rankPosition: 1,
-        calculatedScore: 10.00,
-        syncStatus: 'SYNCED',
-        updatedAt: DateTime.now(),
-      );
-
-      expect(
-        () => controller.initTournament(
-          candidate: movieCandidate,
-          existingCanon: [seriesItem],
-        ),
-        throwsA(isA<CrossCanonDuelException>()),
-      );
-    });
-
-    test('Full multi-step tournament steps through duels and logs to offline queue', () async {
-      // Setup 7 existing TV shows ranked 1 to 7
-      final existingCanon = List.generate(7, (i) {
-        return LocalRanking(
-          showId: 100 + i,
-          mediaType: 'tv',
-          title: 'Existing Show #${i + 1}',
-          posterPath: null,
-          rankPosition: i + 1,
-          calculatedScore: 10.00 - (i * 1.2),
-          syncStatus: 'SYNCED',
-          updatedAt: DateTime.now(),
-        );
-      });
-
-      final newCandidate = LocalRanking(
-        showId: 999,
-        mediaType: 'tv',
-        title: 'The Bear',
-        posterPath: '/the_bear.jpg',
-        rankPosition: 0,
-        calculatedScore: 0.0,
-        syncStatus: 'PENDING',
-        updatedAt: DateTime.now(),
-      );
-
-      await controller.initTournament(
-        candidate: newCandidate,
-        existingCanon: existingCanon,
-      );
-
-      // Verify active state
-      expect(controller.state, isA<DuelActive>());
-      var active = controller.state as DuelActive;
-      expect(active.candidate.showId, equals(999));
-      expect(active.step, equals(1));
-
-      // Vote 1: Candidate wins against midpoint (index 3: Existing Show #4)
-      await controller.voteWinner(999);
-
-      // Verify offline duel queue has 1 record
-      var pendingDuels = await rankingDao.getPendingOfflineDuels();
-      expect(pendingDuels.length, equals(1));
-      expect(pendingDuels.first.winnerTitleId, equals(999));
-      expect(pendingDuels.first.loserTitleId, equals(existingCanon[3].showId));
-
-      // Vote 2: Opponent wins
-      expect(controller.state, isA<DuelActive>());
-      active = controller.state as DuelActive;
-      await controller.voteWinner(active.currentOpponent.showId);
-
-      pendingDuels = await rankingDao.getPendingOfflineDuels();
-      expect(pendingDuels.length, equals(2));
-
-      // Vote 3: Candidate wins
-      expect(controller.state, isA<DuelActive>());
-      active = controller.state as DuelActive;
-      await controller.voteWinner(999);
-
-      // After 3 comparisons on 7 items (ceil(log2(8)) = 3), tournament must complete!
-      expect(controller.state, isA<DuelComplete>());
-      final complete = controller.state as DuelComplete;
-      expect(complete.candidate.showId, equals(999));
-      expect(complete.updatedCanon.length, equals(8));
-
-      // Verify all 8 ranks in SQLite are sequential from 1 to 8 with no duplicates
-      final rankingsInDb = await rankingDao.getRankingsByCanon('tv');
-      expect(rankingsInDb.length, equals(8));
-      for (int i = 0; i < 8; i++) {
-        expect(rankingsInDb[i].rankPosition, equals(i + 1));
-        expect(rankingsInDb[i].calculatedScore, greaterThan(0.0));
+      final votes = <(int, int)>[];
+      var candidateWins = true;
+      while (state is DuelActive) {
+        final opponent = state.currentOpponent.showId;
+        votes.add(candidateWins ? (999, opponent) : (opponent, 999));
+        await controller(r).voteWinner(candidateWins ? 999 : opponent);
+        candidateWins = !candidateWins;
+        state = await settle(r);
       }
+      final done = state as DuelComplete;
+      expect(votes, isNotEmpty);
+
+      final canon = await db.localRankingDao.getRankingsByCanon('tv');
+      expect(canon, hasLength(21));
+      expect(canon.map((e) => e.rankPosition), List.generate(21, (i) => i + 1));
+      expect(canon[done.finalRank - 1].showId, 999);
+      expect(canon.where((e) => e.syncStatus == 'PENDING').map((e) => e.showId), [999]);
+
+      final queue = await db.pendingMutationDao.getAllFifo();
+      expect(queue, hasLength(1));
+      final payload = jsonDecode(queue.single.payload) as Map<String, dynamic>;
+      expect(payload['title_id'], 999);
+      expect(payload['media_type'], 'tv');
+      expect(payload['target_rank'], done.finalRank);
+      final duels = (payload['duels'] as List).cast<Map<String, dynamic>>();
+      expect(duels.map((d) => (d['winner_title_id'], d['loser_title_id'])), votes);
+      expect(duels.map((d) => d['client_mutation_id']).toSet(), hasLength(votes.length));
+      expect(duels.every((d) => d['media_type'] == 'tv'), isTrue);
     });
 
-    test('skipOrTie steps to neighbor and resolves adjacent on repeat tie', () async {
-      final existingCanon = [
-        LocalRanking(
-          showId: 101,
-          mediaType: 'movie',
-          title: 'Movie 1',
-          posterPath: null,
-          rankPosition: 1,
-          calculatedScore: 10.00,
-          syncStatus: 'SYNCED',
-          updatedAt: DateTime.now(),
-        ),
-        LocalRanking(
-          showId: 102,
-          mediaType: 'movie',
-          title: 'Movie 2',
-          posterPath: null,
-          rankPosition: 2,
-          calculatedScore: 5.50,
-          syncStatus: 'SYNCED',
-          updatedAt: DateTime.now(),
-        ),
-        LocalRanking(
-          showId: 103,
-          mediaType: 'movie',
-          title: 'Movie 3',
-          posterPath: null,
-          rankPosition: 3,
-          calculatedScore: 1.00,
-          syncStatus: 'SYNCED',
-          updatedAt: DateTime.now(),
-        ),
-      ];
+    test('a movie duel never loads tv opponents', () async {
+      await seedCanon(db, 'tv', [for (var i = 1; i <= 10; i++) 'Series $i'], baseId: 100);
+      await seedCanon(db, 'movie', [for (var i = 1; i <= 6; i++) 'Movie $i'], baseId: 500);
+      final r = request(777, 'movie', bracket: SentimentBracket.liked);
+      var state = await start(r);
 
-      final candidate = LocalRanking(
-        showId: 999,
-        mediaType: 'movie',
-        title: 'New Movie',
-        posterPath: null,
-        rankPosition: 0,
-        calculatedScore: 0.0,
-        syncStatus: 'PENDING',
-        updatedAt: DateTime.now(),
+      final seen = <String>[];
+      while (state is DuelActive) {
+        seen.add(state.currentOpponent.mediaType);
+        expect(state.currentOpponent.showId, inInclusiveRange(500, 505));
+        await controller(r).voteWinner(state.currentOpponent.showId);
+        state = await settle(r);
+      }
+      expect(seen, isNotEmpty);
+      expect(seen.toSet(), {'movie'});
+      expect(await db.localRankingDao.getRankingsByCanon('tv'), hasLength(10));
+      expect(await db.localRankingDao.getRankingsByCanon('movie'), hasLength(7));
+    });
+
+    test("Can't Compare records no duel", () async {
+      await seedCanon(db, 'tv', ['A', 'B']);
+      final r = request(42, 'tv', bracket: SentimentBracket.masterpiece);
+      var state = await start(r);
+      while (state is DuelActive) {
+        await controller(r).skipOrTie();
+        state = await settle(r);
+      }
+      expect(state, isA<DuelComplete>());
+      final payload = jsonDecode((await db.pendingMutationDao.getAllFifo()).single.payload) as Map<String, dynamic>;
+      expect(payload['duels'], isEmpty);
+    });
+
+    test('re-dueling a ranked title (Reset Duels) excludes it from opponents and commits a move', () async {
+      await seedCanon(db, 'tv', ['A', 'B', 'C', 'D'], baseId: 1);
+      await container.read(rankingRepositoryProvider).attachEditorial(
+            titleId: 2,
+            mediaType: 'tv',
+            data: const EditorialTaggingData(mvpCharacter: 'Helly R.'),
+          );
+      for (final m in await db.pendingMutationDao.getAllFifo()) {
+        await db.pendingMutationDao.remove(m.id);
+      }
+
+      const r = DuelRequest(
+        candidate: CanonCandidate(titleId: 2, mediaType: 'tv', title: 'B'),
+        bracket: SentimentBracket.masterpiece,
+        status: WatchStatus.finished,
       );
+      var state = await start(r);
+      while (state is DuelActive) {
+        expect(state.currentOpponent.showId, isNot(2));
+        await controller(r).voteWinner(2);
+        state = await settle(r);
+      }
+      final done = state as DuelComplete;
+      expect(done.commit.wasMove, isTrue);
+      expect(done.finalRank, 1);
 
-      await controller.initTournament(
-        candidate: candidate,
-        existingCanon: existingCanon,
-      );
-
-      expect(controller.state, isA<DuelActive>());
-
-      // First tie: steps to neighbor
-      await controller.skipOrTie();
-      expect(controller.state, isA<DuelActive>());
-
-      // Second tie: resolves adjacent
-      await controller.skipOrTie();
-      expect(controller.state, isA<DuelComplete>());
+      final canon = await db.localRankingDao.getRankingsByCanon('tv');
+      expect(canon.map((e) => e.showId), [2, 1, 3, 4]);
+      expect(canon.first.favoriteCharacter, 'Helly R.', reason: 'notes survive a reset');
+      final queue = await db.pendingMutationDao.getAllFifo();
+      expect(queue.single.kind, MutationKind.move);
+      expect((jsonDecode(queue.single.payload) as Map)['new_rank'], 1);
     });
   });
 }

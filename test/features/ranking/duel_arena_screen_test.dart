@@ -2,336 +2,121 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:telly_app/core/database/database.dart';
+import 'package:telly_app/core/database/database_provider.dart';
 import 'package:telly_app/core/services/haptics_service.dart';
 import 'package:telly_app/core/theme/telly_theme.dart';
+import 'package:telly_app/features/logging/domain/watch_status.dart';
+import 'package:telly_app/features/ranking/data/ranking_repository.dart';
+import 'package:telly_app/features/ranking/domain/sentiment_bracket.dart';
 import 'package:telly_app/features/ranking/presentation/controllers/duel_controller.dart';
 import 'package:telly_app/features/ranking/presentation/screens/duel_arena_screen.dart';
 
+import '../../helpers/canon_seed.dart';
+
 void main() {
   late AppDatabase db;
-  late LocalRankingDao rankingDao;
 
-  setUp(() {
-    db = AppDatabase.inMemory();
-    rankingDao = db.localRankingDao;
-  });
+  setUp(() => db = AppDatabase.inMemory());
+  tearDown(() => db.close());
 
-  tearDown(() async {
-    await db.close();
-  });
+  DuelRequest request(int id, String title) => DuelRequest(
+        candidate: CanonCandidate(titleId: id, mediaType: 'tv', title: title),
+        bracket: SentimentBracket.masterpiece,
+        status: WatchStatus.finished,
+      );
 
-  Widget buildTestArena({
-    required DuelController controller,
-    VoidCallback? onCancel,
-    VoidCallback? onComplete,
-  }) {
-    return ProviderScope(
-      overrides: [
-        duelControllerProvider.overrideWith((ref) => controller),
-        hapticsEnabledProvider.overrideWith((ref) => false),
-      ],
+  /// Pumps the arena for [candidate] against a one-title canon and returns its container.
+  Future<ProviderContainer> pumpArena(
+    WidgetTester tester, {
+    required DuelRequest candidate,
+    String opponent = 'Succession',
+    ValueChanged<DuelComplete>? onComplete,
+  }) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 2.0;
+    addTearDown(tester.view.reset);
+    await seedCanon(db, 'tv', [opponent], baseId: 102);
+
+    final container = ProviderContainer(overrides: [
+      databaseProvider.overrideWithValue(db),
+      hapticsEnabledProvider.overrideWith((ref) => false),
+    ]);
+    addTearDown(container.dispose);
+    await tester.pumpWidget(UncontrolledProviderScope(
+      container: container,
       child: MaterialApp(
         theme: TellyTheme.dark,
-        home: DuelArenaScreen(
-          onCancel: onCancel,
-          onDuelComplete: onComplete,
-        ),
+        home: DuelArenaScreen(request: candidate, onDuelComplete: onComplete),
       ),
-    );
+    ));
+    await tester.pumpAndSettle();
+    return container;
   }
 
-  group('FE-201 / FE-202 / QA-204: SCR-10 DuelArenaScreen Widget & Gesture Tests', () {
-    testWidgets('renders Candidate A, Candidate B, VS badge, step counter, and Can\'t Compare button', (tester) async {
-      tester.view.physicalSize = const Size(1080, 2400);
-      tester.view.devicePixelRatio = 2.0;
-      addTearDown(tester.view.resetPhysicalSize);
+  DuelState stateOf(ProviderContainer c, DuelRequest r) => c.read(duelControllerProvider(r));
 
-      final controller = DuelController(rankingDao: rankingDao);
+  group('FE-201 / FE-202 / QA-204 / FE-604: SCR-10 DuelArenaScreen', () {
+    testWidgets("renders both cards, VS badge, step counter and Can't Compare", (tester) async {
+      await pumpArena(tester, candidate: request(101, 'Severance'));
 
-      final candidate = LocalRanking(
-        showId: 101,
-        mediaType: 'tv',
-        title: 'Severance',
-        posterPath: '/severance.jpg',
-        rankPosition: 0,
-        calculatedScore: 0.0,
-        syncStatus: 'PENDING',
-        updatedAt: DateTime.now(),
-      );
-
-      final opponent = LocalRanking(
-        showId: 102,
-        mediaType: 'tv',
-        title: 'Succession',
-        posterPath: '/succession.jpg',
-        rankPosition: 1,
-        calculatedScore: 10.00,
-        syncStatus: 'SYNCED',
-        updatedAt: DateTime.now(),
-      );
-
-      await controller.initTournament(
-        candidate: candidate,
-        existingCanon: [opponent],
-      );
-
-      await tester.pumpWidget(buildTestArena(controller: controller));
-      await tester.pump();
-
-      // Assert Candidate Card A and B
       expect(find.byKey(const Key('candidate_card_a')), findsOneWidget);
       expect(find.byKey(const Key('candidate_card_b')), findsOneWidget);
       expect(find.text('Severance'), findsOneWidget);
       expect(find.text('Succession'), findsOneWidget);
-
-      // Assert VS Badge
       expect(find.byKey(const Key('duel_vs_badge')), findsOneWidget);
       expect(find.text('━  VS  ━'), findsOneWidget);
-
-      // Assert Step Counter
-      expect(find.byKey(const Key('duel_step_counter_text')), findsOneWidget);
       expect(find.text('DUEL 1 OF 1'), findsOneWidget);
-
-      // Assert Can't Compare button
       expect(find.byKey(const Key('cant_compare_button')), findsOneWidget);
     });
 
-    testWidgets('Tapping Candidate Card A selects Card A as winner and completes duel', (tester) async {
-      tester.view.physicalSize = const Size(1080, 2400);
-      tester.view.devicePixelRatio = 2.0;
-      addTearDown(tester.view.resetPhysicalSize);
+    testWidgets('tapping card A picks the candidate, commits rank #1 and reports completion', (tester) async {
+      final r = request(101, 'The Bear');
+      DuelComplete? completed;
+      final c = await pumpArena(tester, candidate: r, opponent: 'Fleabag', onComplete: (d) => completed = d);
 
-      final controller = DuelController(rankingDao: rankingDao);
-
-      final candidate = LocalRanking(
-        showId: 101,
-        mediaType: 'tv',
-        title: 'The Bear',
-        posterPath: null,
-        rankPosition: 0,
-        calculatedScore: 0.0,
-        syncStatus: 'PENDING',
-        updatedAt: DateTime.now(),
-      );
-
-      final opponent = LocalRanking(
-        showId: 102,
-        mediaType: 'tv',
-        title: 'Fleabag',
-        posterPath: null,
-        rankPosition: 1,
-        calculatedScore: 10.00,
-        syncStatus: 'SYNCED',
-        updatedAt: DateTime.now(),
-      );
-
-      await controller.initTournament(
-        candidate: candidate,
-        existingCanon: [opponent],
-      );
-
-      bool completeCalled = false;
-      await tester.pumpWidget(buildTestArena(
-        controller: controller,
-        onComplete: () => completeCalled = true,
-      ));
-      await tester.pump();
-
-      // Tap Candidate Card A
       await tester.tap(find.byKey(const Key('candidate_card_a')));
-      // Pump past the 250ms animation delay
       await tester.pump(const Duration(milliseconds: 300));
       await tester.pumpAndSettle();
 
-      expect(controller.state, isA<DuelComplete>());
-      final complete = controller.state as DuelComplete;
-      expect(complete.finalRank, equals(1)); // The Bear beat Fleabag -> Rank 1
-      expect(completeCalled, isTrue);
+      final done = stateOf(c, r) as DuelComplete;
+      expect(done.finalRank, 1);
+      expect(completed?.finalRank, 1);
+      expect((await db.localRankingDao.getRankingsByCanon('tv')).map((e) => e.title), ['The Bear', 'Fleabag']);
     });
 
-    testWidgets('Swiping UP selects Card A as winner', (tester) async {
-      tester.view.physicalSize = const Size(1080, 2400);
-      tester.view.devicePixelRatio = 2.0;
-      addTearDown(tester.view.resetPhysicalSize);
-
-      final controller = DuelController(rankingDao: rankingDao);
-
-      final candidate = LocalRanking(
-        showId: 101,
-        mediaType: 'movie',
-        title: 'Interstellar',
-        posterPath: null,
-        rankPosition: 0,
-        calculatedScore: 0.0,
-        syncStatus: 'PENDING',
-        updatedAt: DateTime.now(),
-      );
-
-      final opponent = LocalRanking(
-        showId: 102,
-        mediaType: 'movie',
-        title: 'Oppenheimer',
-        posterPath: null,
-        rankPosition: 1,
-        calculatedScore: 10.00,
-        syncStatus: 'SYNCED',
-        updatedAt: DateTime.now(),
-      );
-
-      await controller.initTournament(
-        candidate: candidate,
-        existingCanon: [opponent],
-      );
-
-      await tester.pumpWidget(buildTestArena(controller: controller));
-      await tester.pump();
-
-      // Swipe UP with offset -150 (> 100 threshold)
+    testWidgets('swiping UP selects card A', (tester) async {
+      final r = request(101, 'The Bear');
+      final c = await pumpArena(tester, candidate: r);
       await tester.drag(find.byKey(const Key('candidate_card_a')), const Offset(0, -150));
       await tester.pump(const Duration(milliseconds: 300));
       await tester.pumpAndSettle();
-
-      expect(controller.state, isA<DuelComplete>());
-      final complete = controller.state as DuelComplete;
-      expect(complete.finalRank, equals(1));
+      expect((stateOf(c, r) as DuelComplete).finalRank, 1);
     });
 
-    testWidgets('Swiping DOWN selects Card B (opponent) as winner', (tester) async {
-      tester.view.physicalSize = const Size(1080, 2400);
-      tester.view.devicePixelRatio = 2.0;
-      addTearDown(tester.view.resetPhysicalSize);
-
-      final controller = DuelController(rankingDao: rankingDao);
-
-      final candidate = LocalRanking(
-        showId: 101,
-        mediaType: 'movie',
-        title: 'Interstellar',
-        posterPath: null,
-        rankPosition: 0,
-        calculatedScore: 0.0,
-        syncStatus: 'PENDING',
-        updatedAt: DateTime.now(),
-      );
-
-      final opponent = LocalRanking(
-        showId: 102,
-        mediaType: 'movie',
-        title: 'Oppenheimer',
-        posterPath: null,
-        rankPosition: 1,
-        calculatedScore: 10.00,
-        syncStatus: 'SYNCED',
-        updatedAt: DateTime.now(),
-      );
-
-      await controller.initTournament(
-        candidate: candidate,
-        existingCanon: [opponent],
-      );
-
-      await tester.pumpWidget(buildTestArena(controller: controller));
-      await tester.pump();
-
-      // Swipe DOWN with offset +150 (> 100 threshold)
+    testWidgets('swiping DOWN selects card B (the opponent)', (tester) async {
+      final r = request(101, 'The Bear');
+      final c = await pumpArena(tester, candidate: r);
       await tester.drag(find.byKey(const Key('candidate_card_b')), const Offset(0, 150));
       await tester.pump(const Duration(milliseconds: 300));
       await tester.pumpAndSettle();
-
-      expect(controller.state, isA<DuelComplete>());
-      final complete = controller.state as DuelComplete;
-      expect(complete.finalRank, equals(2)); // Opponent won -> Rank 2
+      expect((stateOf(c, r) as DuelComplete).finalRank, 2);
     });
 
-    testWidgets('Drag < 50 dp snaps back with spring physics without selecting a winner', (tester) async {
-      tester.view.physicalSize = const Size(1080, 2400);
-      tester.view.devicePixelRatio = 2.0;
-      addTearDown(tester.view.resetPhysicalSize);
-
-      final controller = DuelController(rankingDao: rankingDao);
-
-      final candidate = LocalRanking(
-        showId: 101,
-        mediaType: 'movie',
-        title: 'Interstellar',
-        posterPath: null,
-        rankPosition: 0,
-        calculatedScore: 0.0,
-        syncStatus: 'PENDING',
-        updatedAt: DateTime.now(),
-      );
-
-      final opponent = LocalRanking(
-        showId: 102,
-        mediaType: 'movie',
-        title: 'Oppenheimer',
-        posterPath: null,
-        rankPosition: 1,
-        calculatedScore: 10.00,
-        syncStatus: 'SYNCED',
-        updatedAt: DateTime.now(),
-      );
-
-      await controller.initTournament(
-        candidate: candidate,
-        existingCanon: [opponent],
-      );
-
-      await tester.pumpWidget(buildTestArena(controller: controller));
-      await tester.pump();
-
-      // Drag with small offset 30 dp (< 100 threshold)
+    testWidgets('a short drag springs back without selecting', (tester) async {
+      final r = request(101, 'The Bear');
+      final c = await pumpArena(tester, candidate: r);
       await tester.drag(find.byKey(const Key('candidate_card_a')), const Offset(0, 30));
       await tester.pump(const Duration(milliseconds: 400));
       await tester.pumpAndSettle();
-
-      // State remains DuelActive (no winner selected)
-      expect(controller.state, isA<DuelActive>());
+      expect(stateOf(c, r), isA<DuelActive>());
     });
 
-    testWidgets('Tapping Can\'t Compare / Equal button triggers skipOrTie', (tester) async {
-      tester.view.physicalSize = const Size(1080, 2400);
-      tester.view.devicePixelRatio = 2.0;
-      addTearDown(tester.view.resetPhysicalSize);
-
-      final controller = DuelController(rankingDao: rankingDao);
-
-      final candidate = LocalRanking(
-        showId: 101,
-        mediaType: 'movie',
-        title: 'Interstellar',
-        posterPath: null,
-        rankPosition: 0,
-        calculatedScore: 0.0,
-        syncStatus: 'PENDING',
-        updatedAt: DateTime.now(),
-      );
-
-      final opponent = LocalRanking(
-        showId: 102,
-        mediaType: 'movie',
-        title: 'Oppenheimer',
-        posterPath: null,
-        rankPosition: 1,
-        calculatedScore: 10.00,
-        syncStatus: 'SYNCED',
-        updatedAt: DateTime.now(),
-      );
-
-      await controller.initTournament(
-        candidate: candidate,
-        existingCanon: [opponent],
-      );
-
-      await tester.pumpWidget(buildTestArena(controller: controller));
-      await tester.pump();
-
-      // Tap Can't Compare button
+    testWidgets("Can't Compare / Equal advances without a duel", (tester) async {
+      final r = request(101, 'The Bear');
+      final c = await pumpArena(tester, candidate: r);
       await tester.tap(find.byKey(const Key('cant_compare_button')));
       await tester.pumpAndSettle();
-
-      // In a 1-item canon, tie completes adjacent immediately
-      expect(controller.state, isA<DuelComplete>());
+      expect(stateOf(c, r), isA<DuelComplete>());
     });
   });
 }

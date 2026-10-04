@@ -15,6 +15,20 @@ class LocalRankingDaoManager {
       $$LocalRankingsTableTableManager(_db.attachedDatabase, _db.localRankings);
 }
 
+mixin _$PendingMutationDaoMixin on DatabaseAccessor<AppDatabase> {
+  $PendingMutationsTable get pendingMutations =>
+      attachedDatabase.pendingMutations;
+  PendingMutationDaoManager get managers => PendingMutationDaoManager(this);
+}
+
+class PendingMutationDaoManager {
+  final _$PendingMutationDaoMixin _db;
+  PendingMutationDaoManager(this._db);
+  $$PendingMutationsTableTableManager get pendingMutations =>
+      $$PendingMutationsTableTableManager(
+          _db.attachedDatabase, _db.pendingMutations);
+}
+
 mixin _$LocalTitleDaoMixin on DatabaseAccessor<AppDatabase> {
   $CachedTitlesTable get cachedTitles => attachedDatabase.cachedTitles;
   LocalTitleDaoManager get managers => LocalTitleDaoManager(this);
@@ -737,6 +751,12 @@ class $LocalRankingsTable extends LocalRankings
   late final GeneratedColumn<String> bracket = GeneratedColumn<String>(
       'bracket', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _favoriteCharacterMeta =
+      const VerificationMeta('favoriteCharacter');
+  @override
+  late final GeneratedColumn<String> favoriteCharacter =
+      GeneratedColumn<String>('favorite_character', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _syncStatusMeta =
       const VerificationMeta('syncStatus');
   @override
@@ -762,6 +782,7 @@ class $LocalRankingsTable extends LocalRankings
         rankPosition,
         calculatedScore,
         bracket,
+        favoriteCharacter,
         syncStatus,
         updatedAt
       ];
@@ -819,6 +840,12 @@ class $LocalRankingsTable extends LocalRankings
       context.handle(_bracketMeta,
           bracket.isAcceptableOrUnknown(data['bracket']!, _bracketMeta));
     }
+    if (data.containsKey('favorite_character')) {
+      context.handle(
+          _favoriteCharacterMeta,
+          favoriteCharacter.isAcceptableOrUnknown(
+              data['favorite_character']!, _favoriteCharacterMeta));
+    }
     if (data.containsKey('sync_status')) {
       context.handle(
           _syncStatusMeta,
@@ -852,6 +879,8 @@ class $LocalRankingsTable extends LocalRankings
           DriftSqlType.double, data['${effectivePrefix}calculated_score'])!,
       bracket: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}bracket']),
+      favoriteCharacter: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}favorite_character']),
       syncStatus: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}sync_status'])!,
       updatedAt: attachedDatabase.typeMapping
@@ -873,6 +902,7 @@ class LocalRanking extends DataClass implements Insertable<LocalRanking> {
   final int rankPosition;
   final double calculatedScore;
   final String? bracket;
+  final String? favoriteCharacter;
   final String syncStatus;
   final DateTime updatedAt;
   const LocalRanking(
@@ -883,6 +913,7 @@ class LocalRanking extends DataClass implements Insertable<LocalRanking> {
       required this.rankPosition,
       required this.calculatedScore,
       this.bracket,
+      this.favoriteCharacter,
       required this.syncStatus,
       required this.updatedAt});
   @override
@@ -898,6 +929,9 @@ class LocalRanking extends DataClass implements Insertable<LocalRanking> {
     map['calculated_score'] = Variable<double>(calculatedScore);
     if (!nullToAbsent || bracket != null) {
       map['bracket'] = Variable<String>(bracket);
+    }
+    if (!nullToAbsent || favoriteCharacter != null) {
+      map['favorite_character'] = Variable<String>(favoriteCharacter);
     }
     map['sync_status'] = Variable<String>(syncStatus);
     map['updated_at'] = Variable<DateTime>(updatedAt);
@@ -917,6 +951,9 @@ class LocalRanking extends DataClass implements Insertable<LocalRanking> {
       bracket: bracket == null && nullToAbsent
           ? const Value.absent()
           : Value(bracket),
+      favoriteCharacter: favoriteCharacter == null && nullToAbsent
+          ? const Value.absent()
+          : Value(favoriteCharacter),
       syncStatus: Value(syncStatus),
       updatedAt: Value(updatedAt),
     );
@@ -933,6 +970,8 @@ class LocalRanking extends DataClass implements Insertable<LocalRanking> {
       rankPosition: serializer.fromJson<int>(json['rankPosition']),
       calculatedScore: serializer.fromJson<double>(json['calculatedScore']),
       bracket: serializer.fromJson<String?>(json['bracket']),
+      favoriteCharacter:
+          serializer.fromJson<String?>(json['favoriteCharacter']),
       syncStatus: serializer.fromJson<String>(json['syncStatus']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -948,6 +987,7 @@ class LocalRanking extends DataClass implements Insertable<LocalRanking> {
       'rankPosition': serializer.toJson<int>(rankPosition),
       'calculatedScore': serializer.toJson<double>(calculatedScore),
       'bracket': serializer.toJson<String?>(bracket),
+      'favoriteCharacter': serializer.toJson<String?>(favoriteCharacter),
       'syncStatus': serializer.toJson<String>(syncStatus),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -961,6 +1001,7 @@ class LocalRanking extends DataClass implements Insertable<LocalRanking> {
           int? rankPosition,
           double? calculatedScore,
           Value<String?> bracket = const Value.absent(),
+          Value<String?> favoriteCharacter = const Value.absent(),
           String? syncStatus,
           DateTime? updatedAt}) =>
       LocalRanking(
@@ -971,6 +1012,9 @@ class LocalRanking extends DataClass implements Insertable<LocalRanking> {
         rankPosition: rankPosition ?? this.rankPosition,
         calculatedScore: calculatedScore ?? this.calculatedScore,
         bracket: bracket.present ? bracket.value : this.bracket,
+        favoriteCharacter: favoriteCharacter.present
+            ? favoriteCharacter.value
+            : this.favoriteCharacter,
         syncStatus: syncStatus ?? this.syncStatus,
         updatedAt: updatedAt ?? this.updatedAt,
       );
@@ -988,6 +1032,9 @@ class LocalRanking extends DataClass implements Insertable<LocalRanking> {
           ? data.calculatedScore.value
           : this.calculatedScore,
       bracket: data.bracket.present ? data.bracket.value : this.bracket,
+      favoriteCharacter: data.favoriteCharacter.present
+          ? data.favoriteCharacter.value
+          : this.favoriteCharacter,
       syncStatus:
           data.syncStatus.present ? data.syncStatus.value : this.syncStatus,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
@@ -1004,6 +1051,7 @@ class LocalRanking extends DataClass implements Insertable<LocalRanking> {
           ..write('rankPosition: $rankPosition, ')
           ..write('calculatedScore: $calculatedScore, ')
           ..write('bracket: $bracket, ')
+          ..write('favoriteCharacter: $favoriteCharacter, ')
           ..write('syncStatus: $syncStatus, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -1011,8 +1059,17 @@ class LocalRanking extends DataClass implements Insertable<LocalRanking> {
   }
 
   @override
-  int get hashCode => Object.hash(showId, mediaType, title, posterPath,
-      rankPosition, calculatedScore, bracket, syncStatus, updatedAt);
+  int get hashCode => Object.hash(
+      showId,
+      mediaType,
+      title,
+      posterPath,
+      rankPosition,
+      calculatedScore,
+      bracket,
+      favoriteCharacter,
+      syncStatus,
+      updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1024,6 +1081,7 @@ class LocalRanking extends DataClass implements Insertable<LocalRanking> {
           other.rankPosition == this.rankPosition &&
           other.calculatedScore == this.calculatedScore &&
           other.bracket == this.bracket &&
+          other.favoriteCharacter == this.favoriteCharacter &&
           other.syncStatus == this.syncStatus &&
           other.updatedAt == this.updatedAt);
 }
@@ -1036,6 +1094,7 @@ class LocalRankingsCompanion extends UpdateCompanion<LocalRanking> {
   final Value<int> rankPosition;
   final Value<double> calculatedScore;
   final Value<String?> bracket;
+  final Value<String?> favoriteCharacter;
   final Value<String> syncStatus;
   final Value<DateTime> updatedAt;
   final Value<int> rowid;
@@ -1047,6 +1106,7 @@ class LocalRankingsCompanion extends UpdateCompanion<LocalRanking> {
     this.rankPosition = const Value.absent(),
     this.calculatedScore = const Value.absent(),
     this.bracket = const Value.absent(),
+    this.favoriteCharacter = const Value.absent(),
     this.syncStatus = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -1059,6 +1119,7 @@ class LocalRankingsCompanion extends UpdateCompanion<LocalRanking> {
     required int rankPosition,
     required double calculatedScore,
     this.bracket = const Value.absent(),
+    this.favoriteCharacter = const Value.absent(),
     this.syncStatus = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -1075,6 +1136,7 @@ class LocalRankingsCompanion extends UpdateCompanion<LocalRanking> {
     Expression<int>? rankPosition,
     Expression<double>? calculatedScore,
     Expression<String>? bracket,
+    Expression<String>? favoriteCharacter,
     Expression<String>? syncStatus,
     Expression<DateTime>? updatedAt,
     Expression<int>? rowid,
@@ -1087,6 +1149,7 @@ class LocalRankingsCompanion extends UpdateCompanion<LocalRanking> {
       if (rankPosition != null) 'rank_position': rankPosition,
       if (calculatedScore != null) 'calculated_score': calculatedScore,
       if (bracket != null) 'bracket': bracket,
+      if (favoriteCharacter != null) 'favorite_character': favoriteCharacter,
       if (syncStatus != null) 'sync_status': syncStatus,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
@@ -1101,6 +1164,7 @@ class LocalRankingsCompanion extends UpdateCompanion<LocalRanking> {
       Value<int>? rankPosition,
       Value<double>? calculatedScore,
       Value<String?>? bracket,
+      Value<String?>? favoriteCharacter,
       Value<String>? syncStatus,
       Value<DateTime>? updatedAt,
       Value<int>? rowid}) {
@@ -1112,6 +1176,7 @@ class LocalRankingsCompanion extends UpdateCompanion<LocalRanking> {
       rankPosition: rankPosition ?? this.rankPosition,
       calculatedScore: calculatedScore ?? this.calculatedScore,
       bracket: bracket ?? this.bracket,
+      favoriteCharacter: favoriteCharacter ?? this.favoriteCharacter,
       syncStatus: syncStatus ?? this.syncStatus,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
@@ -1142,6 +1207,9 @@ class LocalRankingsCompanion extends UpdateCompanion<LocalRanking> {
     if (bracket.present) {
       map['bracket'] = Variable<String>(bracket.value);
     }
+    if (favoriteCharacter.present) {
+      map['favorite_character'] = Variable<String>(favoriteCharacter.value);
+    }
     if (syncStatus.present) {
       map['sync_status'] = Variable<String>(syncStatus.value);
     }
@@ -1164,6 +1232,7 @@ class LocalRankingsCompanion extends UpdateCompanion<LocalRanking> {
           ..write('rankPosition: $rankPosition, ')
           ..write('calculatedScore: $calculatedScore, ')
           ..write('bracket: $bracket, ')
+          ..write('favoriteCharacter: $favoriteCharacter, ')
           ..write('syncStatus: $syncStatus, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
@@ -1172,41 +1241,39 @@ class LocalRankingsCompanion extends UpdateCompanion<LocalRanking> {
   }
 }
 
-class $OfflineDuelQueueTable extends OfflineDuelQueue
-    with TableInfo<$OfflineDuelQueueTable, OfflineDuelQueueData> {
+class $PendingMutationsTable extends PendingMutations
+    with TableInfo<$PendingMutationsTable, PendingMutation> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $OfflineDuelQueueTable(this.attachedDatabase, [this._alias]);
+  $PendingMutationsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _seqMeta = const VerificationMeta('seq');
+  @override
+  late final GeneratedColumn<int> seq = GeneratedColumn<int>(
+      'seq', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
       'id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'));
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+      'kind', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _winnerTitleIdMeta =
-      const VerificationMeta('winnerTitleId');
+  static const VerificationMeta _payloadMeta =
+      const VerificationMeta('payload');
   @override
-  late final GeneratedColumn<int> winnerTitleId = GeneratedColumn<int>(
-      'winner_title_id', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _loserTitleIdMeta =
-      const VerificationMeta('loserTitleId');
-  @override
-  late final GeneratedColumn<int> loserTitleId = GeneratedColumn<int>(
-      'loser_title_id', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _mediaTypeMeta =
-      const VerificationMeta('mediaType');
-  @override
-  late final GeneratedColumn<String> mediaType = GeneratedColumn<String>(
-      'media_type', aliasedName, false,
+  late final GeneratedColumn<String> payload = GeneratedColumn<String>(
+      'payload', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _roundNumberMeta =
-      const VerificationMeta('roundNumber');
-  @override
-  late final GeneratedColumn<int> roundNumber = GeneratedColumn<int>(
-      'round_number', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -1215,363 +1282,333 @@ class $OfflineDuelQueueTable extends OfflineDuelQueue
       type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
-  static const VerificationMeta _syncStatusMeta =
-      const VerificationMeta('syncStatus');
+  static const VerificationMeta _attemptsMeta =
+      const VerificationMeta('attempts');
   @override
-  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
-      'sync_status', aliasedName, false,
-      type: DriftSqlType.string,
+  late final GeneratedColumn<int> attempts = GeneratedColumn<int>(
+      'attempts', aliasedName, false,
+      type: DriftSqlType.int,
       requiredDuringInsert: false,
-      defaultValue: const Constant('PENDING'));
+      defaultValue: const Constant(0));
+  static const VerificationMeta _lastErrorMeta =
+      const VerificationMeta('lastError');
   @override
-  List<GeneratedColumn> get $columns => [
-        id,
-        winnerTitleId,
-        loserTitleId,
-        mediaType,
-        roundNumber,
-        createdAt,
-        syncStatus
-      ];
+  late final GeneratedColumn<String> lastError = GeneratedColumn<String>(
+      'last_error', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [seq, id, kind, payload, createdAt, attempts, lastError];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'offline_duel_queue';
+  static const String $name = 'pending_mutations';
   @override
-  VerificationContext validateIntegrity(
-      Insertable<OfflineDuelQueueData> instance,
+  VerificationContext validateIntegrity(Insertable<PendingMutation> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
+    if (data.containsKey('seq')) {
+      context.handle(
+          _seqMeta, seq.isAcceptableOrUnknown(data['seq']!, _seqMeta));
+    }
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     } else if (isInserting) {
       context.missing(_idMeta);
     }
-    if (data.containsKey('winner_title_id')) {
+    if (data.containsKey('kind')) {
       context.handle(
-          _winnerTitleIdMeta,
-          winnerTitleId.isAcceptableOrUnknown(
-              data['winner_title_id']!, _winnerTitleIdMeta));
+          _kindMeta, kind.isAcceptableOrUnknown(data['kind']!, _kindMeta));
     } else if (isInserting) {
-      context.missing(_winnerTitleIdMeta);
+      context.missing(_kindMeta);
     }
-    if (data.containsKey('loser_title_id')) {
-      context.handle(
-          _loserTitleIdMeta,
-          loserTitleId.isAcceptableOrUnknown(
-              data['loser_title_id']!, _loserTitleIdMeta));
+    if (data.containsKey('payload')) {
+      context.handle(_payloadMeta,
+          payload.isAcceptableOrUnknown(data['payload']!, _payloadMeta));
     } else if (isInserting) {
-      context.missing(_loserTitleIdMeta);
-    }
-    if (data.containsKey('media_type')) {
-      context.handle(_mediaTypeMeta,
-          mediaType.isAcceptableOrUnknown(data['media_type']!, _mediaTypeMeta));
-    } else if (isInserting) {
-      context.missing(_mediaTypeMeta);
-    }
-    if (data.containsKey('round_number')) {
-      context.handle(
-          _roundNumberMeta,
-          roundNumber.isAcceptableOrUnknown(
-              data['round_number']!, _roundNumberMeta));
-    } else if (isInserting) {
-      context.missing(_roundNumberMeta);
+      context.missing(_payloadMeta);
     }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
     }
-    if (data.containsKey('sync_status')) {
-      context.handle(
-          _syncStatusMeta,
-          syncStatus.isAcceptableOrUnknown(
-              data['sync_status']!, _syncStatusMeta));
+    if (data.containsKey('attempts')) {
+      context.handle(_attemptsMeta,
+          attempts.isAcceptableOrUnknown(data['attempts']!, _attemptsMeta));
+    }
+    if (data.containsKey('last_error')) {
+      context.handle(_lastErrorMeta,
+          lastError.isAcceptableOrUnknown(data['last_error']!, _lastErrorMeta));
     }
     return context;
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {id};
+  Set<GeneratedColumn> get $primaryKey => {seq};
   @override
-  OfflineDuelQueueData map(Map<String, dynamic> data, {String? tablePrefix}) {
+  PendingMutation map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return OfflineDuelQueueData(
+    return PendingMutation(
+      seq: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}seq'])!,
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
-      winnerTitleId: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}winner_title_id'])!,
-      loserTitleId: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}loser_title_id'])!,
-      mediaType: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}media_type'])!,
-      roundNumber: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}round_number'])!,
+      kind: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}kind'])!,
+      payload: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}payload'])!,
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
-      syncStatus: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}sync_status'])!,
+      attempts: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}attempts'])!,
+      lastError: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}last_error']),
     );
   }
 
   @override
-  $OfflineDuelQueueTable createAlias(String alias) {
-    return $OfflineDuelQueueTable(attachedDatabase, alias);
+  $PendingMutationsTable createAlias(String alias) {
+    return $PendingMutationsTable(attachedDatabase, alias);
   }
 }
 
-class OfflineDuelQueueData extends DataClass
-    implements Insertable<OfflineDuelQueueData> {
+class PendingMutation extends DataClass implements Insertable<PendingMutation> {
+  final int seq;
   final String id;
-  final int winnerTitleId;
-  final int loserTitleId;
-  final String mediaType;
-  final int roundNumber;
+  final String kind;
+  final String payload;
   final DateTime createdAt;
-  final String syncStatus;
-  const OfflineDuelQueueData(
-      {required this.id,
-      required this.winnerTitleId,
-      required this.loserTitleId,
-      required this.mediaType,
-      required this.roundNumber,
+  final int attempts;
+  final String? lastError;
+  const PendingMutation(
+      {required this.seq,
+      required this.id,
+      required this.kind,
+      required this.payload,
       required this.createdAt,
-      required this.syncStatus});
+      required this.attempts,
+      this.lastError});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
+    map['seq'] = Variable<int>(seq);
     map['id'] = Variable<String>(id);
-    map['winner_title_id'] = Variable<int>(winnerTitleId);
-    map['loser_title_id'] = Variable<int>(loserTitleId);
-    map['media_type'] = Variable<String>(mediaType);
-    map['round_number'] = Variable<int>(roundNumber);
+    map['kind'] = Variable<String>(kind);
+    map['payload'] = Variable<String>(payload);
     map['created_at'] = Variable<DateTime>(createdAt);
-    map['sync_status'] = Variable<String>(syncStatus);
+    map['attempts'] = Variable<int>(attempts);
+    if (!nullToAbsent || lastError != null) {
+      map['last_error'] = Variable<String>(lastError);
+    }
     return map;
   }
 
-  OfflineDuelQueueCompanion toCompanion(bool nullToAbsent) {
-    return OfflineDuelQueueCompanion(
+  PendingMutationsCompanion toCompanion(bool nullToAbsent) {
+    return PendingMutationsCompanion(
+      seq: Value(seq),
       id: Value(id),
-      winnerTitleId: Value(winnerTitleId),
-      loserTitleId: Value(loserTitleId),
-      mediaType: Value(mediaType),
-      roundNumber: Value(roundNumber),
+      kind: Value(kind),
+      payload: Value(payload),
       createdAt: Value(createdAt),
-      syncStatus: Value(syncStatus),
+      attempts: Value(attempts),
+      lastError: lastError == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastError),
     );
   }
 
-  factory OfflineDuelQueueData.fromJson(Map<String, dynamic> json,
+  factory PendingMutation.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return OfflineDuelQueueData(
+    return PendingMutation(
+      seq: serializer.fromJson<int>(json['seq']),
       id: serializer.fromJson<String>(json['id']),
-      winnerTitleId: serializer.fromJson<int>(json['winnerTitleId']),
-      loserTitleId: serializer.fromJson<int>(json['loserTitleId']),
-      mediaType: serializer.fromJson<String>(json['mediaType']),
-      roundNumber: serializer.fromJson<int>(json['roundNumber']),
+      kind: serializer.fromJson<String>(json['kind']),
+      payload: serializer.fromJson<String>(json['payload']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
-      syncStatus: serializer.fromJson<String>(json['syncStatus']),
+      attempts: serializer.fromJson<int>(json['attempts']),
+      lastError: serializer.fromJson<String?>(json['lastError']),
     );
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
+      'seq': serializer.toJson<int>(seq),
       'id': serializer.toJson<String>(id),
-      'winnerTitleId': serializer.toJson<int>(winnerTitleId),
-      'loserTitleId': serializer.toJson<int>(loserTitleId),
-      'mediaType': serializer.toJson<String>(mediaType),
-      'roundNumber': serializer.toJson<int>(roundNumber),
+      'kind': serializer.toJson<String>(kind),
+      'payload': serializer.toJson<String>(payload),
       'createdAt': serializer.toJson<DateTime>(createdAt),
-      'syncStatus': serializer.toJson<String>(syncStatus),
+      'attempts': serializer.toJson<int>(attempts),
+      'lastError': serializer.toJson<String?>(lastError),
     };
   }
 
-  OfflineDuelQueueData copyWith(
-          {String? id,
-          int? winnerTitleId,
-          int? loserTitleId,
-          String? mediaType,
-          int? roundNumber,
+  PendingMutation copyWith(
+          {int? seq,
+          String? id,
+          String? kind,
+          String? payload,
           DateTime? createdAt,
-          String? syncStatus}) =>
-      OfflineDuelQueueData(
+          int? attempts,
+          Value<String?> lastError = const Value.absent()}) =>
+      PendingMutation(
+        seq: seq ?? this.seq,
         id: id ?? this.id,
-        winnerTitleId: winnerTitleId ?? this.winnerTitleId,
-        loserTitleId: loserTitleId ?? this.loserTitleId,
-        mediaType: mediaType ?? this.mediaType,
-        roundNumber: roundNumber ?? this.roundNumber,
+        kind: kind ?? this.kind,
+        payload: payload ?? this.payload,
         createdAt: createdAt ?? this.createdAt,
-        syncStatus: syncStatus ?? this.syncStatus,
+        attempts: attempts ?? this.attempts,
+        lastError: lastError.present ? lastError.value : this.lastError,
       );
-  OfflineDuelQueueData copyWithCompanion(OfflineDuelQueueCompanion data) {
-    return OfflineDuelQueueData(
+  PendingMutation copyWithCompanion(PendingMutationsCompanion data) {
+    return PendingMutation(
+      seq: data.seq.present ? data.seq.value : this.seq,
       id: data.id.present ? data.id.value : this.id,
-      winnerTitleId: data.winnerTitleId.present
-          ? data.winnerTitleId.value
-          : this.winnerTitleId,
-      loserTitleId: data.loserTitleId.present
-          ? data.loserTitleId.value
-          : this.loserTitleId,
-      mediaType: data.mediaType.present ? data.mediaType.value : this.mediaType,
-      roundNumber:
-          data.roundNumber.present ? data.roundNumber.value : this.roundNumber,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      payload: data.payload.present ? data.payload.value : this.payload,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
-      syncStatus:
-          data.syncStatus.present ? data.syncStatus.value : this.syncStatus,
+      attempts: data.attempts.present ? data.attempts.value : this.attempts,
+      lastError: data.lastError.present ? data.lastError.value : this.lastError,
     );
   }
 
   @override
   String toString() {
-    return (StringBuffer('OfflineDuelQueueData(')
+    return (StringBuffer('PendingMutation(')
+          ..write('seq: $seq, ')
           ..write('id: $id, ')
-          ..write('winnerTitleId: $winnerTitleId, ')
-          ..write('loserTitleId: $loserTitleId, ')
-          ..write('mediaType: $mediaType, ')
-          ..write('roundNumber: $roundNumber, ')
+          ..write('kind: $kind, ')
+          ..write('payload: $payload, ')
           ..write('createdAt: $createdAt, ')
-          ..write('syncStatus: $syncStatus')
+          ..write('attempts: $attempts, ')
+          ..write('lastError: $lastError')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, winnerTitleId, loserTitleId, mediaType,
-      roundNumber, createdAt, syncStatus);
+  int get hashCode =>
+      Object.hash(seq, id, kind, payload, createdAt, attempts, lastError);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is OfflineDuelQueueData &&
+      (other is PendingMutation &&
+          other.seq == this.seq &&
           other.id == this.id &&
-          other.winnerTitleId == this.winnerTitleId &&
-          other.loserTitleId == this.loserTitleId &&
-          other.mediaType == this.mediaType &&
-          other.roundNumber == this.roundNumber &&
+          other.kind == this.kind &&
+          other.payload == this.payload &&
           other.createdAt == this.createdAt &&
-          other.syncStatus == this.syncStatus);
+          other.attempts == this.attempts &&
+          other.lastError == this.lastError);
 }
 
-class OfflineDuelQueueCompanion extends UpdateCompanion<OfflineDuelQueueData> {
+class PendingMutationsCompanion extends UpdateCompanion<PendingMutation> {
+  final Value<int> seq;
   final Value<String> id;
-  final Value<int> winnerTitleId;
-  final Value<int> loserTitleId;
-  final Value<String> mediaType;
-  final Value<int> roundNumber;
+  final Value<String> kind;
+  final Value<String> payload;
   final Value<DateTime> createdAt;
-  final Value<String> syncStatus;
-  final Value<int> rowid;
-  const OfflineDuelQueueCompanion({
+  final Value<int> attempts;
+  final Value<String?> lastError;
+  const PendingMutationsCompanion({
+    this.seq = const Value.absent(),
     this.id = const Value.absent(),
-    this.winnerTitleId = const Value.absent(),
-    this.loserTitleId = const Value.absent(),
-    this.mediaType = const Value.absent(),
-    this.roundNumber = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.payload = const Value.absent(),
     this.createdAt = const Value.absent(),
-    this.syncStatus = const Value.absent(),
-    this.rowid = const Value.absent(),
+    this.attempts = const Value.absent(),
+    this.lastError = const Value.absent(),
   });
-  OfflineDuelQueueCompanion.insert({
+  PendingMutationsCompanion.insert({
+    this.seq = const Value.absent(),
     required String id,
-    required int winnerTitleId,
-    required int loserTitleId,
-    required String mediaType,
-    required int roundNumber,
+    required String kind,
+    required String payload,
     this.createdAt = const Value.absent(),
-    this.syncStatus = const Value.absent(),
-    this.rowid = const Value.absent(),
+    this.attempts = const Value.absent(),
+    this.lastError = const Value.absent(),
   })  : id = Value(id),
-        winnerTitleId = Value(winnerTitleId),
-        loserTitleId = Value(loserTitleId),
-        mediaType = Value(mediaType),
-        roundNumber = Value(roundNumber);
-  static Insertable<OfflineDuelQueueData> custom({
+        kind = Value(kind),
+        payload = Value(payload);
+  static Insertable<PendingMutation> custom({
+    Expression<int>? seq,
     Expression<String>? id,
-    Expression<int>? winnerTitleId,
-    Expression<int>? loserTitleId,
-    Expression<String>? mediaType,
-    Expression<int>? roundNumber,
+    Expression<String>? kind,
+    Expression<String>? payload,
     Expression<DateTime>? createdAt,
-    Expression<String>? syncStatus,
-    Expression<int>? rowid,
+    Expression<int>? attempts,
+    Expression<String>? lastError,
   }) {
     return RawValuesInsertable({
+      if (seq != null) 'seq': seq,
       if (id != null) 'id': id,
-      if (winnerTitleId != null) 'winner_title_id': winnerTitleId,
-      if (loserTitleId != null) 'loser_title_id': loserTitleId,
-      if (mediaType != null) 'media_type': mediaType,
-      if (roundNumber != null) 'round_number': roundNumber,
+      if (kind != null) 'kind': kind,
+      if (payload != null) 'payload': payload,
       if (createdAt != null) 'created_at': createdAt,
-      if (syncStatus != null) 'sync_status': syncStatus,
-      if (rowid != null) 'rowid': rowid,
+      if (attempts != null) 'attempts': attempts,
+      if (lastError != null) 'last_error': lastError,
     });
   }
 
-  OfflineDuelQueueCompanion copyWith(
-      {Value<String>? id,
-      Value<int>? winnerTitleId,
-      Value<int>? loserTitleId,
-      Value<String>? mediaType,
-      Value<int>? roundNumber,
+  PendingMutationsCompanion copyWith(
+      {Value<int>? seq,
+      Value<String>? id,
+      Value<String>? kind,
+      Value<String>? payload,
       Value<DateTime>? createdAt,
-      Value<String>? syncStatus,
-      Value<int>? rowid}) {
-    return OfflineDuelQueueCompanion(
+      Value<int>? attempts,
+      Value<String?>? lastError}) {
+    return PendingMutationsCompanion(
+      seq: seq ?? this.seq,
       id: id ?? this.id,
-      winnerTitleId: winnerTitleId ?? this.winnerTitleId,
-      loserTitleId: loserTitleId ?? this.loserTitleId,
-      mediaType: mediaType ?? this.mediaType,
-      roundNumber: roundNumber ?? this.roundNumber,
+      kind: kind ?? this.kind,
+      payload: payload ?? this.payload,
       createdAt: createdAt ?? this.createdAt,
-      syncStatus: syncStatus ?? this.syncStatus,
-      rowid: rowid ?? this.rowid,
+      attempts: attempts ?? this.attempts,
+      lastError: lastError ?? this.lastError,
     );
   }
 
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
+    if (seq.present) {
+      map['seq'] = Variable<int>(seq.value);
+    }
     if (id.present) {
       map['id'] = Variable<String>(id.value);
     }
-    if (winnerTitleId.present) {
-      map['winner_title_id'] = Variable<int>(winnerTitleId.value);
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
     }
-    if (loserTitleId.present) {
-      map['loser_title_id'] = Variable<int>(loserTitleId.value);
-    }
-    if (mediaType.present) {
-      map['media_type'] = Variable<String>(mediaType.value);
-    }
-    if (roundNumber.present) {
-      map['round_number'] = Variable<int>(roundNumber.value);
+    if (payload.present) {
+      map['payload'] = Variable<String>(payload.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
-    if (syncStatus.present) {
-      map['sync_status'] = Variable<String>(syncStatus.value);
+    if (attempts.present) {
+      map['attempts'] = Variable<int>(attempts.value);
     }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
+    if (lastError.present) {
+      map['last_error'] = Variable<String>(lastError.value);
     }
     return map;
   }
 
   @override
   String toString() {
-    return (StringBuffer('OfflineDuelQueueCompanion(')
+    return (StringBuffer('PendingMutationsCompanion(')
+          ..write('seq: $seq, ')
           ..write('id: $id, ')
-          ..write('winnerTitleId: $winnerTitleId, ')
-          ..write('loserTitleId: $loserTitleId, ')
-          ..write('mediaType: $mediaType, ')
-          ..write('roundNumber: $roundNumber, ')
+          ..write('kind: $kind, ')
+          ..write('payload: $payload, ')
           ..write('createdAt: $createdAt, ')
-          ..write('syncStatus: $syncStatus, ')
-          ..write('rowid: $rowid')
+          ..write('attempts: $attempts, ')
+          ..write('lastError: $lastError')
           ..write(')'))
         .toString();
   }
@@ -1936,18 +1973,20 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $CachedTitlesTable cachedTitles = $CachedTitlesTable(this);
   late final $LocalRankingsTable localRankings = $LocalRankingsTable(this);
-  late final $OfflineDuelQueueTable offlineDuelQueue =
-      $OfflineDuelQueueTable(this);
+  late final $PendingMutationsTable pendingMutations =
+      $PendingMutationsTable(this);
   late final $WatchlistCacheTable watchlistCache = $WatchlistCacheTable(this);
   late final LocalRankingDao localRankingDao =
       LocalRankingDao(this as AppDatabase);
   late final LocalTitleDao localTitleDao = LocalTitleDao(this as AppDatabase);
+  late final PendingMutationDao pendingMutationDao =
+      PendingMutationDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [cachedTitles, localRankings, offlineDuelQueue, watchlistCache];
+      [cachedTitles, localRankings, pendingMutations, watchlistCache];
 }
 
 typedef $$CachedTitlesTableCreateCompanionBuilder = CachedTitlesCompanion
@@ -2261,6 +2300,7 @@ typedef $$LocalRankingsTableCreateCompanionBuilder = LocalRankingsCompanion
   required int rankPosition,
   required double calculatedScore,
   Value<String?> bracket,
+  Value<String?> favoriteCharacter,
   Value<String> syncStatus,
   Value<DateTime> updatedAt,
   Value<int> rowid,
@@ -2274,6 +2314,7 @@ typedef $$LocalRankingsTableUpdateCompanionBuilder = LocalRankingsCompanion
   Value<int> rankPosition,
   Value<double> calculatedScore,
   Value<String?> bracket,
+  Value<String?> favoriteCharacter,
   Value<String> syncStatus,
   Value<DateTime> updatedAt,
   Value<int> rowid,
@@ -2309,6 +2350,10 @@ class $$LocalRankingsTableFilterComposer
 
   ColumnFilters<String> get bracket => $composableBuilder(
       column: $table.bracket, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get favoriteCharacter => $composableBuilder(
+      column: $table.favoriteCharacter,
+      builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get syncStatus => $composableBuilder(
       column: $table.syncStatus, builder: (column) => ColumnFilters(column));
@@ -2349,6 +2394,10 @@ class $$LocalRankingsTableOrderingComposer
   ColumnOrderings<String> get bracket => $composableBuilder(
       column: $table.bracket, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get favoriteCharacter => $composableBuilder(
+      column: $table.favoriteCharacter,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get syncStatus => $composableBuilder(
       column: $table.syncStatus, builder: (column) => ColumnOrderings(column));
 
@@ -2385,6 +2434,9 @@ class $$LocalRankingsTableAnnotationComposer
 
   GeneratedColumn<String> get bracket =>
       $composableBuilder(column: $table.bracket, builder: (column) => column);
+
+  GeneratedColumn<String> get favoriteCharacter => $composableBuilder(
+      column: $table.favoriteCharacter, builder: (column) => column);
 
   GeneratedColumn<String> get syncStatus => $composableBuilder(
       column: $table.syncStatus, builder: (column) => column);
@@ -2426,6 +2478,7 @@ class $$LocalRankingsTableTableManager extends RootTableManager<
             Value<int> rankPosition = const Value.absent(),
             Value<double> calculatedScore = const Value.absent(),
             Value<String?> bracket = const Value.absent(),
+            Value<String?> favoriteCharacter = const Value.absent(),
             Value<String> syncStatus = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -2438,6 +2491,7 @@ class $$LocalRankingsTableTableManager extends RootTableManager<
             rankPosition: rankPosition,
             calculatedScore: calculatedScore,
             bracket: bracket,
+            favoriteCharacter: favoriteCharacter,
             syncStatus: syncStatus,
             updatedAt: updatedAt,
             rowid: rowid,
@@ -2450,6 +2504,7 @@ class $$LocalRankingsTableTableManager extends RootTableManager<
             required int rankPosition,
             required double calculatedScore,
             Value<String?> bracket = const Value.absent(),
+            Value<String?> favoriteCharacter = const Value.absent(),
             Value<String> syncStatus = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -2462,6 +2517,7 @@ class $$LocalRankingsTableTableManager extends RootTableManager<
             rankPosition: rankPosition,
             calculatedScore: calculatedScore,
             bracket: bracket,
+            favoriteCharacter: favoriteCharacter,
             syncStatus: syncStatus,
             updatedAt: updatedAt,
             rowid: rowid,
@@ -2492,218 +2548,207 @@ typedef $$LocalRankingsTableProcessedTableManager = ProcessedTableManager<
     ),
     LocalRanking,
     PrefetchHooks Function()>;
-typedef $$OfflineDuelQueueTableCreateCompanionBuilder
-    = OfflineDuelQueueCompanion Function({
+typedef $$PendingMutationsTableCreateCompanionBuilder
+    = PendingMutationsCompanion Function({
+  Value<int> seq,
   required String id,
-  required int winnerTitleId,
-  required int loserTitleId,
-  required String mediaType,
-  required int roundNumber,
+  required String kind,
+  required String payload,
   Value<DateTime> createdAt,
-  Value<String> syncStatus,
-  Value<int> rowid,
+  Value<int> attempts,
+  Value<String?> lastError,
 });
-typedef $$OfflineDuelQueueTableUpdateCompanionBuilder
-    = OfflineDuelQueueCompanion Function({
+typedef $$PendingMutationsTableUpdateCompanionBuilder
+    = PendingMutationsCompanion Function({
+  Value<int> seq,
   Value<String> id,
-  Value<int> winnerTitleId,
-  Value<int> loserTitleId,
-  Value<String> mediaType,
-  Value<int> roundNumber,
+  Value<String> kind,
+  Value<String> payload,
   Value<DateTime> createdAt,
-  Value<String> syncStatus,
-  Value<int> rowid,
+  Value<int> attempts,
+  Value<String?> lastError,
 });
 
-class $$OfflineDuelQueueTableFilterComposer
-    extends Composer<_$AppDatabase, $OfflineDuelQueueTable> {
-  $$OfflineDuelQueueTableFilterComposer({
+class $$PendingMutationsTableFilterComposer
+    extends Composer<_$AppDatabase, $PendingMutationsTable> {
+  $$PendingMutationsTableFilterComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
+  ColumnFilters<int> get seq => $composableBuilder(
+      column: $table.seq, builder: (column) => ColumnFilters(column));
+
   ColumnFilters<String> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<int> get winnerTitleId => $composableBuilder(
-      column: $table.winnerTitleId, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get kind => $composableBuilder(
+      column: $table.kind, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<int> get loserTitleId => $composableBuilder(
-      column: $table.loserTitleId, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get mediaType => $composableBuilder(
-      column: $table.mediaType, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<int> get roundNumber => $composableBuilder(
-      column: $table.roundNumber, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get payload => $composableBuilder(
+      column: $table.payload, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get syncStatus => $composableBuilder(
-      column: $table.syncStatus, builder: (column) => ColumnFilters(column));
+  ColumnFilters<int> get attempts => $composableBuilder(
+      column: $table.attempts, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get lastError => $composableBuilder(
+      column: $table.lastError, builder: (column) => ColumnFilters(column));
 }
 
-class $$OfflineDuelQueueTableOrderingComposer
-    extends Composer<_$AppDatabase, $OfflineDuelQueueTable> {
-  $$OfflineDuelQueueTableOrderingComposer({
+class $$PendingMutationsTableOrderingComposer
+    extends Composer<_$AppDatabase, $PendingMutationsTable> {
+  $$PendingMutationsTableOrderingComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
+  ColumnOrderings<int> get seq => $composableBuilder(
+      column: $table.seq, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<int> get winnerTitleId => $composableBuilder(
-      column: $table.winnerTitleId,
-      builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get kind => $composableBuilder(
+      column: $table.kind, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<int> get loserTitleId => $composableBuilder(
-      column: $table.loserTitleId,
-      builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get mediaType => $composableBuilder(
-      column: $table.mediaType, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<int> get roundNumber => $composableBuilder(
-      column: $table.roundNumber, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get payload => $composableBuilder(
+      column: $table.payload, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get syncStatus => $composableBuilder(
-      column: $table.syncStatus, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<int> get attempts => $composableBuilder(
+      column: $table.attempts, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get lastError => $composableBuilder(
+      column: $table.lastError, builder: (column) => ColumnOrderings(column));
 }
 
-class $$OfflineDuelQueueTableAnnotationComposer
-    extends Composer<_$AppDatabase, $OfflineDuelQueueTable> {
-  $$OfflineDuelQueueTableAnnotationComposer({
+class $$PendingMutationsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PendingMutationsTable> {
+  $$PendingMutationsTableAnnotationComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
+  GeneratedColumn<int> get seq =>
+      $composableBuilder(column: $table.seq, builder: (column) => column);
+
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<int> get winnerTitleId => $composableBuilder(
-      column: $table.winnerTitleId, builder: (column) => column);
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
 
-  GeneratedColumn<int> get loserTitleId => $composableBuilder(
-      column: $table.loserTitleId, builder: (column) => column);
-
-  GeneratedColumn<String> get mediaType =>
-      $composableBuilder(column: $table.mediaType, builder: (column) => column);
-
-  GeneratedColumn<int> get roundNumber => $composableBuilder(
-      column: $table.roundNumber, builder: (column) => column);
+  GeneratedColumn<String> get payload =>
+      $composableBuilder(column: $table.payload, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
-  GeneratedColumn<String> get syncStatus => $composableBuilder(
-      column: $table.syncStatus, builder: (column) => column);
+  GeneratedColumn<int> get attempts =>
+      $composableBuilder(column: $table.attempts, builder: (column) => column);
+
+  GeneratedColumn<String> get lastError =>
+      $composableBuilder(column: $table.lastError, builder: (column) => column);
 }
 
-class $$OfflineDuelQueueTableTableManager extends RootTableManager<
+class $$PendingMutationsTableTableManager extends RootTableManager<
     _$AppDatabase,
-    $OfflineDuelQueueTable,
-    OfflineDuelQueueData,
-    $$OfflineDuelQueueTableFilterComposer,
-    $$OfflineDuelQueueTableOrderingComposer,
-    $$OfflineDuelQueueTableAnnotationComposer,
-    $$OfflineDuelQueueTableCreateCompanionBuilder,
-    $$OfflineDuelQueueTableUpdateCompanionBuilder,
+    $PendingMutationsTable,
+    PendingMutation,
+    $$PendingMutationsTableFilterComposer,
+    $$PendingMutationsTableOrderingComposer,
+    $$PendingMutationsTableAnnotationComposer,
+    $$PendingMutationsTableCreateCompanionBuilder,
+    $$PendingMutationsTableUpdateCompanionBuilder,
     (
-      OfflineDuelQueueData,
-      BaseReferences<_$AppDatabase, $OfflineDuelQueueTable,
-          OfflineDuelQueueData>
+      PendingMutation,
+      BaseReferences<_$AppDatabase, $PendingMutationsTable, PendingMutation>
     ),
-    OfflineDuelQueueData,
+    PendingMutation,
     PrefetchHooks Function()> {
-  $$OfflineDuelQueueTableTableManager(
-      _$AppDatabase db, $OfflineDuelQueueTable table)
+  $$PendingMutationsTableTableManager(
+      _$AppDatabase db, $PendingMutationsTable table)
       : super(TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
-              $$OfflineDuelQueueTableFilterComposer($db: db, $table: table),
+              $$PendingMutationsTableFilterComposer($db: db, $table: table),
           createOrderingComposer: () =>
-              $$OfflineDuelQueueTableOrderingComposer($db: db, $table: table),
+              $$PendingMutationsTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
-              $$OfflineDuelQueueTableAnnotationComposer($db: db, $table: table),
+              $$PendingMutationsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
+            Value<int> seq = const Value.absent(),
             Value<String> id = const Value.absent(),
-            Value<int> winnerTitleId = const Value.absent(),
-            Value<int> loserTitleId = const Value.absent(),
-            Value<String> mediaType = const Value.absent(),
-            Value<int> roundNumber = const Value.absent(),
+            Value<String> kind = const Value.absent(),
+            Value<String> payload = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
-            Value<String> syncStatus = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
+            Value<int> attempts = const Value.absent(),
+            Value<String?> lastError = const Value.absent(),
           }) =>
-              OfflineDuelQueueCompanion(
+              PendingMutationsCompanion(
+            seq: seq,
             id: id,
-            winnerTitleId: winnerTitleId,
-            loserTitleId: loserTitleId,
-            mediaType: mediaType,
-            roundNumber: roundNumber,
+            kind: kind,
+            payload: payload,
             createdAt: createdAt,
-            syncStatus: syncStatus,
-            rowid: rowid,
+            attempts: attempts,
+            lastError: lastError,
           ),
           createCompanionCallback: ({
+            Value<int> seq = const Value.absent(),
             required String id,
-            required int winnerTitleId,
-            required int loserTitleId,
-            required String mediaType,
-            required int roundNumber,
+            required String kind,
+            required String payload,
             Value<DateTime> createdAt = const Value.absent(),
-            Value<String> syncStatus = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
+            Value<int> attempts = const Value.absent(),
+            Value<String?> lastError = const Value.absent(),
           }) =>
-              OfflineDuelQueueCompanion.insert(
+              PendingMutationsCompanion.insert(
+            seq: seq,
             id: id,
-            winnerTitleId: winnerTitleId,
-            loserTitleId: loserTitleId,
-            mediaType: mediaType,
-            roundNumber: roundNumber,
+            kind: kind,
+            payload: payload,
             createdAt: createdAt,
-            syncStatus: syncStatus,
-            rowid: rowid,
+            attempts: attempts,
+            lastError: lastError,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (
-                    e.readTable<$OfflineDuelQueueTable, OfflineDuelQueueData>(
-                        table),
-                    BaseReferences<_$AppDatabase, $OfflineDuelQueueTable,
-                        OfflineDuelQueueData>(db, table, e)
+                    e.readTable<$PendingMutationsTable, PendingMutation>(table),
+                    BaseReferences<_$AppDatabase, $PendingMutationsTable,
+                        PendingMutation>(db, table, e)
                   ))
               .toList(),
           prefetchHooksCallback: null,
         ));
 }
 
-typedef $$OfflineDuelQueueTableProcessedTableManager = ProcessedTableManager<
+typedef $$PendingMutationsTableProcessedTableManager = ProcessedTableManager<
     _$AppDatabase,
-    $OfflineDuelQueueTable,
-    OfflineDuelQueueData,
-    $$OfflineDuelQueueTableFilterComposer,
-    $$OfflineDuelQueueTableOrderingComposer,
-    $$OfflineDuelQueueTableAnnotationComposer,
-    $$OfflineDuelQueueTableCreateCompanionBuilder,
-    $$OfflineDuelQueueTableUpdateCompanionBuilder,
+    $PendingMutationsTable,
+    PendingMutation,
+    $$PendingMutationsTableFilterComposer,
+    $$PendingMutationsTableOrderingComposer,
+    $$PendingMutationsTableAnnotationComposer,
+    $$PendingMutationsTableCreateCompanionBuilder,
+    $$PendingMutationsTableUpdateCompanionBuilder,
     (
-      OfflineDuelQueueData,
-      BaseReferences<_$AppDatabase, $OfflineDuelQueueTable,
-          OfflineDuelQueueData>
+      PendingMutation,
+      BaseReferences<_$AppDatabase, $PendingMutationsTable, PendingMutation>
     ),
-    OfflineDuelQueueData,
+    PendingMutation,
     PrefetchHooks Function()>;
 typedef $$WatchlistCacheTableCreateCompanionBuilder = WatchlistCacheCompanion
     Function({
@@ -2907,8 +2952,8 @@ class $AppDatabaseManager {
       $$CachedTitlesTableTableManager(_db, _db.cachedTitles);
   $$LocalRankingsTableTableManager get localRankings =>
       $$LocalRankingsTableTableManager(_db, _db.localRankings);
-  $$OfflineDuelQueueTableTableManager get offlineDuelQueue =>
-      $$OfflineDuelQueueTableTableManager(_db, _db.offlineDuelQueue);
+  $$PendingMutationsTableTableManager get pendingMutations =>
+      $$PendingMutationsTableTableManager(_db, _db.pendingMutations);
   $$WatchlistCacheTableTableManager get watchlistCache =>
       $$WatchlistCacheTableTableManager(_db, _db.watchlistCache);
 }

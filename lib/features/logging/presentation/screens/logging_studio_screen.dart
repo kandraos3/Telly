@@ -17,7 +17,10 @@ import '../controllers/logging_session_controller.dart';
 /// Search (150 ms debounce) → selected title → watch status → sentiment bracket →
 /// `BEGIN PAIRWISE DUELS` pushes `SCR-10` with the draft held by [loggingSessionProvider].
 class LoggingStudioScreen extends ConsumerStatefulWidget {
-  const LoggingStudioScreen({super.key});
+  /// Pre-selects a title, e.g. "Reset Duels for This Show" (features/02 §7.2).
+  final TitleSearchResult? initialTitle;
+
+  const LoggingStudioScreen({super.key, this.initialTitle});
 
   @override
   ConsumerState<LoggingStudioScreen> createState() => _LoggingStudioScreenState();
@@ -25,6 +28,17 @@ class LoggingStudioScreen extends ConsumerStatefulWidget {
 
 class _LoggingStudioScreenState extends ConsumerState<LoggingStudioScreen> {
   final _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    final initial = widget.initialTitle;
+    if (initial != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) ref.read(loggingSessionProvider.notifier).selectTitle(initial);
+      });
+    }
+  }
 
   @override
   void dispose() {
