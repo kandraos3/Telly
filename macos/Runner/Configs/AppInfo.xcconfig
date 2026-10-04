@@ -8,7 +8,7 @@
 PRODUCT_NAME = telly_app
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.telly.app.tellyApp
+PRODUCT_BUNDLE_IDENTIFIER = app.telly.mobile
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2026 com.telly.app. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2026 app.telly.mobile. All rights reserved.

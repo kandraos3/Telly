@@ -1,24 +1,30 @@
-name: Telly CI Quality Gates
+name: Telly Unified CI Quality Gates (DEV-602)
 
 on:
   push:
     branches: [ main ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, develop ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  quality-gate:
-    name: Lint, Analyze & Test Pyramid (70/20/10)
+  static-analysis-and-unit-tests:
+    name: Flutter Lint, Test Pyramid & Coverage Gate
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout Codebase
         uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -31,24 +37,98 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
-      - name: Quality Gate 1 - Static Analysis & Strict Lints
+      - name: "Quality Gate 1: Static Analysis & Strict Lints"
         run: dart analyze --fatal-infos
 
-      - name: Quality Gate 2 - Execute Automated Test Pyramid with Coverage
+      - name: "Quality Gate 2: Automated Test Pyramid with Coverage"
         run: flutter test --coverage --test-randomize-ordering-seed=random
 
-      - name: Quality Gate 3 - Verify Test Coverage (>= 80% Threshold)
+      - name: "Quality Gate 3: Enforce Coverage Thresholds (80% Overall, 90% Ranking Domain)"
+        run: dart run tool/check_coverage.dart
+
+  database-pgtap-verification:
+    name: Supabase pgTAP, RLS & Concurrency Gate (QA-601)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout Codebase
+        uses: actions/checkout@v4
+
+      - name: Set up Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start Local Supabase (Migrations + Seed)
+        run: supabase start -x studio,imgproxy,vector,logflare,mailpit,realtime,storage-api,edge-runtime
+
+      - name: Reset Database from Migrations
+        run: supabase db reset
+
+      - name: Run pgTAP Test Suite
+        run: supabase test db
+
+      - name: Concurrency Race Test for Ranking RPCs
         run: |
-          if [ -f coverage/lcov.info ]; then
-            total_lines=$(grep -c '^DA:' coverage/lcov.info || true)
-            hit_lines=$(grep -c '^DA:.*,[1-9][0-9]*' coverage/lcov.info || true)
-            if [ "$total_lines" -gt 0 ]; then
-              coverage_percent=$((hit_lines * 100 / total_lines))
-              echo "Automated Line Coverage: $coverage_percent% ($hit_lines / $total_lines lines)"
-              if [ "$coverage_percent" -lt 70 ]; then
-                echo "❌ Code coverage ($coverage_percent%) is below required threshold."
-                exit 1
-              fi
-            fi
-          fi
-          echo "✅ All Quality Gates passed successfully."
+          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client
+          bash supabase/tests/concurrency/ranking_race.sh
+        env:
+          DB_URL: postgresql://postgres:postgres@127.0.0.1:64322/postgres
+
+  edge-functions:
+    name: Edge Function Unit Tests (Deno)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: supabase/functions
+
+    steps:
+      - name: Checkout Codebase
+        uses: actions/checkout@v4
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Lint, Type-Check and Test
+        run: |
+          deno lint
+          deno check */index.ts
+          deno test --allow-env tests/
+
+  android-emulator-integration:
+    name: Android Emulator Integration Test (CUJ Acceptance)
+    runs-on: macos-13 # Intel macos runner has hardware accelerated virtualization for Android emulator
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout Codebase
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.x'
+          channel: 'stable'
+          cache: true
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Run Integration Tests on Android Emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          script: flutter test test/integration/cuj_journeys_test.dart

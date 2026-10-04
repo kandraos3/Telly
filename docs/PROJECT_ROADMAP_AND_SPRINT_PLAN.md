@@ -24,7 +24,7 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 6 — Integration, Wiring & Audit Remediation** (planned 2026-10-03; owner decisions D1–D7 recorded in Sprint 6)
-- **Current Active Ticket**: `DEV-602` (Bundle IDs, Release Signing & Unified CI Gates) — Sprint 6: 24 / 32 tickets complete
+- **Current Active Ticket**: `QA-602` (Real integration_test E2E for CUJ-01 … CUJ-04) — Sprint 6: 25 / 32 tickets complete
 - **Overall Roadmap Progress**: Sprints 1–5 granular tasks after the `DOC-601` honesty reset (2026-10-03): **281 / 431 verified** · **121 un-checked** (each annotated `→ remediated by <Sprint 6 ticket>`) · **29 human-only**. The earlier "89 / 89" claim was overstated.
 - **Human-Only Tasks**: 29 tasks in Sprints 1–5 marked `👤 [TO BE DONE BY HUMAN]` (cloud setup, secrets, store submission, device/CI runs, dashboard verification), plus the Sprint 6 human prerequisites list. These cannot be completed or verified from code.
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (369 / 369 pass; pgTAP 155 assertions / 9 files — note: no real E2E or golden tests exist yet)
@@ -302,7 +302,7 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 - **Granular Tasks**:
   - [x] Add `build_runner`, `mockito`, `package:test`, `flutter_test` to dev dependencies.
   - [x] Configure `.github/workflows/ci.yml` running `dart analyze --fatal-infos` and `flutter test --coverage`.
-  - [ ] Assert CI fails if test coverage on core models drops below 80%. → remediated by `DEV-602`
+  - [x] Assert CI fails if test coverage on core models drops below 80%. ✅ remediated in `DEV-602`
 - **Testing & Verification**:
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Trigger CI build via test pull request; assert pipeline succeeds in $< 90\text{ seconds}$.
 - **Dependencies**: `FE-101`.
@@ -1232,9 +1232,9 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 - **Granular Tasks**:
   - [x] Configure `.github/workflows/pull_request.yml`.
   - [x] Stage 1: `dart analyze --fatal-infos`.
-  - [ ] Stage 2: `flutter test --coverage` (enforcing $\ge 80\%$ project coverage). → remediated by `DEV-602`
+  - [x] Stage 2: `flutter test --coverage` (enforcing $\ge 80\%$ project coverage). ✅ remediated in `DEV-602`
   - [x] Stage 3: pgTAP database stored procedure checks. ✅ remediated in `QA-601`
-  - [ ] Block PR merge automatically if any stage fails. → remediated by `DEV-602`
+  - [x] Block PR merge automatically if any stage fails. ✅ remediated in `DEV-602`
 - **Testing & Verification**:
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Verify workflow passes on clean branch and fails on intentional lint violation.
 - **Dependencies**: `QA-101`.
@@ -1244,8 +1244,8 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
   - [**`technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md) §2 (Fastlane Lanes)
 - **Scope & Objectives**: 1-command build and upload to Apple TestFlight and Google Play Internal Track.
 - **Granular Tasks**:
-  - [ ] Configure `ios/fastlane/Fastfile` with lane `beta` (Match code signing, build ipa, upload to TestFlight). → remediated by `DEV-602`
-  - [ ] Configure `android/fastlane/Fastfile` with lane `beta` (sign AAB bundle, upload to Play Console). → remediated by `DEV-602`
+  - [x] Configure `ios/fastlane/Fastfile` with lane `beta` (Match code signing, build ipa, upload to TestFlight). ✅ remediated in `DEV-602`
+  - [x] Configure `android/fastlane/Fastfile` with lane `beta` (sign AAB bundle, upload to Play Console). ✅ remediated in `DEV-602`
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Store App Store Connect API keys and Android service account JSON in GitHub Secrets.
 - **Testing & Verification**:
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Execute `fastlane beta` dry-run; verify IPA and AAB bundles compile successfully.
@@ -1792,11 +1792,11 @@ Turn the library of individually-tested widgets and algorithms into a **wired, r
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §7.1
 - **Scope & Objectives**: Make release artifacts consistent and CI enforce the spec gates.
 - **Granular Tasks**:
-  - [ ] Unify identifiers on `app.telly.mobile` (matches Fastlane and `APPLE_SERVICE_ID`): Android `namespace`/`applicationId` (+ Kotlin package move), iOS `PRODUCT_BUNDLE_IDENTIFIER` (Runner + RunnerTests).
-  - [ ] Android release `signingConfig` from gitignored `key.properties`; build fails loudly instead of silently using the debug key.
-  - [ ] Merge `ci.yml` + `pull_request.yml` into one workflow: analyze → unit/widget tests with coverage gates **80% overall** and **90% for `lib/features/ranking/domain/`** (lcov filtered) → pgTAP job (`QA-601`) → `integration_test` job on an Android emulator.
+  - [x] Unify identifiers on `app.telly.mobile` (matches Fastlane and `APPLE_SERVICE_ID`): Android `namespace`/`applicationId` (+ Kotlin package move), iOS `PRODUCT_BUNDLE_IDENTIFIER` (Runner + RunnerTests).
+  - [x] Android release `signingConfig` from gitignored `key.properties`; build fails loudly instead of silently using the debug key.
+  - [x] Merge `ci.yml` + `pull_request.yml` into one workflow: analyze → unit/widget tests with coverage gates **80% overall** and **90% for `lib/features/ranking/domain/`** (lcov filtered) → pgTAP job (`QA-601`) → `integration_test` job on an Android emulator.
 - **Testing & Verification**:
-  - [ ] `flutter build apk --release` fails without `key.properties` and succeeds with a throwaway keystore locally; CI fails at 79% coverage (verified once).
+  - [x] `flutter build apk --release` fails without `key.properties` and succeeds with a throwaway keystore locally; CI fails at 79% coverage (verified once).
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Generate the upload keystore and register `app.telly.mobile` in App Store Connect / Play Console.
 - **Dependencies**: `QA-601`.
 
