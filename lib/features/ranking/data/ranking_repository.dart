@@ -166,6 +166,82 @@ class RankingRepository {
     });
   }
 
+  /// Bulk-appends [ordered] (best first) below the existing canon in one transaction —
+  /// the onboarding tournament and the Letterboxd/AniList importers (FE-606). Titles that
+  /// are already ranked are skipped. Each title queues its own `log_title` mutation in
+  /// rank order; the last one carries [duels]. Returns how many titles were added.
+  Future<int> appendCanon({
+    required String mediaType,
+    required List<CanonCandidate> ordered,
+    List<LoggedDuel> duels = const [],
+    String? Function(CanonCandidate c)? bracketOf,
+  }) {
+    _requireCanon(mediaType);
+    return _db.transaction(() async {
+      final canon = await getCanon(mediaType);
+      final ranked = canon.map((r) => r.showId).toSet();
+      final added = <CanonCandidate>[];
+      for (final c in ordered) {
+        if (c.mediaType != mediaType) {
+          throw ArgumentError('${c.title} is a ${c.mediaType}, not part of the $mediaType canon');
+        }
+        if (ranked.add(c.titleId)) added.add(c);
+      }
+      if (added.isEmpty) return 0;
+
+      final start = canon.length;
+      for (final c in added) {
+        canon.add(LocalRanking(
+          showId: c.titleId,
+          mediaType: mediaType,
+          title: c.title,
+          posterPath: c.posterPath,
+          rankPosition: canon.length + 1,
+          calculatedScore: 0,
+          bracket: bracketOf?.call(c),
+          syncStatus: 'PENDING',
+          updatedAt: DateTime.now(),
+        ));
+      }
+      final now = DateTime.now();
+      final n = canon.length;
+      await _rankings.updateBatchRanks([
+        for (var i = 0; i < n; i++)
+          canon[i]
+              .copyWith(
+                rankPosition: i + 1,
+                calculatedScore: ScoreCurveCalculator.calculateRoundedScore(i + 1, n),
+                updatedAt: now,
+              )
+              .toCompanion(true),
+      ]);
+
+      final known = {for (final c in added) c.titleId};
+      final duelPayload = [
+        for (final d in duels)
+          if (known.contains(d.winnerTitleId) || known.contains(d.loserTitleId))
+            {
+              'client_mutation_id': const Uuid().v4(),
+              'winner_title_id': d.winnerTitleId,
+              'loser_title_id': d.loserTitleId,
+              'media_type': mediaType,
+              'decision_time_ms': d.decisionTimeMs,
+            },
+      ];
+      for (var i = 0; i < added.length; i++) {
+        await _queue.enqueue(MutationKind.logTitle, {
+          'title_id': added[i].titleId,
+          'media_type': mediaType,
+          'target_rank': start + i + 1,
+          'status': 'COMPLETED',
+          'is_rewatch': false,
+          'duels': i == added.length - 1 ? duelPayload : const [],
+        });
+      }
+      return added.length;
+    });
+  }
+
   /// Saves `SCR-11` editorial data for a ranked title (replayed as an UPDATE of the
   /// editorial columns, which RLS allows on one's own row).
   Future<void> attachEditorial({

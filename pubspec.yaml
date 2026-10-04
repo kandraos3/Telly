@@ -45,6 +45,7 @@ dependencies:
   url_launcher: ^6.3.0
   csv: ^6.0.0
   connectivity_plus: ^7.3.2
+  file_picker: ^10.2.4
 
 dev_dependencies:
   flutter_test:

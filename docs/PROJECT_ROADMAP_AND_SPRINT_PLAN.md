@@ -24,7 +24,7 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 6 — Integration, Wiring & Audit Remediation** (planned 2026-10-03; owner decisions D1–D7 recorded in Sprint 6)
-- **Current Active Ticket**: `FE-606` (Onboarding Persistence + SCR-04 Onboarding Duel & Canon Reveal) — Sprint 6: 15 / 32 tickets complete
+- **Current Active Ticket**: `FE-607` (Supabase SocialRepository: Feed, Follows, Reactions, Comments, Reports) — Sprint 6: 16 / 32 tickets complete
 - **Overall Roadmap Progress**: Sprints 1–5 granular tasks after the `DOC-601` honesty reset (2026-10-03): **281 / 431 verified** · **121 un-checked** (each annotated `→ remediated by <Sprint 6 ticket>`) · **29 human-only**. The earlier "89 / 89" claim was overstated.
 - **Human-Only Tasks**: 29 tasks in Sprints 1–5 marked `👤 [TO BE DONE BY HUMAN]` (cloud setup, secrets, store submission, device/CI runs, dashboard verification), plus the Sprint 6 human prerequisites list. These cannot be completed or verified from code.
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (215 / 215 pass — note: many tests are widget/unit-level only; no real E2E or golden tests exist yet)
@@ -239,7 +239,7 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 - **Granular Tasks**:
   - [x] Create `lib/features/onboarding/presentation/screens/streaming_setup_screen.dart`.
   - [x] Render 8 provider cards (Netflix, Max, Hulu, Prime Video, Apple TV+, Disney+, Crunchyroll, Paramount+).
-  - [ ] Implement multi-select state persisting selected provider IDs to Drift local database and Supabase `users.streaming_providers`. → remediated by `FE-606`
+  - [x] Implement multi-select state persisting selected provider IDs to Drift local database and Supabase `users.streaming_providers`. *(Superseded by TA-02: persisted to `user_streaming_subscriptions`; no Drift copy.)* ✅ remediated in `FE-606`
   - [x] Include *"I don't have streaming services / Skip for now"* secondary action.
 - **Testing & Verification**:
   - [x] Widget test verifying provider cards toggle selection state on tap and update counter.
@@ -253,7 +253,7 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 - **Granular Tasks**:
   - [x] Create `lib/features/onboarding/presentation/screens/seed_grid_screen.dart`.
   - [x] Implement category filter tabs: `[ All (50) ]`, `[ 🎬 Movies ]`, `[ 📺 TV Series ]`, `[ ⛩️ Anime ]`.
-  - [ ] Render 3-column poster grid using `CachedNetworkImage` with shimmer placeholders. → remediated by `FE-606`
+  - [x] Render 3-column poster grid using `CachedNetworkImage` with shimmer placeholders. ✅ remediated in `FE-606`
   - [x] Add checkmark badge overlay on selected posters with Phosphor Lime border highlight.
   - [x] Render sticky bottom CTA bar displaying `"Select at least 5 titles (X/5 selected)"`, enabling when $X \ge 5$.
 - **Testing & Verification**:
@@ -269,7 +269,7 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 - **Granular Tasks**:
   - [x] Create `lib/features/onboarding/domain/anilist_importer.dart`.
   - [x] Query AniList GraphQL endpoint `https://graphql.anilist.co` for `MediaListCollection(userName, type: ANIME, status: COMPLETED)`.
-  - [ ] Map AniList titles and MAL IDs to internal TMDB IDs via title matching index. → remediated by `FE-606`
+  - [x] Map AniList titles and MAL IDs to internal TMDB IDs via title matching index. ✅ remediated in `FE-606`
   - [x] Seed imported entries into sentiment brackets based on user's 10-point AniList score.
 - **Testing & Verification**:
   - [x] Unit test parsing mock AniList GraphQL JSON fixture into list of `MediaItem` models.
@@ -285,7 +285,7 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [x] Create `lib/features/onboarding/domain/letterboxd_csv_parser.dart` using `package:csv`.
   - [x] Parse columns: `Date`, `Name`, `Year`, `Letterboxd URI`, `Rating`, `Rewatch`.
   - [x] Map star ratings to sentiment brackets ($5.0\star \to \text{Top 10\%}$, $0.5\star \to \text{Bottom 5\%}$).
-  - [ ] Batch match titles against TMDB API using Edge Function. → remediated by `FE-606`
+  - [x] Batch match titles against TMDB API using Edge Function. *(Per-title matching through the `tmdb-search` edge function, capped at 200 entries per import.)* ✅ remediated in `FE-606`
 - **Testing & Verification**:
   - [x] Unit test parsing mock `diary.csv` containing commas in title (*"Everything Everywhere All at Once"*).
   - [x] Assert parsing completes for 500 rows in $< 300\text{ ms}$.
@@ -1660,12 +1660,12 @@ Turn the library of individually-tested widgets and algorithms into a **wired, r
   - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §`SCR-02`–`SCR-04`
 - **Scope & Objectives**: Onboarding produces a real, persisted starter dual canon.
 - **Granular Tasks**:
-  - [ ] `SCR-02` saves to `user_streaming_subscriptions`; `SCR-03` selections feed the tournament.
-  - [ ] `SCR-04`: runs separate movie and series tournaments (5–7 duels total, per spec), reusing `DuelArenaScreen`; celebration screen with confetti, a Top-5 carousel per canon, `[ Add Friends & Finish ]` and `[ Share to Instagram Story ]`.
-  - [ ] Letterboxd CSV and AniList importers persist through `RankingRepository` (bulk insert), not just parse.
-  - [ ] Set an `onboarding_completed` flag consumed by the router redirect.
+  - [x] `SCR-02` saves to `user_streaming_subscriptions`; `SCR-03` selections feed the tournament. *(Platform ids now match `public.streaming_platforms` (`apple_tv` → `apple_tv_plus`, + Criterion); the free-platform toggle merges into `users.preferences`. SCR-03 keys picks by `(media_type, id)` and unlocks at 8 per features/01.)*
+  - [x] `SCR-04`: runs separate movie and series tournaments (5–7 duels total, per spec), reusing `DuelArenaScreen`; celebration screen with confetti, a Top-5 carousel per canon, `[ Add Friends & Finish ]` and `[ Share to Instagram Story ]`. *(Budgeted, segregated binary insertion in `OnboardingTournament` (nominal 3 + 4, unused budget moves to the other canon); the reveal is a segmented Top-5 per canon (features/01 Screen 5). `Share to Instagram Story` goes through `StoryShareService`, which reports "not available yet" until `DEV-601` adds `share_plus`.)*
+  - [x] Letterboxd CSV and AniList importers persist through `RankingRepository` (bulk insert), not just parse. *(`CanonImportService` matches entries via the `tmdb-search` edge function, orders by the user's rating and calls `RankingRepository.appendCanon`; Letterboxd uses `file_picker`.)*
+  - [x] Set an `onboarding_completed` flag consumed by the router redirect. *(`AuthController.finishOnboarding`, wired in FE-602, now called from the reveal's `Add Friends & Finish`.)*
 - **Testing & Verification**:
-  - [ ] Widget/provider tests: selecting 3 movies + 4 series yields two canons with contiguous ranks; importer of 10 CSV rows creates 10 movie rankings.
+  - [x] Widget/provider tests: selecting 3 movies + 4 series yields two canons with contiguous ranks; importer of 10 CSV rows creates 10 movie rankings.
 - **Dependencies**: `FE-604`.
 
 ---

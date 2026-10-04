@@ -1,145 +1,141 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:telly_app/core/database/database.dart';
+import 'package:telly_app/core/database/database_provider.dart';
+import 'package:telly_app/core/widgets/poster_image.dart';
 import 'package:telly_app/core/widgets/telly_primary_button.dart';
+import 'package:telly_app/features/logging/data/title_repository.dart';
+import 'package:telly_app/features/logging/domain/title_search_result.dart';
+import 'package:telly_app/features/onboarding/data/canon_import_service.dart';
+import 'package:telly_app/features/onboarding/data/top_50_seeds.dart';
+import 'package:telly_app/features/onboarding/domain/anilist_importer.dart';
 import 'package:telly_app/features/onboarding/presentation/screens/seed_grid_screen.dart';
 
+import '../../helpers/router_harness.dart';
+
+/// Every query matches exactly one title of each media type, with a stable id.
+class EchoTitleRepository implements TitleRepository {
+  @override
+  Future<TitleSearchOutcome> search(String query) async => TitleSearchOutcome([
+        TitleSearchResult(id: 1000 + query.hashCode.abs() % 100000, mediaType: 'movie', title: query),
+        TitleSearchResult(id: 2000 + query.hashCode.abs() % 100000, mediaType: 'tv', title: query, isAnime: true),
+      ]);
+
+  @override
+  Future<TitleCredits> fetchCredits(int id, String mediaType) async => TitleCredits.empty;
+}
+
+class FakeAniList extends AniListImporter {
+  @override
+  Future<List<AniListEntry>> fetchUserAnime(String username, {bool enableFranchiseRollup = false}) async => const [
+        AniListEntry(id: 1, romajiTitle: 'Sousou no Frieren', englishTitle: 'Frieren', format: 'TV', userScore: 9.8),
+        AniListEntry(id: 2, romajiTitle: 'Kimi no Na wa.', englishTitle: 'Your Name.', format: 'MOVIE', userScore: 9.0),
+      ];
+}
+
 void main() {
-  group('SCR-03 SeedGridScreen Widget & Gating Tests (FE-109)', () {
-    void setupMobileViewport(WidgetTester tester) {
-      tester.view.physicalSize = const Size(1080, 2400);
-      tester.view.devicePixelRatio = 2.0;
-      addTearDown(() {
-        tester.view.resetPhysicalSize();
-        tester.view.resetDevicePixelRatio();
-      });
-    }
+  late AppDatabase db;
+  setUp(() => db = AppDatabase.inMemory());
+  tearDown(() => db.close());
 
-    testWidgets('renders screen headers, 1-click import actions, and category chips', (tester) async {
-      setupMobileViewport(tester);
-      await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: SeedGridScreen(),
-          ),
-        ),
-      );
+  Future<void> pump(WidgetTester tester, {String? csv}) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 2.0;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(routerHarness(const SeedGridScreen(), overrides: [
+      databaseProvider.overrideWithValue(db),
+      posterNetworkImagesProvider.overrideWithValue(false),
+      titleRepositoryProvider.overrideWithValue(EchoTitleRepository()),
+      aniListImporterProvider.overrideWithValue(FakeAniList()),
+      csvFilePickerProvider.overrideWithValue(() async => csv),
+    ]));
+    await tester.pumpAndSettle();
+  }
 
-      expect(find.text('Tap titles you have watched'), findsOneWidget);
-      expect(find.text('Import from Letterboxd'), findsOneWidget);
-      expect(find.text('Import from AniList / MyAnimeList'), findsOneWidget);
+  TellyPrimaryButton cta(WidgetTester tester) =>
+      tester.widget<TellyPrimaryButton>(find.byKey(const Key('start_duels_button')));
 
-      // Verify category filter chips
-      expect(find.text('All (50)'), findsOneWidget);
-      expect(find.text('🎬 Movies (15)'), findsOneWidget);
-      expect(find.text('📺 TV Series (20)'), findsOneWidget);
-      expect(find.text('⛩️ Anime (15)'), findsOneWidget);
+  int countOf(bool Function(SeedTitle) test) => kTop50SeedTitles.where(test).length;
 
-      // Verify CTA starts disabled with 0/5
-      expect(find.text('SELECT AT LEAST 5 TITLES (0/5)'), findsOneWidget);
-      final button = tester.widget<TellyPrimaryButton>(find.byType(TellyPrimaryButton));
-      expect(button.onPressed, isNull);
+  group('SCR-03 SeedGridScreen (FE-109, FE-606)', () {
+    test('poster paths resolve to TMDB image URLs', () {
+      expect(TmdbImages.poster('/abc.jpg'), 'https://image.tmdb.org/t/p/w342/abc.jpg');
+      expect(TmdbImages.poster('https://cdn.example/x.jpg'), 'https://cdn.example/x.jpg');
+      expect(TmdbImages.poster(null), isNull);
     });
 
-    testWidgets('filtering by category changes displayed titles in grid', (tester) async {
-      setupMobileViewport(tester);
-      await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: SeedGridScreen(),
-          ),
-        ),
-      );
 
-      // Initially All (contains Succession and Interstellar)
-      expect(find.text('Succession'), findsOneWidget);
+    testWidgets('renders headers, importers and filter chips with live counts', (tester) async {
+      await pump(tester);
+      expect(find.text("Tap movies, series & anime you've watched."), findsOneWidget);
+      expect(find.text('Import from Letterboxd'), findsOneWidget);
+      expect(find.text('Import from AniList / MyAnimeList'), findsOneWidget);
+      expect(find.text('All (${kTop50SeedTitles.length})'), findsOneWidget);
+      expect(find.text('🎬 Movies (${countOf((t) => t.mediaType == 'movie')})'), findsOneWidget);
+      expect(find.text('📺 Series (${countOf((t) => t.mediaType == 'tv' && !t.isAnime)})'), findsOneWidget);
+      expect(find.text('⚡ Anime (${countOf((t) => t.isAnime)})'), findsOneWidget);
+      expect(find.text('Select at least 8 titles (0/8 selected)'), findsOneWidget);
+      expect(cta(tester).onPressed, isNull);
+    });
 
-      // Tap Movies filter chip
-      await tester.ensureVisible(find.text('🎬 Movies (15)'));
-      await tester.tap(find.text('🎬 Movies (15)'));
+    testWidgets('filter pills narrow the grid', (tester) async {
+      await pump(tester);
+      await tester.tap(find.textContaining('🎬 Movies'));
       await tester.pumpAndSettle();
-
-      // Movie titles should be present, TV titles absent
       expect(find.text('Interstellar'), findsOneWidget);
       expect(find.text('Succession'), findsNothing);
 
-      // Tap Anime filter chip
-      await tester.ensureVisible(find.text('⛩️ Anime (15)'));
-      await tester.tap(find.text('⛩️ Anime (15)'));
+      await tester.ensureVisible(find.textContaining('⚡ Anime'));
+      await tester.tap(find.textContaining('⚡ Anime'));
       await tester.pumpAndSettle();
-
-      // Anime titles present, Movies absent
       expect(find.text('Attack on Titan'), findsOneWidget);
       expect(find.text('Interstellar'), findsNothing);
-
-      // Tap All filter chip
-      await tester.ensureVisible(find.text('All (50)'));
-      await tester.tap(find.text('All (50)'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Succession'), findsOneWidget);
     });
 
-    testWidgets('CTA button enables strictly when 5 or more titles are selected', (tester) async {
-      setupMobileViewport(tester);
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            selectedSeedTitlesProvider.overrideWith((ref) => <int>{}),
-            seedCategoryFilterProvider.overrideWith((ref) => 'all'),
-          ],
-          child: const MaterialApp(
-            home: SeedGridScreen(),
-          ),
-        ),
-      );
-
-      // 0 selected: disabled
-      var button = tester.widget<TellyPrimaryButton>(find.byType(TellyPrimaryButton));
-      expect(button.onPressed, isNull);
-      expect(find.text('SELECT AT LEAST 5 TITLES (0/5)'), findsOneWidget);
-
-      // Select 1st title: Succession (id: 76331)
-      await tester.tap(find.byKey(const ValueKey('seed_card_76331')));
+    testWidgets('CTA unlocks at 8 picks and starts the tournament', (tester) async {
+      await pump(tester);
+      final picks = kTop50SeedTitles.take(8).toList();
+      for (final (i, s) in picks.indexed) {
+        final card = find.byKey(ValueKey('seed_card_${s.mediaType}_${s.id}'));
+        await tester.ensureVisible(card);
+        await tester.tap(card);
+        await tester.pumpAndSettle();
+        if (i < 7) expect(find.text('Select at least 8 titles (${i + 1}/8 selected)'), findsOneWidget);
+      }
+      expect(find.text('Start Ranking Duels →'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('start_duels_button')));
       await tester.pumpAndSettle();
-      expect(find.text('SELECT AT LEAST 5 TITLES (1/5)'), findsOneWidget);
+      expect(find.text('route:/onboarding/tournament'), findsOneWidget);
+    });
 
-      // Select 2nd title: Severance (id: 110492)
-      await tester.tap(find.byKey(const ValueKey('seed_card_110492')));
-      await tester.pumpAndSettle();
-      expect(find.text('SELECT AT LEAST 5 TITLES (2/5)'), findsOneWidget);
-
-      // Select 3rd title: Breaking Bad (id: 1396)
-      await tester.tap(find.byKey(const ValueKey('seed_card_1396')));
-      await tester.pumpAndSettle();
-      expect(find.text('SELECT AT LEAST 5 TITLES (3/5)'), findsOneWidget);
-
-      // Select 4th title: The Bear (id: 124834)
-      await tester.tap(find.byKey(const ValueKey('seed_card_124834')));
-      await tester.pumpAndSettle();
-      expect(find.text('SELECT AT LEAST 5 TITLES (4/5)'), findsOneWidget);
-
-      // Still disabled at 4 items
-      button = tester.widget<TellyPrimaryButton>(find.byType(TellyPrimaryButton));
-      expect(button.onPressed, isNull);
-
-      // Select 5th title: Game of Thrones (id: 1399)
-      await tester.tap(find.byKey(const ValueKey('seed_card_1399')));
+    testWidgets('Letterboxd import persists the CSV as a movie canon and unlocks the CTA', (tester) async {
+      await pump(tester, csv: [
+        'Date,Name,Year,Letterboxd URI,Rating',
+        '2024-01-01,Heat,1995,https://boxd.it/a,4',
+        '2024-01-02,Oppenheimer,2023,https://boxd.it/b,5',
+        '2024-01-03,Cats,2019,https://boxd.it/c,0.5',
+      ].join('\n'));
+      await tester.tap(find.byKey(const Key('import_letterboxd')));
       await tester.pumpAndSettle();
 
-      // Now 5 selected: Enabled!
-      expect(find.text('BEGIN PAIRWISE DUELS (5 SELECTED) →'), findsOneWidget);
-      button = tester.widget<TellyPrimaryButton>(find.byType(TellyPrimaryButton));
-      expect(button.onPressed, isNotNull);
+      expect(find.text('Imported 3 titles'), findsOneWidget);
+      expect(find.byKey(const Key('imported_count_text')), findsOneWidget);
+      expect(cta(tester).onPressed, isNotNull);
+      final canon = await db.localRankingDao.getRankingsByCanon('movie');
+      expect(canon.map((r) => r.title), ['Oppenheimer', 'Heat', 'Cats'], reason: 'ordered by star rating');
+    });
 
-      // Deselect 1 title (tap Succession again)
-      await tester.tap(find.byKey(const ValueKey('seed_card_76331')));
+    testWidgets('AniList import asks for a username and splits movies from series', (tester) async {
+      await pump(tester);
+      await tester.tap(find.byKey(const Key('import_anilist')));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byKey(const Key('anilist_username_field')), 'frieren_fan');
+      await tester.tap(find.byKey(const Key('anilist_import_confirm')));
       await tester.pumpAndSettle();
 
-      // Count drops back to 4: disabled again
-      expect(find.text('SELECT AT LEAST 5 TITLES (4/5)'), findsOneWidget);
-      button = tester.widget<TellyPrimaryButton>(find.byType(TellyPrimaryButton));
-      expect(button.onPressed, isNull);
+      expect(find.text('Imported 2 titles'), findsOneWidget);
+      expect((await db.localRankingDao.getRankingsByCanon('tv')).map((r) => r.title), ['Frieren']);
+      expect((await db.localRankingDao.getRankingsByCanon('movie')).map((r) => r.title), ['Your Name.']);
     });
   });
 }

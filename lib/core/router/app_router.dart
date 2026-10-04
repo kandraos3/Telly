@@ -12,6 +12,7 @@ import '../../features/feed/presentation/screens/comment_thread_screen.dart';
 import '../../features/logging/domain/title_search_result.dart';
 import '../../features/logging/presentation/screens/log_flow_screens.dart';
 import '../../features/logging/presentation/screens/logging_studio_screen.dart';
+import '../../features/onboarding/presentation/screens/onboarding_tournament_screen.dart';
 import '../../features/onboarding/presentation/screens/seed_grid_screen.dart';
 import '../../features/onboarding/presentation/screens/streaming_setup_screen.dart';
 import '../../features/profile/domain/dropped_show.dart';
@@ -24,7 +25,6 @@ import '../../features/queue/presentation/screens/smart_queue_screen.dart';
 import '../../features/sharing/presentation/screens/telly_wrapped_studio_screen.dart';
 import '../../features/squads/domain/squad_models.dart';
 import '../../features/squads/presentation/screens/squad_hub_screen.dart';
-import '../widgets/telly_primary_button.dart';
 import 'app_shell.dart';
 import 'auth_redirect.dart';
 import 'pending_screen.dart';
@@ -75,19 +75,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: Routes.handle, builder: (_, __) => const HandleReservationScreen()),
       GoRoute(path: Routes.streamingSetup, builder: (_, __) => const StreamingSetupScreen()),
       GoRoute(path: Routes.seedGrid, builder: (_, __) => const SeedGridScreen()),
-      GoRoute(
-        path: Routes.tournament,
-        builder: (context, __) => PendingScreen(
-          title: 'Onboarding Duel',
-          ticket: 'FE-606',
-          action: Consumer(
-            builder: (context, ref, _) => TellyPrimaryButton(
-              label: 'FINISH ONBOARDING →',
-              onPressed: () => ref.read(authControllerProvider.notifier).finishOnboarding(),
-            ),
-          ),
-        ),
-      ),
+      GoRoute(path: Routes.tournament, builder: (_, __) => const OnboardingTournamentScreen()),
 
       // The four tabs
       StatefulShellRoute.indexedStack(

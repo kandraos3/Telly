@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
 import '../../../../core/widgets/telly_primary_button.dart';
+import '../controllers/onboarding_controllers.dart';
 
 class StreamingProviderItem {
   final String id;
@@ -23,43 +24,39 @@ class StreamingProviderItem {
 const kDefaultStreamingProviders = [
   StreamingProviderItem(id: 'netflix', name: 'Netflix', tag: 'Top Series & Films', icon: Icons.movie_outlined),
   StreamingProviderItem(id: 'max', name: 'Max', tag: 'HBO Originals & Classics', icon: Icons.tv_outlined),
-  StreamingProviderItem(id: 'apple_tv', name: 'Apple TV+', tag: 'Prestige Sci-Fi & Dramas', icon: Icons.apple),
+  StreamingProviderItem(id: 'apple_tv_plus', name: 'Apple TV+', tag: 'Prestige Sci-Fi & Dramas', icon: Icons.apple),
   StreamingProviderItem(id: 'hulu', name: 'Hulu', tag: 'FX Hits & Next-Day TV', icon: Icons.live_tv_outlined),
   StreamingProviderItem(id: 'disney_plus', name: 'Disney+', tag: 'Star Wars, Marvel & Pixar', icon: Icons.auto_awesome_outlined),
   StreamingProviderItem(id: 'prime_video', name: 'Prime Video', tag: 'Amazon Originals', icon: Icons.play_circle_outline),
   StreamingProviderItem(id: 'crunchyroll', name: 'Crunchyroll', tag: 'Simulcasts & Classic Anime', icon: Icons.video_collection_outlined),
   StreamingProviderItem(id: 'paramount_plus', name: 'Paramount+', tag: 'Yellowstone, Showtime & Trek', icon: Icons.star_border_outlined),
+  StreamingProviderItem(id: 'criterion', name: 'Criterion', tag: 'Arthouse & World Cinema', icon: Icons.theaters_outlined),
 ];
-
-final selectedProvidersProvider = StateProvider<Set<String>>((ref) => {
-      'netflix',
-      'max',
-      'apple_tv',
-    });
-
-final includeFreePlatformsProvider = StateProvider<bool>((ref) => false);
 
 /// SCR-02: Streaming Provider Household Setup Screen.
 /// Conforms to `docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md` §2 (`SCR-02`).
+/// Ids match `public.streaming_platforms`; Continue saves to `user_streaming_subscriptions` (FE-606).
 class StreamingSetupScreen extends ConsumerWidget {
   const StreamingSetupScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selected = ref.watch(selectedProvidersProvider);
-    final includeFree = ref.watch(includeFreePlatformsProvider);
+    final setup = ref.watch(streamingSetupProvider);
+    final controller = ref.read(streamingSetupProvider.notifier);
+    final selected = setup.selected;
+    final includeFree = setup.includeFree;
 
-    void toggleProvider(String id) {
-      final updated = Set<String>.from(selected);
-      if (updated.contains(id)) {
-        updated.remove(id);
-      } else {
-        updated.add(id);
+    void toggleProvider(String id) => controller.toggle(id);
+
+    Future<void> navigateForward() async {
+      if (!await controller.save()) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(ref.read(streamingSetupProvider).error!)));
+        }
+        return;
       }
-      ref.read(selectedProvidersProvider.notifier).state = updated;
+      if (context.mounted) context.go(Routes.seedGrid);
     }
-
-    void navigateForward() => context.go(Routes.seedGrid);
 
     return Scaffold(
       backgroundColor: TellyColors.backgroundPrimary,
@@ -179,7 +176,7 @@ class StreamingSetupScreen extends ConsumerWidget {
                     InkWell(
                       borderRadius: BorderRadius.circular(10),
                       onTap: () {
-                        ref.read(includeFreePlatformsProvider.notifier).state = !includeFree;
+                        controller.setIncludeFree(!includeFree);
                       },
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
@@ -190,7 +187,7 @@ class StreamingSetupScreen extends ConsumerWidget {
                               activeColor: TellyColors.phosphorLime,
                               checkColor: Colors.black,
                               onChanged: (val) {
-                                ref.read(includeFreePlatformsProvider.notifier).state = val ?? false;
+                                controller.setIncludeFree(val ?? false);
                               },
                             ),
                             const SizedBox(width: 8),
@@ -223,11 +220,12 @@ class StreamingSetupScreen extends ConsumerWidget {
                     label: selected.isNotEmpty
                         ? 'CONTINUE (${selected.length} SELECTED) →'
                         : 'CONTINUE →',
-                    onPressed: navigateForward,
+                    isLoading: setup.saving,
+                    onPressed: setup.saving ? null : navigateForward,
                   ),
                   const SizedBox(height: 8),
                   TextButton(
-                    onPressed: navigateForward,
+                    onPressed: setup.saving ? null : navigateForward,
                     child: Text(
                       "I don't have streaming services / Skip for now",
                       style: TellyTypography.caption(color: TellyColors.textTertiary),

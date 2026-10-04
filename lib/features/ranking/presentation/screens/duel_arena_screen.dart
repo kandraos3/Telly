@@ -11,16 +11,36 @@ import '../widgets/duel_arena_card.dart';
 /// `docs/design_system/02_COMPONENT_LIBRARY_AND_PATTERNS.md` §4, and
 /// `docs/design_system/04_USER_INTERACTION_FLOWS_AND_GESTURES.md` §1.
 class DuelArenaScreen extends ConsumerStatefulWidget {
-  /// The logging session being placed (FE-604); keys the [duelControllerProvider] family.
-  final DuelRequest request;
+  /// The duel loop's state and actions (a logging session, or the onboarding tournament).
+  final ProviderListenable<DuelState> state;
+  final ProviderListenable<DuelActions> actions;
   final VoidCallback? onCancel;
   final ValueChanged<DuelComplete>? onDuelComplete;
 
-  const DuelArenaScreen({
+  /// Replaces `DUEL X OF Y` (e.g. `Movie Duel 2 of 3 • Calibrating your Movie Canon`).
+  final String Function(DuelActive active)? progressLabel;
+  final String tieLabel;
+
+  /// `SCR-10` for a logging session (FE-604).
+  DuelArenaScreen({
     super.key,
-    required this.request,
+    required DuelRequest request,
     this.onCancel,
     this.onDuelComplete,
+  })  : state = duelControllerProvider(request),
+        actions = duelControllerProvider(request).notifier,
+        progressLabel = null,
+        tieLabel = "Can't Compare / Equal";
+
+  /// The arena driven by another duel loop, e.g. the `SCR-04` onboarding tournament (FE-606).
+  const DuelArenaScreen.custom({
+    super.key,
+    required this.state,
+    required this.actions,
+    this.onCancel,
+    this.onDuelComplete,
+    this.progressLabel,
+    this.tieLabel = "Can't Compare / Equal",
   });
 
   @override
@@ -101,7 +121,7 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
 
     if (!mounted) return;
 
-    await ref.read(duelControllerProvider(widget.request).notifier).voteWinner(winnerId);
+    await ref.read(widget.actions).voteWinner(winnerId);
 
     if (mounted) {
       setState(() {
@@ -113,12 +133,12 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
   Future<void> _handleSkipOrTie() async {
     if (_selectedWinnerId != null) return;
     await ref.read(hapticsServiceProvider).duelSelectCandidate();
-    await ref.read(duelControllerProvider(widget.request).notifier).skipOrTie();
+    await ref.read(widget.actions).skipOrTie();
   }
 
   @override
   Widget build(BuildContext context) {
-    final provider = duelControllerProvider(widget.request);
+    final provider = widget.state;
     final duelState = ref.watch(provider);
 
     // Listen for completion
@@ -193,14 +213,19 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
                 icon: const Icon(Icons.close, color: TellyColors.textSecondary),
                 onPressed: widget.onCancel ?? () => Navigator.of(context).maybePop(),
               ),
-              Text(
-                'DUEL $step OF $totalSteps',
-                key: const Key('duel_step_counter_text'),
-                style: TellyTypography.titleMedium(
-                  color: TellyColors.textPrimary,
-                ).copyWith(
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.5,
+              Expanded(
+                child: Text(
+                  widget.progressLabel?.call(activeState) ?? 'DUEL $step OF $totalSteps',
+                  key: const Key('duel_step_counter_text'),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TellyTypography.titleMedium(
+                    color: TellyColors.textPrimary,
+                  ).copyWith(
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: widget.progressLabel == null ? 1.5 : 0,
+                  ),
                 ),
               ),
               const SizedBox(width: 48), // Balance close button width
@@ -336,7 +361,7 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
                     size: 18,
                   ),
                   label: Text(
-                    "Can't Compare / Equal",
+                    widget.tieLabel,
                     style: TellyTypography.bodyLarge(
                       color: TellyColors.textSecondary,
                     ).copyWith(

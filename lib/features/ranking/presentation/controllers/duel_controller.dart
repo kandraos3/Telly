@@ -25,14 +25,16 @@ class DuelActive extends DuelState {
   final LocalRanking currentOpponent;
   final int step;
   final int totalEstimatedSteps;
-  final BinaryInsertionTournament<LocalRanking> tournament;
+
+  /// The logging tournament; null for duel loops that track their own (onboarding).
+  final BinaryInsertionTournament<LocalRanking>? tournament;
 
   const DuelActive({
     required this.candidate,
     required this.currentOpponent,
     required this.step,
     required this.totalEstimatedSteps,
-    required this.tournament,
+    this.tournament,
   });
 }
 
@@ -80,12 +82,18 @@ class DuelRequest {
   int get hashCode => Object.hash(candidate.titleId, candidate.mediaType, bracket, status);
 }
 
+/// What the arena (`SCR-10`, reused by `SCR-04`) can ask of a duel loop.
+abstract interface class DuelActions {
+  Future<void> voteWinner(int winnerTitleId);
+  Future<void> skipOrTie();
+}
+
 /// Binary-insertion duel loop for one logging session (FE-604, TA-04 §2.1).
 ///
 /// Opponents come only from the candidate's own canon (`RankingRepository.getCanon`), so a
 /// movie never duels a series. Decided duels are kept in memory and committed together with
 /// the placement in a single repository transaction.
-class DuelController extends AutoDisposeFamilyNotifier<DuelState, DuelRequest> {
+class DuelController extends AutoDisposeFamilyNotifier<DuelState, DuelRequest> implements DuelActions {
   final _duels = <LoggedDuel>[];
   final _clock = Stopwatch();
   bool _disposed = false;
@@ -128,6 +136,7 @@ class DuelController extends AutoDisposeFamilyNotifier<DuelState, DuelRequest> {
   }
 
   /// Records the user's pick between the candidate and the current opponent.
+  @override
   Future<void> voteWinner(int winnerTitleId) async {
     final current = state;
     if (current is! DuelActive) return;
@@ -137,14 +146,15 @@ class DuelController extends AutoDisposeFamilyNotifier<DuelState, DuelRequest> {
       loserTitleId: candidateWon ? current.currentOpponent.showId : current.candidate.showId,
       decisionTimeMs: _clock.elapsedMilliseconds,
     ));
-    await _advance(candidateWon ? current.tournament.onCandidateWins() : current.tournament.onOpponentWins());
+    await _advance(candidateWon ? current.tournament!.onCandidateWins() : current.tournament!.onOpponentWins());
   }
 
   /// "Can't Compare / Equal": steps to a neighbour without recording a duel.
+  @override
   Future<void> skipOrTie() async {
     final current = state;
     if (current is! DuelActive) return;
-    await _advance(current.tournament.onTieOrCantCompare());
+    await _advance(current.tournament!.onTieOrCantCompare());
   }
 
   Future<void> _advance(BinaryInsertionTournament<LocalRanking> t) async {

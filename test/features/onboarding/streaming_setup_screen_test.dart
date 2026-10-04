@@ -1,125 +1,101 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:telly_app/core/widgets/telly_primary_button.dart';
+import 'package:telly_app/features/onboarding/data/onboarding_repository.dart';
 import 'package:telly_app/features/onboarding/presentation/screens/streaming_setup_screen.dart';
 
 import '../../helpers/router_harness.dart';
 
+class FakeOnboardingRepository implements OnboardingRepository {
+  final saves = <(Set<String>, bool)>[];
+  bool fail = false;
+
+  @override
+  Future<void> saveStreamingSetup({required Set<String> platformIds, required bool includeFreePlatforms}) async {
+    if (fail) throw Exception('offline');
+    saves.add((platformIds, includeFreePlatforms));
+  }
+}
+
 void main() {
-  group('SCR-02 StreamingSetupScreen Widget & Flow Tests (FE-108)', () {
-    void setupMobileViewport(WidgetTester tester) {
-      tester.view.physicalSize = const Size(1080, 2400);
-      tester.view.devicePixelRatio = 2.0;
-      addTearDown(() {
-        tester.view.resetPhysicalSize();
-        tester.view.resetDevicePixelRatio();
-      });
-    }
+  late FakeOnboardingRepository repo;
+  setUp(() => repo = FakeOnboardingRepository());
 
-    testWidgets('renders screen title, provider cards, free platforms checkbox, and CTA button', (tester) async {
-      setupMobileViewport(tester);
-      await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: StreamingSetupScreen(),
-          ),
-        ),
-      );
+  Future<void> pump(WidgetTester tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 2.0;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(routerHarness(
+      const StreamingSetupScreen(),
+      overrides: [onboardingRepositoryProvider.overrideWithValue(repo)],
+    ));
+    await tester.pumpAndSettle();
+  }
 
+  group('SCR-02 StreamingSetupScreen (FE-108, FE-606)', () {
+    testWidgets('renders the 9 SCR-02 platforms, free toggle, skip and an unselected CTA', (tester) async {
+      await pump(tester);
       expect(find.text('Where do you watch?'), findsOneWidget);
-      expect(find.textContaining('Select your active subscriptions'), findsOneWidget);
-
-      // Verify core providers exist
-      expect(find.text('Netflix'), findsOneWidget);
-      expect(find.text('Max'), findsOneWidget);
-      expect(find.text('Apple TV+'), findsOneWidget);
-      expect(find.text('Hulu'), findsOneWidget);
-      expect(find.text('Disney+'), findsOneWidget);
-      expect(find.text('Prime Video'), findsOneWidget);
-      expect(find.text('Crunchyroll'), findsOneWidget);
-      expect(find.text('Paramount+'), findsOneWidget);
-
-      // Verify Free platforms toggle & skip option
+      for (final name in ['Netflix', 'Max', 'Apple TV+', 'Hulu', 'Disney+', 'Prime Video', 'Crunchyroll', 'Paramount+', 'Criterion']) {
+        expect(find.text(name), findsOneWidget, reason: name);
+      }
       expect(find.textContaining('Include free platforms'), findsOneWidget);
       expect(find.textContaining("I don't have streaming services"), findsOneWidget);
-
-      // Verify initial selected count in CTA button
-      expect(find.byType(TellyPrimaryButton), findsOneWidget);
-      expect(find.textContaining('CONTINUE (3 SELECTED) →'), findsOneWidget);
+      expect(find.text('CONTINUE →'), findsOneWidget, reason: 'nothing is pre-selected');
     });
 
-    testWidgets('tapping a provider card toggles selection and updates counter', (tester) async {
-      setupMobileViewport(tester);
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            selectedProvidersProvider.overrideWith((ref) => {'netflix'}),
-          ],
-          child: const MaterialApp(
-            home: StreamingSetupScreen(),
-          ),
-        ),
-      );
+    test('platform ids match public.streaming_platforms', () {
+      expect(kDefaultStreamingProviders.map((p) => p.id).toSet(), {
+        'netflix', 'max', 'apple_tv_plus', 'hulu', 'disney_plus', 'prime_video', 'crunchyroll', 'paramount_plus', 'criterion',
+      });
+    });
 
-      // Initially 1 selected
-      expect(find.text('CONTINUE (1 SELECTED) →'), findsOneWidget);
-
-      // Tap to add Disney+
+    testWidgets('tapping cards toggles the selection count', (tester) async {
+      await pump(tester);
+      await tester.tap(find.text('Netflix'));
       await tester.tap(find.text('Disney+'));
       await tester.pumpAndSettle();
-
-      // Now 2 selected
       expect(find.text('CONTINUE (2 SELECTED) →'), findsOneWidget);
-
-      // Tap to deselect Netflix
       await tester.tap(find.text('Netflix'));
       await tester.pumpAndSettle();
-
-      // Now 1 selected
       expect(find.text('CONTINUE (1 SELECTED) →'), findsOneWidget);
     });
 
-    testWidgets('toggling free platforms checkbox updates state', (tester) async {
-      setupMobileViewport(tester);
-      await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: StreamingSetupScreen(),
-          ),
-        ),
-      );
-
-      final checkboxFinder = find.byType(Checkbox);
-      expect(tester.widget<Checkbox>(checkboxFinder).value, isFalse);
-
-      await tester.tap(checkboxFinder);
+    testWidgets('Continue saves the selection and free-platform preference, then opens SCR-03', (tester) async {
+      await pump(tester);
+      await tester.tap(find.text('Apple TV+'));
+      await tester.tap(find.text('Crunchyroll'));
+      await tester.ensureVisible(find.textContaining('Include free platforms'));
+      await tester.tap(find.textContaining('Include free platforms'));
       await tester.pumpAndSettle();
 
-      expect(tester.widget<Checkbox>(checkboxFinder).value, isTrue);
-    });
-
-    testWidgets('tapping continue navigates to SCR-03 (/onboarding/seeds)', (tester) async {
-      setupMobileViewport(tester);
-      await tester.pumpWidget(
-        routerHarness(const StreamingSetupScreen()),
-      );
-
-      await tester.tap(find.byType(TellyPrimaryButton));
+      await tester.ensureVisible(find.text('CONTINUE (2 SELECTED) →'));
+      await tester.tap(find.text('CONTINUE (2 SELECTED) →'));
       await tester.pumpAndSettle();
 
+      expect(repo.saves.single.$1, {'apple_tv_plus', 'crunchyroll'});
+      expect(repo.saves.single.$2, isTrue);
       expect(find.text('route:/onboarding/seeds'), findsOneWidget);
     });
 
-    testWidgets('tapping skip for now navigates to SCR-03 (/onboarding/seeds)', (tester) async {
-      setupMobileViewport(tester);
-      await tester.pumpWidget(
-        routerHarness(const StreamingSetupScreen()),
-      );
-
-      await tester.tap(find.textContaining("I don't have streaming services"));
+    testWidgets('a failed save stays on SCR-02 and explains why', (tester) async {
+      repo.fail = true;
+      await pump(tester);
+      await tester.tap(find.text('Netflix'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('CONTINUE (1 SELECTED) →'));
       await tester.pumpAndSettle();
 
+      expect(find.textContaining("Couldn't save your services"), findsOneWidget);
+      expect(find.text('Where do you watch?'), findsOneWidget);
+    });
+
+    testWidgets('skip saves an empty selection and continues', (tester) async {
+      await pump(tester);
+      await tester.ensureVisible(find.textContaining("I don't have streaming services"));
+      await tester.tap(find.textContaining("I don't have streaming services"));
+      await tester.pumpAndSettle();
+      expect(repo.saves.single.$1, isEmpty);
+      expect(repo.saves.single.$2, isFalse);
       expect(find.text('route:/onboarding/seeds'), findsOneWidget);
     });
   });

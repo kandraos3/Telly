@@ -1,14 +1,29 @@
+import 'dart:convert';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/router/routes.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../../../core/router/routes.dart';
 import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
+import '../../../../core/widgets/poster_image.dart';
 import '../../../../core/widgets/telly_primary_button.dart';
+import '../../data/canon_import_service.dart';
 import '../../data/top_50_seeds.dart';
+import '../controllers/onboarding_controllers.dart';
 
-final selectedSeedTitlesProvider = StateProvider<Set<int>>((ref) => <int>{});
-final seedCategoryFilterProvider = StateProvider<String>((ref) => 'all');
+/// Picks a Letterboxd export and returns its text, or null if cancelled (FE-606).
+final csvFilePickerProvider = Provider<Future<String?> Function()>((ref) => () async {
+      final picked = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: const ['csv'],
+        withData: true,
+      );
+      final bytes = picked?.files.single.bytes;
+      return bytes == null ? null : utf8.decode(bytes, allowMalformed: true);
+    });
 
 /// SCR-03: Movie, Series & Anime Recognition Seed Grid Screen.
 /// Conforms to `docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md` §3 (`SCR-03`)
@@ -18,34 +33,22 @@ class SeedGridScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selectedIds = ref.watch(selectedSeedTitlesProvider);
-    final currentFilter = ref.watch(seedCategoryFilterProvider);
+    final selection = ref.watch(seedSelectionProvider);
+    final controller = ref.read(seedSelectionProvider.notifier);
+    final currentFilter = selection.filter;
 
-    final filteredTitles = kTop50SeedTitles.where((title) {
-      if (currentFilter == 'movie') {
-        return title.mediaType == 'movie';
-      }
-      if (currentFilter == 'tv') {
-        return title.mediaType == 'tv' && !title.isAnime;
-      }
-      if (currentFilter == 'anime') {
-        return title.isAnime;
-      }
-      return true;
-    }).toList();
+    bool matches(SeedTitle t, SeedFilter f) => switch (f) {
+          SeedFilter.all => true,
+          SeedFilter.movie => t.mediaType == 'movie',
+          SeedFilter.tv => t.mediaType == 'tv' && !t.isAnime,
+          SeedFilter.anime => t.isAnime,
+        };
+    int countOf(SeedFilter f) => kTop50SeedTitles.where((t) => matches(t, f)).length;
+    final filteredTitles = kTop50SeedTitles.where((t) => matches(t, currentFilter)).toList();
 
-    final count = selectedIds.length;
-    final canContinue = count >= 5;
-
-    void toggleTitle(int id) {
-      final updated = Set<int>.from(selectedIds);
-      if (updated.contains(id)) {
-        updated.remove(id);
-      } else {
-        updated.add(id);
-      }
-      ref.read(selectedSeedTitlesProvider.notifier).state = updated;
-    }
+    final count = selection.selected.length;
+    final canContinue = selection.canStart;
+    const minimum = SeedSelectionState.minimumPicks;
 
     return Scaffold(
       backgroundColor: TellyColors.backgroundPrimary,
@@ -66,12 +69,12 @@ class SeedGridScreen extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Text(
-                            'Tap titles you have watched',
+                            "Tap movies, series & anime you've watched.",
                             style: TellyTypography.displayXL(),
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            'Select at least 5 to seed your personal canon and kickstart initial pairwise duels.',
+                            'Select at least $minimum to calibrate your Movie and Series canons in a few quick duels.',
                             style: TellyTypography.bodyMedium(color: TellyColors.textSecondary),
                           ),
                           const SizedBox(height: 16),
@@ -88,18 +91,16 @@ class SeedGridScreen extends ConsumerWidget {
                               leading: const Text('🎬', style: TextStyle(fontSize: 22)),
                               title: Text(
                                 'Import from Letterboxd',
-                                style: TellyTypography.titleMedium(color: TellyColors.textPrimary).copyWith(fontSize: 14),
+                                style:
+                                    TellyTypography.titleMedium(color: TellyColors.textPrimary).copyWith(fontSize: 14),
                               ),
                               subtitle: Text(
                                 'Upload diary.csv or sync public profile',
                                 style: TellyTypography.caption(color: TellyColors.textTertiary),
                               ),
                               trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: TellyColors.textTertiary),
-                              onTap: () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Letterboxd importer opened.')),
-                                );
-                              },
+                              key: const Key('import_letterboxd'),
+                              onTap: () => _importLetterboxd(context, ref),
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -114,18 +115,16 @@ class SeedGridScreen extends ConsumerWidget {
                               leading: const Text('⚡', style: TextStyle(fontSize: 22)),
                               title: Text(
                                 'Import from AniList / MyAnimeList',
-                                style: TellyTypography.titleMedium(color: TellyColors.textPrimary).copyWith(fontSize: 14),
+                                style:
+                                    TellyTypography.titleMedium(color: TellyColors.textPrimary).copyWith(fontSize: 14),
                               ),
                               subtitle: Text(
                                 'Instant username sync without password',
                                 style: TellyTypography.caption(color: TellyColors.textTertiary),
                               ),
                               trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: TellyColors.textTertiary),
-                              onTap: () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('AniList importer opened.')),
-                                );
-                              },
+                              key: const Key('import_anilist'),
+                              onTap: () => _importAniList(context, ref),
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -136,27 +135,27 @@ class SeedGridScreen extends ConsumerWidget {
                             child: Row(
                               children: [
                                 _FilterChip(
-                                  label: 'All (${kTop50SeedTitles.length})',
-                                  isSelected: currentFilter == 'all',
-                                  onSelected: () => ref.read(seedCategoryFilterProvider.notifier).state = 'all',
+                                  label: 'All (${countOf(SeedFilter.all)})',
+                                  isSelected: currentFilter == SeedFilter.all,
+                                  onSelected: () => controller.setFilter(SeedFilter.all),
                                 ),
                                 const SizedBox(width: 8),
                                 _FilterChip(
-                                  label: '🎬 Movies (15)',
-                                  isSelected: currentFilter == 'movie',
-                                  onSelected: () => ref.read(seedCategoryFilterProvider.notifier).state = 'movie',
+                                  label: '🎬 Movies (${countOf(SeedFilter.movie)})',
+                                  isSelected: currentFilter == SeedFilter.movie,
+                                  onSelected: () => controller.setFilter(SeedFilter.movie),
                                 ),
                                 const SizedBox(width: 8),
                                 _FilterChip(
-                                  label: '📺 TV Series (20)',
-                                  isSelected: currentFilter == 'tv',
-                                  onSelected: () => ref.read(seedCategoryFilterProvider.notifier).state = 'tv',
+                                  label: '📺 Series (${countOf(SeedFilter.tv)})',
+                                  isSelected: currentFilter == SeedFilter.tv,
+                                  onSelected: () => controller.setFilter(SeedFilter.tv),
                                 ),
                                 const SizedBox(width: 8),
                                 _FilterChip(
-                                  label: '⛩️ Anime (15)',
-                                  isSelected: currentFilter == 'anime',
-                                  onSelected: () => ref.read(seedCategoryFilterProvider.notifier).state = 'anime',
+                                  label: '⚡ Anime (${countOf(SeedFilter.anime)})',
+                                  isSelected: currentFilter == SeedFilter.anime,
+                                  onSelected: () => controller.setFilter(SeedFilter.anime),
                                 ),
                               ],
                             ),
@@ -180,11 +179,11 @@ class SeedGridScreen extends ConsumerWidget {
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
                           final item = filteredTitles[index];
-                          final isSelected = selectedIds.contains(item.id);
+                          final isSelected = selection.selected.contains(seedKey(item));
 
                           return GestureDetector(
-                            key: ValueKey('seed_card_${item.id}'),
-                            onTap: () => toggleTitle(item.id),
+                            key: ValueKey('seed_card_${item.mediaType}_${item.id}'),
+                            onTap: () => controller.toggle(item),
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 150),
                               decoration: BoxDecoration(
@@ -207,37 +206,39 @@ class SeedGridScreen extends ConsumerWidget {
                               child: Stack(
                                 fit: StackFit.expand,
                                 children: [
-                                  // Poster Placeholder / Content
-                                  Container(
-                                    color: TellyColors.backgroundSurface,
-                                    padding: const EdgeInsets.all(6),
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          item.mediaType == 'movie'
-                                              ? '🎬'
-                                              : (item.isAnime ? '⛩️' : '📺'),
-                                          style: const TextStyle(fontSize: 22),
-                                        ),
-                                        const SizedBox(height: 6),
-                                        Text(
-                                          item.title,
-                                          textAlign: TextAlign.center,
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TellyTypography.labelSmall().copyWith(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 11,
+                                  // Poster (cached, shimmer while loading); the title card is the fallback.
+                                  PosterImage(
+                                    posterPath: item.posterPath,
+                                    fallback: Container(
+                                      color: TellyColors.backgroundSurface,
+                                      padding: const EdgeInsets.all(6),
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            item.mediaType == 'movie' ? '🎬' : (item.isAnime ? '⛩️' : '📺'),
+                                            style: const TextStyle(fontSize: 22),
                                           ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          item.releaseYear,
-                                          style: TellyTypography.caption(color: TellyColors.textTertiary).copyWith(fontSize: 10),
-                                        ),
-                                      ],
+                                          const SizedBox(height: 6),
+                                          Text(
+                                            item.title,
+                                            textAlign: TextAlign.center,
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TellyTypography.labelSmall().copyWith(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 11,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            item.releaseYear,
+                                            style: TellyTypography.caption(color: TellyColors.textTertiary)
+                                                .copyWith(fontSize: 10),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
 
@@ -307,13 +308,21 @@ class SeedGridScreen extends ConsumerWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  if (selection.imported > 0)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Text(
+                        '${selection.imported} imported titles are already in your canons',
+                        key: const Key('imported_count_text'),
+                        style: TellyTypography.caption(color: TellyColors.phosphorLime),
+                      ),
+                    ),
                   TellyPrimaryButton(
+                    key: const Key('start_duels_button'),
                     label: canContinue
-                        ? 'BEGIN PAIRWISE DUELS ($count SELECTED) →'
-                        : 'SELECT AT LEAST 5 TITLES ($count/5)',
-                    onPressed: canContinue
-                        ? () => context.go(Routes.tournament)
-                        : null,
+                        ? 'Start Ranking Duels →'
+                        : 'Select at least $minimum titles ($count/$minimum selected)',
+                    onPressed: canContinue ? () => context.go(Routes.tournament) : null,
                   ),
                 ],
               ),
@@ -321,6 +330,73 @@ class SeedGridScreen extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+Future<void> _importLetterboxd(BuildContext context, WidgetRef ref) async {
+  final csv = await ref.read(csvFilePickerProvider)();
+  if (csv == null || !context.mounted) return;
+  await _runImport(context, ref, () => ref.read(canonImportServiceProvider).importLetterboxd(csv));
+}
+
+Future<void> _importAniList(BuildContext context, WidgetRef ref) async {
+  final username = await showDialog<String>(context: context, builder: (_) => const _AniListUsernameDialog());
+  if (username == null || username.isEmpty || !context.mounted) return;
+  await _runImport(context, ref, () async {
+    final entries = await ref.read(aniListImporterProvider).fetchUserAnime(username);
+    return ref.read(canonImportServiceProvider).importAniList(entries);
+  });
+}
+
+Future<void> _runImport(BuildContext context, WidgetRef ref, Future<ImportResult> Function() run) async {
+  final messenger = ScaffoldMessenger.of(context);
+  try {
+    final result = await run();
+    ref.read(seedSelectionProvider.notifier).recordImport(result.added);
+    final skipped = result.unmatched.isEmpty ? '' : ' (${result.unmatched.length} not found)';
+    messenger.showSnackBar(SnackBar(content: Text('Imported ${result.added} titles$skipped')));
+  } catch (e) {
+    messenger.showSnackBar(SnackBar(content: Text('Import failed: $e')));
+  }
+}
+
+/// Owns its controller so it outlives the dialog's exit animation.
+class _AniListUsernameDialog extends StatefulWidget {
+  const _AniListUsernameDialog();
+
+  @override
+  State<_AniListUsernameDialog> createState() => _AniListUsernameDialogState();
+}
+
+class _AniListUsernameDialogState extends State<_AniListUsernameDialog> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      backgroundColor: TellyColors.backgroundCard,
+      title: Text('AniList username', style: TellyTypography.titleMedium()),
+      content: TextField(
+        key: const Key('anilist_username_field'),
+        controller: _controller,
+        autofocus: true,
+        decoration: const InputDecoration(hintText: 'e.g. frieren_fan'),
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
+        TextButton(
+          key: const Key('anilist_import_confirm'),
+          onPressed: () => Navigator.of(context).pop(_controller.text.trim()),
+          child: const Text('Import'),
+        ),
+      ],
     );
   }
 }
