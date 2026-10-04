@@ -24,7 +24,6 @@ import '../../features/queue/presentation/screens/smart_queue_screen.dart';
 import '../../features/sharing/presentation/screens/telly_wrapped_studio_screen.dart';
 import '../../features/squads/presentation/screens/squad_hub_screen.dart';
 import '../../features/squads/presentation/screens/squads_list_screen.dart';
-import '../../features/title_detail/presentation/screens/show_detail_screen.dart';
 import 'app_shell.dart';
 import 'auth_redirect.dart';
 import 'pending_screen.dart';
@@ -159,9 +158,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           final id = int.tryParse(state.pathParameters['id'] ?? '');
           return (mediaType == 'movie' || mediaType == 'tv') && id != null ? null : Routes.feed;
         },
-        builder: (_, state) => ShowDetailScreen(
-          titleId: int.parse(state.pathParameters['id']!),
-          mediaType: state.pathParameters['mediaType']!,
+        builder: (_, state) => PendingScreen(
+          title: 'Show Detail (${state.pathParameters['mediaType']}/${state.pathParameters['id']})',
+          ticket: 'FE-611',
         ),
       ),
       GoRoute(

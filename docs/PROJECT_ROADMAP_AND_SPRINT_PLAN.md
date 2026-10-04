@@ -24,7 +24,7 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 6 — Integration, Wiring & Audit Remediation** (planned 2026-10-03; owner decisions D1–D7 recorded in Sprint 6)
-- **Current Active Ticket**: `FE-612` (SCR-07 Explore & Discover Hub) — Sprint 6: 21 / 32 tickets complete
+- **Current Active Ticket**: `DEV-601` (Real Observability & Platform SDKs) — Sprint 6: 22 / 32 tickets complete
 - **Overall Roadmap Progress**: Sprints 1–5 granular tasks after the `DOC-601` honesty reset (2026-10-03): **281 / 431 verified** · **121 un-checked** (each annotated `→ remediated by <Sprint 6 ticket>`) · **29 human-only**. The earlier "89 / 89" claim was overstated.
 - **Human-Only Tasks**: 29 tasks in Sprints 1–5 marked `👤 [TO BE DONE BY HUMAN]` (cloud setup, secrets, store submission, device/CI runs, dashboard verification), plus the Sprint 6 human prerequisites list. These cannot be completed or verified from code.
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (369 / 369 pass; pgTAP 155 assertions / 9 files — note: no real E2E or golden tests exist yet)
@@ -1747,10 +1747,10 @@ Turn the library of individually-tested widgets and algorithms into a **wired, r
   - [**`features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md) §5
 - **Scope & Objectives**: New Explore tab.
 - **Granular Tasks**:
-  - [ ] Universal search (titles via `TitleRepository`, people/friends via `users`).
-  - [ ] Network Battlegrounds strip + full rankings view; "Friends are currently binging" carousel; Curated Canons cards → tier leaderboard.
+  - [x] Universal search (titles via `TitleRepository`, people/friends via `users`).
+  - [x] Network Battlegrounds strip + full rankings view; "Friends are currently binging" carousel; Curated Canons cards → tier leaderboard.
 - **Testing & Verification**:
-  - [ ] Widget tests per section with fake repositories (empty / loading / data).
+  - [x] Widget tests per section with fake repositories (empty / loading / data).
 - **Dependencies**: `BE-605`, `FE-611`.
 
 ---
