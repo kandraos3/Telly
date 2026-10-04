@@ -15,7 +15,7 @@ import 'package:telly_app/features/ranking/domain/binary_insertion_tournament.da
 import 'package:telly_app/features/ranking/domain/score_curve_calculator.dart';
 import 'package:telly_app/features/ranking/domain/sentiment_bracket.dart';
 
-import '../fakes/fake_auth_repository.dart';
+import '../../fakes/fake_auth_repository.dart';
 
 void main() {
   group('Critical User Journeys E2E Integration Suite (QA-501)', () {

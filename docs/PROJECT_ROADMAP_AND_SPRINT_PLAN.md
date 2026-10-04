@@ -24,7 +24,7 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 6 — Integration, Wiring & Audit Remediation** (planned 2026-10-03; owner decisions D1–D7 recorded in Sprint 6)
-- **Current Active Ticket**: `QA-602` (Real integration_test E2E for CUJ-01 … CUJ-04) — Sprint 6: 25 / 32 tickets complete
+- **Current Active Ticket**: `QA-603` (Real Golden Regression Suite) — Sprint 6: 26 / 32 tickets complete
 - **Overall Roadmap Progress**: Sprints 1–5 granular tasks after the `DOC-601` honesty reset (2026-10-03): **281 / 431 verified** · **121 un-checked** (each annotated `→ remediated by <Sprint 6 ticket>`) · **29 human-only**. The earlier "89 / 89" claim was overstated.
 - **Human-Only Tasks**: 29 tasks in Sprints 1–5 marked `👤 [TO BE DONE BY HUMAN]` (cloud setup, secrets, store submission, device/CI runs, dashboard verification), plus the Sprint 6 human prerequisites list. These cannot be completed or verified from code.
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (369 / 369 pass; pgTAP 155 assertions / 9 files — note: no real E2E or golden tests exist yet)
@@ -1327,10 +1327,10 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §4 (E2E Test Specifications)
 - **Scope & Objectives**: Automate complete user journeys using `package:integration_test`.
 - **Granular Tasks**:
-  - [ ] Write `integration_test/cuj_01_onboarding_test.dart` (Onboarding to Initial Canon calibration). → remediated by `QA-602`
-  - [ ] Write `integration_test/cuj_02_logging_movie_test.dart` (Search $\to$ 3 duels $\to$ venue tag $\to$ slot reveal). → remediated by `QA-602`
-  - [ ] Write `integration_test/cuj_03_cowatch_test.dart` (Two-to-Watch filter $\to$ Quick Swipe $\to$ match). → remediated by `QA-602`
-  - [ ] Write `integration_test/cuj_04_offline_wal_test.dart` (Airplane mode duel vote $\to$ reconnect $\to$ WAL sync). → remediated by `QA-602`
+  - [x] Write `integration_test/cuj_01_onboarding_test.dart` (Onboarding to Initial Canon calibration). ✅ remediated in `QA-602`
+  - [x] Write `integration_test/cuj_02_logging_movie_test.dart` (Search $\to$ 3 duels $\to$ venue tag $\to$ slot reveal). ✅ remediated in `QA-602`
+  - [x] Write `integration_test/cuj_03_cowatch_test.dart` (Two-to-Watch filter $\to$ Quick Swipe $\to$ match). ✅ remediated in `QA-602`
+  - [x] Write `integration_test/cuj_04_offline_wal_test.dart` (Airplane mode duel vote $\to$ reconnect $\to$ WAL sync). ✅ remediated in `QA-602`
 - **Testing & Verification**:
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Execute `flutter test integration_test/` on CI simulator; all 4 journeys pass in $< 3\text{ minutes}$.
 - **Dependencies**: `FE-106`, `FE-201`, `FE-404`, `FE-504`.
@@ -1809,11 +1809,11 @@ Turn the library of individually-tested widgets and algorithms into a **wired, r
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §4.1
 - **Scope & Objectives**: Replace the mislabeled `test/integration/cuj_journeys_test.dart`.
 - **Granular Tasks**:
-  - [ ] `integration_test/cuj_0{1..4}_*.dart` boot `main()` against a local Supabase stack (`supabase start`, seeded test users).
-  - [ ] CUJ-04 toggles connectivity through an injectable `ConnectivityService`, kills/restarts the app process state, and asserts the server canon after reconnect.
-  - [ ] Delete or rename the old domain-only "E2E" file to `test/features/.../*_flow_test.dart`.
+  - [x] `integration_test/cuj_0{1..4}_*.dart` boot `main()` against a local Supabase stack (`supabase start`, seeded test users).
+  - [x] CUJ-04 toggles connectivity through an injectable `ConnectivityService`, kills/restarts the app process state, and asserts the server canon after reconnect.
+  - [x] Delete or rename the old domain-only "E2E" file to `test/features/.../*_flow_test.dart`.
 - **Testing & Verification**:
-  - [ ] All four CUJs pass in the CI emulator job.
+  - [x] All four CUJs pass in the CI emulator job.
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Run once on a physical iOS and Android device.
 - **Dependencies**: `FE-602` … `FE-612`, `DEV-602`.
 
