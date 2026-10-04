@@ -24,7 +24,7 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 6 — Integration, Wiring & Audit Remediation** (planned 2026-10-03; owner decisions D1–D7 recorded in Sprint 6)
-- **Current Active Ticket**: `QA-606` (Offline WAL Persistence & Partition Stress) — Sprint 6: 29 / 32 tickets complete
+- **Current Active Ticket**: `QA-607` (Dart ↔ SQL Parity Suite (Spearman, Borda, Decay)) — Sprint 6: 30 / 32 tickets complete
 - **Overall Roadmap Progress**: Sprints 1–5 granular tasks after the `DOC-601` honesty reset (2026-10-03): **281 / 431 verified** · **121 un-checked** (each annotated `→ remediated by <Sprint 6 ticket>`) · **29 human-only**. The earlier "89 / 89" claim was overstated.
 - **Human-Only Tasks**: 29 tasks in Sprints 1–5 marked `👤 [TO BE DONE BY HUMAN]` (cloud setup, secrets, store submission, device/CI runs, dashboard verification), plus the Sprint 6 human prerequisites list. These cannot be completed or verified from code.
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (369 / 369 pass; pgTAP 155 assertions / 9 files — note: no real E2E or golden tests exist yet)
@@ -1375,10 +1375,10 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §4 (CUJ-04), §2.3 (WAL Storage)
 - **Scope & Objectives**: Verify data consistency during erratic network dropouts and sudden app kills.
 - **Granular Tasks**:
-  - [ ] Test simulating 50 offline duel votes followed by process kill and restart. → remediated by `QA-606`
-  - [ ] Assert on restart, Drift WAL transaction queue remains intact and flushes cleanly upon network restore. → remediated by `QA-606`
+  - [x] Test simulating 50 offline duel votes followed by process kill and restart. ✅ remediated in `QA-606`
+  - [x] Assert on restart, Drift WAL transaction queue remains intact and flushes cleanly upon network restore. ✅ remediated in `QA-606`
 - **Testing & Verification**:
-  - [ ] Zero lost duels, zero corrupted ranking indices. → remediated by `QA-606`
+  - [x] Zero lost duels, zero corrupted ranking indices. ✅ remediated in `QA-606`
 - **Dependencies**: `FE-504`.
 
 ---
@@ -1854,9 +1854,9 @@ Turn the library of individually-tested widgets and algorithms into a **wired, r
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.3, CUJ-04
 - **Scope & Objectives**: Replace the in-memory stress test.
 - **Granular Tasks**:
-  - [ ] File-backed Drift: 50 offline duels + 5 rankings → close DB → reopen → partition mid-flush (fake RPC fails on item 20) → recover → zero loss, FIFO order, contiguous ranks.
+  - [x] File-backed Drift: 50 offline duels + 5 rankings → close DB → reopen → partition mid-flush (fake RPC fails on item 20) → recover → zero loss, FIFO order, contiguous ranks.
 - **Testing & Verification**:
-  - [ ] Test passes 20 consecutive randomized-seed runs.
+  - [x] Test passes 20 consecutive randomized-seed runs.
 - **Dependencies**: `FE-605`.
 
 #### `QA-607`: Dart ↔ SQL Parity Suite
