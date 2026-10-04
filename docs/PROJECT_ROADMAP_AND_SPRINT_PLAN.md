@@ -24,7 +24,7 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 6 — Integration, Wiring & Audit Remediation** (planned 2026-10-03; owner decisions D1–D7 recorded in Sprint 6)
-- **Current Active Ticket**: `QA-603` (Real Golden Regression Suite) — Sprint 6: 26 / 32 tickets complete
+- **Current Active Ticket**: `QA-604` (Accessibility Audit Across All Routed Screens) — Sprint 6: 27 / 32 tickets complete
 - **Overall Roadmap Progress**: Sprints 1–5 granular tasks after the `DOC-601` honesty reset (2026-10-03): **281 / 431 verified** · **121 un-checked** (each annotated `→ remediated by <Sprint 6 ticket>`) · **29 human-only**. The earlier "89 / 89" claim was overstated.
 - **Human-Only Tasks**: 29 tasks in Sprints 1–5 marked `👤 [TO BE DONE BY HUMAN]` (cloud setup, secrets, store submission, device/CI runs, dashboard verification), plus the Sprint 6 human prerequisites list. These cannot be completed or verified from code.
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (369 / 369 pass; pgTAP 155 assertions / 9 files — note: no real E2E or golden tests exist yet)
@@ -1341,10 +1341,10 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 - **Scope & Objectives**: Prevent visual regressions across design tokens, dark surfaces, and typography.
 - **Granular Tasks**:
   - [x] Create `test/goldens/screen_goldens_test.dart`.
-  - [ ] Capture goldens for `SCR-10` (Duel Arena), `SCR-14` (Dual-Canon Profile), `SCR-05` (Feed Upset Card). → remediated by `QA-603`
-  - [ ] Compare using `matchesGoldenFile()`. → remediated by `QA-603`
+  - [x] Capture goldens for `SCR-10` (Duel Arena), `SCR-14` (Dual-Canon Profile), `SCR-05` (Feed Upset Card). ✅ remediated in `QA-603`
+  - [x] Compare using `matchesGoldenFile()`. ✅ remediated in `QA-603`
 - **Testing & Verification**:
-  - [ ] All golden snapshots match pixel-for-pixel on `@2x` and `@3x` retina scales. → remediated by `QA-603`
+  - [x] All golden snapshots match pixel-for-pixel on `@2x` and `@3x` retina scales. ✅ remediated in `QA-603`
 - **Dependencies**: `FE-201`, `FE-206`, `FE-303`.
 
 #### `QA-503`: WCAG 2.1 AA Accessibility Automated Semantics Audit
@@ -1822,10 +1822,10 @@ Turn the library of individually-tested widgets and algorithms into a **wired, r
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §5.1
 - **Scope & Objectives**: Real `matchesGoldenFile` baselines.
 - **Granular Tasks**:
-  - [ ] Bundle the font files as assets (no runtime `google_fonts` fetch in tests) so renders are deterministic.
-  - [ ] Goldens for nav bar, `SCR-05` upset card, `SCR-08`, `SCR-10`, `SCR-12`, `SCR-14` (3 view modes) at iPhone 15 Pro / Pixel 8 / iPad Mini sizes; PNGs committed under `test/goldens/goldens/`, generated on CI's Linux image only.
+  - [x] Bundle the font files as assets (no runtime `google_fonts` fetch in tests) so renders are deterministic.
+  - [x] Goldens for nav bar, `SCR-05` upset card, `SCR-08`, `SCR-10`, `SCR-12`, `SCR-14` (3 view modes) at iPhone 15 Pro / Pixel 8 / iPad Mini sizes; PNGs committed under `test/goldens/goldens/`, generated on CI's Linux image only.
 - **Testing & Verification**:
-  - [ ] Changing a color token breaks at least one golden (verified once).
+  - [x] Changing a color token breaks at least one golden (verified once).
 - **Dependencies**: `FE-611`, `ALGO-601`.
 
 #### `QA-604`: Accessibility Audit Across All Routed Screens
