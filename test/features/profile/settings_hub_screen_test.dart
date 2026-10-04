@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:telly_app/core/database/database.dart';
 import 'package:telly_app/core/database/database_provider.dart';
+import 'package:telly_app/core/services/biometrics_service.dart';
 import 'package:telly_app/features/auth/data/auth_repository.dart';
 import 'package:telly_app/features/onboarding/data/onboarding_repository.dart';
 import 'package:telly_app/features/profile/data/profile_repository.dart';
@@ -120,6 +121,32 @@ void main() {
       await tester.tap(find.byKey(const Key('settings_export_letterboxd')));
       await tester.pumpAndSettle();
       expect(shared, ['csv', 'letterboxd']);
+    });
+
+    testWidgets('biometric quick unlock toggle authenticates and persists preference', (tester) async {
+      final fakeBio = FakeBiometricsService(supported: true, authenticateResult: true);
+      tester.view.physicalSize = const Size(800, 3200);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(routerHarness(const SettingsHubScreen(), overrides: [
+        databaseProvider.overrideWithValue(db),
+        profileRepositoryProvider.overrideWithValue(profiles),
+        onboardingRepositoryProvider.overrideWithValue(onboarding),
+        authRepositoryProvider.overrideWithValue(FakeAuthRepository(signedInUserId: 'u1')),
+        imageCacheServiceProvider.overrideWithValue(cache),
+        biometricsServiceProvider.overrideWithValue(fakeBio),
+      ]));
+      await tester.pumpAndSettle();
+
+      final bioSwitch = find.byKey(const Key('settings_biometric_unlock'));
+      expect(tester.widget<SwitchListTile>(find.descendant(of: bioSwitch, matching: find.byType(SwitchListTile))).value, isFalse);
+
+      await tester.tap(bioSwitch);
+      await tester.pumpAndSettle();
+
+      expect(fakeBio.authenticateCallCount, equals(1));
+      expect(profiles.preferences['biometric_enabled'], isTrue);
     });
   });
 

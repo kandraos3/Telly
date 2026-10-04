@@ -12,6 +12,8 @@ import 'package:telly_app/features/onboarding/data/top_50_seeds.dart';
 import 'package:telly_app/features/onboarding/presentation/controllers/onboarding_controllers.dart';
 import 'package:telly_app/features/onboarding/presentation/screens/onboarding_tournament_screen.dart';
 
+import 'package:telly_app/features/sharing/data/story_share_service.dart';
+
 import '../../fakes/fake_auth_repository.dart';
 
 void main() {
@@ -29,10 +31,12 @@ void main() {
       signedInUserId: 'u1',
       profile: UserProfile(id: 'u1', username: 'maya', displayName: 'Maya', createdAt: DateTime(2026)),
     );
+    final fakeShare = FakeStoryShareService();
     final container = ProviderContainer(overrides: [
       databaseProvider.overrideWithValue(db),
       hapticsEnabledProvider.overrideWith((ref) => false),
       authRepositoryProvider.overrideWithValue(auth),
+      storyShareServiceProvider.overrideWithValue(fakeShare),
     ]);
     addTearDown(container.dispose);
     container.listen(authControllerProvider, (_, __) {});
@@ -73,7 +77,9 @@ void main() {
 
     await tester.tap(find.byKey(const Key('share_starter_canon_button')));
     await tester.pumpAndSettle();
-    expect(find.textContaining('DEV-601'), findsOneWidget, reason: 'honest until the share sheet lands');
+    expect(fakeShare.sharedStories.length, equals(1));
+    expect(fakeShare.sharedStories.first.canonLabel, equals('Top Series & Anime'));
+    expect(fakeShare.sharedStories.first.topTitles.length, equals(5));
 
     await tester.tap(find.byKey(const Key('finish_onboarding_button')));
     // No router here to navigate away, so the button keeps its loading spinner.

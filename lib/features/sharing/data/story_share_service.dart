@@ -1,26 +1,48 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 
-/// Shares a 9:16 story asset through the OS share sheet.
+/// Shares a 9:16 story asset through the OS share sheet (`DEV-601`, `share_plus`).
 abstract interface class StoryShareService {
   /// Shares a starter-canon story (features/01 Screen 5). [topTitles] are best first.
   Future<void> shareStarterCanon({required String canonLabel, required List<String> topTitles});
 }
 
-/// Thrown until the native share sheet lands (`DEV-601`, `share_plus`).
-class StoryShareUnavailable implements Exception {
-  const StoryShareUnavailable();
+/// Real implementation backed by `package:share_plus`.
+class SharePlusStoryShareService implements StoryShareService {
+  final Future<void> Function(String text, {String? subject}) _shareText;
+
+  SharePlusStoryShareService({
+    Future<void> Function(String text, {String? subject})? shareText,
+  }) : _shareText = shareText ??
+            ((text, {subject}) => SharePlus.instance
+                .share(ShareParams(text: text, subject: subject)));
 
   @override
-  String toString() => 'Story sharing is not available yet (DEV-601).';
+  Future<void> shareStarterCanon({
+    required String canonLabel,
+    required List<String> topTitles,
+  }) async {
+    final buffer = StringBuffer('🎬 My $canonLabel on Telly:\n\n');
+    for (var i = 0; i < topTitles.length; i++) {
+      buffer.writeln('#${i + 1} ${topTitles[i]}');
+    }
+    buffer.writeln('\nRank your own favorites on Telly: https://telly.app');
+    await _shareText(buffer.toString(), subject: 'My $canonLabel Top Shows');
+  }
 }
 
-class _UnavailableStoryShareService implements StoryShareService {
-  const _UnavailableStoryShareService();
+/// In-memory fake for widget and unit tests (zero platform channel calls).
+class FakeStoryShareService implements StoryShareService {
+  final List<({String canonLabel, List<String> topTitles})> sharedStories = [];
 
   @override
-  Future<void> shareStarterCanon({required String canonLabel, required List<String> topTitles}) async =>
-      throw const StoryShareUnavailable();
+  Future<void> shareStarterCanon({
+    required String canonLabel,
+    required List<String> topTitles,
+  }) async {
+    sharedStories.add((canonLabel: canonLabel, topTitles: List.unmodifiable(topTitles)));
+  }
 }
 
-/// Replaced by the `share_plus` implementation in `DEV-601`.
-final storyShareServiceProvider = Provider<StoryShareService>((ref) => const _UnavailableStoryShareService());
+final storyShareServiceProvider = Provider<StoryShareService>((ref) => SharePlusStoryShareService());
+

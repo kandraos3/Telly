@@ -24,7 +24,7 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 6 — Integration, Wiring & Audit Remediation** (planned 2026-10-03; owner decisions D1–D7 recorded in Sprint 6)
-- **Current Active Ticket**: `DEV-601` (Real Observability & Platform SDKs) — Sprint 6: 22 / 32 tickets complete
+- **Current Active Ticket**: `LEGAL-601` (Store-Compliance Fixes) — Sprint 6: 23 / 32 tickets complete
 - **Overall Roadmap Progress**: Sprints 1–5 granular tasks after the `DOC-601` honesty reset (2026-10-03): **281 / 431 verified** · **121 un-checked** (each annotated `→ remediated by <Sprint 6 ticket>`) · **29 human-only**. The earlier "89 / 89" claim was overstated.
 - **Human-Only Tasks**: 29 tasks in Sprints 1–5 marked `👤 [TO BE DONE BY HUMAN]` (cloud setup, secrets, store submission, device/CI runs, dashboard verification), plus the Sprint 6 human prerequisites list. These cannot be completed or verified from code.
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (369 / 369 pass; pgTAP 155 assertions / 9 files — note: no real E2E or golden tests exist yet)
@@ -1122,7 +1122,7 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
   - [x] Create `lib/features/sharing/presentation/widgets/story_card_renderer.dart`.
   - [x] Wrap target card in off-screen `RepaintBoundary` with fixed $1080 \times 1920$ dimensions.
   - [x] Convert boundary to PNG byte buffer using `toImage(pixelRatio: 3.0)`.
-  - [ ] Invoke native OS sharing sheet via `package:share_plus`. → remediated by `DEV-601`
+  - [x] Invoke native OS sharing sheet via `package:share_plus`. ✅ remediated in `DEV-601`
 - **Testing & Verification**:
   - [x] Unit test asserting generated image bytes correspond to valid PNG header and $1080 \times 1920$ size.
 - **Dependencies**: `FE-102`.
@@ -1137,7 +1137,7 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
   - [x] Template 2: **Top 9 Series Canon Grid**.
   - [x] Template 3: **Spicy Upset Card** showcasing the user's most controversial duel.
   - [x] Template 4: **Director Affinity Radar** (e.g., Nolan, Villeneuve, Miyazaki).
-  - [ ] Export directly to Instagram Stories with 1 tap. → remediated by `DEV-601`
+  - [x] Export directly to Instagram Stories with 1 tap. ✅ remediated in `DEV-601`
 - **Testing & Verification**:
   - [x] Widget test verifying template carousel switches cards cleanly.
 - **Dependencies**: `FE-501`.
@@ -1149,7 +1149,7 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 - **Scope & Objectives**: High-converting shareable graphic for Letterboxd immigrants.
 - **Granular Tasks**:
   - [x] Generate graphic stating: *"Imported 412 films from Letterboxd to Telly — here is my true #1 ranked movie"*.
-  - [ ] Include user's top-ranked movie poster, dynamic score (10.00), and custom QR code deep link. → remediated by `DEV-601`
+  - [x] Include user's top-ranked movie poster, dynamic score (10.00), and custom QR code deep link. ✅ remediated in `DEV-601`
 - **Testing & Verification**:
   - [x] Test graphic paints correct movie title and poster without rendering overflows.
 - **Dependencies**: `FE-501`, `FE-111`.
@@ -1173,7 +1173,7 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
   - [**`adjacent_systems/03_SETTINGS_AND_PREFERENCES_ARCHITECTURE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/adjacent_systems/03_SETTINGS_AND_PREFERENCES_ARCHITECTURE.md) §1–§4 (Settings Hierarchy)
 - **Scope & Objectives**: Central configuration hub for account, streaming services, push notifications, and storage.
 - **Granular Tasks**:
-  - [ ] Account section: Change phone/email, FaceID biometric unlock toggle. → remediated by `DEV-601`
+  - [x] Account section: Change phone/email, FaceID biometric unlock toggle. ✅ remediated in `DEV-601`
   - [x] Streaming section: Edit active services and update JustWatch country region. ✅ remediated in `FE-608`
   - [x] Notifications matrix: Granular toggles (Upset Alerts, Co-Watch Invites, Friend Activity) + Quiet Hours schedule. ✅ remediated in `FE-608` *(Quiet Hours is a fixed 10 PM – 9 AM on/off preference; no custom schedule. Push delivery itself is not built)*
   - [x] Storage hygiene: Display local cached image size with *"Clear Image Cache"* action. ✅ remediated in `FE-608`
@@ -1257,9 +1257,9 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
   - [**`technical_architecture/01_TECH_STACK_AND_LIBRARIES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/01_TECH_STACK_AND_LIBRARIES.md) §2 (Monitoring Libs)
 - **Scope & Objectives**: Real-time crash diagnostics, performance tracing, and product telemetry.
 - **Granular Tasks**:
-  - [ ] Initialize `sentry_flutter` in `main.dart` with DSN from `.env`. → remediated by `DEV-601`
-  - [ ] Configure automatic breadcrumb capture (navigation routes, network calls, duel votes). → remediated by `DEV-601`
-  - [ ] Initialize `posthog_flutter` tracking core product events (`duel_completed`, `upset_alert_shared`, `cowatch_matched`). → remediated by `DEV-601`
+  - [x] Initialize `sentry_flutter` in `main.dart` with DSN from `.env`. ✅ remediated in `DEV-601`
+  - [x] Configure automatic breadcrumb capture (navigation routes, network calls, duel votes). ✅ remediated in `DEV-601`
+  - [x] Initialize `posthog_flutter` tracking core product events (`duel_completed`, `upset_alert_shared`, `cowatch_matched`). ✅ remediated in `DEV-601`
 - **Testing & Verification**:
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Trigger test exception `Sentry.captureException()`; verify error appears in Sentry dashboard.
 - **Dependencies**: `FE-101`.
@@ -1764,12 +1764,12 @@ Turn the library of individually-tested widgets and algorithms into a **wired, r
   - [**`adjacent_systems/04_VIRAL_SHARING_AND_EXPORT_STUDIO.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/adjacent_systems/04_VIRAL_SHARING_AND_EXPORT_STUDIO.md)
 - **Scope & Objectives**: Replace the in-memory "Sentry" and "PostHog" services with real SDKs.
 - **Granular Tasks**:
-  - [ ] Add `sentry_flutter`, `posthog_flutter`, `share_plus`, `image_picker`, `local_auth`, `connectivity_plus`, and `integration_test` (dev).
-  - [ ] `SentryFlutter.init` wraps `runApp` (DSN from config; no-op when absent); `FlutterError.onError` + Drift migration failures reported.
-  - [ ] PostHog behind the existing `TelemetryService` interface with the spec §3.2 event names; no IDFA.
-  - [ ] Story Card / Wrapped share via `share_plus`; biometric quick unlock (auth spec §4.1) via `local_auth` behind a setting.
+  - [x] Add `sentry_flutter`, `posthog_flutter`, `share_plus`, `image_picker`, `local_auth`, `connectivity_plus`, and `integration_test` (dev).
+  - [x] `SentryFlutter.init` wraps `runApp` (DSN from config; no-op when absent); `FlutterError.onError` + Drift migration failures reported.
+  - [x] PostHog behind the existing `TelemetryService` interface with the spec §3.2 event names; no IDFA.
+  - [x] Story Card / Wrapped share via `share_plus`; biometric quick unlock (auth spec §4.1) via `local_auth` behind a setting.
 - **Testing & Verification**:
-  - [ ] Unit tests with fakes injected via providers; no SDK network calls in `flutter test`.
+  - [x] Unit tests with fakes injected via providers; no SDK network calls in `flutter test`.
 - **Dependencies**: `FE-601`.
 
 #### `LEGAL-601`: Store-Compliance Fixes (Deletion, Legal Links, Reports, Privacy Manifest)

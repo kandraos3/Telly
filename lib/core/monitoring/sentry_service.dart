@@ -2,6 +2,9 @@ library sentry_service;
 
 import 'dart:async';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
+
 /// Breadcrumb representation for tracking user actions prior to an error.
 class TellyBreadcrumb {
   final String category; // 'navigation', 'duel', 'network', 'auth'
@@ -25,7 +28,7 @@ class TellyBreadcrumb {
 }
 
 /// Sentry monitoring and crash diagnostics service.
-/// Conforms to `DEV-503` and `docs/technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md` §3.
+/// Conforms to `DEV-503`, `DEV-601`, and `docs/technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md` §3.1.
 class SentryService {
   static final SentryService _instance = SentryService._internal();
   factory SentryService() => _instance;
@@ -62,6 +65,15 @@ class SentryService {
         timestamp: DateTime.now(),
       ),
     );
+    if (Sentry.isEnabled) {
+      Sentry.addBreadcrumb(
+        Breadcrumb(
+          category: 'navigation',
+          message: 'Navigated to $routeName',
+          level: SentryLevel.info,
+        ),
+      );
+    }
   }
 
   /// Record duel decision for debugging tournament state.
@@ -84,6 +96,21 @@ class SentryService {
         timestamp: DateTime.now(),
       ),
     );
+    if (Sentry.isEnabled) {
+      Sentry.addBreadcrumb(
+        Breadcrumb(
+          category: 'duel',
+          message: 'Duel decided: Winner #$winnerId over #${winnerId == showAId ? showBId : showAId}',
+          data: {
+            'candidate_a': showAId,
+            'candidate_b': showBId,
+            'winner': winnerId,
+            'is_upset': isUpset,
+          },
+          level: SentryLevel.info,
+        ),
+      );
+    }
   }
 
   /// Record network request metadata.
@@ -100,6 +127,16 @@ class SentryService {
         timestamp: DateTime.now(),
       ),
     );
+    if (Sentry.isEnabled) {
+      Sentry.addBreadcrumb(
+        Breadcrumb(
+          category: 'network',
+          message: '$method $url [${statusCode ?? 'PENDING'}]',
+          data: {'url': url, 'method': method, 'status_code': statusCode},
+          level: SentryLevel.info,
+        ),
+      );
+    }
   }
 
   void _addBreadcrumb(TellyBreadcrumb breadcrumb) {
@@ -114,14 +151,32 @@ class SentryService {
     dynamic exception, [
     dynamic stackTrace,
     Map<String, dynamic>? extra,
+    String? action,
   ]) async {
+    final mergedExtra = <String, dynamic>{
+      if (extra != null) ...extra,
+      if (action != null) 'action': action,
+    };
+
     _capturedExceptions.add({
       'exception': exception.toString(),
       'stackTrace': stackTrace?.toString(),
-      'extra': extra,
+      'extra': mergedExtra.isEmpty ? null : mergedExtra,
       'timestamp': DateTime.now().toIso8601String(),
       'breadcrumbs_count': _breadcrumbs.length,
     });
+
+    if (Sentry.isEnabled) {
+      await Sentry.captureException(
+        exception,
+        stackTrace: stackTrace,
+        withScope: (scope) {
+          for (final entry in mergedExtra.entries) {
+            scope.setContexts(entry.key, entry.value);
+          }
+        },
+      );
+    }
   }
 
   /// Capture text warning or notice.
@@ -133,6 +188,15 @@ class SentryService {
         timestamp: DateTime.now(),
       ),
     );
+    if (Sentry.isEnabled) {
+      final sentryLevel = switch (level.toLowerCase()) {
+        'warning' => SentryLevel.warning,
+        'error' => SentryLevel.error,
+        'fatal' => SentryLevel.fatal,
+        _ => SentryLevel.info,
+      };
+      Sentry.captureMessage(message, level: sentryLevel);
+    }
   }
 
   /// Clear monitoring state (for testing).
@@ -143,3 +207,4 @@ class SentryService {
   }
 }
 
+final sentryServiceProvider = Provider<SentryService>((ref) => SentryService());

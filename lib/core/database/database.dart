@@ -3,9 +3,11 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
+
+import '../monitoring/sentry_service.dart';
 
 part 'database.g.dart';
 
@@ -224,7 +226,17 @@ class AppDatabase extends _$AppDatabase {
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (m) => m.createAll(),
         onUpgrade: (m, from, to) async {
-          if (from < 2) await _migrateV1ToV2(m);
+          try {
+            if (from < 2) await _migrateV1ToV2(m);
+          } catch (e, stack) {
+            await SentryService().captureException(
+              e,
+              stack,
+              {'from': from, 'to': to},
+              'drift_migration_upgrade',
+            );
+            rethrow;
+          }
         },
       );
 

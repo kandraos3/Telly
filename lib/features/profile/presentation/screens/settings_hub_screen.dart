@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/routes.dart';
+import '../../../../core/services/biometrics_service.dart';
 import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
@@ -89,6 +90,33 @@ class SettingsHubScreen extends ConsumerWidget {
             ),
             const Divider(color: TellyColors.borderGlass),
             _VisibilityTile(current: me?.visibilityMode ?? 'PUBLIC'),
+            const Divider(color: TellyColors.borderGlass),
+            _SwitchTile(
+              key: const Key('settings_biometric_unlock'),
+              title: 'Biometric Quick Unlock',
+              subtitle: 'Face ID / Fingerprint to unlock app (auth §4.1)',
+              value: prefs.biometricEnabled,
+              onChanged: (on) async {
+                if (on) {
+                  final can = await ref.read(biometricsServiceProvider).canAuthenticate();
+                  if (!can) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Biometric authentication is not supported or not enrolled on this device.')),
+                      );
+                    }
+                    return;
+                  }
+                  final ok = await ref.read(biometricsServiceProvider).authenticate(
+                        localizedReason: 'Authenticate to enable biometric quick unlock',
+                      );
+                  if (!ok) return;
+                }
+                if (context.mounted) {
+                  _guard(context, () => prefsController.edit((p) => p.copyWith(biometricEnabled: on)));
+                }
+              },
+            ),
           ]),
           const SizedBox(height: 20),
 

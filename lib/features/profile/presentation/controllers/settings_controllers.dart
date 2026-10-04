@@ -38,6 +38,7 @@ class AppPreferences {
   final String region;
   final bool includeRentals;
   final bool quietHours;
+  final bool biometricEnabled;
   final Map<NotificationKind, bool> notifications;
 
   const AppPreferences({
@@ -46,6 +47,7 @@ class AppPreferences {
     this.region = 'US',
     this.includeRentals = false,
     this.quietHours = false,
+    this.biometricEnabled = false,
     this.notifications = const {},
   });
 
@@ -61,6 +63,7 @@ class AppPreferences {
       region: (j['region'] as String?) ?? 'US',
       includeRentals: (j['include_rentals'] as bool?) ?? false,
       quietHours: (j['quiet_hours'] as bool?) ?? false,
+      biometricEnabled: (j['biometric_enabled'] as bool?) ?? false,
       notifications: {
         for (final k in NotificationKind.values)
           if (n[k.key] is bool) k: n[k.key] as bool,
@@ -74,6 +77,7 @@ class AppPreferences {
         'region': region,
         'include_rentals': includeRentals,
         'quiet_hours': quietHours,
+        'biometric_enabled': biometricEnabled,
         'notifications': {for (final k in NotificationKind.values) k.key: notificationOn(k)},
       };
 
@@ -83,6 +87,7 @@ class AppPreferences {
     String? region,
     bool? includeRentals,
     bool? quietHours,
+    bool? biometricEnabled,
     Map<NotificationKind, bool>? notifications,
   }) =>
       AppPreferences(
@@ -91,6 +96,7 @@ class AppPreferences {
         region: region ?? this.region,
         includeRentals: includeRentals ?? this.includeRentals,
         quietHours: quietHours ?? this.quietHours,
+        biometricEnabled: biometricEnabled ?? this.biometricEnabled,
         notifications: notifications ?? this.notifications,
       );
 }

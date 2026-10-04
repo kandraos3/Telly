@@ -50,9 +50,14 @@ dependencies:
   image_picker: ^1.2.3
   image_cropper: ^12.2.1
   flutter_cache_manager: ^3.4.5
+  posthog_flutter: ^5.50.13
+  sentry_flutter: ^8.9.0
+  local_auth: ^2.3.0
 
 dev_dependencies:
   flutter_test:
+    sdk: flutter
+  integration_test:
     sdk: flutter
   flutter_driver:
     sdk: flutter
