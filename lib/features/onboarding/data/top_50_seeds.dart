@@ -74,10 +74,24 @@ const List<SeedTitle> kTop50SeedTitles = [
 ];
 
 /// Looks up the verified seed poster path for a given [id] and [mediaType].
-String? findSeedPoster(int id, String mediaType) {
+/// Optionally falls back to matching by [title] (case-insensitive) if [id] is not found or is 0.
+String? findSeedPoster(int id, String mediaType, [String? title]) {
   for (final s in kTop50SeedTitles) {
     if (s.id == id && s.mediaType == mediaType) {
       return s.posterPath;
+    }
+  }
+  if (title != null && title.isNotEmpty) {
+    final lower = title.trim().toLowerCase();
+    for (final s in kTop50SeedTitles) {
+      if (s.title.toLowerCase() == lower && s.mediaType == mediaType) {
+        return s.posterPath;
+      }
+    }
+    for (final s in kTop50SeedTitles) {
+      if (s.title.toLowerCase() == lower) {
+        return s.posterPath;
+      }
     }
   }
   return null;

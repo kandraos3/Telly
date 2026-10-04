@@ -1,4 +1,7 @@
+import 'dart:io' show Platform;
+
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
@@ -22,12 +25,17 @@ abstract final class TmdbImages {
   }
 }
 
-/// Whether posters load from the network. Widget tests override this to false: the
-/// image cache never resolves there, so the shimmer would never settle.
-final posterNetworkImagesProvider = Provider<bool>((ref) => true);
+/// Whether posters load from the network. Defaults to false in test environments so
+/// the shimmer animation never loops infinitely during pumpAndSettle.
+final posterNetworkImagesProvider = Provider<bool>((ref) {
+  if (!kIsWeb && Platform.environment.containsKey('FLUTTER_TEST')) {
+    return false;
+  }
+  return true;
+});
 
 /// A cached poster with a shimmer placeholder and a readable [fallback] (FE-606).
-class PosterImage extends ConsumerWidget {
+class PosterImage extends StatelessWidget {
   final String? posterPath;
   final Widget fallback;
   final BoxFit fit;
@@ -35,9 +43,20 @@ class PosterImage extends ConsumerWidget {
   const PosterImage({super.key, required this.posterPath, required this.fallback, this.fit = BoxFit.cover});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final url = TmdbImages.poster(posterPath);
-    if (url == null || !ref.watch(posterNetworkImagesProvider)) return fallback;
+    if (url == null) return fallback;
+
+    bool enabled = !(!kIsWeb && Platform.environment.containsKey('FLUTTER_TEST'));
+    try {
+      final container = ProviderScope.containerOf(context, listen: false);
+      enabled = container.read(posterNetworkImagesProvider);
+    } catch (_) {
+      // Gracefully handles standalone widget tests without an ancestor ProviderScope
+    }
+
+    if (!enabled) return fallback;
+
     return CachedNetworkImage(
       imageUrl: url,
       fit: fit,

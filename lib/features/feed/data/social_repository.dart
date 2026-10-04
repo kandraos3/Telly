@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/network/supabase_providers.dart';
 import '../../../core/widgets/poster_image.dart';
+import '../../onboarding/data/top_50_seeds.dart';
 import '../../profile/domain/dropped_show.dart';
 import '../../queue/data/watchlist_repository.dart';
 import '../../ranking/domain/canon_tier.dart';
@@ -257,6 +258,18 @@ ActivityLog activityFromFeedRow(Map<String, dynamic> r) {
   final metadata = (r['metadata'] as Map?)?.cast<String, dynamic>() ?? const {};
   final score = (r['calculated_score'] as num?)?.toDouble();
   final counts = (r['reaction_counts'] as Map?) ?? const {};
+  final titleId = (r['title_id'] as num?)?.toInt() ?? 0;
+  final mediaType = (r['media_type'] as String?) ?? 'tv';
+  final titleName = (r['title'] as String?) ?? 'Unknown title';
+  final rawPoster = r['poster_path'] as String?;
+  final seedPoster = findSeedPoster(titleId, mediaType, titleName);
+  final effectivePoster = (rawPoster != null && rawPoster.isNotEmpty) ? rawPoster : seedPoster;
+
+  final loserTitleId = (metadata['loser_title_id'] as num?)?.toInt() ?? 0;
+  final loserTitleName = r['upset_over_title'] as String?;
+  final loserSeedPoster = findSeedPoster(loserTitleId, mediaType, loserTitleName);
+  final loserPoster = (metadata['loser_poster_path'] as String?) ?? loserSeedPoster;
+
   return ActivityLog(
     id: r['id'] as String,
     userId: r['user_id'] as String,
@@ -264,11 +277,11 @@ ActivityLog activityFromFeedRow(Map<String, dynamic> r) {
     userDisplayName: (r['display_name'] as String?) ?? '',
     userAvatarUrl: r['avatar_url'] as String?,
     activityType: ActivityType.fromString(r['activity_type'] as String),
-    titleId: (r['title_id'] as num?)?.toInt() ?? 0,
-    titleName: (r['title'] as String?) ?? 'Unknown title',
-    titlePosterUrl: TmdbImages.poster(r['poster_path'] as String?),
+    titleId: titleId,
+    titleName: titleName,
+    titlePosterUrl: TmdbImages.poster(effectivePoster),
     releaseYear: (r['release_year'] as num?)?.toInt(),
-    mediaType: (r['media_type'] as String?) ?? 'tv',
+    mediaType: mediaType,
     rankPosition: (r['rank_position'] as num?)?.toInt(),
     calculatedScore: score,
     culturalTier: score == null ? null : CanonTier.fromScore(score).label,
@@ -277,7 +290,8 @@ ActivityLog activityFromFeedRow(Map<String, dynamic> r) {
     microReview: r['review_short'] as String?,
     isUpset: (r['is_upset'] as bool?) ?? false,
     upsetDelta: (r['upset_delta'] as num?)?.toDouble() ?? 0,
-    upsetOverTitleName: r['upset_over_title'] as String?,
+    upsetOverTitleName: loserTitleName,
+    upsetOverTitlePoster: TmdbImages.poster(loserPoster),
     upsetOverTitleRank: (r['upset_over_rank'] as num?)?.toInt(),
     droppedSeason: (metadata['season'] as num?)?.toInt(),
     droppedEpisode: (metadata['episode'] as num?)?.toInt(),

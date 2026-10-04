@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:telly_app/core/services/haptics_service.dart';
 import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/theme/telly_typography.dart';
+import 'package:telly_app/core/widgets/poster_image.dart';
 import 'package:telly_app/features/feed/domain/social_models.dart';
+import 'package:telly_app/features/onboarding/data/top_50_seeds.dart';
 
 /// High-visibility Spicy Upset Alert feed card (FE-303).
 ///
@@ -182,14 +184,19 @@ class _UpsetActivityCardState extends State<UpsetActivityCard>
                     CircleAvatar(
                       radius: 14,
                       backgroundColor: TellyColors.backgroundCard,
-                      child: Text(
-                        activity.userDisplayName.isNotEmpty
-                            ? activity.userDisplayName[0].toUpperCase()
-                            : '?',
-                        style: TellyTypography.caption(
-                          color: TellyColors.neonCoral,
-                        ).copyWith(fontWeight: FontWeight.bold),
-                      ),
+                      backgroundImage: (activity.userAvatarUrl != null && activity.userAvatarUrl!.isNotEmpty)
+                          ? NetworkImage(activity.userAvatarUrl!)
+                          : null,
+                      child: (activity.userAvatarUrl == null || activity.userAvatarUrl!.isEmpty)
+                          ? Text(
+                              activity.userDisplayName.isNotEmpty
+                                  ? activity.userDisplayName[0].toUpperCase()
+                                  : '?',
+                              style: TellyTypography.caption(
+                                color: TellyColors.neonCoral,
+                              ).copyWith(fontWeight: FontWeight.bold),
+                            )
+                          : null,
                     ),
                     const SizedBox(width: 8),
                     Flexible(
@@ -253,8 +260,13 @@ class _UpsetActivityCardState extends State<UpsetActivityCard>
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(color: TellyColors.phosphorLime, width: 2),
                             ),
-                            child: const Center(
-                              child: Icon(Icons.tv_rounded, color: TellyColors.phosphorLime, size: 28),
+                            clipBehavior: Clip.antiAlias,
+                            child: PosterImage(
+                              posterPath: activity.titlePosterUrl ??
+                                  TmdbImages.poster(findSeedPoster(activity.titleId, activity.mediaType, activity.titleName)),
+                              fallback: const Center(
+                                child: Icon(Icons.tv_rounded, color: TellyColors.phosphorLime, size: 28),
+                              ),
                             ),
                           ),
                           const SizedBox(height: 6),
@@ -304,12 +316,23 @@ class _UpsetActivityCardState extends State<UpsetActivityCard>
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(color: TellyColors.borderGlass),
                             ),
-                            child: Center(
-                              child: Icon(
-                                Icons.tv_rounded,
-                                color: TellyColors.textTertiary.withValues(alpha: 0.6),
-                                size: 28,
-                              ),
+                            clipBehavior: Clip.antiAlias,
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                PosterImage(
+                                  posterPath: activity.upsetOverTitlePoster ??
+                                      TmdbImages.poster(findSeedPoster(0, activity.mediaType, activity.upsetOverTitleName)),
+                                  fallback: Center(
+                                    child: Icon(
+                                      Icons.tv_rounded,
+                                      color: TellyColors.textTertiary.withValues(alpha: 0.6),
+                                      size: 28,
+                                    ),
+                                  ),
+                                ),
+                                Container(color: Colors.black.withValues(alpha: 0.35)),
+                              ],
                             ),
                           ),
                           const SizedBox(height: 6),

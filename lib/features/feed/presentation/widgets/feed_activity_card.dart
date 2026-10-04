@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:telly_app/core/services/haptics_service.dart';
 import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/theme/telly_typography.dart';
+import 'package:telly_app/core/widgets/poster_image.dart';
 import 'package:telly_app/features/feed/domain/social_models.dart';
+import 'package:telly_app/features/onboarding/data/top_50_seeds.dart';
 
 /// Standard activity feed card component (FE-302, FE-304).
 ///
@@ -106,12 +108,17 @@ class _FeedActivityCardState extends State<FeedActivityCard> {
                     CircleAvatar(
                       radius: 18,
                       backgroundColor: TellyColors.backgroundCard,
-                      child: Text(
-                        activity.userDisplayName.isNotEmpty
-                            ? activity.userDisplayName[0].toUpperCase()
-                            : '?',
-                        style: TellyTypography.labelLarge(color: TellyColors.phosphorLime),
-                      ),
+                      backgroundImage: (activity.userAvatarUrl != null && activity.userAvatarUrl!.isNotEmpty)
+                          ? NetworkImage(activity.userAvatarUrl!)
+                          : null,
+                      child: (activity.userAvatarUrl == null || activity.userAvatarUrl!.isEmpty)
+                          ? Text(
+                              activity.userDisplayName.isNotEmpty
+                                  ? activity.userDisplayName[0].toUpperCase()
+                                  : '?',
+                              style: TellyTypography.labelLarge(color: TellyColors.phosphorLime),
+                            )
+                          : null,
                     ),
                     const SizedBox(width: 10),
                     Expanded(
@@ -168,13 +175,18 @@ class _FeedActivityCardState extends State<FeedActivityCard> {
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(color: TellyColors.borderGlass),
                       ),
-                      child: Center(
-                        child: Icon(
-                          activity.mediaType == 'movie'
-                              ? Icons.movie_rounded
-                              : Icons.tv_rounded,
-                          color: TellyColors.textTertiary,
-                          size: 28,
+                      clipBehavior: Clip.antiAlias,
+                      child: PosterImage(
+                        posterPath: activity.titlePosterUrl ??
+                            TmdbImages.poster(findSeedPoster(activity.titleId, activity.mediaType, activity.titleName)),
+                        fallback: Center(
+                          child: Icon(
+                            activity.mediaType == 'movie'
+                                ? Icons.movie_rounded
+                                : Icons.tv_rounded,
+                            color: TellyColors.textTertiary,
+                            size: 28,
+                          ),
                         ),
                       ),
                     ),

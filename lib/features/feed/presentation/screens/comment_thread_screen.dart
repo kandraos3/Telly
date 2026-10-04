@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:telly_app/core/services/haptics_service.dart';
 import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/theme/telly_typography.dart';
+import 'package:telly_app/core/widgets/poster_image.dart';
 import 'package:telly_app/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:telly_app/features/onboarding/data/top_50_seeds.dart';
 import 'package:telly_app/features/feed/data/social_repository.dart';
 import 'package:telly_app/features/feed/domain/social_models.dart';
 import 'package:telly_app/features/feed/presentation/controllers/feed_controllers.dart';
@@ -165,12 +167,17 @@ class _CommentThreadScreenState extends ConsumerState<CommentThreadScreen> {
           CircleAvatar(
             radius: 16,
             backgroundColor: TellyColors.backgroundCard,
-            child: Text(
-              activity.userDisplayName.isNotEmpty ? activity.userDisplayName[0] : '?',
-              style: TellyTypography.caption(
-                color: activity.isUpset ? TellyColors.neonCoral : TellyColors.phosphorLime,
-              ).copyWith(fontWeight: FontWeight.bold),
-            ),
+            backgroundImage: (activity.userAvatarUrl != null && activity.userAvatarUrl!.isNotEmpty)
+                ? NetworkImage(activity.userAvatarUrl!)
+                : null,
+            child: (activity.userAvatarUrl == null || activity.userAvatarUrl!.isEmpty)
+                ? Text(
+                    activity.userDisplayName.isNotEmpty ? activity.userDisplayName[0] : '?',
+                    style: TellyTypography.caption(
+                      color: activity.isUpset ? TellyColors.neonCoral : TellyColors.phosphorLime,
+                    ).copyWith(fontWeight: FontWeight.bold),
+                  )
+                : null,
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -206,6 +213,28 @@ class _CommentThreadScreenState extends ConsumerState<CommentThreadScreen> {
               ],
             ),
           ),
+          const SizedBox(width: 10),
+          Container(
+            width: 44,
+            height: 66,
+            decoration: BoxDecoration(
+              color: TellyColors.backgroundCard,
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: TellyColors.borderGlass),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: PosterImage(
+              posterPath: activity.titlePosterUrl ??
+                  TmdbImages.poster(findSeedPoster(activity.titleId, activity.mediaType, activity.titleName)),
+              fallback: Center(
+                child: Icon(
+                  activity.mediaType == 'movie' ? Icons.movie_rounded : Icons.tv_rounded,
+                  color: TellyColors.textTertiary,
+                  size: 20,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -227,12 +256,17 @@ class _CommentThreadScreenState extends ConsumerState<CommentThreadScreen> {
           CircleAvatar(
             radius: 16,
             backgroundColor: TellyColors.backgroundCard,
-            child: Text(
-              comment.userDisplayName.isNotEmpty ? comment.userDisplayName[0] : '?',
-              style: TellyTypography.caption(
-                color: TellyColors.textPrimary,
-              ).copyWith(fontWeight: FontWeight.bold),
-            ),
+            backgroundImage: (comment.userAvatarUrl != null && comment.userAvatarUrl!.isNotEmpty)
+                ? NetworkImage(comment.userAvatarUrl!)
+                : null,
+            child: (comment.userAvatarUrl == null || comment.userAvatarUrl!.isEmpty)
+                ? Text(
+                    comment.userDisplayName.isNotEmpty ? comment.userDisplayName[0] : '?',
+                    style: TellyTypography.caption(
+                      color: TellyColors.textPrimary,
+                    ).copyWith(fontWeight: FontWeight.bold),
+                  )
+                : null,
           ),
           const SizedBox(width: 10),
           Expanded(
