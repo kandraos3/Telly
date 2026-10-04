@@ -12,7 +12,11 @@ import 'package:telly_app/features/profile/presentation/widgets/log_dropped_show
 class TvGraveyardScreen extends StatefulWidget {
   final List<DroppedShow>? initialDroppedShows;
 
-  const TvGraveyardScreen({super.key, this.initialDroppedShows});
+  /// A show just dropped from the Logging Studio (`SCR-09`, FE-603). Persisting to
+  /// `user_dropped_shows` is FE-608.
+  final DroppedShow? newlyDropped;
+
+  const TvGraveyardScreen({super.key, this.initialDroppedShows, this.newlyDropped});
 
   @override
   State<TvGraveyardScreen> createState() => _TvGraveyardScreenState();
@@ -27,6 +31,7 @@ class _TvGraveyardScreenState extends State<TvGraveyardScreen> {
     _droppedShows = widget.initialDroppedShows != null
         ? List.from(widget.initialDroppedShows!)
         : _seedInitialGraveyard();
+    if (widget.newlyDropped != null) _droppedShows.insert(0, widget.newlyDropped!);
   }
 
   List<DroppedShow> _seedInitialGraveyard() {

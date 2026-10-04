@@ -38,6 +38,32 @@ extension SentimentBracketExtension on SentimentBracket {
     }
   }
 
+  /// The four cards shown on `SCR-09` (FE-603); [SentimentBracket.regret] is importer-only.
+  static const studioBrackets = [
+    SentimentBracket.masterpiece,
+    SentimentBracket.loved,
+    SentimentBracket.liked,
+    SentimentBracket.meh,
+  ];
+
+  /// `SCR-09` card headline, e.g. `👑 Masterpiece / Top 10%`.
+  String get studioTitle => switch (this) {
+        SentimentBracket.masterpiece => '👑 Masterpiece / Top 10%',
+        SentimentBracket.loved => '✨ Loved It / Top 25%',
+        SentimentBracket.liked => '👍 Liked It / Middle 40%',
+        SentimentBracket.meh => '🤷 Meh / Bottom 25%',
+        SentimentBracket.regret => '💔 Disappointed / Bottom 5%',
+      };
+
+  /// `SCR-09` card tagline.
+  String get studioTagline => switch (this) {
+        SentimentBracket.masterpiece => 'Life-changing, flawless television',
+        SentimentBracket.loved => 'Outstanding, highly recommended',
+        SentimentBracket.liked => 'Solid, enjoyable, some flaws',
+        SentimentBracket.meh => 'Forgettable, background noise',
+        SentimentBracket.regret => 'Wish I had that time back',
+      };
+
   /// Maps an external 10-point rating (e.g. AniList) to a starting bracket.
   static SentimentBracket fromScore(double score) {
     if (score >= 9.0) return SentimentBracket.masterpiece;

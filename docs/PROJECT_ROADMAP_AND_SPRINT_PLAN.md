@@ -24,7 +24,7 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 6 — Integration, Wiring & Audit Remediation** (planned 2026-10-03; owner decisions D1–D7 recorded in Sprint 6)
-- **Current Active Ticket**: `FE-603` (SCR-09 Logging Studio — Title Search, Status & Sentiment Bracket) — Sprint 6: 12 / 32 tickets complete
+- **Current Active Ticket**: `FE-604` (RankingRepository & Duel Loop Wiring) — Sprint 6: 13 / 32 tickets complete
 - **Overall Roadmap Progress**: Sprints 1–5 granular tasks after the `DOC-601` honesty reset (2026-10-03): **281 / 431 verified** · **121 un-checked** (each annotated `→ remediated by <Sprint 6 ticket>`) · **29 human-only**. The earlier "89 / 89" claim was overstated.
 - **Human-Only Tasks**: 29 tasks in Sprints 1–5 marked `👤 [TO BE DONE BY HUMAN]` (cloud setup, secrets, store submission, device/CI runs, dashboard verification), plus the Sprint 6 human prerequisites list. These cannot be completed or verified from code.
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (215 / 215 pass — note: many tests are widget/unit-level only; no real E2E or golden tests exist yet)
@@ -1618,11 +1618,11 @@ Turn the library of individually-tested widgets and algorithms into a **wired, r
   - [**`features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md) §2 Steps 1–2
 - **Scope & Objectives**: The missing entry point to the duel loop.
 - **Granular Tasks**:
-  - [ ] `TitleRepository`: `search(query)` → `functions.invoke('tmdb-search')`, debounced 150 ms, results cached into Drift `CachedTitles`; offline falls back to `LocalTitleDao.searchTitles`.
-  - [ ] Screen: search → selected title header → status radios (movie: First-Time/Rewatch; series: Finished / Up to Date / Season X / Dropped, where Dropped routes to `LogDroppedShowSheet`) → 4 sentiment cards (lime highlight + check) → `BEGIN PAIRWISE DUELS` CTA.
-  - [ ] `LoggingSessionNotifier` holds the draft (title, status, bracket) and hands it to `SCR-10` via the router.
+  - [x] `TitleRepository`: `search(query)` → `functions.invoke('tmdb-search')`, debounced 150 ms, results cached into Drift `CachedTitles`; offline falls back to `LocalTitleDao.searchTitles`. *(The 150 ms debounce lives in `LoggingSessionController.updateQuery`, keeping the repository stateless.)*
+  - [x] Screen: search → selected title header → status radios (movie: First-Time/Rewatch; series: Finished / Up to Date / Season X / Dropped, where Dropped routes to `LogDroppedShowSheet`) → 4 sentiment cards (lime highlight + check) → `BEGIN PAIRWISE DUELS` CTA.
+  - [x] `LoggingSessionNotifier` (`LoggingSessionController`, auto-disposed with the `/log` stack) holds the draft (title, status, bracket) and hands it to `SCR-10` via the router.
 - **Testing & Verification**:
-  - [ ] Widget tests: debounce issues one search per 150 ms burst; CTA disabled until title + bracket chosen; a movie selection shows movie statuses only.
+  - [x] Widget tests: debounce issues one search per 150 ms burst; CTA disabled until title + bracket chosen; a movie selection shows movie statuses only.
 - **Dependencies**: `FE-602`, `ALGO-601`.
 
 #### `FE-604`: `RankingRepository` & Duel Loop Wiring (`SCR-10` → `SCR-11` → `SCR-12`)

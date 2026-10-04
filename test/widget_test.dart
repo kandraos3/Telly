@@ -9,6 +9,7 @@ import 'package:telly_app/features/auth/data/auth_repository.dart';
 import 'package:telly_app/features/auth/domain/user_profile.dart';
 import 'package:telly_app/features/auth/presentation/screens/auth_screen.dart';
 import 'package:telly_app/features/feed/presentation/screens/activity_feed_screen.dart';
+import 'package:telly_app/features/logging/presentation/screens/logging_studio_screen.dart';
 import 'package:telly_app/features/onboarding/presentation/screens/streaming_setup_screen.dart';
 
 import 'fakes/fake_auth_repository.dart';
@@ -86,7 +87,7 @@ void main() {
       await tester.tap(find.byKey(const Key('nav_log_button')));
       await tester.pumpAndSettle();
       // Pushed full-screen over the shell (imperative match, so assert on what renders).
-      expect(find.text('Log a Show is not built yet'), findsOneWidget);
+      expect(find.byType(LoggingStudioScreen), findsOneWidget);
       expect(find.byKey(const Key('nav_bar_surface')), findsNothing);
       expect(c.read(appRouterProvider).canPop(), isTrue);
     });
