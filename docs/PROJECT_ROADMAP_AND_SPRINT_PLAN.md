@@ -24,7 +24,7 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 6 — Integration, Wiring & Audit Remediation** (planned 2026-10-03; owner decisions D1–D7 recorded in Sprint 6)
-- **Current Active Ticket**: `QA-607` (Dart ↔ SQL Parity Suite (Spearman, Borda, Decay)) — Sprint 6: 30 / 32 tickets complete
+- **Current Active Ticket**: `QA-608` (Riverpod Sweep & Sprint 6 Quality Gate) — Sprint 6: 31 / 32 tickets complete
 - **Overall Roadmap Progress**: Sprints 1–5 granular tasks after the `DOC-601` honesty reset (2026-10-03): **281 / 431 verified** · **121 un-checked** (each annotated `→ remediated by <Sprint 6 ticket>`) · **29 human-only**. The earlier "89 / 89" claim was overstated.
 - **Human-Only Tasks**: 29 tasks in Sprints 1–5 marked `👤 [TO BE DONE BY HUMAN]` (cloud setup, secrets, store submission, device/CI runs, dashboard verification), plus the Sprint 6 human prerequisites list. These cannot be completed or verified from code.
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (369 / 369 pass; pgTAP 155 assertions / 9 files — note: no real E2E or golden tests exist yet)
@@ -702,7 +702,7 @@ Build social connections, the activity feed with real-time upset alert detection
   - [x] Implement Borda Count aggregation assigning points based on each member's rank position.
   - [x] Order consensus titles by cumulative Borda points.
 - **Testing & Verification**:
-  - [ ] Test 3 users with overlapping canons generate consistent consensus ranking. → remediated by `QA-607`
+  - [x] Test 3 users with overlapping canons generate consistent consensus ranking. ✅ remediated in `QA-607`
 - **Dependencies**: `BE-101`.
 
 ---
@@ -1864,9 +1864,9 @@ Turn the library of individually-tested widgets and algorithms into a **wired, r
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §2.1, §3.3
 - **Scope & Objectives**: Guarantee the client's optimistic numbers equal the server's.
 - **Granular Tasks**:
-  - [ ] Shared fixtures (`test/fixtures/*.json`) for score curve, Spearman taste match, and Borda squad canon, asserted in Dart tests and loaded into pgTAP.
+  - [x] Shared fixtures (`test/fixtures/*.json`) for score curve, Spearman taste match, and Borda squad canon, asserted in Dart tests and loaded into pgTAP.
 - **Testing & Verification**:
-  - [ ] Both suites green on identical fixtures.
+  - [x] Both suites green on identical fixtures.
 - **Dependencies**: `BE-603`, `BE-604`, `ALGO-601`.
 
 #### `QA-608`: Riverpod Sweep & Sprint 6 Quality Gate

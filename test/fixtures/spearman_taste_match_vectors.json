@@ -1,0 +1,134 @@
+{
+  "description": "Canonical Spearman Rank Correlation with Bayesian Shrinkage (k0=5.0) vectors. features/05 §2; shared by Dart SpearmanTasteMatchCalculator and SQL calculate_taste_match_rpc.",
+  "k0": 5.0,
+  "vectors": [
+    {
+      "name": "zero_mutual_titles",
+      "k": 0,
+      "pairs": [],
+      "raw_rho": 0.0,
+      "adjusted_rho": 0.0,
+      "match_pct": 50
+    },
+    {
+      "name": "single_mutual_title",
+      "k": 1,
+      "pairs": [
+        {"ra": 1, "rb": 1}
+      ],
+      "raw_rho": 0.0,
+      "adjusted_rho": 0.0,
+      "match_pct": 50
+    },
+    {
+      "name": "two_titles_perfect_agreement",
+      "k": 2,
+      "pairs": [
+        {"ra": 1, "rb": 1},
+        {"ra": 2, "rb": 2}
+      ],
+      "raw_rho": 1.0,
+      "adjusted_rho": 0.2857,
+      "match_pct": 64
+    },
+    {
+      "name": "two_titles_total_disagreement",
+      "k": 2,
+      "pairs": [
+        {"ra": 1, "rb": 2},
+        {"ra": 2, "rb": 1}
+      ],
+      "raw_rho": -1.0,
+      "adjusted_rho": -0.2857,
+      "match_pct": 36
+    },
+    {
+      "name": "four_titles_perfect_agreement",
+      "k": 4,
+      "pairs": [
+        {"ra": 1, "rb": 1},
+        {"ra": 2, "rb": 2},
+        {"ra": 3, "rb": 3},
+        {"ra": 4, "rb": 4}
+      ],
+      "raw_rho": 1.0,
+      "adjusted_rho": 0.4444,
+      "match_pct": 72
+    },
+    {
+      "name": "four_titles_total_inversion",
+      "k": 4,
+      "pairs": [
+        {"ra": 1, "rb": 4},
+        {"ra": 2, "rb": 3},
+        {"ra": 3, "rb": 2},
+        {"ra": 4, "rb": 1}
+      ],
+      "raw_rho": -1.0,
+      "adjusted_rho": -0.4444,
+      "match_pct": 28
+    },
+    {
+      "name": "five_titles_moderate_correlation",
+      "k": 5,
+      "pairs": [
+        {"ra": 1, "rb": 2},
+        {"ra": 2, "rb": 1},
+        {"ra": 3, "rb": 3},
+        {"ra": 4, "rb": 5},
+        {"ra": 5, "rb": 4}
+      ],
+      "raw_rho": 0.8,
+      "adjusted_rho": 0.4,
+      "match_pct": 70
+    },
+    {
+      "name": "ten_titles_perfect_agreement",
+      "k": 10,
+      "pairs": [
+        {"ra": 1, "rb": 1},
+        {"ra": 2, "rb": 2},
+        {"ra": 3, "rb": 3},
+        {"ra": 4, "rb": 4},
+        {"ra": 5, "rb": 5},
+        {"ra": 6, "rb": 6},
+        {"ra": 7, "rb": 7},
+        {"ra": 8, "rb": 8},
+        {"ra": 9, "rb": 9},
+        {"ra": 10, "rb": 10}
+      ],
+      "raw_rho": 1.0,
+      "adjusted_rho": 0.6667,
+      "match_pct": 83
+    },
+    {
+      "name": "twenty_titles_perfect_agreement",
+      "k": 20,
+      "pairs": [
+        {"ra": 1, "rb": 1},
+        {"ra": 2, "rb": 2},
+        {"ra": 3, "rb": 3},
+        {"ra": 4, "rb": 4},
+        {"ra": 5, "rb": 5},
+        {"ra": 6, "rb": 6},
+        {"ra": 7, "rb": 7},
+        {"ra": 8, "rb": 8},
+        {"ra": 9, "rb": 9},
+        {"ra": 10, "rb": 10},
+        {"ra": 11, "rb": 11},
+        {"ra": 12, "rb": 12},
+        {"ra": 13, "rb": 13},
+        {"ra": 14, "rb": 14},
+        {"ra": 15, "rb": 15},
+        {"ra": 16, "rb": 16},
+        {"ra": 17, "rb": 17},
+        {"ra": 18, "rb": 18},
+        {"ra": 19, "rb": 19},
+        {"ra": 20, "rb": 20}
+      ],
+      "raw_rho": 1.0,
+      "adjusted_rho": 0.8,
+      "match_pct": 90
+    }
+  ]
+}

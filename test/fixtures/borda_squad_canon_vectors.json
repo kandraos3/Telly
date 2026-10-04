@@ -1,0 +1,118 @@
+{
+  "description": "Canonical Borda Count squad consensus leaderboard vectors. features/04 §4.2; shared by Dart SquadCanonAggregator and SQL calculate_squad_canon.",
+  "squad_id": "5a000000-0000-0000-0000-000000000001",
+  "media_type": "movie",
+  "members": [
+    {
+      "user_id": "a0000000-0000-0000-0000-00000000000a",
+      "display_name": "Member A",
+      "canon_size": 4,
+      "rankings": [
+        {"title_id": 155, "title": "The Dark Knight", "rank": 1, "points": 4},
+        {"title_id": 238, "title": "The Godfather", "rank": 2, "points": 3},
+        {"title_id": 680, "title": "Pulp Fiction", "rank": 3, "points": 2},
+        {"title_id": 129, "title": "Spirited Away", "rank": 4, "points": 1}
+      ]
+    },
+    {
+      "user_id": "b0000000-0000-0000-0000-00000000000b",
+      "display_name": "Member B",
+      "canon_size": 7,
+      "rankings": [
+        {"title_id": 424, "title": "Schindler's List", "rank": 1, "points": 7},
+        {"title_id": 155, "title": "The Dark Knight", "rank": 2, "points": 6},
+        {"title_id": 278, "title": "The Shawshank Redemption", "rank": 3, "points": 5},
+        {"title_id": 238, "title": "The Godfather", "rank": 4, "points": 4},
+        {"title_id": 680, "title": "Pulp Fiction", "rank": 5, "points": 3},
+        {"title_id": 13, "title": "Forrest Gump", "rank": 6, "points": 2},
+        {"title_id": 129, "title": "Spirited Away", "rank": 7, "points": 1}
+      ]
+    }
+  ],
+  "expected_consensus": [
+    {
+      "consensus_rank": 1,
+      "title_id": 155,
+      "title": "The Dark Knight",
+      "total_borda_points": 10,
+      "members_ranked_count": 2,
+      "champion_user_id": "a0000000-0000-0000-0000-00000000000a",
+      "champion_rank": 1,
+      "lowest_user_id": "b0000000-0000-0000-0000-00000000000b",
+      "lowest_rank": 2,
+      "mean_rank": 1.5
+    },
+    {
+      "consensus_rank": 2,
+      "title_id": 238,
+      "title": "The Godfather",
+      "total_borda_points": 7,
+      "members_ranked_count": 2,
+      "champion_user_id": "a0000000-0000-0000-0000-00000000000a",
+      "champion_rank": 2,
+      "lowest_user_id": "b0000000-0000-0000-0000-00000000000b",
+      "lowest_rank": 4,
+      "mean_rank": 3.0
+    },
+    {
+      "consensus_rank": 3,
+      "title_id": 424,
+      "title": "Schindler's List",
+      "total_borda_points": 7,
+      "members_ranked_count": 1,
+      "champion_user_id": "b0000000-0000-0000-0000-00000000000b",
+      "champion_rank": 1,
+      "lowest_user_id": "b0000000-0000-0000-0000-00000000000b",
+      "lowest_rank": 1,
+      "mean_rank": 1.0
+    },
+    {
+      "consensus_rank": 4,
+      "title_id": 680,
+      "title": "Pulp Fiction",
+      "total_borda_points": 5,
+      "members_ranked_count": 2,
+      "champion_user_id": "a0000000-0000-0000-0000-00000000000a",
+      "champion_rank": 3,
+      "lowest_user_id": "b0000000-0000-0000-0000-00000000000b",
+      "lowest_rank": 5,
+      "mean_rank": 4.0
+    },
+    {
+      "consensus_rank": 5,
+      "title_id": 278,
+      "title": "The Shawshank Redemption",
+      "total_borda_points": 5,
+      "members_ranked_count": 1,
+      "champion_user_id": "b0000000-0000-0000-0000-00000000000b",
+      "champion_rank": 3,
+      "lowest_user_id": "b0000000-0000-0000-0000-00000000000b",
+      "lowest_rank": 3,
+      "mean_rank": 3.0
+    },
+    {
+      "consensus_rank": 6,
+      "title_id": 129,
+      "title": "Spirited Away",
+      "total_borda_points": 2,
+      "members_ranked_count": 2,
+      "champion_user_id": "a0000000-0000-0000-0000-00000000000a",
+      "champion_rank": 4,
+      "lowest_user_id": "b0000000-0000-0000-0000-00000000000b",
+      "lowest_rank": 7,
+      "mean_rank": 5.5
+    },
+    {
+      "consensus_rank": 7,
+      "title_id": 13,
+      "title": "Forrest Gump",
+      "total_borda_points": 2,
+      "members_ranked_count": 1,
+      "champion_user_id": "b0000000-0000-0000-0000-00000000000b",
+      "champion_rank": 6,
+      "lowest_user_id": "b0000000-0000-0000-0000-00000000000b",
+      "lowest_rank": 6,
+      "mean_rank": 6.0
+    }
+  ]
+}
