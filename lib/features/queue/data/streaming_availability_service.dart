@@ -1,11 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:telly_app/features/profile/presentation/controllers/settings_controllers.dart';
 import 'package:telly_app/features/queue/domain/streaming_models.dart';
 
-/// Provider for user's active streaming subscriptions.
-/// By default includes Netflix and Max.
-final userSubscriptionsProvider = StateProvider<Set<String>>((ref) {
-  return {'netflix', 'max', 'apple_tv_plus'};
-});
+/// The user's saved streaming subscriptions (FE-608: from `user_streaming_subscriptions`;
+/// empty until loaded or when signed out).
+final userSubscriptionsProvider = Provider<Set<String>>(
+  (ref) => ref.watch(subscriptionsProvider.select((s) => s.valueOrNull?.platformIds ?? const <String>{})),
+);
 
 /// Service providing streaming availability queries and catalog metadata.
 /// Conforms to `docs/technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md` §2.

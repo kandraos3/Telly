@@ -1,6 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:telly_app/features/profile/data/profile_repository.dart';
+import 'package:telly_app/features/profile/presentation/controllers/settings_controllers.dart';
 import 'package:telly_app/core/services/haptics_service.dart';
+
+import '../../fakes/fake_profile_repository.dart';
 
 class MockPlatformHaptics implements PlatformHaptics {
   int selectionClicks = 0;
@@ -112,15 +116,19 @@ void main() {
   });
 
   group('Riverpod hapticsServiceProvider Integration', () {
-    test('Reflects changes in hapticsEnabledProvider', () {
-      final container = ProviderContainer();
+    test('follows the Settings haptics preference (FE-608)', () async {
+      final profiles = FakeProfileRepository();
+      final container = ProviderContainer(overrides: [profileRepositoryProvider.overrideWithValue(profiles)]);
       addTearDown(container.dispose);
 
-      expect(container.read(hapticsServiceProvider).enabled, isTrue);
-
-      container.read(hapticsEnabledProvider.notifier).state = false;
+      expect(container.read(hapticsServiceProvider).enabled, isTrue, reason: 'on before preferences load');
+      await container.read(preferencesProvider.future);
+      await container.read(preferencesProvider.notifier).edit((p) => p.copyWith(haptics: HapticsMode.off));
       expect(container.read(hapticsServiceProvider).enabled, isFalse);
+      expect(profiles.preferences['haptics'], 'off');
+
+      await container.read(preferencesProvider.notifier).edit((p) => p.copyWith(haptics: HapticsMode.subtle));
+      expect(container.read(hapticsServiceProvider).enabled, isTrue);
     });
   });
 }
-

@@ -35,6 +35,9 @@ abstract interface class SocialRepository {
   /// 1-tap queue add/remove (features/04 §2.2), attributed to the poster.
   Future<void> setQueued({required ActivityLog activity, required bool queued});
 
+  /// Adds a title to my queue, optionally crediting the friend who recommended it.
+  Future<void> queueTitle({required int titleId, required String mediaType, String? recommendedBy});
+
   Future<void> setReaction({required String activityId, required FeedReactionType reaction, required bool active});
 
   Future<List<RankingComment>> getComments(String activityId);
@@ -83,22 +86,27 @@ class SupabaseSocialRepository implements SocialRepository {
 
   @override
   Future<void> setQueued({required ActivityLog activity, required bool queued}) async {
-    final me = _me;
     if (queued) {
-      await _client.from('user_watchlist').upsert({
-        'user_id': me,
-        'title_id': activity.titleId,
-        'media_type': activity.mediaType,
-        if (activity.userId != me) 'recommended_by_user_id': activity.userId,
-      }, onConflict: 'user_id,title_id,media_type', ignoreDuplicates: true);
+      await queueTitle(titleId: activity.titleId, mediaType: activity.mediaType, recommendedBy: activity.userId);
     } else {
       await _client
           .from('user_watchlist')
           .delete()
-          .eq('user_id', me)
+          .eq('user_id', _me)
           .eq('title_id', activity.titleId)
           .eq('media_type', activity.mediaType);
     }
+  }
+
+  @override
+  Future<void> queueTitle({required int titleId, required String mediaType, String? recommendedBy}) async {
+    final me = _me;
+    await _client.from('user_watchlist').upsert({
+      'user_id': me,
+      'title_id': titleId,
+      'media_type': mediaType,
+      if (recommendedBy != null && recommendedBy != me) 'recommended_by_user_id': recommendedBy,
+    }, onConflict: 'user_id,title_id,media_type', ignoreDuplicates: true);
   }
 
   @override
@@ -209,15 +217,6 @@ class SupabaseSocialRepository implements SocialRepository {
   }
 }
 
-/// `drop_reason_enum` → the Graveyard taxonomy labels.
-const _dropReasons = {
-  'PACING_SLOWED': DropReasonTaxonomy.pacingSlowed,
-  'WRITING_JUMPED_SHARK': DropReasonTaxonomy.jumpedShark,
-  'CAST_DEPARTURE': DropReasonTaxonomy.charactersDied,
-  'TOO_DARK_DEPRESSING': DropReasonTaxonomy.tooDepressing,
-  'TIME_COMMITMENT': DropReasonTaxonomy.timeCommitment,
-  'BETTER_OPTIONS': DropReasonTaxonomy.betterOptions,
-};
 
 /// Maps one `get_activity_feed` row (see migration `20261010000500`) to a card model.
 ActivityLog activityFromFeedRow(Map<String, dynamic> r) {
@@ -248,7 +247,7 @@ ActivityLog activityFromFeedRow(Map<String, dynamic> r) {
     upsetOverTitleRank: (r['upset_over_rank'] as num?)?.toInt(),
     droppedSeason: (metadata['season'] as num?)?.toInt(),
     droppedEpisode: (metadata['episode'] as num?)?.toInt(),
-    dropReason: _dropReasons[metadata['reason']] ?? metadata['reason'] as String?,
+    dropReason: DropReasonTaxonomy.fromDbValue(metadata['reason'] as String?) ?? metadata['reason'] as String?,
     inUserQueue: (r['in_my_queue'] as bool?) ?? false,
     reactions: {
       for (final MapEntry(:key, :value) in counts.entries)

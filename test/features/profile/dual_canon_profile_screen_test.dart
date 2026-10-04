@@ -3,14 +3,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:telly_app/core/database/database.dart';
 import 'package:telly_app/core/database/database_provider.dart';
+import 'package:telly_app/features/auth/data/auth_repository.dart';
+import 'package:telly_app/features/auth/domain/user_profile.dart';
 import 'package:telly_app/core/services/haptics_service.dart';
+import 'package:telly_app/features/profile/data/profile_repository.dart';
 import 'package:telly_app/features/profile/presentation/controllers/profile_controller.dart';
 import 'package:telly_app/features/profile/presentation/screens/dual_canon_profile_screen.dart';
 import 'package:telly_app/features/profile/presentation/widgets/poster_grid_view.dart';
 import 'package:telly_app/features/profile/presentation/widgets/ranked_canon_list.dart';
 import 'package:telly_app/features/profile/presentation/widgets/tier_view_list.dart';
+import 'package:telly_app/features/profile/presentation/widgets/top_showcase_row.dart';
 import 'package:telly_app/features/ranking/domain/canon_type.dart';
 import 'package:telly_app/features/ranking/domain/franchise_rollup_service.dart';
+
+import '../../fakes/fake_auth_repository.dart';
+import '../../fakes/fake_profile_repository.dart';
 
 /// Fixed canon for screen tests: these fixtures carry franchise metadata Drift does not store.
 class SeededProfileCanon extends ProfileCanonNotifier {
@@ -110,15 +117,28 @@ void main() {
     CanonType initialCanon = CanonType.movie,
     CanonViewMode initialViewMode = CanonViewMode.rankedList,
     bool initialRollup = false,
+    FakeProfileRepository? profiles,
   }) {
     return ProviderScope(
       overrides: [
         hapticsEnabledProvider.overrideWith((ref) => false),
-        selectedCanonProvider.overrideWith((ref) => initialCanon),
-        canonViewModeProvider.overrideWith((ref) => initialViewMode),
-        franchiseRollupProvider.overrideWith((ref) => initialRollup),
+        selectedCanonProvider.overrideWith(() => Selection(initialCanon)),
+        canonViewModeProvider.overrideWith(() => Selection(initialViewMode)),
+        franchiseRollupProvider.overrideWith(() => Selection(initialRollup)),
         databaseProvider.overrideWithValue(db),
+        authRepositoryProvider.overrideWithValue(FakeAuthRepository(
+          signedInUserId: 'u-jordan',
+          profile: UserProfile(
+            id: 'u-jordan',
+            username: 'jordan',
+            displayName: 'Jordan Miller',
+            bio: 'Cinema purist. Severance truther.',
+            onboardingCompleted: true,
+            createdAt: DateTime(2026),
+          ),
+        )),
         profileCanonProvider.overrideWith(() => SeededProfileCanon(movies ?? sampleMovies, series ?? sampleSeries)),
+        if (profiles != null) profileRepositoryProvider.overrideWithValue(profiles),
       ],
       child: const MaterialApp(
         home: DualCanonProfileScreen(),
@@ -126,6 +146,23 @@ void main() {
     );
   }
 
+  group('FE-608: SCR-14 pinned Top 3 showcase', () {
+    testWidgets('pinned titles of the shown canon lead the showcase, then top ranks fill in', (tester) async {
+      final profiles = FakeProfileRepository()
+        ..profiles['jordan'] = const PublicProfile(
+          id: 'u-jordan',
+          username: 'jordan',
+          displayName: 'Jordan Miller',
+          // (12, tv) belongs to the other canon and must not leak into the movie row.
+          pinnedShowcase: [(titleId: 12, mediaType: 'tv'), (titleId: 3, mediaType: 'movie')],
+        );
+      await tester.pumpWidget(buildTestableProfileScreen(profiles: profiles));
+      await tester.pumpAndSettle();
+
+      final row = tester.widget<TopShowcaseRow>(find.byType(TopShowcaseRow));
+      expect(row.topEntries.map((e) => e.title), ['Dune: Part Two', 'Interstellar', 'Parasite']);
+    });
+  });
   group('FE-206: SCR-14 Dual-Canon Profile Header & Segmented Pill Switcher Tests', () {
     testWidgets('renders profile avatar, handle, bio, and cultural stats', (tester) async {
       await tester.pumpWidget(buildTestableProfileScreen());
@@ -137,6 +174,7 @@ void main() {
       expect(find.text('Jordan Miller'), findsOneWidget);
       expect(find.byKey(const Key('profile_bio_text')), findsOneWidget);
       expect(find.byKey(const Key('profile_stats_summary_text')), findsOneWidget);
+      expect(find.text('3 Movies  •  5 Series'), findsOneWidget, reason: 'real counts, no invented hours');
     });
 
     testWidgets('defaults to Movie Canon and displays movie titles', (tester) async {

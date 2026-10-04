@@ -39,6 +39,7 @@ class FakeSocialRepository implements SocialRepository {
 
   final String me;
   final List<ActivityLog> feed;
+  final follows = <String, FollowStatus>{};
 
   /// Which ids each tab shows; tabs not listed show everything.
   final Map<FeedFilter, Set<String>> tabs;
@@ -75,6 +76,12 @@ class FakeSocialRepository implements SocialRepository {
   }
 
   @override
+  Future<void> queueTitle({required int titleId, required String mediaType, String? recommendedBy}) async {
+    _maybeFail();
+    queued.add((titleId, true));
+  }
+
+  @override
   Future<void> setReaction({required String activityId, required FeedReactionType reaction, required bool active}) async {
     _maybeFail();
     reactions.add((activityId, reaction, active));
@@ -104,14 +111,23 @@ class FakeSocialRepository implements SocialRepository {
     return c;
   }
 
-  @override
-  Future<FollowStatus?> getFollowStatus(String targetUserId) async => null;
+  /// Users whose follow requests stay pending (friends-only profiles).
+  final privateUsers = <String>{};
 
   @override
-  Future<FollowStatus> follow(String targetUserId) async => FollowStatus.accepted;
+  Future<FollowStatus?> getFollowStatus(String targetUserId) async => follows[targetUserId];
 
   @override
-  Future<void> unfollow(String targetUserId) async {}
+  Future<FollowStatus> follow(String targetUserId) async {
+    _maybeFail();
+    return follows[targetUserId] = privateUsers.contains(targetUserId) ? FollowStatus.pending : FollowStatus.accepted;
+  }
+
+  @override
+  Future<void> unfollow(String targetUserId) async {
+    _maybeFail();
+    follows.remove(targetUserId);
+  }
 
   @override
   Future<void> respondToFollow({required String followerId, required bool approve}) async {}

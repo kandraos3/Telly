@@ -1,149 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/router/routes.dart';
-import '../../../../core/router/app_router.dart';
 import 'package:go_router/go_router.dart';
-import 'package:telly_app/core/theme/telly_colors.dart';
-import 'package:telly_app/core/theme/telly_typography.dart';
-import 'package:telly_app/core/widgets/telly_primary_button.dart';
-import 'package:telly_app/features/cowatch/domain/spearman_taste_match_calculator.dart';
-import 'package:telly_app/features/profile/presentation/widgets/taste_breakdown_section.dart';
-import 'package:telly_app/features/profile/presentation/widgets/taste_match_dial.dart';
+
+import '../../../../core/router/app_router.dart';
+import '../../../../core/router/routes.dart';
+import '../../../../core/theme/telly_colors.dart';
+import '../../../../core/theme/telly_typography.dart';
+import '../../../../core/widgets/telly_primary_button.dart';
+import '../../../cowatch/domain/spearman_taste_match_calculator.dart';
+import '../../../feed/domain/social_models.dart';
+import '../controllers/friend_profile_controller.dart';
+import '../widgets/taste_breakdown_section.dart';
+import '../widgets/taste_match_dial.dart';
 
 /// SCR-15: Friend Profile & Taste Comparison View.
 /// Conforms to `docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md` §15
 /// and `docs/features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md` §2.
-class FriendProfileScreen extends ConsumerStatefulWidget {
-  final String userId;
+/// FE-608: loaded by handle through [friendProfileProvider]; per-canon matches come from
+/// `calculate_taste_match_rpc`, comparisons from both users' canons.
+class FriendProfileScreen extends ConsumerWidget {
   final String handle;
-  final String displayName;
-  final String? avatarUrl;
-  final String location;
-  final int initialMatchPercentage;
-  final int mutualTitleCount;
-  final int? movieMatchPercentage;
-  final int? seriesMatchPercentage;
-  final List<RankedTitleComparison>? initialAgreements;
-  final List<RankedTitleComparison>? initialClashes;
-  final List<UnwatchedGem>? initialGems;
 
-  const FriendProfileScreen({
-    super.key,
-    required this.userId,
-    required this.handle,
-    required this.displayName,
-    this.avatarUrl,
-    this.location = 'Brooklyn, NY',
-    this.initialMatchPercentage = 88,
-    this.mutualTitleCount = 34,
-    this.movieMatchPercentage = 92,
-    this.seriesMatchPercentage = 84,
-    this.initialAgreements,
-    this.initialClashes,
-    this.initialGems,
-  });
+  const FriendProfileScreen({super.key, required this.handle});
 
   @override
-  ConsumerState<FriendProfileScreen> createState() => _FriendProfileScreenState();
-}
-
-class _FriendProfileScreenState extends ConsumerState<FriendProfileScreen> {
-  bool _isFollowing = true;
-  late final List<RankedTitleComparison> _agreements;
-  late final List<RankedTitleComparison> _clashes;
-  late final List<UnwatchedGem> _gems;
-
-  @override
-  void initState() {
-    super.initState();
-    _agreements = widget.initialAgreements ??
-        [
-          const RankedTitleComparison(
-            showId: 101,
-            title: 'Succession',
-            rankA: 1,
-            rankB: 2,
-            scoreA: 10.0,
-            scoreB: 9.8,
-            reviewB: 'The sharpest dialogue on television.',
-          ),
-          const RankedTitleComparison(
-            showId: 102,
-            title: 'Severance',
-            rankA: 3,
-            rankB: 3,
-            scoreA: 9.4,
-            scoreB: 9.4,
-          ),
-          const RankedTitleComparison(
-            showId: 103,
-            title: 'The Bear',
-            rankA: 5,
-            rankB: 6,
-            scoreA: 9.1,
-            scoreB: 8.9,
-          ),
-        ];
-
-    _clashes = widget.initialClashes ??
-        [
-          const RankedTitleComparison(
-            showId: 104,
-            title: 'Game of Thrones',
-            rankA: 8,
-            rankB: 64,
-            scoreA: 9.3,
-            scoreB: 5.1,
-            reviewB: 'Season 8 ruined the entire franchise for me.',
-          ),
-        ];
-
-    _gems = widget.initialGems ??
-        [
-          const UnwatchedGem(
-            showId: 201,
-            title: 'Station Eleven',
-            friendRank: 4,
-            friendScore: 9.3,
-            mediaType: 'Series',
-            network: 'HBO / Max',
-          ),
-          const UnwatchedGem(
-            showId: 202,
-            title: 'Whiplash',
-            friendRank: 5,
-            friendScore: 9.2,
-            mediaType: 'Movie',
-            network: 'Sony Pictures',
-          ),
-        ];
-  }
-
-  void _onToggleFollow() {
-    setState(() {
-      _isFollowing = !_isFollowing;
-    });
-  }
-
-  void _onQueueGem(UnwatchedGem gem) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Added "${gem.title}" to your Queue!'),
-        backgroundColor: TellyColors.backgroundCard,
-      ),
-    );
-  }
-
-  void _openTwoToWatch() {
-    context.push(
-      Routes.twoToWatch(widget.handle),
-      extra: FriendRouteArgs(userId: widget.userId, displayName: widget.displayName, avatarUrl: widget.avatarUrl),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final affinityTier = TasteAffinityTier.fromPercentage(widget.initialMatchPercentage);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final async = ref.watch(friendProfileProvider(handle));
+    final data = async.valueOrNull;
 
     return Scaffold(
       backgroundColor: TellyColors.backgroundCanvasOled,
@@ -152,103 +35,176 @@ class _FriendProfileScreenState extends ConsumerState<FriendProfileScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: TellyColors.textPrimary),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => context.canPop() ? context.pop() : context.go(Routes.feed),
         ),
-        title: Text(
-          '@${widget.handle}',
-          style: TellyTypography.titleMedium(color: TellyColors.textPrimary),
+        title: Text('@$handle', style: TellyTypography.titleMedium(color: TellyColors.textPrimary)),
+        actions: [if (data != null) _FollowButton(handle: handle, status: data.followStatus)],
+      ),
+      body: async.when(
+        loading: () => const Center(child: CircularProgressIndicator(color: TellyColors.phosphorLime)),
+        error: (e, _) => _Message(
+          key: const Key('friend_profile_error'),
+          text: e is ProfileNotFound ? "We couldn't find @$handle." : "Couldn't load @$handle. Pull to retry.",
+          onRetry: e is ProfileNotFound ? null : () => ref.invalidate(friendProfileProvider(handle)),
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: Center(
-              child: OutlinedButton(
-                onPressed: _onToggleFollow,
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: _isFollowing ? TellyColors.textSecondary : TellyColors.phosphorLime,
-                  side: BorderSide(
-                    color: _isFollowing ? TellyColors.strokeSubtle : TellyColors.phosphorLime,
-                  ),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                  minimumSize: Size.zero,
-                ),
+        data: (data) => _Body(handle: handle, data: data),
+      ),
+    );
+  }
+}
+
+class _FollowButton extends ConsumerWidget {
+  final String handle;
+  final FollowStatus? status;
+  const _FollowButton({required this.handle, required this.status});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final following = status == FollowStatus.accepted;
+    final label = switch (status) {
+      FollowStatus.accepted => 'Following',
+      FollowStatus.pending => 'Requested',
+      _ => '+ Follow',
+    };
+    return Padding(
+      padding: const EdgeInsets.only(right: 16),
+      child: Center(
+        child: OutlinedButton(
+          key: const Key('follow_button'),
+          onPressed: () async {
+            try {
+              await ref.read(friendProfileProvider(handle).notifier).toggleFollow();
+            } catch (_) {
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Couldn't update follow. Try again.")),
+                );
+              }
+            }
+          },
+          style: OutlinedButton.styleFrom(
+            foregroundColor: following ? TellyColors.textSecondary : TellyColors.phosphorLime,
+            side: BorderSide(color: following ? TellyColors.strokeSubtle : TellyColors.phosphorLime),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+            minimumSize: Size.zero,
+          ),
+          child: Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+        ),
+      ),
+    );
+  }
+}
+
+class _Body extends ConsumerWidget {
+  final String handle;
+  final FriendProfileData data;
+  const _Body({required this.handle, required this.data});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profile = data.profile;
+    final blended = data.blendedMatch;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 28,
+                backgroundColor: TellyColors.backgroundCard,
+                foregroundImage: profile.avatarUrl == null ? null : NetworkImage(profile.avatarUrl!),
                 child: Text(
-                  _isFollowing ? 'Following' : '+ Follow',
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                  profile.displayName.isNotEmpty ? profile.displayName[0] : '?',
+                  style: const TextStyle(fontSize: 22, color: TellyColors.textPrimary, fontWeight: FontWeight.bold),
                 ),
               ),
-            ),
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        child: Column(
-          children: [
-            // User identity header
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 28,
-                  backgroundColor: TellyColors.backgroundCard,
-                  child: Text(
-                    widget.displayName.isNotEmpty ? widget.displayName[0] : '?',
-                    style: const TextStyle(fontSize: 22, color: TellyColors.textPrimary, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.displayName,
-                        style: TellyTypography.headlineSmall(color: TellyColors.textPrimary),
-                      ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(profile.displayName, style: TellyTypography.headlineSmall(color: TellyColors.textPrimary)),
+                    if (profile.bio != null && profile.bio!.isNotEmpty) ...[
                       const SizedBox(height: 2),
-                      Text(
-                        widget.location,
-                        style: TellyTypography.caption(color: TellyColors.textTertiary),
-                      ),
+                      Text(profile.bio!, style: TellyTypography.caption(color: TellyColors.textTertiary)),
                     ],
-                  ),
+                  ],
                 ),
-              ],
-            ),
-            const SizedBox(height: 24),
-
-            // Radial Taste Match Dial
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          if (!profile.canView)
+            _Message(
+              key: const Key('friend_profile_private'),
+              text: data.followStatus == FollowStatus.pending
+                  ? 'Follow request sent. Their canon appears once @$handle accepts.'
+                  : '@$handle shares their canon with friends only. Follow to request access.',
+            )
+          else ...[
             TasteMatchDial(
-              matchPercentage: widget.initialMatchPercentage,
-              mutualTitleCount: widget.mutualTitleCount,
-              affinityTier: affinityTier,
+              matchPercentage: blended ?? 50,
+              mutualTitleCount: data.mutualCount,
+              affinityTier: TasteAffinityTier.fromPercentage(blended ?? 50),
             ),
             const SizedBox(height: 24),
-
-            // Primary Action: Two-to-Watch
             TellyPrimaryButton(
-              label: '🍿 Two-to-Watch with @${widget.handle}',
-              onPressed: _openTwoToWatch,
+              label: '🍿 Two-to-Watch with @$handle',
+              onPressed: () => context.push(
+                Routes.twoToWatch(handle),
+                extra: FriendRouteArgs(userId: profile.id, displayName: profile.displayName, avatarUrl: profile.avatarUrl),
+              ),
             ),
             const SizedBox(height: 20),
-
-            // Dual Taste Match Breakdown (FE-402)
             DualTasteMatchBreakdown(
-              movieMatchPercentage: widget.movieMatchPercentage,
-              seriesMatchPercentage: widget.seriesMatchPercentage,
+              movieMatchPercentage: data.movieMatch?.percentage,
+              seriesMatchPercentage: data.seriesMatch?.percentage,
             ),
             const SizedBox(height: 24),
-
-            // Agreements, Clashes, and Unwatched Gems (FE-403)
             TasteComparisonsSection(
-              friendHandle: '@${widget.handle}',
-              agreements: _agreements,
-              clashes: _clashes,
-              unwatchedGems: _gems,
-              onAddGemToQueue: _onQueueGem,
+              friendHandle: '@$handle',
+              agreements: data.agreements,
+              clashes: data.clashes,
+              unwatchedGems: data.gems,
+              onAddGemToQueue: (gem) async {
+                final messenger = ScaffoldMessenger.of(context);
+                try {
+                  await ref.read(friendProfileProvider(handle).notifier).queueGem(gem);
+                  messenger.showSnackBar(SnackBar(content: Text('Added "${gem.title}" to your Queue')));
+                } catch (_) {
+                  messenger.showSnackBar(const SnackBar(content: Text("Couldn't add it to your Queue.")));
+                }
+              },
             ),
             const SizedBox(height: 32),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _Message extends StatelessWidget {
+  final String text;
+  final VoidCallback? onRetry;
+  const _Message({super.key, required this.text, this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(text, textAlign: TextAlign.center, style: TellyTypography.bodyMedium()),
+            if (onRetry != null) ...[
+              const SizedBox(height: 12),
+              TextButton(onPressed: onRetry, child: const Text('Retry')),
+            ],
           ],
         ),
       ),

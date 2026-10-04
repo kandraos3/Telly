@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:telly_app/core/services/haptics_service.dart';
 import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/theme/telly_typography.dart';
@@ -8,12 +9,12 @@ import 'package:telly_app/features/profile/domain/dropped_show.dart';
 ///
 /// Implements drop reason taxonomy, season/episode milestone steppers,
 /// and "Would you revisit?" toggle per Feature Spec 03 §3.2.
-class LogDroppedShowSheet extends StatefulWidget {
+class LogDroppedShowSheet extends ConsumerStatefulWidget {
   final int titleId;
   final String title;
   final int releaseYear;
   final String? posterUrl;
-  final ValueChanged<DroppedShow> onSaved;
+  final ValueChanged<DropDetails> onSaved;
 
   const LogDroppedShowSheet({
     super.key,
@@ -24,14 +25,14 @@ class LogDroppedShowSheet extends StatefulWidget {
     required this.onSaved,
   });
 
-  static Future<DroppedShow?> show({
+  static Future<DropDetails?> show({
     required BuildContext context,
     required int titleId,
     required String title,
     required int releaseYear,
     String? posterUrl,
   }) {
-    return showModalBottomSheet<DroppedShow>(
+    return showModalBottomSheet<DropDetails>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -40,22 +41,20 @@ class LogDroppedShowSheet extends StatefulWidget {
         title: title,
         releaseYear: releaseYear,
         posterUrl: posterUrl,
-        onSaved: (show) => Navigator.of(ctx).pop(show),
+        onSaved: (details) => Navigator.of(ctx).pop(details),
       ),
     );
   }
 
   @override
-  State<LogDroppedShowSheet> createState() => _LogDroppedShowSheetState();
+  ConsumerState<LogDroppedShowSheet> createState() => _LogDroppedShowSheetState();
 }
 
-class _LogDroppedShowSheetState extends State<LogDroppedShowSheet> {
-  int _droppedSeason = 2;
-  int _droppedEpisode = 3;
-  String _selectedReason = DropReasonTaxonomy.jumpedShark;
-  bool _willingToRevisit = false;
-  bool _notifyOnAcclaim = false;
+class _LogDroppedShowSheetState extends ConsumerState<LogDroppedShowSheet> {
   final TextEditingController _notesController = TextEditingController();
+
+  DropDetails get _form => ref.watch(dropFormProvider);
+  DropFormController get _edit => ref.read(dropFormProvider.notifier);
 
   @override
   void dispose() {
@@ -65,24 +64,8 @@ class _LogDroppedShowSheetState extends State<LogDroppedShowSheet> {
 
   void _handleSave() {
     HapticsService.heavyImpact();
-
-    final dropped = DroppedShow(
-      id: 'drop-${DateTime.now().millisecondsSinceEpoch}',
-      userId: 'current-user-id',
-      titleId: widget.titleId,
-      title: widget.title,
-      posterUrl: widget.posterUrl,
-      releaseYear: widget.releaseYear,
-      droppedAtSeason: _droppedSeason,
-      droppedAtEpisode: _droppedEpisode,
-      reason: _selectedReason,
-      willingToRevisit: _willingToRevisit,
-      notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
-      notifyOnAcclaim: _notifyOnAcclaim,
-      createdAt: DateTime.now(),
-    );
-
-    widget.onSaved(dropped);
+    final notes = _notesController.text.trim();
+    widget.onSaved(ref.read(dropFormProvider).copyWith(notes: notes.isEmpty ? null : notes));
   }
 
   @override
@@ -179,15 +162,15 @@ class _LogDroppedShowSheetState extends State<LogDroppedShowSheet> {
                         children: [
                           IconButton(
                             icon: const Icon(Icons.remove, size: 16, color: TellyColors.textPrimary),
-                            onPressed: _droppedSeason > 1
+                            onPressed: _form.season > 1
                                 ? () {
                                     HapticsService.selectionClick();
-                                    setState(() => _droppedSeason--);
+                                    _edit.set(_form.copyWith(season: _form.season - 1));
                                   }
                                 : null,
                           ),
                           Text(
-                            'Season $_droppedSeason',
+                            'Season ${_form.season}',
                             style: TellyTypography.bodyMedium(color: TellyColors.textPrimary).copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -196,7 +179,7 @@ class _LogDroppedShowSheetState extends State<LogDroppedShowSheet> {
                             icon: const Icon(Icons.add, size: 16, color: TellyColors.textPrimary),
                             onPressed: () {
                               HapticsService.selectionClick();
-                              setState(() => _droppedSeason++);
+                              _edit.set(_form.copyWith(season: _form.season + 1));
                             },
                           ),
                         ],
@@ -219,15 +202,15 @@ class _LogDroppedShowSheetState extends State<LogDroppedShowSheet> {
                         children: [
                           IconButton(
                             icon: const Icon(Icons.remove, size: 16, color: TellyColors.textPrimary),
-                            onPressed: _droppedEpisode > 1
+                            onPressed: (_form.episode ?? 1) > 1
                                 ? () {
                                     HapticsService.selectionClick();
-                                    setState(() => _droppedEpisode--);
+                                    _edit.set(_form.copyWith(episode: (_form.episode ?? 1) - 1));
                                   }
                                 : null,
                           ),
                           Text(
-                            'Episode $_droppedEpisode',
+                            'Episode ${_form.episode ?? 1}',
                             style: TellyTypography.bodyMedium(color: TellyColors.textPrimary).copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -236,7 +219,7 @@ class _LogDroppedShowSheetState extends State<LogDroppedShowSheet> {
                             icon: const Icon(Icons.add, size: 16, color: TellyColors.textPrimary),
                             onPressed: () {
                               HapticsService.selectionClick();
-                              setState(() => _droppedEpisode++);
+                              _edit.set(_form.copyWith(episode: (_form.episode ?? 0) + 1));
                             },
                           ),
                         ],
@@ -260,16 +243,14 @@ class _LogDroppedShowSheetState extends State<LogDroppedShowSheet> {
                 spacing: 8,
                 runSpacing: 8,
                 children: DropReasonTaxonomy.allReasons.map((reason) {
-                  final isSelected = _selectedReason == reason;
+                  final isSelected = _form.reason == reason;
                   final icon = DropReasonTaxonomy.getReasonIcon(reason);
 
                   return InkWell(
                     borderRadius: BorderRadius.circular(8),
                     onTap: () {
                       HapticsService.selectionClick();
-                      setState(() {
-                        _selectedReason = reason;
-                      });
+                      _edit.set(_form.copyWith(reason: reason));
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -317,24 +298,24 @@ class _LogDroppedShowSheetState extends State<LogDroppedShowSheet> {
                       borderRadius: BorderRadius.circular(8),
                       onTap: () {
                         HapticsService.selectionClick();
-                        setState(() => _willingToRevisit = false);
+                        _edit.set(_form.copyWith(willingToRevisit: false));
                       },
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         decoration: BoxDecoration(
-                          color: !_willingToRevisit
+                          color: !_form.willingToRevisit
                               ? TellyColors.backgroundCard
                               : Colors.transparent,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: !_willingToRevisit ? TellyColors.borderGlass : Colors.transparent,
+                            color: !_form.willingToRevisit ? TellyColors.borderGlass : Colors.transparent,
                           ),
                         ),
                         alignment: Alignment.center,
                         child: Text(
                           '🚪 Dead & Buried',
                           style: TellyTypography.caption(
-                            color: !_willingToRevisit ? TellyColors.textPrimary : TellyColors.textTertiary,
+                            color: !_form.willingToRevisit ? TellyColors.textPrimary : TellyColors.textTertiary,
                           ).copyWith(fontWeight: FontWeight.bold),
                         ),
                       ),
@@ -346,24 +327,24 @@ class _LogDroppedShowSheetState extends State<LogDroppedShowSheet> {
                       borderRadius: BorderRadius.circular(8),
                       onTap: () {
                         HapticsService.selectionClick();
-                        setState(() => _willingToRevisit = true);
+                        _edit.set(_form.copyWith(willingToRevisit: true));
                       },
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         decoration: BoxDecoration(
-                          color: _willingToRevisit
+                          color: _form.willingToRevisit
                               ? TellyColors.phosphorLime.withValues(alpha: 0.15)
                               : Colors.transparent,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: _willingToRevisit ? TellyColors.phosphorLime : Colors.transparent,
+                            color: _form.willingToRevisit ? TellyColors.phosphorLime : Colors.transparent,
                           ),
                         ),
                         alignment: Alignment.center,
                         child: Text(
                           '🔄 Willing to Revisit',
                           style: TellyTypography.caption(
-                            color: _willingToRevisit ? TellyColors.phosphorLime : TellyColors.textTertiary,
+                            color: _form.willingToRevisit ? TellyColors.phosphorLime : TellyColors.textTertiary,
                           ).copyWith(fontWeight: FontWeight.bold),
                         ),
                       ),
@@ -376,15 +357,15 @@ class _LogDroppedShowSheetState extends State<LogDroppedShowSheet> {
               // Notify on acclaim checkbox
               InkWell(
                 onTap: () {
-                  setState(() => _notifyOnAcclaim = !_notifyOnAcclaim);
+                  _edit.set(_form.copyWith(notifyOnAcclaim: !_form.notifyOnAcclaim));
                 },
                 child: Row(
                   children: [
                     Checkbox(
-                      value: _notifyOnAcclaim,
+                      value: _form.notifyOnAcclaim,
                       activeColor: TellyColors.phosphorLime,
                       checkColor: Colors.black,
-                      onChanged: (val) => setState(() => _notifyOnAcclaim = val ?? false),
+                      onChanged: (val) => _edit.set(_form.copyWith(notifyOnAcclaim: val ?? false)),
                     ),
                     Expanded(
                       child: Text(
@@ -460,3 +441,13 @@ class _LogDroppedShowSheetState extends State<LogDroppedShowSheet> {
     );
   }
 }
+
+/// Form state of [LogDroppedShowSheet] (FE-608: no business `setState`).
+class DropFormController extends AutoDisposeNotifier<DropDetails> {
+  @override
+  DropDetails build() => const DropDetails();
+
+  void set(DropDetails details) => state = details;
+}
+
+final dropFormProvider = AutoDisposeNotifierProvider<DropFormController, DropDetails>(DropFormController.new);

@@ -18,6 +18,25 @@ abstract class DropReasonTaxonomy {
     betterOptions,
   ];
 
+  /// `drop_reason_enum` values (TA-02) for each taxonomy label.
+  static const dbValues = {
+    pacingSlowed: 'PACING_SLOWED',
+    jumpedShark: 'WRITING_JUMPED_SHARK',
+    charactersDied: 'CAST_DEPARTURE',
+    tooDepressing: 'TOO_DARK_DEPRESSING',
+    timeCommitment: 'TIME_COMMITMENT',
+    betterOptions: 'BETTER_OPTIONS',
+  };
+
+  static String toDbValue(String label) => dbValues[label] ?? 'BETTER_OPTIONS';
+
+  static String? fromDbValue(String? value) {
+    for (final MapEntry(:key, value: db) in dbValues.entries) {
+      if (db == value) return key;
+    }
+    return null;
+  }
+
   static String getReasonIcon(String reason) {
     switch (reason) {
       case jumpedShark:
@@ -38,12 +57,51 @@ abstract class DropReasonTaxonomy {
   }
 }
 
+/// What the "Log Dropped Show" sheet collects (FE-608); the Graveyard controller turns it
+/// into a `user_dropped_shows` row.
+@immutable
+class DropDetails {
+  final int season;
+  final int? episode;
+  final String reason;
+  final bool willingToRevisit;
+  final bool notifyOnAcclaim;
+  final String? notes;
+
+  const DropDetails({
+    this.season = 1,
+    this.episode = 1,
+    this.reason = DropReasonTaxonomy.jumpedShark,
+    this.willingToRevisit = false,
+    this.notifyOnAcclaim = false,
+    this.notes,
+  });
+
+  DropDetails copyWith({
+    int? season,
+    int? episode,
+    String? reason,
+    bool? willingToRevisit,
+    bool? notifyOnAcclaim,
+    String? notes,
+  }) =>
+      DropDetails(
+        season: season ?? this.season,
+        episode: episode ?? this.episode,
+        reason: reason ?? this.reason,
+        willingToRevisit: willingToRevisit ?? this.willingToRevisit,
+        notifyOnAcclaim: notifyOnAcclaim ?? this.notifyOnAcclaim,
+        notes: notes ?? this.notes,
+      );
+}
+
 /// An entry in the user's TV Graveyard (SCR-18, FE-307).
 @immutable
 class DroppedShow {
   final String id;
   final String userId;
   final int titleId;
+  final String mediaType;
   final String title;
   final String? posterUrl;
   final int releaseYear;
@@ -59,6 +117,7 @@ class DroppedShow {
     required this.id,
     required this.userId,
     required this.titleId,
+    this.mediaType = 'tv',
     required this.title,
     this.posterUrl,
     required this.releaseYear,
@@ -87,6 +146,7 @@ class DroppedShow {
       id: id,
       userId: userId,
       titleId: titleId,
+      mediaType: mediaType,
       title: title,
       posterUrl: posterUrl,
       releaseYear: releaseYear,

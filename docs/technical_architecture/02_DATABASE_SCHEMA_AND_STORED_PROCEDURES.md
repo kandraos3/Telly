@@ -126,6 +126,11 @@ All of the following are `SECURITY DEFINER`, `SET search_path = public`. They ta
 | `get_friends_binging(p_limit, p_days)` | Titles accepted followees ranked or queued recently; SECURITY INVOKER (RLS applies). |
 | `get_title_social_summary(p_title_id, p_media_type) → JSONB` | `SCR-08`: my rank/score/σ, visible followees who ranked it, community average, survival rate (completed / watching / dropped, most common drop point). |
 | `stale_watchlist_titles(p_older_than_hours, p_limit)` / `refresh_leaving_soon_flags(p_today)` | `service_role` only; used by the `streaming-catalog-sync` edge function and a daily `pg_cron` job. |
+| `lookup_profile_card(p_handle TEXT) → (id, username, display_name, avatar_url, bio, visibility_mode, pinned_showcase, can_view)` | FE-608, `SCR-15`. Finds a non-deleted, non-`GHOST`, non-blocked user by handle even when `users` RLS hides them (`FRIENDS_ONLY` non-follower), so a follow request can be sent. `bio` and `pinned_showcase` are returned only when `can_view_user` holds (`'[]'` otherwise). Authenticated only. |
+| `get_squad_members(p_squad_id) → (user_id, username, display_name, avatar_url, role, joined_at)` | FE-608, `SCR-17`. Members only (`42501` otherwise); shows squad-mates whose profiles RLS would hide. |
+| `squad_shared_watchlist(p_squad_id) → (title_id, media_type, title, poster_path, queued_by, member_count)` | FE-608, `SCR-17`. Members only. Titles queued by at least `LEAST(2, member_count)` members, most-queued first. |
+
+**Storage.** Bucket `avatars` (public read, ≤ 2 MB, JPEG/PNG/WebP): authenticated users may insert/update/delete only objects under `<auth.uid()>/`. Edit Profile uploads a 1:1 crop to `<uid>/avatar.jpg` (upsert) and stores its public URL in `users.avatar_url`. The Top 3 showcase is `users.pinned_showcase`: a JSON array of at most 3 `{title_id, media_type}` objects.
 
 ### 3.5 Edge Functions (Deno, `supabase/functions/`)
 Each function keeps its logic in `handler.ts` (dependencies injected) with a thin `index.ts`; tests live in `supabase/functions/tests/`.

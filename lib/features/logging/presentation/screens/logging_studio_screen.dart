@@ -6,6 +6,7 @@ import '../../../../core/router/routes.dart';
 import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
 import '../../../../core/widgets/telly_primary_button.dart';
+import '../../../profile/presentation/controllers/graveyard_controller.dart';
 import '../../../profile/presentation/widgets/log_dropped_show_sheet.dart';
 import '../../../ranking/domain/sentiment_bracket.dart';
 import '../../domain/title_search_result.dart';
@@ -57,13 +58,25 @@ class _LoggingStudioScreenState extends ConsumerState<LoggingStudioScreen> {
       return;
     }
     // Dropped shows are not ranked: they go to the TV Graveyard (features/03 §2).
-    final dropped = await LogDroppedShowSheet.show(
+    final details = await LogDroppedShowSheet.show(
       context: context,
       titleId: title.id,
       title: title.title,
       releaseYear: int.tryParse(title.releaseYear) ?? 0,
     );
-    if (dropped != null && mounted) context.go(Routes.graveyard, extra: dropped);
+    if (details == null || !mounted) return;
+    try {
+      await ref
+          .read(graveyardControllerProvider.notifier)
+          .drop(titleId: title.id, mediaType: title.mediaType, details: details);
+      if (mounted) context.go(Routes.graveyard);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Couldn't add it to your Graveyard. Try again.")),
+        );
+      }
+    }
   }
 
   @override

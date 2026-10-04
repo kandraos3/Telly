@@ -1,88 +1,237 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:telly_app/core/theme/telly_theme.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:telly_app/features/auth/data/auth_repository.dart';
+import 'package:telly_app/features/profile/data/profile_repository.dart';
+import 'package:telly_app/features/squads/data/squad_repository.dart';
 import 'package:telly_app/features/squads/domain/squad_models.dart';
 import 'package:telly_app/features/squads/presentation/screens/squad_hub_screen.dart';
+import 'package:telly_app/features/squads/presentation/screens/squads_list_screen.dart';
 
-void main() {
-  Widget buildTestableScreen(Widget child) {
-    return MaterialApp(
-      theme: TellyTheme.darkTheme,
-      home: child,
+import '../../fakes/fake_auth_repository.dart';
+import '../../fakes/fake_profile_repository.dart';
+import '../../helpers/router_harness.dart';
+
+SquadMember member(String id, String name, {SquadRole role = SquadRole.member}) =>
+    SquadMember(userId: id, username: name.toLowerCase(), displayName: name, role: role, joinedAt: DateTime(2026));
+
+SquadConsensusItem item(int rank, int id, String title, {int champ = 1, int low = 3}) => SquadConsensusItem(
+      consensusRank: rank,
+      titleId: id,
+      title: title,
+      releaseYear: 0,
+      totalBordaPoints: 100 - rank,
+      championUserId: 'u1',
+      championDisplayName: 'Jordan',
+      championRank: champ,
+      lowestUserId: 'u3',
+      lowestDisplayName: 'Alex',
+      lowestRank: low,
+      membersRankedCount: 3,
+      rankVariance: (low - champ).toDouble(),
     );
+
+class FakeSquadRepository implements SquadRepository {
+  final squads = <String, Squad>{};
+  final boards = <String, List<SquadConsensusItem>>{};
+  List<SharedWatchlistItem> watchlist = const [];
+  final consensusCalls = <String>[];
+  final added = <(String, String)>[];
+  bool failReads = false;
+
+  @override
+  Future<List<Squad>> mySquads() async {
+    if (failReads) throw Exception('offline');
+    return squads.values.toList();
   }
 
-  group('FE-306: SquadHubScreen Widget Tests (SCR-17)', () {
-    final sampleSquad = Squad(
+  @override
+  Future<Squad> fetchSquad(String squadId) async {
+    if (failReads) throw Exception('offline');
+    return squads[squadId]!;
+  }
+
+  @override
+  Future<List<SquadConsensusItem>> consensus(Squad squad, String mediaType) async {
+    consensusCalls.add(mediaType);
+    return boards[mediaType] ?? const [];
+  }
+
+  @override
+  Future<List<SharedWatchlistItem>> sharedWatchlist(String squadId) async => watchlist;
+
+  @override
+  Future<Squad> create({required String name, String? description}) async {
+    final s = Squad(id: 'sq-new', name: name, createdBy: 'u1', members: [member('u1', 'Jordan', role: SquadRole.owner)], createdAt: DateTime(2026));
+    return squads[s.id] = s;
+  }
+
+  @override
+  Future<void> addMember({required String squadId, required String userId}) async {
+    added.add((squadId, userId));
+    final s = squads[squadId]!;
+    squads[squadId] = Squad(
+      id: s.id,
+      name: s.name,
+      createdBy: s.createdBy,
+      members: [...s.members, member(userId, 'Maya')],
+      createdAt: s.createdAt,
+    );
+  }
+}
+
+void main() {
+  late FakeSquadRepository repo;
+  late FakeProfileRepository profiles;
+
+  setUp(() {
+    repo = FakeSquadRepository();
+    profiles = FakeProfileRepository();
+    repo.squads['sq-1'] = Squad(
       id: 'sq-1',
       name: 'The Apartment',
       createdBy: 'u1',
-      members: [
-        SquadMember(
-          userId: 'u1',
-          username: 'jordan',
-          displayName: 'Jordan',
-          joinedAt: DateTime.now(),
-        ),
-        SquadMember(
-          userId: 'u2',
-          username: 'maya',
-          displayName: 'Maya',
-          joinedAt: DateTime.now(),
-        ),
-        SquadMember(
-          userId: 'u3',
-          username: 'alex',
-          displayName: 'Alex',
-          joinedAt: DateTime.now(),
-        ),
-      ],
-      createdAt: DateTime.now(),
+      members: [member('u1', 'Jordan', role: SquadRole.owner), member('u3', 'Alex')],
+      createdAt: DateTime(2026),
     );
+    repo.boards['tv'] = [item(1, 101, 'Succession'), item(2, 105, 'Lost', champ: 4, low: 68)];
+    repo.boards['movie'] = [item(1, 201, 'Heat')];
+  });
 
-    testWidgets('renders squad name, members, consensus items, and hot debate card', (tester) async {
-      await tester.pumpWidget(buildTestableScreen(
-        SquadHubScreen(squad: sampleSquad),
-      ));
-      await tester.pumpAndSettle();
+  Future<void> pump(WidgetTester tester, Widget screen, {String me = 'u1'}) async {
+    tester.view.physicalSize = const Size(800, 1600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(routerHarness(screen, overrides: [
+      squadRepositoryProvider.overrideWithValue(repo),
+      profileRepositoryProvider.overrideWithValue(profiles),
+      authRepositoryProvider.overrideWithValue(FakeAuthRepository(signedInUserId: me)),
+    ]));
+    await tester.pumpAndSettle();
+  }
 
-      expect(find.text('THE APARTMENT'), findsOneWidget);
-      expect(find.text('MEMBERS (3)'), findsOneWidget);
-      expect(find.text('Jordan'), findsOneWidget);
-      expect(find.text('Maya'), findsOneWidget);
-      expect(find.text('Alex'), findsOneWidget);
-
-      // Verify consensus items
-      expect(find.text('Succession'), findsOneWidget);
-      expect(find.text('Severance'), findsOneWidget);
-      expect(find.text('The Bear'), findsOneWidget);
-
-      // Verify Borda points
-      expect(find.textContaining('pts'), findsAtLeastNWidgets(1));
-
-      // Verify Hot debate card
-      expect(find.textContaining("SQUAD'S BIGGEST DEBATE"), findsOneWidget);
+  group('FE-306 / FE-608: SCR-17 SquadHubScreen', () {
+    testWidgets('renders members, the Borda leaderboard and the biggest debate', (tester) async {
+      await pump(tester, const SquadHubScreen(squadId: 'sq-1'));
+      expect(find.text('THE APARTMENT (2)'), findsOneWidget);
+      expect(find.text('MEMBERS (2)'), findsOneWidget);
+      expect(find.byKey(const Key('squad_consensus_101')), findsOneWidget);
+      expect(find.textContaining("SQUAD'S BIGGEST DEBATE: LOST"), findsOneWidget);
+      expect(find.textContaining('Divergence: 64 ranks'), findsOneWidget);
     });
 
-    testWidgets('switching dual canon toggles series vs movie consensus', (tester) async {
-      await tester.pumpWidget(buildTestableScreen(
-        SquadHubScreen(squad: sampleSquad),
-      ));
+    testWidgets('switching canon loads that canon once', (tester) async {
+      await pump(tester, const SquadHubScreen(squadId: 'sq-1'));
+      await tester.tap(find.byKey(const Key('squad_canon_movie')));
       await tester.pumpAndSettle();
-
-      expect(find.text('📺 Series Canon'), findsOneWidget);
-      expect(find.text('🎬 Movie Canon'), findsOneWidget);
-
-      await tester.tap(find.text('🎬 Movie Canon'));
+      expect(find.byKey(const Key('squad_consensus_201')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('squad_canon_tv')));
+      await tester.tap(find.byKey(const Key('squad_canon_movie')));
       await tester.pumpAndSettle();
+      expect(repo.consensusCalls, ['tv', 'movie']);
+    });
 
-      // In movie canon with no movies in sample entries, 0 titles shown
-      expect(find.text('0 Titles'), findsOneWidget);
-
-      await tester.tap(find.text('📺 Series Canon'));
+    testWidgets('Squad Watchlist and Debates tabs show their own content', (tester) async {
+      repo.watchlist = const [
+        SharedWatchlistItem(titleId: 1396, mediaType: 'tv', title: 'Breaking Bad', queuedBy: 2, memberCount: 2),
+      ];
+      await pump(tester, const SquadHubScreen(squadId: 'sq-1'));
+      await tester.tap(find.byKey(const Key('squad_tab_watchlist')));
       await tester.pumpAndSettle();
+      expect(find.text('Breaking Bad'), findsOneWidget);
+      expect(find.text('Everyone wants to watch'), findsOneWidget);
+      expect(find.byKey(const Key('squad_consensus_101')), findsNothing);
 
-      expect(find.text('Succession'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('squad_tab_debates')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('squad_debate_105')), findsOneWidget);
+      expect(find.byKey(const Key('squad_debate_101')), findsNothing);
+    });
+
+    testWidgets('the owner invites by handle', (tester) async {
+      profiles.profiles['maya'] = const PublicProfile(id: 'u2', username: 'maya', displayName: 'Maya');
+      await pump(tester, const SquadHubScreen(squadId: 'sq-1'));
+      await tester.tap(find.byKey(const Key('squad_invite_button')));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byKey(const Key('squad_invite_field')), '@maya');
+      await tester.tap(find.byKey(const Key('squad_invite_confirm')));
+      await tester.pumpAndSettle();
+      expect(repo.added.single, ('sq-1', 'u2'));
+      expect(find.text('MEMBERS (3)'), findsOneWidget);
+    });
+
+    testWidgets('members cannot invite', (tester) async {
+      await pump(tester, const SquadHubScreen(squadId: 'sq-1'), me: 'u3');
+      expect(find.byKey(const Key('squad_invite_button')), findsNothing);
+    });
+
+    testWidgets('a failed load shows a retryable error', (tester) async {
+      repo.failReads = true;
+      await pump(tester, const SquadHubScreen(squadId: 'sq-1'));
+      expect(find.byKey(const Key('squad_error')), findsOneWidget);
+    });
+  });
+
+  group('FE-608: SquadsListScreen', () {
+    testWidgets('lists my squads and creates a new one', (tester) async {
+      await pump(tester, const SquadsListScreen());
+      expect(find.text('The Apartment'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('squad_row_sq-1')));
+      await tester.pumpAndSettle();
+      expect(find.text('route:/squads/sq-1'), findsOneWidget);
+    });
+
+    testWidgets('create opens the new squad', (tester) async {
+      await pump(tester, const SquadsListScreen());
+      await tester.tap(find.byKey(const Key('create_squad_button')));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byKey(const Key('squad_name_field')), 'Sci-Fi Club');
+      await tester.tap(find.byKey(const Key('squad_create_confirm')));
+      await tester.pumpAndSettle();
+      expect(find.text('route:/squads/sq-new'), findsOneWidget);
+    });
+  });
+
+  group('FE-608: SupabaseSquadRepository', () {
+    test('consensus maps champion/lowest names from members and calls the RPC per canon', () async {
+      final requests = <http.Request>[];
+      final client = SupabaseClient(
+        'http://supabase.test',
+        'anon-key',
+        httpClient: MockClient((req) async {
+          requests.add(req);
+          return http.Response(
+            jsonEncode([
+              {
+                'consensus_rank': 1,
+                'title_id': 1396,
+                'title': 'Breaking Bad',
+                'poster_path': '/bb.jpg',
+                'total_borda_points': 9,
+                'champion_user_id': 'u1',
+                'champion_rank': 1,
+                'lowest_user_id': 'u3',
+                'lowest_rank': 4,
+                'members_ranked_count': 2,
+                'rank_variance': 4.5,
+              },
+            ]),
+            200,
+            headers: {'content-type': 'application/json'},
+            request: req,
+          );
+        }),
+        authOptions: const AuthClientOptions(autoRefreshToken: false),
+      );
+      final board = await SupabaseSquadRepository(client).consensus(repo.squads['sq-1']!, 'tv');
+      expect(requests.single.url.path, '/rest/v1/rpc/calculate_squad_canon');
+      expect(jsonDecode(requests.single.body), {'p_squad_id': 'sq-1', 'p_media_type': 'tv'});
+      expect((board.single.championDisplayName, board.single.lowestDisplayName), ('Jordan', 'Alex'));
+      expect(board.single.posterUrl, 'https://image.tmdb.org/t/p/w342/bb.jpg');
     });
   });
 }

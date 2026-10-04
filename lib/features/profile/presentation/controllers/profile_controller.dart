@@ -19,14 +19,28 @@ enum CanonViewMode {
   const CanonViewMode({required this.label, required this.shortName});
 }
 
+/// A single selectable value (tab, view mode, toggle) held in a [Notifier] (FE-608
+/// replaced the legacy `StateProvider`s). Tests override with `() => Selection(x)`.
+class Selection<T> extends Notifier<T> {
+  Selection(this._initial);
+  final T _initial;
+
+  @override
+  T build() => _initial;
+
+  void select(T value) => state = value;
+}
+
 /// Provider managing the active dual-canon tab (Movie vs Series).
-final selectedCanonProvider = StateProvider<CanonType>((ref) => CanonType.movie);
+final selectedCanonProvider =
+    NotifierProvider<Selection<CanonType>, CanonType>(() => Selection(CanonType.movie));
 
 /// Provider managing the active visual presentation mode (Ranked List, Tier View, 3x3 Grid).
-final canonViewModeProvider = StateProvider<CanonViewMode>((ref) => CanonViewMode.rankedList);
+final canonViewModeProvider =
+    NotifierProvider<Selection<CanonViewMode>, CanonViewMode>(() => Selection(CanonViewMode.rankedList));
 
 /// Provider tracking whether multi-season anime are rolled up into master franchise entries.
-final franchiseRollupProvider = StateProvider<bool>((ref) => false);
+final franchiseRollupProvider = NotifierProvider<Selection<bool>, bool>(() => Selection(false));
 
 /// State holding segregated Movie and Series canon entries.
 class ProfileCanonState {

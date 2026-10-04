@@ -1,15 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:telly_app/core/database/database.dart';
+import 'package:telly_app/core/database/database_provider.dart';
+import 'package:telly_app/features/profile/data/graveyard_repository.dart';
 import 'package:telly_app/core/widgets/telly_primary_button.dart';
 import 'package:telly_app/features/logging/data/title_repository.dart';
 import 'package:telly_app/features/logging/presentation/screens/logging_studio_screen.dart';
 
+import '../../fakes/fake_graveyard_repository.dart';
 import '../../fakes/fake_title_repository.dart';
 import '../../helpers/router_harness.dart';
 
 void main() {
   late FakeTitleRepository repo;
-  setUp(() => repo = FakeTitleRepository());
+  late FakeGraveyardRepository graveyard;
+  late AppDatabase db;
+  setUp(() {
+    repo = FakeTitleRepository();
+    graveyard = FakeGraveyardRepository();
+    db = AppDatabase.inMemory();
+  });
+  tearDown(() => db.close());
 
   Future<void> pumpStudio(WidgetTester tester) async {
     tester.view.physicalSize = const Size(800, 1600);
@@ -17,7 +28,11 @@ void main() {
     addTearDown(tester.view.reset);
     await tester.pumpWidget(routerHarness(
       const LoggingStudioScreen(),
-      overrides: [titleRepositoryProvider.overrideWithValue(repo)],
+      overrides: [
+        titleRepositoryProvider.overrideWithValue(repo),
+        graveyardRepositoryProvider.overrideWithValue(graveyard),
+        databaseProvider.overrideWithValue(db),
+      ],
     ));
     await tester.pumpAndSettle();
   }
@@ -130,6 +145,7 @@ void main() {
       await tester.tap(find.text('🪦 Bury in The TV Graveyard'));
       await tester.pumpAndSettle();
       expect(find.text('route:/canon/graveyard'), findsOneWidget);
+      expect(graveyard.shows.single.titleId, 136315, reason: 'persisted to user_dropped_shows');
     });
 
     testWidgets('Change returns to search with the previous results', (tester) async {

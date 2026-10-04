@@ -27,7 +27,7 @@ dependencies:
   # --- Local Persistence & Offline-First (Drift SQLite) ---
   drift: ^2.20.1
   sqlite3_flutter_libs: ^0.5.24
-  path_provider: ^2.1.4
+  path_provider: ^2.1.6
   path: ^1.9.0
   flutter_secure_storage: ^9.2.2
 
@@ -46,6 +46,10 @@ dependencies:
   csv: ^6.0.0
   connectivity_plus: ^7.3.2
   file_picker: ^10.2.4
+  share_plus: ^12.0.2
+  image_picker: ^1.2.3
+  image_cropper: ^12.2.1
+  flutter_cache_manager: ^3.4.5
 
 dev_dependencies:
   flutter_test:

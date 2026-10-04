@@ -9,6 +9,7 @@ import 'package:telly_app/core/database/database_provider.dart';
 import 'package:telly_app/core/router/routes.dart';
 import 'package:telly_app/core/services/haptics_service.dart';
 import 'package:telly_app/core/theme/telly_theme.dart';
+import 'package:telly_app/features/auth/data/auth_repository.dart';
 import 'package:telly_app/features/logging/data/title_repository.dart';
 import 'package:telly_app/features/logging/domain/title_search_result.dart';
 import 'package:telly_app/features/logging/presentation/controllers/logging_session_controller.dart';
@@ -17,6 +18,7 @@ import 'package:telly_app/features/logging/presentation/screens/logging_studio_s
 import 'package:telly_app/features/profile/presentation/screens/dual_canon_profile_screen.dart';
 import 'package:telly_app/features/ranking/domain/sentiment_bracket.dart';
 
+import '../../fakes/fake_auth_repository.dart';
 import '../../fakes/fake_title_repository.dart';
 import '../../helpers/canon_seed.dart';
 
@@ -34,6 +36,7 @@ void main() {
       databaseProvider.overrideWithValue(db),
       hapticsEnabledProvider.overrideWith((ref) => false),
       titleRepositoryProvider.overrideWithValue(FakeTitleRepository()),
+      authRepositoryProvider.overrideWithValue(FakeAuthRepository(signedInUserId: 'u1')),
     ]);
     addTearDown(container.dispose);
     Widget stub(BuildContext _, GoRouterState s) => Scaffold(body: Text('route:${s.uri}'));

@@ -26,6 +26,7 @@ abstract final class Routes {
   static String title(String mediaType, int id) => '/title/$mediaType/$id'; // SCR-08
   static String profile(String handle) => '/u/$handle'; // SCR-15
   static String twoToWatch(String handle) => '/u/$handle/two-to-watch'; // SCR-16
+  static const squads = '/squads'; // SCR-17 list
   static String squad(String id) => '/squads/$id'; // SCR-17
   static const graveyard = '/canon/graveyard'; // SCR-18
   static const wrapped = '/canon/wrapped'; // SCR-19

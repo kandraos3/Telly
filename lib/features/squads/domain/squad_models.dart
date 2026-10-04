@@ -2,12 +2,18 @@ import 'package:flutter/foundation.dart';
 
 /// Role within a squad circle.
 enum SquadRole {
+  owner,
   admin,
   member;
 
-  static SquadRole fromString(String value) {
-    return value.toUpperCase() == 'ADMIN' ? SquadRole.admin : SquadRole.member;
-  }
+  static SquadRole fromString(String value) => switch (value.toUpperCase()) {
+        'OWNER' => SquadRole.owner,
+        'ADMIN' => SquadRole.admin,
+        _ => SquadRole.member,
+      };
+
+  /// Owners and admins can invite (RLS `squad_members_insert`).
+  bool get canInvite => this != SquadRole.member;
 }
 
 /// A Squad / Circle of friends sharing a collective canon (Feature Spec 04 §4).
@@ -53,7 +59,7 @@ class SquadMember {
     required this.joinedAt,
   });
 
-  bool get isAdmin => role == SquadRole.admin;
+  bool get isAdmin => role == SquadRole.admin || role == SquadRole.owner;
 }
 
 /// An entry in a squad's consensus canon calculated via Borda Count (BE-304).

@@ -3,18 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:telly_app/features/onboarding/data/onboarding_repository.dart';
 import 'package:telly_app/features/onboarding/presentation/screens/streaming_setup_screen.dart';
 
+import '../../fakes/fake_onboarding_repository.dart';
 import '../../helpers/router_harness.dart';
-
-class FakeOnboardingRepository implements OnboardingRepository {
-  final saves = <(Set<String>, bool)>[];
-  bool fail = false;
-
-  @override
-  Future<void> saveStreamingSetup({required Set<String> platformIds, required bool includeFreePlatforms}) async {
-    if (fail) throw Exception('offline');
-    saves.add((platformIds, includeFreePlatforms));
-  }
-}
 
 void main() {
   late FakeOnboardingRepository repo;

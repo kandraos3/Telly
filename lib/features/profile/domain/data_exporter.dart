@@ -71,6 +71,8 @@ class DataExporter {
         'mvp_actor',
         'tags',
         'date_logged',
+        // TMDB ids collide across movies and tv, so the canon must travel with the id.
+        'media_type',
       ],
     ];
 
@@ -86,6 +88,7 @@ class DataExporter {
         item.mvpActor ?? '',
         item.tags.join(';'),
         item.dateLogged,
+        item.mediaType,
       ]);
     }
 

@@ -15,7 +15,6 @@ import '../../features/logging/presentation/screens/logging_studio_screen.dart';
 import '../../features/onboarding/presentation/screens/onboarding_tournament_screen.dart';
 import '../../features/onboarding/presentation/screens/seed_grid_screen.dart';
 import '../../features/onboarding/presentation/screens/streaming_setup_screen.dart';
-import '../../features/profile/domain/dropped_show.dart';
 import '../../features/profile/presentation/screens/dual_canon_profile_screen.dart';
 import '../../features/profile/presentation/screens/edit_profile_studio_screen.dart';
 import '../../features/profile/presentation/screens/friend_profile_screen.dart';
@@ -23,8 +22,8 @@ import '../../features/profile/presentation/screens/settings_hub_screen.dart';
 import '../../features/profile/presentation/screens/tv_graveyard_screen.dart';
 import '../../features/queue/presentation/screens/smart_queue_screen.dart';
 import '../../features/sharing/presentation/screens/telly_wrapped_studio_screen.dart';
-import '../../features/squads/domain/squad_models.dart';
 import '../../features/squads/presentation/screens/squad_hub_screen.dart';
+import '../../features/squads/presentation/screens/squads_list_screen.dart';
 import 'app_shell.dart';
 import 'auth_redirect.dart';
 import 'pending_screen.dart';
@@ -110,6 +109,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               path: Routes.canon,
               builder: (context, __) => DualCanonProfileScreen(
                 onSettingsTap: () => context.push(Routes.settings),
+                onSquadsTap: () => context.push(Routes.squads),
               ),
               routes: [
                 GoRoute(
@@ -125,9 +125,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 GoRoute(
                   path: 'graveyard',
                   parentNavigatorKey: rootNavigatorKey,
-                  builder: (_, state) => TvGraveyardScreen(
-                    newlyDropped: state.extra is DroppedShow ? state.extra! as DroppedShow : null,
-                  ),
+                  builder: (_, __) => const TvGraveyardScreen(),
                 ),
                 GoRoute(
                   path: 'wrapped',
@@ -167,18 +165,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/u/:handle',
-        builder: (_, state) {
-          final args = state.extra;
-          final handle = state.pathParameters['handle']!;
-          return args is FriendRouteArgs
-              ? FriendProfileScreen(
-                  userId: args.userId,
-                  handle: handle,
-                  displayName: args.displayName,
-                  avatarUrl: args.avatarUrl,
-                )
-              : PendingScreen(title: '@$handle', ticket: 'FE-608');
-        },
+        builder: (_, state) => FriendProfileScreen(handle: state.pathParameters['handle']!),
         routes: [
           GoRoute(
             path: 'two-to-watch',
@@ -193,10 +180,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ],
       ),
       GoRoute(
-        path: '/squads/:id',
-        builder: (_, state) => state.extra is Squad
-            ? SquadHubScreen(squad: state.extra! as Squad)
-            : const PendingScreen(title: 'Squad', ticket: 'FE-608'),
+        path: Routes.squads,
+        builder: (_, __) => const SquadsListScreen(),
+        routes: [
+          GoRoute(path: ':id', builder: (_, state) => SquadHubScreen(squadId: state.pathParameters['id']!)),
+        ],
       ),
     ],
   );

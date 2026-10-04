@@ -1,91 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:telly_app/core/router/routes.dart';
 import 'package:telly_app/core/services/haptics_service.dart';
 import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/theme/telly_typography.dart';
 import 'package:telly_app/features/profile/domain/dropped_show.dart';
-import 'package:telly_app/features/profile/presentation/widgets/log_dropped_show_sheet.dart';
+import 'package:telly_app/features/profile/presentation/controllers/graveyard_controller.dart';
 
 /// SCR-18: The TV Graveyard (Dropped / DNF Tracker Screen) (FE-307).
 ///
 /// Dedicated catalog for abandoned television series with milestone markers,
 /// reason taxonomies, and "Dead & Buried" vs "Willing to Revisit" tracking.
-class TvGraveyardScreen extends StatefulWidget {
-  final List<DroppedShow>? initialDroppedShows;
-
-  /// A show just dropped from the Logging Studio (`SCR-09`, FE-603). Persisting to
-  /// `user_dropped_shows` is FE-608.
-  final DroppedShow? newlyDropped;
-
-  const TvGraveyardScreen({super.key, this.initialDroppedShows, this.newlyDropped});
+/// FE-608: backed by `user_dropped_shows` through [graveyardControllerProvider]. New drops
+/// come from the Logging Studio (`SCR-09` → "Dropped"), so "+" opens it.
+class TvGraveyardScreen extends ConsumerWidget {
+  const TvGraveyardScreen({super.key});
 
   @override
-  State<TvGraveyardScreen> createState() => _TvGraveyardScreenState();
-}
-
-class _TvGraveyardScreenState extends State<TvGraveyardScreen> {
-  late List<DroppedShow> _droppedShows;
-
-  @override
-  void initState() {
-    super.initState();
-    _droppedShows = widget.initialDroppedShows != null
-        ? List.from(widget.initialDroppedShows!)
-        : _seedInitialGraveyard();
-    if (widget.newlyDropped != null) _droppedShows.insert(0, widget.newlyDropped!);
-  }
-
-  List<DroppedShow> _seedInitialGraveyard() {
-    final now = DateTime.now();
-    return [
-      DroppedShow(
-        id: 'drop-1',
-        userId: 'current-user',
-        titleId: 501,
-        title: 'Westworld',
-        releaseYear: 2016,
-        droppedAtSeason: 3,
-        droppedAtEpisode: 4,
-        reason: DropReasonTaxonomy.jumpedShark,
-        willingToRevisit: false,
-        notes: 'Lost the mystery once they left the park and entered futuristic neo-Los Angeles.',
-        notifyOnAcclaim: false,
-        createdAt: now.subtract(const Duration(days: 45)),
-      ),
-      DroppedShow(
-        id: 'drop-2',
-        userId: 'current-user',
-        titleId: 502,
-        title: 'Yellowjackets',
-        releaseYear: 2021,
-        droppedAtSeason: 2,
-        droppedAtEpisode: 3,
-        reason: DropReasonTaxonomy.pacingSlowed,
-        willingToRevisit: true,
-        notes: 'Season 1 was electric, but season 2 adult storyline felt meandering.',
-        notifyOnAcclaim: true,
-        createdAt: now.subtract(const Duration(days: 12)),
-      ),
-    ];
-  }
-
-  void _openLogDroppedSheet() {
-    HapticsService.lightImpact();
-    LogDroppedShowSheet.show(
-      context: context,
-      titleId: 999,
-      title: 'True Detective: Night Country',
-      releaseYear: 2024,
-    ).then((dropped) {
-      if (dropped != null) {
-        setState(() {
-          _droppedShows.insert(0, dropped);
-        });
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final async = ref.watch(graveyardControllerProvider);
+    final droppedShows = async.valueOrNull ?? const <DroppedShow>[];
     return Scaffold(
       backgroundColor: TellyColors.backgroundCanvasOled,
       appBar: AppBar(
@@ -93,7 +28,7 @@ class _TvGraveyardScreenState extends State<TvGraveyardScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded, color: TellyColors.textPrimary),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => context.canPop() ? context.pop() : context.go(Routes.canon),
         ),
         title: Row(
           mainAxisSize: MainAxisSize.min,
@@ -114,7 +49,11 @@ class _TvGraveyardScreenState extends State<TvGraveyardScreen> {
           IconButton(
             icon: const Icon(Icons.add_rounded, color: TellyColors.neonCoral),
             tooltip: 'Log Dropped Show',
-            onPressed: _openLogDroppedSheet,
+            key: const Key('graveyard_add_button'),
+            onPressed: () {
+              HapticsService.lightImpact();
+              context.push(Routes.log);
+            },
           ),
         ],
       ),
@@ -136,7 +75,7 @@ class _TvGraveyardScreenState extends State<TvGraveyardScreen> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'Shows you abandoned and why (${_droppedShows.length} Total). Dropped shows do not affect active canon percentiles.',
+                      'Shows you abandoned and why (${droppedShows.length} Total). Dropped shows do not affect active canon percentiles.',
                       style: TellyTypography.caption(color: TellyColors.textSecondary),
                     ),
                   ),
@@ -146,10 +85,29 @@ class _TvGraveyardScreenState extends State<TvGraveyardScreen> {
             const SizedBox(height: 16),
 
             // Dropped Cards List
-            if (_droppedShows.isEmpty)
+            if (async.isLoading && !async.hasValue)
+              const Padding(
+                padding: EdgeInsets.all(32),
+                child: Center(child: CircularProgressIndicator(color: TellyColors.neonCoral)),
+              )
+            else if (async.hasError && !async.hasValue)
+              Padding(
+                key: const Key('graveyard_error'),
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  children: [
+                    Text("Couldn't load your Graveyard.", style: TellyTypography.bodyMedium()),
+                    TextButton(
+                      onPressed: () => ref.invalidate(graveyardControllerProvider),
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              )
+            else if (droppedShows.isEmpty)
               _buildEmptyState()
             else
-              ..._droppedShows.map((show) => _buildDroppedCard(show)),
+              ...droppedShows.map((show) => _buildDroppedCard(show)),
           ],
         ),
       ),

@@ -6,9 +6,11 @@ import '../../../../core/router/routes.dart';
 import '../../../../core/services/haptics_service.dart';
 import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../logging/domain/title_search_result.dart';
 import '../../../ranking/domain/canon_type.dart';
 import '../../../ranking/domain/franchise_rollup_service.dart';
+import '../controllers/edit_profile_controller.dart';
 import '../controllers/profile_controller.dart';
 import '../widgets/poster_grid_view.dart';
 import '../widgets/profile_header_card.dart';
@@ -26,12 +28,14 @@ import '../widgets/top_showcase_row.dart';
 /// - Tickets: FE-206, FE-207, FE-208, FE-209
 class DualCanonProfileScreen extends ConsumerWidget {
   final VoidCallback? onSettingsTap;
+  final VoidCallback? onSquadsTap;
   final VoidCallback? onShareTap;
   final ValueChanged<CanonEntry>? onTapEntry;
 
   const DualCanonProfileScreen({
     super.key,
     this.onSettingsTap,
+    this.onSquadsTap,
     this.onShareTap,
     this.onTapEntry,
   });
@@ -42,6 +46,7 @@ class DualCanonProfileScreen extends ConsumerWidget {
     final viewMode = ref.watch(canonViewModeProvider);
     final rollupAnime = ref.watch(franchiseRollupProvider);
     final canonState = ref.watch(profileCanonProvider);
+    final me = ref.watch(authControllerProvider.select((s) => s.user));
 
     final entries = canonState.entriesFor(
       selectedCanon,
@@ -63,9 +68,14 @@ class DualCanonProfileScreen extends ConsumerWidget {
 
               // 1. PROFILE HEADER CARD (Avatar, Handle, Bio, Stats)
               ProfileHeaderCard(
+                displayName: me?.displayName ?? '',
+                handle: me?.username == null ? '' : '@${me!.username}',
+                bio: me?.bio,
+                avatarUrl: me?.avatarUrl,
                 movieCount: moviesCount,
                 seriesCount: seriesCount,
                 onSettingsTap: onSettingsTap,
+                onSquadsTap: onSquadsTap,
                 onShareTap: onShareTap,
               ),
 
@@ -92,7 +102,7 @@ class DualCanonProfileScreen extends ConsumerWidget {
                           isSelected: selectedCanon == CanonType.movie,
                           onTap: () {
                             ref.read(hapticsServiceProvider).duelSelectCandidate();
-                            ref.read(selectedCanonProvider.notifier).state = CanonType.movie;
+                            ref.read(selectedCanonProvider.notifier).select(CanonType.movie);
                           },
                         ),
                       ),
@@ -107,7 +117,7 @@ class DualCanonProfileScreen extends ConsumerWidget {
                           isSelected: selectedCanon == CanonType.series,
                           onTap: () {
                             ref.read(hapticsServiceProvider).duelSelectCandidate();
-                            ref.read(selectedCanonProvider.notifier).state = CanonType.series;
+                            ref.read(selectedCanonProvider.notifier).select(CanonType.series);
                           },
                         ),
                       ),
@@ -118,9 +128,9 @@ class DualCanonProfileScreen extends ConsumerWidget {
 
               const SizedBox(height: 16),
 
-              // 3. TOP 3 SHOWCASE ROW
+              // 3. TOP 3 SHOWCASE ROW — pinned titles (Edit Profile) first, then top ranks.
               TopShowcaseRow(
-                topEntries: entries,
+                topEntries: _showcase(entries, ref.watch(myPinnedShowcaseProvider).valueOrNull ?? const []),
                 onTapEntry: onTapEntry,
               ),
 
@@ -150,7 +160,7 @@ class DualCanonProfileScreen extends ConsumerWidget {
                             isSelected: viewMode == CanonViewMode.rankedList,
                             onTap: () {
                               ref.read(hapticsServiceProvider).duelSelectCandidate();
-                              ref.read(canonViewModeProvider.notifier).state = CanonViewMode.rankedList;
+                              ref.read(canonViewModeProvider.notifier).select(CanonViewMode.rankedList);
                             },
                           ),
                           _buildViewModeButton(
@@ -160,7 +170,7 @@ class DualCanonProfileScreen extends ConsumerWidget {
                             isSelected: viewMode == CanonViewMode.tierView,
                             onTap: () {
                               ref.read(hapticsServiceProvider).duelSelectCandidate();
-                              ref.read(canonViewModeProvider.notifier).state = CanonViewMode.tierView;
+                              ref.read(canonViewModeProvider.notifier).select(CanonViewMode.tierView);
                             },
                           ),
                           _buildViewModeButton(
@@ -170,7 +180,7 @@ class DualCanonProfileScreen extends ConsumerWidget {
                             isSelected: viewMode == CanonViewMode.grid3x3,
                             onTap: () {
                               ref.read(hapticsServiceProvider).duelSelectCandidate();
-                              ref.read(canonViewModeProvider.notifier).state = CanonViewMode.grid3x3;
+                              ref.read(canonViewModeProvider.notifier).select(CanonViewMode.grid3x3);
                             },
                           ),
                         ],
@@ -183,7 +193,7 @@ class DualCanonProfileScreen extends ConsumerWidget {
                         key: const Key('franchise_rollup_toggle'),
                         onTap: () {
                           ref.read(hapticsServiceProvider).duelSelectCandidate();
-                          ref.read(franchiseRollupProvider.notifier).state = !rollupAnime;
+                          ref.read(franchiseRollupProvider.notifier).select(!rollupAnime);
                         },
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -261,6 +271,16 @@ class DualCanonProfileScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  /// Up to three titles: my pinned picks that belong to the shown canon (in pin order),
+  /// then the canon's best-ranked titles that are not already pinned.
+  static List<CanonEntry> _showcase(List<CanonEntry> entries, List<ShowcasePick> pinned) {
+    final picked = <CanonEntry>[
+      for (final p in pinned)
+        ...entries.where((e) => e.id == p.titleId && e.mediaType == p.mediaType).take(1),
+    ];
+    return [...picked, ...entries.where((e) => !picked.contains(e))].take(3).toList();
   }
 
   /// Row context menu: "Reset Duels for This Show" re-runs the tournament for the title

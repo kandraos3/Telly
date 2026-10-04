@@ -24,10 +24,10 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 6 — Integration, Wiring & Audit Remediation** (planned 2026-10-03; owner decisions D1–D7 recorded in Sprint 6)
-- **Current Active Ticket**: `FE-608` (Profile, Friend Profile, TV Graveyard, Squads & Settings Wiring) — Sprint 6: 17 / 32 tickets complete
+- **Current Active Ticket**: `FE-609` (Smart Queue & Streaming Availability Wiring) — Sprint 6: 18 / 32 tickets complete
 - **Overall Roadmap Progress**: Sprints 1–5 granular tasks after the `DOC-601` honesty reset (2026-10-03): **281 / 431 verified** · **121 un-checked** (each annotated `→ remediated by <Sprint 6 ticket>`) · **29 human-only**. The earlier "89 / 89" claim was overstated.
 - **Human-Only Tasks**: 29 tasks in Sprints 1–5 marked `👤 [TO BE DONE BY HUMAN]` (cloud setup, secrets, store submission, device/CI runs, dashboard verification), plus the Sprint 6 human prerequisites list. These cannot be completed or verified from code.
-- **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (215 / 215 pass — note: many tests are widget/unit-level only; no real E2E or golden tests exist yet)
+- **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (369 / 369 pass; pgTAP 155 assertions / 9 files — note: no real E2E or golden tests exist yet)
 - **Last Updated**: 2026-10-03
 
 | Sprint | Status | Total Tickets | Audit Verdict |
@@ -792,7 +792,7 @@ Build social connections, the activity feed with real-time upset alert detection
 - **Granular Tasks**:
   - [x] Create `lib/features/squads/presentation/screens/squad_hub_screen.dart`.
   - [x] Render squad banner, name, member avatars row, and invite link button.
-  - [ ] Display Squad Consensus Leaderboard (calculated via Borda count RPC). → remediated by `FE-608`
+  - [x] Display Squad Consensus Leaderboard (calculated via Borda count RPC). ✅ remediated in `FE-608`
   - [x] Provide toggle: `[ 🎬 Movie Canon ]` vs `[ 📺 Series Canon ]`.
 - **Testing & Verification**:
   - [x] Widget test verifying member avatars and ranked squad items render.
@@ -821,9 +821,9 @@ Build social connections, the activity feed with real-time upset alert detection
   - [x] Create `lib/features/profile/presentation/widgets/log_dropped_show_sheet.dart`.
   - [x] Season/Episode picker dropdowns.
   - [x] Standardized reason taxonomy chips.
-  - [ ] Save mutation writing to `user_rankings` with `status: 'dropped'`. → remediated by `FE-608`
+  - [x] Save mutation writing to `user_rankings` with `status: 'dropped'`. ✅ remediated in `FE-608` *(as a `user_dropped_shows` row plus `RankingRepository.remove`: a dropped show leaves the canon instead of staying in `user_rankings` with a dropped status)*
 - **Testing & Verification**:
-  - [ ] Unit test confirming moving show to Graveyard removes it from active Canon without corrupting Canon rank indexes. → remediated by `FE-608`
+  - [x] Unit test confirming moving show to Graveyard removes it from active Canon without corrupting Canon rank indexes. ✅ remediated in `FE-608`
 - **Dependencies**: `FE-307`, `BE-201`.
 
 ---
@@ -1174,11 +1174,11 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 - **Scope & Objectives**: Central configuration hub for account, streaming services, push notifications, and storage.
 - **Granular Tasks**:
   - [ ] Account section: Change phone/email, FaceID biometric unlock toggle. → remediated by `DEV-601`
-  - [ ] Streaming section: Edit active services and update JustWatch country region. → remediated by `FE-608`
-  - [ ] Notifications matrix: Granular toggles (Upset Alerts, Co-Watch Invites, Friend Activity) + Quiet Hours schedule. → remediated by `FE-608`
-  - [ ] Storage hygiene: Display local cached image size with *"Clear Image Cache"* action. → remediated by `FE-608`
+  - [x] Streaming section: Edit active services and update JustWatch country region. ✅ remediated in `FE-608`
+  - [x] Notifications matrix: Granular toggles (Upset Alerts, Co-Watch Invites, Friend Activity) + Quiet Hours schedule. ✅ remediated in `FE-608` *(Quiet Hours is a fixed 10 PM – 9 AM on/off preference; no custom schedule. Push delivery itself is not built)*
+  - [x] Storage hygiene: Display local cached image size with *"Clear Image Cache"* action. ✅ remediated in `FE-608`
 - **Testing & Verification**:
-  - [ ] Widget test verifying toggle state changes update SharedPreferences / Drift settings. → remediated by `FE-608`
+  - [x] Widget test verifying toggle state changes update SharedPreferences / Drift settings. ✅ remediated in `FE-608` *(preferences persist to `users.preferences` on Supabase, not SharedPreferences/Drift)*
 - **Dependencies**: `FE-104`.
 
 #### `FE-506`: Self-Service CSV, Notion & Letterboxd Data Exporter
@@ -1189,7 +1189,7 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
   - [x] Create `lib/features/profile/domain/data_exporter.dart`.
   - [x] Format 1: `telly_canon_export.csv` (Rank, Title, Media Type, Score, MVP, Vibe Tags, Date Added).
   - [x] Format 2: `letterboxd_diary_export.csv` (compatible with Letterboxd re-import).
-  - [ ] Provide 1-tap download and OS share sheet invocation. → remediated by `FE-608`
+  - [x] Provide 1-tap download and OS share sheet invocation. ✅ remediated in `FE-608` *(CSV + Letterboxd via `share_plus`. The Letterboxd `Year` column is empty because the local canon stores no release year. CSV gained a `media_type` column because TMDB ids collide across canons)*
 - **Testing & Verification**:
   - [x] Unit test asserting CSV output matches standard RFC 4180 format.
 - **Dependencies**: `FE-105`.
@@ -1200,12 +1200,12 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
   - [**`adjacent_systems/02_PROFILE_MANAGEMENT_AND_CUSTOMIZATION.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/adjacent_systems/02_PROFILE_MANAGEMENT_AND_CUSTOMIZATION.md) §1–§2 (Profile Studio)
 - **Scope & Objectives**: Profile personalization screen with square avatar cropping and Top 3 title curation.
 - **Granular Tasks**:
-  - [ ] Implement avatar upload using `image_picker` and `image_cropper` (1:1 aspect ratio constraint). → remediated by `FE-608`
+  - [x] Implement avatar upload using `image_picker` and `image_cropper` (1:1 aspect ratio constraint). ✅ remediated in `FE-608`
   - [x] Bio editor with 160-character ceiling.
   - [x] Top 3 Showcase Selector: Pick 3 crowning titles pinned to top of profile.
   - [x] Privacy Mode Toggle: `[ Public ]` | `[ Friends-Only ]` | `[ Ghost Mode ]`.
 - **Testing & Verification**:
-  - [ ] Widget test verifying avatar crop result updates preview state. → remediated by `FE-608`
+  - [x] Widget test verifying avatar crop result updates preview state. ✅ remediated in `FE-608`
 - **Dependencies**: `FE-104`.
 
 #### `FE-508`: In-App Spoiler Shield & Report Content Sheets
@@ -1694,13 +1694,13 @@ Turn the library of individually-tested widgets and algorithms into a **wired, r
   - [**`adjacent_systems/03_SETTINGS_AND_PREFERENCES_ARCHITECTURE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/adjacent_systems/03_SETTINGS_AND_PREFERENCES_ARCHITECTURE.md)
 - **Scope & Objectives**: Remove mock data from `SCR-14`, `SCR-15`, `SCR-17`, `SCR-18`, `SCR-20` and Edit Profile.
 - **Granular Tasks**:
-  - [ ] Friend profile: profile + per-canon `calculate_taste_match_rpc` (Movie % vs Series %), agreements/divergences from both canons.
-  - [ ] Graveyard ↔ `user_dropped_shows`; Squads ↔ `squads`/`squad_members` + `calculate_squad_canon`.
-  - [ ] Edit Profile: avatar via `image_picker` → Supabase Storage; Top-3 showcase saved to `pinned_showcase_ids`.
-  - [ ] Settings: preferences persisted (haptics toggle backs `HapticsService`), subscriptions editor, data export via `DataExporter` + `share_plus`.
-  - [ ] Convert remaining `StateProvider`s in these features; move business `setState` out of `edit_profile_studio_screen`, `settings_hub_screen`, `log_dropped_show_sheet`, `squad_hub_screen`, `friend_profile_screen`, `tv_graveyard_screen`.
+  - [x] Friend profile: profile + per-canon `calculate_taste_match_rpc` (Movie % vs Series %), agreements/divergences from both canons. *(+ `lookup_profile_card` RPC, migration `…0600`: `users` RLS hid friends-only profiles, so non-followers couldn't send them a follow request)*
+  - [x] Graveyard ↔ `user_dropped_shows`; Squads ↔ `squads`/`squad_members` + `calculate_squad_canon`. *(+ `get_squad_members` and `squad_shared_watchlist` RPCs, migration `…0700`, because member names and the shared watchlist sit behind other users' RLS; + a new `/squads` list screen since nothing linked to squads yet)*
+  - [x] Edit Profile: avatar via `image_picker` → Supabase Storage; Top-3 showcase saved to `pinned_showcase_ids`. *(the column is `users.pinned_showcase`, a JSON array of up to 3 `{title_id, media_type}` objects, chosen from my own canon. The SCR-14 Top 3 row now leads with the pinned titles. The handle is read-only here (the reservation flow owns it). Favourite creator is stored in `users.preferences`. Removed: the emoji "Iconic Avatars" (no assets, and `avatar_url` is a URL) and the module privacy toggles (graveyard / co-watch / spoiler blur), because nothing stored or enforced them)*
+  - [x] Settings: preferences persisted (haptics toggle backs `HapticsService`), subscriptions editor, data export via `DataExporter` + `share_plus`. *(account deletion and Terms/Privacy links are left to `LEGAL-601`. The fake biometric-unlock toggle was removed until `DEV-601`)*
+  - [x] Convert remaining `StateProvider`s in these features; move business `setState` out of `edit_profile_studio_screen`, `settings_hub_screen`, `log_dropped_show_sheet`, `squad_hub_screen`, `friend_profile_screen`, `tv_graveyard_screen`.
 - **Testing & Verification**:
-  - [ ] Notifier tests with fake repositories; widget tests asserting loading / error / data states for each screen.
+  - [x] Notifier tests with fake repositories; widget tests asserting loading / error / data states for each screen.
 - **Dependencies**: `FE-604`, `BE-604`.
 
 #### `FE-609`: Smart Queue & Streaming Availability Wiring

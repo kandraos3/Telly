@@ -1,8 +1,14 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../features/profile/presentation/controllers/settings_controllers.dart';
+
 /// Provider holding the user's global haptic feedback preference.
-final hapticsEnabledProvider = StateProvider<bool>((ref) => true);
+/// Whether haptics fire: Settings → Haptics (`users.preferences.haptics`, FE-608).
+/// On until preferences load.
+final hapticsEnabledProvider = Provider<bool>(
+  (ref) => ref.watch(preferencesProvider.select((p) => p.valueOrNull?.haptics ?? HapticsMode.full)) != HapticsMode.off,
+);
 
 /// Interface to allow clean mocking and testing of platform haptic calls.
 class PlatformHaptics {

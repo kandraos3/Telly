@@ -7,27 +7,25 @@ import '../../../../core/theme/telly_typography.dart';
 class ProfileHeaderCard extends StatelessWidget {
   final String displayName;
   final String handle;
-  final String bio;
+  final String? bio;
   final String? avatarUrl;
   final int movieCount;
   final int seriesCount;
-  final int totalEpisodes;
-  final int totalFilmHours;
   final VoidCallback? onSettingsTap;
   final VoidCallback? onShareTap;
+  final VoidCallback? onSquadsTap;
 
   const ProfileHeaderCard({
     super.key,
-    this.displayName = 'Jordan Miller',
-    this.handle = '@jordan',
-    this.bio = 'Cinema purist. Severance truther.',
+    required this.displayName,
+    required this.handle,
+    this.bio,
     this.avatarUrl,
     required this.movieCount,
     required this.seriesCount,
-    this.totalEpisodes = 3120,
-    this.totalFilmHours = 412,
     this.onSettingsTap,
     this.onShareTap,
+    this.onSquadsTap,
   });
 
   @override
@@ -53,10 +51,21 @@ class ProfileHeaderCard extends StatelessWidget {
                   letterSpacing: 0.5,
                 ),
               ),
-              IconButton(
-                key: const Key('profile_share_button'),
-                icon: const Icon(Icons.ios_share_rounded, color: TellyColors.textSecondary),
-                onPressed: onShareTap,
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    key: const Key('profile_squads_button'),
+                    tooltip: 'My Squads',
+                    icon: const Icon(Icons.groups_2_outlined, color: TellyColors.textSecondary),
+                    onPressed: onSquadsTap,
+                  ),
+                  IconButton(
+                    key: const Key('profile_share_button'),
+                    icon: const Icon(Icons.ios_share_rounded, color: TellyColors.textSecondary),
+                    onPressed: onShareTap,
+                  ),
+                ],
               ),
             ],
           ),
@@ -105,12 +114,14 @@ class ProfileHeaderCard extends StatelessWidget {
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      bio,
-                      key: const Key('profile_bio_text'),
-                      style: TellyTypography.bodyMedium(color: TellyColors.textSecondary),
-                    ),
+                    if (bio != null && bio!.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        bio!,
+                        key: const Key('profile_bio_text'),
+                        style: TellyTypography.bodyMedium(color: TellyColors.textSecondary),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -129,7 +140,7 @@ class ProfileHeaderCard extends StatelessWidget {
               border: Border.all(color: TellyColors.borderGlass),
             ),
             child: Text(
-              '$movieCount Movies  •  $seriesCount Series  •  $totalEpisodes Eps  •  ${totalFilmHours}h Film',
+              '$movieCount Movies  •  $seriesCount Series',
               key: const Key('profile_stats_summary_text'),
               textAlign: TextAlign.center,
               style: TellyTypography.caption(color: TellyColors.textSecondary).copyWith(
