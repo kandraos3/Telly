@@ -226,9 +226,9 @@ void main() {
       await tester.tap(rollupToggle);
       await tester.pumpAndSettle();
 
-      // After rollup: seasons aggregated into master 'Attack on Titan' entry
+      // After rollup: seasons folded into one 'Attack on Titan' entry (ALGO-602)
       expect(find.text('Attack on Titan'), findsOneWidget);
-      expect(find.text('2 Seasons aggregated'), findsOneWidget);
+      expect(find.text('Includes: S1, S2'), findsOneWidget);
       expect(find.text('Attack on Titan Season 1'), findsNothing);
     });
   });

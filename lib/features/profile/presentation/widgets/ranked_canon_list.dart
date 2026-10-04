@@ -141,7 +141,7 @@ class RankedCanonList extends StatelessWidget {
                       ),
                     ] else if (item.isRolledUp) ...[
                       Text(
-                        '${item.subEntries.length} Seasons aggregated',
+                        'Includes: ${item.seasonBreakdown.map((s) => s.seasonTitle ?? 'S${s.seasonNumber}').join(', ')}',
                         style: TellyTypography.caption(color: TellyColors.textTertiary),
                       ),
                     ],

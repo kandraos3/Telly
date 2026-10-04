@@ -1,138 +1,73 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:telly_app/features/ranking/domain/franchise_rollup_service.dart';
 
+CanonEntry aot(int id, int rank, double score, {int? season}) => CanonEntry(
+      id: id,
+      title: season == null ? 'Attack on Titan' : 'Attack on Titan Season $season',
+      mediaType: 'tv',
+      rankPosition: rank,
+      calculatedScore: score,
+      isAnime: true,
+      franchiseId: 'attack-on-titan',
+      franchiseName: 'Attack on Titan',
+      seasonNumber: season,
+    );
+
+const succession = CanonEntry(id: 100, title: 'Succession', mediaType: 'tv', rankPosition: 1, calculatedScore: 10.0);
+const severance = CanonEntry(id: 101, title: 'Severance', mediaType: 'tv', rankPosition: 4, calculatedScore: 9.31);
+
 void main() {
-  group('FE-208: FranchiseRollupService Tests', () {
-    test('rollup combines 4 Attack on Titan seasons into 1 parent entry with mean score', () {
-      final seasons = [
-        const CanonEntry(
-          id: 1,
-          title: 'Attack on Titan Season 1',
-          mediaType: 'tv',
-          rankPosition: 5,
-          calculatedScore: 9.12,
-          isAnime: true,
-          franchiseId: 'attack-on-titan',
-          franchiseName: 'Attack on Titan',
-          seasonNumber: 1,
-        ),
-        const CanonEntry(
-          id: 2,
-          title: 'Attack on Titan Season 2',
-          mediaType: 'tv',
-          rankPosition: 7,
-          calculatedScore: 8.90,
-          isAnime: true,
-          franchiseId: 'attack-on-titan',
-          franchiseName: 'Attack on Titan',
-          seasonNumber: 2,
-        ),
-        const CanonEntry(
-          id: 3,
-          title: 'Attack on Titan Season 3 Part 2',
-          mediaType: 'tv',
-          rankPosition: 2,
-          calculatedScore: 9.85,
-          isAnime: true,
-          franchiseId: 'attack-on-titan',
-          franchiseName: 'Attack on Titan',
-          seasonNumber: 3,
-        ),
-        const CanonEntry(
-          id: 4,
-          title: 'Attack on Titan: The Final Season',
-          mediaType: 'tv',
-          rankPosition: 12,
-          calculatedScore: 8.65,
-          isAnime: true,
-          franchiseId: 'attack-on-titan',
-          franchiseName: 'Attack on Titan',
-          seasonNumber: 4,
-        ),
-      ];
+  group('ALGO-602: franchise rollup via primary series duel (features/08 §4, D6)', () {
+    // Raw series canon, contiguous 1..7.
+    final canon = [
+      succession,
+      aot(3, 2, 9.85, season: 3),
+      aot(1, 3, 9.68), // primary series entry the user dueled
+      severance,
+      aot(10, 5, 9.12, season: 1),
+      aot(2, 6, 8.90, season: 2),
+      aot(4, 7, 8.65, season: 4),
+    ];
 
-      const standaloneShow = CanonEntry(
-        id: 100,
-        title: 'Succession',
-        mediaType: 'tv',
-        rankPosition: 1,
-        calculatedScore: 9.95,
-      );
+    test('4 seasons + primary → one entry with the primary rank/score and 4 breakdown rows', () {
+      final rolled = FranchiseRollupService.rollupFranchises(canon);
 
-      final mixedList = [standaloneShow, ...seasons];
-
-      final rolledUp = FranchiseRollupService.rollupFranchises(mixedList);
-
-      // We expect 2 entries: Succession and Attack on Titan
-      expect(rolledUp.length, equals(2));
-
-      final aot = rolledUp.firstWhere((e) => e.franchiseId == 'attack-on-titan');
-      expect(aot.isRolledUp, isTrue);
-      expect(aot.title, equals('Attack on Titan'));
-      expect(aot.subEntries.length, equals(4));
-
-      // Expected composite score: (9.12 + 8.90 + 9.85 + 8.65) / 4 = 36.52 / 4 = 9.13
-      expect(aot.calculatedScore, equals(9.13));
-
-      // Verify ranks are continuous: 1, 2
-      expect(rolledUp[0].rankPosition, equals(1)); // Succession (9.95)
-      expect(rolledUp[1].rankPosition, equals(2)); // Attack on Titan (9.13)
+      expect(rolled.map((e) => e.title), ['Succession', 'Attack on Titan', 'Severance']);
+      final franchise = rolled[1];
+      expect(franchise.isRolledUp, isTrue);
+      expect(franchise.id, 1);
+      expect(franchise.rankPosition, 3);
+      expect(franchise.calculatedScore, 9.68); // never averaged (mean would be 9.24)
+      expect(franchise.seasonBreakdown.map((s) => s.seasonNumber), [1, 2, 3, 4]);
+      expect(franchise.seasonBreakdown.map((s) => s.calculatedScore), [9.12, 8.90, 9.85, 8.65]);
+      // Other entries keep their canon positions.
+      expect(rolled.map((e) => e.rankPosition), [1, 3, 4]);
     });
 
-    test('unbundleFranchises restores child seasons and re-indexes ranks 1..N', () {
-      const parentAot = CanonEntry(
-        id: 1,
-        title: 'Attack on Titan',
-        mediaType: 'tv',
-        rankPosition: 2,
-        calculatedScore: 9.13,
-        isRolledUp: true,
-        franchiseId: 'attack-on-titan',
-        subEntries: [
-          CanonEntry(
-            id: 1,
-            title: 'Attack on Titan Season 1',
-            mediaType: 'tv',
-            rankPosition: 0,
-            calculatedScore: 9.12,
-            seasonNumber: 1,
-          ),
-          CanonEntry(
-            id: 2,
-            title: 'Attack on Titan Season 3 Part 2',
-            mediaType: 'tv',
-            rankPosition: 0,
-            calculatedScore: 9.85,
-            seasonNumber: 3,
-          ),
-        ],
-      );
-
-      const standaloneShow = CanonEntry(
-        id: 100,
-        title: 'Severance',
-        mediaType: 'tv',
-        rankPosition: 1,
-        calculatedScore: 9.70,
-      );
-
-      final unbundled = FranchiseRollupService.unbundleFranchises([standaloneShow, parentAot]);
-
-      expect(unbundled.length, equals(3));
-      // Scores: AoT S3 P2 (9.85), Severance (9.70), AoT S1 (9.12)
-      expect(unbundled[0].title, equals('Attack on Titan Season 3 Part 2'));
-      expect(unbundled[0].rankPosition, equals(1));
-
-      expect(unbundled[1].title, equals('Severance'));
-      expect(unbundled[1].rankPosition, equals(2));
-
-      expect(unbundled[2].title, equals('Attack on Titan Season 1'));
-      expect(unbundled[2].rankPosition, equals(3));
+    test('without a primary ranking the highest-ranked season represents the franchise', () {
+      final seasonsOnly = canon.where((e) => e.id != 1).toList();
+      final franchise = FranchiseRollupService.rollupFranchises(seasonsOnly).singleWhere((e) => e.isRolledUp);
+      expect(franchise.id, 3);
+      expect(franchise.rankPosition, 2);
+      expect(franchise.calculatedScore, 9.85);
+      expect(franchise.title, 'Attack on Titan');
+      expect(franchise.seasonBreakdown, hasLength(4));
     });
 
-    test('rollup with empty list returns empty list', () {
+    test('the unbundled (raw) canon is unchanged by rolling up', () {
+      final before = canon.map((e) => (e.id, e.rankPosition, e.calculatedScore, e.isRolledUp)).toList();
+      FranchiseRollupService.rollupFranchises(canon);
+      expect(canon.map((e) => (e.id, e.rankPosition, e.calculatedScore, e.isRolledUp)).toList(), before);
+    });
+
+    test('a franchise with a single ranked entry is not wrapped', () {
+      final rolled = FranchiseRollupService.rollupFranchises([succession, aot(1, 2, 9.68)]);
+      expect(rolled.every((e) => !e.isRolledUp), isTrue);
+      expect(rolled, hasLength(2));
+    });
+
+    test('empty input', () {
       expect(FranchiseRollupService.rollupFranchises([]), isEmpty);
-      expect(FranchiseRollupService.unbundleFranchises([]), isEmpty);
     });
   });
 }

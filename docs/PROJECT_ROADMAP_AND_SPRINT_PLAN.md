@@ -24,7 +24,7 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 6 — Integration, Wiring & Audit Remediation** (planned 2026-10-03; owner decisions D1–D7 recorded in Sprint 6)
-- **Current Active Ticket**: `ALGO-602` (Franchise Rollup via Primary Series Duel) — Sprint 6: 11 / 32 tickets complete
+- **Current Active Ticket**: `FE-603` (SCR-09 Logging Studio — Title Search, Status & Sentiment Bracket) — Sprint 6: 12 / 32 tickets complete
 - **Overall Roadmap Progress**: Sprints 1–5 granular tasks after the `DOC-601` honesty reset (2026-10-03): **281 / 431 verified** · **121 un-checked** (each annotated `→ remediated by <Sprint 6 ticket>`) · **29 human-only**. The earlier "89 / 89" claim was overstated.
 - **Human-Only Tasks**: 29 tasks in Sprints 1–5 marked `👤 [TO BE DONE BY HUMAN]` (cloud setup, secrets, store submission, device/CI runs, dashboard verification), plus the Sprint 6 human prerequisites list. These cannot be completed or verified from code.
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (215 / 215 pass — note: many tests are widget/unit-level only; no real E2E or golden tests exist yet)
@@ -571,11 +571,11 @@ Build the mathematical core of Telly: the binary insertion duel tournament, dyna
 - **Scope & Objectives**: Allow users to collapse anime seasons/cours into a single franchise entity or unbundle them.
 - **Granular Tasks**:
   - [x] Create `lib/features/ranking/domain/franchise_rollup_service.dart`.
-  - [ ] When collapsed: aggregate *Attack on Titan Season 1–4* into a single entry scored by the primary series duel. → remediated by `ALGO-602`
+  - [x] When collapsed: aggregate *Attack on Titan Season 1–4* into a single entry scored by the primary series duel. ✅ remediated in `ALGO-602`
   - [x] When unbundled: show individual seasons as standalone ranked entries.
   - [x] Provide user toggle switch: `[ Franchise Rollup: ON / OFF ]`.
 - **Testing & Verification**:
-  - [ ] Unit test verifying rollup combines 4 seasons into 1 parent entry carrying the primary series duel score (features/08 §4, decision D6). → remediated by `ALGO-602`
+  - [x] Unit test verifying rollup combines 4 seasons into 1 parent entry carrying the primary series duel score (features/08 §4, decision D6). ✅ remediated in `ALGO-602`
 - **Dependencies**: `FE-206`.
 
 #### `FE-209`: Reorderable Drag-and-Drop Manual Re-Indexing
@@ -1605,10 +1605,10 @@ Turn the library of individually-tested widgets and algorithms into a **wired, r
   - [**`features/08_ANIME_INTEGRATION_AND_HYBRID_CANON.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/08_ANIME_INTEGRATION_AND_HYBRID_CANON.md) §4
 - **Scope & Objectives**: Apply D6.
 - **Granular Tasks**:
-  - [ ] Rolled-up entry takes the rank/score of the franchise's primary series ranking; seasons become a `seasonBreakdown` list for the dropdown.
-  - [ ] Franchises without a primary ranking fall back to the highest-ranked season (documented in spec).
+  - [x] Rolled-up entry takes the rank/score of the franchise's primary series ranking; seasons become a `seasonBreakdown` list for the dropdown.
+  - [x] Franchises without a primary ranking fall back to the highest-ranked season (documented in spec).
 - **Testing & Verification**:
-  - [ ] Unit tests: 4 AoT seasons + primary → one entry with the primary's score and 4 breakdown rows; the unbundled view is unchanged.
+  - [x] Unit tests: 4 AoT seasons + primary → one entry with the primary's score and 4 breakdown rows; the unbundled view is unchanged.
 - **Dependencies**: `ALGO-601`.
 
 #### `FE-603`: `SCR-09` Logging Studio — Title Search, Status & Sentiment Bracket
