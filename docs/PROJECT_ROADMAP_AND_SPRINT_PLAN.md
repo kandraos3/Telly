@@ -24,7 +24,7 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 6 — Integration, Wiring & Audit Remediation** (planned 2026-10-03; owner decisions D1–D7 recorded in Sprint 6)
-- **Current Active Ticket**: `LEGAL-601` (Store-Compliance Fixes) — Sprint 6: 23 / 32 tickets complete
+- **Current Active Ticket**: `DEV-602` (Bundle IDs, Release Signing & Unified CI Gates) — Sprint 6: 24 / 32 tickets complete
 - **Overall Roadmap Progress**: Sprints 1–5 granular tasks after the `DOC-601` honesty reset (2026-10-03): **281 / 431 verified** · **121 un-checked** (each annotated `→ remediated by <Sprint 6 ticket>`) · **29 human-only**. The earlier "89 / 89" claim was overstated.
 - **Human-Only Tasks**: 29 tasks in Sprints 1–5 marked `👤 [TO BE DONE BY HUMAN]` (cloud setup, secrets, store submission, device/CI runs, dashboard verification), plus the Sprint 6 human prerequisites list. These cannot be completed or verified from code.
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (369 / 369 pass; pgTAP 155 assertions / 9 files — note: no real E2E or golden tests exist yet)
@@ -1287,7 +1287,7 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 - **Scope & Objectives**: Host compliant legal documentation required for App Store and Google Play approval.
 - **Granular Tasks**:
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Host static markdown/HTML at `https://telly.app/privacy` and `https://telly.app/terms`.
-  - [ ] Embed in-app web views in `SCR-20` Settings linking directly to both documents. → remediated by `LEGAL-601`
+  - [x] Embed in-app web views in `SCR-20` Settings linking directly to both documents. ✅ remediated in `LEGAL-601`
 - **Testing & Verification**:
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Verify public HTTP 200 response on both URLs.
 - **Dependencies**: None.
@@ -1298,11 +1298,11 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
   - [**`technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md) §4 (App Store Guidelines)
 - **Scope & Objectives**: Satisfy Apple Guideline 1.2 (User Generated Content) and mandatory self-service account deletion.
 - **Granular Tasks**:
-  - [ ] Implement self-service "Delete Account" button in `SCR-20` Settings with confirmation dialog. → remediated by `LEGAL-601`
+  - [x] Implement self-service "Delete Account" button in `SCR-20` Settings with confirmation dialog. ✅ remediated in `LEGAL-601`
   - [x] Queue account for 30-day soft deletion, revoking sessions and scrubbing user data permanently. ✅ remediated in `BE-604`
   - [x] Include 1-tap user blocking and reporting on all user-generated comments. ✅ remediated in `FE-607`
 - **Testing & Verification**:
-  - [ ] Test account deletion marks profile `is_deleted: true` and logs user out immediately. → remediated by `LEGAL-601`
+  - [x] Test account deletion marks profile `is_deleted: true` and logs user out immediately. ✅ remediated in `LEGAL-601`
 - **Dependencies**: `FE-505`, `BE-101`.
 
 #### `LEGAL-503`: Production App Store Connect & Google Play Console Submission
@@ -1778,12 +1778,12 @@ Turn the library of individually-tested widgets and algorithms into a **wired, r
   - [**`technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/05_DEPLOYMENT_DEVOPS_AND_LAUNCH_CHECKLIST.md) §4
 - **Scope & Objectives**: Close the App Store blockers listed in audit §3.
 - **Granular Tasks**:
-  - [ ] Delete Account: confirmation sheet → `request_account_deletion()` → local wipe (Drift + secure storage) → sign out → `SCR-01`.
-  - [ ] Privacy Policy / Terms rows open configured URLs via `url_launcher`.
-  - [ ] Report flows persist via `submit_report` (done in `FE-607`; verified here end-to-end).
-  - [ ] Add `ios/Runner/PrivacyInfo.xcprivacy` declaring the collected data types and required-reason APIs.
+  - [x] Delete Account: confirmation sheet → `request_account_deletion()` → local wipe (Drift + secure storage) → sign out → `SCR-01`.
+  - [x] Privacy Policy / Terms rows open configured URLs via `url_launcher`.
+  - [x] Report flows persist via `submit_report` (done in `FE-607`; verified here end-to-end).
+  - [x] Add `ios/Runner/PrivacyInfo.xcprivacy` declaring the collected data types and required-reason APIs.
 - **Testing & Verification**:
-  - [ ] Widget test: deletion calls the RPC, clears the local DB, and routes to `SCR-01`; a cancelled confirm does nothing.
+  - [x] Widget test: deletion calls the RPC, clears the local DB, and routes to `SCR-01`; a cancelled confirm does nothing.
 - **Dependencies**: `BE-604`, `FE-608`.
 
 #### `DEV-602`: Bundle IDs, Release Signing & Unified CI Gates

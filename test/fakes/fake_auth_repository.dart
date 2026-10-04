@@ -98,6 +98,15 @@ class FakeAuthRepository implements AuthRepository {
     _profile = _profile?.copyWith(onboardingCompleted: true);
   }
 
+  bool deletionRequested = false;
+
+  @override
+  Future<DateTime> requestAccountDeletion() async {
+    _maybeFail();
+    deletionRequested = true;
+    return DateTime.now().add(const Duration(days: 30));
+  }
+
   @override
   Future<void> signOut() async {
     _userId = null;

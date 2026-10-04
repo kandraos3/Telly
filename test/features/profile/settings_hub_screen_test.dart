@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:telly_app/core/database/database.dart';
 import 'package:telly_app/core/database/database_provider.dart';
@@ -51,6 +52,7 @@ void main() {
   late FakeOnboardingRepository onboarding;
   late FakeImageCache cache;
   late List<String> shared;
+  late FakeAuthRepository auth;
 
   setUp(() {
     db = AppDatabase.inMemory();
@@ -58,6 +60,8 @@ void main() {
     onboarding = FakeOnboardingRepository();
     cache = FakeImageCache();
     shared = [];
+    auth = FakeAuthRepository(signedInUserId: 'u1');
+    FlutterSecureStorage.setMockInitialValues({});
   });
   tearDown(() => db.close());
 
@@ -69,7 +73,7 @@ void main() {
       databaseProvider.overrideWithValue(db),
       profileRepositoryProvider.overrideWithValue(profiles),
       onboardingRepositoryProvider.overrideWithValue(onboarding),
-      authRepositoryProvider.overrideWithValue(FakeAuthRepository(signedInUserId: 'u1')),
+      authRepositoryProvider.overrideWithValue(auth),
       imageCacheServiceProvider.overrideWithValue(cache),
       canonExportServiceProvider.overrideWith((ref) => RecordingExport(RankingRepository(db), shared)),
     ]));
@@ -147,6 +151,60 @@ void main() {
 
       expect(fakeBio.authenticateCallCount, equals(1));
       expect(profiles.preferences['biometric_enabled'], isTrue);
+    });
+
+    testWidgets('terms and privacy policy legal rows render with proper labels (LEGAL-601)', (tester) async {
+      await pump(tester);
+      final terms = find.byKey(const Key('settings_terms'));
+      final privacy = find.byKey(const Key('settings_privacy'));
+
+      expect(terms, findsOneWidget);
+      expect(find.descendant(of: terms, matching: find.text('Terms of Service')), findsOneWidget);
+      expect(find.descendant(of: terms, matching: find.text('telly.app/terms')), findsOneWidget);
+
+      expect(privacy, findsOneWidget);
+      expect(find.descendant(of: privacy, matching: find.text('Privacy Policy')), findsOneWidget);
+      expect(find.descendant(of: privacy, matching: find.text('telly.app/privacy')), findsOneWidget);
+    });
+
+    testWidgets('account deletion cancelled preserves local database and session (LEGAL-601)', (tester) async {
+      await seedCanon(db, 'tv', ['Succession']);
+      await pump(tester);
+
+      final deleteTile = find.byKey(const Key('settings_delete_account'));
+      expect(deleteTile, findsOneWidget);
+      await tester.tap(deleteTile);
+      await tester.pumpAndSettle();
+
+      final cancelButton = find.byKey(const Key('delete_account_cancel_button'));
+      expect(cancelButton, findsOneWidget);
+      await tester.tap(cancelButton);
+      await tester.pumpAndSettle();
+
+      expect(auth.deletionRequested, isFalse);
+      expect(auth.currentUserId, equals('u1'));
+      final remaining = await db.select(db.localRankings).get();
+      expect(remaining, isNotEmpty);
+    });
+
+    testWidgets('account deletion confirmed invokes deletion RPC, wipes local DB, and signs out (LEGAL-601)', (tester) async {
+      await seedCanon(db, 'tv', ['Succession']);
+      await pump(tester);
+
+      final deleteTile = find.byKey(const Key('settings_delete_account'));
+      await tester.tap(deleteTile);
+      await tester.pumpAndSettle();
+
+      final confirmButton = find.byKey(const Key('delete_account_confirm_button'));
+      expect(confirmButton, findsOneWidget);
+      await tester.tap(confirmButton);
+      await tester.pumpAndSettle();
+
+      expect(auth.deletionRequested, isTrue);
+      expect(auth.currentUserId, isNull);
+      final remaining = await db.select(db.localRankings).get();
+      expect(remaining, isEmpty);
+      expect(find.textContaining('Account deletion requested'), findsOneWidget);
     });
   });
 

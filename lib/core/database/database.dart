@@ -264,6 +264,16 @@ class AppDatabase extends _$AppDatabase {
     await customStatement('DROP TABLE IF EXISTS offline_duel_queue');
   }
 
+  /// Wipes all local SQLite tables (rankings, watchlist, mutations, titles) on account deletion.
+  Future<void> wipeLocalData() async {
+    await transaction(() async {
+      await delete(localRankings).go();
+      await delete(watchlistCache).go();
+      await delete(pendingMutations).go();
+      await delete(cachedTitles).go();
+    });
+  }
+
   static AppDatabase inMemory() {
     return AppDatabase(NativeDatabase.memory());
   }

@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import '../../../../core/database/database.dart';
 import '../../data/auth_repository.dart';
 import '../../domain/user_profile.dart';
 
@@ -163,6 +165,17 @@ class AuthController extends Notifier<AuthState> {
   Future<void> finishOnboarding() async {
     await _repository.markOnboardingCompleted();
     await refreshProfile();
+  }
+
+  /// Deletes account via 30-day soft deletion RPC, wipes local Drift DB and secure storage, and signs out (LEGAL-601).
+  Future<DateTime> deleteAccount({required AppDatabase database}) async {
+    final gracePeriodEnd = await _repository.requestAccountDeletion();
+    await database.wipeLocalData();
+    try {
+      await const FlutterSecureStorage().deleteAll();
+    } catch (_) {}
+    await signOut();
+    return gracePeriodEnd;
   }
 
   Future<void> signOut() => _repository.signOut();

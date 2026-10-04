@@ -46,6 +46,9 @@ abstract class AuthRepository {
   /// Sets `users.onboarding_completed` once SCR-04 finishes (router stops redirecting to onboarding).
   Future<void> markOnboardingCompleted();
 
+  /// Requests 30-day soft account deletion via `request_account_deletion` RPC (LEGAL-601).
+  Future<DateTime> requestAccountDeletion();
+
   Future<void> signOut();
 }
 
@@ -183,6 +186,13 @@ class SupabaseAuthRepository implements AuthRepository {
     final uid = currentUserId;
     if (uid == null) throw StateError('Not signed in');
     await _client.from('users').update({'onboarding_completed': true}).eq('id', uid);
+  }
+
+  @override
+  Future<DateTime> requestAccountDeletion() async {
+    final res = await _client.rpc('request_account_deletion');
+    if (res is String) return DateTime.tryParse(res) ?? DateTime.now().add(const Duration(days: 30));
+    return DateTime.now().add(const Duration(days: 30));
   }
 
   @override

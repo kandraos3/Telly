@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/database/database_provider.dart';
 import '../../../../core/router/routes.dart';
 import '../../../../core/services/biometrics_service.dart';
 import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../onboarding/presentation/screens/streaming_setup_screen.dart';
 import '../../data/profile_repository.dart';
 import '../../data/settings_services.dart';
@@ -276,10 +278,20 @@ class SettingsHubScreen extends ConsumerWidget {
           // 7. Session & legal
           const _SectionHeader('LEGAL & SESSION'),
           _Card(children: [
-            const _Tile(
-              title: 'Terms & Privacy',
-              subtitle: 'Opens in the browser (LEGAL-601)',
-              trailing: Icon(Icons.open_in_new, color: TellyColors.textTertiary, size: 18),
+            _Tile(
+              key: const Key('settings_terms'),
+              title: 'Terms of Service',
+              subtitle: 'telly.app/terms',
+              trailing: const Icon(Icons.open_in_new, color: TellyColors.textTertiary, size: 18),
+              onTap: () => _launchLegalUrl('https://telly.app/terms'),
+            ),
+            const Divider(color: TellyColors.borderGlass),
+            _Tile(
+              key: const Key('settings_privacy'),
+              title: 'Privacy Policy',
+              subtitle: 'telly.app/privacy',
+              trailing: const Icon(Icons.open_in_new, color: TellyColors.textTertiary, size: 18),
+              onTap: () => _launchLegalUrl('https://telly.app/privacy'),
             ),
             const Divider(color: TellyColors.borderGlass),
             _Tile(
@@ -289,16 +301,106 @@ class SettingsHubScreen extends ConsumerWidget {
               onTap: () => ref.read(authControllerProvider.notifier).signOut(),
             ),
             const Divider(color: TellyColors.borderGlass),
-            const _Tile(
+            _Tile(
+              key: const Key('settings_delete_account'),
               title: 'Delete Account…',
-              subtitle: '30-day soft deletion (LEGAL-601)',
-              trailing: Icon(Icons.delete_forever, color: TellyColors.neonCoral, size: 20),
+              subtitle: '30-day soft deletion grace period (LEGAL-601)',
+              trailing: const Icon(Icons.delete_forever, color: TellyColors.neonCoral, size: 20),
+              onTap: () => _confirmAccountDeletion(context, ref),
             ),
           ]),
           const SizedBox(height: 40),
         ],
       ),
     );
+  }
+
+  Future<void> _launchLegalUrl(String url) async {
+    final uri = Uri.parse(url);
+    try {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {}
+  }
+
+  Future<void> _confirmAccountDeletion(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showModalBottomSheet<bool>(
+      context: context,
+      backgroundColor: TellyColors.backgroundCard,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Delete Account?',
+                style: TellyTypography.titleLarge(color: TellyColors.neonCoral)
+                    .copyWith(fontWeight: FontWeight.w900),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Your profile, rankings, duel history, and social connections will become invisible immediately. '
+                'You will have a 30-day grace period to log back in and cancel deletion before permanent destruction.',
+                style: TellyTypography.bodyMedium(color: TellyColors.textSecondary),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      key: const Key('delete_account_cancel_button'),
+                      onPressed: () => Navigator.of(ctx).pop(false),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: TellyColors.borderGlass),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: const Text('Cancel', style: TextStyle(color: TellyColors.textPrimary)),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      key: const Key('delete_account_confirm_button'),
+                      onPressed: () => Navigator.of(ctx).pop(true),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: TellyColors.neonCoral,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: const Text(
+                        'Delete Account',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
+    try {
+      final database = ref.read(databaseProvider);
+      await ref.read(authControllerProvider.notifier).deleteAccount(database: database);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Account deletion requested. 30-day grace period started.')),
+        );
+      }
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Couldn't process deletion. Check your connection.")),
+        );
+      }
+    }
   }
 }
 
