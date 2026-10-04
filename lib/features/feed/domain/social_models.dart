@@ -74,16 +74,49 @@ enum ActivityType {
 
 /// Expressive reaction emojis on activity cards (SCR-05, Feature Spec 04 §5).
 enum FeedReactionType {
-  fire('🔥', 'Facts / Peak'),
-  mindBlown('🤯', 'Mind Blown'),
-  trashTake('🗑️', 'Trash Take'),
-  heartbreak('💔', 'Heartbreak'),
-  tasteTwin('🤝', 'Taste Twin');
+  fire('🔥', 'Facts / Peak', 'FIRE'),
+  mindBlown('🤯', 'Mind Blown', 'MIND_BLOWN'),
+  trashTake('🗑️', 'Trash Take', 'TRASH'),
+  heartbreak('💔', 'Heartbreak', 'HEARTBREAK'),
+  tasteTwin('🤝', 'Taste Twin', 'TASTE_TWIN');
 
   final String emoji;
   final String label;
 
-  const FeedReactionType(this.emoji, this.label);
+  /// `reaction_type_enum` value.
+  final String dbValue;
+
+  const FeedReactionType(this.emoji, this.label, this.dbValue);
+
+  static FeedReactionType? fromDbValue(String value) {
+    for (final r in values) {
+      if (r.dbValue == value) return r;
+    }
+    return null;
+  }
+}
+
+/// `report_target_enum` (features/04, TA-02 moderation).
+enum ReportTarget {
+  comment('COMMENT'),
+  activity('ACTIVITY'),
+  ranking('RANKING'),
+  user('USER');
+
+  final String dbValue;
+  const ReportTarget(this.dbValue);
+}
+
+/// `report_reason_enum`.
+enum ReportReason {
+  unmarkedSpoiler('UNMARKED_SPOILER', 'Unmarked spoiler'),
+  harassment('HARASSMENT', 'Harassment or hate'),
+  spam('SPAM', 'Spam'),
+  inaccurateMetadata('INACCURATE_METADATA', 'Wrong title or details');
+
+  final String dbValue;
+  final String label;
+  const ReportReason(this.dbValue, this.label);
 }
 
 /// An activity feed item representing an action taken by a user in the social graph.

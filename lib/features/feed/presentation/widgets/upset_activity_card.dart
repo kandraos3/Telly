@@ -347,11 +347,19 @@ class _UpsetActivityCardState extends State<UpsetActivityCard>
                       const Icon(Icons.people_outline_rounded,
                           color: TellyColors.neonCoral, size: 16),
                       const SizedBox(width: 6),
-                      Text(
-                        'Only ${activity.agreementPercentage?.toStringAsFixed(0) ?? '14'}% of Telly users agree with this pick',
-                        style: TellyTypography.caption(
-                          color: TellyColors.neonCoral,
-                        ).copyWith(fontWeight: FontWeight.bold),
+                      Flexible(
+                        child: Text(
+                          // features/04 §3.2: Δ is a percentile gap; 0.25 = 2.5 score points.
+                          activity.agreementPercentage != null
+                              ? 'Only ${activity.agreementPercentage!.toStringAsFixed(0)}% of Telly users agree with this pick'
+                              : 'Community consensus favors ${activity.upsetOverTitleName ?? 'the other title'} '
+                                  'by ${(activity.upsetDelta * 10).toStringAsFixed(1)} pts',
+                          key: const Key('upset_consensus_text'),
+                          textAlign: TextAlign.center,
+                          style: TellyTypography.caption(
+                            color: TellyColors.neonCoral,
+                          ).copyWith(fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ],
                   ),

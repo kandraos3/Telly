@@ -1,105 +1,109 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:telly_app/core/services/haptics_service.dart';
 import 'package:telly_app/core/theme/telly_theme.dart';
+import 'package:telly_app/features/auth/data/auth_repository.dart';
 import 'package:telly_app/features/feed/data/social_repository.dart';
 import 'package:telly_app/features/feed/domain/social_models.dart';
 import 'package:telly_app/features/feed/presentation/screens/comment_thread_screen.dart';
 
+import '../../fakes/fake_auth_repository.dart';
+import '../../fakes/fake_social_repository.dart';
+
 void main() {
-  Widget buildTestableScreen({
-    required ActivityLog activity,
-    required SocialRepository repository,
-  }) {
-    return ProviderScope(
+  late FakeSocialRepository repo;
+  final activity = fakeActivity('act-1', upset: true);
+
+  RankingComment comment(String id, String text, {bool spoiler = false}) => RankingComment(
+        id: id,
+        rankingId: 'act-1',
+        userId: 'u-alex',
+        username: 'alex',
+        userDisplayName: 'Alex',
+        commentText: text,
+        containsSpoilers: spoiler,
+        createdAt: DateTime(2026, 10, 3),
+      );
+
+  setUp(() {
+    repo = FakeSocialRepository(feed: [activity]);
+    repo.comments['act-1'] = [
+      comment('c-safe', 'Logan Roy is untouchable.'),
+      comment('c-spoil', 'Kendall takes the blame', spoiler: true),
+    ];
+  });
+
+  Future<void> pump(WidgetTester tester) async {
+    tester.view.physicalSize = const Size(800, 1600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(ProviderScope(
       overrides: [
-        socialRepositoryProvider.overrideWithValue(repository),
+        socialRepositoryProvider.overrideWithValue(repo),
+        hapticsEnabledProvider.overrideWith((ref) => false),
+        authRepositoryProvider.overrideWithValue(FakeAuthRepository(signedInUserId: 'u-me')),
       ],
-      child: MaterialApp(
-        theme: TellyTheme.darkTheme,
-        home: CommentThreadScreen(activity: activity),
-      ),
-    );
+      child: MaterialApp(theme: TellyTheme.dark, home: CommentThreadScreen(activity: activity)),
+    ));
+    await tester.pumpAndSettle();
   }
 
-  group('QA-303: Spoiler Masking & Tap-to-Reveal Tests (SCR-06, FE-305)', () {
-    late InMemorySocialRepository repo;
-    late ActivityLog sampleActivity;
+  group('FE-305 / FE-607: SCR-06 spoiler-safe comment thread', () {
+    testWidgets('spoilers sit under a frosted BackdropFilter (σ 8); tap reveals, tap again re-blurs', (tester) async {
+      await pump(tester);
+      expect(find.text('Logan Roy is untouchable.'), findsOneWidget);
+      expect(find.byKey(const Key('spoiler_mask_c-safe')), findsNothing);
 
-    setUp(() {
-      repo = InMemorySocialRepository();
-      sampleActivity = ActivityLog(
-        id: 'act-1',
-        userId: 'u-jordan',
-        username: 'jordan',
-        userDisplayName: 'Jordan Miller',
-        activityType: ActivityType.rankingCreated,
-        titleId: 102,
-        titleName: 'Severance',
-        releaseYear: 2022,
-        rankPosition: 2,
-        calculatedScore: 9.72,
-        commentCount: 2,
-        createdAt: DateTime.now().subtract(const Duration(hours: 1)),
-      );
+      final blur = find.byKey(const Key('spoiler_blur_c-spoil'));
+      expect(blur, findsOneWidget);
+      final filter = tester.widget<BackdropFilter>(blur).filter;
+      expect(filter, ImageFilter.blur(sigmaX: 8, sigmaY: 8));
+      expect(find.text('TAP TO REVEAL SPOILER'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('spoiler_mask_c-spoil')));
+      await tester.pumpAndSettle();
+      expect(blur, findsNothing);
+
+      await tester.tap(find.byKey(const Key('spoiler_mask_c-spoil')));
+      await tester.pumpAndSettle();
+      expect(blur, findsOneWidget, reason: 're-blurred');
     });
 
-    testWidgets('comments with containsSpoilers render TAP TO REVEAL SPOILER mask', (tester) async {
-      await tester.pumpWidget(buildTestableScreen(
-        activity: sampleActivity,
-        repository: repo,
-      ));
+    testWidgets('the composer tags a spoiler and posts it masked', (tester) async {
+      await pump(tester);
+      await tester.tap(find.byKey(const Key('composer_spoiler_toggle')));
+      await tester.enterText(find.byKey(const Key('comment_input')), 'The goat dies');
+      await tester.tap(find.byKey(const Key('comment_send')));
       await tester.pumpAndSettle();
 
-      // Comment 1 is non-spoiler
-      expect(
-        find.textContaining('How could you rank it over Succession though?'),
-        findsOneWidget,
-      );
-
-      // Comment 2 is a spoiler - should show mask
-      expect(find.text('TAP TO REVEAL SPOILER'), findsOneWidget);
-      expect(find.text('SPOILER'), findsOneWidget);
-
-      // Tap spoiler mask to reveal
-      await tester.tap(find.byKey(const Key('spoiler_mask_comm-2')));
-      await tester.pumpAndSettle();
-
-      // Mask banner should now be gone, and revealed text readable
-      expect(find.text('TAP TO REVEAL SPOILER'), findsNothing);
-      expect(find.textContaining('In the finale when Helly steps onto the stage'), findsOneWidget);
-
-      // Tap again to re-mask
-      await tester.tap(find.textContaining('In the finale when Helly steps onto the stage'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('TAP TO REVEAL SPOILER'), findsOneWidget);
+      final posted = repo.comments['act-1']!.last;
+      expect(posted.commentText, 'The goat dies');
+      expect(posted.containsSpoilers, isTrue);
+      expect(find.byKey(Key('spoiler_blur_${posted.id}')), findsOneWidget);
+      expect(tester.widget<TextField>(find.byKey(const Key('comment_input'))).controller!.text, isEmpty);
     });
 
-    testWidgets('comment composer can toggle spoiler flag and submit comment', (tester) async {
-      await tester.pumpWidget(buildTestableScreen(
-        activity: sampleActivity,
-        repository: repo,
-      ));
+    testWidgets('a failed post keeps the draft and explains', (tester) async {
+      repo.failWrites = true;
+      await pump(tester);
+      await tester.enterText(find.byKey(const Key('comment_input')), 'hot take');
+      await tester.tap(find.byKey(const Key('comment_send')));
       await tester.pumpAndSettle();
+      expect(find.textContaining("Couldn't post your comment"), findsOneWidget);
+      expect(tester.widget<TextField>(find.byKey(const Key('comment_input'))).controller!.text, 'hot take');
+    });
 
-      // Type comment
-      await tester.enterText(
-        find.byType(TextField),
-        'Mind blowing ending! The cliffhanger was insane.',
-      );
+    testWidgets('long-press → report a comment hides it', (tester) async {
+      await pump(tester);
+      await tester.longPress(find.byKey(const Key('comment_row_c-safe')));
       await tester.pumpAndSettle();
-
-      // Toggle spoiler tag
-      await tester.tap(find.text('Contains Spoilers'));
+      await tester.tap(find.byKey(const Key('report_reason_harassment')));
       await tester.pumpAndSettle();
-
-      // Submit
-      await tester.tap(find.byIcon(Icons.send_rounded));
-      await tester.pumpAndSettle();
-
-      // The new comment should appear with a spoiler mask
-      expect(find.text('TAP TO REVEAL SPOILER'), findsNWidgets(2));
+      expect(repo.reports.single, (ReportTarget.comment, 'c-safe', ReportReason.harassment));
+      expect(find.text('Logan Roy is untouchable.'), findsNothing);
     });
   });
 }

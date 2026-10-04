@@ -24,7 +24,7 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 6 — Integration, Wiring & Audit Remediation** (planned 2026-10-03; owner decisions D1–D7 recorded in Sprint 6)
-- **Current Active Ticket**: `FE-607` (Supabase SocialRepository: Feed, Follows, Reactions, Comments, Reports) — Sprint 6: 16 / 32 tickets complete
+- **Current Active Ticket**: `FE-608` (Profile, Friend Profile, TV Graveyard, Squads & Settings Wiring) — Sprint 6: 17 / 32 tickets complete
 - **Overall Roadmap Progress**: Sprints 1–5 granular tasks after the `DOC-601` honesty reset (2026-10-03): **281 / 431 verified** · **121 un-checked** (each annotated `→ remediated by <Sprint 6 ticket>`) · **29 human-only**. The earlier "89 / 89" claim was overstated.
 - **Human-Only Tasks**: 29 tasks in Sprints 1–5 marked `👤 [TO BE DONE BY HUMAN]` (cloud setup, secrets, store submission, device/CI runs, dashboard verification), plus the Sprint 6 human prerequisites list. These cannot be completed or verified from code.
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (215 / 215 pass — note: many tests are widget/unit-level only; no real E2E or golden tests exist yet)
@@ -717,10 +717,10 @@ Build social connections, the activity feed with real-time upset alert detection
 - **Granular Tasks**:
   - [x] Create `lib/features/feed/presentation/screens/activity_feed_screen.dart`.
   - [x] Implement top tab bar: `[ Following ]`, `[ Squads ]`, `[ Global ]`.
-  - [ ] Implement pull-to-refresh and pagination using Riverpod `feedPaginationProvider`. → remediated by `FE-607`
+  - [x] Implement pull-to-refresh and pagination using Riverpod `feedPaginationProvider`. *(as `feedControllerProvider`)* ✅ remediated in `FE-607`
   - [x] Handle empty state: *"Follow friends to see what they are watching and ranking!"*.
 - **Testing & Verification**:
-  - [ ] Widget test verifying feed scrolls and loads next page when reaching bottom. → remediated by `FE-607`
+  - [x] Widget test verifying feed scrolls and loads next page when reaching bottom. ✅ remediated in `FE-607`
 - **Dependencies**: `FE-104`, `BE-303`.
 
 #### `FE-302`: Standard Activity Feed Card Component
@@ -773,7 +773,7 @@ Build social connections, the activity feed with real-time upset alert detection
 - **Scope & Objectives**: Comments thread with automatic and user-tagged spoiler masking.
 - **Granular Tasks**:
   - [x] Create `lib/features/feed/presentation/screens/comment_thread_screen.dart`.
-  - [ ] Comments tagged with `is_spoiler: true` render frosted Gaussian blur overlay (`BackdropFilter`). → remediated by `FE-607`
+  - [x] Comments tagged with `is_spoiler: true` render frosted Gaussian blur overlay (`BackdropFilter`). ✅ remediated in `FE-607`
   - [x] Tap on blur reveals content with label: *"Tap to reveal spoiler"*.
   - [x] Add spoiler toggle switch on comment composer: `[ ⚠️ Contains Spoilers ]`.
 - **Testing & Verification**:
@@ -861,7 +861,7 @@ Build social connections, the activity feed with real-time upset alert detection
   - [x] Write `test/features/feed/upset_activity_card_test.dart`.
   - [x] Write `test/features/feed/spoiler_comment_test.dart`.
 - **Testing & Verification**:
-  - [ ] Tap on spoiler mask removes `BackdropFilter` and displays text. → remediated by `FE-607`
+  - [x] Tap on spoiler mask removes `BackdropFilter` and displays text. ✅ remediated in `FE-607`
 - **Dependencies**: `FE-302`, `FE-303`, `FE-305`.
 
 #### `QA-304`: pgTAP Tests for Social Follows, RLS & Feeds
@@ -1215,9 +1215,9 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 - **Granular Tasks**:
   - [x] Build Proactive Show Mute Sheet: Mute any series or movie (e.g., hide all posts about *House of the Dragon* until watched).
   - [x] Build Content Reporting Bottom Sheet: Options (`Spoiler Unmasked`, `Harassment`, `Spam`, `Inaccurate Metadata`).
-  - [ ] Submit reports to Supabase `reports` table for back-office moderation queue. → remediated by `FE-607`
+  - [x] Submit reports to Supabase `reports` table for back-office moderation queue. ✅ remediated in `FE-607`
 - **Testing & Verification**:
-  - [ ] Test submitting a report creates row in `reports` and hides offending post immediately for current user. → remediated by `FE-607`
+  - [x] Test submitting a report creates row in `reports` and hides offending post immediately for current user. ✅ remediated in `FE-607`
 - **Dependencies**: `FE-104`, `BE-101`.
 
 ---
@@ -1300,7 +1300,7 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 - **Granular Tasks**:
   - [ ] Implement self-service "Delete Account" button in `SCR-20` Settings with confirmation dialog. → remediated by `LEGAL-601`
   - [x] Queue account for 30-day soft deletion, revoking sessions and scrubbing user data permanently. ✅ remediated in `BE-604`
-  - [ ] Include 1-tap user blocking and reporting on all user-generated comments. → remediated by `FE-607`
+  - [x] Include 1-tap user blocking and reporting on all user-generated comments. ✅ remediated in `FE-607`
 - **Testing & Verification**:
   - [ ] Test account deletion marks profile `is_deleted: true` and logs user out immediately. → remediated by `LEGAL-601`
 - **Dependencies**: `FE-505`, `BE-101`.
@@ -1678,12 +1678,12 @@ Turn the library of individually-tested widgets and algorithms into a **wired, r
   - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §`SCR-05`, §`SCR-06` (spoiler mask: `blur(8px)` frosted overlay)
 - **Scope & Objectives**: Replace `InMemorySocialRepository` and the mock comments.
 - **Granular Tasks**:
-  - [ ] `SupabaseSocialRepository`: `get_activity_feed` pagination per tab, follow request/approve/unfollow, reactions, comments with `contains_spoilers`, 1-tap queue add.
-  - [ ] Spoiler mask uses a `BackdropFilter` (`sigma 8`) frosted overlay per `SCR-06`; tap toggles reveal/re-blur.
-  - [ ] Report and block sheets call `submit_report` / `block_user`.
-  - [ ] Feed / comment state → `AsyncNotifier`; remove business `setState` from `comment_thread_screen.dart`.
+  - [x] `SupabaseSocialRepository`: `get_activity_feed` pagination per tab, follow request/approve/unfollow, reactions, comments with `contains_spoilers`, 1-tap queue add. *(Migration `20261010000500` extends `get_activity_feed` with the fields cards need but could not derive: upset "over" title/rank, release year, tags, `in_my_queue`; pgTAP `007` covers them. The upset card no longer prints a made-up "14% agree": it shows the consensus gap from `upset_delta`.)*
+  - [x] Spoiler mask uses a `BackdropFilter` (`sigma 8`) frosted overlay per `SCR-06`; tap toggles reveal/re-blur.
+  - [x] Report and block sheets call `submit_report` / `block_user`. *(Long-press on feed cards and comments; content hides for me on success. SCR-05's "Share Log" menu item waits for `DEV-601`.)*
+  - [x] Feed / comment state → `AsyncNotifier`; remove business `setState` from `comment_thread_screen.dart`. *(`FeedController` (family per tab, keyset paging, optimistic reactions/queue with rollback), `CommentsController`, `CommentComposerController`; spoiler reveal is presentation-only state in `SpoilerMask`.)*
 - **Testing & Verification**:
-  - [ ] Repository tests with a mocked client; widget tests for pagination, spoiler toggle, report submission success/failure.
+  - [x] Repository tests with a mocked client; widget tests for pagination, spoiler toggle, report submission success/failure.
 - **Dependencies**: `BE-604`, `FE-602`.
 
 #### `FE-608`: Profile, Friend Profile, TV Graveyard, Squads & Settings Wiring

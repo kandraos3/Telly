@@ -1,250 +1,133 @@
-import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:telly_app/features/feed/domain/social_models.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-/// Feed tab filters (SCR-05).
+import '../../../core/network/supabase_providers.dart';
+import '../../../core/widgets/poster_image.dart';
+import '../../profile/domain/dropped_show.dart';
+import '../../ranking/domain/canon_tier.dart';
+import '../domain/social_models.dart';
+
+/// Feed tab filters (SCR-05); the server's `get_activity_feed(p_filter)` values.
 enum FeedFilter {
   following,
   squads,
   global;
 
-  String get displayName {
-    switch (this) {
-      case FeedFilter.following:
-        return 'Following';
-      case FeedFilter.squads:
-        return 'Squads';
-      case FeedFilter.global:
-        return 'Global';
-    }
-  }
+  String get displayName => switch (this) {
+        FeedFilter.following => 'Following',
+        FeedFilter.squads => 'Squads',
+        FeedFilter.global => 'Global',
+      };
 }
 
-/// Abstract contract for social interactions, feeds, and comments.
-abstract class SocialRepository {
-  Future<List<ActivityLog>> getFeedActivities({
-    required FeedFilter filter,
-    int offset = 0,
-    int limit = 20,
-  });
-
-  Future<void> toggleQueue({
-    required String activityId,
-    required int titleId,
-    required bool addToQueue,
-  });
-
-  Future<ActivityLog> toggleReaction({
-    required String activityId,
-    required FeedReactionType reaction,
-  });
-
-  Future<List<RankingComment>> getComments({required String activityId});
-
-  Future<RankingComment> addComment({
-    required String activityId,
-    required String text,
-    required bool containsSpoilers,
-  });
-
-  Future<FollowStatus> followUser({required String targetUserId});
-
-  Future<void> unfollowUser({required String targetUserId});
-
-  Future<FollowStatus> getFollowStatus({required String targetUserId});
+/// One keyset page of the feed.
+class FeedPage {
+  final List<ActivityLog> items;
+  final bool hasMore;
+  const FeedPage(this.items, {required this.hasMore});
 }
 
-/// In-memory implementation of SocialRepository (replaced by the Supabase-backed repository in FE-607).
-class InMemorySocialRepository implements SocialRepository {
-  InMemorySocialRepository() {
-    _seedInitialData();
-  }
+/// Social graph, feed, reactions, comments and moderation (features/04, FE-607).
+abstract interface class SocialRepository {
+  /// Newest first; pass the last item of the previous page as [after] for the next one.
+  Future<FeedPage> getFeedPage({required FeedFilter filter, ActivityLog? after, int limit = 20});
 
-  final List<ActivityLog> _activities = [];
-  final Map<String, List<RankingComment>> _comments = {};
-  final Map<String, FollowStatus> _followStatuses = {};
+  /// 1-tap queue add/remove (features/04 §2.2), attributed to the poster.
+  Future<void> setQueued({required ActivityLog activity, required bool queued});
 
-  void _seedInitialData() {
-    final now = DateTime.now();
+  Future<void> setReaction({required String activityId, required FeedReactionType reaction, required bool active});
 
-    _activities.addAll([
-      ActivityLog(
-        id: 'act-1',
-        userId: 'u-jordan',
-        username: 'jordan',
-        userDisplayName: 'Jordan Miller',
-        activityType: ActivityType.upsetAlert,
-        titleId: 102,
-        titleName: 'Severance',
-        releaseYear: 2022,
-        mediaType: 'tv',
-        rankPosition: 2,
-        calculatedScore: 9.72,
-        culturalTier: 'God Tier',
-        vibeTags: const ['Mind-Bending', 'Flawless Finale'],
-        microReview:
-            'The season 2 finale was the most stressful 60 minutes of television in the last decade. Absolute peak.',
-        isUpset: true,
-        upsetDelta: 0.28,
-        upsetOverTitleName: 'Succession',
-        upsetOverTitleRank: 4,
-        agreementPercentage: 14.0,
-        reactions: const {
-          FeedReactionType.fire: 18,
-          FeedReactionType.mindBlown: 9,
-        },
-        userReactions: const {FeedReactionType.fire},
-        commentCount: 4,
-        createdAt: now.subtract(const Duration(hours: 2)),
-      ),
-      ActivityLog(
-        id: 'act-2',
-        userId: 'u-maya',
-        username: 'maya',
-        userDisplayName: 'Maya Lin',
-        activityType: ActivityType.showDropped,
-        titleId: 104,
-        titleName: 'The Morning Show',
-        releaseYear: 2019,
-        mediaType: 'tv',
-        droppedSeason: 2,
-        droppedEpisode: 3,
-        dropReason: 'Writing jumped the shark',
-        willingToRevisit: false,
-        microReview:
-            'Loved season 1 but season 2 lost completely what made the newsroom dynamic compelling.',
-        reactions: const {
-          FeedReactionType.tasteTwin: 12,
-          FeedReactionType.trashTake: 6,
-        },
-        commentCount: 2,
-        createdAt: now.subtract(const Duration(hours: 5)),
-      ),
-      ActivityLog(
-        id: 'act-3',
-        userId: 'u-alex',
-        username: 'alex',
-        userDisplayName: 'Alex Rivera',
-        activityType: ActivityType.rankingCreated,
-        titleId: 201,
-        titleName: 'Dune: Part Two',
-        releaseYear: 2024,
-        mediaType: 'movie',
-        rankPosition: 3,
-        calculatedScore: 9.42,
-        culturalTier: 'God Tier',
-        favoriteCharacter: 'Paul Atreides',
-        vibeTags: const ['Masterpiece Acting', 'Aesthetic Marvel'],
-        microReview:
-            'Hans Zimmer score vibrating in IMAX was religious. Timothée Chalamet commanding the Fremen army gives goosebumps.',
-        reactions: const {
-          FeedReactionType.fire: 24,
-        },
-        commentCount: 7,
-        createdAt: now.subtract(const Duration(hours: 8)),
-      ),
-    ]);
+  Future<List<RankingComment>> getComments(String activityId);
 
-    _comments['act-1'] = [
-      RankingComment(
-        id: 'comm-1',
-        rankingId: 'act-1',
-        userId: 'u-alex',
-        username: 'alex',
-        userDisplayName: 'Alex Rivera',
-        commentText:
-            'How could you rank it over Succession though? Logan Roy’s funeral episode is untouchable.',
-        containsSpoilers: false,
-        createdAt: now.subtract(const Duration(hours: 1)),
-      ),
-      RankingComment(
-        id: 'comm-2',
-        rankingId: 'act-1',
-        userId: 'u-jordan',
-        username: 'jordan',
-        userDisplayName: 'Jordan Miller',
-        commentText:
-            'True, but Severance hasn’t had a single wasted scene. In the finale when Helly steps onto the stage...',
-        containsSpoilers: true,
-        createdAt: now.subtract(const Duration(minutes: 45)),
-      ),
-    ];
+  Future<RankingComment> addComment({required String activityId, required String text, required bool containsSpoilers});
+
+  /// Null when there is no relationship.
+  Future<FollowStatus?> getFollowStatus(String targetUserId);
+
+  /// Accepted immediately for public profiles, pending for friends-only ones (server rule).
+  Future<FollowStatus> follow(String targetUserId);
+
+  Future<void> unfollow(String targetUserId);
+
+  /// Approve or reject [followerId]'s pending request to follow me.
+  Future<void> respondToFollow({required String followerId, required bool approve});
+
+  Future<void> report({required ReportTarget target, required String targetId, required ReportReason reason, String? notes});
+
+  Future<void> blockUser(String userId);
+}
+
+class SupabaseSocialRepository implements SocialRepository {
+  SupabaseSocialRepository(this._client, {String? Function()? currentUserId})
+      : _currentUserId = currentUserId ?? (() => _client.auth.currentUser?.id);
+
+  final SupabaseClient _client;
+  final String? Function() _currentUserId;
+
+  String get _me => _currentUserId() ?? (throw StateError('Not signed in'));
+
+  static const _commentColumns =
+      'id, activity_id, user_id, body, contains_spoilers, created_at, users(username, display_name, avatar_url)';
+
+  @override
+  Future<FeedPage> getFeedPage({required FeedFilter filter, ActivityLog? after, int limit = 20}) async {
+    final rows = await _client.rpc('get_activity_feed', params: {
+      'p_filter': filter.name,
+      'p_before': after?.createdAt.toUtc().toIso8601String(),
+      'p_before_id': after?.id,
+      'p_limit': limit,
+    }) as List;
+    final items = [for (final r in rows) activityFromFeedRow(r as Map<String, dynamic>)];
+    return FeedPage(items, hasMore: items.length == limit);
   }
 
   @override
-  Future<List<ActivityLog>> getFeedActivities({
-    required FeedFilter filter,
-    int offset = 0,
-    int limit = 20,
-  }) async {
-    List<ActivityLog> list;
-    switch (filter) {
-      case FeedFilter.following:
-        list = _activities;
-        break;
-      case FeedFilter.squads:
-        list = _activities.where((a) => a.userId == 'u-jordan' || a.userId == 'u-alex').toList();
-        break;
-      case FeedFilter.global:
-        list = _activities;
-        break;
-    }
-
-    if (offset >= list.length) return [];
-    final end = (offset + limit).clamp(0, list.length);
-    return list.sublist(offset, end);
-  }
-
-  @override
-  Future<void> toggleQueue({
-    required String activityId,
-    required int titleId,
-    required bool addToQueue,
-  }) async {
-    final index = _activities.indexWhere((a) => a.id == activityId);
-    if (index != -1) {
-      _activities[index] = _activities[index].copyWith(inUserQueue: addToQueue);
-    }
-  }
-
-  @override
-  Future<ActivityLog> toggleReaction({
-    required String activityId,
-    required FeedReactionType reaction,
-  }) async {
-    final index = _activities.indexWhere((a) => a.id == activityId);
-    if (index == -1) {
-      throw ArgumentError('Activity $activityId not found');
-    }
-
-    final current = _activities[index];
-    final newUserReactions = Set<FeedReactionType>.from(current.userReactions);
-    final newReactions = Map<FeedReactionType, int>.from(current.reactions);
-
-    if (newUserReactions.contains(reaction)) {
-      newUserReactions.remove(reaction);
-      final count = (newReactions[reaction] ?? 1) - 1;
-      if (count <= 0) {
-        newReactions.remove(reaction);
-      } else {
-        newReactions[reaction] = count;
-      }
+  Future<void> setQueued({required ActivityLog activity, required bool queued}) async {
+    final me = _me;
+    if (queued) {
+      await _client.from('user_watchlist').upsert({
+        'user_id': me,
+        'title_id': activity.titleId,
+        'media_type': activity.mediaType,
+        if (activity.userId != me) 'recommended_by_user_id': activity.userId,
+      }, onConflict: 'user_id,title_id,media_type', ignoreDuplicates: true);
     } else {
-      newUserReactions.add(reaction);
-      newReactions[reaction] = (newReactions[reaction] ?? 0) + 1;
+      await _client
+          .from('user_watchlist')
+          .delete()
+          .eq('user_id', me)
+          .eq('title_id', activity.titleId)
+          .eq('media_type', activity.mediaType);
     }
-
-    final updated = current.copyWith(
-      reactions: newReactions,
-      userReactions: newUserReactions,
-    );
-    _activities[index] = updated;
-    return updated;
   }
 
   @override
-  Future<List<RankingComment>> getComments({required String activityId}) async {
-    return _comments[activityId] ?? [];
+  Future<void> setReaction({required String activityId, required FeedReactionType reaction, required bool active}) async {
+    final me = _me;
+    if (active) {
+      await _client.from('feed_reactions').upsert(
+        {'activity_id': activityId, 'user_id': me, 'reaction_type': reaction.dbValue},
+        onConflict: 'activity_id,user_id,reaction_type',
+        ignoreDuplicates: true,
+      );
+    } else {
+      await _client
+          .from('feed_reactions')
+          .delete()
+          .eq('activity_id', activityId)
+          .eq('user_id', me)
+          .eq('reaction_type', reaction.dbValue);
+    }
+  }
+
+  @override
+  Future<List<RankingComment>> getComments(String activityId) async {
+    final rows = await _client
+        .from('comments')
+        .select(_commentColumns)
+        .eq('activity_id', activityId)
+        .order('created_at', ascending: true);
+    return [for (final r in rows) _comment(r)];
   }
 
   @override
@@ -253,63 +136,132 @@ class InMemorySocialRepository implements SocialRepository {
     required String text,
     required bool containsSpoilers,
   }) async {
-    final newComment = RankingComment(
-      id: 'comm-${DateTime.now().millisecondsSinceEpoch}',
-      rankingId: activityId,
-      userId: 'current-user-id',
-      username: 'you',
-      userDisplayName: 'You',
-      commentText: text,
-      containsSpoilers: containsSpoilers,
-      createdAt: DateTime.now(),
+    final row = await _client
+        .from('comments')
+        .insert({'activity_id': activityId, 'user_id': _me, 'body': text, 'contains_spoilers': containsSpoilers})
+        .select(_commentColumns)
+        .single();
+    return _comment(row);
+  }
+
+  @override
+  Future<FollowStatus?> getFollowStatus(String targetUserId) async {
+    final row = await _client
+        .from('social_follows')
+        .select('status')
+        .eq('follower_id', _me)
+        .eq('following_id', targetUserId)
+        .maybeSingle();
+    return row == null ? null : FollowStatus.fromString(row['status'] as String);
+  }
+
+  @override
+  Future<FollowStatus> follow(String targetUserId) async {
+    final row = await _client
+        .from('social_follows')
+        .insert({'follower_id': _me, 'following_id': targetUserId})
+        .select('status')
+        .single();
+    return FollowStatus.fromString(row['status'] as String);
+  }
+
+  @override
+  Future<void> unfollow(String targetUserId) =>
+      _client.from('social_follows').delete().eq('follower_id', _me).eq('following_id', targetUserId);
+
+  @override
+  Future<void> respondToFollow({required String followerId, required bool approve}) => _client
+      .from('social_follows')
+      .update({'status': approve ? 'accepted' : 'rejected'})
+      .eq('follower_id', followerId)
+      .eq('following_id', _me);
+
+  @override
+  Future<void> report({
+    required ReportTarget target,
+    required String targetId,
+    required ReportReason reason,
+    String? notes,
+  }) =>
+      _client.rpc('submit_report', params: {
+        'p_target_type': target.dbValue,
+        'p_target_id': targetId,
+        'p_reason': reason.dbValue,
+        'p_notes': notes,
+      });
+
+  @override
+  Future<void> blockUser(String userId) => _client.rpc('block_user', params: {'p_user': userId});
+
+  static RankingComment _comment(Map<String, dynamic> r) {
+    final user = (r['users'] as Map?) ?? const {};
+    return RankingComment(
+      id: r['id'] as String,
+      rankingId: r['activity_id'] as String,
+      userId: r['user_id'] as String,
+      username: (user['username'] as String?) ?? '',
+      userDisplayName: (user['display_name'] as String?) ?? '',
+      userAvatarUrl: user['avatar_url'] as String?,
+      commentText: r['body'] as String,
+      containsSpoilers: (r['contains_spoilers'] as bool?) ?? false,
+      createdAt: DateTime.parse(r['created_at'] as String).toLocal(),
     );
-
-    _comments.putIfAbsent(activityId, () => []).add(newComment);
-
-    final actIndex = _activities.indexWhere((a) => a.id == activityId);
-    if (actIndex != -1) {
-      _activities[actIndex] = _activities[actIndex].copyWith(
-        commentCount: _activities[actIndex].commentCount + 1,
-      );
-    }
-
-    return newComment;
-  }
-
-  @override
-  Future<FollowStatus> followUser({required String targetUserId}) async {
-    // If target is private, returns pending; default public returns accepted
-    const status = FollowStatus.accepted;
-    _followStatuses[targetUserId] = status;
-    return status;
-  }
-
-  @override
-  Future<void> unfollowUser({required String targetUserId}) async {
-    _followStatuses.remove(targetUserId);
-  }
-
-  @override
-  Future<FollowStatus> getFollowStatus({required String targetUserId}) async {
-    return _followStatuses[targetUserId] ?? FollowStatus.rejected;
   }
 }
 
-/// Global Riverpod providers for feed and social interactions
-final socialRepositoryProvider = Provider<SocialRepository>((ref) {
-  return InMemorySocialRepository();
-});
+/// `drop_reason_enum` → the Graveyard taxonomy labels.
+const _dropReasons = {
+  'PACING_SLOWED': DropReasonTaxonomy.pacingSlowed,
+  'WRITING_JUMPED_SHARK': DropReasonTaxonomy.jumpedShark,
+  'CAST_DEPARTURE': DropReasonTaxonomy.charactersDied,
+  'TOO_DARK_DEPRESSING': DropReasonTaxonomy.tooDepressing,
+  'TIME_COMMITMENT': DropReasonTaxonomy.timeCommitment,
+  'BETTER_OPTIONS': DropReasonTaxonomy.betterOptions,
+};
 
-final feedFilterProvider = StateProvider<FeedFilter>((ref) => FeedFilter.following);
+/// Maps one `get_activity_feed` row (see migration `20261010000500`) to a card model.
+ActivityLog activityFromFeedRow(Map<String, dynamic> r) {
+  final metadata = (r['metadata'] as Map?)?.cast<String, dynamic>() ?? const {};
+  final score = (r['calculated_score'] as num?)?.toDouble();
+  final counts = (r['reaction_counts'] as Map?) ?? const {};
+  return ActivityLog(
+    id: r['id'] as String,
+    userId: r['user_id'] as String,
+    username: (r['username'] as String?) ?? '',
+    userDisplayName: (r['display_name'] as String?) ?? '',
+    userAvatarUrl: r['avatar_url'] as String?,
+    activityType: ActivityType.fromString(r['activity_type'] as String),
+    titleId: (r['title_id'] as num?)?.toInt() ?? 0,
+    titleName: (r['title'] as String?) ?? 'Unknown title',
+    titlePosterUrl: TmdbImages.poster(r['poster_path'] as String?),
+    releaseYear: (r['release_year'] as num?)?.toInt(),
+    mediaType: (r['media_type'] as String?) ?? 'tv',
+    rankPosition: (r['rank_position'] as num?)?.toInt(),
+    calculatedScore: score,
+    culturalTier: score == null ? null : CanonTier.fromScore(score).label,
+    favoriteCharacter: r['favorite_character'] as String?,
+    vibeTags: [for (final t in (r['tags'] as List? ?? const [])) t as String],
+    microReview: r['review_short'] as String?,
+    isUpset: (r['is_upset'] as bool?) ?? false,
+    upsetDelta: (r['upset_delta'] as num?)?.toDouble() ?? 0,
+    upsetOverTitleName: r['upset_over_title'] as String?,
+    upsetOverTitleRank: (r['upset_over_rank'] as num?)?.toInt(),
+    droppedSeason: (metadata['season'] as num?)?.toInt(),
+    droppedEpisode: (metadata['episode'] as num?)?.toInt(),
+    dropReason: _dropReasons[metadata['reason']] ?? metadata['reason'] as String?,
+    inUserQueue: (r['in_my_queue'] as bool?) ?? false,
+    reactions: {
+      for (final MapEntry(:key, :value) in counts.entries)
+        if (FeedReactionType.fromDbValue(key as String) case final reaction?) reaction: (value as num).toInt(),
+    },
+    userReactions: {
+      for (final v in (r['my_reactions'] as List? ?? const []))
+        if (FeedReactionType.fromDbValue(v as String) case final reaction?) reaction,
+    },
+    commentCount: (r['comment_count'] as num?)?.toInt() ?? 0,
+    createdAt: DateTime.parse(r['created_at'] as String).toLocal(),
+  );
+}
 
-final feedActivitiesProvider = FutureProvider<List<ActivityLog>>((ref) async {
-  final filter = ref.watch(feedFilterProvider);
-  final repo = ref.watch(socialRepositoryProvider);
-  return repo.getFeedActivities(filter: filter);
-});
-
-final commentsProvider =
-    FutureProvider.family<List<RankingComment>, String>((ref, activityId) async {
-  final repo = ref.watch(socialRepositoryProvider);
-  return repo.getComments(activityId: activityId);
-});
+final socialRepositoryProvider =
+    Provider<SocialRepository>((ref) => SupabaseSocialRepository(ref.watch(supabaseClientProvider)));

@@ -7,6 +7,8 @@ import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/theme/telly_typography.dart';
 import 'package:telly_app/features/feed/data/social_repository.dart';
 import 'package:telly_app/features/feed/domain/social_models.dart';
+import 'package:telly_app/features/feed/presentation/controllers/feed_controllers.dart';
+import 'package:telly_app/features/feed/presentation/widgets/moderation_sheet.dart';
 import 'package:telly_app/features/feed/presentation/widgets/feed_activity_card.dart';
 import 'package:telly_app/features/feed/presentation/widgets/upset_activity_card.dart';
 
@@ -14,6 +16,8 @@ import 'package:telly_app/features/feed/presentation/widgets/upset_activity_card
 ///
 /// Features segmented tab switching (Following, Squads, Global),
 /// high-visibility spicy upset cards, 1-tap queue saving, and spoiler comments.
+/// FE-607: served by `get_activity_feed` through [FeedController] (keyset pagination,
+/// optimistic reactions/queue with rollback); long-press opens report/block.
 class ActivityFeedScreen extends ConsumerStatefulWidget {
   const ActivityFeedScreen({super.key});
 
@@ -22,31 +26,74 @@ class ActivityFeedScreen extends ConsumerStatefulWidget {
 }
 
 class _ActivityFeedScreenState extends ConsumerState<ActivityFeedScreen> {
+  final _scroll = ScrollController();
+
+  /// Start fetching the next page this far from the bottom.
+  static const _prefetchExtent = 400.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _scroll.addListener(_maybeLoadMore);
+  }
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  FeedController get _feed => ref.read(feedControllerProvider(ref.read(feedFilterProvider)).notifier);
+
+  void _maybeLoadMore() {
+    if (_scroll.hasClients && _scroll.position.extentAfter < _prefetchExtent) _feed.loadMore();
+  }
+
   void _openComments(ActivityLog activity) {
     HapticsService.lightImpact();
     context.push(Routes.activity(activity.id), extra: activity);
   }
 
-  void _handleReactionToggle(ActivityLog activity, FeedReactionType reaction) {
-    ref.read(socialRepositoryProvider).toggleReaction(
-          activityId: activity.id,
-          reaction: reaction,
+  Future<void> _guard(Future<void> Function() action) async {
+    try {
+      await action();
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Couldn't save that. Check your connection.")),
         );
-    ref.invalidate(feedActivitiesProvider);
+      }
+    }
   }
 
-  void _handleQueueToggle(ActivityLog activity, bool inQueue) {
-    ref.read(socialRepositoryProvider).toggleQueue(
-          activityId: activity.id,
-          titleId: activity.titleId,
-          addToQueue: inQueue,
-        );
+  void _handleReactionToggle(ActivityLog activity, FeedReactionType reaction) =>
+      _guard(() => _feed.toggleReaction(activity.id, reaction));
+
+  void _handleQueueToggle(ActivityLog activity, bool inQueue) => _guard(() => _feed.setQueued(activity.id, inQueue));
+
+  void _openModeration(ActivityLog activity) {
+    showModerationSheet(
+      context: context,
+      ref: ref,
+      target: ReportTarget.activity,
+      targetId: activity.id,
+      authorId: activity.userId,
+      authorHandle: activity.username,
+      onReported: () => _forEachFeed((f) => f.hideActivity(activity.id)),
+      onBlocked: () => _forEachFeed((f) => f.hideUser(activity.userId)),
+    );
+  }
+
+  void _forEachFeed(void Function(FeedController) action) {
+    for (final filter in FeedFilter.values) {
+      if (ref.exists(feedControllerProvider(filter))) action(ref.read(feedControllerProvider(filter).notifier));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final currentFilter = ref.watch(feedFilterProvider);
-    final feedAsync = ref.watch(feedActivitiesProvider);
+    final feedAsync = ref.watch(feedControllerProvider(currentFilter));
 
     return Scaffold(
       backgroundColor: TellyColors.backgroundCanvasOled,
@@ -103,54 +150,71 @@ class _ActivityFeedScreenState extends ConsumerState<ActivityFeedScreen> {
               child: RefreshIndicator(
                 color: TellyColors.phosphorLime,
                 backgroundColor: TellyColors.backgroundCard,
-                onRefresh: () async {
-                  ref.invalidate(feedActivitiesProvider);
-                  await ref.read(feedActivitiesProvider.future);
-                },
+                onRefresh: () => _feed.refresh(),
                 child: feedAsync.when(
-                  data: (activities) {
+                  data: (feed) {
+                    final activities = feed.items;
                     if (activities.isEmpty) {
                       return _buildEmptyState();
                     }
 
                     return ListView.builder(
+                      key: const Key('feed_list'),
+                      controller: _scroll,
                       physics: const AlwaysScrollableScrollPhysics(
                         parent: BouncingScrollPhysics(),
                       ),
-                      padding: const EdgeInsets.only(top: 8, bottom: 24),
-                      itemCount: activities.length,
+                      padding: const EdgeInsets.only(top: 8, bottom: 120),
+                      itemCount: activities.length + (feed.hasMore ? 1 : 0),
                       itemBuilder: (context, index) {
+                        if (index == activities.length) {
+                          return const Padding(
+                            key: Key('feed_page_loader'),
+                            padding: EdgeInsets.all(24),
+                            child: Center(child: CircularProgressIndicator(color: TellyColors.phosphorLime)),
+                          );
+                        }
                         final activity = activities[index];
 
+                        final Widget card;
                         if (activity.isUpset) {
-                          return UpsetActivityCard(
+                          card = UpsetActivityCard(
                             key: Key('upset_card_${activity.id}'),
                             activity: activity,
                             onCardTap: () => _openComments(activity),
                             onCommentTap: () => _openComments(activity),
-                            onReactionToggle: (reaction) =>
-                                _handleReactionToggle(activity, reaction),
+                            onReactionToggle: (reaction) => _handleReactionToggle(activity, reaction),
+                            onQueueToggle: (inQueue) => _handleQueueToggle(activity, inQueue),
+                          );
+                        } else {
+                          card = FeedActivityCard(
+                            key: Key('feed_card_${activity.id}'),
+                            activity: activity,
+                            onCardTap: () => _openComments(activity),
+                            onCommentTap: () => _openComments(activity),
+                            onReactionToggle: (reaction) => _handleReactionToggle(activity, reaction),
                             onQueueToggle: (inQueue) => _handleQueueToggle(activity, inQueue),
                           );
                         }
-
-                        return FeedActivityCard(
-                          key: Key('feed_card_${activity.id}'),
-                          activity: activity,
-                          onCardTap: () => _openComments(activity),
-                          onCommentTap: () => _openComments(activity),
-                          onReactionToggle: (reaction) =>
-                              _handleReactionToggle(activity, reaction),
-                          onQueueToggle: (inQueue) => _handleQueueToggle(activity, inQueue),
-                        );
+                        // SCR-05: long-press opens the context menu (report / block).
+                        return GestureDetector(onLongPress: () => _openModeration(activity), child: card);
                       },
                     );
                   },
                   loading: () => const Center(
                     child: CircularProgressIndicator(color: TellyColors.phosphorLime),
                   ),
-                  error: (e, _) => Center(
-                    child: Text('Error loading feed: $e', style: TellyTypography.bodyMedium()),
+                  error: (e, _) => ListView(
+                    children: [
+                      const SizedBox(height: 120),
+                      Center(
+                        child: Text(
+                          "Couldn't load the feed. Pull to retry.",
+                          key: const Key('feed_error_text'),
+                          style: TellyTypography.bodyMedium(),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -178,7 +242,7 @@ class _ActivityFeedScreenState extends ConsumerState<ActivityFeedScreen> {
               borderRadius: BorderRadius.circular(8),
               onTap: () {
                 HapticsService.selectionClick();
-                ref.read(feedFilterProvider.notifier).state = filter;
+                ref.read(feedFilterProvider.notifier).select(filter);
               },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
