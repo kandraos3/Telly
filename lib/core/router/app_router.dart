@@ -40,7 +40,7 @@ class FriendRouteArgs {
   const FriendRouteArgs({required this.userId, required this.displayName, this.avatarUrl});
 }
 
-/// Bridges Riverpod auth state to GoRouter's `refreshListenable` without a ChangeNotifier.
+/// Bridges Riverpod auth state to GoRouter's `refreshListenable` directly.
 class _RouterRefresh implements Listenable {
   final _listeners = <VoidCallback>[];
   void notify() {

@@ -7,12 +7,16 @@ CREATE EXTENSION IF NOT EXISTS pgtap WITH SCHEMA extensions;
 SELECT plan(7);
 
 -- 1. Setup authenticated test users for taste match and squad fixtures
-INSERT INTO public.users (id, username, display_name)
+INSERT INTO auth.users (id, email)
 VALUES
-    ('a0000000-0000-0000-0000-00000000000a', 'fixture_user_a', 'Member A'),
-    ('b0000000-0000-0000-0000-00000000000b', 'fixture_user_b', 'Member B'),
-    ('c0000000-0000-0000-0000-00000000000c', 'fixture_user_c', 'Member C')
+    ('a0000000-0000-0000-0000-00000000000a', 'member-a@test.dev'),
+    ('b0000000-0000-0000-0000-00000000000b', 'member-b@test.dev'),
+    ('c0000000-0000-0000-0000-00000000000c', 'member-c@test.dev')
 ON CONFLICT (id) DO NOTHING;
+
+UPDATE public.users SET username = 'fixture_user_a', display_name = 'Member A' WHERE id = 'a0000000-0000-0000-0000-00000000000a';
+UPDATE public.users SET username = 'fixture_user_b', display_name = 'Member B' WHERE id = 'b0000000-0000-0000-0000-00000000000b';
+UPDATE public.users SET username = 'fixture_user_c', display_name = 'Member C' WHERE id = 'c0000000-0000-0000-0000-00000000000c';
 
 -- 2. Setup titles
 INSERT INTO public.titles (id, media_type, title, release_year)

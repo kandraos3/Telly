@@ -20,8 +20,8 @@ enum CanonViewMode {
   const CanonViewMode({required this.label, required this.shortName});
 }
 
-/// A single selectable value (tab, view mode, toggle) held in a [Notifier] (FE-608
-/// replaced the legacy `StateProvider`s). Tests override with `() => Selection(x)`.
+/// A single selectable value (tab, view mode, toggle) held in a [Notifier].
+/// Tests override with `() => Selection(x)`.
 class Selection<T> extends Notifier<T> {
   Selection(this._initial);
   final T _initial;
