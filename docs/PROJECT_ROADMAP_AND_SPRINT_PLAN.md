@@ -24,7 +24,7 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 6 — Integration, Wiring & Audit Remediation** (planned 2026-10-03; owner decisions D1–D7 recorded in Sprint 6)
-- **Current Active Ticket**: `FE-611` (SCR-08 Show Detail Page) — Sprint 6: 20 / 32 tickets complete
+- **Current Active Ticket**: `FE-612` (SCR-07 Explore & Discover Hub) — Sprint 6: 21 / 32 tickets complete
 - **Overall Roadmap Progress**: Sprints 1–5 granular tasks after the `DOC-601` honesty reset (2026-10-03): **281 / 431 verified** · **121 un-checked** (each annotated `→ remediated by <Sprint 6 ticket>`) · **29 human-only**. The earlier "89 / 89" claim was overstated.
 - **Human-Only Tasks**: 29 tasks in Sprints 1–5 marked `👤 [TO BE DONE BY HUMAN]` (cloud setup, secrets, store submission, device/CI runs, dashboard verification), plus the Sprint 6 human prerequisites list. These cannot be completed or verified from code.
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (369 / 369 pass; pgTAP 155 assertions / 9 files — note: no real E2E or golden tests exist yet)
@@ -1734,11 +1734,11 @@ Turn the library of individually-tested widgets and algorithms into a **wired, r
   - [**`features/03_SERIES_VS_SEASONS_AND_DROPPED_TRACKING.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/03_SERIES_VS_SEASONS_AND_DROPPED_TRACKING.md)
 - **Scope & Objectives**: New screen, reachable from feed cards, search, canon rows, and deep links.
 - **Granular Tasks**:
-  - [ ] 16:9 backdrop with gradient fade, poster + meta, community score with `CanonTier` badge.
-  - [ ] `STREAMING NOW` → `StreamingDeepLinkFactory`; `YOUR STATUS` (rank/score) + `Re-Duel` → `SCR-10`; bookmark → watchlist.
-  - [ ] Friends who ranked it, seasons accordion, community survival rate (via `BE-605`).
+  - [x] 16:9 backdrop with gradient fade, poster + meta, community score with `CanonTier` badge.
+  - [x] `STREAMING NOW` → `StreamingDeepLinkFactory`; `YOUR STATUS` (rank/score) + `Re-Duel` → `SCR-10`; bookmark → watchlist.
+  - [x] Friends who ranked it, seasons accordion, community survival rate (via `BE-605`).
 - **Testing & Verification**:
-  - [ ] Widget tests for ranked vs unranked states, movie (no seasons) vs tv; golden in `QA-603`.
+  - [x] Widget tests for ranked vs unranked states, movie (no seasons) vs tv; golden in `QA-603`.
 - **Dependencies**: `BE-605`, `FE-604`, `FE-609`.
 
 #### `FE-612`: `SCR-07` Explore & Discover Hub
