@@ -43,7 +43,7 @@ jobs:
           ! git grep -E "\b(StateNotifier|StateNotifierProvider|StateProvider|ChangeNotifier)\b" lib/
 
       - name: "Quality Gate 2: Automated Test Pyramid with Coverage"
-        run: flutter test --coverage --test-randomize-ordering-seed=random
+        run: flutter test --coverage --test-randomize-ordering-seed=random --reporter=expanded
 
       - name: "Quality Gate 3: Enforce Coverage Thresholds (80% Overall, 90% Ranking Domain)"
         run: dart run tool/check_coverage.dart

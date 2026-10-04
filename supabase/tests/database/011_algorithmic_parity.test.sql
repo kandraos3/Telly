@@ -83,6 +83,12 @@ VALUES
     ('5a000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-00000000000b')
 ON CONFLICT (squad_id, user_id) DO NOTHING;
 
+SELECT is(
+    (SELECT count(*)::INT FROM public.squad_members WHERE squad_id = '5a000000-0000-0000-0000-000000000001'),
+    2,
+    'Squad Setup: exactly 2 members in test squad'
+);
+
 SET LOCAL ROLE authenticated;
 SELECT set_config('request.jwt.claims', '{"sub":"a0000000-0000-0000-0000-00000000000a","role":"authenticated"}', true);
 

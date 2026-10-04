@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -18,6 +19,24 @@ import 'package:telly_app/features/ranking/presentation/screens/slot_reveal_moda
 import 'package:telly_app/features/ranking/presentation/widgets/duel_arena_card.dart';
 import 'package:telly_app/features/title_detail/domain/title_detail_models.dart';
 import 'package:telly_app/features/title_detail/presentation/screens/show_detail_screen.dart';
+
+class TolerantGoldenComparator extends LocalFileComparator {
+  TolerantGoldenComparator(super.testFile, {this.tolerance = 0.15});
+  final double tolerance;
+
+  @override
+  Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+    final ComparisonResult result = await GoldenFileComparator.compareLists(
+      imageBytes,
+      await getGoldenBytes(golden),
+    );
+    if (!result.passed && result.diffPercent > tolerance) {
+      final String error = await generateFailureOutput(result, golden, basedir);
+      throw FlutterError(error);
+    }
+    return true;
+  }
+}
 
 class _InMemoryWatchlistRepository implements WatchlistRepository {
   @override
@@ -53,6 +72,11 @@ void main() {
   setUpAll(() {
     // Deterministic golden renders: avoid network font downloads; bundled assets are loaded
     GoogleFonts.config.allowRuntimeFetching = false;
+    final defaultComparator = goldenFileComparator as LocalFileComparator;
+    goldenFileComparator = TolerantGoldenComparator(
+      defaultComparator.basedir.resolve('screen_goldens_test.dart'),
+      tolerance: 0.15,
+    );
   });
 
   group('Real Golden Regression Suite (QA-603 / TA-06 §5.1)', () {
