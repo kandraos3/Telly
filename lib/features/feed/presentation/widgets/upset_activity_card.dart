@@ -381,41 +381,51 @@ class _UpsetActivityCardState extends State<UpsetActivityCard>
                 const SizedBox(height: 10),
 
                 // 6. Action Bar
-                Row(
-                  children: [
-                    _buildQueueButton(),
-                    const Spacer(),
-                    _buildReactionsRow(activity),
-                    const SizedBox(width: 12),
-                    InkWell(
-                      borderRadius: BorderRadius.circular(8),
-                      onTap: widget.onCommentTap,
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(
-                                Icons.chat_bubble_outline_rounded,
-                                size: 16,
-                                color: TellyColors.textTertiary,
+                SizedBox(
+                  width: double.infinity,
+                  child: Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    runSpacing: 8,
+                    children: [
+                      _buildQueueButton(),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _buildReactionsRow(activity),
+                          const SizedBox(width: 8),
+                          InkWell(
+                            borderRadius: BorderRadius.circular(8),
+                            onTap: widget.onCommentTap,
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.chat_bubble_outline_rounded,
+                                      size: 16,
+                                      color: TellyColors.textTertiary,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      '${activity.commentCount}',
+                                      style: TellyTypography.caption(
+                                        color: TellyColors.textSecondary,
+                                      ).copyWith(fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
+                                ),
                               ),
-                              const SizedBox(width: 4),
-                              Text(
-                                '${activity.commentCount}',
-                                style: TellyTypography.caption(
-                                  color: TellyColors.textSecondary,
-                                ).copyWith(fontWeight: FontWeight.bold),
-                              ),
-                            ],
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -487,7 +497,7 @@ class _UpsetActivityCardState extends State<UpsetActivityCard>
               widget.onReactionToggle?.call(reaction);
             },
             child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
+              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
               child: Container(
                 alignment: Alignment.center,
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),

@@ -91,5 +91,11 @@ void main() {
       expect(entries, hasLength(500));
       expect(stopwatch.elapsedMilliseconds, lessThan(300));
     });
+
+    test('returns empty list when input is empty or lacks required Name column', () {
+      expect(LetterboxdCsvParser.parse(''), isEmpty);
+      expect(LetterboxdCsvParser.parse('   \n\r  '), isEmpty);
+      expect(LetterboxdCsvParser.parse('Date,Year,Rating\n2024,2024,4.5'), isEmpty);
+    });
   });
 }

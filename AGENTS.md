@@ -66,8 +66,9 @@ When writing Flutter or Backend code, the agent must honor these non-negotiable 
    - Glass Borders: `rgba(255, 255, 255, 0.08)` with subtle backdrop blur.
    - Score Tiers (style guide §2.2): God `9.20–10.00`, Prestige `8.50–9.19`, Great `7.80–8.49`, Good `7.00–7.79`, Mid `5.50–6.99`, Dropped `< 5.50`.
 3. **State Management**:
-   - Use **Riverpod 2.5+** exclusively (`@riverpod` code generation or `NotifierProvider`).
-   - Avoid legacy `setState` or mixing multiple state management libraries.
+   - Use **Riverpod 2.5+** exclusively (`Notifier` / `AsyncNotifier` via `NotifierProvider` / `AsyncNotifierProvider`).
+   - Zero legacy `StateNotifier`, `StateNotifierProvider`, `StateProvider`, or `ChangeNotifier` in `lib/`.
+   - `setState` is strictly allowed ONLY for ephemeral UI-internal state (e.g. animation controllers, button press scaling, focus, drag offsets, modal form draft chips, expandable accordions); never for business, ranking, auth, or domain state.
 4. **Local Persistence & Offline Sync**:
    - Use **Drift SQLite ORM** for local offline storage and reactive streams.
    - Offline mutations append to `OfflineDuelQueue` (Write-Ahead Log) for 0ms optimistic UI.

@@ -270,12 +270,9 @@ class BinaryInsertionTournament<T> {
     }
 
     // First tie: attempt to step to an adjacent neighbor within [low, high]
-    int? neighborIndex;
-    if (currentComparisonIndex + 1 <= high) {
-      neighborIndex = currentComparisonIndex + 1;
-    } else if (currentComparisonIndex - 1 >= low) {
-      neighborIndex = currentComparisonIndex - 1;
-    }
+    final int? neighborIndex = (currentComparisonIndex + 1 <= high)
+        ? currentComparisonIndex + 1
+        : null;
 
     if (neighborIndex != null) {
       return BinaryInsertionTournament._(

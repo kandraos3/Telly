@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:telly_app/features/onboarding/domain/anilist_importer.dart';
 import 'package:telly_app/features/ranking/domain/sentiment_bracket.dart';
@@ -200,7 +204,16 @@ void main() {
     test('handles empty or null GraphQL payloads gracefully', () {
       expect(AniListImporter.parseJson({}), isEmpty);
       expect(AniListImporter.parseJson({'MediaListCollection': null}), isEmpty);
+      expect(AniListImporter.parseJson({'MediaListCollection': {'lists': null}}), isEmpty);
       expect(AniListImporter.parseJson({'MediaListCollection': {'lists': []}}), isEmpty);
+    });
+
+    test('Franchise Rollup preserves primary score when all entries lack score', () {
+      const entry1 = AniListEntry(id: 1, romajiTitle: 'Mob Psycho 100 Season 1', format: 'TV', genres: []);
+      const entry2 = AniListEntry(id: 2, romajiTitle: 'Mob Psycho 100 Season 2', format: 'TV', genres: []);
+      final rolled = AniListImporter.rollupFranchises([entry1, entry2]);
+      expect(rolled.length, equals(1));
+      expect(rolled.first.userScore, isNull);
     });
 
     test('throws validation exception on empty username', () async {
@@ -210,5 +223,131 @@ void main() {
         throwsA(isA<AniListSyncException>()),
       );
     });
+
+    test('exceptions have informative toString() representations', () {
+      const notFound = AniListUserNotFoundException('nonexistent_user');
+      expect(notFound.toString(), equals('AniList profile not found for @nonexistent_user'));
+      expect(notFound.username, equals('nonexistent_user'));
+
+      const syncEx = AniListSyncException('Custom sync failed');
+      expect(syncEx.toString(), equals('Custom sync failed'));
+      expect(syncEx.message, equals('Custom sync failed'));
+    });
+
+    test('fetchUserAnime succeeds and handles rollup flag', () async {
+      final dio = Dio();
+      dio.httpClientAdapter = _TestHttpClientAdapter((options) {
+        return ResponseBody.fromString(
+          jsonEncode({'data': mockGraphQLResponse}),
+          200,
+          headers: {
+            Headers.contentTypeHeader: [Headers.jsonContentType],
+          },
+        );
+      });
+
+      final importer = AniListImporter(dio: dio);
+      final entriesNoRollup = await importer.fetchUserAnime('@maya');
+      expect(entriesNoRollup.length, equals(6));
+
+      final entriesWithRollup = await importer.fetchUserAnime('maya', enableFranchiseRollup: true);
+      expect(entriesWithRollup.length, equals(5));
+    });
+
+    test('fetchUserAnime handles GraphQL not found and generic errors', () async {
+      final dio404Gql = Dio();
+      dio404Gql.httpClientAdapter = _TestHttpClientAdapter((options) {
+        return ResponseBody.fromString(
+          jsonEncode({
+            'errors': [
+              {'message': 'User not found'}
+            ]
+          }),
+          200,
+          headers: {
+            Headers.contentTypeHeader: [Headers.jsonContentType],
+          },
+        );
+      });
+      final importer404Gql = AniListImporter(dio: dio404Gql);
+      expect(() => importer404Gql.fetchUserAnime('ghost'), throwsA(isA<AniListUserNotFoundException>()));
+
+      final dioGenericGql = Dio();
+      dioGenericGql.httpClientAdapter = _TestHttpClientAdapter((options) {
+        return ResponseBody.fromString(
+          jsonEncode({
+            'errors': [
+              {'message': 'Rate limit exceeded'}
+            ]
+          }),
+          200,
+          headers: {
+            Headers.contentTypeHeader: [Headers.jsonContentType],
+          },
+        );
+      });
+      final importerGenericGql = AniListImporter(dio: dioGenericGql);
+      expect(() => importerGenericGql.fetchUserAnime('maya'), throwsA(isA<AniListSyncException>()));
+    });
+
+    test('fetchUserAnime handles null body and null data', () async {
+      final dioNullData = Dio();
+      dioNullData.httpClientAdapter = _TestHttpClientAdapter((options) {
+        return ResponseBody.fromString(
+          jsonEncode({'data': null}),
+          200,
+          headers: {
+            Headers.contentTypeHeader: [Headers.jsonContentType],
+          },
+        );
+      });
+      final importerNullData = AniListImporter(dio: dioNullData);
+      expect(() => importerNullData.fetchUserAnime('maya'), throwsA(isA<AniListSyncException>()));
+    });
+
+    test('fetchUserAnime handles DioException 404 and network errors', () async {
+      final dio404 = Dio();
+      dio404.httpClientAdapter = _TestHttpClientAdapter((options) {
+        throw DioException.badResponse(
+          statusCode: 404,
+          requestOptions: options,
+          response: Response(
+            requestOptions: options,
+            statusCode: 404,
+          ),
+        );
+      });
+      final importer404 = AniListImporter(dio: dio404);
+      expect(() => importer404.fetchUserAnime('missing_person'), throwsA(isA<AniListUserNotFoundException>()));
+
+      final dioNetErr = Dio();
+      dioNetErr.httpClientAdapter = _TestHttpClientAdapter((options) {
+        throw DioException(
+          requestOptions: options,
+          message: 'Connection timed out',
+          type: DioExceptionType.connectionTimeout,
+        );
+      });
+      final importerNetErr = AniListImporter(dio: dioNetErr);
+      expect(() => importerNetErr.fetchUserAnime('maya'), throwsA(isA<AniListSyncException>()));
+    });
   });
 }
+
+class _TestHttpClientAdapter implements HttpClientAdapter {
+  final ResponseBody Function(RequestOptions options) handler;
+  _TestHttpClientAdapter(this.handler);
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    return handler(options);
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+

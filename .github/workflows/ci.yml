@@ -40,6 +40,10 @@ jobs:
       - name: "Quality Gate 1: Static Analysis & Strict Lints"
         run: dart analyze --fatal-infos
 
+      - name: "Quality Gate 1.5: Enforce Modern Riverpod (Zero Legacy StateNotifier / StateProvider / ChangeNotifier)"
+        run: |
+          ! git grep -E "\b(StateNotifier|StateNotifierProvider|StateProvider|ChangeNotifier)\b" lib/
+
       - name: "Quality Gate 2: Automated Test Pyramid with Coverage"
         run: flutter test --coverage --test-randomize-ordering-seed=random
 
@@ -131,5 +135,5 @@ jobs:
           target: google_apis
           arch: x86_64
           profile: pixel_6
-          script: flutter test test/integration/cuj_journeys_test.dart
+          script: flutter test integration_test/app_test.dart
 

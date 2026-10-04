@@ -15,6 +15,7 @@ import 'package:telly_app/features/feed/presentation/screens/activity_feed_scree
 import 'package:telly_app/features/logging/presentation/screens/logging_studio_screen.dart';
 import 'package:telly_app/features/ranking/data/canon_hydration.dart';
 import 'package:telly_app/features/ranking/data/ranking_repository.dart';
+import 'package:telly_app/features/discovery/data/discovery_repository.dart';
 import 'package:telly_app/features/onboarding/presentation/screens/streaming_setup_screen.dart';
 
 import 'fakes/fake_auth_repository.dart';
@@ -44,6 +45,7 @@ void main() {
       databaseProvider.overrideWithValue(db),
       remoteCanonSourceProvider.overrideWithValue(_EmptyRemoteCanon()),
       connectivityProvider.overrideWith((ref) => Stream.value(true)),
+      discoveryRepositoryProvider.overrideWithValue(FakeDiscoveryRepository()),
     ]);
     addTearDown(container.dispose);
     await tester.pumpWidget(UncontrolledProviderScope(container: container, child: const TellyApp()));
