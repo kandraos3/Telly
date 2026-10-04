@@ -24,7 +24,7 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 6 — Integration, Wiring & Audit Remediation** (planned 2026-10-03; owner decisions D1–D7 recorded in Sprint 6)
-- **Current Active Ticket**: `FE-605` (Drift-Backed Offline WAL & Connectivity Sync Engine) — Sprint 6: 14 / 32 tickets complete
+- **Current Active Ticket**: `FE-606` (Onboarding Persistence + SCR-04 Onboarding Duel & Canon Reveal) — Sprint 6: 15 / 32 tickets complete
 - **Overall Roadmap Progress**: Sprints 1–5 granular tasks after the `DOC-601` honesty reset (2026-10-03): **281 / 431 verified** · **121 un-checked** (each annotated `→ remediated by <Sprint 6 ticket>`) · **29 human-only**. The earlier "89 / 89" claim was overstated.
 - **Human-Only Tasks**: 29 tasks in Sprints 1–5 marked `👤 [TO BE DONE BY HUMAN]` (cloud setup, secrets, store submission, device/CI runs, dashboard verification), plus the Sprint 6 human prerequisites list. These cannot be completed or verified from code.
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (215 / 215 pass — note: many tests are widget/unit-level only; no real E2E or golden tests exist yet)
@@ -325,7 +325,7 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 - **Granular Tasks**:
   - [x] Write `test/core/database/local_ranking_dao_test.dart`.
   - [x] Test inserting, updating ranks, and query filtering by `media_type`.
-  - [ ] Test transaction rollback upon failure. → remediated by `FE-605`
+  - [x] Test transaction rollback upon failure. ✅ remediated in `FE-605`
 - **Testing & Verification**:
   - [x] Run tests on pure Dart VM; all tests pass in $< 1\text{ second}$.
 - **Dependencies**: `FE-105`.
@@ -1159,12 +1159,12 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
   - [**`technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/04_CLIENT_ARCHITECTURE_AND_OFFLINE_SYNC.md) §3 (Offline Sync Architecture)
 - **Scope & Objectives**: 0ms optimistic UI updates during airplane mode with FIFO queue flushing on reconnect.
 - **Granular Tasks**:
-  - [ ] Create `lib/core/network/offline_sync_manager.dart`. → remediated by `FE-605`
-  - [ ] When offline: persist ranking/duel mutations to Drift `OfflineDuelQueue` with pending UUIDs. → remediated by `FE-605`
+  - [x] Create `lib/core/network/offline_sync_manager.dart`. ✅ remediated in `FE-605`
+  - [x] When offline: persist ranking/duel mutations to Drift `OfflineDuelQueue` with pending UUIDs. ✅ remediated in `FE-605`
   - [x] Update local Drift tables immediately for zero perceived latency.
-  - [ ] Listen to `connectivity_plus` network transitions: when online, flush queued transactions in sequential FIFO order to Supabase. → remediated by `FE-605`
+  - [x] Listen to `connectivity_plus` network transitions: when online, flush queued transactions in sequential FIFO order to Supabase. ✅ remediated in `FE-605`
 - **Testing & Verification**:
-  - [ ] Unit test queue: enqueue 3 offline duels $\to$ simulate reconnect $\to$ assert 3 calls executed in FIFO order. → remediated by `FE-605`
+  - [x] Unit test queue: enqueue 3 offline duels $\to$ simulate reconnect $\to$ assert 3 calls executed in FIFO order. ✅ remediated in `FE-605`
 - **Dependencies**: `FE-105`.
 
 #### `FE-505`: `SCR-20` Settings Hub & Granular Preferences
@@ -1647,11 +1647,11 @@ Turn the library of individually-tested widgets and algorithms into a **wired, r
 - **Scope & Objectives**: Close audit C5 by replacing the in-memory `OfflineSyncManager`.
 - **Granular Tasks**:
   - [x] Drift schema v2: `PendingMutations(id UUID, kind, payload JSON, createdAt, attempts, lastError)` with a `MigrationStrategy` from v1 (existing `OfflineDuelQueue` rows migrated). *(delivered in `FE-604`; `seq` autoincrement gives FIFO order)*
-  - [ ] `SyncEngine` (`AsyncNotifier`): FIFO flush via the `BE-603` RPCs, passing `client_mutation_id`; marks `LocalRankings.syncStatus = 'SYNCED'`; exponential backoff; halts on first failure to preserve order.
-  - [ ] Add `connectivity_plus`; flush on offline→online transitions, app resume, and post-login.
-  - [ ] Delete the in-memory `OfflineSyncManager`.
+  - [x] `SyncEngine` (`AsyncNotifier`): FIFO flush via the `BE-603` RPCs, passing `client_mutation_id`; marks `LocalRankings.syncStatus = 'SYNCED'`; exponential backoff; halts on first failure to preserve order. *(`lib/core/sync/sync_engine.dart`; RPC mapping in `mutation_transport.dart`; editorial mutations replay as an RLS-scoped UPDATE.)*
+  - [x] Add `connectivity_plus`; flush on offline→online transitions, app resume, and post-login.
+  - [x] Delete the in-memory `OfflineSyncManager`. *(CUJ-04 integration test rebuilt on the real engine.)*
 - **Testing & Verification**:
-  - [ ] Unit tests on file-backed Drift: enqueue 3 → close DB → reopen → flush in FIFO; mid-flush failure leaves the remaining entries intact; replaying a flushed mutation is a server no-op.
+  - [x] Unit tests on file-backed Drift: enqueue 3 → close DB → reopen → flush in FIFO; mid-flush failure leaves the remaining entries intact; replaying a flushed mutation is a server no-op.
 - **Dependencies**: `FE-604`.
 
 #### `FE-606`: Onboarding Persistence + `SCR-04` Onboarding Duel & Canon Reveal

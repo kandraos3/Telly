@@ -6,6 +6,7 @@ import 'package:telly_app/app.dart';
 import 'package:telly_app/core/database/database.dart';
 import 'package:telly_app/core/database/database_provider.dart';
 import 'package:telly_app/core/router/app_router.dart';
+import 'package:telly_app/core/sync/connectivity_signal.dart';
 import 'package:telly_app/core/router/routes.dart';
 import 'package:telly_app/features/auth/data/auth_repository.dart';
 import 'package:telly_app/features/auth/domain/user_profile.dart';
@@ -42,6 +43,7 @@ void main() {
       authRepositoryProvider.overrideWithValue(repo),
       databaseProvider.overrideWithValue(db),
       remoteCanonSourceProvider.overrideWithValue(_EmptyRemoteCanon()),
+      connectivityProvider.overrideWith((ref) => Stream.value(true)),
     ]);
     addTearDown(container.dispose);
     await tester.pumpWidget(UncontrolledProviderScope(container: container, child: const TellyApp()));

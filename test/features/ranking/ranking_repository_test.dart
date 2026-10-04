@@ -102,6 +102,23 @@ void main() {
       expect(payloadOf(m), containsPair('tags', ['Mind-Bending']));
     });
 
+    test('a failed queue write rolls the canon change back (one transaction)', () async {
+      await seedCanon(db, 'tv', ['A', 'B'], baseId: 1);
+      await db.customStatement(
+        "CREATE TRIGGER fail_queue BEFORE INSERT ON pending_mutations BEGIN SELECT RAISE(ABORT, 'disk full'); END",
+      );
+
+      await expectLater(
+        repo.commitPlacement(candidate: const CanonCandidate(titleId: 9, mediaType: 'tv', title: 'New'), targetRank: 1),
+        throwsA(anything),
+      );
+      await expectLater(repo.move(mediaType: 'tv', titleId: 2, newRank: 1), throwsA(anything));
+
+      final canon = await repo.getCanon('tv');
+      expect(canon.map((r) => (r.showId, r.rankPosition, r.syncStatus)), [(1, 1, 'SYNCED'), (2, 2, 'SYNCED')]);
+      expect(await queue(), isEmpty);
+    });
+
     test('rejects media types outside the dual canon', () {
       expect(() => repo.move(mediaType: 'anime', titleId: 1, newRank: 1), throwsArgumentError);
     });

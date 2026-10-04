@@ -1,9 +1,21 @@
+import 'dart:async';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:telly_app/core/network/offline_sync_manager.dart';
+import 'package:telly_app/core/database/database.dart';
+import 'package:telly_app/core/database/database_provider.dart';
+import 'package:telly_app/core/sync/connectivity_signal.dart';
+import 'package:telly_app/core/sync/mutation_transport.dart';
+import 'package:telly_app/core/sync/sync_engine.dart';
+import 'package:telly_app/features/auth/data/auth_repository.dart';
+import 'package:telly_app/features/auth/domain/user_profile.dart';
+import 'package:telly_app/features/ranking/data/ranking_repository.dart';
 import 'package:telly_app/features/cowatch/domain/two_to_watch_engine.dart';
 import 'package:telly_app/features/ranking/domain/binary_insertion_tournament.dart';
 import 'package:telly_app/features/ranking/domain/score_curve_calculator.dart';
 import 'package:telly_app/features/ranking/domain/sentiment_bracket.dart';
+
+import '../fakes/fake_auth_repository.dart';
 
 void main() {
   group('Critical User Journeys E2E Integration Suite (QA-501)', () {
@@ -185,51 +197,57 @@ void main() {
     // CUJ-04: Airplane Mode Offline Logging & Sync Resilience
     // -------------------------------------------------------------------------
     test('CUJ-04: Airplane Mode Offline WAL Persistence & Reconnect Flush', () async {
-      final flushedEntries = <OfflineDuelEntry>[];
+      final db = AppDatabase.inMemory();
+      addTearDown(db.close);
+      final online = StreamController<bool>();
+      addTearDown(online.close);
+      final applied = <String>[];
+      final container = ProviderContainer(overrides: [
+        databaseProvider.overrideWithValue(db),
+        connectivityProvider.overrideWith((ref) => online.stream),
+        mutationTransportProvider.overrideWithValue(_RecordingTransport(applied)),
+        authRepositoryProvider.overrideWithValue(FakeAuthRepository(
+          signedInUserId: 'u1',
+          profile: UserProfile(id: 'u1', username: 'maya', displayName: 'Maya', createdAt: DateTime(2026)),
+        )),
+      ]);
+      addTearDown(container.dispose);
+      container.listen(syncEngineProvider, (_, __) {});
 
-      // 1. Initialize offline manager in airplane mode
-      final syncManager = OfflineSyncManager(
-        initialOnlineState: false,
-        onSyncEntry: (entry) async {
-          flushedEntries.add(entry);
-          return true;
-        },
-      );
+      // 1. Airplane mode
+      online.add(false);
+      await Future<void>.delayed(const Duration(milliseconds: 20));
 
-      expect(syncManager.isOnline, isFalse);
+      // 2. Three offline logs: the canon updates instantly, mutations wait in the WAL
+      final repo = container.read(rankingRepositoryProvider);
+      final ids = <String>[];
+      for (final (id, title) in [(76331, 'Succession'), (110492, 'Peacemaker'), (85937, 'Demon Slayer')]) {
+        ids.add((await repo.commitPlacement(
+          candidate: CanonCandidate(titleId: id, mediaType: 'tv', title: title),
+          targetRank: 1,
+        ))
+            .mutationId);
+      }
+      expect((await repo.getCanon('tv')).map((r) => r.title), ['Demon Slayer', 'Peacemaker', 'Succession']);
+      expect(await db.pendingMutationDao.count(), 3);
+      expect(applied, isEmpty);
 
-      // 2. Perform 3 offline duel mutations
-      await syncManager.enqueueDuel(
-        winnerTitleId: 76331,
-        loserTitleId: 110492,
-        mediaType: 'tv',
-        roundNumber: 1,
-      );
-      await syncManager.enqueueDuel(
-        winnerTitleId: 110492,
-        loserTitleId: 85937,
-        mediaType: 'tv',
-        roundNumber: 2,
-      );
-      await syncManager.enqueueDuel(
-        winnerTitleId: 85937,
-        loserTitleId: 94997,
-        mediaType: 'tv',
-        roundNumber: 3,
-      );
-
-      expect(syncManager.pendingCount, equals(3));
-      expect(flushedEntries, isEmpty);
-
-      // 3. Reconnect to network (setOnlineStatus automatically flushes queue)
-      await syncManager.setOnlineStatus(true);
-      expect(syncManager.isOnline, isTrue);
-
-      expect(syncManager.pendingCount, equals(0));
-      expect(flushedEntries.length, equals(3));
-      expect(flushedEntries[0].winnerTitleId, equals(76331));
-      expect(flushedEntries[1].winnerTitleId, equals(110492));
-      expect(flushedEntries[2].winnerTitleId, equals(85937));
+      // 3. Reconnect: the queue flushes in order and the canon is marked synced
+      online.add(true);
+      for (var i = 0; i < 200 && applied.length < 3; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 5));
+      }
+      expect(applied, ids);
+      expect(await db.pendingMutationDao.count(), 0);
+      expect((await repo.getCanon('tv')).every((r) => r.syncStatus == 'SYNCED'), isTrue);
     });
   });
+}
+
+class _RecordingTransport implements MutationTransport {
+  _RecordingTransport(this.applied);
+  final List<String> applied;
+
+  @override
+  Future<void> apply(PendingMutation mutation) async => applied.add(mutation.id);
 }
