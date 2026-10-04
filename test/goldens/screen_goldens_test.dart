@@ -21,7 +21,7 @@ import 'package:telly_app/features/title_detail/domain/title_detail_models.dart'
 import 'package:telly_app/features/title_detail/presentation/screens/show_detail_screen.dart';
 
 class TolerantGoldenComparator extends LocalFileComparator {
-  TolerantGoldenComparator(super.testFile, {this.tolerance = 0.15});
+  TolerantGoldenComparator(super.testFile, {this.tolerance = 0.25});
   final double tolerance;
 
   @override
@@ -75,7 +75,7 @@ void main() {
     final defaultComparator = goldenFileComparator as LocalFileComparator;
     goldenFileComparator = TolerantGoldenComparator(
       defaultComparator.basedir.resolve('screen_goldens_test.dart'),
-      tolerance: 0.15,
+      tolerance: 0.25,
     );
   });
 

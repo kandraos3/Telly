@@ -43,7 +43,18 @@ jobs:
           ! git grep -E "\b(StateNotifier|StateNotifierProvider|StateProvider|ChangeNotifier)\b" lib/
 
       - name: "Quality Gate 2: Automated Test Pyramid with Coverage"
-        run: flutter test --coverage --test-randomize-ordering-seed=random --reporter=expanded
+        run: |
+          set -o pipefail
+          flutter test --coverage --test-randomize-ordering-seed=random --reporter=expanded 2>&1 | tee test_output.log
+        shell: bash
+
+      - name: "Log Test Failure Details on Failure"
+        if: failure()
+        run: |
+          echo "### Test Failures Summary" >> $GITHUB_STEP_SUMMARY
+          grep -E "(\[E\]|EXCEPTION CAUGHT|Some tests failed|Failing tests:)" test_output.log -A 8 >> $GITHUB_STEP_SUMMARY || true
+          tail -n 120 test_output.log
+        shell: bash
 
       - name: "Quality Gate 3: Enforce Coverage Thresholds (80% Overall, 90% Ranking Domain)"
         run: dart run tool/check_coverage.dart
@@ -128,9 +139,11 @@ jobs:
       - name: Run Integration Tests on Android Emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 34
+          api-level: 33
           target: google_apis
           arch: arm64-v8a
           profile: pixel_6
+          emulator-boot-timeout: 1200
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
           script: flutter test integration_test/app_test.dart
 
