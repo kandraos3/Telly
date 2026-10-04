@@ -112,6 +112,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               builder: (context, __) => DualCanonProfileScreen(
                 onSettingsTap: () => context.push(Routes.settings),
                 onSquadsTap: () => context.push(Routes.squads),
+                onTapEntry: (entry) => context.push(Routes.title(entry.mediaType, entry.id)),
               ),
               routes: [
                 GoRoute(

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:telly_app/core/router/routes.dart';
 import 'package:telly_app/core/network/supabase_providers.dart';
 import 'package:telly_app/core/services/streaming_deep_link_factory.dart';
 import 'package:telly_app/core/theme/telly_colors.dart';
@@ -638,39 +640,46 @@ class _TwoToWatchScreenState extends ConsumerState<TwoToWatchScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      candidate.title,
-                      style: TellyTypography.titleMedium(color: TellyColors.textPrimary).copyWith(fontWeight: FontWeight.w800),
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => context.push(Routes.title(candidate.mediaType, candidate.showId)),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 48),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          candidate.title,
+                          style: TellyTypography.titleMedium(color: TellyColors.textPrimary).copyWith(fontWeight: FontWeight.w800),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${candidate.network} • ${candidate.runtimeMinutes != null ? '${candidate.runtimeMinutes}m • ' : ''}★ ${candidate.communityScore.toStringAsFixed(1)}',
+                          style: TellyTypography.caption(color: TellyColors.warmAmber),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${candidate.network} • ${candidate.runtimeMinutes != null ? '${candidate.runtimeMinutes}m • ' : ''}★ ${candidate.communityScore.toStringAsFixed(1)}',
-                      style: TellyTypography.caption(color: TellyColors.warmAmber),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: TellyColors.phosphorLime.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                  ],
-                ),
+                    child: Text(
+                      '${rec.score.toStringAsFixed(0)} PTS',
+                      style: TellyTypography.caption(
+                        color: TellyColors.phosphorLime,
+                      ).copyWith(fontWeight: FontWeight.w800),
+                    ),
+                  ),
+                ],
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: TellyColors.phosphorLime.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  '${rec.score.toStringAsFixed(0)} PTS',
-                  style: TellyTypography.caption(
-                    color: TellyColors.phosphorLime,
-                  ).copyWith(fontWeight: FontWeight.w800),
-                ),
-              ),
-            ],
+            ),
           ),
           const SizedBox(height: 8),
           Text(

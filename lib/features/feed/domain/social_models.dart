@@ -143,6 +143,7 @@ class ActivityLog {
   // Upset specific metadata
   final bool isUpset;
   final double upsetDelta;
+  final int? upsetOverTitleId;
   final String? upsetOverTitleName;
   final String? upsetOverTitlePoster;
   final int? upsetOverTitleRank;
@@ -181,6 +182,7 @@ class ActivityLog {
     this.microReview,
     this.isUpset = false,
     this.upsetDelta = 0.0,
+    this.upsetOverTitleId,
     this.upsetOverTitleName,
     this.upsetOverTitlePoster,
     this.upsetOverTitleRank,
@@ -202,6 +204,7 @@ class ActivityLog {
     Map<FeedReactionType, int>? reactions,
     Set<FeedReactionType>? userReactions,
     int? commentCount,
+    int? upsetOverTitleId,
   }) {
     return ActivityLog(
       id: id,
@@ -223,6 +226,7 @@ class ActivityLog {
       microReview: microReview,
       isUpset: isUpset,
       upsetDelta: upsetDelta,
+      upsetOverTitleId: upsetOverTitleId ?? this.upsetOverTitleId,
       upsetOverTitleName: upsetOverTitleName,
       upsetOverTitlePoster: upsetOverTitlePoster,
       upsetOverTitleRank: upsetOverTitleRank,

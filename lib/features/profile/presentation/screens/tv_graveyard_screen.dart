@@ -108,26 +108,29 @@ class TvGraveyardScreen extends ConsumerWidget {
             else if (droppedShows.isEmpty)
               _buildEmptyState()
             else
-              ...droppedShows.map((show) => _buildDroppedCard(show)),
+              ...droppedShows.map((show) => _buildDroppedCard(context, show)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildDroppedCard(DroppedShow show) {
+  Widget _buildDroppedCard(BuildContext context, DroppedShow show) {
     final reasonIcon = DropReasonTaxonomy.getReasonIcon(show.reason);
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: TellyColors.backgroundSurface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: TellyColors.strokeSubtle),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: () => context.push(Routes.title(show.mediaType, show.titleId)),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: TellyColors.backgroundSurface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: TellyColors.strokeSubtle),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Title & Status Badge
@@ -241,7 +244,8 @@ class TvGraveyardScreen extends ConsumerWidget {
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 
   Widget _buildEmptyState() {

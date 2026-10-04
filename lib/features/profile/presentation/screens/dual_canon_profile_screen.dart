@@ -56,6 +56,11 @@ class DualCanonProfileScreen extends ConsumerWidget {
     final moviesCount = canonState.movies.length;
     final seriesCount = canonState.series.length;
 
+    final handleTap = onTapEntry ??
+        (CanonEntry entry) {
+          context.push(Routes.title(entry.mediaType, entry.id));
+        };
+
     return Scaffold(
       backgroundColor: TellyColors.backgroundPrimary,
       body: SafeArea(
@@ -131,7 +136,7 @@ class DualCanonProfileScreen extends ConsumerWidget {
               // 3. TOP 3 SHOWCASE ROW — pinned titles (Edit Profile) first, then top ranks.
               TopShowcaseRow(
                 topEntries: _showcase(entries, ref.watch(myPinnedShowcaseProvider).valueOrNull ?? const []),
-                onTapEntry: onTapEntry,
+                onTapEntry: handleTap,
               ),
 
               const SizedBox(height: 16),
@@ -243,7 +248,7 @@ class DualCanonProfileScreen extends ConsumerWidget {
               switch (viewMode) {
                 CanonViewMode.rankedList => RankedCanonList(
                     entries: entries,
-                    onTapEntry: onTapEntry,
+                    onTapEntry: handleTap,
                     onLongPressEntry: (entry) => _showEntryActions(context, entry),
                     onReorder: (oldIndex, newIndex) {
                       // Map list indices to canon ranks so this also works on the rolled-up list.
@@ -259,11 +264,11 @@ class DualCanonProfileScreen extends ConsumerWidget {
                   ),
                 CanonViewMode.tierView => TierViewList(
                     entries: entries,
-                    onTapEntry: onTapEntry,
+                    onTapEntry: handleTap,
                   ),
                 CanonViewMode.grid3x3 => PosterGridView(
                     entries: entries,
-                    onTapEntry: onTapEntry,
+                    onTapEntry: handleTap,
                   ),
               },
 

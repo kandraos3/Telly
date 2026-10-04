@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:telly_app/core/router/routes.dart';
 import 'package:telly_app/core/services/haptics_service.dart';
 import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/theme/telly_typography.dart';
@@ -16,6 +18,7 @@ class FeedActivityCard extends StatefulWidget {
   final VoidCallback? onCommentTap;
   final ValueChanged<FeedReactionType>? onReactionToggle;
   final ValueChanged<bool>? onQueueToggle;
+  final VoidCallback? onTapTitle;
 
   const FeedActivityCard({
     super.key,
@@ -24,6 +27,7 @@ class FeedActivityCard extends StatefulWidget {
     this.onCommentTap,
     this.onReactionToggle,
     this.onQueueToggle,
+    this.onTapTitle,
   });
 
   @override
@@ -163,110 +167,121 @@ class _FeedActivityCardState extends State<FeedActivityCard> {
                 const SizedBox(height: 12),
 
                 // 3. Media row: Poster + Details + Score
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Poster thumbnail
-                    Container(
-                      width: 60,
-                      height: 90,
-                      decoration: BoxDecoration(
-                        color: TellyColors.backgroundCard,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: TellyColors.borderGlass),
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      child: PosterImage(
-                        posterPath: activity.titlePosterUrl ??
-                            TmdbImages.poster(findSeedPoster(activity.titleId, activity.mediaType, activity.titleName)),
-                        fallback: Center(
-                          child: Icon(
-                            activity.mediaType == 'movie'
-                                ? Icons.movie_rounded
-                                : Icons.tv_rounded,
-                            color: TellyColors.textTertiary,
-                            size: 28,
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    HapticsService.lightImpact();
+                    if (widget.onTapTitle != null) {
+                      widget.onTapTitle!();
+                    } else {
+                      context.push(Routes.title(activity.mediaType, activity.titleId));
+                    }
+                  },
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Poster thumbnail
+                      Container(
+                        width: 60,
+                        height: 90,
+                        decoration: BoxDecoration(
+                          color: TellyColors.backgroundCard,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: TellyColors.borderGlass),
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: PosterImage(
+                          posterPath: activity.titlePosterUrl ??
+                              TmdbImages.poster(findSeedPoster(activity.titleId, activity.mediaType, activity.titleName)),
+                          fallback: Center(
+                            child: Icon(
+                              activity.mediaType == 'movie'
+                                  ? Icons.movie_rounded
+                                  : Icons.tv_rounded,
+                              color: TellyColors.textTertiary,
+                              size: 28,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
+                      const SizedBox(width: 12),
 
-                    // Title info & badges
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            activity.titleName,
-                            style: TellyTypography.headlineSmall(
-                              color: TellyColors.textPrimary,
-                            ).copyWith(fontWeight: FontWeight.bold, fontSize: 16),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          if (activity.releaseYear != null) ...[
-                            const SizedBox(height: 2),
+                      // Title info & badges
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                             Text(
-                              '${activity.releaseYear} • ${activity.mediaType == 'movie' ? 'Film' : 'Series'}',
-                              style: TellyTypography.caption(
-                                color: TellyColors.textTertiary,
+                              activity.titleName,
+                              style: TellyTypography.headlineSmall(
+                                color: TellyColors.textPrimary,
+                              ).copyWith(fontWeight: FontWeight.bold, fontSize: 16),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            if (activity.releaseYear != null) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                '${activity.releaseYear} • ${activity.mediaType == 'movie' ? 'Film' : 'Series'}',
+                                style: TellyTypography.caption(
+                                  color: TellyColors.textTertiary,
+                                ),
                               ),
+                            ],
+                            const SizedBox(height: 6),
+                            Row(
+                              children: [
+                                if (activity.calculatedScore != null)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                    decoration: BoxDecoration(
+                                      color: TellyColors.phosphorLime.withValues(alpha: 0.15),
+                                      borderRadius: BorderRadius.circular(6),
+                                      border: Border.all(
+                                        color: TellyColors.phosphorLime.withValues(alpha: 0.5),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(Icons.star_rounded,
+                                            color: TellyColors.phosphorLime, size: 14),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          activity.calculatedScore!.toStringAsFixed(2),
+                                          style: TellyTypography.monoDigits(
+                                            color: TellyColors.phosphorLime,
+                                          ).copyWith(fontWeight: FontWeight.bold, fontSize: 12),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                if (activity.culturalTier != null) ...[
+                                  const SizedBox(width: 6),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                    decoration: BoxDecoration(
+                                      color: TellyColors.warmAmber.withValues(alpha: 0.15),
+                                      borderRadius: BorderRadius.circular(6),
+                                      border: Border.all(
+                                        color: TellyColors.warmAmber.withValues(alpha: 0.5),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      activity.culturalTier!,
+                                      style: TellyTypography.caption(
+                                        color: TellyColors.warmAmber,
+                                      ).copyWith(fontWeight: FontWeight.bold, fontSize: 11),
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
                           ],
-                          const SizedBox(height: 6),
-                          Row(
-                            children: [
-                              if (activity.calculatedScore != null)
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                  decoration: BoxDecoration(
-                                    color: TellyColors.phosphorLime.withValues(alpha: 0.15),
-                                    borderRadius: BorderRadius.circular(6),
-                                    border: Border.all(
-                                      color: TellyColors.phosphorLime.withValues(alpha: 0.5),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      const Icon(Icons.star_rounded,
-                                          color: TellyColors.phosphorLime, size: 14),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        activity.calculatedScore!.toStringAsFixed(2),
-                                        style: TellyTypography.monoDigits(
-                                          color: TellyColors.phosphorLime,
-                                        ).copyWith(fontWeight: FontWeight.bold, fontSize: 12),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              if (activity.culturalTier != null) ...[
-                                const SizedBox(width: 6),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                  decoration: BoxDecoration(
-                                    color: TellyColors.warmAmber.withValues(alpha: 0.15),
-                                    borderRadius: BorderRadius.circular(6),
-                                    border: Border.all(
-                                      color: TellyColors.warmAmber.withValues(alpha: 0.5),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    activity.culturalTier!,
-                                    style: TellyTypography.caption(
-                                      color: TellyColors.warmAmber,
-                                    ).copyWith(fontWeight: FontWeight.bold, fontSize: 11),
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
 
                 // 4. MVP Character Chip

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:telly_app/core/router/routes.dart';
 import 'package:telly_app/core/services/haptics_service.dart';
 import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/theme/telly_typography.dart';
@@ -158,84 +160,88 @@ class _CommentThreadScreenState extends ConsumerState<CommentThreadScreen> {
 
   Widget _buildPostSummaryCard() {
     final activity = widget.activity;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      color: TellyColors.backgroundSurface,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CircleAvatar(
-            radius: 16,
-            backgroundColor: TellyColors.backgroundCard,
-            backgroundImage: (activity.userAvatarUrl != null && activity.userAvatarUrl!.isNotEmpty)
-                ? NetworkImage(activity.userAvatarUrl!)
-                : null,
-            child: (activity.userAvatarUrl == null || activity.userAvatarUrl!.isEmpty)
-                ? Text(
-                    activity.userDisplayName.isNotEmpty ? activity.userDisplayName[0] : '?',
+    return InkWell(
+      onTap: () => context.push(Routes.title(activity.mediaType, activity.titleId)),
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 56),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        color: TellyColors.backgroundSurface,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CircleAvatar(
+              radius: 16,
+              backgroundColor: TellyColors.backgroundCard,
+              backgroundImage: (activity.userAvatarUrl != null && activity.userAvatarUrl!.isNotEmpty)
+                  ? NetworkImage(activity.userAvatarUrl!)
+                  : null,
+              child: (activity.userAvatarUrl == null || activity.userAvatarUrl!.isEmpty)
+                  ? Text(
+                      activity.userDisplayName.isNotEmpty ? activity.userDisplayName[0] : '?',
+                      style: TellyTypography.caption(
+                        color: activity.isUpset ? TellyColors.neonCoral : TellyColors.phosphorLime,
+                      ).copyWith(fontWeight: FontWeight.bold),
+                    )
+                  : null,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${activity.userDisplayName} @${activity.username}',
+                    style: TellyTypography.labelMedium(
+                      color: TellyColors.textPrimary,
+                    ).copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    activity.isUpset
+                        ? 'Ranked ${activity.titleName} over ${activity.upsetOverTitleName ?? 'Titan'}'
+                        : 'Ranked ${activity.titleName} at #${activity.rankPosition ?? 1}',
                     style: TellyTypography.caption(
                       color: activity.isUpset ? TellyColors.neonCoral : TellyColors.phosphorLime,
-                    ).copyWith(fontWeight: FontWeight.bold),
-                  )
-                : null,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '${activity.userDisplayName} @${activity.username}',
-                  style: TellyTypography.labelMedium(
-                    color: TellyColors.textPrimary,
-                  ).copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  activity.isUpset
-                      ? 'Ranked ${activity.titleName} over ${activity.upsetOverTitleName ?? 'Titan'}'
-                      : 'Ranked ${activity.titleName} at #${activity.rankPosition ?? 1}',
-                  style: TellyTypography.caption(
-                    color: activity.isUpset ? TellyColors.neonCoral : TellyColors.phosphorLime,
-                  ).copyWith(fontWeight: FontWeight.w600),
-                ),
-                if (activity.microReview != null) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    '“${activity.microReview}”',
-                    style: TellyTypography.caption(
-                      color: TellyColors.textSecondary,
-                    ).copyWith(fontStyle: FontStyle.italic),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                    ).copyWith(fontWeight: FontWeight.w600),
                   ),
+                  if (activity.microReview != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      '“${activity.microReview}”',
+                      style: TellyTypography.caption(
+                        color: TellyColors.textSecondary,
+                      ).copyWith(fontStyle: FontStyle.italic),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
-          const SizedBox(width: 10),
-          Container(
-            width: 44,
-            height: 66,
-            decoration: BoxDecoration(
-              color: TellyColors.backgroundCard,
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: TellyColors.borderGlass),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: PosterImage(
-              posterPath: activity.titlePosterUrl ??
-                  TmdbImages.poster(findSeedPoster(activity.titleId, activity.mediaType, activity.titleName)),
-              fallback: Center(
-                child: Icon(
-                  activity.mediaType == 'movie' ? Icons.movie_rounded : Icons.tv_rounded,
-                  color: TellyColors.textTertiary,
-                  size: 20,
+            const SizedBox(width: 10),
+            Container(
+              width: 44,
+              height: 66,
+              decoration: BoxDecoration(
+                color: TellyColors.backgroundCard,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: TellyColors.borderGlass),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: PosterImage(
+                posterPath: activity.titlePosterUrl ??
+                    TmdbImages.poster(findSeedPoster(activity.titleId, activity.mediaType, activity.titleName)),
+                fallback: Center(
+                  child: Icon(
+                    activity.mediaType == 'movie' ? Icons.movie_rounded : Icons.tv_rounded,
+                    color: TellyColors.textTertiary,
+                    size: 20,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

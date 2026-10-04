@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:telly_app/core/router/routes.dart';
 import 'package:telly_app/core/services/haptics_service.dart';
 import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/theme/telly_typography.dart';
@@ -16,6 +18,8 @@ class UpsetActivityCard extends StatefulWidget {
   final VoidCallback? onCommentTap;
   final ValueChanged<FeedReactionType>? onReactionToggle;
   final ValueChanged<bool>? onQueueToggle;
+  final VoidCallback? onTapWinner;
+  final VoidCallback? onTapLoser;
 
   const UpsetActivityCard({
     super.key,
@@ -24,6 +28,8 @@ class UpsetActivityCard extends StatefulWidget {
     this.onCommentTap,
     this.onReactionToggle,
     this.onQueueToggle,
+    this.onTapWinner,
+    this.onTapLoser,
   });
 
   @override
@@ -250,39 +256,50 @@ class _UpsetActivityCardState extends State<UpsetActivityCard>
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       // Winner Card
-                      Column(
-                        children: [
-                          Container(
-                            width: 60,
-                            height: 85,
-                            decoration: BoxDecoration(
-                              color: TellyColors.backgroundSurface,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: TellyColors.phosphorLime, width: 2),
-                            ),
-                            clipBehavior: Clip.antiAlias,
-                            child: PosterImage(
-                              posterPath: activity.titlePosterUrl ??
-                                  TmdbImages.poster(findSeedPoster(activity.titleId, activity.mediaType, activity.titleName)),
-                              fallback: const Center(
-                                child: Icon(Icons.tv_rounded, color: TellyColors.phosphorLime, size: 28),
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          HapticsService.lightImpact();
+                          if (widget.onTapWinner != null) {
+                            widget.onTapWinner!();
+                          } else {
+                            context.push(Routes.title(activity.mediaType, activity.titleId));
+                          }
+                        },
+                        child: Column(
+                          children: [
+                            Container(
+                              width: 60,
+                              height: 85,
+                              decoration: BoxDecoration(
+                                color: TellyColors.backgroundSurface,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: TellyColors.phosphorLime, width: 2),
+                              ),
+                              clipBehavior: Clip.antiAlias,
+                              child: PosterImage(
+                                posterPath: activity.titlePosterUrl ??
+                                    TmdbImages.poster(findSeedPoster(activity.titleId, activity.mediaType, activity.titleName)),
+                                fallback: const Center(
+                                  child: Icon(Icons.tv_rounded, color: TellyColors.phosphorLime, size: 28),
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            activity.titleName,
-                            style: TellyTypography.caption(
-                              color: TellyColors.phosphorLime,
-                            ).copyWith(fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            'WINNER • #${activity.rankPosition ?? 1}',
-                            style: TellyTypography.caption(
-                              color: TellyColors.textTertiary,
-                            ).copyWith(fontSize: 10),
-                          ),
-                        ],
+                            const SizedBox(height: 6),
+                            Text(
+                              activity.titleName,
+                              style: TellyTypography.caption(
+                                color: TellyColors.phosphorLime,
+                              ).copyWith(fontWeight: FontWeight.bold),
+                            ),
+                            Text(
+                              'WINNER • #${activity.rankPosition ?? 1}',
+                              style: TellyTypography.caption(
+                                color: TellyColors.textTertiary,
+                              ).copyWith(fontSize: 10),
+                            ),
+                          ],
+                        ),
                       ),
 
                       // Central VS Indicator
@@ -306,49 +323,69 @@ class _UpsetActivityCardState extends State<UpsetActivityCard>
                       ),
 
                       // Loser Card (Struck through)
-                      Column(
-                        children: [
-                          Container(
-                            width: 60,
-                            height: 85,
-                            decoration: BoxDecoration(
-                              color: TellyColors.backgroundSurface,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: TellyColors.borderGlass),
-                            ),
-                            clipBehavior: Clip.antiAlias,
-                            child: Stack(
-                              fit: StackFit.expand,
-                              children: [
-                                PosterImage(
-                                  posterPath: activity.upsetOverTitlePoster ??
-                                      TmdbImages.poster(findSeedPoster(0, activity.mediaType, activity.upsetOverTitleName)),
-                                  fallback: Center(
-                                    child: Icon(
-                                      Icons.tv_rounded,
-                                      color: TellyColors.textTertiary.withValues(alpha: 0.6),
-                                      size: 28,
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          final loserId = activity.upsetOverTitleId ??
+                              (activity.upsetOverTitleName != null
+                                  ? kTop50SeedTitles
+                                      .where((s) => s.title.toLowerCase() == activity.upsetOverTitleName!.toLowerCase())
+                                      .firstOrNull
+                                      ?.id
+                                  : null);
+                          if (loserId != null && loserId > 0) {
+                            HapticsService.lightImpact();
+                            if (widget.onTapLoser != null) {
+                              widget.onTapLoser!();
+                            } else {
+                              context.push(Routes.title(activity.mediaType, loserId));
+                            }
+                          }
+                        },
+                        child: Column(
+                          children: [
+                            Container(
+                              width: 60,
+                              height: 85,
+                              decoration: BoxDecoration(
+                                color: TellyColors.backgroundSurface,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: TellyColors.borderGlass),
+                              ),
+                              clipBehavior: Clip.antiAlias,
+                              child: Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  PosterImage(
+                                    posterPath: activity.upsetOverTitlePoster ??
+                                        TmdbImages.poster(findSeedPoster(0, activity.mediaType, activity.upsetOverTitleName)),
+                                    fallback: Center(
+                                      child: Icon(
+                                        Icons.tv_rounded,
+                                        color: TellyColors.textTertiary.withValues(alpha: 0.6),
+                                        size: 28,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                Container(color: Colors.black.withValues(alpha: 0.35)),
-                              ],
+                                  Container(color: Colors.black.withValues(alpha: 0.35)),
+                                ],
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            activity.upsetOverTitleName ?? 'Titan',
-                            style: TellyTypography.caption(
-                              color: TellyColors.textTertiary,
-                            ).copyWith(fontWeight: FontWeight.w600),
-                          ),
-                          Text(
-                            '#${activity.upsetOverTitleRank ?? 4}',
-                            style: TellyTypography.caption(
-                              color: TellyColors.textTertiary,
-                            ).copyWith(fontSize: 10),
-                          ),
-                        ],
+                            const SizedBox(height: 6),
+                            Text(
+                              activity.upsetOverTitleName ?? 'Titan',
+                              style: TellyTypography.caption(
+                                color: TellyColors.textTertiary,
+                              ).copyWith(fontWeight: FontWeight.w600),
+                            ),
+                            Text(
+                              '#${activity.upsetOverTitleRank ?? 4}',
+                              style: TellyTypography.caption(
+                                color: TellyColors.textTertiary,
+                              ).copyWith(fontSize: 10),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),

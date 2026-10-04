@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:telly_app/core/router/routes.dart';
 import 'package:telly_app/core/services/streaming_deep_link_factory.dart';
 import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/theme/telly_typography.dart';
@@ -362,97 +364,101 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Media Type Icon / Poster Box
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Container(
-                    width: 52,
-                    height: 72,
-                    decoration: BoxDecoration(
-                      color: TellyColors.backgroundCard,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: TellyColors.borderGlass),
-                    ),
-                    child: PosterImage(
-                      posterPath: item.posterPath,
-                      fallback: Center(
-                        child: Icon(
-                          item.mediaType == 'movie' ? Icons.movie_outlined : Icons.tv_outlined,
-                          color: TellyColors.textTertiary,
-                          size: 28,
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => context.push(Routes.title(item.mediaType, item.showId)),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Media Type Icon / Poster Box
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      width: 52,
+                      height: 72,
+                      decoration: BoxDecoration(
+                        color: TellyColors.backgroundCard,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: TellyColors.borderGlass),
+                      ),
+                      child: PosterImage(
+                        posterPath: item.posterPath,
+                        fallback: Center(
+                          child: Icon(
+                            item.mediaType == 'movie' ? Icons.movie_outlined : Icons.tv_outlined,
+                            color: TellyColors.textTertiary,
+                            size: 28,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 14),
+                  const SizedBox(width: 14),
 
-                // Title & Details
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              item.title,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TellyTypography.titleMedium(
-                                color: TellyColors.textPrimary,
-                              ).copyWith(fontWeight: FontWeight.w800),
-                            ),
-                          ),
-                          if (item.isLeavingSoon)
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: TellyColors.neonCoral.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
+                  // Title & Details
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
                               child: Text(
-                                '⚠️ LEAVING SOON',
-                                style: TellyTypography.caption(
-                                  color: TellyColors.neonCoral,
-                                ).copyWith(fontSize: 8, fontWeight: FontWeight.w800),
+                                item.title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TellyTypography.titleMedium(
+                                  color: TellyColors.textPrimary,
+                                ).copyWith(fontWeight: FontWeight.w800),
                               ),
                             ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        item.mediaType == 'movie'
-                            ? '${item.runtimeMinutes ?? 120} min'
-                            : '${item.seasonCount ?? 1} Seasons • ${item.episodeCount ?? 10} Episodes',
-                        style: TellyTypography.caption(color: TellyColors.textTertiary),
-                      ),
-                      const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          const Icon(Icons.star, size: 13, color: TellyColors.warmAmber),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${item.friendsAvgScore.toStringAsFixed(2)} Friends Avg',
-                            style: TellyTypography.caption(
-                              color: TellyColors.warmAmber,
-                            ).copyWith(fontWeight: FontWeight.w700),
-                          ),
-                          if (item.savedFromHandle != null) ...[
-                            Text(
-                              ' • From ${item.savedFromHandle}',
-                              style: TellyTypography.caption(color: TellyColors.textSecondary),
-                            ),
+                            if (item.isLeavingSoon)
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: TellyColors.neonCoral.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  '⚠️ LEAVING SOON',
+                                  style: TellyTypography.caption(
+                                    color: TellyColors.neonCoral,
+                                  ).copyWith(fontSize: 8, fontWeight: FontWeight.w800),
+                                ),
+                              ),
                           ],
-                        ],
-                      ),
-                    ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          item.mediaType == 'movie'
+                              ? '${item.runtimeMinutes ?? 120} min'
+                              : '${item.seasonCount ?? 1} Seasons • ${item.episodeCount ?? 10} Episodes',
+                          style: TellyTypography.caption(color: TellyColors.textTertiary),
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            const Icon(Icons.star, size: 13, color: TellyColors.warmAmber),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${item.friendsAvgScore.toStringAsFixed(2)} Friends Avg',
+                              style: TellyTypography.caption(
+                                color: TellyColors.warmAmber,
+                              ).copyWith(fontWeight: FontWeight.w700),
+                            ),
+                            if (item.savedFromHandle != null) ...[
+                              Text(
+                                ' • From ${item.savedFromHandle}',
+                                style: TellyTypography.caption(color: TellyColors.textSecondary),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             const SizedBox(height: 12),
 

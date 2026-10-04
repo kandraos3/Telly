@@ -265,8 +265,17 @@ ActivityLog activityFromFeedRow(Map<String, dynamic> r) {
   final seedPoster = findSeedPoster(titleId, mediaType, titleName);
   final effectivePoster = (rawPoster != null && rawPoster.isNotEmpty) ? rawPoster : seedPoster;
 
-  final loserTitleId = (metadata['loser_title_id'] as num?)?.toInt() ?? 0;
   final loserTitleName = r['upset_over_title'] as String?;
+  int? effectiveLoserId = (metadata['loser_title_id'] as num?)?.toInt();
+  if ((effectiveLoserId == null || effectiveLoserId == 0) && loserTitleName != null) {
+    for (final s in kTop50SeedTitles) {
+      if (s.title.toLowerCase() == loserTitleName.toLowerCase()) {
+        effectiveLoserId = s.id;
+        break;
+      }
+    }
+  }
+  final loserTitleId = effectiveLoserId ?? 0;
   final loserSeedPoster = findSeedPoster(loserTitleId, mediaType, loserTitleName);
   final loserPoster = (metadata['loser_poster_path'] as String?) ?? loserSeedPoster;
 
@@ -290,6 +299,7 @@ ActivityLog activityFromFeedRow(Map<String, dynamic> r) {
     microReview: r['review_short'] as String?,
     isUpset: (r['is_upset'] as bool?) ?? false,
     upsetDelta: (r['upset_delta'] as num?)?.toDouble() ?? 0,
+    upsetOverTitleId: effectiveLoserId,
     upsetOverTitleName: loserTitleName,
     upsetOverTitlePoster: TmdbImages.poster(loserPoster),
     upsetOverTitleRank: (r['upset_over_rank'] as num?)?.toInt(),
