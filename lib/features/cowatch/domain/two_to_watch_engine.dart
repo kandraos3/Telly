@@ -64,6 +64,31 @@ class CoWatchCandidate {
   });
 
   bool get inBothWatchlists => inWatchlistA && inWatchlistB;
+
+  factory CoWatchCandidate.fromJson(Map<String, dynamic> json) {
+    return CoWatchCandidate(
+      showId: (json['show_id'] as num).toInt(),
+      title: json['title'] as String? ?? '',
+      mediaType: json['media_type'] as String? ?? 'movie',
+      runtimeMinutes: (json['runtime_minutes'] as num?)?.toInt(),
+      posterPath: json['poster_path'] as String?,
+      network: json['network'] as String? ?? '',
+      availableProviders: (json['available_providers'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          const [],
+      vibeTags: (json['vibe_tags'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          const [],
+      inWatchlistA: json['in_watchlist_a'] as bool? ?? false,
+      inWatchlistB: json['in_watchlist_b'] as bool? ?? false,
+      ratingA: (json['rating_a'] as num?)?.toDouble(),
+      ratingB: (json['rating_b'] as num?)?.toDouble(),
+      communityScore: (json['community_score'] as num?)?.toDouble() ?? 8.0,
+      overview: json['overview'] as String? ?? '',
+    );
+  }
 }
 
 class ScoredRecommendation {
@@ -121,21 +146,17 @@ class TwoToWatchEngine {
       }
 
       // 4. Scoring function:
-      // Score = w1 * InBothWatchlists (+50) + w2 * TasteMatch * UserRating + w3 * VibeMatch (+20)
+      // Score = w1 * InBothWatchlists (+50) + w2 * TasteMatch * UserRating + w3 * PopularityFactor (+ GodTier + Vibe)
       double score = 0.0;
       final reasons = <String>[];
 
-      // +50 points if on both watchlists
+      // w1 * InBothWatchlists (+50 bonus points)
       if (c.inBothWatchlists) {
         score += 50.0;
         reasons.add('On both of your watchlists');
-      } else if (c.inWatchlistA || c.inWatchlistB) {
-        score += 20.0;
-        reasons.add('Saved on watchlist');
       }
 
-      // +35 points if one user rated it God Tier and the other hasn't seen it.
-      // God Tier uses the single canonical threshold (CanonTier, style guide §2.2).
+      // God Tier recommendation (+35 points) via CanonTier.god
       final isGodTierA = c.ratingA != null && CanonTier.fromScore(c.ratingA!) == CanonTier.god && c.ratingB == null;
       final isGodTierB = c.ratingB != null && CanonTier.fromScore(c.ratingB!) == CanonTier.god && c.ratingA == null;
       if (isGodTierA) {
@@ -146,7 +167,7 @@ class TwoToWatchEngine {
         reasons.add('Partner rated it ★${c.ratingB!.toStringAsFixed(1)} (God Tier)');
       }
 
-      // +20 points for vibe tag match
+      // Vibe tag match (+20 points)
       if (selectedVibes.isNotEmpty) {
         final matchesVibe = c.vibeTags.any((v) => selectedVibes.contains(v));
         if (matchesVibe) {
@@ -155,10 +176,18 @@ class TwoToWatchEngine {
         }
       }
 
-      // Base quality and taste match alignment
-      final avgRating = ((c.ratingA ?? c.communityScore) + (c.ratingB ?? c.communityScore)) / 2.0;
+      // w2 * TasteMatch * UserRating (w2 = 2.5)
+      const w2 = 2.5;
       final tasteMultiplier = tasteMatchPercentage / 100.0;
-      score += (avgRating / 10.0) * tasteMultiplier * 25.0;
+      final userRating = c.ratingA != null && c.ratingB != null
+          ? (c.ratingA! + c.ratingB!) / 2.0
+          : (c.ratingA ?? c.ratingB ?? c.communityScore);
+      score += w2 * tasteMultiplier * userRating;
+
+      // w3 * PopularityFactor (w3 = 10.0, PopularityFactor in [0, 1])
+      const w3 = 10.0;
+      final popularityFactor = (c.communityScore / 10.0).clamp(0.0, 1.0);
+      score += w3 * popularityFactor;
 
       scoredList.add(
         ScoredRecommendation(

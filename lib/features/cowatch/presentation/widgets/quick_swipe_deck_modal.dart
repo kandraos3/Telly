@@ -1,19 +1,24 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:telly_app/core/services/streaming_deep_link_factory.dart';
 import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/theme/telly_typography.dart';
 import 'package:telly_app/core/widgets/telly_neon_badge.dart';
+import 'package:telly_app/features/cowatch/data/co_watch_repository.dart';
 import 'package:telly_app/features/cowatch/domain/two_to_watch_engine.dart';
 
 /// 15-Second "Rapid Swipe" Duel Mode Modal.
-/// Conforms to `FE-406` and `docs/features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md` §3.2.
-class QuickSwipeDeckModal extends StatefulWidget {
+/// Conforms to `FE-406`, `FE-610` and `docs/features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md` §3.2.
+class QuickSwipeDeckModal extends ConsumerStatefulWidget {
   final List<CoWatchCandidate> candidates;
   final String friendHandle;
   final Set<String> sharedProviders;
   final VoidCallback? onDismiss;
+  final String? sessionId;
+  final String? friendId;
+  final CoWatchSessionClient? sessionClient;
 
   const QuickSwipeDeckModal({
     super.key,
@@ -21,23 +26,69 @@ class QuickSwipeDeckModal extends StatefulWidget {
     required this.friendHandle,
     required this.sharedProviders,
     this.onDismiss,
+    this.sessionId,
+    this.friendId,
+    this.sessionClient,
   });
 
   @override
-  State<QuickSwipeDeckModal> createState() => _QuickSwipeDeckModalState();
+  ConsumerState<QuickSwipeDeckModal> createState() => _QuickSwipeDeckModalState();
 }
 
-class _QuickSwipeDeckModalState extends State<QuickSwipeDeckModal> {
+class _QuickSwipeDeckModalState extends ConsumerState<QuickSwipeDeckModal> {
   final CardSwiperController _swiperController = CardSwiperController();
   int _secondsLeft = 15;
   Timer? _countdownTimer;
   CoWatchCandidate? _matchedTitle;
   bool _isMatched = false;
+  bool _isPartnerConnected = false;
+
+  late final CoWatchSessionClient _sessionClient;
+  StreamSubscription<int>? _matchSubscription;
+  StreamSubscription<Set<String>>? _presenceSubscription;
 
   @override
   void initState() {
     super.initState();
+    _initSessionClient();
     _startTimer();
+  }
+
+  void _initSessionClient() {
+    if (widget.sessionClient != null) {
+      _sessionClient = widget.sessionClient!;
+    } else {
+      final sessId = widget.sessionId ??
+          'cowatch-${widget.friendHandle.replaceAll('@', '')}';
+      try {
+        _sessionClient = ref.read(coWatchRepositoryProvider).createSessionClient(
+              sessionId: sessId,
+            );
+      } catch (_) {
+        _sessionClient = FakeCoWatchSessionClient(
+          sessionId: sessId,
+          currentUserId: 'me',
+        );
+      }
+    }
+
+    _matchSubscription = _sessionClient.onMutualMatch.listen((titleId) {
+      if (!mounted || _isMatched) return;
+      try {
+        final match = widget.candidates.firstWhere((c) => c.showId == titleId);
+        _triggerMatch(match);
+      } catch (_) {}
+    });
+
+    _presenceSubscription = _sessionClient.onPresence.listen((users) {
+      if (!mounted) return;
+      setState(() {
+        _isPartnerConnected = users.length > 1 ||
+            (widget.friendId != null && users.contains(widget.friendId));
+      });
+    });
+
+    _sessionClient.join();
   }
 
   void _startTimer() {
@@ -64,18 +115,25 @@ class _QuickSwipeDeckModalState extends State<QuickSwipeDeckModal> {
 
   @override
   void dispose() {
+    _matchSubscription?.cancel();
+    _presenceSubscription?.cancel();
+    if (widget.sessionClient == null) {
+      _sessionClient.dispose();
+    }
     _countdownTimer?.cancel();
     _swiperController.dispose();
     super.dispose();
   }
 
   bool _onSwipe(int previousIndex, int? currentIndex, CardSwiperDirection direction) {
-    if (direction == CardSwiperDirection.right) {
-      // User swiped right (YES)
+    if (previousIndex < widget.candidates.length) {
       final swipedCandidate = widget.candidates[previousIndex];
-      // In rapid swipe mode, simulate partner mutual right swipe
-      _triggerMatch(swipedCandidate);
-      return true;
+      _sessionClient.sendSwipe(
+        titleId: swipedCandidate.showId,
+        direction: direction == CardSwiperDirection.right
+            ? SwipeDirection.right
+            : SwipeDirection.left,
+      );
     }
     return true;
   }
@@ -109,7 +167,7 @@ class _QuickSwipeDeckModalState extends State<QuickSwipeDeckModal> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Header with 15s Countdown Timer
+        // Header with 15s Countdown Timer & Presence
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -122,9 +180,33 @@ class _QuickSwipeDeckModalState extends State<QuickSwipeDeckModal> {
                     color: TellyColors.phosphorLime,
                   ).copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
                 ),
-                Text(
-                  'With ${widget.friendHandle}',
-                  style: TellyTypography.caption(color: TellyColors.textTertiary),
+                Row(
+                  children: [
+                    Text(
+                      'With ${widget.friendHandle}',
+                      style: TellyTypography.caption(color: TellyColors.textTertiary),
+                    ),
+                    const SizedBox(width: 6),
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: _isPartnerConnected
+                            ? TellyColors.phosphorLime
+                            : TellyColors.textTertiary,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      _isPartnerConnected ? 'Connected' : 'Waiting',
+                      style: TellyTypography.caption(
+                        color: _isPartnerConnected
+                            ? TellyColors.phosphorLime
+                            : TellyColors.textTertiary,
+                      ).copyWith(fontSize: 10),
+                    ),
+                  ],
                 ),
               ],
             ),

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:telly_app/core/network/supabase_providers.dart';
 import 'package:telly_app/core/services/streaming_deep_link_factory.dart';
 import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/theme/telly_typography.dart';
 import 'package:telly_app/core/widgets/telly_neon_badge.dart';
 import 'package:telly_app/core/widgets/telly_primary_button.dart';
+import 'package:telly_app/features/cowatch/data/co_watch_repository.dart';
 import 'package:telly_app/features/cowatch/domain/two_to_watch_engine.dart';
 import 'package:telly_app/features/cowatch/presentation/widgets/quick_swipe_deck_modal.dart';
 
@@ -45,7 +47,82 @@ class _TwoToWatchScreenState extends ConsumerState<TwoToWatchScreen> {
   List<ScoredRecommendation> _recommendations = [];
   bool _hasSearched = false;
 
-  late final List<CoWatchCandidate> _allCandidates;
+  late List<CoWatchCandidate> _allCandidates;
+
+  static const List<CoWatchCandidate> _defaultFallbackCandidates = [
+    CoWatchCandidate(
+      showId: 101,
+      title: 'Parasite',
+      mediaType: 'movie',
+      runtimeMinutes: 132,
+      network: 'Neon',
+      availableProviders: ['max'],
+      vibeTags: ['thriller', 'festival_darling'],
+      inWatchlistA: true,
+      inWatchlistB: true,
+      communityScore: 9.7,
+      overview: 'Greed and class discrimination threaten the newly formed symbiotic relationship.',
+    ),
+    CoWatchCandidate(
+      showId: 102,
+      title: 'Past Lives',
+      mediaType: 'movie',
+      runtimeMinutes: 106,
+      network: 'A24',
+      availableProviders: ['netflix'],
+      vibeTags: ['festival_darling'],
+      inWatchlistA: true,
+      inWatchlistB: false,
+      ratingB: 9.4,
+      communityScore: 9.2,
+      overview: 'Nora and Hae Sung, two deeply connected childhood friends, are reunited.',
+    ),
+    CoWatchCandidate(
+      showId: 103,
+      title: 'Run Lola Run',
+      mediaType: 'movie',
+      runtimeMinutes: 81,
+      network: 'Sony',
+      availableProviders: ['max'],
+      vibeTags: ['thriller'],
+      communityScore: 8.4,
+      overview: 'After a botched money delivery, Lola has 20 minutes to find 100,000 marks.',
+    ),
+    CoWatchCandidate(
+      showId: 201,
+      title: 'Chernobyl',
+      mediaType: 'tv',
+      network: 'HBO',
+      availableProviders: ['max'],
+      vibeTags: ['thriller', 'miniseries'],
+      inWatchlistA: true,
+      inWatchlistB: true,
+      communityScore: 9.8,
+      overview: 'In April 1986, an explosion at the Chernobyl nuclear power plant occurs.',
+    ),
+    CoWatchCandidate(
+      showId: 202,
+      title: 'Severance',
+      mediaType: 'tv',
+      network: 'Apple TV+',
+      availableProviders: ['apple_tv_plus'],
+      vibeTags: ['sci_fi', 'thriller'],
+      ratingA: 9.5,
+      ratingB: 9.5,
+      communityScore: 9.4,
+      overview: 'Mark leads a team whose memories have been surgically divided.',
+    ),
+    CoWatchCandidate(
+      showId: 203,
+      title: 'The Bear',
+      mediaType: 'tv',
+      network: 'FX',
+      availableProviders: ['hulu'],
+      vibeTags: ['comedy', 'prestige'],
+      communityScore: 9.1,
+      overview: 'A young chef from the fine dining world comes home to Chicago.',
+    ),
+  ];
 
   @override
   void initState() {
@@ -58,84 +135,32 @@ class _TwoToWatchScreenState extends ConsumerState<TwoToWatchScreen> {
       providersB: _userBProviders,
     );
 
-    _allCandidates = widget.initialCandidates ??
-        [
-          const CoWatchCandidate(
-            showId: 101,
-            title: 'Parasite',
-            mediaType: 'movie',
-            runtimeMinutes: 132,
-            network: 'Neon',
-            availableProviders: ['max'],
-            vibeTags: ['thriller', 'festival_darling'],
-            inWatchlistA: true,
-            inWatchlistB: true,
-            communityScore: 9.7,
-            overview: 'Greed and class discrimination threaten the newly formed symbiotic relationship.',
-          ),
-          const CoWatchCandidate(
-            showId: 102,
-            title: 'Past Lives',
-            mediaType: 'movie',
-            runtimeMinutes: 106,
-            network: 'A24',
-            availableProviders: ['netflix'],
-            vibeTags: ['festival_darling'],
-            inWatchlistA: true,
-            inWatchlistB: false,
-            ratingB: 9.4,
-            communityScore: 9.2,
-            overview: 'Nora and Hae Sung, two deeply connected childhood friends, are reunited.',
-          ),
-          const CoWatchCandidate(
-            showId: 103,
-            title: 'Run Lola Run',
-            mediaType: 'movie',
-            runtimeMinutes: 81,
-            network: 'Sony',
-            availableProviders: ['max'],
-            vibeTags: ['thriller'],
-            communityScore: 8.4,
-            overview: 'After a botched money delivery, Lola has 20 minutes to find 100,000 marks.',
-          ),
-          const CoWatchCandidate(
-            showId: 201,
-            title: 'Chernobyl',
-            mediaType: 'tv',
-            network: 'HBO',
-            availableProviders: ['max'],
-            vibeTags: ['thriller', 'miniseries'],
-            inWatchlistA: true,
-            inWatchlistB: true,
-            communityScore: 9.8,
-            overview: 'In April 1986, an explosion at the Chernobyl nuclear power plant occurs.',
-          ),
-          const CoWatchCandidate(
-            showId: 202,
-            title: 'Severance',
-            mediaType: 'tv',
-            network: 'Apple TV+',
-            availableProviders: ['apple_tv_plus'],
-            vibeTags: ['sci_fi', 'thriller'],
-            ratingA: 9.5,
-            ratingB: 9.5,
-            communityScore: 9.4,
-            overview: 'Mark leads a team whose memories have been surgically divided.',
-          ),
-          const CoWatchCandidate(
-            showId: 203,
-            title: 'The Bear',
-            mediaType: 'tv',
-            network: 'FX',
-            availableProviders: ['hulu'],
-            vibeTags: ['comedy', 'prestige'],
-            communityScore: 9.1,
-            overview: 'A young chef from the fine dining world comes home to Chicago.',
-          ),
-        ];
-
-    // Compute initial recommendations
+    _allCandidates = widget.initialCandidates ?? _defaultFallbackCandidates;
     _calculateRecommendations();
+
+    if (widget.initialCandidates == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _loadRemoteCandidates();
+      });
+    }
+  }
+
+  Future<void> _loadRemoteCandidates() async {
+    try {
+      final repo = ref.read(coWatchRepositoryProvider);
+      final remote = await repo.fetchCandidates(
+        partnerId: widget.friendId,
+        mediaType: _selectedFormat.mediaType,
+      );
+      if (mounted && remote.isNotEmpty) {
+        setState(() {
+          _allCandidates = remote;
+          _calculateRecommendations();
+        });
+      }
+    } catch (_) {
+      // Offline fallback already present in _allCandidates
+    }
   }
 
   void _calculateRecommendations() {
@@ -154,8 +179,26 @@ class _TwoToWatchScreenState extends ConsumerState<TwoToWatchScreen> {
     });
   }
 
+  void _selectFormat(CoWatchFormat format) {
+    if (_selectedFormat == format) return;
+    setState(() {
+      _selectedFormat = format;
+      _calculateRecommendations();
+    });
+    if (widget.initialCandidates == null) {
+      _loadRemoteCandidates();
+    }
+  }
+
   void _openQuickSwipeMode() {
     final formatCandidates = _allCandidates.where((c) => c.mediaType == _selectedFormat.mediaType).toList();
+    String? currentUserId;
+    try {
+      currentUserId = ref.read(supabaseClientProvider).auth.currentUser?.id;
+    } catch (_) {}
+    final myId = currentUserId ?? 'me';
+    final sorted = [myId, widget.friendId]..sort();
+    final sessionId = 'cowatch-${sorted.join('-')}';
 
     showDialog(
       context: context,
@@ -163,6 +206,8 @@ class _TwoToWatchScreenState extends ConsumerState<TwoToWatchScreen> {
       builder: (ctx) => QuickSwipeDeckModal(
         candidates: formatCandidates,
         friendHandle: '@${widget.friendHandle}',
+        friendId: widget.friendId,
+        sessionId: sessionId,
         sharedProviders: _activeSharedProviders,
       ),
     );
@@ -347,12 +392,7 @@ class _TwoToWatchScreenState extends ConsumerState<TwoToWatchScreen> {
   }) {
     final isSelected = _selectedFormat == format;
     return InkWell(
-      onTap: () {
-        setState(() {
-          _selectedFormat = format;
-          _calculateRecommendations();
-        });
-      },
+      onTap: () => _selectFormat(format),
       borderRadius: BorderRadius.circular(14),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),

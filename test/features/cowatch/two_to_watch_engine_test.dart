@@ -36,6 +36,7 @@ void main() {
         availableProviders: ['max'],
         inWatchlistA: true,
         inWatchlistB: false,
+        ratingA: 9.0,
       );
 
       const unrankedShow = CoWatchCandidate(
@@ -46,6 +47,7 @@ void main() {
         availableProviders: ['max'],
         inWatchlistA: false,
         inWatchlistB: false,
+        communityScore: 8.0,
       );
 
       final results = TwoToWatchEngine.scoreCandidates(
@@ -188,6 +190,76 @@ void main() {
 
       expect(results.length, 1);
       expect(results.first.candidate.title, 'Succession');
+    });
+
+    test('reproduces §3.1 and §5.1 formula terms: w1(+50), w2*Taste*Rating, w3*Popularity, GodTier(+35), Vibe(+20)', () {
+      // 1. Chernobyl: In both watchlists (+50), matches miniseries vibe (+20), communityScore 9.8
+      // w2 * 0.88 * 9.8 = 21.56
+      // w3 * 0.98 = 9.8
+      // Expected = 50 + 20 + 21.56 + 9.8 = 101.4
+      const chernobyl = CoWatchCandidate(
+        showId: 101,
+        title: 'Chernobyl',
+        mediaType: 'tv',
+        network: 'HBO',
+        availableProviders: ['max'],
+        vibeTags: ['miniseries', 'thriller'],
+        inWatchlistA: true,
+        inWatchlistB: true,
+        communityScore: 9.8,
+      );
+
+      // 2. Squid Game: Partner ranked 9.4 (God Tier >= 9.20), you haven't seen (+35), no vibe match
+      // w2 * 0.88 * 9.4 = 20.68
+      // w3 * 0.85 = 8.5
+      // Expected = 35 + 20.68 + 8.5 = 64.2
+      const squidGame = CoWatchCandidate(
+        showId: 102,
+        title: 'Squid Game',
+        mediaType: 'tv',
+        network: 'Netflix',
+        availableProviders: ['netflix'],
+        vibeTags: ['survival', 'drama'],
+        ratingB: 9.4,
+        communityScore: 8.5,
+      );
+
+      // 3. Single Watchlist Title (no invented +20 bonus): inWatchlistA only, communityScore 8.0
+      // w2 * 0.88 * 8.0 = 17.6
+      // w3 * 0.80 = 8.0
+      // Expected = 0 + 0 + 17.6 + 8.0 = 25.6
+      const singleWatchlist = CoWatchCandidate(
+        showId: 103,
+        title: 'Severance',
+        mediaType: 'tv',
+        network: 'Apple TV+',
+        availableProviders: ['apple_tv_plus'],
+        inWatchlistA: true,
+        inWatchlistB: false,
+        communityScore: 8.0,
+      );
+
+      final results = TwoToWatchEngine.scoreCandidates(
+        candidates: [chernobyl, squidGame, singleWatchlist],
+        activeSharedProviders: {'max', 'netflix', 'apple_tv_plus'},
+        format: CoWatchFormat.series,
+        selectedVibes: ['miniseries'],
+        tasteMatchPercentage: 88,
+      );
+
+      expect(results.length, 3);
+      expect(results[0].candidate.title, 'Chernobyl');
+      expect(results[0].score, 101.4);
+      expect(results[0].matchReason, contains('On both of your watchlists'));
+      expect(results[0].matchReason, contains('Matches selected vibe'));
+
+      expect(results[1].candidate.title, 'Squid Game');
+      expect(results[1].score, 64.2);
+      expect(results[1].matchReason, contains('Partner rated it ★9.4 (God Tier)'));
+
+      expect(results[2].candidate.title, 'Severance');
+      expect(results[2].score, 25.6);
+      expect(results[2].matchReason, isNot(contains('Saved on watchlist')));
     });
   });
 }

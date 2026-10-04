@@ -24,7 +24,7 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 6 — Integration, Wiring & Audit Remediation** (planned 2026-10-03; owner decisions D1–D7 recorded in Sprint 6)
-- **Current Active Ticket**: `FE-610` (Two-to-Watch Formula Fix + Realtime Quick-Swipe) — Sprint 6: 19 / 32 tickets complete
+- **Current Active Ticket**: `FE-611` (SCR-08 Show Detail Page) — Sprint 6: 20 / 32 tickets complete
 - **Overall Roadmap Progress**: Sprints 1–5 granular tasks after the `DOC-601` honesty reset (2026-10-03): **281 / 431 verified** · **121 un-checked** (each annotated `→ remediated by <Sprint 6 ticket>`) · **29 human-only**. The earlier "89 / 89" claim was overstated.
 - **Human-Only Tasks**: 29 tasks in Sprints 1–5 marked `👤 [TO BE DONE BY HUMAN]` (cloud setup, secrets, store submission, device/CI runs, dashboard verification), plus the Sprint 6 human prerequisites list. These cannot be completed or verified from code.
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (369 / 369 pass; pgTAP 155 assertions / 9 files — note: no real E2E or golden tests exist yet)
@@ -987,7 +987,7 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
   - [x] Automatically calculate intersection of streaming providers between both users:
     $$\text{Shared} = \text{Providers}_A \cap \text{Providers}_B$$
   - [x] Display shared provider icons (e.g., Netflix + Max).
-  - [ ] Query and rank candidate pool combining both watchlists sorted by joint predicted enjoyment. → remediated by `FE-610`
+  - [x] Query and rank candidate pool combining both watchlists sorted by joint predicted enjoyment. ✅ remediated in `FE-610`
 - **Testing & Verification**:
   - [x] Widget test verifying only shared providers appear in active filters.
 - **Dependencies**: `FE-108`, `FE-401`.
@@ -1016,10 +1016,10 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
 - **Granular Tasks**:
   - [x] Build card deck presentation using `flutter_card_swiper`.
   - [x] Swipe right = Want to watch tonight; swipe left = Pass.
-  - [ ] Connect WebSocket / Supabase Realtime channel broadcasting user swipes to friend's device. → remediated by `FE-610`
-  - [ ] When both swipe right on same title $\to$ trigger full-screen Match Modal with confetti and stream deep link. → remediated by `FE-610`
+  - [x] Connect WebSocket / Supabase Realtime channel broadcasting user swipes to friend's device. ✅ remediated in `FE-610`
+  - [x] When both swipe right on same title $\to$ trigger full-screen Match Modal with confetti and stream deep link. ✅ remediated in `FE-610`
 - **Testing & Verification**:
-  - [ ] Integration test simulating mutual right-swipe triggers match state in $< 100\text{ ms}$. → remediated by `FE-610`
+  - [x] Integration test simulating mutual right-swipe triggers match state in $< 100\text{ ms}$. ✅ remediated in `FE-610`
 - **Dependencies**: `FE-404`.
 
 #### `FE-407`: `StreamingDeepLinkFactory` Service
@@ -1721,11 +1721,11 @@ Turn the library of individually-tested widgets and algorithms into a **wired, r
   - [**`features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md) §3.1, §3.2, §5.1
 - **Scope & Objectives**: Make the scoring match §3.1 and make Quick-Swipe genuinely two-player.
 - **Granular Tasks**:
-  - [ ] `TwoToWatchEngine`: remove the invented `+20` single-watchlist bonus and quality term; implement $w_1\cdot\text{InBoth}(+50) + w_2\cdot\text{TasteMatch}\cdot\text{UserRating} + w_3\cdot\text{Popularity}$, with God-Tier (+35) via `CanonTier.god` and vibe (+20). Document $w_2$, $w_3$ in spec §3.1.
-  - [ ] Candidate pool = `Watchlist_A ∪ Watchlist_B ∪ HighRatedNotSeen` from an RPC / `co-watch-decider` edge function per §5.1.
-  - [ ] Quick-Swipe via a Supabase Realtime channel `cowatch:<session>`: presence for both players, broadcast swipes, match only when **both** swiped right on the same title.
+  - [x] `TwoToWatchEngine`: remove the invented `+20` single-watchlist bonus and quality term; implement $w_1\cdot\text{InBoth}(+50) + w_2\cdot\text{TasteMatch}\cdot\text{UserRating} + w_3\cdot\text{Popularity}$, with God-Tier (+35) via `CanonTier.god` and vibe (+20). Document $w_2$, $w_3$ in spec §3.1.
+  - [x] Candidate pool = `Watchlist_A ∪ Watchlist_B ∪ HighRatedNotSeen` from an RPC / `co-watch-decider` edge function per §5.1.
+  - [x] Quick-Swipe via a Supabase Realtime channel `cowatch:<session>`: presence for both players, broadcast swipes, match only when **both** swiped right on the same title.
 - **Testing & Verification**:
-  - [ ] Unit tests reproduce §3.1 worked examples; Realtime logic tested with a fake channel (one-sided swipe ≠ match).
+  - [x] Unit tests reproduce §3.1 worked examples; Realtime logic tested with a fake channel (one-sided swipe ≠ match).
 - **Dependencies**: `FE-608`, `FE-609`.
 
 #### `FE-611`: `SCR-08` Show Detail Page

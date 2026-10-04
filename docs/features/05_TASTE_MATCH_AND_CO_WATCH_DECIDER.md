@@ -107,10 +107,16 @@ For each candidate title $s \in C$:
    - If *Series* selected: $s$ must be `media_type = 'tv'`.
 2. **Streaming Filter:** Must be available on at least one shared service between all participants.
 3. **Scoring Function:**
-   $$\text{Score}(s) = w_1 \cdot \text{InBothWatchlists}(s) + w_2 \cdot \text{TasteMatch}(A, B) \cdot \text{UserRating}(s) + w_3 \cdot \text{PopularityFactor}(s)$$
-   - Both users saved it to their Watchlist $\implies$ **+50 bonus points**.
-   - User A ranked it God Tier ($>9.0$) and User B hasn't seen it $\implies$ **+35 points**.
-   - Title matches selected vibe/genre tag $\implies$ **+20 points**.
+   $$\text{Score}(s) = w_1 \cdot \text{InBothWatchlists}(s) + w_2 \cdot \text{TasteMatch}(A, B) \cdot \text{UserRating}(s) + w_3 \cdot \text{PopularityFactor}(s) + \text{GodTierBonus}(s) + \text{VibeBonus}(s)$$
+   - **Mutual Watchlist Bonus ($w_1 = 50.0$):** $+50$ points if the title is present in both participants' watchlists ($s \in \text{Watchlist}_A \cap \text{Watchlist}_B$). Titles on only one watchlist receive $+0$ bonus points.
+   - **Taste Match & User Rating Term ($w_2 = 2.5$):** Scales by taste alignment and user score:
+     $$w_2 \cdot \text{TasteMatch}(A, B) \cdot \text{UserRating}(s)$$
+     where $\text{TasteMatch} \in [0.0, 1.0]$ (derived from the Spearman Taste Match % / 100), and $\text{UserRating}(s) \in [1.0, 10.0]$ is the average rating between users who have rated the title (or the single user's rating, falling back to $\text{community\_score}$).
+   - **Popularity Term ($w_3 = 10.0$):** Scales by community acclaim:
+     $$w_3 \cdot \text{PopularityFactor}(s)$$
+     where $\text{PopularityFactor}(s) = \text{clamp}(\text{community\_score} / 10.0, 0.0, 1.0) \in [0.0, 1.0]$.
+   - **God-Tier Recommendation Bonus (+35 points):** If one participant ranked the title God Tier ($\ge 9.20$, via `CanonTier.god`) and the partner has not seen it (or vice versa), $+35$ bonus points are added.
+   - **Vibe Match Bonus (+20 points):** $+20$ points if the title matches any selected vibe or genre tag.
 
 ### 3.2 The 15-Second "Rapid Swipe" Duel Mode
 If the group still can't pick from the top 3 recommendations, they launch **"Quick Swipe Mode"**:
