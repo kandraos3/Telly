@@ -19,15 +19,15 @@ UPDATE public.users SET username = 'fixture_user_b', display_name = 'Member B' W
 UPDATE public.users SET username = 'fixture_user_c', display_name = 'Member C' WHERE id = 'c0000000-0000-0000-0000-00000000000c';
 
 -- 2. Setup titles
-INSERT INTO public.titles (id, media_type, title, release_year)
+INSERT INTO public.titles (id, media_type, title)
 VALUES
-    (155, 'movie', 'The Dark Knight', 2008),
-    (238, 'movie', 'The Godfather', 1972),
-    (680, 'movie', 'Pulp Fiction', 1994),
-    (129, 'movie', 'Spirited Away', 2001),
-    (424, 'movie', 'Schindler''s List', 1993),
-    (278, 'movie', 'The Shawshank Redemption', 1994),
-    (13, 'movie', 'Forrest Gump', 1994)
+    (155, 'movie', 'The Dark Knight'),
+    (238, 'movie', 'The Godfather'),
+    (680, 'movie', 'Pulp Fiction'),
+    (129, 'movie', 'Spirited Away'),
+    (424, 'movie', 'Schindler''s List'),
+    (278, 'movie', 'The Shawshank Redemption'),
+    (13, 'movie', 'Forrest Gump')
 ON CONFLICT (id, media_type) DO NOTHING;
 
 -- 3. Populate Member A rankings (canon size = 4)
