@@ -4,126 +4,115 @@ import 'package:telly_app/core/services/streaming_deep_link_factory.dart';
 import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/theme/telly_typography.dart';
 import 'package:telly_app/core/widgets/telly_neon_badge.dart';
+import 'package:telly_app/features/queue/data/streaming_availability_repository.dart';
 import 'package:telly_app/features/queue/data/streaming_availability_service.dart';
+import 'package:telly_app/features/queue/data/watchlist_repository.dart';
 import 'package:telly_app/features/queue/domain/streaming_models.dart';
 
-/// Provider for user's universal watchlist items.
-final userWatchlistProvider = StateNotifierProvider<WatchlistNotifier, List<WatchlistItem>>((ref) {
-  return WatchlistNotifier();
-});
+/// Provider for user's universal watchlist items (FE-609).
+/// Backed by Drift [WatchlistCache] + Supabase `user_watchlist` and [StreamingAvailabilityRepository].
+final userWatchlistProvider =
+    AsyncNotifierProvider<WatchlistNotifier, List<WatchlistItem>>(WatchlistNotifier.new);
 
-class WatchlistNotifier extends StateNotifier<List<WatchlistItem>> {
-  WatchlistNotifier()
-      : super([
-          WatchlistItem(
-            showId: 101,
-            title: 'Slow Horses',
-            mediaType: 'tv',
-            seasonCount: 4,
-            episodeCount: 24,
-            friendsAvgScore: 8.94,
-            friendsCount: 6,
-            savedFromHandle: '@maya',
-            addedAt: DateTime.now().subtract(const Duration(days: 2)),
-            availability: const [
-              ShowStreamingAvailability(
-                platformId: 'apple_tv_plus',
-                platformName: 'Apple TV+',
-                monetizationType: MonetizationType.flatrate,
-                webUrl: 'https://tv.apple.com/us/show/slow-horses/101',
-                deepLinkUrl: 'videos://tv.apple.com/us/show/slow-horses/101',
-              ),
-            ],
-          ),
-          WatchlistItem(
-            showId: 102,
-            title: 'Station Eleven',
-            mediaType: 'tv',
-            seasonCount: 1,
-            episodeCount: 10,
-            friendsAvgScore: 8.81,
-            friendsCount: 4,
-            savedFromHandle: '@alex',
-            addedAt: DateTime.now().subtract(const Duration(days: 5)),
-            availability: const [
-              ShowStreamingAvailability(
-                platformId: 'max',
-                platformName: 'Max',
-                monetizationType: MonetizationType.flatrate,
-                webUrl: 'https://play.max.com/show/102',
-                deepLinkUrl: 'max://play/102',
-              ),
-            ],
-          ),
-          WatchlistItem(
-            showId: 103,
-            title: 'Fargo',
-            mediaType: 'tv',
-            seasonCount: 5,
-            episodeCount: 51,
-            friendsAvgScore: 8.75,
-            friendsCount: 5,
-            savedFromHandle: '@jordan',
-            isLeavingSoon: true,
-            addedAt: DateTime.now().subtract(const Duration(days: 8)),
-            availability: const [
-              ShowStreamingAvailability(
-                platformId: 'hulu',
-                platformName: 'Hulu',
-                monetizationType: MonetizationType.flatrate,
-                webUrl: 'https://www.hulu.com/series/103',
-                deepLinkUrl: 'hulu://series/103',
-                isLeavingSoon: true,
-              ),
-            ],
-          ),
-          WatchlistItem(
-            showId: 201,
-            title: 'Parasite',
-            mediaType: 'movie',
-            runtimeMinutes: 132,
-            friendsAvgScore: 9.72,
-            friendsCount: 12,
-            savedFromHandle: '@maya',
-            addedAt: DateTime.now().subtract(const Duration(days: 1)),
-            availability: const [
-              ShowStreamingAvailability(
-                platformId: 'max',
-                platformName: 'Max',
-                monetizationType: MonetizationType.flatrate,
-                webUrl: 'https://play.max.com/show/201',
-                deepLinkUrl: 'max://play/201',
-              ),
-            ],
-          ),
-          WatchlistItem(
-            showId: 202,
-            title: 'Past Lives',
-            mediaType: 'movie',
-            runtimeMinutes: 106,
-            friendsAvgScore: 9.15,
-            friendsCount: 8,
-            savedFromHandle: '@chris',
-            addedAt: DateTime.now().subtract(const Duration(days: 3)),
-            availability: const [
-              ShowStreamingAvailability(
-                platformId: 'netflix',
-                platformName: 'Netflix',
-                monetizationType: MonetizationType.flatrate,
-                webUrl: 'https://www.netflix.com/title/202',
-                deepLinkUrl: 'nflx://www.netflix.com/title/202',
-              ),
-            ],
-          ),
-        ]);
+class WatchlistNotifier extends AsyncNotifier<List<WatchlistItem>> {
+  @override
+  Future<List<WatchlistItem>> build() async {
+    final repo = ref.watch(watchlistRepositoryProvider);
+    final streamingRepo = ref.watch(streamingAvailabilityRepositoryProvider);
 
-  void removeItem(int showId) {
-    state = state.where((item) => item.showId != showId).toList();
+    final sub = repo.watchWatchlist().listen((entries) async {
+      state = AsyncData(await _enrich(entries, streamingRepo));
+    });
+    ref.onDispose(sub.cancel);
+
+    final initial = await repo.getWatchlist();
+    return _enrich(initial, streamingRepo);
+  }
+
+  Future<List<WatchlistItem>> _enrich(
+    List<WatchlistEntry> entries,
+    StreamingAvailabilityRepository streamingRepo,
+  ) async {
+    final results = await Future.wait(
+      entries.map((entry) async {
+        final avail = await streamingRepo.getAvailability(
+          titleId: entry.titleId,
+          mediaType: entry.mediaType,
+        );
+        final isLeavingSoon = avail.any((a) => a.isLeavingSoon);
+        return WatchlistItem(
+          showId: entry.titleId,
+          title: entry.title,
+          posterPath: entry.posterPath,
+          mediaType: entry.mediaType,
+          runtimeMinutes: entry.mediaType == 'movie' ? 120 : null,
+          seasonCount: entry.mediaType == 'tv' ? 1 : null,
+          episodeCount: entry.mediaType == 'tv' ? 10 : null,
+          friendsAvgScore: 0.0,
+          friendsCount: 0,
+          savedFromHandle: null,
+          addedAt: entry.savedAt,
+          availability: avail,
+          isLeavingSoon: isLeavingSoon,
+        );
+      }),
+    );
+    return results;
+  }
+
+  Future<void> removeItem(int showId, [String? mediaType]) async {
+    final currentMediaType = mediaType ??
+        state.valueOrNull?.firstWhere(
+          (i) => i.showId == showId,
+          orElse: () => WatchlistItem(showId: showId, title: '', mediaType: 'tv', addedAt: DateTime.now()),
+        ).mediaType ??
+        'tv';
+    await ref.read(watchlistRepositoryProvider).remove(
+          titleId: showId,
+          mediaType: currentMediaType,
+        );
+  }
+
+  Future<void> addItem({
+    required int titleId,
+    required String mediaType,
+    required String title,
+    String? posterPath,
+    String? recommendedBy,
+  }) async {
+    await ref.read(watchlistRepositoryProvider).add(
+          titleId: titleId,
+          mediaType: mediaType,
+          title: title,
+          posterPath: posterPath,
+          recommendedBy: recommendedBy,
+        );
   }
 }
 
+/// Filter state for displaying only titles on user subscriptions.
+class QueueFilterSubscribedNotifier extends Notifier<bool> {
+  @override
+  bool build() => false;
+  void toggle() => state = !state;
+  void set(bool val) => state = val;
+}
+
+final queueFilterSubscribedProvider =
+    NotifierProvider<QueueFilterSubscribedNotifier, bool>(QueueFilterSubscribedNotifier.new);
+
+/// Sort mode for the universal queue ('friends_score' or 'leaving_soon').
+class QueueSortByNotifier extends Notifier<String> {
+  @override
+  String build() => 'friends_score';
+  void set(String val) => state = val;
+}
+
+final queueSortByProvider =
+    NotifierProvider<QueueSortByNotifier, String>(QueueSortByNotifier.new);
+
 /// SCR-13: Smart Queue Screen with Dual Watchlists & Streaming Filters.
-/// Conforms to `FE-408` and `docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md` §13.
+/// Conforms to `FE-408`, `FE-609` and `docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md` §13.
 class SmartQueueScreen extends ConsumerStatefulWidget {
   final List<WatchlistItem>? testItems;
 
@@ -138,8 +127,6 @@ class SmartQueueScreen extends ConsumerStatefulWidget {
 
 class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with SingleTickerProviderStateMixin {
   late final TabController _tabController;
-  bool _onlyOnMySubscriptions = false;
-  String _sortBy = 'friends_score';
 
   @override
   void initState() {
@@ -155,16 +142,26 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
 
   @override
   Widget build(BuildContext context) {
-    final List<WatchlistItem> allItems = widget.testItems ?? ref.watch(userWatchlistProvider);
+    final watchlistAsync = ref.watch(userWatchlistProvider);
+    final List<WatchlistItem> allItems = widget.testItems ?? watchlistAsync.valueOrNull ?? const [];
     final userSubscriptions = ref.watch(userSubscriptionsProvider);
+    final onlyOnMySubscriptions = ref.watch(queueFilterSubscribedProvider);
+    final sortBy = ref.watch(queueSortByProvider);
 
     // Apply subscriptions filter if toggle is ON
-    final List<WatchlistItem> filteredItems = _onlyOnMySubscriptions
+    final List<WatchlistItem> filteredItems = onlyOnMySubscriptions
         ? allItems.where((item) => item.isAvailableOn(userSubscriptions)).toList()
         : allItems;
 
-    final movieItems = filteredItems.where((item) => item.mediaType == 'movie').toList();
-    final seriesItems = filteredItems.where((item) => item.mediaType == 'tv').toList();
+    final sortedItems = List<WatchlistItem>.from(filteredItems);
+    if (sortBy == 'leaving_soon') {
+      sortedItems.sort((a, b) => (b.isLeavingSoon ? 1 : 0).compareTo(a.isLeavingSoon ? 1 : 0));
+    } else {
+      sortedItems.sort((a, b) => b.friendsAvgScore.compareTo(a.friendsAvgScore));
+    }
+
+    final movieItems = sortedItems.where((item) => item.mediaType == 'movie').toList();
+    final seriesItems = sortedItems.where((item) => item.mediaType == 'tv').toList();
 
     return Scaffold(
       backgroundColor: TellyColors.backgroundCanvasOled,
@@ -214,34 +211,32 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
                 // Master Subscription Filter Toggle
                 InkWell(
                   onTap: () {
-                    setState(() {
-                      _onlyOnMySubscriptions = !_onlyOnMySubscriptions;
-                    });
+                    ref.read(queueFilterSubscribedProvider.notifier).toggle();
                   },
                   borderRadius: BorderRadius.circular(20),
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
-                      color: _onlyOnMySubscriptions
+                      color: onlyOnMySubscriptions
                           ? TellyColors.phosphorLime.withValues(alpha: 0.15)
                           : TellyColors.backgroundSurface,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: _onlyOnMySubscriptions ? TellyColors.phosphorLime : TellyColors.borderGlass,
+                        color: onlyOnMySubscriptions ? TellyColors.phosphorLime : TellyColors.borderGlass,
                       ),
                     ),
                     child: Row(
                       children: [
                         Icon(
-                          _onlyOnMySubscriptions ? Icons.check_circle : Icons.radio_button_unchecked,
+                          onlyOnMySubscriptions ? Icons.check_circle : Icons.radio_button_unchecked,
                           size: 14,
-                          color: _onlyOnMySubscriptions ? TellyColors.phosphorLime : TellyColors.textTertiary,
+                          color: onlyOnMySubscriptions ? TellyColors.phosphorLime : TellyColors.textTertiary,
                         ),
                         const SizedBox(width: 6),
                         Text(
                           'On My Services',
                           style: TellyTypography.caption(
-                            color: _onlyOnMySubscriptions ? TellyColors.phosphorLime : TellyColors.textSecondary,
+                            color: onlyOnMySubscriptions ? TellyColors.phosphorLime : TellyColors.textSecondary,
                           ).copyWith(fontWeight: FontWeight.w700),
                         ),
                       ],
@@ -251,16 +246,14 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
 
                 // Sort Dropdown
                 DropdownButton<String>(
-                  value: _sortBy,
+                  value: sortBy,
                   dropdownColor: TellyColors.backgroundCard,
                   underline: const SizedBox.shrink(),
                   icon: const Icon(Icons.arrow_drop_down, color: TellyColors.textTertiary, size: 18),
                   style: TellyTypography.caption(color: TellyColors.textSecondary),
                   onChanged: (val) {
                     if (val != null) {
-                      setState(() {
-                        _sortBy = val;
-                      });
+                      ref.read(queueSortByProvider.notifier).set(val);
                     }
                   },
                   items: const [
@@ -274,20 +267,24 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
 
           // Tab Content
           Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildQueueList(movieItems, userSubscriptions),
-                _buildQueueList(seriesItems, userSubscriptions),
-              ],
-            ),
+            child: watchlistAsync.isLoading && widget.testItems == null && allItems.isEmpty
+                ? const Center(
+                    child: CircularProgressIndicator(color: TellyColors.phosphorLime),
+                  )
+                : TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _buildQueueList(movieItems, userSubscriptions, onlyOnMySubscriptions),
+                      _buildQueueList(seriesItems, userSubscriptions, onlyOnMySubscriptions),
+                    ],
+                  ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildQueueList(List<WatchlistItem> items, Set<String> userSubscriptions) {
+  Widget _buildQueueList(List<WatchlistItem> items, Set<String> userSubscriptions, bool onlyOnMySubscriptions) {
     if (items.isEmpty) {
       return Center(
         child: Column(
@@ -301,7 +298,7 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
             ),
             const SizedBox(height: 4),
             Text(
-              _onlyOnMySubscriptions
+              onlyOnMySubscriptions
                   ? 'No titles found on your active subscriptions.'
                   : 'Add shows from friend profiles and the feed.',
               style: TellyTypography.caption(color: TellyColors.textTertiary),
@@ -339,7 +336,7 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
         child: const Icon(Icons.delete_outline, color: Colors.white),
       ),
       onDismissed: (_) {
-        ref.read(userWatchlistProvider.notifier).removeItem(item.showId);
+        ref.read(userWatchlistProvider.notifier).removeItem(item.showId, item.mediaType);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Removed "${item.title}" from queue'),
@@ -460,7 +457,7 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
                   children: [
                     TextButton(
                       onPressed: () {
-                        ref.read(userWatchlistProvider.notifier).removeItem(item.showId);
+                        ref.read(userWatchlistProvider.notifier).removeItem(item.showId, item.mediaType);
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text('Marked "${item.title}" as Seen!'),

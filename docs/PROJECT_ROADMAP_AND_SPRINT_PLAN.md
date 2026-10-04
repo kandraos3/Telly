@@ -24,7 +24,7 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 6 — Integration, Wiring & Audit Remediation** (planned 2026-10-03; owner decisions D1–D7 recorded in Sprint 6)
-- **Current Active Ticket**: `FE-609` (Smart Queue & Streaming Availability Wiring) — Sprint 6: 18 / 32 tickets complete
+- **Current Active Ticket**: `FE-610` (Two-to-Watch Formula Fix + Realtime Quick-Swipe) — Sprint 6: 19 / 32 tickets complete
 - **Overall Roadmap Progress**: Sprints 1–5 granular tasks after the `DOC-601` honesty reset (2026-10-03): **281 / 431 verified** · **121 un-checked** (each annotated `→ remediated by <Sprint 6 ticket>`) · **29 human-only**. The earlier "89 / 89" claim was overstated.
 - **Human-Only Tasks**: 29 tasks in Sprints 1–5 marked `👤 [TO BE DONE BY HUMAN]` (cloud setup, secrets, store submission, device/CI runs, dashboard verification), plus the Sprint 6 human prerequisites list. These cannot be completed or verified from code.
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (369 / 369 pass; pgTAP 155 assertions / 9 files — note: no real E2E or golden tests exist yet)
@@ -759,10 +759,10 @@ Build social connections, the activity feed with real-time upset alert detection
 - **Scope & Objectives**: Allow users to save titles spotted in their feed directly to their watchlist in 1 tap.
 - **Granular Tasks**:
   - [x] Add bookmark icon button to all feed cards.
-  - [ ] On tap: trigger `HapticFeedback.selectionClick()`, insert title into local Drift `WatchlistCache`, and sync to Supabase `user_watchlist`. → remediated by `FE-609`
+  - [x] On tap: trigger `HapticFeedback.selectionClick()`, insert title into local Drift `WatchlistCache`, and sync to Supabase `user_watchlist`. ✅ remediated in `FE-609`
   - [x] Display animated toast: *"Added to your Watchlist (available on Netflix)"*.
 - **Testing & Verification**:
-  - [ ] Widget test verifying tapping bookmark toggles state and invokes watchlist repository. → remediated by `FE-609`
+  - [x] Widget test verifying tapping bookmark toggles state and invokes watchlist repository. ✅ remediated in `FE-609`
 - **Dependencies**: `FE-302`, `FE-105`.
 
 #### `FE-305`: `SCR-06` Spoiler-Safe Discussion Thread & Tap-to-Reveal Blur
@@ -1709,11 +1709,11 @@ Turn the library of individually-tested widgets and algorithms into a **wired, r
   - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §`SCR-13`
 - **Scope & Objectives**: Replace the mock queue and simulated availability.
 - **Granular Tasks**:
-  - [ ] `WatchlistRepository`: Drift `WatchlistCache` + `user_watchlist`, with offline add/remove through `PendingMutations`.
-  - [ ] `StreamingAvailabilityRepository` → `functions.invoke('streaming-availability')`; "On My Services" toggle uses persisted subscriptions.
-  - [ ] `WatchlistNotifier` (`AsyncNotifier`) replaces `StateNotifier`; remove business `setState`.
+  - [x] `WatchlistRepository`: Drift `WatchlistCache` + `user_watchlist`, with offline add/remove through `PendingMutations`.
+  - [x] `StreamingAvailabilityRepository` → `functions.invoke('streaming-availability')`; "On My Services" toggle uses persisted subscriptions.
+  - [x] `WatchlistNotifier` (`AsyncNotifier`) replaces `StateNotifier`; remove business `setState`.
 - **Testing & Verification**:
-  - [ ] Provider tests: offline add appears instantly and syncs later; the services filter hides unavailable titles.
+  - [x] Provider tests: offline add appears instantly and syncs later; the services filter hides unavailable titles.
 - **Dependencies**: `FE-605`, `BE-605`.
 
 #### `FE-610`: Two-to-Watch Formula Fix + Realtime Quick-Swipe

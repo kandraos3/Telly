@@ -8,6 +8,7 @@ import 'package:telly_app/features/feed/data/social_repository.dart';
 import 'package:telly_app/features/feed/domain/social_models.dart';
 
 import '../../fakes/fake_social_repository.dart';
+import '../../fakes/fake_watchlist_repository.dart';
 
 Map<String, dynamic> feedRow({String id = 'a1', String createdAt = '2026-10-03T11:00:00.123456+00:00'}) => {
       'id': id,
@@ -123,6 +124,27 @@ void main() {
       });
       expect(requests[1].method, 'DELETE');
       expect(requests[1].url.queryParameters, {'user_id': 'eq.u-me', 'title_id': 'eq.110492', 'media_type': 'eq.tv'});
+    });
+
+    test('queue add with watchlistRepository delegates to local-first cache and offline WAL', () async {
+      final fakeWatchlist = FakeWatchlistRepository();
+      final socialRepo = SupabaseSocialRepository(
+        SupabaseClient(
+          'http://supabase.test',
+          'anon-key',
+          httpClient: MockClient((req) async => http.Response('null', 200)),
+          authOptions: const AuthClientOptions(autoRefreshToken: false),
+        ),
+        currentUserId: () => 'u-me',
+        watchlistRepository: fakeWatchlist,
+      );
+
+      final activity = fakeActivity('a1', userId: 'u-b', titleId: 110492, title: 'Severance');
+      await socialRepo.setQueued(activity: activity, queued: true);
+      expect(await fakeWatchlist.isInWatchlist(110492, 'tv'), isTrue);
+
+      await socialRepo.setQueued(activity: activity, queued: false);
+      expect(await fakeWatchlist.isInWatchlist(110492, 'tv'), isFalse);
     });
 
     test('reactions write the server enum value', () async {

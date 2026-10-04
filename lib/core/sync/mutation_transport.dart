@@ -68,6 +68,24 @@ class SupabaseMutationTransport implements MutationTransport {
             .eq('user_id', userId)
             .eq('title_id', p['title_id'] as Object)
             .eq('media_type', p['media_type'] as Object);
+      case MutationKind.watchlistAdd:
+        final userId = _currentUserId();
+        if (userId == null) throw StateError('Cannot sync watchlist while signed out');
+        await _client.from('user_watchlist').upsert({
+          'user_id': userId,
+          'title_id': p['title_id'],
+          'media_type': p['media_type'],
+          if (p['recommended_by_user_id'] != null) 'recommended_by_user_id': p['recommended_by_user_id'],
+        }, onConflict: 'user_id,title_id,media_type', ignoreDuplicates: true);
+      case MutationKind.watchlistRemove:
+        final userId = _currentUserId();
+        if (userId == null) throw StateError('Cannot sync watchlist while signed out');
+        await _client
+            .from('user_watchlist')
+            .delete()
+            .eq('user_id', userId)
+            .eq('title_id', p['title_id'] as Object)
+            .eq('media_type', p['media_type'] as Object);
       default:
         throw UnsupportedError('Unknown mutation kind ${m.kind}');
     }

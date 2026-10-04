@@ -76,6 +76,12 @@ abstract final class MutationKind {
 
   /// UPDATE of the editorial columns on the caller's own `user_rankings` row.
   static const editorial = 'editorial';
+
+  /// UPSERT into `user_watchlist` (FE-609).
+  static const watchlistAdd = 'watchlist_add';
+
+  /// DELETE from `user_watchlist` (FE-609).
+  static const watchlistRemove = 'watchlist_remove';
 }
 
 class WatchlistCache extends Table {

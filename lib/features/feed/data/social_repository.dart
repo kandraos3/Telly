@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/network/supabase_providers.dart';
 import '../../../core/widgets/poster_image.dart';
 import '../../profile/domain/dropped_show.dart';
+import '../../queue/data/watchlist_repository.dart';
 import '../../ranking/domain/canon_tier.dart';
 import '../domain/social_models.dart';
 
@@ -61,11 +62,16 @@ abstract interface class SocialRepository {
 }
 
 class SupabaseSocialRepository implements SocialRepository {
-  SupabaseSocialRepository(this._client, {String? Function()? currentUserId})
-      : _currentUserId = currentUserId ?? (() => _client.auth.currentUser?.id);
+  SupabaseSocialRepository(
+    this._client, {
+    String? Function()? currentUserId,
+    WatchlistRepository? watchlistRepository,
+  })  : _currentUserId = currentUserId ?? (() => _client.auth.currentUser?.id),
+        _watchlistRepository = watchlistRepository;
 
   final SupabaseClient _client;
   final String? Function() _currentUserId;
+  final WatchlistRepository? _watchlistRepository;
 
   String get _me => _currentUserId() ?? (throw StateError('Not signed in'));
 
@@ -86,6 +92,24 @@ class SupabaseSocialRepository implements SocialRepository {
 
   @override
   Future<void> setQueued({required ActivityLog activity, required bool queued}) async {
+    final watchlistRepo = _watchlistRepository;
+    if (watchlistRepo != null) {
+      if (queued) {
+        await watchlistRepo.add(
+          titleId: activity.titleId,
+          mediaType: activity.mediaType,
+          title: activity.titleName,
+          posterPath: activity.titlePosterUrl,
+          recommendedBy: activity.userId != _currentUserId() ? activity.userId : null,
+        );
+      } else {
+        await watchlistRepo.remove(
+          titleId: activity.titleId,
+          mediaType: activity.mediaType,
+        );
+      }
+      return;
+    }
     if (queued) {
       await queueTitle(titleId: activity.titleId, mediaType: activity.mediaType, recommendedBy: activity.userId);
     } else {
@@ -100,6 +124,16 @@ class SupabaseSocialRepository implements SocialRepository {
 
   @override
   Future<void> queueTitle({required int titleId, required String mediaType, String? recommendedBy}) async {
+    final watchlistRepo = _watchlistRepository;
+    if (watchlistRepo != null) {
+      await watchlistRepo.add(
+        titleId: titleId,
+        mediaType: mediaType,
+        title: 'Title $titleId',
+        recommendedBy: recommendedBy != _currentUserId() ? recommendedBy : null,
+      );
+      return;
+    }
     final me = _me;
     await _client.from('user_watchlist').upsert({
       'user_id': me,
@@ -262,5 +296,9 @@ ActivityLog activityFromFeedRow(Map<String, dynamic> r) {
   );
 }
 
-final socialRepositoryProvider =
-    Provider<SocialRepository>((ref) => SupabaseSocialRepository(ref.watch(supabaseClientProvider)));
+final socialRepositoryProvider = Provider<SocialRepository>(
+  (ref) => SupabaseSocialRepository(
+    ref.watch(supabaseClientProvider),
+    watchlistRepository: ref.watch(watchlistRepositoryProvider),
+  ),
+);

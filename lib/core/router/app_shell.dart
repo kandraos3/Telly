@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/queue/data/watchlist_repository.dart';
 import '../../features/ranking/data/canon_hydration.dart';
 import '../sync/sync_engine.dart';
 import '../theme/telly_colors.dart';
@@ -41,6 +42,7 @@ class _AppShellState extends ConsumerState<AppShell> {
   @override
   Widget build(BuildContext context) {
     ref.listen(canonHydrationProvider, (_, __) {});
+    ref.listen(watchlistHydrationProvider, (_, __) {});
     ref.listen(syncEngineProvider, (_, __) {});
     final shell = widget.navigationShell;
     return Scaffold(
