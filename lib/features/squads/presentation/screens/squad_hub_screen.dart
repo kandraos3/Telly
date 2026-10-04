@@ -30,6 +30,7 @@ class SquadHubScreen extends ConsumerWidget {
         backgroundColor: TellyColors.backgroundCanvasOled,
         elevation: 0,
         leading: IconButton(
+          tooltip: 'Back',
           icon: const Icon(Icons.arrow_back_rounded, color: TellyColors.textPrimary),
           onPressed: () => context.canPop() ? context.pop() : context.go(Routes.squads),
         ),
@@ -155,6 +156,7 @@ class _Hub extends ConsumerWidget {
                     controller.selectTab(tab);
                   },
                   child: Container(
+                    constraints: const BoxConstraints(minHeight: 48),
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     decoration: BoxDecoration(
                       border: Border(
@@ -317,6 +319,7 @@ class _CanonSwitcher extends StatelessWidget {
               onSelect(mediaType);
             },
             child: Container(
+              constraints: const BoxConstraints(minHeight: 48),
               padding: const EdgeInsets.symmetric(vertical: 6),
               decoration: BoxDecoration(
                 color: selected == mediaType ? TellyColors.backgroundCard : Colors.transparent,

@@ -54,6 +54,7 @@ class SettingsHubScreen extends ConsumerWidget {
         backgroundColor: TellyColors.backgroundCanvasOled,
         elevation: 0,
         leading: IconButton(
+          tooltip: 'Back',
           icon: const Icon(Icons.arrow_back, color: TellyColors.textPrimary),
           onPressed: () => context.canPop() ? context.pop() : context.go(Routes.canon),
         ),

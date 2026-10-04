@@ -78,6 +78,7 @@ class _CommentThreadScreenState extends ConsumerState<CommentThreadScreen> {
         backgroundColor: TellyColors.backgroundCanvasOled,
         elevation: 0,
         leading: IconButton(
+          tooltip: 'Close',
           icon: const Icon(Icons.close_rounded, color: TellyColors.textPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
@@ -118,7 +119,7 @@ class _CommentThreadScreenState extends ConsumerState<CommentThreadScreen> {
                           Text(
                             'No comments yet. Be the first to share your take!',
                             style: TellyTypography.bodyMedium(
-                              color: TellyColors.textTertiary,
+                              color: TellyColors.textSecondary,
                             ),
                           ),
                         ],
@@ -304,30 +305,34 @@ class _CommentThreadScreenState extends ConsumerState<CommentThreadScreen> {
                   HapticsService.selectionClick();
                   ref.read(commentComposerProvider(_activityId).notifier).toggleSpoiler();
                 },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: containsSpoilers ? TellyColors.neonCoral.withValues(alpha: 0.2) : TellyColors.backgroundCard,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: containsSpoilers ? TellyColors.neonCoral : TellyColors.borderGlass,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 48),
+                  child: Container(
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: containsSpoilers ? TellyColors.neonCoral.withValues(alpha: 0.2) : TellyColors.backgroundCard,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: containsSpoilers ? TellyColors.neonCoral : TellyColors.borderGlass,
+                      ),
                     ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.warning_amber_rounded,
-                        size: 14,
-                        color: containsSpoilers ? TellyColors.neonCoral : TellyColors.textTertiary,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Contains Spoilers',
-                        style: TellyTypography.caption(
-                          color: containsSpoilers ? TellyColors.neonCoral : TellyColors.textTertiary,
-                        ).copyWith(fontWeight: FontWeight.bold, fontSize: 11),
-                      ),
-                    ],
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.warning_amber_rounded,
+                          size: 14,
+                          color: containsSpoilers ? TellyColors.neonCoral : TellyColors.textSecondary,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Contains Spoilers',
+                          style: TellyTypography.caption(
+                            color: containsSpoilers ? TellyColors.neonCoral : TellyColors.textSecondary,
+                          ).copyWith(fontWeight: FontWeight.bold, fontSize: 11),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -369,6 +374,7 @@ class _CommentThreadScreenState extends ConsumerState<CommentThreadScreen> {
               const SizedBox(width: 8),
               IconButton(
                 key: const Key('comment_send'),
+                tooltip: 'Send comment',
                 onPressed: composer.submitting ? null : _handleSubmitComment,
                 icon: composer.submitting
                     ? const SizedBox(

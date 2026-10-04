@@ -193,7 +193,9 @@ class _CanonToggle extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
+          constraints: const BoxConstraints(minHeight: 48),
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
           decoration: BoxDecoration(
             color: selected ? TellyColors.phosphorLime : TellyColors.backgroundSurface,
             borderRadius: BorderRadius.circular(20),

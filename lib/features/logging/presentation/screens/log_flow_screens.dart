@@ -15,7 +15,11 @@ import '../controllers/logging_session_controller.dart';
 /// Sends a deep link into the middle of the flow back to `SCR-09` (no draft to continue).
 void _restartLogging(BuildContext context) {
   WidgetsBinding.instance.addPostFrameCallback((_) {
-    if (context.mounted) context.go(Routes.log);
+    if (context.mounted) {
+      try {
+        context.go(Routes.log);
+      } catch (_) {}
+    }
   });
 }
 

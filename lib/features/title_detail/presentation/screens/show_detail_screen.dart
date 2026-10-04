@@ -151,11 +151,13 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
         Positioned(
           top: 0,
           left: 0,
-          child: Opacity(
-            opacity: 0.01,
-            child: Text(
-              'Show Detail (${widget.mediaType}/${widget.titleId})',
-              style: const TextStyle(fontSize: 1, color: Colors.transparent),
+          child: ExcludeSemantics(
+            child: Opacity(
+              opacity: 0.01,
+              child: Text(
+                'Show Detail (${widget.mediaType}/${widget.titleId})',
+                style: const TextStyle(fontSize: 1, color: Colors.transparent),
+              ),
             ),
           ),
         ),
@@ -179,8 +181,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Hidden router test anchor
-                  Semantics(
-                    label: 'Show Detail (${widget.mediaType}/${widget.titleId})',
+                  ExcludeSemantics(
                     child: Text(
                       'Show Detail (${widget.mediaType}/${widget.titleId})',
                       style: const TextStyle(fontSize: 0, color: Colors.transparent),
@@ -244,6 +245,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
       expandedHeight: 220,
       pinned: true,
       leading: IconButton(
+        tooltip: 'Back',
         icon: const Icon(Icons.arrow_back, color: TellyColors.textPrimary),
         onPressed: () => context.pop(),
       ),
@@ -341,7 +343,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
               Text(
                 _formatMetaLine(title),
                 style: TellyTypography.bodyMedium(
-                  color: TellyColors.textTertiary,
+                  color: TellyColors.textSecondary,
                 ),
               ),
               if (title.director != null && title.director!.isNotEmpty) ...[
@@ -424,7 +426,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
           if (providers.isEmpty)
             Text(
               'No streaming services currently available for this title.',
-              style: TellyTypography.bodyMedium(color: TellyColors.textTertiary),
+              style: TellyTypography.bodyMedium(color: TellyColors.textSecondary),
             )
           else
             Wrap(

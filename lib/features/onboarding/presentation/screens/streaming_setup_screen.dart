@@ -61,7 +61,7 @@ class StreamingSetupScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: TellyColors.backgroundPrimary,
       appBar: AppBar(
-        title: Text('STEP 2 OF 3', style: TellyTypography.caption(color: TellyColors.textTertiary)),
+        title: Text('STEP 2 OF 3', style: TellyTypography.caption(color: TellyColors.textPrimary)),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -184,6 +184,7 @@ class StreamingSetupScreen extends ConsumerWidget {
                           children: [
                             Checkbox(
                               value: includeFree,
+                              semanticLabel: 'Include free platforms (Tubi, Pluto, Kanopy)',
                               activeColor: TellyColors.phosphorLime,
                               checkColor: Colors.black,
                               onChanged: (val) {
@@ -228,7 +229,7 @@ class StreamingSetupScreen extends ConsumerWidget {
                     onPressed: setup.saving ? null : navigateForward,
                     child: Text(
                       "I don't have streaming services / Skip for now",
-                      style: TellyTypography.caption(color: TellyColors.textTertiary),
+                      style: TellyTypography.caption(color: TellyColors.textSecondary),
                     ),
                   ),
                 ],

@@ -131,6 +131,7 @@ class _ActivityFeedScreenState extends ConsumerState<ActivityFeedScreen> {
         ),
         actions: [
           IconButton(
+            tooltip: 'Search',
             icon: const Icon(Icons.search_rounded, color: TellyColors.textPrimary),
             onPressed: () {
               HapticsService.selectionClick();
@@ -246,6 +247,7 @@ class _ActivityFeedScreenState extends ConsumerState<ActivityFeedScreen> {
               },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
+                constraints: const BoxConstraints(minHeight: 48),
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 decoration: BoxDecoration(
                   color: isSelected ? TellyColors.backgroundCard : Colors.transparent,
@@ -257,10 +259,10 @@ class _ActivityFeedScreenState extends ConsumerState<ActivityFeedScreen> {
                 alignment: Alignment.center,
                 child: Text(
                   filter.displayName,
-                  style: TellyTypography.caption(
-                    color: isSelected ? TellyColors.phosphorLime : TellyColors.textTertiary,
+                  style: TellyTypography.labelSmall(
+                    color: isSelected ? TellyColors.phosphorLime : Colors.white,
                   ).copyWith(
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),

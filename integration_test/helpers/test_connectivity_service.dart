@@ -26,3 +26,4 @@ class TestConnectivityService implements ConnectivityService {
     _controller.close();
   }
 }
+

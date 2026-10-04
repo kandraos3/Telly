@@ -132,3 +132,4 @@ jobs:
           arch: x86_64
           profile: pixel_6
           script: flutter test test/integration/cuj_journeys_test.dart
+

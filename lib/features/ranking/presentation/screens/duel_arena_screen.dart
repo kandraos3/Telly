@@ -210,6 +210,7 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
             children: [
               IconButton(
                 key: const Key('duel_arena_close_button'),
+                tooltip: 'Close duel',
                 icon: const Icon(Icons.close, color: TellyColors.textSecondary),
                 onPressed: widget.onCancel ?? () => Navigator.of(context).maybePop(),
               ),
@@ -345,7 +346,7 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
             padding: const EdgeInsets.only(bottom: 16),
             child: SizedBox(
               width: double.infinity,
-              height: 48,
+              height: 52,
               child: Container(
                 decoration: BoxDecoration(
                   color: TellyColors.backgroundSurface,
@@ -354,6 +355,10 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
                 ),
                 child: TextButton.icon(
                   key: const Key('cant_compare_button'),
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size.fromHeight(48),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                  ),
                   onPressed: hasSelection ? null : _handleSkipOrTie,
                   icon: const Icon(
                     Icons.shuffle_rounded,

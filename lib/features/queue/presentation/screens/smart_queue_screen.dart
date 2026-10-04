@@ -214,32 +214,36 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
                     ref.read(queueFilterSubscribedProvider.notifier).toggle();
                   },
                   borderRadius: BorderRadius.circular(20),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: onlyOnMySubscriptions
-                          ? TellyColors.phosphorLime.withValues(alpha: 0.15)
-                          : TellyColors.backgroundSurface,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: onlyOnMySubscriptions ? TellyColors.phosphorLime : TellyColors.borderGlass,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minHeight: 48),
+                    child: Container(
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: onlyOnMySubscriptions
+                            ? TellyColors.phosphorLime.withValues(alpha: 0.15)
+                            : TellyColors.backgroundSurface,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: onlyOnMySubscriptions ? TellyColors.phosphorLime : TellyColors.borderGlass,
+                        ),
                       ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          onlyOnMySubscriptions ? Icons.check_circle : Icons.radio_button_unchecked,
-                          size: 14,
-                          color: onlyOnMySubscriptions ? TellyColors.phosphorLime : TellyColors.textTertiary,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          'On My Services',
-                          style: TellyTypography.caption(
-                            color: onlyOnMySubscriptions ? TellyColors.phosphorLime : TellyColors.textSecondary,
-                          ).copyWith(fontWeight: FontWeight.w700),
-                        ),
-                      ],
+                      child: Row(
+                        children: [
+                          Icon(
+                            onlyOnMySubscriptions ? Icons.check_circle : Icons.radio_button_unchecked,
+                            size: 14,
+                            color: onlyOnMySubscriptions ? TellyColors.phosphorLime : TellyColors.textTertiary,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'On My Services',
+                            style: TellyTypography.caption(
+                              color: onlyOnMySubscriptions ? TellyColors.phosphorLime : TellyColors.textSecondary,
+                            ).copyWith(fontWeight: FontWeight.w700),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

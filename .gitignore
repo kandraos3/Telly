@@ -44,3 +44,4 @@ supabase/.branches/
 # Build-time app config (FE-601); only the example is committed
 env/*.json
 !env/example.json
+

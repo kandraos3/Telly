@@ -36,3 +36,4 @@ final connectivityProvider = StreamProvider<bool>((ref) {
   final service = ref.watch(connectivityServiceProvider);
   return service.watchOnline();
 });
+

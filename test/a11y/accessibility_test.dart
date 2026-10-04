@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/theme/telly_theme.dart';
 import 'package:telly_app/core/widgets/telly_primary_button.dart';
+import 'package:telly_app/features/auth/data/auth_repository.dart';
+import 'package:telly_app/features/auth/presentation/screens/auth_screen.dart';
+import '../fakes/fake_auth_repository.dart';
 
 void main() {
   group('WCAG 2.1 AA Accessibility & Semantics Audit (QA-503)', () {
@@ -86,6 +90,26 @@ void main() {
       expect(contrastRatio, greaterThan(4.5));
       // For pure white on OLED black, contrast ratio is typically > 18:1
       expect(contrastRatio, greaterThan(15.0));
+    });
+
+    testWidgets('Screen A11y Audit: SCR-01 AuthScreen meets all guidelines', (tester) async {
+      final handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [authRepositoryProvider.overrideWithValue(FakeAuthRepository())],
+          child: MaterialApp(
+            theme: TellyTheme.darkTheme,
+            home: const AuthScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+      await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
+      await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
+      await expectLater(tester, meetsGuideline(textContrastGuideline));
+      handle.dispose();
     });
   });
 }

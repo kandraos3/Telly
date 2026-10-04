@@ -98,3 +98,4 @@ void main() {
     expect(syncedCanon.every((r) => r.syncStatus == 'SYNCED'), isTrue);
   });
 }
+

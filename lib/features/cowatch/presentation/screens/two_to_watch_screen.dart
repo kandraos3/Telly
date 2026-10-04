@@ -221,6 +221,7 @@ class _TwoToWatchScreenState extends ConsumerState<TwoToWatchScreen> {
         backgroundColor: TellyColors.backgroundCanvasOled,
         elevation: 0,
         leading: IconButton(
+          tooltip: 'Close',
           icon: const Icon(Icons.close, color: TellyColors.textPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
@@ -321,7 +322,7 @@ class _TwoToWatchScreenState extends ConsumerState<TwoToWatchScreen> {
               const Text('You', style: TextStyle(color: TellyColors.textPrimary, fontWeight: FontWeight.w700)),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 8),
-                child: Text('+', style: TextStyle(color: TellyColors.textTertiary, fontSize: 16)),
+                child: Text('+', style: TextStyle(color: TellyColors.textPrimary, fontSize: 16)),
               ),
               CircleAvatar(
                 radius: 18,
@@ -674,7 +675,7 @@ class _TwoToWatchScreenState extends ConsumerState<TwoToWatchScreen> {
           const SizedBox(height: 8),
           Text(
             rec.matchReason,
-            style: TellyTypography.caption(color: TellyColors.textSecondary),
+            style: TellyTypography.caption(color: TellyColors.textPrimary),
           ),
           const SizedBox(height: 12),
           Row(
@@ -695,9 +696,8 @@ class _TwoToWatchScreenState extends ConsumerState<TwoToWatchScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: TellyColors.phosphorLime,
                   foregroundColor: TellyColors.backgroundCanvasOled,
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  minimumSize: const Size(48, 48),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
                 icon: const Icon(Icons.play_arrow, size: 16),

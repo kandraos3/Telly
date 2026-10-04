@@ -615,18 +615,22 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
           ),
           const SizedBox(height: 14),
           InkWell(
+            borderRadius: BorderRadius.circular(8),
             onTap: () => _showFullNetworkRankings(battlegrounds),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'See Full Network Rankings',
-                  style: TellyTypography.labelMedium(color: TellyColors.phosphorLime)
-                      .copyWith(fontWeight: FontWeight.w800),
-                ),
-                const SizedBox(width: 4),
-                const Icon(Icons.arrow_forward, size: 14, color: TellyColors.phosphorLime),
-              ],
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 48),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'See Full Network Rankings',
+                    style: TellyTypography.labelMedium(color: TellyColors.phosphorLime)
+                        .copyWith(fontWeight: FontWeight.w800),
+                  ),
+                  const SizedBox(width: 4),
+                  const Icon(Icons.arrow_forward, size: 14, color: TellyColors.phosphorLime),
+                ],
+              ),
             ),
           ),
         ],

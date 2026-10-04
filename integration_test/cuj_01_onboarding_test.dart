@@ -83,3 +83,4 @@ void main() {
     expect(auth.fetchCurrentProfile(), completion(predicate<UserProfile?>((u) => u?.onboardingCompleted == true)));
   });
 }
+

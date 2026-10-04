@@ -24,7 +24,7 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 6 — Integration, Wiring & Audit Remediation** (planned 2026-10-03; owner decisions D1–D7 recorded in Sprint 6)
-- **Current Active Ticket**: `QA-604` (Accessibility Audit Across All Routed Screens) — Sprint 6: 27 / 32 tickets complete
+- **Current Active Ticket**: `QA-605` (Honest Performance Profiling) — Sprint 6: 28 / 32 tickets complete
 - **Overall Roadmap Progress**: Sprints 1–5 granular tasks after the `DOC-601` honesty reset (2026-10-03): **281 / 431 verified** · **121 un-checked** (each annotated `→ remediated by <Sprint 6 ticket>`) · **29 human-only**. The earlier "89 / 89" claim was overstated.
 - **Human-Only Tasks**: 29 tasks in Sprints 1–5 marked `👤 [TO BE DONE BY HUMAN]` (cloud setup, secrets, store submission, device/CI runs, dashboard verification), plus the Sprint 6 human prerequisites list. These cannot be completed or verified from code.
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (369 / 369 pass; pgTAP 155 assertions / 9 files — note: no real E2E or golden tests exist yet)
@@ -1353,10 +1353,10 @@ Build the high-resolution Instagram Story studio, harden offline Drift WAL synch
 - **Scope & Objectives**: Ensure screen reader accessibility and physical touch target sizes.
 - **Granular Tasks**:
   - [x] Write `test/a11y/accessibility_test.dart` using `tester.getSemantics()`.
-  - [ ] Assert every tap target is at least $48 \times 48\text{ dp}$. → remediated by `QA-604`
-  - [ ] Assert every interactive icon has a descriptive `semanticsLabel`. → remediated by `QA-604`
+  - [x] Assert every tap target is at least $48 \times 48\text{ dp}$. ✅ remediated in `QA-604`
+  - [x] Assert every interactive icon has a descriptive `semanticsLabel`. ✅ remediated in `QA-604`
 - **Testing & Verification**:
-  - [ ] Automated semantics audit passes with zero violations. → remediated by `QA-604`
+  - [x] Automated semantics audit passes with zero violations. ✅ remediated in `QA-604`
 - **Dependencies**: `FE-104`.
 
 #### `QA-504`: 60fps/120fps Frame Rate Benchmarking & Jank Regression Profiling
@@ -1833,9 +1833,9 @@ Turn the library of individually-tested widgets and algorithms into a **wired, r
   - [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) §5.2
 - **Scope & Objectives**: Extend the single-button check to every screen, with honest naming (automated guideline checks, not "WCAG certified").
 - **Granular Tasks**:
-  - [ ] For each routed screen: `androidTapTargetGuideline`, `iOSTapTargetGuideline`, `labeledTapTargetGuideline`, `textContrastGuideline`.
+  - [x] For each routed screen: `androidTapTargetGuideline`, `iOSTapTargetGuideline`, `labeledTapTargetGuideline`, `textContrastGuideline`.
 - **Testing & Verification**:
-  - [ ] Zero guideline violations across all 20 screens.
+  - [x] Zero guideline violations across all 20 screens.
 - **Dependencies**: `FE-612`.
 
 #### `QA-605`: Honest Performance Profiling

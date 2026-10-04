@@ -54,6 +54,7 @@ class _TellyWrappedStudioScreenState extends State<TellyWrappedStudioScreen> {
         backgroundColor: TellyColors.backgroundCanvasOled,
         elevation: 0,
         leading: IconButton(
+          tooltip: 'Close',
           icon: const Icon(Icons.close, color: TellyColors.textPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
@@ -63,6 +64,7 @@ class _TellyWrappedStudioScreenState extends State<TellyWrappedStudioScreen> {
         ),
         actions: [
           IconButton(
+            tooltip: 'Share story',
             icon: const Icon(Icons.share, color: TellyColors.phosphorLime),
             onPressed: _shareStory,
           ),

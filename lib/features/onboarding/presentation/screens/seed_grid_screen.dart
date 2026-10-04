@@ -53,7 +53,7 @@ class SeedGridScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: TellyColors.backgroundPrimary,
       appBar: AppBar(
-        title: Text('STEP 3 OF 3', style: TellyTypography.caption(color: TellyColors.textTertiary)),
+        title: Text('STEP 3 OF 3', style: TellyTypography.caption(color: TellyColors.textPrimary)),
         centerTitle: true,
       ),
       body: SafeArea(

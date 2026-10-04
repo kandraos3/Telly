@@ -176,7 +176,7 @@ class TopShowcaseRow extends StatelessWidget {
       child: Center(
         child: Text(
           '#$rank',
-          style: TellyTypography.titleMedium(color: TellyColors.textDisabled),
+          style: TellyTypography.titleMedium(color: TellyColors.textSecondary),
         ),
       ),
     );

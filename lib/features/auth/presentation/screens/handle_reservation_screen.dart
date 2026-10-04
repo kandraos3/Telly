@@ -68,7 +68,7 @@ class _HandleReservationScreenState extends ConsumerState<HandleReservationScree
     return Scaffold(
       backgroundColor: TellyColors.backgroundPrimary,
       appBar: AppBar(
-        title: Text('STEP 1 OF 3', style: TellyTypography.caption(color: TellyColors.textTertiary)),
+        title: Text('STEP 1 OF 3', style: TellyTypography.caption(color: TellyColors.textPrimary)),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -96,7 +96,7 @@ class _HandleReservationScreenState extends ConsumerState<HandleReservationScree
                 autofocus: true,
                 prefixIcon: const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 14, vertical: 16),
-                  child: Text('@', style: TextStyle(color: TellyColors.textSecondary, fontSize: 16)),
+                  child: Text('@', style: TextStyle(color: TellyColors.textPrimary, fontSize: 16)),
                 ),
                 suffixIcon: _buildSuffixIcon(reservation.availability),
                 errorText: reservation.error,

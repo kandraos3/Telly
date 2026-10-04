@@ -319,7 +319,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   Center(
                     child: Text(
                       'By continuing, you agree to our Terms & Privacy.',
-                      style: TellyTypography.caption(color: TellyColors.textTertiary),
+                      style: TellyTypography.caption(color: TellyColors.textPrimary),
                     ),
                   ),
                   const SizedBox(height: 16),

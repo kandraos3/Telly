@@ -330,23 +330,28 @@ class _FeedActivityCardState extends State<FeedActivityCard> {
                     InkWell(
                       borderRadius: BorderRadius.circular(8),
                       onTap: widget.onCommentTap,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.chat_bubble_outline_rounded,
-                              size: 16,
-                              color: TellyColors.textTertiary,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '${activity.commentCount}',
-                              style: TellyTypography.caption(
-                                color: TellyColors.textSecondary,
-                              ).copyWith(fontWeight: FontWeight.bold),
-                            ),
-                          ],
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.chat_bubble_outline_rounded,
+                                size: 16,
+                                color: TellyColors.textTertiary,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '${activity.commentCount}',
+                                style: TellyTypography.caption(
+                                  color: TellyColors.textSecondary,
+                                ).copyWith(fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -384,33 +389,37 @@ class _FeedActivityCardState extends State<FeedActivityCard> {
     return InkWell(
       borderRadius: BorderRadius.circular(8),
       onTap: _handleQueueToggle,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          color: _inQueue
-              ? TellyColors.phosphorLime.withValues(alpha: 0.15)
-              : TellyColors.backgroundCard,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: _inQueue ? TellyColors.phosphorLime : TellyColors.borderGlass,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 48),
+        child: Container(
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: _inQueue
+                ? TellyColors.phosphorLime.withValues(alpha: 0.15)
+                : TellyColors.backgroundCard,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: _inQueue ? TellyColors.phosphorLime : TellyColors.borderGlass,
+            ),
           ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              _inQueue ? Icons.bookmark_added_rounded : Icons.bookmark_add_outlined,
-              size: 15,
-              color: _inQueue ? TellyColors.phosphorLime : TellyColors.textSecondary,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              _inQueue ? 'In Queue' : '+ Want to Watch',
-              style: TellyTypography.caption(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                _inQueue ? Icons.bookmark_added_rounded : Icons.bookmark_add_outlined,
+                size: 15,
                 color: _inQueue ? TellyColors.phosphorLime : TellyColors.textSecondary,
-              ).copyWith(fontWeight: FontWeight.bold, fontSize: 11),
-            ),
-          ],
+              ),
+              const SizedBox(width: 6),
+              Text(
+                _inQueue ? 'In Queue' : '+ Want to Watch',
+                style: TellyTypography.caption(
+                  color: _inQueue ? TellyColors.phosphorLime : TellyColors.textSecondary,
+                ).copyWith(fontWeight: FontWeight.bold, fontSize: 11),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -437,31 +446,35 @@ class _FeedActivityCardState extends State<FeedActivityCard> {
               HapticsService.selectionClick();
               widget.onReactionToggle?.call(reaction);
             },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? TellyColors.phosphorLime.withValues(alpha: 0.15)
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: isSelected ? TellyColors.phosphorLime : Colors.transparent,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
+              child: Container(
+                alignment: Alignment.center,
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? TellyColors.phosphorLime.withValues(alpha: 0.15)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: isSelected ? TellyColors.phosphorLime : Colors.transparent,
+                  ),
                 ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(reaction.emoji, style: const TextStyle(fontSize: 14)),
-                  if (count > 0) ...[
-                    const SizedBox(width: 3),
-                    Text(
-                      '$count',
-                      style: TellyTypography.caption(
-                        color: isSelected ? TellyColors.phosphorLime : TellyColors.textSecondary,
-                      ).copyWith(fontWeight: FontWeight.bold, fontSize: 11),
-                    ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(reaction.emoji, style: const TextStyle(fontSize: 14, color: TellyColors.textPrimary)),
+                    if (count > 0) ...[
+                      const SizedBox(width: 3),
+                      Text(
+                        '$count',
+                        style: TellyTypography.caption(
+                          color: isSelected ? TellyColors.phosphorLime : TellyColors.textSecondary,
+                        ).copyWith(fontWeight: FontWeight.bold, fontSize: 11),
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ),

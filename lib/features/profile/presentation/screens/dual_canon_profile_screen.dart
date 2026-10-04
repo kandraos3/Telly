@@ -85,7 +85,7 @@ class DualCanonProfileScreen extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Container(
-                  height: 48,
+                  constraints: const BoxConstraints(minHeight: 56),
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
                     color: TellyColors.backgroundSurface,
@@ -144,7 +144,7 @@ class DualCanonProfileScreen extends ConsumerWidget {
                   children: [
                     // View Mode Switcher
                     Container(
-                      height: 38,
+                      constraints: const BoxConstraints(minHeight: 48),
                       padding: const EdgeInsets.all(3),
                       decoration: BoxDecoration(
                         color: TellyColors.backgroundCard,
@@ -196,6 +196,8 @@ class DualCanonProfileScreen extends ConsumerWidget {
                           ref.read(franchiseRollupProvider.notifier).select(!rollupAnime);
                         },
                         child: Container(
+                          constraints: const BoxConstraints(minHeight: 48),
+                          alignment: Alignment.center,
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                           decoration: BoxDecoration(
                             color: rollupAnime
@@ -316,6 +318,8 @@ class DualCanonProfileScreen extends ConsumerWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
+        constraints: const BoxConstraints(minHeight: 48),
+        alignment: Alignment.center,
         decoration: BoxDecoration(
           color: isSelected ? TellyColors.phosphorLime : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
@@ -356,6 +360,8 @@ class DualCanonProfileScreen extends ConsumerWidget {
       key: key,
       onTap: onTap,
       child: Container(
+        constraints: const BoxConstraints(minHeight: 48),
+        alignment: Alignment.center,
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
           color: isSelected ? TellyColors.backgroundSurface : Colors.transparent,
@@ -373,7 +379,7 @@ class DualCanonProfileScreen extends ConsumerWidget {
             Text(
               label,
               style: TellyTypography.caption(
-                color: isSelected ? TellyColors.textPrimary : TellyColors.textTertiary,
+                color: TellyColors.textPrimary,
               ).copyWith(fontWeight: isSelected ? FontWeight.bold : FontWeight.w500),
             ),
           ],
