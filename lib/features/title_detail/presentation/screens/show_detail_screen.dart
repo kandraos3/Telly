@@ -553,7 +553,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
           if (providers.isEmpty)
             Text(
               'No streaming services currently available for this title.',
-              style: TellyTypography.bodyMedium(color: TellyColors.textSecondary),
+              style: TellyTypography.bodyMedium(color: TellyColors.textPrimary).copyWith(fontSize: 14),
             )
           else
             Wrap(
@@ -660,7 +660,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
           ] else ...[
             Text(
               'You have not ranked this ${title.isMovie ? 'movie' : 'show'} yet.',
-              style: TellyTypography.bodyMedium(color: TellyColors.textSecondary),
+              style: TellyTypography.bodyMedium(color: TellyColors.textPrimary).copyWith(fontSize: 14),
             ),
             const SizedBox(height: 12),
             TellyPrimaryButton(
@@ -730,7 +730,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
               directorName != null
                   ? 'Key creative leadership: $directorName. Full cast list syncing from TMDB.'
                   : 'Cast and crew information syncing from TMDB.',
-              style: TellyTypography.caption(color: TellyColors.textSecondary),
+              style: TellyTypography.caption(color: TellyColors.textPrimary),
             ),
           )
         else
