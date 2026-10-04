@@ -9,114 +9,19 @@ import '../controllers/auth_controller.dart';
 
 /// SCR-01: Onboarding Splash & Authentication Screen.
 /// Conforms to `docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md` §1 (`SCR-01`).
-class AuthScreen extends ConsumerStatefulWidget {
+class AuthScreen extends ConsumerWidget {
   const AuthScreen({super.key});
 
-  @override
-  ConsumerState<AuthScreen> createState() => _AuthScreenState();
-}
-
-class _AuthScreenState extends ConsumerState<AuthScreen> {
-  final _phoneController = TextEditingController();
-  final _otpController = TextEditingController();
-
-  @override
-  void dispose() {
-    _phoneController.dispose();
-    _otpController.dispose();
-    super.dispose();
-  }
-
-  void _openPhoneAuthSheet(BuildContext context) {
+  void _openEmailAuthSheet(BuildContext context, WidgetRef ref) {
+    ref.read(authControllerProvider.notifier).clearError();
     TellyFrostedSheet.show(
       context: context,
-      builder: (sheetContext) {
-        return Consumer(
-          builder: (context, ref, _) {
-            final authState = ref.watch(authControllerProvider);
-            final isAwaitingOtp = authState.status == AuthStepStatus.awaitingOtp;
-            final isBusy = authState.status == AuthStepStatus.authenticating;
-
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    isAwaitingOtp ? 'Enter 6-Digit Code' : 'Sign In with Phone',
-                    style: TellyTypography.titleLarge(),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    isAwaitingOtp
-                        ? 'We sent a verification code to ${authState.phoneNumber}'
-                        : 'We will send a 6-digit verification code via SMS.',
-                    style: TellyTypography.bodyMedium(color: TellyColors.textSecondary),
-                  ),
-                  const SizedBox(height: 20),
-                  if (!isAwaitingOtp) ...[
-                    TellyTextField(
-                      controller: _phoneController,
-                      hintText: '+1 (555) 000-0000',
-                      labelText: 'Phone Number',
-                      keyboardType: TextInputType.phone,
-                      prefixIcon: const Icon(Icons.phone_outlined, color: TellyColors.textTertiary),
-                    ),
-                    const SizedBox(height: 16),
-                    TellyPrimaryButton(
-                      label: 'Send Verification Code',
-                      isLoading: isBusy,
-                      onPressed: () {
-                        if (_phoneController.text.trim().isNotEmpty) {
-                          ref
-                              .read(authControllerProvider.notifier)
-                              .requestPhoneOtp(_phoneController.text.trim());
-                        }
-                      },
-                    ),
-                  ] else ...[
-                    TellyTextField(
-                      controller: _otpController,
-                      hintText: '••••••',
-                      labelText: '6-Digit SMS Code',
-                      keyboardType: TextInputType.number,
-                      prefixIcon: const Icon(Icons.lock_clock_outlined, color: TellyColors.textTertiary),
-                    ),
-                    if (authState.errorMessage != null) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        authState.errorMessage!,
-                        style: TellyTypography.caption(color: TellyColors.neonCoral),
-                      ),
-                    ],
-                    const SizedBox(height: 16),
-                    TellyPrimaryButton(
-                      label: 'Verify & Continue',
-                      isLoading: isBusy,
-                      onPressed: () async {
-                        final success = await ref
-                            .read(authControllerProvider.notifier)
-                            .verifyOtp(_otpController.text.trim());
-                        // On success the session stream flips state to authenticated and the
-                        // listener in build() navigates; only the sheet is closed here.
-                        if (success && sheetContext.mounted) {
-                          Navigator.of(sheetContext).pop();
-                        }
-                      },
-                    ),
-                  ],
-                ],
-              ),
-            );
-          },
-        );
-      },
+      builder: (sheetContext) => const EmailAuthSheet(),
     );
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authControllerProvider);
     final isBusy = authState.status == AuthStepStatus.authenticating;
 
@@ -281,7 +186,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   ),
                   const SizedBox(height: 12),
 
-                  // 3. Phone Button (Ghost bordered)
+                  // 3. Email Button (Ghost bordered)
                   Container(
                     height: 52,
                     decoration: BoxDecoration(
@@ -293,15 +198,15 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                       color: Colors.transparent,
                       child: InkWell(
                         borderRadius: BorderRadius.circular(14),
-                        onTap: isBusy ? null : () => _openPhoneAuthSheet(context),
+                        onTap: isBusy ? null : () => _openEmailAuthSheet(context, ref),
                         child: Center(
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(Icons.phone_iphone, color: TellyColors.textPrimary, size: 20),
+                              const Icon(Icons.mail_outline_rounded, color: TellyColors.textPrimary, size: 20),
                               const SizedBox(width: 10),
                               Text(
-                                'Continue with Phone Number',
+                                'Continue with Email',
                                 style: TellyTypography.titleMedium(color: TellyColors.textPrimary).copyWith(
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -325,6 +230,166 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   const SizedBox(height: 16),
                 ],
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Frosted sheet supporting both Email Sign In and Email Sign Up.
+class EmailAuthSheet extends ConsumerStatefulWidget {
+  const EmailAuthSheet({super.key});
+
+  @override
+  ConsumerState<EmailAuthSheet> createState() => _EmailAuthSheetState();
+}
+
+class _EmailAuthSheetState extends ConsumerState<EmailAuthSheet> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  bool _isSignUp = false;
+  bool _obscurePassword = true;
+  String? _localError;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  void _toggleMode() {
+    setState(() {
+      _isSignUp = !_isSignUp;
+      _localError = null;
+    });
+    ref.read(authControllerProvider.notifier).clearError();
+  }
+
+  Future<void> _submit() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    if (email.isEmpty) {
+      setState(() => _localError = 'Please enter your email.');
+      return;
+    }
+    if (!email.contains('@') || !email.contains('.')) {
+      setState(() => _localError = 'Please enter a valid email address.');
+      return;
+    }
+    if (password.length < 6) {
+      setState(() => _localError = 'Password must be at least 6 characters.');
+      return;
+    }
+
+    if (_isSignUp) {
+      final confirm = _confirmPasswordController.text;
+      if (password != confirm) {
+        setState(() => _localError = 'Passwords do not match.');
+        return;
+      }
+    }
+
+    setState(() => _localError = null);
+
+    final notifier = ref.read(authControllerProvider.notifier);
+    if (_isSignUp) {
+      final hasSession = await notifier.signUpWithEmail(email: email, password: password);
+      if (hasSession && mounted) {
+        Navigator.of(context).pop();
+      }
+    } else {
+      final success = await notifier.signInWithEmail(email: email, password: password);
+      if (success && mounted) {
+        Navigator.of(context).pop();
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final authState = ref.watch(authControllerProvider);
+    final isBusy = authState.status == AuthStepStatus.authenticating;
+    final displayError = _localError ?? authState.errorMessage;
+
+    return SingleChildScrollView(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            _isSignUp ? 'Create an Account' : 'Sign In with Email',
+            style: TellyTypography.titleLarge(),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            _isSignUp
+                ? 'Join Telly to build and share your personal TV canon.'
+                : 'Welcome back. Enter your credentials to continue.',
+            style: TellyTypography.bodyMedium(color: TellyColors.textSecondary),
+          ),
+          const SizedBox(height: 20),
+          TellyTextField(
+            controller: _emailController,
+            hintText: 'you@example.com',
+            labelText: 'Email',
+            keyboardType: TextInputType.emailAddress,
+            prefixIcon: const Icon(Icons.mail_outline_rounded, color: TellyColors.textTertiary),
+          ),
+          const SizedBox(height: 16),
+          TellyTextField(
+            controller: _passwordController,
+            hintText: '••••••••',
+            labelText: 'Password',
+            obscureText: _obscurePassword,
+            keyboardType: TextInputType.visiblePassword,
+            prefixIcon: const Icon(Icons.lock_outline_rounded, color: TellyColors.textTertiary),
+            suffixIcon: IconButton(
+              icon: Icon(
+                _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                color: TellyColors.textTertiary,
+              ),
+              onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+            ),
+          ),
+          if (_isSignUp) ...[
+            const SizedBox(height: 16),
+            TellyTextField(
+              controller: _confirmPasswordController,
+              hintText: '••••••••',
+              labelText: 'Confirm Password',
+              obscureText: _obscurePassword,
+              keyboardType: TextInputType.visiblePassword,
+              prefixIcon: const Icon(Icons.lock_outline_rounded, color: TellyColors.textTertiary),
+            ),
+          ],
+          if (displayError != null) ...[
+            const SizedBox(height: 12),
+            Text(
+              displayError,
+              style: TellyTypography.caption(color: TellyColors.neonCoral),
+            ),
+          ],
+          const SizedBox(height: 20),
+          TellyPrimaryButton(
+            label: _isSignUp ? 'Create Account' : 'Sign In',
+            isLoading: isBusy,
+            onPressed: isBusy ? null : _submit,
+          ),
+          const SizedBox(height: 12),
+          TextButton(
+            onPressed: isBusy ? null : _toggleMode,
+            child: Text(
+              _isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up",
+              style: TellyTypography.bodyMedium(color: TellyColors.phosphorLime),
             ),
           ),
         ],

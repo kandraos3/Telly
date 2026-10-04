@@ -56,6 +56,19 @@ class FakeAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<void> signInWithEmail({required String email, required String password}) async {
+    _maybeFail();
+    _signIn('email-user', 'Email User');
+  }
+
+  @override
+  Future<bool> signUpWithEmail({required String email, required String password}) async {
+    _maybeFail();
+    _signIn('email-user', 'Email User');
+    return true;
+  }
+
+  @override
   Future<void> sendPhoneOtp(String phoneNumber) async => _maybeFail();
 
   @override

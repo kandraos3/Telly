@@ -26,6 +26,12 @@ abstract class AuthRepository {
   Future<void> signInWithApple();
   Future<void> signInWithGoogle();
 
+  /// Signs in with email and password.
+  Future<void> signInWithEmail({required String email, required String password});
+
+  /// Signs up with email and password. Returns true if session was immediately created, false if email confirmation is required.
+  Future<bool> signUpWithEmail({required String email, required String password});
+
   Future<void> sendPhoneOtp(String phoneNumber);
 
   /// Returns true when the code is valid and a session was created.
@@ -125,6 +131,16 @@ class SupabaseAuthRepository implements AuthRepository {
 
   @override
   Future<void> signInWithGoogle() => _auth.signInWithOAuth(OAuthProvider.google, redirectTo: _redirectUrl);
+
+  @override
+  Future<void> signInWithEmail({required String email, required String password}) =>
+      _auth.signInWithPassword(email: email.trim(), password: password);
+
+  @override
+  Future<bool> signUpWithEmail({required String email, required String password}) async {
+    final res = await _auth.signUp(email: email.trim(), password: password);
+    return res.session != null;
+  }
 
   @override
   Future<void> sendPhoneOtp(String phoneNumber) => _auth.signInWithOtp(phone: phoneNumber);

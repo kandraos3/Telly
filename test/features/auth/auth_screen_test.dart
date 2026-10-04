@@ -25,10 +25,10 @@ void main() {
       // Verify 3 Auth Buttons
       expect(find.text('Continue with Apple'), findsOneWidget);
       expect(find.text('Continue with Google'), findsOneWidget);
-      expect(find.text('Continue with Phone Number'), findsOneWidget);
+      expect(find.text('Continue with Email'), findsOneWidget);
     });
 
-    testWidgets('tapping Continue with Phone opens the phone number sheet', (tester) async {
+    testWidgets('tapping Continue with Email opens the email auth sheet', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [authRepositoryProvider.overrideWithValue(FakeAuthRepository())],
@@ -38,17 +38,18 @@ void main() {
         ),
       );
 
-      // Tap Phone Auth Button
-      await tester.tap(find.text('Continue with Phone Number'));
+      // Tap Email Auth Button
+      await tester.tap(find.text('Continue with Email'));
       await tester.pumpAndSettle();
 
       // Verify Frosted Sheet appears
-      expect(find.text('Sign In with Phone'), findsOneWidget);
-      expect(find.text('Send Verification Code'), findsOneWidget);
-      expect(find.byType(TextField), findsOneWidget);
+      expect(find.text('Sign In with Email'), findsOneWidget);
+      expect(find.text('Sign In'), findsOneWidget);
+      expect(find.text("Don't have an account? Sign Up"), findsOneWidget);
+      expect(find.byType(TextField), findsNWidgets(2)); // Email & Password
     });
 
-    testWidgets('complete phone authentication flow with 6-digit OTP verification', (tester) async {
+    testWidgets('complete email sign-in flow', (tester) async {
       final fakeRepo = FakeAuthRepository();
 
       await tester.pumpWidget(
@@ -62,33 +63,64 @@ void main() {
         ),
       );
 
-      // Open Phone Auth
-      await tester.tap(find.text('Continue with Phone Number'));
+      // Open Email Auth
+      await tester.tap(find.text('Continue with Email'));
       await tester.pumpAndSettle();
 
-      // Enter phone number
-      await tester.enterText(find.byType(TextField), '+15551234567');
+      // Enter email and password
+      final textFields = find.byType(TextField);
+      await tester.enterText(textFields.at(0), 'alex@example.com');
+      await tester.enterText(textFields.at(1), 'password123');
       await tester.pumpAndSettle();
 
-      // Tap Send Verification Code
-      await tester.tap(find.text('Send Verification Code'));
+      // Tap Sign In
+      await tester.tap(find.text('Sign In'));
       await tester.pumpAndSettle();
 
-      // Sheet should now display OTP entry
-      expect(find.text('Enter 6-Digit Code'), findsOneWidget);
-      expect(find.text('Verify & Continue'), findsOneWidget);
+      // Signed in through the session stream; sheet closes
+      expect(fakeRepo.currentUserId, 'email-user');
+      expect(find.text('Sign In with Email'), findsNothing);
+    });
 
-      // Enter 6-digit OTP
-      await tester.enterText(find.byType(TextField), '123456');
+    testWidgets('toggle to sign up mode and complete email registration', (tester) async {
+      final fakeRepo = FakeAuthRepository();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            authRepositoryProvider.overrideWithValue(fakeRepo),
+          ],
+          child: const MaterialApp(
+            home: AuthScreen(),
+          ),
+        ),
+      );
+
+      // Open Email Auth
+      await tester.tap(find.text('Continue with Email'));
       await tester.pumpAndSettle();
 
-      // Tap Verify & Continue
-      await tester.tap(find.text('Verify & Continue'));
+      // Toggle to Sign Up
+      await tester.tap(find.text("Don't have an account? Sign Up"));
       await tester.pumpAndSettle();
 
-      // Signed in through the session stream; the router (FE-602) redirects to handle reservation.
-      expect(fakeRepo.currentUserId, 'phone-user');
-      expect(find.text('Enter 6-Digit Code'), findsNothing, reason: 'OTP sheet closes on success');
+      expect(find.text('Create an Account'), findsOneWidget);
+      expect(find.text('Create Account'), findsOneWidget);
+      expect(find.byType(TextField), findsNWidgets(3)); // Email, Password, Confirm Password
+
+      // Fill in registration fields
+      final textFields = find.byType(TextField);
+      await tester.enterText(textFields.at(0), 'newuser@example.com');
+      await tester.enterText(textFields.at(1), 'securepassword');
+      await tester.enterText(textFields.at(2), 'securepassword');
+      await tester.pumpAndSettle();
+
+      // Tap Create Account
+      await tester.tap(find.text('Create Account'));
+      await tester.pumpAndSettle();
+
+      expect(fakeRepo.currentUserId, 'email-user');
+      expect(find.text('Create an Account'), findsNothing);
     });
 
     testWidgets('tapping Apple button triggers signInWithApple and transitions state', (tester) async {

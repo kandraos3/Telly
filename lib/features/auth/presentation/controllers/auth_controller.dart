@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/database/database.dart';
 import '../../data/auth_repository.dart';
@@ -88,6 +89,52 @@ class AuthController extends Notifier<AuthState> {
 
   Future<void> signInWithGoogle() =>
       _startOAuth(_repository.signInWithGoogle, 'Google sign in failed. Please try again.');
+
+  Future<bool> signInWithEmail({required String email, required String password}) async {
+    state = state.copyWith(status: AuthStepStatus.authenticating);
+    try {
+      await _repository.signInWithEmail(email: email, password: password);
+      return true;
+    } on AuthException catch (e) {
+      state = state.copyWith(status: AuthStepStatus.error, errorMessage: e.message);
+      return false;
+    } catch (_) {
+      state = state.copyWith(
+        status: AuthStepStatus.error,
+        errorMessage: 'Invalid email or password.',
+      );
+      return false;
+    }
+  }
+
+  Future<bool> signUpWithEmail({required String email, required String password}) async {
+    state = state.copyWith(status: AuthStepStatus.authenticating);
+    try {
+      final hasSession = await _repository.signUpWithEmail(email: email, password: password);
+      if (!hasSession) {
+        state = state.copyWith(
+          status: AuthStepStatus.unauthenticated,
+          errorMessage: 'Account created! Please check your email to confirm.',
+        );
+      }
+      return hasSession;
+    } on AuthException catch (e) {
+      state = state.copyWith(status: AuthStepStatus.error, errorMessage: e.message);
+      return false;
+    } catch (_) {
+      state = state.copyWith(
+        status: AuthStepStatus.error,
+        errorMessage: 'Account creation failed. Please try again.',
+      );
+      return false;
+    }
+  }
+
+  void clearError() {
+    if (state.errorMessage != null) {
+      state = state.copyWith(errorMessage: null);
+    }
+  }
 
   Future<void> _startOAuth(Future<void> Function() launch, String failure) async {
     state = state.copyWith(status: AuthStepStatus.authenticating);
