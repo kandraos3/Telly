@@ -13,9 +13,12 @@ import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../legal/domain/legal_markdown.dart';
 import '../../../legal/presentation/screens/legal_document_screen.dart';
 import '../../../onboarding/presentation/screens/streaming_setup_screen.dart';
+import '../../../onboarding/data/canon_import_service.dart';
+import '../../../onboarding/presentation/widgets/import_sources.dart';
 import '../../data/profile_repository.dart';
 import '../../data/settings_services.dart';
 import '../controllers/settings_controllers.dart';
+import '../controllers/watch_history_import_controller.dart';
 
 /// Disk usage of cached artwork (settings spec S5).
 final imageCacheSizeProvider =
@@ -264,7 +267,10 @@ class SettingsHubScreen extends ConsumerWidget {
           ]),
           const SizedBox(height: 20),
 
-          // 6. Data portability
+          // 6. Data portability: imports (FE-SETTINGS-02), then exports
+          const _SectionHeader('IMPORT WATCH HISTORY'),
+          const _ImportWatchHistoryCard(),
+          const SizedBox(height: 20),
           const _SectionHeader('DATA & EXPORTS'),
           _Card(children: [
             _Tile(
@@ -472,6 +478,142 @@ class _Card extends StatelessWidget {
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: children),
         ),
       );
+}
+
+/// Letterboxd CSV / AniList import into my canons, with progress and a summary.
+class _ImportWatchHistoryCard extends ConsumerWidget {
+  const _ImportWatchHistoryCard();
+
+  Future<void> _letterboxd(WidgetRef ref) async {
+    final csv = await ref.read(csvFilePickerProvider)();
+    if (csv == null) return;
+    await ref.read(watchHistoryImportProvider.notifier).importLetterboxd(csv);
+  }
+
+  Future<void> _aniList(BuildContext context, WidgetRef ref) async {
+    final username = await showDialog<String>(context: context, builder: (_) => const AniListUsernameDialog());
+    if (username == null || username.isEmpty) return;
+    await ref.read(watchHistoryImportProvider.notifier).importAniList(username);
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(watchHistoryImportProvider);
+    final running = state is ImportRunning;
+    return _Card(children: [
+      _Tile(
+        key: const Key('settings_import_letterboxd'),
+        title: 'Import from Letterboxd',
+        subtitle: 'Pick watched.csv or ratings.csv from your export',
+        trailing: const Icon(Icons.upload_file_rounded, color: TellyColors.phosphorLime, size: 20),
+        onTap: running ? null : () => _letterboxd(ref),
+      ),
+      const Divider(color: TellyColors.borderGlass),
+      _Tile(
+        key: const Key('settings_import_anilist'),
+        title: 'Import from AniList',
+        subtitle: 'Your completed anime, by AniList username',
+        trailing: const Icon(Icons.person_search_rounded, color: TellyColors.phosphorLime, size: 20),
+        onTap: running ? null : () => _aniList(context, ref),
+      ),
+      ...switch (state) {
+        ImportIdle() => const <Widget>[],
+        ImportRunning(:final source) => [
+            const SizedBox(height: 10),
+            const LinearProgressIndicator(color: TellyColors.phosphorLime, backgroundColor: TellyColors.backgroundCard),
+            const SizedBox(height: 8),
+            Text(
+              'Importing from ${source.label}… matching each title takes a moment.',
+              key: const Key('settings_import_running'),
+              style: TellyTypography.caption(color: TellyColors.textSecondary),
+            ),
+          ],
+        ImportDone(:final source, :final result) => [
+            const SizedBox(height: 10),
+            _ImportSummary(source: source, result: result, onDismiss: ref.read(watchHistoryImportProvider.notifier).dismiss),
+          ],
+        ImportFailed(:final message) => [
+            const SizedBox(height: 10),
+            Text(message, key: const Key('settings_import_error'), style: TellyTypography.caption(color: TellyColors.neonCoral)),
+          ],
+      },
+    ]);
+  }
+}
+
+class _ImportSummary extends StatelessWidget {
+  const _ImportSummary({required this.source, required this.result, required this.onDismiss});
+
+  final ImportSource source;
+  final ImportResult result;
+  final VoidCallback onDismiss;
+
+  @override
+  Widget build(BuildContext context) {
+    final lines = [
+      'Added ${result.added} ${result.added == 1 ? 'title' : 'titles'} from ${source.label}',
+      if (result.alreadyRanked > 0) '${result.alreadyRanked} already in your canon',
+      if (result.unmatched.isNotEmpty) "${result.unmatched.length} couldn't be matched",
+    ];
+    return Container(
+      key: const Key('settings_import_summary'),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: TellyColors.phosphorLime.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: TellyColors.phosphorLime.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.check_circle_rounded, color: TellyColors.phosphorLime, size: 18),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(lines.join(' · '), style: TellyTypography.bodyMedium(color: TellyColors.textPrimary)),
+              ),
+              IconButton(
+                tooltip: 'Dismiss',
+                onPressed: onDismiss,
+                icon: const Icon(Icons.close, size: 18, color: TellyColors.textTertiary),
+              ),
+            ],
+          ),
+          if (result.added > 0)
+            Text(
+              'New titles sit at the bottom of your canon. Duel them to place them properly.',
+              style: TellyTypography.caption(color: TellyColors.textSecondary),
+            ),
+          if (result.unmatched.isNotEmpty)
+            Theme(
+              data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+              // Its own Material: the summary box's tint would otherwise hide the ink.
+              child: Material(
+                type: MaterialType.transparency,
+                child: ExpansionTile(
+                  key: const Key('settings_import_unmatched'),
+                  tilePadding: EdgeInsets.zero,
+                  title: Text('See unmatched titles', style: TellyTypography.labelMedium(color: TellyColors.textSecondary)),
+                  children: [
+                    for (final t in result.unmatched.take(50))
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text('• $t', style: TellyTypography.caption(color: TellyColors.textTertiary)),
+                      ),
+                    if (result.unmatched.length > 50)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text('…and ${result.unmatched.length - 50} more', style: TellyTypography.caption()),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 }
 
 class _Tile extends StatelessWidget {

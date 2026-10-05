@@ -14,7 +14,13 @@ class ImportResult {
   /// Entries that could not be matched to a TMDB title.
   final List<String> unmatched;
 
-  const ImportResult({required this.added, this.unmatched = const []});
+  /// Entries matched to a title, including ones already in the canon (FE-SETTINGS-02).
+  final int matched;
+
+  const ImportResult({required this.added, this.unmatched = const [], int? matched}) : matched = matched ?? added;
+
+  /// Matched titles that were already ranked, so nothing was added for them.
+  int get alreadyRanked => matched - added;
 }
 
 /// Turns Letterboxd / AniList exports into persisted canons (features/01 Screen 3, FE-606).
@@ -53,7 +59,7 @@ class CanonImportService {
       }
     }
     final added = await _append('movie', matched);
-    return ImportResult(added: added, unmatched: unmatched);
+    return ImportResult(added: added, unmatched: unmatched, matched: matched.length);
   }
 
   Future<ImportResult> importAniList(List<AniListEntry> entries) async {
@@ -73,7 +79,7 @@ class CanonImportService {
       (mediaType == 'movie' ? movies : series).add((hit, bracket));
     }
     final added = await _append('movie', movies) + await _append('tv', series);
-    return ImportResult(added: added, unmatched: unmatched);
+    return ImportResult(added: added, unmatched: unmatched, matched: movies.length + series.length);
   }
 
   Future<int> _append(String mediaType, List<(CanonCandidate, String?)> matched) {

@@ -2119,6 +2119,16 @@ Tickets ingested through the `issue-manager` skill. Each entry mirrors its GitHu
 - **Testing & Verification**:
   - [x] Unit tests for the interleaving cadence and edge cases. Widget tests: card placement after the sixth post, reason and streaming copy, Add to Queue, Rate / Rank route, open title, no picks. pgTAP `019_recommendation_providers.test.sql` (runs in CI).
 
+#### `FE-SETTINGS-02`: Import Watch History from Settings — Letterboxd CSV & AniList (#35)
+- **Spec Reference**: [**`features/01_ONBOARDING_AND_TASTE_SEEDING.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/01_ONBOARDING_AND_TASTE_SEEDING.md) §3 (1-click importers); `SCR-20`
+- **Granular Tasks**:
+  - [x] SCR-20 "Import Watch History" section above Data & Exports: **Import from Letterboxd** (file picker for `watched.csv` / `ratings.csv`) and **Import from AniList** (username dialog).
+  - [x] `WatchHistoryImportController` (idle / running / done / failed) runs the onboarding `CanonImportService` (TMDB matching, ordered by my rating, appended to the right canon, already-ranked titles skipped). It isn't auto-disposed, so an import keeps going if Settings closes.
+  - [x] Progress bar while importing, then a summary: added, already in canon (`ImportResult.matched` / `alreadyRanked`), unmatched (expandable list). Errors for files that aren't Letterboxd exports and for unknown AniList users.
+  - [x] `csvFilePickerProvider` and `AniListUsernameDialog` move to `onboarding/presentation/widgets/import_sources.dart`, shared with SCR-03.
+- **Testing & Verification**:
+  - [x] Widget tests: section placement, Letterboxd import into the movie canon only (ordered by rating) with unmatched list, idempotent re-import, invalid file, cancelled picker, AniList into both canons, unknown AniList user. `ImportResult.alreadyRanked` unit test. SCR-03 import tests still pass.
+
 ---
 
 ## 🏆 Sprint Deliverables Summary Matrix

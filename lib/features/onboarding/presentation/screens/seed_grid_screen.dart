@@ -1,6 +1,3 @@
-import 'dart:convert';
-
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -13,17 +10,9 @@ import '../../../../core/widgets/telly_primary_button.dart';
 import '../../data/canon_import_service.dart';
 import '../../data/top_50_seeds.dart';
 import '../controllers/onboarding_controllers.dart';
+import '../widgets/import_sources.dart';
 
-/// Picks a Letterboxd export and returns its text, or null if cancelled (FE-606).
-final csvFilePickerProvider = Provider<Future<String?> Function()>((ref) => () async {
-      final picked = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: const ['csv'],
-        withData: true,
-      );
-      final bytes = picked?.files.single.bytes;
-      return bytes == null ? null : utf8.decode(bytes, allowMalformed: true);
-    });
+export '../widgets/import_sources.dart' show csvFilePickerProvider;
 
 /// SCR-03: Movie, Series & Anime Recognition Seed Grid Screen.
 /// Conforms to `docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md` §3 (`SCR-03`)
@@ -346,7 +335,7 @@ Future<void> _importLetterboxd(BuildContext context, WidgetRef ref) async {
 }
 
 Future<void> _importAniList(BuildContext context, WidgetRef ref) async {
-  final username = await showDialog<String>(context: context, builder: (_) => const _AniListUsernameDialog());
+  final username = await showDialog<String>(context: context, builder: (_) => const AniListUsernameDialog());
   if (username == null || username.isEmpty || !context.mounted) return;
   await _runImport(context, ref, () async {
     final entries = await ref.read(aniListImporterProvider).fetchUserAnime(username);
@@ -363,46 +352,6 @@ Future<void> _runImport(BuildContext context, WidgetRef ref, Future<ImportResult
     messenger.showSnackBar(SnackBar(content: Text('Imported ${result.added} titles$skipped')));
   } catch (e) {
     messenger.showSnackBar(SnackBar(content: Text('Import failed: $e')));
-  }
-}
-
-/// Owns its controller so it outlives the dialog's exit animation.
-class _AniListUsernameDialog extends StatefulWidget {
-  const _AniListUsernameDialog();
-
-  @override
-  State<_AniListUsernameDialog> createState() => _AniListUsernameDialogState();
-}
-
-class _AniListUsernameDialogState extends State<_AniListUsernameDialog> {
-  final _controller = TextEditingController();
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      backgroundColor: TellyColors.backgroundCard,
-      title: Text('AniList username', style: TellyTypography.titleMedium()),
-      content: TextField(
-        key: const Key('anilist_username_field'),
-        controller: _controller,
-        autofocus: true,
-        decoration: const InputDecoration(hintText: 'e.g. frieren_fan'),
-      ),
-      actions: [
-        TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
-        TextButton(
-          key: const Key('anilist_import_confirm'),
-          onPressed: () => Navigator.of(context).pop(_controller.text.trim()),
-          child: const Text('Import'),
-        ),
-      ],
-    );
   }
 }
 
