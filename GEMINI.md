@@ -6,6 +6,7 @@
 ## Quick Reference
 - **Roadmap & Tickets**: [`docs/PROJECT_ROADMAP_AND_SPRINT_PLAN.md`](file:///c:/Users/karla/Desktop/SeriesBeli/docs/PROJECT_ROADMAP_AND_SPRINT_PLAN.md)
 - **Architecture & Test Pyramid**: [`docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md)
+- **Supabase Deployment Skill**: [`.agents/skills/supabase-deploy/SKILL.md`](file:///c:/Users/karla/Desktop/SeriesBeli/.agents/skills/supabase-deploy/SKILL.md)
 - **Design System Tokens**: [`docs/design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md`](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md)
 
 ### Non-Negotiable Workflow
@@ -15,3 +16,4 @@
 4. Pass `dart analyze` and `flutter test` before claiming completion.
 5. Check off completed tasks `[x]` and update the **Active Sprint Execution Dashboard** in the roadmap.
 6. Commit using `feat(<scope>): [<TICKET-ID>] <description>`.
+7. Do all Supabase backend work (migrations, edge functions, secrets, pgTAP) through the **`supabase-deploy`** skill. Start with its `status` action; the human only runs `supabase login`; confirm before writing to `telly-prod`.

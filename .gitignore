@@ -45,3 +45,6 @@ supabase/.branches/
 env/*.json
 !env/example.json
 
+
+# Supabase pg_dump backups taken by the supabase-deploy skill
+supabase/backups/

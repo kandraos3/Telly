@@ -2010,6 +2010,15 @@ Tickets ingested through the `issue-manager` skill. Each entry mirrors its GitHu
 - **Testing & Verification**:
   - [x] Deno edge test for aggregate credits (CI), credits parsing test, widget tests for cast carousel, cast empty state and live streaming badges.
 
+#### `BE-DEPLOY-01`: `supabase-deploy` Skill & Non-Interactive Backend Deployment Toolchain
+- **Spec Reference**: [**`technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md), [**`technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md)
+- **Granular Tasks**:
+  - [x] `supabase_deploy.ps1` with status / plan / push / functions / deploy / test actions; login is the only manual step (CLI login role, no DB password).
+  - [x] Guards: link/ref check, remote-only and out-of-order migrations, empty-history push, dry-run, pre-push backup, post-push verification, per-function secret checks.
+  - [x] Skill mirrored in `.claude/skills` and `.agents/skills`; usage mandated in `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`; `supabase/backups/` gitignored.
+- **Testing & Verification**:
+  - [x] Verified against `telly-prod`: `status` and `plan` (read-only); dry-run with a throwaway migration; out-of-order guard refuses with exit 3.
+
 ---
 
 ## 🏆 Sprint Deliverables Summary Matrix

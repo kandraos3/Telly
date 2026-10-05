@@ -75,6 +75,15 @@ When writing Flutter or Backend code, the agent must honor these non-negotiable 
 
 ---
 
+## 🛰️ Backend Deployment (Supabase)
+
+All remote Supabase work (checking what's live, applying migrations, deploying edge functions, setting or checking secrets, running pgTAP) **must go through the `supabase-deploy` skill**: [`.agents/skills/supabase-deploy/SKILL.md`](file:///c:/Users/karla/Desktop/SeriesBeli/.agents/skills/supabase-deploy/SKILL.md) (mirrored in `.claude/skills/`).
+- Start with its read-only `status` action, and author migrations and edge functions following its §4–§5 conventions.
+- The only manual step for the human is `supabase login`. Never ask for database passwords or tokens.
+- Confirm with the user before writing to `telly-prod` (push / functions / deploy) unless they asked for a deploy in the current session. Deploy the backend before releasing an app build that depends on it.
+
+---
+
 ## 🔄 Standard 6-Step Ticket Execution Workflow
 
 ```mermaid
