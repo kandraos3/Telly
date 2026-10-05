@@ -66,7 +66,7 @@ void main() {
       expect(find.text('Succession'), findsOneWidget);
       expect(find.byKey(const Key('duel_vs_badge')), findsOneWidget);
       expect(find.text('━  VS  ━'), findsOneWidget);
-      expect(find.text('DUEL 1 OF 1'), findsOneWidget);
+      expect(find.text('Duel 1 of 1'), findsOneWidget);
       expect(find.byKey(const Key('cant_compare_button')), findsOneWidget);
     });
 

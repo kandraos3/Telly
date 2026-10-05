@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/router/routes.dart';
 import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
+import '../../../../core/widgets/telly_screen_header.dart';
 import '../controllers/squad_controllers.dart';
 
 /// My Squads (entry to `SCR-17`, FE-608): list + create.
@@ -29,9 +30,9 @@ class SquadsListScreen extends ConsumerWidget {
     final async = ref.watch(squadsListProvider);
     return Scaffold(
       backgroundColor: TellyColors.canvasOf(context),
-      appBar: AppBar(
-        title: Text('MY SQUADS', style: TellyTypography.labelLarge(color: TellyColors.textPrimaryOf(context))),
-        centerTitle: true,
+      appBar: TellySubpageAppBar(
+        title: 'My Squads',
+        onNav: () => context.canPop() ? context.pop() : context.go(Routes.feed),
       ),
       floatingActionButton: FloatingActionButton.extended(
         key: const Key('create_squad_button'),

@@ -8,6 +8,7 @@ import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
 import '../../../../core/widgets/telly_neon_badge.dart';
 import '../../../../core/widgets/telly_primary_button.dart';
+import '../../../../core/widgets/telly_screen_header.dart';
 import '../../../ranking/domain/franchise_rollup_service.dart';
 import '../controllers/edit_profile_controller.dart';
 import '../controllers/profile_controller.dart';
@@ -49,28 +50,21 @@ class EditProfileStudioScreen extends ConsumerWidget {
     final canSave = draft != null && !draft.saving;
 
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        leading: IconButton(
-          tooltip: 'Cancel',
-          icon: Icon(Icons.close, color: TellyColors.textPrimaryOf(context)),
-          onPressed: () {
-            final rootNav = Navigator.of(context, rootNavigator: true);
-            if (rootNav.canPop()) {
-              rootNav.pop();
-            } else if (Navigator.of(context).canPop()) {
-              Navigator.of(context).pop();
-            } else {
-              try {
-                context.pop();
-              } catch (_) {}
-            }
-          },
-        ),
-        title: Text(
-          'EDIT PROFILE',
-          style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context)).copyWith(letterSpacing: 1.2),
-        ),
+      appBar: TellySubpageAppBar(
+        nav: TellyNavKind.close,
+        title: 'Edit profile',
+        onNav: () {
+          final rootNav = Navigator.of(context, rootNavigator: true);
+          if (rootNav.canPop()) {
+            rootNav.pop();
+          } else if (Navigator.of(context).canPop()) {
+            Navigator.of(context).pop();
+          } else {
+            try {
+              context.pop();
+            } catch (_) {}
+          }
+        },
         actions: [
           TextButton(
             key: const Key('edit_profile_save'),
@@ -78,7 +72,7 @@ class EditProfileStudioScreen extends ConsumerWidget {
             child: draft?.saving == true
                 ? const SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2))
                 : Text(
-                    'Save ✓',
+                    'Save',
                     style: TellyTypography.labelLarge(color: canSave ? TellyColors.primaryAccentOf(context) : TellyColors.textTertiaryOf(context))
                         .copyWith(fontWeight: FontWeight.bold),
                   ),

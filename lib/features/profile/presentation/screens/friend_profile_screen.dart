@@ -7,6 +7,7 @@ import '../../../../core/router/routes.dart';
 import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
 import '../../../../core/widgets/telly_primary_button.dart';
+import '../../../../core/widgets/telly_screen_header.dart';
 import '../../../auth/data/auth_repository.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../cowatch/domain/spearman_taste_match_calculator.dart';
@@ -37,14 +38,9 @@ class FriendProfileScreen extends ConsumerWidget {
         (currentUserId != null && data != null && data.profile.id == currentUserId);
 
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        leading: IconButton(
-          tooltip: 'Back',
-          icon: Icon(Icons.arrow_back, color: TellyColors.textPrimaryOf(context)),
-          onPressed: () => context.canPop() ? context.pop() : context.go(Routes.feed),
-        ),
-        title: Text('@$handle', style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context))),
+      appBar: TellySubpageAppBar(
+        title: '@$handle',
+        onNav: () => context.canPop() ? context.pop() : context.go(Routes.feed),
         actions: [
           if (data != null)
             _FollowButton(handle: handle, status: data.followStatus, isSelf: isSelf),
@@ -73,7 +69,7 @@ class _FollowButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     if (isSelf) {
       return Padding(
-        padding: const EdgeInsets.only(right: 16),
+        padding: const EdgeInsets.only(right: 12), // + the app bar's 4 dp = the 16 dp gutter
         child: Center(
           child: OutlinedButton(
             key: const Key('edit_profile_button'),
@@ -98,7 +94,7 @@ class _FollowButton extends ConsumerWidget {
       _ => '+ Follow',
     };
     return Padding(
-      padding: const EdgeInsets.only(right: 16),
+      padding: const EdgeInsets.only(right: 12), // + the app bar's 4 dp = the 16 dp gutter
       child: Center(
         child: OutlinedButton(
           key: const Key('follow_button'),

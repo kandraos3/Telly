@@ -9,6 +9,7 @@ import '../../../../core/router/routes.dart';
 import '../../../../core/services/biometrics_service.dart';
 import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
+import '../../../../core/widgets/telly_screen_header.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../legal/domain/legal_markdown.dart';
 import '../../../legal/presentation/screens/legal_document_screen.dart';
@@ -53,17 +54,9 @@ class SettingsHubScreen extends ConsumerWidget {
     final cacheSize = ref.watch(imageCacheSizeProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        leading: IconButton(
-          tooltip: 'Back',
-          icon: Icon(Icons.arrow_back, color: TellyColors.textPrimaryOf(context)),
-          onPressed: () => context.canPop() ? context.pop() : context.go(Routes.canon),
-        ),
-        title: Text(
-          'SETTINGS & PREFERENCES',
-          style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context)).copyWith(letterSpacing: 1.2),
-        ),
+      appBar: TellySubpageAppBar(
+        title: 'Settings',
+        onNav: () => context.canPop() ? context.pop() : context.go(Routes.canon),
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),

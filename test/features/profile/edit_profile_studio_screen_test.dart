@@ -160,7 +160,7 @@ void main() {
 
       expect(find.byKey(const Key('edit_profile_error')), findsOneWidget);
       expect(find.textContaining("Couldn't save your profile"), findsOneWidget);
-      expect(find.text('EDIT PROFILE'), findsOneWidget);
+      expect(find.text('Edit profile'), findsOneWidget);
     });
 
     testWidgets('clearing a showcase slot removes the pin', (tester) async {

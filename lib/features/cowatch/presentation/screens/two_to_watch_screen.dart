@@ -7,6 +7,7 @@ import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/theme/telly_typography.dart';
 import 'package:telly_app/core/widgets/poster_image.dart';
 import 'package:telly_app/core/widgets/telly_neon_badge.dart';
+import 'package:telly_app/core/widgets/telly_screen_header.dart';
 import 'package:telly_app/features/auth/data/auth_repository.dart';
 import 'package:telly_app/features/cowatch/data/co_watch_repository.dart';
 import 'package:telly_app/features/cowatch/domain/two_to_watch_engine.dart';
@@ -54,19 +55,7 @@ class TwoToWatchScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: TellyColors.canvasOf(context),
-      appBar: AppBar(
-        backgroundColor: TellyColors.canvasOf(context),
-        elevation: 0,
-        leading: IconButton(
-          tooltip: 'Close',
-          icon: Icon(Icons.close, color: TellyColors.textPrimaryOf(context)),
-          onPressed: () => Navigator.of(context).maybePop(),
-        ),
-        title: Text(
-          'TWO-TO-WATCH',
-          style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context)).copyWith(letterSpacing: 1.2),
-        ),
-      ),
+      appBar: const TellySubpageAppBar(nav: TellyNavKind.close, title: 'Two-to-Watch'),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
         children: [

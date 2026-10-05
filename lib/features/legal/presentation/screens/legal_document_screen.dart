@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
+import '../../../../core/widgets/telly_screen_header.dart';
 import '../../domain/legal_markdown.dart';
 
 /// Native viewer for the bundled legal Markdown (FE-AUTH-04, FE-LEGAL-01). Works signed in
@@ -32,10 +33,7 @@ class _LegalDocumentScreenState extends State<LegalDocumentScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        title: Text(widget.document.title, style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context))),
-      ),
+      appBar: TellySubpageAppBar(title: widget.document.title),
       body: FutureBuilder<List<LegalBlock>>(
         future: _blocks,
         builder: (context, snapshot) {

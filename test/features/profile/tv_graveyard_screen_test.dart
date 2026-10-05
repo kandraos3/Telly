@@ -57,7 +57,7 @@ void main() {
     testWidgets('renders persisted drops with milestone, reason and status', (tester) async {
       repo.shows.add(westworld());
       await pump(tester);
-      expect(find.text('THE TV GRAVEYARD'), findsOneWidget);
+      expect(find.text('TV Graveyard'), findsOneWidget);
       expect(find.text('WESTWORLD'), findsOneWidget);
       expect(find.text('2016 • Season 3, Episode 4'), findsOneWidget);
       expect(find.text('Reason: “Writing jumped the shark”'), findsOneWidget);

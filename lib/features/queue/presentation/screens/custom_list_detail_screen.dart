@@ -7,6 +7,7 @@ import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/theme/telly_typography.dart';
 import 'package:telly_app/core/widgets/poster_image.dart';
 import 'package:telly_app/core/widgets/telly_neon_badge.dart';
+import 'package:telly_app/core/widgets/telly_screen_header.dart';
 
 import '../../domain/custom_list_models.dart';
 import '../../data/custom_list_repository.dart';
@@ -115,13 +116,7 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
 
     if (currentList == null) {
       return Scaffold(
-        appBar: AppBar(
-          elevation: 0,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: TellyColors.textPrimaryOf(context)),
-            onPressed: () => context.pop(),
-          ),
-        ),
+        appBar: TellySubpageAppBar(onNav: () => context.pop()),
         body: Center(
           child: Text('List not found', style: TextStyle(color: TellyColors.textTertiaryOf(context))),
         ),
@@ -132,30 +127,32 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
     final isOwner = list.isOwner('@me');
 
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: TellyColors.textPrimaryOf(context)),
-          onPressed: () => context.pop(),
-        ),
-        title: Text(
-          list.title.toUpperCase(),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context)).copyWith(letterSpacing: 1.2),
-        ),
+      appBar: TellySubpageAppBar(
+        title: list.title,
+        onNav: () => context.pop(),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.share_outlined, color: TellyColors.phosphorLime),
+          TellyHeaderAction(
+            icon: Icons.share_outlined,
             tooltip: 'Share List',
             onPressed: () => _shareList(list),
           ),
           if (isOwner)
-            IconButton(
-              icon: const Icon(Icons.delete_outline, color: TellyColors.neonCoral),
-              tooltip: 'Delete List',
-              onPressed: () async {
-                final router = GoRouter.of(context);
+            TellyHeaderMenu<String>(
+              key: const Key('list_menu_button'),
+              tooltip: 'List options',
+              itemBuilder: (_) => [
+                PopupMenuItem(
+                  key: const Key('list_delete'),
+                  value: 'delete',
+                  child: Row(children: [
+                    Icon(Icons.delete_outline, color: TellyColors.neonCoralOf(context), size: 20),
+                    const SizedBox(width: 12),
+                    Text('Delete List', style: TellyTypography.bodyMedium(color: TellyColors.neonCoralOf(context))),
+                  ]),
+                ),
+              ],
+              onSelected: (_) async {
+                final navigator = Navigator.of(context);
                 final confirm = await showDialog<bool>(
                   context: context,
                   builder: (ctx) => AlertDialog(
@@ -180,7 +177,7 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
                 );
                 if (confirm == true && mounted) {
                   await ref.read(userCustomListsProvider.notifier).deleteList(list.id);
-                  if (mounted) router.pop();
+                  if (mounted) navigator.pop();
                 }
               },
             ),

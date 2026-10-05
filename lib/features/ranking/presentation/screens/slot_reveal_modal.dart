@@ -5,6 +5,7 @@ import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
 import '../../../../core/widgets/poster_image.dart';
 import '../../../../core/widgets/telly_primary_button.dart';
+import '../../../../core/widgets/telly_screen_header.dart';
 import '../../domain/canon_type.dart';
 import '../../domain/score_curve_calculator.dart';
 import '../../data/ranking_repository.dart';
@@ -173,15 +174,14 @@ class _SlotRevealModalState extends ConsumerState<SlotRevealModal>
           child: Column(
             children: [
               // 1. TOP HEADER WITH CLOSE BUTTON
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  IconButton(
-                    key: const Key('slot_reveal_close_button'),
-                    icon: Icon(Icons.close, color: TellyColors.textSecondaryOf(context)),
-                    onPressed: widget.onClose ?? () => Navigator.of(context).maybePop(),
-                  ),
-                ],
+              // Close sits on the left, like every pushed screen (FE-HEADER-02).
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TellyNavButton(
+                  key: const Key('slot_reveal_close_button'),
+                  kind: TellyNavKind.close,
+                  onPressed: widget.onClose,
+                ),
               ),
 
               // 2. SCROLLABLE REVEAL CONTENT

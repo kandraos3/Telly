@@ -7,7 +7,8 @@ import '../theme/telly_typography.dart';
 /// Shared header for the four tab screens: Feed, Explore, Queue and Canon (FE-HEADER-01).
 ///
 /// A large sentence-case title with no emoji, and up to three muted icon actions on the
-/// right. Spec: `docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md` §0.
+/// right. Pushed screens use the one-step-smaller [TellySubpageAppBar] (FE-HEADER-02).
+/// Spec: `docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md` §0.
 class TellyScreenHeader extends StatelessWidget {
   static const height = 56.0;
 
@@ -35,11 +36,7 @@ class TellyScreenHeader extends StatelessWidget {
                   key: const Key('screen_header_title'),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TellyTypography.titleLarge(color: TellyColors.textPrimaryOf(context)).copyWith(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.5,
-                  ),
+                  style: TellyTypography.screenTitle(color: TellyColors.textPrimaryOf(context)),
                 ),
               ),
             ),
@@ -109,6 +106,123 @@ class TellyFloatingHeaderScrollView extends StatelessWidget {
         ],
         body: body,
       ),
+    );
+  }
+}
+
+/// How a pushed screen is left: back for screens you drill into, close for tasks you dismiss.
+enum TellyNavKind { back, close }
+
+/// The one back / close button used by every pushed screen (FE-HEADER-02).
+class TellyNavButton extends StatelessWidget {
+  final TellyNavKind kind;
+
+  /// Defaults to [Navigator.maybePop].
+  final VoidCallback? onPressed;
+
+  const TellyNavButton({super.key, this.kind = TellyNavKind.back, this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    final back = kind == TellyNavKind.back;
+    return IconButton(
+      tooltip: back ? 'Back' : 'Close',
+      icon: Icon(back ? Icons.arrow_back_rounded : Icons.close_rounded, color: TellyColors.textPrimaryOf(context)),
+      onPressed: onPressed ?? () => Navigator.of(context).maybePop(),
+    );
+  }
+}
+
+/// App bar for every pushed (non-tab) screen (FE-HEADER-02): back or close on the left, a
+/// left-aligned sentence-case title one step below [TellyScreenHeader], and muted actions.
+/// At most one action may be accented (the screen's primary action, e.g. Save or Follow);
+/// destructive actions go in a [TellyHeaderMenu]. It stays put while the content scrolls.
+class TellySubpageAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final String? title;
+
+  /// A quiet second line under the title, e.g. "5 members".
+  final String? subtitle;
+  final TellyNavKind nav;
+  final Key? navKey;
+  final VoidCallback? onNav;
+  final List<Widget> actions;
+  final Color? backgroundColor;
+
+  const TellySubpageAppBar({
+    super.key,
+    this.title,
+    this.subtitle,
+    this.nav = TellyNavKind.back,
+    this.navKey,
+    this.onNav,
+    this.actions = const [],
+    this.backgroundColor,
+  });
+
+  @override
+  Size get preferredSize => const Size.fromHeight(TellyScreenHeader.height);
+
+  @override
+  Widget build(BuildContext context) {
+    final title = this.title;
+    final subtitle = this.subtitle;
+    return AppBar(
+      automaticallyImplyLeading: false,
+      backgroundColor: backgroundColor ?? TellyColors.canvasOf(context),
+      leading: TellyNavButton(key: navKey, kind: nav, onPressed: onNav),
+      titleSpacing: 4,
+      title: title == null
+          ? null
+          : Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Separate nodes, so each line is announced (and contrast-checked) on its own.
+                Semantics(
+                  container: true,
+                  header: true,
+                  child: Text(
+                    title,
+                    key: const Key('subpage_title'),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TellyTypography.subpageTitle(color: TellyColors.textPrimaryOf(context)),
+                  ),
+                ),
+                if (subtitle != null)
+                  Semantics(
+                    container: true,
+                    child: Text(
+                      subtitle,
+                      key: const Key('subpage_subtitle'),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TellyTypography.labelMedium(color: TellyColors.textSecondaryOf(context)),
+                    ),
+                  ),
+              ],
+            ),
+      actions: [...actions, const SizedBox(width: 4)],
+    );
+  }
+}
+
+/// Muted ⋮ overflow menu for header actions, home of destructive ones (FE-HEADER-02).
+class TellyHeaderMenu<T> extends StatelessWidget {
+  final String tooltip;
+  final PopupMenuItemBuilder<T> itemBuilder;
+  final PopupMenuItemSelected<T> onSelected;
+
+  const TellyHeaderMenu({super.key, this.tooltip = 'More options', required this.itemBuilder, required this.onSelected});
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<T>(
+      tooltip: tooltip,
+      color: TellyColors.cardOf(context),
+      icon: Icon(Icons.more_vert_rounded, color: TellyColors.textSecondaryOf(context)),
+      onSelected: onSelected,
+      itemBuilder: itemBuilder,
     );
   }
 }

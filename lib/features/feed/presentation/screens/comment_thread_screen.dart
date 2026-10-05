@@ -6,6 +6,7 @@ import 'package:telly_app/core/services/haptics_service.dart';
 import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/theme/telly_typography.dart';
 import 'package:telly_app/core/widgets/poster_image.dart';
+import 'package:telly_app/core/widgets/telly_screen_header.dart';
 import 'package:telly_app/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:telly_app/features/onboarding/data/top_50_seeds.dart';
 import 'package:telly_app/features/feed/data/social_repository.dart';
@@ -78,24 +79,10 @@ class _CommentThreadScreenState extends ConsumerState<CommentThreadScreen> {
 
     return Scaffold(
       backgroundColor: TellyColors.canvasOf(context),
-      appBar: AppBar(
-        backgroundColor: TellyColors.canvasOf(context),
-        elevation: 0,
-        leading: IconButton(
-          tooltip: 'Close',
-          icon: Icon(Icons.close_rounded, color: TellyColors.textPrimaryOf(context)),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Text(
-          'CONVERSATION',
-          style: TellyTypography.labelLarge(
-            color: TellyColors.textPrimaryOf(context),
-          ).copyWith(
-            letterSpacing: 1.2,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
+      appBar: TellySubpageAppBar(
+        nav: TellyNavKind.close,
+        title: 'Comments',
+        onNav: () => Navigator.of(context).pop(),
       ),
       body: SafeArea(
         child: Column(

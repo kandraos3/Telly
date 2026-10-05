@@ -6,6 +6,7 @@ import '../../../../core/router/routes.dart';
 import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
 import '../../../../core/widgets/telly_primary_button.dart';
+import '../../../../core/widgets/telly_screen_header.dart';
 import '../../../profile/presentation/controllers/graveyard_controller.dart';
 import '../../../profile/presentation/widgets/log_dropped_show_sheet.dart';
 import '../../../ranking/domain/sentiment_bracket.dart';
@@ -87,11 +88,15 @@ class _LoggingStudioScreenState extends ConsumerState<LoggingStudioScreen> {
     final title = draft.title;
 
     return Scaffold(
+      appBar: TellySubpageAppBar(
+        nav: TellyNavKind.close,
+        navKey: const Key('logging_cancel'),
+        title: 'Log a show',
+        onNav: _close,
+      ),
       body: SafeArea(
         child: Column(
           children: [
-            _Header(onCancel: _close),
-            Divider(height: 1, color: TellyColors.strokeOf(context)),
             Expanded(
               child: title == null
                   ? _SearchPane(controller: _searchController, draft: draft)
@@ -108,40 +113,6 @@ class _LoggingStudioScreenState extends ConsumerState<LoggingStudioScreen> {
               ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _Header extends StatelessWidget {
-  final VoidCallback onCancel;
-  const _Header({required this.onCancel});
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 52,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton(
-              key: const Key('logging_cancel'),
-              onPressed: onCancel,
-              child: Text(
-                '✕ Cancel',
-                style: TellyTypography.labelLarge(color: TellyColors.textPrimaryOf(context))
-                    .copyWith(fontWeight: FontWeight.w800),
-              ),
-            ),
-          ),
-          Text(
-            'LOG A SHOW',
-            style: TellyTypography.labelLarge(color: TellyColors.textPrimaryOf(context))
-                .copyWith(fontWeight: FontWeight.w800),
-          ),
-        ],
       ),
     );
   }

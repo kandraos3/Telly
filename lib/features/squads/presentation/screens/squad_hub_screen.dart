@@ -8,6 +8,7 @@ import '../../../../core/router/routes.dart';
 import '../../../../core/services/haptics_service.dart';
 import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
+import '../../../../core/widgets/telly_screen_header.dart';
 import '../../data/squad_repository.dart';
 import '../../domain/squad_models.dart';
 import '../controllers/squad_controllers.dart';
@@ -27,36 +28,22 @@ class SquadHubScreen extends ConsumerWidget {
     final hub = async.valueOrNull;
 
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        leading: IconButton(
-          tooltip: 'Back',
-          icon: Icon(Icons.arrow_back_rounded, color: TellyColors.textPrimaryOf(context)),
-          onPressed: () => context.canPop() ? context.pop() : context.go(Routes.squads),
-        ),
-        title: Text(
-          hub == null ? 'SQUAD' : '${hub.squad.name.toUpperCase()} (${hub.squad.memberCount})',
-          style: TellyTypography.labelLarge(color: TellyColors.textPrimaryOf(context))
-              .copyWith(letterSpacing: 1.2, fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
+      appBar: TellySubpageAppBar(
+        title: hub?.squad.name ?? 'Squad',
+        subtitle: hub == null ? null : '${hub.squad.memberCount} ${hub.squad.memberCount == 1 ? 'member' : 'members'}',
+        onNav: () => context.canPop() ? context.pop() : context.go(Routes.squads),
         actions: [
           if (hub != null && ref.read(squadHubProvider(squadId).notifier).canInvite)
-            TextButton.icon(
+            TellyHeaderAction(
               key: const Key('squad_invite_button'),
+              icon: Icons.person_add_outlined,
+              tooltip: 'Invite',
               onPressed: () => _invite(context, ref),
-              icon: Icon(Icons.person_add_outlined, size: 16, color: TellyColors.primaryAccentOf(context)),
-              label: Text(
-                'Invite',
-                style: TellyTypography.caption(color: TellyColors.primaryAccentOf(context)).copyWith(fontWeight: FontWeight.bold),
-              ),
             ),
           if (hub != null)
-            PopupMenuButton<String>(
+            TellyHeaderMenu<String>(
               key: const Key('squad_menu_button'),
               tooltip: 'Squad options',
-              color: TellyColors.cardOf(context),
-              icon: Icon(Icons.more_vert_rounded, color: TellyColors.textPrimaryOf(context)),
               onSelected: (_) => _deleteOrLeave(context, ref),
               itemBuilder: (_) {
                 final owner = ref.read(squadHubProvider(squadId).notifier).isOwner;

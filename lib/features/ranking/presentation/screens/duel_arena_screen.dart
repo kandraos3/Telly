@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/services/haptics_service.dart';
 import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
+import '../../../../core/widgets/telly_screen_header.dart';
 import '../controllers/duel_controller.dart';
 import '../widgets/duel_arena_card.dart';
 
@@ -243,25 +244,19 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen> with SingleTi
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              IconButton(
+              TellyNavButton(
                 key: const Key('duel_arena_close_button'),
-                tooltip: 'Close duel',
-                icon: Icon(Icons.close, color: TellyColors.textSecondaryOf(context)),
-                onPressed: widget.onCancel ?? () => Navigator.of(context).maybePop(),
+                kind: TellyNavKind.close,
+                onPressed: widget.onCancel,
               ),
               Expanded(
                 child: Text(
-                  widget.progressLabel?.call(activeState) ?? 'DUEL $step OF $totalSteps',
+                  widget.progressLabel?.call(activeState) ?? 'Duel $step of $totalSteps',
                   key: const Key('duel_step_counter_text'),
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TellyTypography.titleMedium(
-                    color: TellyColors.textPrimaryOf(context),
-                  ).copyWith(
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: widget.progressLabel == null ? 1.5 : 0,
-                  ),
+                  style: TellyTypography.subpageTitle(color: TellyColors.textPrimaryOf(context)),
                 ),
               ),
               const SizedBox(width: 48), // Balance close button width

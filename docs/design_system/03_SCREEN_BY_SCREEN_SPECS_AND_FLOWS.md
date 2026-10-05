@@ -52,6 +52,42 @@ The four tab screens (`SCR-05`, `SCR-07`, `SCR-13`, `SCR-14`) share one header, 
 
 * **Scroll behavior:** the header scrolls away as the content scrolls down, and any upward scroll snaps it back in full, wherever the content is; there is no need to return to the top. Controls under the header (Feed filter tabs, Queue hub pills and Movies / TV Shows tabs) stay in place.
 
+#### §0.2 Pushed Screens — `FE-HEADER-02`
+
+Every screen opened on top of the tabs uses `TellySubpageAppBar`, the same design one step down:
+
+```
+┌────────────────────────────────────────────────────────┐
+│ [←]  Settings                                          │   drill-in screens
+│ [✕]  Edit profile                               Save   │   task / modal screens
+│ [←]  The Apartment                         [👤+]  [⋮]  │   optional quiet subtitle
+│      5 members                                         │
+└────────────────────────────────────────────────────────┘
+```
+
+* **Title:** sentence case, no emoji, left-aligned: Plus Jakarta Sans 20 / ExtraBold (w800) / −0.3, `textPrimary`, announced as a heading. Names people typed (squads, lists) are shown as typed, never upper-cased. An optional second line (`labelMedium`, `textSecondary`) carries a count or context ("5 members").
+* **Leading:** one back arrow (`arrow_back_rounded`, "Back") for screens you drill into, one close (`close_rounded`, "Close") for tasks you dismiss, in `textPrimary`. Full-screen flows without an app bar (Duel arena, Canon reveal) use the same close button, on the left.
+* **Actions:** the same muted 48 dp icons as the tab header. At most one accented action per screen, its primary one (Save on Edit profile, Follow on a friend's profile). Destructive actions (Delete list, Delete / Leave squad) live in a muted ⋮ menu, never as a bare coloured icon.
+* **Scroll behavior:** fixed. Only the four tab headers hide on scroll, so Back / Close is always one tap away.
+* **Theme default:** `TellyTheme`'s `AppBarTheme` uses the same title style, left alignment and canvas background, so an app bar that sets nothing still matches.
+* **Out of scope:** onboarding (`SCR-01` to `SCR-04`) keeps its own step header, and the show detail page (`SCR-08`) keeps its backdrop header with the shared back button.
+
+| Screen | Leading | Title | Actions |
+| :--- | :--- | :--- | :--- |
+| `SCR-06` Comments | ✕ | Comments | none |
+| `SCR-09` Log a show | ✕ | Log a show | none |
+| `SCR-10` Duel arena | ✕ | "Duel 2 of 4", centred (progress) | none |
+| `SCR-12` Canon reveal | ✕ | none | none |
+| `SCR-15` Friend profile | ← | @handle | Follow (accent) or Edit Profile |
+| `SCR-16` Two-to-Watch | ✕ | Two-to-Watch | none |
+| `SCR-17` My Squads / Squad | ← | My Squads / squad name + "N members" | Invite, ⋮ (Delete / Leave) |
+| `SCR-18` TV Graveyard | ← | TV Graveyard | Log dropped show (+) |
+| `SCR-19` Story studio | ✕ | Story studio | Share |
+| `SCR-20` Settings | ← | Settings | none |
+| Edit profile | ✕ | Edit profile | Save (accent) |
+| Custom list | ← | list name | Share, ⋮ (Delete) |
+| Legal documents, placeholders | ← | document / screen name | none |
+
 ---
 
 ### `SCR-01`: Onboarding Splash & Authentication
@@ -236,7 +272,7 @@ The four tab screens (`SCR-05`, `SCR-07`, `SCR-13`, `SCR-14`) share one header, 
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│ [✕ Close]             CONVERSATION                     │
+│ [✕]  Comments                                          │
 ├────────────────────────────────────────────────────────┤
 │  [ Original Post Card summarized ]                     │
 ├────────────────────────────────────────────────────────┤
@@ -343,7 +379,7 @@ The four tab screens (`SCR-05`, `SCR-07`, `SCR-13`, `SCR-14`) share one header, 
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│ [✕ Cancel]            LOG A SHOW                       │
+│ [✕]  Log a show                                        │
 ├────────────────────────────────────────────────────────┤
 │  Selected: THE BEAR (FX / Hulu)                        │
 │                                                        │
@@ -618,7 +654,8 @@ The four tab screens (`SCR-05`, `SCR-07`, `SCR-13`, `SCR-14`) share one header, 
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│ [←]               THE APARTMENT (5)           [Invite] │
+│ [←]  The Apartment                         [👤+]  [⋮]  │
+│      5 members                                         │
 ├────────────────────────────────────────────────────────┤
 │  Members: Jordan, Maya, Alex, Chris, Sam               │
 │                                                        │
@@ -650,7 +687,7 @@ The four tab screens (`SCR-05`, `SCR-07`, `SCR-13`, `SCR-14`) share one header, 
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│ [←]                 THE TV GRAVEYARD                   │
+│ [←]  TV Graveyard                                [ + ] │
 │  Shows you abandoned and why (14 Total)                │
 ├────────────────────────────────────────────────────────┤
 │                                                        │

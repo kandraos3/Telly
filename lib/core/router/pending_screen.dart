@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/telly_colors.dart';
 import '../theme/telly_typography.dart';
+import '../widgets/telly_screen_header.dart';
 
 /// Honest placeholder for a routed screen whose ticket has not landed yet.
 /// Every use names its ticket; `QA-608` fails if any remain at the end of Sprint 6.
@@ -16,10 +17,7 @@ class PendingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: TellyColors.canvasOf(context),
-      appBar: AppBar(
-        backgroundColor: TellyColors.canvasOf(context),
-        title: Text(title, style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context))),
-      ),
+      appBar: TellySubpageAppBar(title: title),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),

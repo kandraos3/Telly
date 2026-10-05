@@ -24,6 +24,25 @@ abstract class TellyTypography {
         color: color,
       );
 
+  // Screen headers: tab screens (FE-HEADER-01) sit one step above pushed screens (FE-HEADER-02).
+  static TextStyle screenTitle({Color color = TellyColors.textPrimary}) =>
+      GoogleFonts.plusJakartaSans(
+        fontSize: 24,
+        height: 1.25,
+        fontWeight: FontWeight.w800,
+        letterSpacing: -0.5,
+        color: color,
+      );
+
+  static TextStyle subpageTitle({Color color = TellyColors.textPrimary}) =>
+      GoogleFonts.plusJakartaSans(
+        fontSize: 20,
+        height: 1.25,
+        fontWeight: FontWeight.w800,
+        letterSpacing: -0.3,
+        color: color,
+      );
+
   // Plus Jakarta Sans for UI & Metadata
   static TextStyle titleLarge({Color color = TellyColors.textPrimary}) =>
       GoogleFonts.plusJakartaSans(

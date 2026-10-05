@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:telly_app/core/router/routes.dart';
-import 'package:telly_app/core/services/haptics_service.dart';
 import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/theme/telly_typography.dart';
+import 'package:telly_app/core/widgets/telly_screen_header.dart';
 import 'package:telly_app/features/profile/domain/dropped_show.dart';
 import 'package:telly_app/features/profile/presentation/controllers/graveyard_controller.dart';
 
@@ -22,37 +22,15 @@ class TvGraveyardScreen extends ConsumerWidget {
     final async = ref.watch(graveyardControllerProvider);
     final droppedShows = async.valueOrNull ?? const <DroppedShow>[];
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        leading: IconButton(
-          tooltip: 'Back',
-          icon: Icon(Icons.arrow_back_rounded, color: TellyColors.textPrimaryOf(context)),
-          onPressed: () => context.canPop() ? context.pop() : context.go(Routes.canon),
-        ),
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('🪦', style: TextStyle(fontSize: 18)),
-            const SizedBox(width: 8),
-            Text(
-              'THE TV GRAVEYARD',
-              style: TellyTypography.labelLarge(color: TellyColors.textPrimaryOf(context)).copyWith(
-                letterSpacing: 1.2,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        centerTitle: true,
+      appBar: TellySubpageAppBar(
+        title: 'TV Graveyard',
+        onNav: () => context.canPop() ? context.pop() : context.go(Routes.canon),
         actions: [
-          IconButton(
-            icon: Icon(Icons.add_rounded, color: TellyColors.neonCoralOf(context)),
-            tooltip: 'Log Dropped Show',
+          TellyHeaderAction(
             key: const Key('graveyard_add_button'),
-            onPressed: () {
-              HapticsService.lightImpact();
-              context.push(Routes.log);
-            },
+            icon: Icons.add_rounded,
+            tooltip: 'Log Dropped Show',
+            onPressed: () => context.push(Routes.log),
           ),
         ],
       ),

@@ -37,18 +37,18 @@ abstract class TellyTheme {
         ),
       ),
       colorScheme: colorScheme,
-      appBarTheme: const AppBarTheme(
+      // FE-HEADER-02: every app bar defaults to the shared pushed-screen header look.
+      appBarTheme: AppBarTheme(
         backgroundColor: TellyColors.backgroundPrimary,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
+        toolbarHeight: 56,
         systemOverlayStyle: SystemUiOverlayStyle.light,
-        iconTheme: IconThemeData(color: TellyColors.textPrimary),
-        titleTextStyle: TextStyle(
-          color: TellyColors.textPrimary,
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-        ),
+        iconTheme: const IconThemeData(color: TellyColors.textPrimary),
+        actionsIconTheme: const IconThemeData(color: TellyColors.textSecondary),
+        titleTextStyle: TellyTypography.subpageTitle(color: TellyColors.textPrimary),
       ),
       dividerColor: TellyColors.strokeSubtle,
       dividerTheme: const DividerThemeData(
@@ -103,18 +103,18 @@ abstract class TellyTheme {
         ),
       ),
       colorScheme: colorScheme,
-      appBarTheme: const AppBarTheme(
+      // FE-HEADER-02: every app bar defaults to the shared pushed-screen header look.
+      appBarTheme: AppBarTheme(
         backgroundColor: TellyColors.lightBackgroundPrimary,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
+        toolbarHeight: 56,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
-        iconTheme: IconThemeData(color: TellyColors.lightTextPrimary),
-        titleTextStyle: TextStyle(
-          color: TellyColors.lightTextPrimary,
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-        ),
+        iconTheme: const IconThemeData(color: TellyColors.lightTextPrimary),
+        actionsIconTheme: const IconThemeData(color: TellyColors.lightTextSecondary),
+        titleTextStyle: TellyTypography.subpageTitle(color: TellyColors.lightTextPrimary),
       ),
       dividerColor: TellyColors.lightStrokeSubtle,
       dividerTheme: const DividerThemeData(

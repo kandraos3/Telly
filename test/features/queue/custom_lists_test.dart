@@ -234,7 +234,7 @@ void main() {
       await tester.pumpWidget(createDetailWidget(testList));
       await tester.pumpAndSettle();
 
-      expect(find.text('STUDIO GHIBLI WONDERS'), findsOneWidget);
+      expect(find.text('Studio Ghibli Wonders'), findsNWidgets(2), reason: 'header title (as typed) and the list hero');
       expect(find.text('Hand-drawn animation epics'), findsOneWidget);
       expect(find.text('PUBLIC'), findsOneWidget);
       expect(find.text('@maya'), findsOneWidget);
@@ -260,6 +260,19 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.textContaining('https://telly.app/lists/test-list-42'), findsOneWidget);
+    });
+
+    testWidgets('delete lives in the header menu, not as a bare icon (FE-HEADER-02)', (tester) async {
+      await tester.pumpWidget(createDetailWidget(testList));
+      await tester.pumpAndSettle();
+
+      expect(find.byTooltip('Delete List'), findsNothing);
+      await tester.tap(find.byKey(const Key('list_menu_button')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('list_delete')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Delete List?'), findsOneWidget);
     });
 
     testWidgets('removes an item from the list', (tester) async {

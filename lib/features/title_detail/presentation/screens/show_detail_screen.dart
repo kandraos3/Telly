@@ -9,6 +9,7 @@ import 'package:telly_app/core/theme/telly_typography.dart';
 import 'package:telly_app/core/widgets/poster_image.dart';
 import 'package:telly_app/core/widgets/telly_neon_badge.dart';
 import 'package:telly_app/core/widgets/telly_primary_button.dart';
+import 'package:telly_app/core/widgets/telly_screen_header.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:telly_app/features/logging/domain/title_search_result.dart';
 import 'package:telly_app/features/onboarding/data/top_50_seeds.dart';
@@ -277,11 +278,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
       backgroundColor: canvasColor,
       expandedHeight: 220,
       pinned: true,
-      leading: IconButton(
-        tooltip: 'Back',
-        icon: Icon(Icons.arrow_back, color: TellyColors.textPrimaryOf(context)),
-        onPressed: () => context.canPop() ? context.pop() : context.go(Routes.feed),
-      ),
+      leading: TellyNavButton(onPressed: () => context.canPop() ? context.pop() : context.go(Routes.feed)),
       actions: [
         IconButton(
           icon: Icon(

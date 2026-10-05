@@ -28,7 +28,7 @@
 - **Overall Roadmap Progress**: All 32/32 Sprint 6 architecture, integration, algorithm, and QA remediation tickets fully implemented and verified.
 - **Human-Only Tasks**: Tasks marked `👤 [TO BE DONE BY HUMAN]` (cloud deployment, secrets provisioning, store submission, physical-device profile runs). Client application codebase is 100% complete and self-contained.
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (462 / 462 pass; 100% golden, a11y, integration, and algorithmic parity suites pass; coverage 86.81% overall / 97.04% ranking)
-- **Last Updated**: 2026-10-05 (`FE-HEADER-01` unified tab headers complete)
+- **Last Updated**: 2026-10-05 (`FE-HEADER-01` tab headers and `FE-HEADER-02` pushed-screen headers complete)
 
 | Sprint | Status | Total Tickets | Audit Verdict |
 | :---: | :---: | :---: | :--- |
@@ -179,6 +179,20 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [x] `test/core/widgets/telly_screen_header_test.dart`: title style, heading semantics, 48 dp actions, 16 dp edges, and hide-on-scroll-down / reappear-on-scroll-up mid-list.
   - [x] Screen tests: Feed search opens Explore with a request, Explore focuses on each new request, Queue sort sheet re-sorts and header actions follow the hub mode, Canon header title and actions.
 - **Dependencies**: `FE-102`, `FE-602`.
+
+#### `FE-HEADER-02`: Unified Pushed-Screen Header Across the App
+- **Spec Reference**:
+  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §0.2 (Pushed Screens); `SCR-06`, `SCR-08` to `SCR-10`, `SCR-12`, `SCR-15` to `SCR-20`
+- **Scope & Objectives**: Pushed screens used three title alignments, four title styles (mostly ALL CAPS, some with emoji), three back icons, and accent or coral icons in their bars. They now share one header that matches `FE-HEADER-01`, one step smaller, so the app reads as one product. Onboarding is out of scope.
+- **Granular Tasks**:
+  - [x] `TellyTypography.screenTitle` (24) / `subpageTitle` (20); `TellyTheme` `AppBarTheme` (dark and light) defaults to the subpage title, left alignment and canvas background.
+  - [x] `telly_screen_header.dart`: `TellyNavButton` (back / close), `TellySubpageAppBar` (title, optional subtitle, muted actions; fixed) and `TellyHeaderMenu` (muted ⋮ for destructive actions).
+  - [x] Back screens: Settings, TV Graveyard (+ now muted), My Squads, Squad (name as typed + "N members"; Invite as an icon), custom list (name as typed; Share muted; Delete moved to ⋮), friend profile, legal documents, placeholder screen, show detail (shared back button).
+  - [x] Close screens: Comments, Two-to-Watch, Edit profile ("Save"), Story studio (Share muted), Log a show (replaces the custom "✕ Cancel" bar), Duel arena ("Duel 2 of 4" in the shared style), Canon reveal (close moved to the left).
+- **Testing & Verification**:
+  - [x] `telly_screen_header_test.dart`: subpage title style, left alignment, heading semantics, back / close, subtitle, ⋮ menu, theme defaults.
+  - [x] Screen tests updated for the new titles; custom list delete through the ⋮ menu. Squad header subtitle passes the light-theme a11y contrast audit.
+- **Dependencies**: `FE-HEADER-01`.
 
 #### `FE-103`: Haptic Feedback Engine (`HapticsService`)
 - **Spec Reference**:

@@ -3,6 +3,7 @@ import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/theme/telly_typography.dart';
 import 'package:telly_app/core/widgets/telly_neon_badge.dart';
 import 'package:telly_app/core/widgets/telly_primary_button.dart';
+import 'package:telly_app/core/widgets/telly_screen_header.dart';
 
 /// SCR-19: Telly Wrapped Studio & Shareable Story Carousel.
 /// Conforms to `FE-502` and `docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md` §19.
@@ -49,23 +50,12 @@ class _TellyWrappedStudioScreenState extends State<TellyWrappedStudioScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        leading: IconButton(
-          tooltip: 'Close',
-          icon: Icon(Icons.close, color: TellyColors.textPrimaryOf(context)),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Text(
-          'STORY STUDIO',
-          style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context)).copyWith(letterSpacing: 1.2),
-        ),
+      appBar: TellySubpageAppBar(
+        nav: TellyNavKind.close,
+        title: 'Story studio',
+        onNav: () => Navigator.of(context).pop(),
         actions: [
-          IconButton(
-            tooltip: 'Share story',
-            icon: Icon(Icons.share, color: TellyColors.primaryAccentOf(context)),
-            onPressed: _shareStory,
-          ),
+          TellyHeaderAction(icon: Icons.ios_share_rounded, tooltip: 'Share story', onPressed: _shareStory),
         ],
       ),
       body: Column(

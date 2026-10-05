@@ -145,7 +145,9 @@ void main() {
       await pump(tester, const SquadHubScreen(squadId: 'sq-1'));
       await tester.tap(find.byKey(const Key('squad_canon_tv')));
       await tester.pumpAndSettle();
-      expect(find.text('THE APARTMENT (2)'), findsOneWidget);
+      // FE-HEADER-02: the name as typed, the member count on a quiet second line.
+      expect(tester.widget<Text>(find.byKey(const Key('subpage_title'))).data, 'The Apartment');
+      expect(tester.widget<Text>(find.byKey(const Key('subpage_subtitle'))).data, '2 members');
       expect(find.text('MEMBERS (2)'), findsOneWidget);
       expect(find.byKey(const Key('squad_consensus_101')), findsOneWidget);
       expect(find.textContaining("SQUAD'S BIGGEST DEBATE: LOST"), findsOneWidget);
@@ -324,7 +326,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(repo.deleted, isEmpty);
-      expect(find.text('THE APARTMENT (2)'), findsOneWidget);
+      expect(tester.widget<Text>(find.byKey(const Key('subpage_title'))).data, 'The Apartment');
     });
 
     testWidgets('a rejected delete stays on the hub and says so', (tester) async {
@@ -337,7 +339,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text("Couldn't delete the squad. Try again."), findsOneWidget);
-      expect(find.text('THE APARTMENT (2)'), findsOneWidget);
+      expect(tester.widget<Text>(find.byKey(const Key('subpage_title'))).data, 'The Apartment');
     });
   });
 
