@@ -24,11 +24,11 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 6 — Integration, Wiring & Audit Remediation** (COMPLETED: 32 / 32 tickets complete)
-- **Current Active Ticket**: `ALL_DONE` (Squads redesign complete: `FE-UI-01` ✅ → `FE-SQUADS-03` ✅ → `FE-SQUADS-04` ✅) — Sprint 6: 32 / 32 tickets complete
+- **Current Active Ticket**: `WEB-02` (Marketing Website track: `WEB-01` ✅ → `WEB-02` → `WEB-03` → `WEB-04`; 1 / 4 complete) — Sprint 6: 32 / 32 tickets complete
 - **Overall Roadmap Progress**: All 32/32 Sprint 6 architecture, integration, algorithm, and QA remediation tickets fully implemented and verified.
 - **Human-Only Tasks**: Tasks marked `👤 [TO BE DONE BY HUMAN]` (cloud deployment, secrets provisioning, store submission, physical-device profile runs). Client application codebase is 100% complete and self-contained.
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (682 / 682 pass; 100% golden, a11y, integration, and algorithmic parity suites pass; coverage 86.81% overall / 97.04% ranking)
-- **Last Updated**: 2026-10-05 (`FE-SQUADS-04` squad hub redesign complete)
+- **Last Updated**: 2026-10-05 (`WEB-01` site design tokens generated from the app theme)
 
 | Sprint | Status | Total Tickets | Audit Verdict |
 | :---: | :---: | :---: | :--- |
@@ -2251,6 +2251,62 @@ Tickets ingested through the `issue-manager` skill. Each entry mirrors its GitHu
   - [x] `csvFilePickerProvider` and `AniListUsernameDialog` move to `onboarding/presentation/widgets/import_sources.dart`, shared with SCR-03.
 - **Testing & Verification**:
   - [x] Widget tests: section placement, Letterboxd import into the movie canon only (ordered by rating) with unmatched list, idempotent re-import, invalid file, cancelled picker, AniList into both canons, unknown AniList user. `ImportResult.alreadyRanked` unit test. SCR-03 import tests still pass.
+
+---
+
+## 🌐 Marketing Website Track (`WEB`)
+
+A promotional site at `https://kandraos3.github.io/Telly/` that hosts the Privacy Policy and Terms of Service, shows real app screenshots and lists the features. It has no design values of its own: colors, type, screenshots and legal text are regenerated from the app on every deploy, so the site follows the app without code changes. Dark mode only (Midnight Cathode).
+
+#### `WEB-01`: Site Design Tokens Generated from the App Theme
+- **Spec Reference**: [**`design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md) §2 (colors), §2.2 (tier gradients), §3 (type scale), §4 (spacing, radii, glows)
+- **Scope & Objectives**: `tokens.css` is generated from `lib/core/theme/`, never hand-edited. Changing a color or text style in the app changes the site on the next deploy.
+- **Granular Tasks**:
+  - [x] Read every dark-mode `static const Color` in `telly_colors.dart` (skipping `light*`) and write it as a CSS custom property (`phosphorLime` → `--phosphor-lime`), with an `-rgb` triplet for translucent glows.
+  - [x] Write each `TellyTypography` style (family, size, weight, line height, tracking, tabular figures) as a `.t-<style>` class plus `--t-<style>-*` properties, read from the live `TextStyle`s.
+  - [x] Self-host the app's bundled fonts (`assets/fonts/`) with `@font-face`.
+- **Testing & Verification**:
+  - [x] Unit tests: color parsing (ARGB → CSS, alpha, naming, light tokens skipped), typography CSS output.
+  - [x] Drift guard: a test fails if `telly_typography.dart` gains a style the generator doesn't export.
+- **Dependencies**: None.
+
+#### `WEB-02`: Automated App Screenshots for the Site
+- **Spec Reference**: [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) `SCR-05`, `SCR-07`, `SCR-08`, `SCR-10`, `SCR-12`–`SCR-19`; [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) (golden rendering)
+- **Scope & Objectives**: Render real screens headlessly at iPhone 15 size (393 × 852 pt, 2×) with fixture data, so a redesigned screen shows up on the site on its own.
+- **Granular Tasks**:
+  - [ ] Screenshot font loader: bundled fonts under google_fonts' family names, Material Icons from the SDK, and an emoji font in the fallback family (`flutter test` disables system font fallback).
+  - [ ] `posterArtProvider` hook in `PosterImage` (null in the app) so screenshots show generated poster art instead of the icon fallback, with no studio artwork on the site.
+  - [ ] Scene catalogue (one entry per screen: fixtures, tab, file name) rendered by `tool/site/generate_site_test.dart` into `build/site_gen/screenshots/`.
+- **Testing & Verification**:
+  - [ ] Unit test for the font re-weighting; widget test that `PosterImage` uses `posterArtProvider` only when network posters are off.
+  - [ ] The generator fails if a scene throws or a screenshot named in `site/content.yaml` has no scene.
+- **Dependencies**: `WEB-01`.
+
+#### `WEB-03`: Static Site Build — Landing Page, Legal Pages, Store Placeholders & Attribution
+- **Spec Reference**: [**`DESIGN_DOCUMENT.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/DESIGN_DOCUMENT.md) §1–§4 (positioning and features); [**`design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md) §1, §4, §7 (brand mark usage); [**`legal/PRIVACY_POLICY.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/legal/PRIVACY_POLICY.md), [**`legal/TERMS_OF_SERVICE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/legal/TERMS_OF_SERVICE.md)
+- **Scope & Objectives**: `dart run tool/site/build.dart` assembles `build/site/` from `site/content.yaml`, `site/static/`, the generated tokens and screenshots, and `docs/legal/`.
+- **Granular Tasks**:
+  - [ ] `site/content.yaml`: tagline, feature rows (screenshot, accent, copy), gallery, store links (`null` → "Coming soon" badge), contact email.
+  - [ ] Landing page: sticky glass nav, hero with phone mockup, tier strip, alternating feature rows, screen gallery, closing CTA, footer.
+  - [ ] `/privacy/` and `/terms/` rendered with the app's own legal Markdown parser (`parseLegalMarkdown`), so they always match the in-app text. Support page with the contact email.
+  - [ ] Footer: © year, TMDB attribution ("not endorsed or certified by TMDB"), JustWatch and AniList credits, Apple / Google trademark notices, font licenses (SIL OFL), Twemoji (CC-BY 4.0) credit.
+  - [ ] Hand-written `site.css` uses `var(--…)` tokens only; hex literals are rejected. Favicon and social image from `assets/brand/`.
+  - [ ] Legal contact addresses point to `karlandraos@gmail.com` (the `telly.app` addresses don't exist).
+- **Testing & Verification**:
+  - [ ] Unit tests: content parsing and validation, store badge live vs. placeholder, legal Markdown → HTML (escaping, bullets, inline styles), page output contains every feature and attribution line, CSS guard (no hex, every `var()` defined), internal link check.
+- **Dependencies**: `WEB-01`, `WEB-02`.
+
+#### `WEB-04`: GitHub Pages Auto-Deploy on Relevant Changes
+- **Spec Reference**: [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) (CI gates); `.github/workflows/ci.yml` (`DEV-602`)
+- **Scope & Objectives**: `.github/workflows/site.yml` rebuilds and redeploys the site when a push to `main` touches anything the site is made from, and skips the deploy when the output didn't change.
+- **Granular Tasks**:
+  - [ ] Triggers: pushes to `main` touching `lib/**`, `assets/**`, `docs/legal/**`, `site/**`, `tool/site/**`, `test/fakes/**`, `pubspec.*` or the workflow; plus manual `workflow_dispatch` (with a force option).
+  - [ ] Steps: site unit tests → fetch emoji font → generate tokens and screenshots → build → content hash compared with the live `build-hash.txt` → `actions/deploy-pages` only when it differs.
+  - [ ] `tool/site/build.sh` runs the same pipeline locally.
+  - [ ] 👤 **[TO BE DONE BY HUMAN]** Approve enabling GitHub Pages (Settings → Pages → Source: GitHub Actions).
+- **Testing & Verification**:
+  - [ ] Local `tool/site/build.sh` run produces the full site; workflow YAML validated by a successful run on `main`.
+- **Dependencies**: `WEB-03`.
 
 ---
 
