@@ -24,11 +24,16 @@ class AuthState {
   final String? phoneNumber;
   final String? errorMessage;
 
+  /// Set when a password recovery link opened the app; the router holds the user on the
+  /// reset-password screen until a new password is saved (FE-AUTH-03).
+  final bool passwordRecovery;
+
   const AuthState({
     this.status = AuthStepStatus.unauthenticated,
     this.user,
     this.phoneNumber,
     this.errorMessage,
+    this.passwordRecovery = false,
   });
 
   bool get isSignedIn => status == AuthStepStatus.authenticated;
@@ -39,12 +44,14 @@ class AuthState {
     UserProfile? user,
     String? phoneNumber,
     String? errorMessage,
+    bool? passwordRecovery,
   }) {
     return AuthState(
       status: status ?? this.status,
       user: user ?? this.user,
       phoneNumber: phoneNumber ?? this.phoneNumber,
       errorMessage: errorMessage,
+      passwordRecovery: passwordRecovery ?? this.passwordRecovery,
     );
   }
 }
@@ -56,8 +63,15 @@ class AuthController extends Notifier<AuthState> {
 
   @override
   AuthState build() {
-    final subscription = ref.watch(authRepositoryProvider).watchSignedInUserId().listen(_onSessionChanged);
-    ref.onDispose(subscription.cancel);
+    final repository = ref.watch(authRepositoryProvider);
+    final subscription = repository.watchSignedInUserId().listen(_onSessionChanged);
+    final recovery = repository.watchPasswordRecovery().listen((_) {
+      state = state.copyWith(passwordRecovery: true);
+    });
+    ref.onDispose(() {
+      subscription.cancel();
+      recovery.cancel();
+    });
     return const AuthState(status: AuthStepStatus.initializing);
   }
 
@@ -72,11 +86,12 @@ class AuthController extends Notifier<AuthState> {
     }
     try {
       final profile = await _repository.fetchCurrentProfile();
-      state = AuthState(status: AuthStepStatus.authenticated, user: profile);
+      state = AuthState(status: AuthStepStatus.authenticated, user: profile, passwordRecovery: state.passwordRecovery);
     } catch (_) {
-      state = const AuthState(
+      state = AuthState(
         status: AuthStepStatus.authenticated,
         errorMessage: 'Signed in, but your profile could not be loaded.',
+        passwordRecovery: state.passwordRecovery,
       );
     }
   }
@@ -84,8 +99,7 @@ class AuthController extends Notifier<AuthState> {
   /// Re-reads the profile row (e.g. after onboarding marks it complete).
   Future<void> refreshProfile() => _onSessionChanged(_repository.currentUserId);
 
-  Future<void> signInWithApple() =>
-      _startOAuth(_repository.signInWithApple, 'Apple sign in failed. Please try again.');
+  Future<void> signInWithApple() => _startOAuth(_repository.signInWithApple, 'Apple sign in failed. Please try again.');
 
   Future<void> signInWithGoogle() =>
       _startOAuth(_repository.signInWithGoogle, 'Google sign in failed. Please try again.');
@@ -126,6 +140,35 @@ class AuthController extends Notifier<AuthState> {
         status: AuthStepStatus.error,
         errorMessage: 'Account creation failed. Please try again.',
       );
+      return false;
+    }
+  }
+
+  /// Sends the recovery email. Returns true on success; failures land in `errorMessage`.
+  Future<bool> sendPasswordReset(String email) async {
+    try {
+      await _repository.sendPasswordResetEmail(email);
+      return true;
+    } on AuthException catch (e) {
+      state = state.copyWith(errorMessage: e.message);
+      return false;
+    } catch (_) {
+      state = state.copyWith(errorMessage: 'Could not send the reset email. Please try again.');
+      return false;
+    }
+  }
+
+  /// Saves the new password and releases the router from the recovery screen.
+  Future<bool> updatePassword(String newPassword) async {
+    try {
+      await _repository.updatePassword(newPassword);
+      state = state.copyWith(passwordRecovery: false);
+      return true;
+    } on AuthException catch (e) {
+      state = state.copyWith(errorMessage: e.message);
+      return false;
+    } catch (_) {
+      state = state.copyWith(errorMessage: 'Could not update your password. Please try again.');
       return false;
     }
   }

@@ -34,7 +34,10 @@ void main() {
         },
       };
 
-  SupabaseAuthRepository repoWith(Future<http.Response> Function(http.Request) handler) {
+  SupabaseAuthRepository repoWith(
+    Future<http.Response> Function(http.Request) handler, {
+    AuthFlowType flowType = AuthFlowType.pkce,
+  }) {
     final client = SupabaseClient(
       'http://supabase.test',
       'anon-key',
@@ -44,7 +47,7 @@ void main() {
         // postgrest reads response.request; a bare http.Response leaves it null.
         return http.Response(res.body, res.statusCode, headers: res.headers, request: req);
       }),
-      authOptions: const AuthClientOptions(autoRefreshToken: false),
+      authOptions: AuthClientOptions(autoRefreshToken: false, authFlowType: flowType),
     );
     return SupabaseAuthRepository(client, redirectUrl: 'app.telly.mobile://login-callback');
   }
@@ -79,14 +82,16 @@ void main() {
     expect(repo.currentUserId, isNull);
   });
 
-  test('verifyPhoneOtp creates a session on success; completeRegistration maps 23505 to HandleTakenException', () async {
+  test('verifyPhoneOtp creates a session on success; completeRegistration maps 23505 to HandleTakenException',
+      () async {
     final repo = repoWith((req) async {
       if (req.url.path == '/auth/v1/verify') {
         return http.Response(jsonEncode(sessionJson()), 200, headers: {'content-type': 'application/json'});
       }
       if (req.url.path == '/rest/v1/users' && req.method == 'PATCH') {
         return http.Response(
-          jsonEncode({'code': '23505', 'message': 'duplicate key value violates unique constraint "users_username_key"'}),
+          jsonEncode(
+              {'code': '23505', 'message': 'duplicate key value violates unique constraint "users_username_key"'}),
           409,
           headers: {'content-type': 'application/json'},
         );
@@ -109,5 +114,20 @@ void main() {
   test('completeRegistration requires a signed-in user', () async {
     final repo = repoWith((_) async => http.Response('{}', 200));
     await expectLater(repo.completeRegistration(username: 'jordan', displayName: 'J'), throwsStateError);
+  });
+
+  test('FE-AUTH-03: sendPasswordResetEmail posts to /recover with the app redirect URL', () async {
+    // PKCE needs platform storage for the code verifier; the request shape is the same.
+    final repo = repoWith(
+      (_) async => http.Response('{}', 200, headers: {'content-type': 'application/json'}),
+      flowType: AuthFlowType.implicit,
+    );
+
+    await repo.sendPasswordResetEmail('  jordan@example.com ');
+
+    final req = requests.single;
+    expect(req.url.path, '/auth/v1/recover');
+    expect(req.url.queryParameters['redirect_to'], 'app.telly.mobile://login-callback');
+    expect((jsonDecode(req.body) as Map)['email'], 'jordan@example.com');
   });
 }

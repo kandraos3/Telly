@@ -3,7 +3,7 @@ import 'routes.dart';
 
 /// Pure redirect policy for the router (FE-602), unit-testable without widgets.
 ///
-/// no session → SCR-01; session without handle → handle reservation;
+/// no session → SCR-01; recovery link → reset password; session without handle → handle reservation;
 /// onboarding incomplete → SCR-02 → SCR-03 → SCR-04; otherwise the app.
 String? authRedirect(AuthState auth, String location) {
   bool at(String prefix) => location == prefix || location.startsWith('$prefix/');
@@ -16,6 +16,10 @@ String? authRedirect(AuthState auth, String location) {
     return at(Routes.auth) ? null : Routes.auth;
   }
 
+  if (auth.passwordRecovery) {
+    return location == Routes.resetPassword ? null : Routes.resetPassword;
+  }
+
   final user = auth.user;
   if (user == null || !user.hasHandle) {
     return location == Routes.handle ? null : Routes.handle;
@@ -26,7 +30,7 @@ String? authRedirect(AuthState auth, String location) {
     return inOnboarding ? null : Routes.streamingSetup;
   }
 
-  if (at(Routes.auth) || at(Routes.onboarding) || location == Routes.splash) {
+  if (at(Routes.auth) || at(Routes.onboarding) || location == Routes.splash || location == Routes.resetPassword) {
     return Routes.feed;
   }
   return null;

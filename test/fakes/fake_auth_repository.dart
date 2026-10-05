@@ -68,6 +68,31 @@ class FakeAuthRepository implements AuthRepository {
     return true;
   }
 
+  final List<String> resetEmailsSent = [];
+  final _recoveries = StreamController<void>.broadcast();
+  String? updatedPassword;
+
+  /// Simulates opening the app from a recovery link: emits the recovery event, then the session.
+  void openRecoveryLink() {
+    _recoveries.add(null);
+    _signIn('email-user', 'Email User');
+  }
+
+  @override
+  Future<void> sendPasswordResetEmail(String email) async {
+    _maybeFail();
+    resetEmailsSent.add(email.trim());
+  }
+
+  @override
+  Stream<void> watchPasswordRecovery() => _recoveries.stream;
+
+  @override
+  Future<void> updatePassword(String newPassword) async {
+    _maybeFail();
+    updatedPassword = newPassword;
+  }
+
   @override
   Future<void> sendPhoneOtp(String phoneNumber) async => _maybeFail();
 

@@ -32,6 +32,15 @@ abstract class AuthRepository {
   /// Signs up with email and password. Returns true if session was immediately created, false if email confirmation is required.
   Future<bool> signUpWithEmail({required String email, required String password});
 
+  /// Emails a recovery link that deep-links back through the auth redirect URL.
+  Future<void> sendPasswordResetEmail(String email);
+
+  /// Emits whenever a recovery link opens the app (the session arrives separately).
+  Stream<void> watchPasswordRecovery();
+
+  /// Sets a new password for the signed-in (recovering) user.
+  Future<void> updatePassword(String newPassword);
+
   Future<void> sendPhoneOtp(String phoneNumber);
 
   /// Returns true when the code is valid and a session was created.
@@ -141,6 +150,17 @@ class SupabaseAuthRepository implements AuthRepository {
     final res = await _auth.signUp(email: email.trim(), password: password);
     return res.session != null;
   }
+
+  @override
+  Future<void> sendPasswordResetEmail(String email) =>
+      _auth.resetPasswordForEmail(email.trim(), redirectTo: _redirectUrl);
+
+  @override
+  Stream<void> watchPasswordRecovery() =>
+      _auth.onAuthStateChange.where((s) => s.event == AuthChangeEvent.passwordRecovery);
+
+  @override
+  Future<void> updatePassword(String newPassword) => _auth.updateUser(UserAttributes(password: newPassword));
 
   @override
   Future<void> sendPhoneOtp(String phoneNumber) => _auth.signInWithOtp(phone: phoneNumber);

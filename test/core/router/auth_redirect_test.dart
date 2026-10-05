@@ -71,4 +71,21 @@ void main() {
       expect(authRedirect(s, '/authors'), isNull);
     });
   });
+
+  test('FE-AUTH-03: a recovery session is held on the reset-password screen', () {
+    final s = AuthState(
+      status: AuthStepStatus.authenticated,
+      user: signedIn(handle: 'maya', onboarded: true).user,
+      passwordRecovery: true,
+    );
+    expect(authRedirect(s, Routes.feed), Routes.resetPassword);
+    expect(authRedirect(s, Routes.auth), Routes.resetPassword);
+    expect(authRedirect(s, Routes.resetPassword), isNull);
+    // Once saved, the screen hands back to the normal flow.
+    expect(authRedirect(signedIn(handle: 'maya', onboarded: true), Routes.resetPassword), Routes.feed);
+    expect(authRedirect(signedIn(handle: 'maya'), Routes.resetPassword), Routes.streamingSetup);
+    // Recovery never applies without a session.
+    const out = AuthState(status: AuthStepStatus.unauthenticated, passwordRecovery: true);
+    expect(authRedirect(out, Routes.resetPassword), Routes.auth);
+  });
 }

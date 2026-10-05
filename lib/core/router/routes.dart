@@ -2,6 +2,7 @@
 abstract final class Routes {
   static const splash = '/splash';
   static const auth = '/auth'; // SCR-01
+  static const resetPassword = '/reset-password'; // opened by a password recovery link
 
   // Onboarding (SCR-02 … SCR-04, preceded by handle reservation)
   static const onboarding = '/onboarding';

@@ -8,6 +8,7 @@ import '../../../../core/widgets/telly_primary_button.dart';
 import '../../../../core/widgets/telly_text_field.dart';
 import '../controllers/auth_controller.dart';
 import '../widgets/auth_poster_backdrop.dart';
+import '../widgets/forgot_password_sheet.dart';
 
 /// SCR-01: Onboarding Splash & Authentication Screen.
 /// Conforms to `docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md` §1 (`SCR-01`).
@@ -218,6 +219,14 @@ class _EmailAuthSheetState extends ConsumerState<EmailAuthSheet> {
     ref.read(authControllerProvider.notifier).clearError();
   }
 
+  void _openForgotPassword() {
+    ref.read(authControllerProvider.notifier).clearError();
+    TellyFrostedSheet.show(
+      context: context,
+      builder: (_) => ForgotPasswordSheet(initialEmail: _emailController.text.trim()),
+    );
+  }
+
   Future<void> _submit() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
@@ -308,6 +317,17 @@ class _EmailAuthSheetState extends ConsumerState<EmailAuthSheet> {
               onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
             ),
           ),
+          if (!_isSignUp)
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: isBusy ? null : _openForgotPassword,
+                child: Text(
+                  'Forgot Password?',
+                  style: TellyTypography.bodyMedium(color: TellyColors.textSecondary),
+                ),
+              ),
+            ),
           if (_isSignUp) ...[
             const SizedBox(height: 16),
             TellyTextField(

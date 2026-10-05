@@ -7,6 +7,7 @@ import '../../fakes/fake_auth_repository.dart';
 import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/widgets/telly_logo.dart';
 import 'package:telly_app/features/auth/presentation/screens/auth_screen.dart';
+import 'package:telly_app/features/auth/presentation/screens/reset_password_screen.dart';
 import 'package:telly_app/features/auth/presentation/widgets/auth_poster_backdrop.dart';
 
 void main() {
@@ -191,6 +192,70 @@ void main() {
       final gradient = (scrim.decoration as BoxDecoration).gradient! as LinearGradient;
       expect(gradient.colors.first, TellyColors.backgroundPrimary.withValues(alpha: 0.8));
       expect(gradient.colors.every((c) => c.a >= 0.8), isTrue);
+    });
+
+    testWidgets('Forgot Password? sends a reset email and confirms (FE-AUTH-03)', (tester) async {
+      final fakeRepo = FakeAuthRepository();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [authRepositoryProvider.overrideWithValue(fakeRepo)],
+          child: const MaterialApp(home: AuthScreen()),
+        ),
+      );
+
+      await tester.tap(find.text('Continue with Email'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField).at(0), 'maya@example.com');
+      await tester.tap(find.text('Forgot Password?'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Reset Your Password'), findsOneWidget);
+      // The email typed in the sign-in sheet is carried over.
+      expect(find.widgetWithText(TextField, 'maya@example.com'), findsNWidgets(2));
+
+      await tester.tap(find.text('Send Reset Link'));
+      await tester.pumpAndSettle();
+
+      expect(fakeRepo.resetEmailsSent, ['maya@example.com']);
+      expect(find.byKey(const ValueKey('reset-email-sent-banner')), findsOneWidget);
+    });
+
+    testWidgets('Forgot Password? is hidden in sign-up mode', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [authRepositoryProvider.overrideWithValue(FakeAuthRepository())],
+          child: const MaterialApp(home: AuthScreen()),
+        ),
+      );
+      await tester.tap(find.text('Continue with Email'));
+      await tester.pumpAndSettle();
+      expect(find.text('Forgot Password?'), findsOneWidget);
+      await tester.tap(find.text("Don't have an account? Sign Up"));
+      await tester.pumpAndSettle();
+      expect(find.text('Forgot Password?'), findsNothing);
+    });
+
+    testWidgets('ResetPasswordScreen validates and saves the new password (FE-AUTH-03)', (tester) async {
+      final fakeRepo = FakeAuthRepository();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [authRepositoryProvider.overrideWithValue(fakeRepo)],
+          child: const MaterialApp(home: ResetPasswordScreen()),
+        ),
+      );
+
+      final fields = find.byType(TextField);
+      await tester.enterText(fields.at(0), 'n3w-secret');
+      await tester.enterText(fields.at(1), 'different');
+      await tester.tap(find.text('Save Password'));
+      await tester.pumpAndSettle();
+      expect(find.text('Passwords do not match.'), findsOneWidget);
+      expect(fakeRepo.updatedPassword, isNull);
+
+      await tester.enterText(fields.at(1), 'n3w-secret');
+      await tester.tap(find.text('Save Password'));
+      await tester.pumpAndSettle();
+      expect(fakeRepo.updatedPassword, 'n3w-secret');
     });
   });
 }

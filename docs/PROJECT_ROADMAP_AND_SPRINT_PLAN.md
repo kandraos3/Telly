@@ -1939,6 +1939,15 @@ Tickets ingested through the `issue-manager` skill. Each entry mirrors its GitHu
 - **Testing & Verification**:
   - [x] Widget test: logo renders, 24 mosaic tiles, scrim ≥ 80% opacity.
 
+#### `FE-AUTH-03`: Forgot Password & Email Password Reset Flow (#4)
+- **Spec Reference**: [**`adjacent_systems/01_AUTH_REGISTER_AND_LOGIN_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/adjacent_systems/01_AUTH_REGISTER_AND_LOGIN_FLOWS.md) §3 Screen A2 (Login & Quick Recovery)
+- **Granular Tasks**:
+  - [x] `Forgot Password?` action in the email sign-in sheet opens `ForgotPasswordSheet` (email carried over, confirmation banner).
+  - [x] `AuthRepository.sendPasswordResetEmail` / `watchPasswordRecovery` / `updatePassword` via Supabase `/recover` with the `login-callback` redirect.
+  - [x] Recovery deep link sets `AuthState.passwordRecovery`; the router holds the session on `/reset-password` until a new password is saved.
+- **Testing & Verification**:
+  - [x] Repository request-shape test, controller recovery tests, redirect tests, widget tests for the sheet and `ResetPasswordScreen`.
+
 ---
 
 ## 🏆 Sprint Deliverables Summary Matrix

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../features/auth/presentation/screens/auth_screen.dart';
 import '../../features/auth/presentation/screens/handle_reservation_screen.dart';
+import '../../features/auth/presentation/screens/reset_password_screen.dart';
 import '../../features/cowatch/presentation/screens/two_to_watch_screen.dart';
 import '../../features/feed/domain/social_models.dart';
 import '../../features/feed/presentation/screens/activity_feed_screen.dart';
@@ -71,6 +72,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(path: Routes.splash, builder: (_, __) => const SplashScreen()),
       GoRoute(path: Routes.auth, builder: (_, __) => const AuthScreen()),
+      GoRoute(path: Routes.resetPassword, builder: (_, __) => const ResetPasswordScreen()),
 
       // Onboarding
       GoRoute(path: Routes.handle, builder: (_, __) => const HandleReservationScreen()),

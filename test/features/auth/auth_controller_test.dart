@@ -69,6 +69,46 @@ void main() {
     expect(container.read(authControllerProvider).status, AuthStepStatus.error);
   });
 
+  group('FE-AUTH-03: password recovery', () {
+    test('sendPasswordReset forwards the email and reports failures', () async {
+      container.listen(authControllerProvider, (_, __) {});
+      final notifier = container.read(authControllerProvider.notifier);
+
+      expect(await notifier.sendPasswordReset('maya@example.com'), isTrue);
+      expect(repo.resetEmailsSent, ['maya@example.com']);
+
+      repo.failNextCall = true;
+      expect(await notifier.sendPasswordReset('maya@example.com'), isFalse);
+      expect(container.read(authControllerProvider).errorMessage, isNotNull);
+    });
+
+    test('a recovery link signs in with the recovery hold, cleared by saving a password', () async {
+      container.listen(authControllerProvider, (_, __) {});
+      await settle();
+
+      repo.openRecoveryLink();
+      await settle();
+      var state = container.read(authControllerProvider);
+      expect(state.isSignedIn, isTrue);
+      expect(state.passwordRecovery, isTrue);
+
+      expect(await container.read(authControllerProvider.notifier).updatePassword('n3w-secret'), isTrue);
+      expect(repo.updatedPassword, 'n3w-secret');
+      state = container.read(authControllerProvider);
+      expect(state.passwordRecovery, isFalse);
+      expect(state.isSignedIn, isTrue);
+    });
+
+    test('signing out abandons the recovery hold', () async {
+      container.listen(authControllerProvider, (_, __) {});
+      repo.openRecoveryLink();
+      await settle();
+      await container.read(authControllerProvider.notifier).signOut();
+      await settle();
+      expect(container.read(authControllerProvider).passwordRecovery, isFalse);
+    });
+  });
+
   group('HandleReservationController', () {
     test('debounces lookups: a burst of keystrokes triggers one availability check', () async {
       final sub = container.listen(handleReservationProvider, (_, __) {});
