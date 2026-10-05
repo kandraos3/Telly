@@ -97,7 +97,7 @@ class SettingsHubScreen extends ConsumerWidget {
             _SwitchTile(
               key: const Key('settings_biometric_unlock'),
               title: 'Biometric Quick Unlock',
-              subtitle: 'Face ID / Fingerprint to unlock app (auth §4.1)',
+              subtitle: 'Face ID / Fingerprint unlock',
               value: prefs.biometricEnabled,
               onChanged: (on) async {
                 if (on) {
@@ -305,7 +305,7 @@ class SettingsHubScreen extends ConsumerWidget {
             _Tile(
               key: const Key('settings_delete_account'),
               title: 'Delete Account…',
-              subtitle: '30-day soft deletion grace period (LEGAL-601)',
+              subtitle: '30-day soft deletion grace period',
               trailing: const Icon(Icons.delete_forever, color: TellyColors.neonCoral, size: 20),
               onTap: () => _confirmAccountDeletion(context, ref),
             ),

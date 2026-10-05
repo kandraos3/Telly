@@ -206,6 +206,14 @@ void main() {
       expect(remaining, isEmpty);
       expect(find.textContaining('Account deletion requested'), findsOneWidget);
     });
+
+    testWidgets('production UI labels do not leak internal spec or ticket codes (FE-SETTINGS-04)', (tester) async {
+      await pump(tester);
+      expect(find.textContaining('auth §'), findsNothing);
+      expect(find.textContaining('LEGAL-601'), findsNothing);
+      expect(find.text('Face ID / Fingerprint unlock'), findsOneWidget);
+      expect(find.text('30-day soft deletion grace period'), findsOneWidget);
+    });
   });
 
   group('FE-608: CanonExportService', () {
