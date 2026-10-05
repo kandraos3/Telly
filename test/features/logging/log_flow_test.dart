@@ -17,6 +17,7 @@ import 'package:telly_app/features/logging/presentation/screens/log_flow_screens
 import 'package:telly_app/features/logging/presentation/screens/logging_studio_screen.dart';
 import 'package:telly_app/features/profile/presentation/screens/dual_canon_profile_screen.dart';
 import 'package:telly_app/features/ranking/domain/sentiment_bracket.dart';
+import 'package:telly_app/features/sharing/data/story_share_service.dart';
 
 import '../../fakes/fake_auth_repository.dart';
 import '../../fakes/fake_title_repository.dart';
@@ -24,7 +25,11 @@ import '../../helpers/canon_seed.dart';
 
 void main() {
   late AppDatabase db;
-  setUp(() => db = AppDatabase.inMemory());
+  late FakeStoryShareService stories;
+  setUp(() {
+    db = AppDatabase.inMemory();
+    stories = FakeStoryShareService();
+  });
   tearDown(() => db.close());
 
   Future<(ProviderContainer, GoRouter)> pumpFlow(WidgetTester tester, {String initial = Routes.log}) async {
@@ -37,6 +42,7 @@ void main() {
       hapticsEnabledProvider.overrideWith((ref) => false),
       titleRepositoryProvider.overrideWithValue(FakeTitleRepository()),
       authRepositoryProvider.overrideWithValue(FakeAuthRepository(signedInUserId: 'u1')),
+      storyShareServiceProvider.overrideWithValue(stories),
     ]);
     addTearDown(container.dispose);
     Widget stub(BuildContext _, GoRouterState s) => Scaffold(body: Text('route:${s.uri}'));
@@ -90,7 +96,16 @@ void main() {
       // SCR-12 reveal of the committed slot
       expect(find.byKey(const Key('slot_reveal_rank_text')), findsOneWidget);
       expect(find.textContaining('#1'), findsWidgets);
-      expect(find.byKey(const Key('beating_text')), findsOneWidget);
+      // FE-SHARE-01: leaderboard snippet with the new title highlighted at #1.
+      expect(find.byKey(const Key('reveal_leaderboard_snippet')), findsOneWidget);
+      expect(find.byKey(const Key('reveal_leaderboard_row_1')), findsOneWidget);
+      expect(find.byKey(const Key('reveal_leaderboard_row_2')), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('share_story_button')));
+      await tester.pumpAndSettle();
+      final story = stories.sharedReveals.single;
+      expect((story.title, story.rank, story.total, story.canonLabel), ('The Bear', 1, 2, 'Series Canon'));
+      expect(story.leaderboard.where((e) => e.isNew).single.title, 'The Bear');
 
       final canon = await db.localRankingDao.getRankingsByCanon('tv');
       expect(canon.map((e) => e.title), ['The Bear', 'Succession']);

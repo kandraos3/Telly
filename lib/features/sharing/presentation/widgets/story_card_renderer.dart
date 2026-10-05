@@ -51,6 +51,57 @@ class StoryCardRenderer {
     return generateSyntheticStoryPng();
   }
 
+  /// Renders [card] in a detached pipeline (no on-screen widget needed) at [logicalSize]
+  /// scaled by [pixelRatio] — 360×640 × 3 = 1080×1920 — and returns PNG bytes
+  /// (FE-SHARE-01, viral sharing spec §3.1).
+  static Future<Uint8List> renderOffscreen(
+    Widget card, {
+    Size logicalSize = const Size(storyWidth / 3, storyHeight / 3),
+    double pixelRatio = 3.0,
+  }) async {
+    final boundary = RenderRepaintBoundary();
+    final view = ui.PlatformDispatcher.instance.implicitView ?? ui.PlatformDispatcher.instance.views.first;
+    final renderView = RenderView(
+      view: view,
+      child: RenderPositionedBox(alignment: Alignment.center, child: boundary),
+      configuration: ViewConfiguration(
+        logicalConstraints: BoxConstraints.tight(logicalSize),
+        physicalConstraints: BoxConstraints.tight(logicalSize),
+      ),
+    );
+    final pipelineOwner = PipelineOwner()..rootNode = renderView;
+    renderView.prepareInitialFrame();
+
+    final buildOwner = BuildOwner(focusManager: FocusManager());
+    final root = RenderObjectToWidgetAdapter<RenderBox>(
+      container: boundary,
+      child: MediaQuery(
+        data: MediaQueryData(size: logicalSize),
+        child: Directionality(textDirection: TextDirection.ltr, child: card),
+      ),
+    ).attachToRenderTree(buildOwner);
+
+    try {
+      buildOwner
+        ..buildScope(root)
+        ..finalizeTree();
+      pipelineOwner
+        ..flushLayout()
+        ..flushCompositingBits()
+        ..flushPaint();
+
+      final image = await boundary.toImage(pixelRatio: pixelRatio);
+      final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+      image.dispose();
+      if (bytes == null) throw StateError('Story card could not be encoded');
+      return bytes.buffer.asUint8List();
+    } finally {
+      // Unmount the detached tree so its elements and render objects are released.
+      RenderObjectToWidgetAdapter<RenderBox>(container: boundary).attachToRenderTree(buildOwner, root);
+      buildOwner.finalizeTree();
+    }
+  }
+
   /// Generates a valid 1080x1920 PNG byte stream with standard IHDR and IEND chunks.
   static Uint8List generateSyntheticStoryPng() {
     final buffer = BytesBuilder();

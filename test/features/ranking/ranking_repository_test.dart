@@ -74,6 +74,34 @@ void main() {
       expect(logs.map((p) => p['broadcast']), [false, true]);
     });
 
+    test('FE-SHARE-01: leaderboard() centres a 5-row window and slides at the canon edges', () async {
+      await seedCanon(db, 'tv', ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'], baseId: 1);
+      Future<List<int>> windowFor(int titleId, int rank) async {
+        final commit = await repo.commitPlacement(
+          candidate: CanonCandidate(titleId: titleId, mediaType: 'tv', title: 'New $titleId'),
+          targetRank: rank,
+        );
+        final rows = commit.leaderboard();
+        expect(rows.where((r) => r.isNew).single.rank, rank);
+        await repo.remove(mediaType: 'tv', titleId: titleId);
+        return rows.map((r) => r.rank).toList();
+      }
+
+      expect(await windowFor(100, 5), [3, 4, 5, 6, 7], reason: 'two above, two below');
+      expect(await windowFor(101, 1), [1, 2, 3, 4, 5], reason: 'top slides down');
+      expect(await windowFor(102, 9), [5, 6, 7, 8, 9], reason: 'bottom slides up');
+      expect(await windowFor(103, 2), [1, 2, 3, 4, 5]);
+    });
+
+    test('FE-SHARE-01: leaderboard() shows every row of a tiny canon', () async {
+      await seedCanon(db, 'movie', ['Solo'], baseId: 1);
+      final commit = await repo.commitPlacement(
+        candidate: const CanonCandidate(titleId: 50, mediaType: 'movie', title: 'Duo'),
+        targetRank: 2,
+      );
+      expect(commit.leaderboard().map((r) => (r.rank, r.title, r.isNew)), [(1, 'Solo', false), (2, 'Duo', true)]);
+    });
+
     test('moving an unknown title is a no-op', () async {
       await seedCanon(db, 'tv', ['A'], baseId: 1);
       await repo.move(mediaType: 'tv', titleId: 99, newRank: 1);

@@ -5,6 +5,10 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/router/routes.dart';
 import '../../../../core/theme/telly_colors.dart';
 import '../../../ranking/data/ranking_repository.dart';
+import '../../../ranking/domain/canon_tier.dart';
+import '../../../ranking/domain/canon_type.dart';
+import '../../../sharing/data/story_share_service.dart';
+import '../../../sharing/domain/reveal_story.dart';
 import '../../data/title_repository.dart';
 import '../../../ranking/presentation/controllers/duel_controller.dart';
 import '../../../ranking/presentation/screens/duel_arena_screen.dart';
@@ -87,6 +91,26 @@ class _LogDuelScreenState extends ConsumerState<LogDuelScreen> {
 class LogRevealScreen extends ConsumerWidget {
   const LogRevealScreen({super.key});
 
+  /// Renders the 9:16 reveal story and hands it to the OS share sheet (FE-SHARE-01).
+  Future<void> _shareStory(BuildContext context, WidgetRef ref, RankingCommit commit) async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await ref.read(storyShareServiceProvider).shareRankReveal(RevealStory(
+            title: commit.candidate.title,
+            canonLabel: CanonType.fromMediaType(commit.candidate.mediaType) == CanonType.movie
+                ? 'Movie Canon'
+                : 'Series Canon',
+            rank: commit.rank,
+            total: commit.total,
+            score: commit.score,
+            tierLabel: CanonTier.fromScore(commit.score).label,
+            leaderboard: commit.leaderboard(),
+          ));
+    } catch (_) {
+      messenger.showSnackBar(const SnackBar(content: Text("Couldn't create your story. Try again.")));
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final commit = ref.watch(loggingSessionProvider.select((d) => d.commit));
@@ -106,6 +130,8 @@ class LogRevealScreen extends ConsumerWidget {
         targetScore: commit.score,
         beatingTitles: commit.beating(),
         justBehindTitles: [if (commit.justBehind != null) commit.justBehind!],
+        leaderboard: commit.leaderboard(),
+        onShareStory: () => _shareStory(context, ref, commit),
         onViewInCanon: () => context.go(Routes.canon),
         onClose: () => context.go(Routes.feed),
       ),

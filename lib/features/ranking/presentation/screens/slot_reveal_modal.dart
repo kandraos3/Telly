@@ -7,7 +7,9 @@ import '../../../../core/widgets/poster_image.dart';
 import '../../../../core/widgets/telly_primary_button.dart';
 import '../../domain/canon_type.dart';
 import '../../domain/score_curve_calculator.dart';
+import '../../data/ranking_repository.dart';
 import '../widgets/canon_tier_style.dart';
+import '../widgets/reveal_leaderboard_snippet.dart';
 
 /// SCR-12 Celebration Slot Reveal Modal with Number Ticker.
 /// Conforms to:
@@ -23,6 +25,9 @@ class SlotRevealModal extends ConsumerStatefulWidget {
   final double targetScore;
   final List<String> beatingTitles;
   final List<String> justBehindTitles;
+
+  /// Rows around the new entry; when present they replace the beating/just-behind text.
+  final List<RevealLeaderboardEntry> leaderboard;
   final VoidCallback onViewInCanon;
   final VoidCallback? onShareStory;
   final VoidCallback? onClose;
@@ -38,6 +43,7 @@ class SlotRevealModal extends ConsumerStatefulWidget {
     required this.targetScore,
     this.beatingTitles = const [],
     this.justBehindTitles = const [],
+    this.leaderboard = const [],
     required this.onViewInCanon,
     this.onShareStory,
     this.onClose,
@@ -58,6 +64,7 @@ class SlotRevealModal extends ConsumerStatefulWidget {
     required double targetScore,
     List<String> beatingTitles = const [],
     List<String> justBehindTitles = const [],
+    List<RevealLeaderboardEntry> leaderboard = const [],
     required VoidCallback onViewInCanon,
     VoidCallback? onShareStory,
   }) {
@@ -77,6 +84,7 @@ class SlotRevealModal extends ConsumerStatefulWidget {
           targetScore: targetScore,
           beatingTitles: beatingTitles,
           justBehindTitles: justBehindTitles,
+          leaderboard: leaderboard,
           onViewInCanon: () {
             Navigator.of(ctx).pop();
             onViewInCanon();
@@ -316,8 +324,17 @@ class _SlotRevealModalState extends ConsumerState<SlotRevealModal>
 
                       const SizedBox(height: 16),
 
-                      // Comparison Context (Beating / Just behind)
-                      if (widget.justBehindTitles.isNotEmpty || widget.beatingTitles.isNotEmpty) ...[
+                      // Ranking Context: leaderboard snippet, else Beating / Just behind
+                      if (widget.leaderboard.isNotEmpty) ...[
+                        FadeTransition(
+                          opacity: _fadeAnimation,
+                          child: RevealLeaderboardSnippet(
+                            key: const Key('reveal_leaderboard_snippet'),
+                            entries: widget.leaderboard,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                      ] else if (widget.justBehindTitles.isNotEmpty || widget.beatingTitles.isNotEmpty) ...[
                         FadeTransition(
                           opacity: _fadeAnimation,
                           child: Container(

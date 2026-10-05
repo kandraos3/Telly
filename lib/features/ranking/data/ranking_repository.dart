@@ -55,6 +55,43 @@ class RankingCommit {
 
   /// Titles directly below the new entry (the ones it beat).
   List<String> beating([int count = 2]) => canon.skip(rank).take(count).map((r) => r.title).toList();
+
+  /// Up to `2 * radius + 1` rows centred on the new entry (FE-SHARE-01). Near the top or
+  /// bottom of the canon the window slides so it still shows as many rows as exist.
+  List<RevealLeaderboardEntry> leaderboard({int radius = 2}) {
+    final size = 2 * radius + 1;
+    final index = rank - 1;
+    final start = (index - radius).clamp(0, (canon.length - size).clamp(0, canon.length));
+    return [
+      for (final r in canon.skip(start).take(size))
+        RevealLeaderboardEntry(
+          rank: r.rankPosition,
+          title: r.title,
+          posterPath: r.posterPath,
+          score: r.calculatedScore,
+          isNew: r.showId == candidate.titleId,
+        ),
+    ];
+  }
+}
+
+/// One row of the `SCR-12` leaderboard snippet and the reveal story card.
+class RevealLeaderboardEntry {
+  final int rank;
+  final String title;
+  final String? posterPath;
+  final double score;
+
+  /// The title that was just ranked (highlighted in Phosphor Lime).
+  final bool isNew;
+
+  const RevealLeaderboardEntry({
+    required this.rank,
+    required this.title,
+    this.posterPath,
+    required this.score,
+    this.isNew = false,
+  });
 }
 
 /// A ranking row fetched from Supabase for pull-hydration.

@@ -1983,6 +1983,15 @@ Tickets ingested through the `issue-manager` skill. Each entry mirrors its GitHu
 - **Testing & Verification**:
   - [x] Widget tests: only the dragged card moves, badge/other card fixed, dim + glow, spring-back, no cross-direction picks.
 
+#### `FE-SHARE-01`: LogReveal Instagram Story Share & 5-Item Leaderboard Snippet (#10)
+- **Spec Reference**: [**`adjacent_systems/04_VIRAL_SHARING_AND_EXPORT_STUDIO.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/adjacent_systems/04_VIRAL_SHARING_AND_EXPORT_STUDIO.md) §2–§3; `SCR-12`
+- **Granular Tasks**:
+  - [x] `RankingCommit.leaderboard()` — 5-row window (±2) that slides at canon edges; `RevealLeaderboardSnippet` on SCR-12 with posters, scores and the new row in Phosphor Lime.
+  - [x] `RevealStoryCard` (360×640 → 1080×1920 @3x) rendered in a detached pipeline by `StoryCardRenderer.renderOffscreen`.
+  - [x] `StoryShareService.shareRankReveal` shares the PNG + caption through `share_plus` (Instagram "Add to Story" in the system sheet).
+- **Testing & Verification**:
+  - [x] Window unit tests, offscreen PNG dimension test, service share test, SCR-09→SCR-12 flow test incl. share.
+
 ---
 
 ## 🏆 Sprint Deliverables Summary Matrix
