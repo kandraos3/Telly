@@ -47,9 +47,14 @@ class DuelArenaScreen extends ConsumerStatefulWidget {
   ConsumerState<DuelArenaScreen> createState() => _DuelArenaScreenState();
 }
 
-class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
-    with SingleTickerProviderStateMixin {
+class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen> with SingleTickerProviderStateMixin {
+  static const _swipeThreshold = 100.0;
+
   int? _selectedWinnerId;
+
+  /// Only the dragged card moves: A (upper) may only rise, B (lower) may only fall, and the
+  /// VS badge stays anchored (FE-GESTURE-01). Null when no card is being dragged.
+  _DuelSlot? _draggingSlot;
   double _dragOffsetY = 0.0;
   late AnimationController _springController;
   late Animation<double> _springAnimation;
@@ -72,23 +77,25 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
     super.dispose();
   }
 
-  void _onPanUpdate(DragUpdateDetails details) {
+  void _onDragUpdate(_DuelSlot slot, DragUpdateDetails details) {
     if (_selectedWinnerId != null) return;
+    _springController.stop();
     setState(() {
-      _dragOffsetY += details.delta.dy;
+      if (_draggingSlot != slot) _dragOffsetY = 0;
+      _draggingSlot = slot;
+      final next = _dragOffsetY + details.delta.dy;
+      // A card only travels toward its own pick direction.
+      _dragOffsetY =
+          slot == _DuelSlot.upper ? next.clamp(double.negativeInfinity, 0.0) : next.clamp(0.0, double.infinity);
     });
   }
 
-  void _onPanEnd(DragEndDetails details, DuelActive active) {
-    if (_selectedWinnerId != null) return;
+  void _onDragEnd(_DuelSlot slot, DuelActive active) {
+    if (_selectedWinnerId != null || _draggingSlot != slot) return;
 
-    const threshold = 100.0;
-    if (_dragOffsetY < -threshold) {
-      // Swiped UP -> Select Candidate A (Upper Card)
-      _handleSelection(active.candidate.showId);
-    } else if (_dragOffsetY > threshold) {
-      // Swiped DOWN -> Select Candidate B (Lower Card)
-      _handleSelection(active.currentOpponent.showId);
+    if (_dragOffsetY.abs() > _swipeThreshold) {
+      // Swiped the upper card UP picks the candidate; the lower card DOWN picks the opponent.
+      _handleSelection(slot == _DuelSlot.upper ? active.candidate.showId : active.currentOpponent.showId);
     } else {
       // Drag < threshold -> Spring back to 0
       _springAnimation = Tween<double>(
@@ -99,6 +106,7 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
       )..addListener(() {
           setState(() {
             _dragOffsetY = _springAnimation.value;
+            if (_springController.isCompleted) _draggingSlot = null;
           });
         });
       _springController.forward(from: 0.0);
@@ -111,6 +119,7 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
     setState(() {
       _selectedWinnerId = winnerId;
       _dragOffsetY = 0.0;
+      _draggingSlot = null;
     });
 
     // Trigger sensory tactile feedback
@@ -134,6 +143,32 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
     if (_selectedWinnerId != null) return;
     await ref.read(hapticsServiceProvider).duelSelectCandidate();
     await ref.read(widget.actions).skipOrTie();
+  }
+
+  double _swipeProgress(_DuelSlot slot) =>
+      _draggingSlot == slot ? (_dragOffsetY.abs() / _swipeThreshold).clamp(0.0, 1.0) : 0.0;
+
+  double _highlightFor(_DuelSlot slot) => _selectedWinnerId == null ? _swipeProgress(slot) : 0.0;
+
+  /// Translates and tilts only the dragged card; the idle card dims as the swipe commits.
+  Widget _draggableCard({required _DuelSlot slot, required DuelActive active, required Widget child}) {
+    final dragging = _draggingSlot == slot;
+    final other = slot == _DuelSlot.upper ? _DuelSlot.lower : _DuelSlot.upper;
+    final dim = _selectedWinnerId == null ? _swipeProgress(other) : 0.0;
+    return GestureDetector(
+      onVerticalDragUpdate: (d) => _onDragUpdate(slot, d),
+      onVerticalDragEnd: (_) => _onDragEnd(slot, active),
+      child: Opacity(
+        opacity: 1 - 0.45 * dim,
+        child: Transform.translate(
+          offset: Offset(0, dragging ? _dragOffsetY : 0),
+          child: Transform.rotate(
+            angle: dragging ? _dragOffsetY / 4000 : 0,
+            child: child,
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -261,81 +296,82 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
 
           const SizedBox(height: 16),
 
-          // 2. THE DUEL CARDS WITH GESTURE DETECTOR
+          // 2. THE DUEL CARDS — each card owns its swipe; the VS badge never moves.
           Expanded(
-            child: GestureDetector(
-              onVerticalDragUpdate: _onPanUpdate,
-              onVerticalDragEnd: (details) => _onPanEnd(details, activeState),
-              child: Transform.translate(
-                offset: Offset(0, _dragOffsetY),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Candidate Card A (Upper Card)
-                    Expanded(
-                      child: DuelArenaCard(
-                        key: const Key('candidate_card_a'),
-                        showId: candidate.showId,
-                        title: candidate.title,
-                        subtitle: candidate.mediaType == 'movie'
-                            ? 'Movie Canon Candidate'
-                            : 'Series Canon Candidate',
-                        posterPath: candidate.posterPath,
-                        actionPrompt: 'TAP OR SWIPE UP TO PICK',
-                        isWinner: candidateWon,
-                        isLoser: hasSelection && !candidateWon,
-                        onTap: () => _handleSelection(candidate.showId),
-                      ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Candidate Card A (Upper Card)
+                Expanded(
+                  child: _draggableCard(
+                    slot: _DuelSlot.upper,
+                    active: activeState,
+                    child: DuelArenaCard(
+                      key: const Key('candidate_card_a'),
+                      showId: candidate.showId,
+                      title: candidate.title,
+                      subtitle: candidate.mediaType == 'movie' ? 'Movie Canon Candidate' : 'Series Canon Candidate',
+                      posterPath: candidate.posterPath,
+                      actionPrompt: 'TAP OR SWIPE UP TO PICK',
+                      isWinner: candidateWon,
+                      isLoser: hasSelection && !candidateWon,
+                      dragHighlight: _highlightFor(_DuelSlot.upper),
+                      onTap: () => _handleSelection(candidate.showId),
                     ),
-
-                    // Central Glowing VS Badge
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      child: Container(
-                        key: const Key('duel_vs_badge'),
-                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: TellyColors.backgroundSurface,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: TellyColors.borderGlass),
-                          boxShadow: [
-                            BoxShadow(
-                              color: TellyColors.neonCoral.withValues(alpha: 0.25),
-                              blurRadius: 16,
-                            ),
-                          ],
-                        ),
-                        child: Text(
-                          '━  VS  ━',
-                          style: TellyTypography.titleMedium(
-                            color: TellyColors.neonCoral,
-                          ).copyWith(
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 2.0,
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    // Candidate Card B (Lower Card - Opponent)
-                    Expanded(
-                      child: DuelArenaCard(
-                        key: const Key('candidate_card_b'),
-                        showId: opponent.showId,
-                        title: opponent.title,
-                        subtitle: opponent.rankPosition > 0
-                            ? 'Currently your #${opponent.rankPosition} (${opponent.calculatedScore.toStringAsFixed(2)})'
-                            : 'Comparison Title',
-                        posterPath: opponent.posterPath,
-                        actionPrompt: 'TAP OR SWIPE DOWN TO PICK',
-                        isWinner: opponentWon,
-                        isLoser: hasSelection && !opponentWon,
-                        onTap: () => _handleSelection(opponent.showId),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
+
+                // Central Glowing VS Badge
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: Container(
+                    key: const Key('duel_vs_badge'),
+                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: TellyColors.backgroundSurface,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: TellyColors.borderGlass),
+                      boxShadow: [
+                        BoxShadow(
+                          color: TellyColors.neonCoral.withValues(alpha: 0.25),
+                          blurRadius: 16,
+                        ),
+                      ],
+                    ),
+                    child: Text(
+                      '━  VS  ━',
+                      style: TellyTypography.titleMedium(
+                        color: TellyColors.neonCoral,
+                      ).copyWith(
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 2.0,
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Candidate Card B (Lower Card - Opponent)
+                Expanded(
+                  child: _draggableCard(
+                    slot: _DuelSlot.lower,
+                    active: activeState,
+                    child: DuelArenaCard(
+                      key: const Key('candidate_card_b'),
+                      showId: opponent.showId,
+                      title: opponent.title,
+                      subtitle: opponent.rankPosition > 0
+                          ? 'Currently your #${opponent.rankPosition} (${opponent.calculatedScore.toStringAsFixed(2)})'
+                          : 'Comparison Title',
+                      posterPath: opponent.posterPath,
+                      actionPrompt: 'TAP OR SWIPE DOWN TO PICK',
+                      isWinner: opponentWon,
+                      isLoser: hasSelection && !opponentWon,
+                      dragHighlight: _highlightFor(_DuelSlot.lower),
+                      onTap: () => _handleSelection(opponent.showId),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
 
@@ -382,3 +418,5 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen>
     );
   }
 }
+
+enum _DuelSlot { upper, lower }

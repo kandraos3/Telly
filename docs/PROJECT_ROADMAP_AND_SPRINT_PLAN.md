@@ -1975,6 +1975,14 @@ Tickets ingested through the `issue-manager` skill. Each entry mirrors its GitHu
 - **Testing & Verification**:
   - [x] Exhaustive property tests over every bracket, canon size and true slot (correct slot, ≥ 2 duels, edge neighbour faced, progress estimate monotone).
 
+#### `FE-GESTURE-01`: DuelSwipe Dual-Card & VS Badge Drag Glitch (#9)
+- **Spec Reference**: [**`design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md) §1 Pillar 2 (Tactile Physicality); `SCR-10`
+- **Granular Tasks**:
+  - [x] Per-card drag detectors: card A only rises (picks the candidate), card B only falls (picks the opponent).
+  - [x] Dragged card translates with a subtle tilt and a swipe-progress Phosphor Lime glow; the idle card dims; the VS badge stays anchored.
+- **Testing & Verification**:
+  - [x] Widget tests: only the dragged card moves, badge/other card fixed, dim + glow, spring-back, no cross-direction picks.
+
 ---
 
 ## 🏆 Sprint Deliverables Summary Matrix

@@ -16,6 +16,9 @@ class DuelArenaCard extends StatelessWidget {
   final bool isLoser;
   final VoidCallback? onTap;
 
+  /// 0–1 swipe progress toward picking this card; ramps up the Phosphor Lime glow (FE-GESTURE-01).
+  final double dragHighlight;
+
   const DuelArenaCard({
     super.key,
     required this.showId,
@@ -26,15 +29,17 @@ class DuelArenaCard extends StatelessWidget {
     this.isWinner = false,
     this.isLoser = false,
     this.onTap,
+    this.dragHighlight = 0,
   });
 
   @override
   Widget build(BuildContext context) {
+    final highlight = dragHighlight.clamp(0.0, 1.0);
     final borderColor = isWinner
         ? TellyColors.phosphorLime
         : isLoser
             ? Colors.transparent
-            : TellyColors.borderGlass;
+            : Color.lerp(TellyColors.borderGlass, TellyColors.phosphorLime, highlight)!;
 
     final double targetOpacity = isLoser ? 0.20 : 1.0;
     final double targetScale = isWinner ? 1.04 : (isLoser ? 0.96 : 1.0);
@@ -54,19 +59,20 @@ class DuelArenaCard extends StatelessWidget {
             splashColor: TellyColors.phosphorLime.withValues(alpha: 0.15),
             highlightColor: TellyColors.phosphorLime.withValues(alpha: 0.08),
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 220),
+              // Track the finger 1:1 while swiping; animate only discrete state changes.
+              duration: highlight > 0 ? Duration.zero : const Duration(milliseconds: 220),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: TellyColors.backgroundCard,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
                   color: borderColor,
-                  width: isWinner ? 2.0 : 1.0,
+                  width: isWinner ? 2.0 : 1.0 + highlight,
                 ),
-                boxShadow: isWinner
+                boxShadow: isWinner || highlight > 0
                     ? [
                         BoxShadow(
-                          color: TellyColors.phosphorLime.withValues(alpha: 0.35),
+                          color: TellyColors.phosphorLime.withValues(alpha: isWinner ? 0.35 : 0.35 * highlight),
                           blurRadius: 24,
                           spreadRadius: 2,
                         ),
@@ -127,17 +133,13 @@ class DuelArenaCard extends StatelessWidget {
                             Icon(
                               Icons.touch_app_rounded,
                               size: 14,
-                              color: isWinner
-                                  ? TellyColors.phosphorLime
-                                  : TellyColors.textTertiary,
+                              color: isWinner ? TellyColors.phosphorLime : TellyColors.textTertiary,
                             ),
                             const SizedBox(width: 4),
                             Text(
                               actionPrompt,
                               style: TellyTypography.caption(
-                                color: isWinner
-                                    ? TellyColors.phosphorLime
-                                    : TellyColors.textTertiary,
+                                color: isWinner ? TellyColors.phosphorLime : TellyColors.textTertiary,
                               ).copyWith(
                                 fontWeight: FontWeight.w600,
                                 letterSpacing: 0.8,

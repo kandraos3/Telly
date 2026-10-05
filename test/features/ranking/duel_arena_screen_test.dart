@@ -10,6 +10,7 @@ import 'package:telly_app/features/ranking/data/ranking_repository.dart';
 import 'package:telly_app/features/ranking/domain/sentiment_bracket.dart';
 import 'package:telly_app/features/ranking/presentation/controllers/duel_controller.dart';
 import 'package:telly_app/features/ranking/presentation/screens/duel_arena_screen.dart';
+import 'package:telly_app/features/ranking/presentation/widgets/duel_arena_card.dart';
 
 import '../../helpers/canon_seed.dart';
 
@@ -109,6 +110,55 @@ void main() {
       await tester.pump(const Duration(milliseconds: 400));
       await tester.pumpAndSettle();
       expect(stateOf(c, r), isA<DuelActive>());
+    });
+
+    testWidgets('FE-GESTURE-01: dragging card A moves only card A; card B and the VS badge stay put', (tester) async {
+      final r = request(101, 'The Bear');
+      await pumpArena(tester, candidate: r);
+      final cardA = find.byKey(const Key('candidate_card_a'));
+      final cardB = find.byKey(const Key('candidate_card_b'));
+      final badge = find.byKey(const Key('duel_vs_badge'));
+      final a0 = tester.getCenter(cardA), b0 = tester.getCenter(cardB), v0 = tester.getCenter(badge);
+
+      final gesture = await tester.startGesture(a0);
+      await gesture.moveBy(const Offset(0, -20)); // clears the drag slop
+      await gesture.moveBy(const Offset(0, -60));
+      await tester.pump();
+
+      expect(tester.getCenter(cardA).dy, lessThan(a0.dy - 40));
+      expect(tester.getCenter(cardB), b0);
+      expect(tester.getCenter(badge), v0);
+      // The idle card dims and the dragged card glows lime as the swipe builds.
+      final dimmed = tester.widget<Opacity>(find.ancestor(of: cardB, matching: find.byType(Opacity)).first);
+      expect(dimmed.opacity, lessThan(1));
+      final glowing = tester.widget<DuelArenaCard>(cardA);
+      expect(glowing.dragHighlight, greaterThan(0));
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(tester.getCenter(cardA), a0, reason: 'short swipe springs back');
+    });
+
+    testWidgets('FE-GESTURE-01: a card cannot be dragged against its pick direction', (tester) async {
+      final r = request(101, 'The Bear');
+      final c = await pumpArena(tester, candidate: r);
+      final cardA = find.byKey(const Key('candidate_card_a'));
+      final cardB = find.byKey(const Key('candidate_card_b'));
+      final a0 = tester.getCenter(cardA), b0 = tester.getCenter(cardB);
+
+      final down = await tester.startGesture(a0);
+      await down.moveBy(const Offset(0, 20));
+      await down.moveBy(const Offset(0, 140));
+      await tester.pump();
+      expect(tester.getCenter(cardA), a0, reason: 'card A only rises');
+      expect(tester.getCenter(cardB), b0, reason: 'card B is untouched by a drag on card A');
+      await down.up();
+      await tester.pumpAndSettle();
+      expect(stateOf(c, r), isA<DuelActive>(), reason: 'dragging A downward never picks B');
+
+      await tester.drag(cardB, const Offset(0, -150));
+      await tester.pumpAndSettle();
+      expect(stateOf(c, r), isA<DuelActive>(), reason: 'dragging B upward never picks A');
     });
 
     testWidgets("Can't Compare / Equal advances without a duel", (tester) async {
