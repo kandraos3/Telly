@@ -6,6 +6,8 @@ import 'package:telly_app/features/queue/data/streaming_availability_service.dar
 import 'package:telly_app/features/queue/domain/streaming_models.dart';
 import 'package:telly_app/features/queue/presentation/screens/smart_queue_screen.dart';
 
+import '../../helpers/real_fonts.dart';
+
 void main() {
   final testWatchlist = [
     WatchlistItem(
@@ -95,6 +97,22 @@ void main() {
       // Default selected tab is Movies: Parasite should be visible
       expect(find.text('Parasite'), findsOneWidget);
       expect(find.text('Watch on Max'), findsOneWidget);
+    });
+
+    testWidgets('FE-QUEUE-01: a long provider name fits an iPhone 15 width without overflow', (tester) async {
+      tester.view.physicalSize = const Size(393 * 3, 852 * 3);
+      tester.view.devicePixelRatio = 3;
+      addTearDown(tester.view.reset);
+      // Measure with the real bundled fonts; the default test font is far wider.
+      await tester.runAsync(loadRealFonts);
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('TV Shows (2)'));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('APPLE TV+'), findsOneWidget);
+      expect(find.text('Watch on Apple TV+'), findsOneWidget);
     });
 
     testWidgets(

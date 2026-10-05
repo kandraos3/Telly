@@ -112,12 +112,16 @@ class TellyNeonBadge extends StatelessWidget {
             icon!,
             const SizedBox(width: 4),
           ],
-          Text(
-            label.toUpperCase(),
-            style: TellyTypography.caption(color: textColor).copyWith(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.5,
+          Flexible(
+            child: Text(
+              label.toUpperCase(),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TellyTypography.caption(color: textColor).copyWith(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.5,
+              ),
             ),
           ),
         ],

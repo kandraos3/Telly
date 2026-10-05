@@ -2252,6 +2252,15 @@ Tickets ingested through the `issue-manager` skill. Each entry mirrors its GitHu
 - **Testing & Verification**:
   - [x] Widget tests: section placement, Letterboxd import into the movie canon only (ordered by rating) with unmatched list, idempotent re-import, invalid file, cancelled picker, AniList into both canons, unknown AniList user. `ImportResult.alreadyRanked` unit test. SCR-03 import tests still pass.
 
+#### `FE-QUEUE-01`: Smart Queue Card Action Row Overflow on 393 pt Phones
+- **Spec Reference**: `SCR-13` in [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md); [**`design_system/02_COMPONENT_LIBRARY_AND_PATTERNS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/02_COMPONENT_LIBRARY_AND_PATTERNS.md) (badges)
+- **Scope & Objectives**: Found by the website screenshot generator (`WEB-02`): a queued title on Apple TV+ overflowed the card's action row by 5.4 pt on an iPhone 15 (provider badge + Mark Seen + "Watch on Apple TV+").
+- **Granular Tasks**:
+  - [x] The provider badge is `Flexible` in the action row, and `TellyNeonBadge` ellipsizes its label when it has to shrink.
+  - [x] `test/helpers/real_fonts.dart` loads the bundled fonts, Material Icons and (when cached) an emoji font into `flutter test`, so layout tests can measure real text widths.
+- **Testing & Verification**:
+  - [x] Widget test at 393 × 852 with the real fonts: no overflow, badge and Watch button present (fails before the fix with the 5.4 pt overflow).
+
 ---
 
 ## 🌐 Marketing Website Track (`WEB`)

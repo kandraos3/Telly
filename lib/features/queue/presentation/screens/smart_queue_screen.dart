@@ -882,10 +882,14 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                TellyNeonBadge(
-                  label: providerName.toUpperCase(),
-                  variant: TellyBadgeVariant.winner,
+                // Shrinks (ellipsized) so long provider names fit a 393 pt phone (FE-QUEUE-01).
+                Flexible(
+                  child: TellyNeonBadge(
+                    label: providerName.toUpperCase(),
+                    variant: TellyBadgeVariant.winner,
+                  ),
                 ),
+                const SizedBox(width: 8),
                 Row(
                   children: [
                     TextButton(
