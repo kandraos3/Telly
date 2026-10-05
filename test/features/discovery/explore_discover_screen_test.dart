@@ -117,13 +117,21 @@ void main() {
       await tester.tap(find.text('The "Stuck the Landing" Canon'));
       await tester.pumpAndSettle();
 
-      // Modal Bottom Sheet displays description and sample titles
+      // Modal Bottom Sheet displays DraggableScrollableSheet, description and sample titles
+      expect(find.byType(DraggableScrollableSheet), findsOneWidget);
       expect(find.text('The "Stuck the Landing" Canon'), findsWidgets);
       expect(find.text('FEATURED TITLES'), findsOneWidget);
       expect(find.text('Shows with universally revered, transcendent final episodes.'), findsWidgets);
       expect(find.text('Breaking Bad'), findsOneWidget);
       expect(find.text('Succession'), findsOneWidget);
       expect(find.text('Six Feet Under'), findsOneWidget);
+
+      // Tapping a featured title dismisses sheet and populates search
+      await tester.tap(find.byKey(const Key('curated_title_Breaking_Bad')));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(DraggableScrollableSheet), findsNothing);
+      expect(find.text('Breaking Bad'), findsWidgets);
     });
 
     testWidgets('search query renders titles and people results with working filter chips', (tester) async {

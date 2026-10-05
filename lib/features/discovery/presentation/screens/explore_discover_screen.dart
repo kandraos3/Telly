@@ -216,63 +216,94 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) {
-        return Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+        return DraggableScrollableSheet(
+          initialChildSize: 0.75,
+          minChildSize: 0.5,
+          maxChildSize: 0.95,
+          expand: false,
+          builder: (_, scrollController) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: ListView(
+                controller: scrollController,
                 children: [
-                  Text(canon.emoji, style: const TextStyle(fontSize: 28)),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      canon.title,
-                      style: TellyTypography.titleLarge(
-                        color: TellyColors.textPrimary,
-                      ).copyWith(fontWeight: FontWeight.w900),
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 20),
+                      decoration: BoxDecoration(
+                        color: TellyColors.textTertiary.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
                   ),
+                  Row(
+                    children: [
+                      Text(canon.emoji, style: const TextStyle(fontSize: 28)),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          canon.title,
+                          style: TellyTypography.titleLarge(
+                            color: TellyColors.textPrimary,
+                          ).copyWith(fontWeight: FontWeight.w900),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    canon.subtitle,
+                    style: TellyTypography.bodyMedium(color: TellyColors.textSecondary),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'FEATURED TITLES',
+                    style: TellyTypography.labelSmall(
+                      color: TellyColors.textTertiary,
+                    ).copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
+                  ),
+                  const SizedBox(height: 12),
+                  ...canon.sampleTitles.map((title) => InkWell(
+                        key: Key('curated_title_${title.replaceAll(' ', '_')}'),
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () {
+                          Navigator.of(ctx).pop();
+                          _searchController.text = title;
+                          _onSearchChanged(title);
+                          _searchFocusNode.requestFocus();
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: TellyColors.backgroundSurface,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: TellyColors.borderGlass),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.star, size: 16, color: TellyColors.warmAmber),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  title,
+                                  style: TellyTypography.labelLarge(
+                                    color: TellyColors.textPrimary,
+                                  ).copyWith(fontWeight: FontWeight.w700),
+                                ),
+                              ),
+                              const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: TellyColors.textTertiary),
+                            ],
+                          ),
+                        ),
+                      )),
+                  const SizedBox(height: 16),
                 ],
               ),
-              const SizedBox(height: 8),
-              Text(
-                canon.subtitle,
-                style: TellyTypography.bodyMedium(color: TellyColors.textSecondary),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'FEATURED TITLES',
-                style: TellyTypography.labelSmall(
-                  color: TellyColors.textTertiary,
-                ).copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
-              ),
-              const SizedBox(height: 12),
-              ...canon.sampleTitles.map((title) => Container(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: TellyColors.backgroundSurface,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: TellyColors.borderGlass),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.star, size: 16, color: TellyColors.warmAmber),
-                        const SizedBox(width: 8),
-                        Text(
-                          title,
-                          style: TellyTypography.labelLarge(
-                            color: TellyColors.textPrimary,
-                          ).copyWith(fontWeight: FontWeight.w700),
-                        ),
-                      ],
-                    ),
-                  )),
-              const SizedBox(height: 16),
-            ],
-          ),
+            );
+          },
         );
       },
     );
