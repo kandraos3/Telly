@@ -121,6 +121,10 @@ class PreferencesController extends AsyncNotifier<AppPreferences> {
 
   Future<void> setNotification(NotificationKind kind, bool on) =>
       edit((p) => p.copyWith(notifications: {...p.notifications, kind: on}));
+
+  Future<void> setAllNotifications(bool on) => edit((p) => p.copyWith(notifications: {
+        for (final kind in NotificationKind.values) kind: on,
+      }));
 }
 
 final preferencesProvider = AsyncNotifierProvider<PreferencesController, AppPreferences>(PreferencesController.new);

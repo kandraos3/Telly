@@ -191,6 +191,14 @@ class SettingsHubScreen extends ConsumerWidget {
           // 3. Notifications matrix (S3)
           const _SectionHeader('NOTIFICATIONS'),
           _Card(children: [
+            _SwitchTile(
+              key: const Key('settings_notify_all'),
+              title: 'All Notifications',
+              subtitle: 'Master switch to enable or pause all notifications',
+              value: NotificationKind.values.every(prefs.notificationOn),
+              onChanged: (v) => _guard(context, () => prefsController.setAllNotifications(v)),
+            ),
+            const Divider(color: TellyColors.borderGlass),
             for (final kind in NotificationKind.values)
               _SwitchTile(
                 key: Key('settings_notify_${kind.key}'),

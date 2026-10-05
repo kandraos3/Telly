@@ -11,6 +11,7 @@ import 'package:telly_app/features/onboarding/data/onboarding_repository.dart';
 import 'package:telly_app/features/profile/data/profile_repository.dart';
 import 'package:telly_app/features/profile/data/settings_services.dart';
 import 'package:telly_app/features/ranking/data/ranking_repository.dart';
+import 'package:telly_app/features/profile/presentation/controllers/settings_controllers.dart';
 import 'package:telly_app/features/profile/presentation/screens/settings_hub_screen.dart';
 
 import '../../fakes/fake_auth_repository.dart';
@@ -89,6 +90,35 @@ void main() {
       await tester.pumpAndSettle();
       expect((profiles.preferences['notifications'] as Map)['weekly_digest'], isTrue);
       expect((profiles.preferences['notifications'] as Map)['friend_finale'], isTrue);
+    });
+
+    testWidgets('master All Notifications toggle switches all notification categories (FE-SETTINGS-03)', (tester) async {
+      await pump(tester);
+      final masterSwitch = find.byKey(const Key('settings_notify_all'));
+      expect(masterSwitch, findsOneWidget);
+
+      // Initially false because weekly_digest is default false
+      expect(tester.widget<SwitchListTile>(find.descendant(of: masterSwitch, matching: find.byType(SwitchListTile))).value, isFalse);
+
+      // Tap master toggle ON
+      await tester.tap(masterSwitch);
+      await tester.pumpAndSettle();
+
+      final notifsMap = profiles.preferences['notifications'] as Map;
+      for (final kind in NotificationKind.values) {
+        expect(notifsMap[kind.key], isTrue);
+      }
+      expect(tester.widget<SwitchListTile>(find.descendant(of: masterSwitch, matching: find.byType(SwitchListTile))).value, isTrue);
+
+      // Tap master toggle OFF
+      await tester.tap(masterSwitch);
+      await tester.pumpAndSettle();
+
+      final notifsMapOff = profiles.preferences['notifications'] as Map;
+      for (final kind in NotificationKind.values) {
+        expect(notifsMapOff[kind.key], isFalse);
+      }
+      expect(tester.widget<SwitchListTile>(find.descendant(of: masterSwitch, matching: find.byType(SwitchListTile))).value, isFalse);
     });
 
     testWidgets('a failed save rolls the toggle back and says so', (tester) async {
