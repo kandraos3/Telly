@@ -26,6 +26,7 @@ enum SearchFilterTab { all, titles, people }
 
 class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
   String _searchQuery = '';
   SearchFilterTab _activeTab = SearchFilterTab.all;
   bool _isSearching = false;
@@ -36,7 +37,14 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+    _onSearchChanged('');
+    _searchFocusNode.unfocus();
   }
 
   Future<void> _onSearchChanged(String query) async {
@@ -280,10 +288,27 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
         backgroundColor: TellyColors.backgroundCanvasOled,
         elevation: 0,
         title: Text(
-          '🧭 DISCOVER',
+          '🧭 EXPLORE',
           style: TellyTypography.titleMedium(color: TellyColors.textPrimary)
               .copyWith(letterSpacing: 1.2, fontWeight: FontWeight.w900),
         ),
+        actions: [
+          IconButton(
+            key: const Key('explore_appbar_search_btn'),
+            icon: const Icon(Icons.search, color: TellyColors.textSecondary),
+            tooltip: 'Search',
+            onPressed: () {
+              _searchFocusNode.requestFocus();
+            },
+          ),
+          if (_searchQuery.isNotEmpty)
+            IconButton(
+              key: const Key('explore_appbar_clear_btn'),
+              icon: const Icon(Icons.close, color: TellyColors.textSecondary),
+              tooltip: 'Clear search',
+              onPressed: _clearSearch,
+            ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
@@ -343,6 +368,7 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
       ),
       child: TextField(
         controller: _searchController,
+        focusNode: _searchFocusNode,
         onChanged: _onSearchChanged,
         style: const TextStyle(color: TellyColors.textPrimary, fontSize: 14),
         decoration: InputDecoration(
@@ -354,11 +380,9 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
           prefixIcon: const Icon(Icons.search, color: TellyColors.textTertiary, size: 20),
           suffixIcon: _searchQuery.isNotEmpty
               ? IconButton(
+                  key: const Key('explore_search_field_clear_btn'),
                   icon: const Icon(Icons.close, color: TellyColors.textTertiary, size: 18),
-                  onPressed: () {
-                    _searchController.clear();
-                    _onSearchChanged('');
-                  },
+                  onPressed: _clearSearch,
                 )
               : null,
           border: InputBorder.none,

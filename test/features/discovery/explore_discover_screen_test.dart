@@ -46,7 +46,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Header & Search Bar
-      expect(find.text('🧭 DISCOVER'), findsOneWidget);
+      expect(find.text('🧭 EXPLORE'), findsOneWidget);
       expect(find.text('Search shows, actors, showrunners, friends...'), findsOneWidget);
 
       // Network Battlegrounds Section
@@ -168,7 +168,7 @@ void main() {
       expect(find.text('Maya Lin'), findsOneWidget);
 
       // Clear search query
-      await tester.tap(find.byIcon(Icons.close));
+      await tester.tap(find.byKey(const Key('explore_search_field_clear_btn')));
       await tester.pumpAndSettle();
 
       // Returns to default Discover hub view
@@ -193,11 +193,52 @@ void main() {
       await tester.pumpWidget(createTestWidget(discoveryRepo: emptyRepo));
       await tester.pumpAndSettle();
 
-      // Discover hub loads, empty battlegrounds and friends binging shrink away, curated canons remain
-      expect(find.text('🧭 DISCOVER'), findsOneWidget);
+      // Explore hub loads, empty battlegrounds and friends binging shrink away, curated canons remain
+      expect(find.text('🧭 EXPLORE'), findsOneWidget);
       expect(find.text('NETWORK BATTLEGROUNDS'), findsNothing);
       expect(find.text('FRIENDS ARE CURRENTLY BINGING'), findsNothing);
       expect(find.text('CURATED CANONS'), findsOneWidget);
+    });
+
+    testWidgets('AppBar search button requests focus and clear button resets query', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
+
+      final searchFieldFinder = find.byType(TextField);
+      expect(searchFieldFinder, findsOneWidget);
+
+      // Tap AppBar search button
+      final appbarSearchBtn = find.byKey(const Key('explore_appbar_search_btn'));
+      expect(appbarSearchBtn, findsOneWidget);
+      await tester.tap(appbarSearchBtn);
+      await tester.pumpAndSettle();
+
+      // Field now has focus
+      final textField = tester.widget<TextField>(searchFieldFinder);
+      expect(textField.focusNode?.hasFocus, isTrue);
+
+      // Enter text
+      await tester.enterText(searchFieldFinder, 'Succession');
+      await tester.pumpAndSettle();
+
+      // Clear button in AppBar appears
+      final appbarClearBtn = find.byKey(const Key('explore_appbar_clear_btn'));
+      expect(appbarClearBtn, findsOneWidget);
+
+      // Tap AppBar clear button
+      await tester.tap(appbarClearBtn);
+      await tester.pumpAndSettle();
+
+      // Search query reset
+      expect(find.text('NETWORK BATTLEGROUNDS'), findsOneWidget);
+      expect(find.byKey(const Key('explore_appbar_clear_btn')), findsNothing);
     });
   });
 }
