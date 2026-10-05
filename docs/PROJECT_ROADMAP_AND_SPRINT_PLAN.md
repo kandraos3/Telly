@@ -2036,6 +2036,16 @@ Tickets ingested through the `issue-manager` skill. Each entry mirrors its GitHu
 - **Testing & Verification**:
   - [x] Widget tests: top bar actions, avatar â†’ `/canon/edit`, Share sends the caption.
 
+#### `FE-PROFILE-03`: Per-Canon Stats Dashboard â€” Hours, Top Genre, Top Director (#17)
+- **Spec Reference**: [**`features/06_PROFILE_THE_CANON_AND_STATS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/06_PROFILE_THE_CANON_AND_STATS.md) Â§2, Â§5; `SCR-14`
+- **Granular Tasks**:
+  - [x] Migration `20261010001100_canon_stats.sql`: `get_canon_stats(p_media_type)` â€” titles, minutes (movie runtimes; series estimated from episode counts at 45 min / 24 min anime), top genre with share, top director (movies) or network (series).
+  - [x] `CanonStats` model, `ProfileRepository.fetchCanonStats`, `canonStatsProvider` (family per canon, refetches when that canon changes).
+  - [x] `CanonStatsPanel` under the canon tabs on SCR-14; follows the Movies / TV Shows selection; offline falls back to the local count.
+  - [ ] ðŸ‘¤ **[TO BE DONE BY HUMAN]** Apply the migration to `telly-prod` (`supabase-deploy` â†’ `push`) before shipping a build that shows the panel.
+- **Testing & Verification**:
+  - [x] Model parsing / hour-format unit tests; widget tests for movie stats, tab switch and offline fallback; pgTAP `014_canon_stats.test.sql` (runs in CI).
+
 ---
 
 ## 🏆 Sprint Deliverables Summary Matrix

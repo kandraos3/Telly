@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:telly_app/features/profile/data/profile_repository.dart';
+import 'package:telly_app/features/profile/domain/canon_stats.dart';
 import 'package:telly_app/features/ranking/domain/franchise_rollup_service.dart';
 
 /// In-memory [ProfileRepository] for notifier/widget tests (FE-608).
@@ -9,6 +10,7 @@ class FakeProfileRepository implements ProfileRepository {
   final profiles = <String, PublicProfile>{};
   final canons = <(String, String), List<CanonEntry>>{};
   final matches = <(String, String), CanonMatch>{};
+  final stats = <String, CanonStats>{};
   Map<String, dynamic> preferences = {};
   final updates = <Map<String, Object?>>[];
   final uploads = <Uint8List>[];
@@ -37,6 +39,12 @@ class FakeProfileRepository implements ProfileRepository {
   Future<List<CanonEntry>> fetchCanon(String userId, String mediaType) async {
     await _read();
     return canons[(userId, mediaType)] ?? const [];
+  }
+
+  @override
+  Future<CanonStats> fetchCanonStats(String mediaType) async {
+    await _read();
+    return stats[mediaType] ?? CanonStats(mediaType: mediaType);
   }
 
   @override

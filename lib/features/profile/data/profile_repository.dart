@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/network/supabase_providers.dart';
 import '../../ranking/domain/franchise_rollup_service.dart';
+import '../domain/canon_stats.dart';
 
 /// What anyone allowed to see a profile can read (`public.users`, RLS `can_view_user`).
 class PublicProfile {
@@ -64,6 +65,9 @@ abstract interface class ProfileRepository {
   /// Null when the server refuses (not visible, or myself).
   Future<CanonMatch?> tasteMatch(String otherUserId, String mediaType);
 
+  /// My viewing stats for one canon (`get_canon_stats`, FE-PROFILE-03).
+  Future<CanonStats> fetchCanonStats(String mediaType);
+
   Future<void> updateProfile({
     String? displayName,
     String? bio,
@@ -121,6 +125,12 @@ class SupabaseProfileRepository implements ProfileRepository {
           shortReview: r['review_short'] as String?,
         ),
     ];
+  }
+
+  @override
+  Future<CanonStats> fetchCanonStats(String mediaType) async {
+    final res = await _client.rpc('get_canon_stats', params: {'p_media_type': mediaType});
+    return res is Map ? CanonStats.fromJson(Map<String, dynamic>.from(res)) : CanonStats(mediaType: mediaType);
   }
 
   @override

@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/database/database.dart';
 import '../../../onboarding/data/top_50_seeds.dart';
+import '../../data/profile_repository.dart';
+import '../../domain/canon_stats.dart';
 import '../../../ranking/data/ranking_repository.dart';
 import '../../../ranking/domain/canon_type.dart';
 import '../../../ranking/domain/franchise_rollup_service.dart';
@@ -159,3 +161,14 @@ class ProfileCanonNotifier extends Notifier<ProfileCanonState> {
 }
 
 final profileCanonProvider = NotifierProvider<ProfileCanonNotifier, ProfileCanonState>(ProfileCanonNotifier.new);
+
+/// Viewing stats for one of my canons (FE-PROFILE-03). Refetches when that canon's size
+/// changes; null when the server can't be reached, so the header falls back to counts.
+final canonStatsProvider = FutureProvider.autoDispose.family<CanonStats?, CanonType>((ref, canon) async {
+  ref.watch(profileCanonProvider.select((s) => s.entriesFor(canon).length));
+  try {
+    return await ref.watch(profileRepositoryProvider).fetchCanonStats(canon.dbValue);
+  } catch (_) {
+    return null;
+  }
+});

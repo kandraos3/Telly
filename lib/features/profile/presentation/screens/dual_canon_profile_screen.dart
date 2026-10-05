@@ -13,6 +13,7 @@ import '../../../ranking/domain/franchise_rollup_service.dart';
 import '../../data/profile_share_service.dart';
 import '../controllers/edit_profile_controller.dart';
 import '../controllers/profile_controller.dart';
+import '../widgets/canon_stats_panel.dart';
 import '../widgets/poster_grid_view.dart';
 import '../widgets/profile_header_card.dart';
 import '../widgets/ranked_canon_list.dart';
@@ -153,6 +154,15 @@ class DualCanonProfileScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
+
+              const SizedBox(height: 12),
+
+              // 2b. PER-CANON STATS DASHBOARD (FE-PROFILE-03) — follows the selected tab.
+              CanonStatsPanel(
+                stats: ref.watch(canonStatsProvider(selectedCanon)).valueOrNull,
+                isMovie: selectedCanon == CanonType.movie,
+                localTitleCount: selectedCanon == CanonType.movie ? moviesCount : seriesCount,
+              ),
 
               const SizedBox(height: 16),
 

@@ -10,6 +10,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:telly_app/core/router/routes.dart';
 import 'package:telly_app/features/profile/data/profile_repository.dart';
 import 'package:telly_app/features/profile/data/profile_share_service.dart';
+import 'package:telly_app/features/profile/domain/canon_stats.dart';
 import 'package:telly_app/features/profile/presentation/controllers/profile_controller.dart';
 import 'package:telly_app/features/profile/presentation/screens/dual_canon_profile_screen.dart';
 import 'package:telly_app/features/profile/presentation/widgets/poster_grid_view.dart';
@@ -154,6 +155,60 @@ void main() {
       ),
     );
   }
+
+  group('FE-PROFILE-03: SCR-14 per-canon stats dashboard', () {
+    FakeProfileRepository statsRepo() => FakeProfileRepository()
+      ..stats['movie'] = const CanonStats(
+        mediaType: 'movie',
+        totalTitles: 3,
+        totalMinutes: 470,
+        topGenre: StatLeader(name: 'Science Fiction', count: 2, percent: 67),
+        topCreator: StatLeader(name: 'Christopher Nolan', count: 2),
+      )
+      ..stats['tv'] = const CanonStats(
+        mediaType: 'tv',
+        totalTitles: 5,
+        totalMinutes: 15000,
+        hoursEstimated: true,
+        topGenre: StatLeader(name: 'Drama', count: 4, percent: 80),
+        topCreator: StatLeader(name: 'HBO', count: 3),
+      );
+
+    String tile(WidgetTester tester, String key) => tester
+        .widgetList<Text>(find.descendant(of: find.byKey(Key(key)), matching: find.byType(Text)))
+        .map((t) => t.data)
+        .join(' | ');
+
+    testWidgets('shows hours, top genre and top director for the movie canon', (tester) async {
+      await tester.pumpWidget(buildTestableProfileScreen(profiles: statsRepo()));
+      await tester.pumpAndSettle();
+
+      expect(tile(tester, 'canon_stat_titles'), contains('3'));
+      expect(tile(tester, 'canon_stat_hours'), contains('8h'));
+      expect(tile(tester, 'canon_stat_genre'), allOf(contains('Science Fiction'), contains('67% of your canon')));
+      expect(tile(tester, 'canon_stat_creator'), allOf(contains('Top Director'.toUpperCase()), contains('Christopher Nolan'), contains('2 films')));
+    });
+
+    testWidgets('switching to TV Shows recalculates the stats for the series canon', (tester) async {
+      await tester.pumpWidget(buildTestableProfileScreen(profiles: statsRepo()));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('series_canon_tab')));
+      await tester.pumpAndSettle();
+
+      expect(tile(tester, 'canon_stat_hours'), allOf(contains('≈250h'), contains('from episode counts')));
+      expect(tile(tester, 'canon_stat_genre'), contains('Drama'));
+      expect(tile(tester, 'canon_stat_creator'), allOf(contains('Top Network'.toUpperCase()), contains('HBO'), contains('3 shows')));
+    });
+
+    testWidgets('offline falls back to the local title count and dashes', (tester) async {
+      await tester.pumpWidget(buildTestableProfileScreen(profiles: statsRepo()..failReads = true));
+      await tester.pumpAndSettle();
+
+      expect(tile(tester, 'canon_stat_titles'), contains('3'));
+      expect(tile(tester, 'canon_stat_hours'), contains('—'));
+    });
+  });
 
   group('FE-PROFILE-02: SCR-14 top bar, avatar and share', () {
     testWidgets('top bar reads "Profile" with squads, share and settings actions', (tester) async {
@@ -314,6 +369,8 @@ void main() {
       await tester.pumpAndSettle();
 
       final tierBtn = find.byKey(const Key('view_mode_tier_button'));
+      await tester.ensureVisible(tierBtn);
+      await tester.pumpAndSettle();
       await tester.tap(tierBtn);
       await tester.pumpAndSettle();
 
@@ -329,6 +386,8 @@ void main() {
       await tester.pumpAndSettle();
 
       final gridBtn = find.byKey(const Key('view_mode_grid_button'));
+      await tester.ensureVisible(gridBtn);
+      await tester.pumpAndSettle();
       await tester.tap(gridBtn);
       await tester.pumpAndSettle();
 
@@ -352,6 +411,8 @@ void main() {
       // Tap View Options button to open sheet
       final optionsBtn = find.byKey(const Key('canon_options_button'));
       expect(optionsBtn, findsOneWidget);
+      await tester.ensureVisible(optionsBtn);
+      await tester.pumpAndSettle();
       await tester.tap(optionsBtn);
       await tester.pumpAndSettle();
 
@@ -424,6 +485,8 @@ void main() {
       expect(find.text('Remove from List?'), findsOneWidget);
       final confirmBtn = find.byKey(const Key('confirm_delete_title_button'));
       expect(confirmBtn, findsOneWidget);
+      await tester.ensureVisible(confirmBtn);
+      await tester.pumpAndSettle();
       await tester.tap(confirmBtn);
       await tester.pumpAndSettle();
 
