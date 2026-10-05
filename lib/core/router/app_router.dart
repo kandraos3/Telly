@@ -103,7 +103,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(routes: [
             GoRoute(
               path: Routes.explore,
-              builder: (_, __) => const ExploreDiscoverScreen(),
+              builder: (_, state) => ExploreDiscoverScreen(searchRequest: state.uri.queryParameters['search']),
             ),
           ]),
           StatefulShellBranch(routes: [

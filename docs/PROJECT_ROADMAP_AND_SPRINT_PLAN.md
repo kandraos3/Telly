@@ -28,7 +28,7 @@
 - **Overall Roadmap Progress**: All 32/32 Sprint 6 architecture, integration, algorithm, and QA remediation tickets fully implemented and verified.
 - **Human-Only Tasks**: Tasks marked `👤 [TO BE DONE BY HUMAN]` (cloud deployment, secrets provisioning, store submission, physical-device profile runs). Client application codebase is 100% complete and self-contained.
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (462 / 462 pass; 100% golden, a11y, integration, and algorithmic parity suites pass; coverage 86.81% overall / 97.04% ranking)
-- **Last Updated**: 2026-10-04
+- **Last Updated**: 2026-10-05 (`FE-HEADER-01` unified tab headers complete)
 
 | Sprint | Status | Total Tickets | Audit Verdict |
 | :---: | :---: | :---: | :--- |
@@ -163,6 +163,22 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 - **Testing & Verification**:
   - [x] Unit and widget tests in `test/features/theme/telly_theme_test.dart` verifying theme switcher toggling, persistence, and light mode WCAG AAA/AA color rendering.
 - **Dependencies**: `FE-102`.
+
+#### `FE-HEADER-01`: Unified Tab Screen Header (Feed, Explore, Queue, Canon)
+- **Spec Reference**:
+  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §0 (Shared Tab Header); `SCR-05`, `SCR-07`, `SCR-13`, `SCR-14`
+  - [**`design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md) §2
+- **Scope & Objectives**: The four tab screens had four different headers (an emoji `TELLY` badge, `🧭 EXPLORE`, `UNIVERSAL QUEUE`, `Profile`). All four now use the Canon screen's style: a large sentence-case title with no emoji, and muted icon actions on the right that vary per screen.
+- **Granular Tasks**:
+  - [x] `lib/core/widgets/telly_screen_header.dart`: `TellyScreenHeader` (56 dp, 24 / w800 / −0.5 title, heading semantics, ≤ 3 actions), `TellyHeaderAction` (48 dp muted icon button with haptic) and `TellyFloatingHeaderScrollView` (floating + snapping `SliverAppBar` in a `NestedScrollView`: the header hides on scroll down and returns on any scroll up, without going back to the top).
+  - [x] Feed: title **Feed**; Squads becomes an icon (`feed_squads_button`); Search, previously a no-op, opens Explore with its field focused (`Routes.exploreSearch()` → `ExploreDiscoverScreen.searchRequest`). Paging now listens to scroll notifications, since the list scrolls on the header's primary controller.
+  - [x] Explore: title **Explore**; the redundant header search and clear buttons are removed (the search bar below does both).
+  - [x] Queue: title **Queue**; the header action follows the hub mode: Sort sheet on Watchlist (replaces the dropdown), New list on My Lists (replaces the "New List" button), none on Friends' Lists. Movies / TV Shows tabs drop their emoji and match the Canon selector.
+  - [x] Canon: title **Canon** (was "Profile"); Squads, Share and Settings move from `ProfileHeaderCard` into the shared header.
+- **Testing & Verification**:
+  - [x] `test/core/widgets/telly_screen_header_test.dart`: title style, heading semantics, 48 dp actions, 16 dp edges, and hide-on-scroll-down / reappear-on-scroll-up mid-list.
+  - [x] Screen tests: Feed search opens Explore with a request, Explore focuses on each new request, Queue sort sheet re-sorts and header actions follow the hub mode, Canon header title and actions.
+- **Dependencies**: `FE-102`, `FE-602`.
 
 #### `FE-103`: Haptic Feedback Engine (`HapticsService`)
 - **Spec Reference**:

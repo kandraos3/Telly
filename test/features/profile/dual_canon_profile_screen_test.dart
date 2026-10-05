@@ -211,12 +211,12 @@ void main() {
   });
 
   group('FE-PROFILE-02: SCR-14 top bar, avatar and share', () {
-    testWidgets('top bar reads "Profile" with squads, share and settings actions', (tester) async {
+    testWidgets('header reads "Canon" with squads, share and settings actions (FE-HEADER-01)', (tester) async {
       await tester.pumpWidget(buildTestableProfileScreen());
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('profile_title_text')), findsOneWidget);
-      expect(find.text('Profile'), findsOneWidget);
+      expect(tester.widget<Text>(find.byKey(const Key('screen_header_title'))).data, 'Canon');
+      expect(find.text('Profile'), findsNothing);
       for (final key in ['profile_squads_button', 'profile_share_button', 'profile_settings_button']) {
         expect(find.byKey(Key(key)), findsOneWidget);
       }

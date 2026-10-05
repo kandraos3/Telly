@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:telly_app/core/services/haptics_service.dart';
 import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/theme/telly_typography.dart';
+import 'package:telly_app/core/widgets/telly_screen_header.dart';
 import 'package:telly_app/features/feed/data/social_repository.dart';
 import 'package:telly_app/features/feed/domain/social_models.dart';
 import 'package:telly_app/features/discovery/domain/discovery_models.dart';
@@ -30,27 +31,16 @@ class ActivityFeedScreen extends ConsumerStatefulWidget {
 }
 
 class _ActivityFeedScreenState extends ConsumerState<ActivityFeedScreen> {
-  final _scroll = ScrollController();
-
   /// Start fetching the next page this far from the bottom.
   static const _prefetchExtent = 400.0;
 
-  @override
-  void initState() {
-    super.initState();
-    _scroll.addListener(_maybeLoadMore);
-  }
-
-  @override
-  void dispose() {
-    _scroll.dispose();
-    super.dispose();
-  }
-
   FeedController get _feed => ref.read(feedControllerProvider(ref.read(feedFilterProvider)).notifier);
 
-  void _maybeLoadMore() {
-    if (_scroll.hasClients && _scroll.position.extentAfter < _prefetchExtent) _feed.loadMore();
+  /// The list scrolls on the header's primary controller (FE-HEADER-01), so paging
+  /// listens to its scroll notifications instead of owning a controller.
+  bool _maybeLoadMore(ScrollUpdateNotification n) {
+    if (n.depth == 0 && n.metrics.extentAfter < _prefetchExtent) _feed.loadMore();
+    return false;
   }
 
   void _openComments(ActivityLog activity) {
@@ -123,71 +113,26 @@ class _ActivityFeedScreenState extends ConsumerState<ActivityFeedScreen> {
     final feedAsync = ref.watch(feedControllerProvider(currentFilter));
 
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        centerTitle: false,
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: TellyColors.primaryAccentOf(context).withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: TellyColors.primaryAccentOf(context).withValues(alpha: 0.4)),
-              ),
-              child: Row(
-                children: [
-                  const Text('📺', style: TextStyle(fontSize: 14)),
-                  const SizedBox(width: 4),
-                  Text(
-                    'TELLY',
-                    style: TellyTypography.labelLarge(
-                      color: TellyColors.primaryAccentOf(context),
-                    ).copyWith(
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1.5,
-                    ),
-                  ),
-                ],
-              ),
+      body: TellyFloatingHeaderScrollView(
+        header: TellyScreenHeader(
+          title: 'Feed',
+          actions: [
+            // FE-SQUADS-01: Squads one tap from the home tab, not only behind the profile icon.
+            TellyHeaderAction(
+              key: const Key('feed_squads_button'),
+              icon: Icons.groups_2_outlined,
+              tooltip: 'My Squads',
+              onPressed: () => context.push(Routes.squads),
+            ),
+            TellyHeaderAction(
+              key: const Key('feed_search_button'),
+              icon: Icons.search_rounded,
+              tooltip: 'Search',
+              onPressed: () => context.go(Routes.exploreSearch()),
             ),
           ],
         ),
-        actions: [
-          // FE-SQUADS-01: Squads one tap from the home tab, not only behind the profile icon.
-          Center(
-            child: OutlinedButton.icon(
-              key: const Key('feed_squads_button'),
-              onPressed: () {
-                HapticsService.selectionClick();
-                context.push(Routes.squads);
-              },
-              style: OutlinedButton.styleFrom(
-                foregroundColor: TellyColors.primaryAccentOf(context),
-                side: BorderSide(color: TellyColors.primaryAccentOf(context).withValues(alpha: 0.4)),
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                minimumSize: const Size(48, 48),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-              ),
-              icon: const Icon(Icons.groups_2_outlined, size: 18),
-              label: Text('My Squads',
-                  style: TellyTypography.labelMedium(color: TellyColors.primaryAccentOf(context))
-                      .copyWith(fontWeight: FontWeight.w700)),
-            ),
-          ),
-          IconButton(
-            tooltip: 'Search',
-            icon: Icon(Icons.search_rounded, color: TellyColors.textPrimaryOf(context)),
-            onPressed: () {
-              HapticsService.selectionClick();
-            },
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
-      body: SafeArea(
-        child: Column(
+        body: Column(
           children: [
             // Segmented Filter Tabs: [ Following ] | [ Squads ] | [ Global ]
             _buildSegmentedFilterBar(currentFilter),
@@ -208,54 +153,56 @@ class _ActivityFeedScreenState extends ConsumerState<ActivityFeedScreen> {
                     final recs = ref.watch(feedRecommendationsProvider).valueOrNull ?? const FeedRecommendations();
                     final entries = interleaveRecommendations(activities, recs.picks);
 
-                    return ListView.builder(
-                      key: const Key('feed_list'),
-                      controller: _scroll,
-                      physics: const AlwaysScrollableScrollPhysics(
-                        parent: BouncingScrollPhysics(),
-                      ),
-                      padding: const EdgeInsets.only(top: 8, bottom: 120),
-                      itemCount: entries.length + (feed.hasMore ? 1 : 0),
-                      itemBuilder: (context, index) {
-                        if (index == entries.length) {
-                          return Padding(
-                            key: const Key('feed_page_loader'),
-                            padding: const EdgeInsets.all(24),
-                            child: Center(child: CircularProgressIndicator(color: TellyColors.primaryAccentOf(context))),
-                          );
-                        }
-                        final entry = entries[index];
-                        final ActivityLog activity;
-                        switch (entry) {
-                          case RecommendationEntry(:final title):
-                            return _buildRecommendation(title, recs);
-                          case ActivityEntry(activity: final a):
-                            activity = a;
-                        }
+                    return NotificationListener<ScrollUpdateNotification>(
+                      onNotification: _maybeLoadMore,
+                      child: ListView.builder(
+                        key: const Key('feed_list'),
+                        physics: const AlwaysScrollableScrollPhysics(
+                          parent: BouncingScrollPhysics(),
+                        ),
+                        padding: const EdgeInsets.only(top: 8, bottom: 120),
+                        itemCount: entries.length + (feed.hasMore ? 1 : 0),
+                        itemBuilder: (context, index) {
+                          if (index == entries.length) {
+                            return Padding(
+                              key: const Key('feed_page_loader'),
+                              padding: const EdgeInsets.all(24),
+                              child: Center(child: CircularProgressIndicator(color: TellyColors.primaryAccentOf(context))),
+                            );
+                          }
+                          final entry = entries[index];
+                          final ActivityLog activity;
+                          switch (entry) {
+                            case RecommendationEntry(:final title):
+                              return _buildRecommendation(title, recs);
+                            case ActivityEntry(activity: final a):
+                              activity = a;
+                          }
 
-                        final Widget card;
-                        if (activity.isUpset) {
-                          card = UpsetActivityCard(
-                            key: Key('upset_card_${activity.id}'),
-                            activity: activity,
-                            onCardTap: () => _openComments(activity),
-                            onCommentTap: () => _openComments(activity),
-                            onReactionToggle: (reaction) => _handleReactionToggle(activity, reaction),
-                            onQueueToggle: (inQueue) => _handleQueueToggle(activity, inQueue),
-                          );
-                        } else {
-                          card = FeedActivityCard(
-                            key: Key('feed_card_${activity.id}'),
-                            activity: activity,
-                            onCardTap: () => _openComments(activity),
-                            onCommentTap: () => _openComments(activity),
-                            onReactionToggle: (reaction) => _handleReactionToggle(activity, reaction),
-                            onQueueToggle: (inQueue) => _handleQueueToggle(activity, inQueue),
-                          );
-                        }
-                        // SCR-05: long-press opens the context menu (report / block).
-                        return GestureDetector(onLongPress: () => _openModeration(activity), child: card);
-                      },
+                          final Widget card;
+                          if (activity.isUpset) {
+                            card = UpsetActivityCard(
+                              key: Key('upset_card_${activity.id}'),
+                              activity: activity,
+                              onCardTap: () => _openComments(activity),
+                              onCommentTap: () => _openComments(activity),
+                              onReactionToggle: (reaction) => _handleReactionToggle(activity, reaction),
+                              onQueueToggle: (inQueue) => _handleQueueToggle(activity, inQueue),
+                            );
+                          } else {
+                            card = FeedActivityCard(
+                              key: Key('feed_card_${activity.id}'),
+                              activity: activity,
+                              onCardTap: () => _openComments(activity),
+                              onCommentTap: () => _openComments(activity),
+                              onReactionToggle: (reaction) => _handleReactionToggle(activity, reaction),
+                              onQueueToggle: (inQueue) => _handleQueueToggle(activity, inQueue),
+                            );
+                          }
+                          // SCR-05: long-press opens the context menu (report / block).
+                          return GestureDetector(onLongPress: () => _openModeration(activity), child: card);
+                        },
+                      ),
                     );
                   },
                   loading: () => Center(

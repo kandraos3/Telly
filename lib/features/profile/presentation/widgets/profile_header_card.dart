@@ -11,9 +11,6 @@ class ProfileHeaderCard extends StatelessWidget {
   final String? avatarUrl;
   final int movieCount;
   final int seriesCount;
-  final VoidCallback? onSettingsTap;
-  final VoidCallback? onShareTap;
-  final VoidCallback? onSquadsTap;
 
   /// Opens Edit Profile (FE-PROFILE-02).
   final VoidCallback? onAvatarTap;
@@ -26,9 +23,6 @@ class ProfileHeaderCard extends StatelessWidget {
     this.avatarUrl,
     required this.movieCount,
     required this.seriesCount,
-    this.onSettingsTap,
-    this.onShareTap,
-    this.onSquadsTap,
     this.onAvatarTap,
   });
 
@@ -38,47 +32,7 @@ class ProfileHeaderCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         children: [
-          // 1. TOP BAR: "Profile" title, then Squads, Share and Settings (FE-PROFILE-02).
-          Row(
-            children: [
-              Expanded(
-                child: Semantics(
-                  header: true,
-                  child: Text(
-                    'Profile',
-                    key: const Key('profile_title_text'),
-                    style: TellyTypography.titleLarge(color: TellyColors.textPrimaryOf(context)).copyWith(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                ),
-              ),
-              IconButton(
-                key: const Key('profile_squads_button'),
-                tooltip: 'My Squads',
-                icon: Icon(Icons.groups_2_outlined, color: TellyColors.textSecondaryOf(context)),
-                onPressed: onSquadsTap,
-              ),
-              IconButton(
-                key: const Key('profile_share_button'),
-                tooltip: 'Share profile',
-                icon: Icon(Icons.ios_share_rounded, color: TellyColors.textSecondaryOf(context)),
-                onPressed: onShareTap,
-              ),
-              IconButton(
-                key: const Key('profile_settings_button'),
-                tooltip: 'Settings',
-                icon: Icon(Icons.settings_outlined, color: TellyColors.textSecondaryOf(context)),
-                onPressed: onSettingsTap,
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 12),
-
-          // 2. AVATAR & NAME & BIO
+          // 1. AVATAR & NAME & BIO (the title and actions live in the screen's TellyScreenHeader)
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -178,7 +132,7 @@ class ProfileHeaderCard extends StatelessWidget {
 
           const SizedBox(height: 14),
 
-          // 3. CULTURAL IDENTITY STATS ROW
+          // 2. CULTURAL IDENTITY STATS ROW
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),

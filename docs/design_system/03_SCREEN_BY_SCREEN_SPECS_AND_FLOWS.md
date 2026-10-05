@@ -29,6 +29,31 @@ This document defines every single screen in the Telly application. For each scr
 
 ---
 
+### §0 Shared Tab Header (Feed, Explore, Queue, Canon) — `FE-HEADER-01`
+
+The four tab screens (`SCR-05`, `SCR-07`, `SCR-13`, `SCR-14`) share one header, `TellyScreenHeader`:
+
+```
+┌────────────────────────────────────────────────────────┐
+│  Title                                 [ a ] [ b ] [ c ]│
+└────────────────────────────────────────────────────────┘
+```
+
+* **Title:** the tab's name in sentence case, no emoji: Plus Jakarta Sans 24 / ExtraBold (w800) / −0.5 letter spacing, `textPrimary`. Announced as a heading.
+* **Row:** 56 dp tall, 16 dp gutters (the last icon glyph sits 16 dp from the edge), canvas background, no divider or elevation.
+* **Actions:** up to three 48 dp icon buttons in `textSecondary`, each with a tooltip and a selection-click haptic. They vary per screen:
+
+| Screen | Title | Actions |
+| :--- | :--- | :--- |
+| `SCR-05` Feed | Feed | My Squads, Search (opens Explore with the search field focused) |
+| `SCR-07` Explore | Explore | none (the search bar sits directly below) |
+| `SCR-13` Queue | Queue | Watchlist: Sort (sheet: Friends' Score / Leaving Soon). My Lists: New list. Friends' Lists: none |
+| `SCR-14` Canon | Canon | My Squads, Share profile, Settings |
+
+* **Scroll behavior:** the header scrolls away as the content scrolls down, and any upward scroll snaps it back in full, wherever the content is; there is no need to return to the top. Controls under the header (Feed filter tabs, Queue hub pills and Movies / TV Shows tabs) stay in place.
+
+---
+
 ### `SCR-01`: Onboarding Splash & Authentication
 
 ```
@@ -166,7 +191,8 @@ This document defines every single screen in the Telly application. For each scr
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│  [ 📺 TELLY ]       [ Following ▾ ]           [ 🔍 ]   │
+│  Feed                                   [ 👥 ] [ 🔍 ]  │
+│  [ Following ]  [ Squads ]  [ Global ]                 │
 ├────────────────────────────────────────────────────────┤
 │                                                        │
 │  ┌──────────────────────────────────────────────────┐  │
@@ -240,7 +266,7 @@ This document defines every single screen in the Telly application. For each scr
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│  🧭 DISCOVER                                  [ Filter]│
+│  Explore                                               │
 ├────────────────────────────────────────────────────────┤
 │                                                        │
 │  [ 🔍 Search shows, actors, showrunners, friends...  ] │
@@ -458,7 +484,9 @@ This document defines every single screen in the Telly application. For each scr
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│  📑 QUEUE (38)    [ All (38) ]   [ On My Services (24)]│
+│  Queue                              [ ⇅ Sort | + New ] │
+│  [ Watchlist ]  [ My Lists ]  [ Friends' Lists ]       │
+│  [  Movies (14)  |  TV Shows (24)  ]  ○ On My Services │
 ├────────────────────────────────────────────────────────┤
 │                                                        │
 │  Filter: [ Genre ▾ ]  [ Miniseries ▾ ]  [ Friends Avg ▾]│
@@ -494,7 +522,7 @@ This document defines every single screen in the Telly application. For each scr
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│  [⚙️]                     @jordan             [Share 📤]│
+│  Canon                           [ 👥 ] [ 📤 ] [ ⚙️ ]  │
 ├────────────────────────────────────────────────────────┤
 │  (👤) Jordan Miller • 142 Movies • 94 Series • 88% Match│
 │                                                        │

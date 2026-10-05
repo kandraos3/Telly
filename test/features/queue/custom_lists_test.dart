@@ -117,6 +117,24 @@ void main() {
       expect(find.text('PRIVATE'), findsWidgets);
     });
 
+    testWidgets('header actions follow the hub mode (FE-HEADER-01)', (tester) async {
+      await tester.pumpWidget(createHubWidget(initialMode: QueueHubMode.watchlist));
+      await tester.pumpAndSettle();
+      expect(find.text('Queue'), findsOneWidget);
+      expect(find.byKey(const Key('queue_sort_button')), findsOneWidget);
+      expect(find.byKey(const Key('create_new_list_button')), findsNothing);
+
+      await tester.tap(find.text('My Lists'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('queue_sort_button')), findsNothing);
+      expect(find.byKey(const Key('create_new_list_button')), findsOneWidget);
+
+      await tester.tap(find.text('Friends\' Lists'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('queue_sort_button')), findsNothing);
+      expect(find.byKey(const Key('create_new_list_button')), findsNothing);
+    });
+
     testWidgets('creates new named custom list with private toggle', (tester) async {
       await tester.pumpWidget(createHubWidget(initialMode: QueueHubMode.myLists));
       await tester.pumpAndSettle();

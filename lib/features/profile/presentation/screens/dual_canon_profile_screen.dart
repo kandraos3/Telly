@@ -6,6 +6,7 @@ import '../../../../core/router/routes.dart';
 import '../../../../core/services/haptics_service.dart';
 import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
+import '../../../../core/widgets/telly_screen_header.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../logging/domain/title_search_result.dart';
 import '../../../ranking/domain/canon_type.dart';
@@ -65,27 +66,57 @@ class DualCanonProfileScreen extends ConsumerWidget {
           context.push(Routes.title(entry.mediaType, entry.id));
         };
 
+    final onShare = onShareTap ??
+        () => ref.read(profileShareServiceProvider).shareProfile(
+              handle: me?.username ?? '',
+              displayName: me?.displayName ?? '',
+              topMovies: [for (final e in canonState.movies) e.title],
+              topSeries: [for (final e in canonState.series) e.title],
+            );
+
     return Scaffold(
-      body: SafeArea(
-        child: GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onHorizontalDragEnd: (details) {
-            final velocity = details.primaryVelocity ?? 0;
-            if (velocity < -200 && selectedCanon == CanonType.movie) {
-              ref.read(hapticsServiceProvider).duelSelectCandidate();
-              ref.read(selectedCanonProvider.notifier).select(CanonType.series);
-            } else if (velocity > 200 && selectedCanon == CanonType.series) {
-              ref.read(hapticsServiceProvider).duelSelectCandidate();
-              ref.read(selectedCanonProvider.notifier).select(CanonType.movie);
-            }
-          },
-          child: SingleChildScrollView(
+      body: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onHorizontalDragEnd: (details) {
+          final velocity = details.primaryVelocity ?? 0;
+          if (velocity < -200 && selectedCanon == CanonType.movie) {
+            ref.read(hapticsServiceProvider).duelSelectCandidate();
+            ref.read(selectedCanonProvider.notifier).select(CanonType.series);
+          } else if (velocity > 200 && selectedCanon == CanonType.series) {
+            ref.read(hapticsServiceProvider).duelSelectCandidate();
+            ref.read(selectedCanonProvider.notifier).select(CanonType.movie);
+          }
+        },
+        child: TellyFloatingHeaderScrollView(
+          // FE-HEADER-01: the shared tab header; Squads, Share and Settings moved here from the card.
+          header: TellyScreenHeader(
+            title: 'Canon',
+            actions: [
+              TellyHeaderAction(
+                key: const Key('profile_squads_button'),
+                icon: Icons.groups_2_outlined,
+                tooltip: 'My Squads',
+                onPressed: onSquadsTap,
+              ),
+              TellyHeaderAction(
+                key: const Key('profile_share_button'),
+                icon: Icons.ios_share_rounded,
+                tooltip: 'Share profile',
+                onPressed: onShare,
+              ),
+              TellyHeaderAction(
+                key: const Key('profile_settings_button'),
+                icon: Icons.settings_outlined,
+                tooltip: 'Settings',
+                onPressed: onSettingsTap,
+              ),
+            ],
+          ),
+          body: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 8),
-
                 // 1. PROFILE HEADER CARD (Avatar, Handle, Bio, Stats)
                 ProfileHeaderCard(
                   displayName: me?.displayName ?? '',
@@ -94,15 +125,6 @@ class DualCanonProfileScreen extends ConsumerWidget {
                   avatarUrl: me?.avatarUrl,
                   movieCount: moviesCount,
                   seriesCount: seriesCount,
-                  onSettingsTap: onSettingsTap,
-                  onSquadsTap: onSquadsTap,
-                  onShareTap: onShareTap ??
-                      () => ref.read(profileShareServiceProvider).shareProfile(
-                            handle: me?.username ?? '',
-                            displayName: me?.displayName ?? '',
-                            topMovies: [for (final e in canonState.movies) e.title],
-                            topSeries: [for (final e in canonState.series) e.title],
-                          ),
                   onAvatarTap: onAvatarTap ?? () => context.push(Routes.editProfile),
                 ),
 

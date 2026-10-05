@@ -24,6 +24,7 @@ void main() {
     DiscoveryRepository? discoveryRepo,
     TitleRepository? titleRepo,
     AuthRepository? authRepo,
+    String? searchRequest,
   }) {
     return ProviderScope(
       overrides: [
@@ -40,8 +41,8 @@ void main() {
       ],
       child: MaterialApp(
         theme: TellyTheme.dark,
-        home: const Scaffold(
-          body: ExploreDiscoverScreen(),
+        home: Scaffold(
+          body: ExploreDiscoverScreen(searchRequest: searchRequest),
         ),
       ),
     );
@@ -60,7 +61,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Header & Search Bar
-      expect(find.text('🧭 EXPLORE'), findsOneWidget);
+      expect(find.text('Explore'), findsOneWidget);
       expect(find.text('Search shows, actors, showrunners, friends...'), findsOneWidget);
 
       // Network Battlegrounds Section
@@ -216,13 +217,13 @@ void main() {
       await tester.pumpAndSettle();
 
       // Explore hub loads, empty battlegrounds and friends binging shrink away, curated canons remain
-      expect(find.text('🧭 EXPLORE'), findsOneWidget);
+      expect(find.text('Explore'), findsOneWidget);
       expect(find.text('NETWORK BATTLEGROUNDS'), findsNothing);
       expect(find.text('FRIENDS ARE CURRENTLY BINGING'), findsNothing);
       expect(find.text('CURATED CANONS'), findsOneWidget);
     });
 
-    testWidgets('AppBar search button requests focus and clear button resets query', (tester) async {
+    testWidgets('header has no actions; each Feed search request focuses the search field (FE-HEADER-01)', (tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 2.0;
       addTearDown(() {
@@ -230,37 +231,28 @@ void main() {
         tester.view.resetDevicePixelRatio();
       });
 
+      bool focused() => tester.widget<TextField>(find.byType(TextField)).focusNode!.hasFocus;
+
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
+      expect(find.byTooltip('Search'), findsNothing, reason: 'the redundant header search button is gone');
+      expect(focused(), isFalse);
 
-      final searchFieldFinder = find.byType(TextField);
-      expect(searchFieldFinder, findsOneWidget);
-
-      // Tap AppBar search button
-      final appbarSearchBtn = find.byKey(const Key('explore_appbar_search_btn'));
-      expect(appbarSearchBtn, findsOneWidget);
-      await tester.tap(appbarSearchBtn);
+      await tester.pumpWidget(createTestWidget(searchRequest: '1'));
       await tester.pumpAndSettle();
+      expect(focused(), isTrue);
 
-      // Field now has focus
-      final textField = tester.widget<TextField>(searchFieldFinder);
-      expect(textField.focusNode?.hasFocus, isTrue);
-
-      // Enter text
-      await tester.enterText(searchFieldFinder, 'Succession');
+      FocusManager.instance.primaryFocus?.unfocus();
       await tester.pumpAndSettle();
+      expect(focused(), isFalse);
 
-      // Clear button in AppBar appears
-      final appbarClearBtn = find.byKey(const Key('explore_appbar_clear_btn'));
-      expect(appbarClearBtn, findsOneWidget);
-
-      // Tap AppBar clear button
-      await tester.tap(appbarClearBtn);
+      // The same request again does nothing; a new one focuses again.
+      await tester.pumpWidget(createTestWidget(searchRequest: '1'));
       await tester.pumpAndSettle();
-
-      // Search query reset
-      expect(find.text('NETWORK BATTLEGROUNDS'), findsOneWidget);
-      expect(find.byKey(const Key('explore_appbar_clear_btn')), findsNothing);
+      expect(focused(), isFalse);
+      await tester.pumpWidget(createTestWidget(searchRequest: '2'));
+      await tester.pumpAndSettle();
+      expect(focused(), isTrue);
     });
 
     testWidgets('tapping own user search result navigates to own canon', (tester) async {

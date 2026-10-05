@@ -87,10 +87,10 @@ void main() {
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
 
-      expect(find.text('UNIVERSAL QUEUE'), findsOneWidget);
-      // Tabs: Movies (1) and Series (2)
-      expect(find.text('🎬 Movies (1)'), findsOneWidget);
-      expect(find.text('📺 Series (2)'), findsOneWidget);
+      expect(find.text('Queue'), findsOneWidget);
+      // Tabs: Movies (1) and TV Shows (2), no emoji (FE-HEADER-01)
+      expect(find.text('Movies (1)'), findsOneWidget);
+      expect(find.text('TV Shows (2)'), findsOneWidget);
 
       // Default selected tab is Movies: Parasite should be visible
       expect(find.text('Parasite'), findsOneWidget);
@@ -104,7 +104,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap Series tab
-      await tester.tap(find.text('📺 Series (2)'));
+      await tester.tap(find.text('TV Shows (2)'));
       await tester.pumpAndSettle();
 
       expect(find.text('Slow Horses'), findsOneWidget);
@@ -121,7 +121,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Switch to Series tab
-      await tester.tap(find.text('📺 Series (2)'));
+      await tester.tap(find.text('TV Shows (2)'));
       await tester.pumpAndSettle();
 
       // Both Slow Horses and Fargo are initially shown because filter is OFF
@@ -135,6 +135,27 @@ void main() {
       // Fargo (on Hulu) should be filtered out; Slow Horses (on Apple TV+) remains
       expect(find.text('Slow Horses'), findsOneWidget);
       expect(find.text('Fargo'), findsNothing);
+    });
+
+    testWidgets('the header sort action re-sorts the watchlist (FE-HEADER-01)', (tester) async {
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('TV Shows (2)'));
+      await tester.pumpAndSettle();
+
+      double y(String title) => tester.getTopLeft(find.text(title)).dy;
+      // Default: friends' score, so Slow Horses (8.94) sits above Fargo (8.75).
+      expect(y('Slow Horses'), lessThan(y('Fargo')));
+      expect(find.byType(DropdownButton<String>), findsNothing, reason: 'sorting moved to the header');
+
+      await tester.tap(find.byKey(const Key('queue_sort_button')));
+      await tester.pumpAndSettle();
+      expect(find.text('SORT BY'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('queue_sort_option_leaving_soon')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('SORT BY'), findsNothing);
+      expect(y('Fargo'), lessThan(y('Slow Horses')));
     });
   });
 }

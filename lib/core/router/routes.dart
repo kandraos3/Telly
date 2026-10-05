@@ -17,6 +17,9 @@ abstract final class Routes {
   static const queue = '/queue'; // SCR-13
   static const canon = '/canon'; // SCR-14
 
+  /// Explore with its search field focused; the token makes every request a new location.
+  static String exploreSearch() => '$explore?search=${DateTime.now().microsecondsSinceEpoch}';
+
   // Logging flow (full-screen, outside the shell)
   static const log = '/log'; // SCR-09
   static const duel = '/log/duel'; // SCR-10 (+ SCR-11 sheet)

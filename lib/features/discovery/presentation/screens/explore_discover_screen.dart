@@ -6,6 +6,7 @@ import 'package:telly_app/core/router/routes.dart';
 import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/theme/telly_typography.dart';
 import 'package:telly_app/core/widgets/poster_image.dart';
+import 'package:telly_app/core/widgets/telly_screen_header.dart';
 import 'package:telly_app/core/widgets/telly_neon_badge.dart';
 import 'package:telly_app/features/auth/data/auth_repository.dart';
 import 'package:telly_app/features/auth/presentation/controllers/auth_controller.dart';
@@ -18,7 +19,11 @@ import 'package:telly_app/features/logging/domain/title_search_result.dart';
 /// Conforms to `docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md` §SCR-07
 /// and `docs/features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md` §5.
 class ExploreDiscoverScreen extends ConsumerStatefulWidget {
-  const ExploreDiscoverScreen({super.key});
+  /// Set by [Routes.exploreSearch] (the Feed header's search button): each new value
+  /// focuses the search field (FE-HEADER-01).
+  final String? searchRequest;
+
+  const ExploreDiscoverScreen({super.key, this.searchRequest});
 
   @override
   ConsumerState<ExploreDiscoverScreen> createState() => _ExploreDiscoverScreenState();
@@ -41,6 +46,19 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
   void initState() {
     super.initState();
     _searchFocusNode.addListener(_onSearchFocusChanged);
+    if (widget.searchRequest != null) _focusSearchAfterFrame();
+  }
+
+  @override
+  void didUpdateWidget(ExploreDiscoverScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.searchRequest != null && widget.searchRequest != oldWidget.searchRequest) _focusSearchAfterFrame();
+  }
+
+  void _focusSearchAfterFrame() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _searchFocusNode.requestFocus();
+    });
   }
 
   void _onSearchFocusChanged() {
@@ -337,80 +355,58 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
     final curatedCanons = ref.watch(discoveryRepositoryProvider).getCuratedCanons();
 
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        title: Text(
-          '🧭 EXPLORE',
-          style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context))
-              .copyWith(letterSpacing: 1.2, fontWeight: FontWeight.w900),
-        ),
-        actions: [
-          IconButton(
-            key: const Key('explore_appbar_search_btn'),
-            icon: const Icon(Icons.search, color: TellyColors.textSecondary),
-            tooltip: 'Search',
-            onPressed: () {
-              _searchFocusNode.requestFocus();
-            },
-          ),
-          if (_searchQuery.isNotEmpty)
-            IconButton(
-              key: const Key('explore_appbar_clear_btn'),
-              icon: const Icon(Icons.close, color: TellyColors.textSecondary),
-              tooltip: 'Clear search',
-              onPressed: _clearSearch,
-            ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 1. Search Bar
-            _buildSearchBar(),
-            const SizedBox(height: 20),
+      body: TellyFloatingHeaderScrollView(
+        header: const TellyScreenHeader(title: 'Explore'),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 1. Search Bar
+              _buildSearchBar(),
+              const SizedBox(height: 20),
 
-            // If user is searching, render Search Results
-            if (_searchQuery.isNotEmpty)
-              _buildSearchResults()
-            else if (_searchFocused)
-              _buildSearchZeroState()
-            else ...[
-              // 2. Recommended for You (FE-EXPLORE-03)
-              _buildRecommendedSection(),
+              // If user is searching, render Search Results
+              if (_searchQuery.isNotEmpty)
+                _buildSearchResults()
+              else if (_searchFocused)
+                _buildSearchZeroState()
+              else ...[
+                // 2. Recommended for You (FE-EXPLORE-03)
+                _buildRecommendedSection(),
 
-              // 2. Network Battlegrounds Strip
-              battlegroundsAsync.when(
-                loading: () => const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(16),
-                    child: CircularProgressIndicator(color: TellyColors.phosphorLime),
+                // 2. Network Battlegrounds Strip
+                battlegroundsAsync.when(
+                  loading: () => const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(16),
+                      child: CircularProgressIndicator(color: TellyColors.phosphorLime),
+                    ),
                   ),
+                  error: (_, __) => const SizedBox.shrink(),
+                  data: (battlegrounds) => _buildNetworkBattlegroundsStrip(battlegrounds),
                 ),
-                error: (_, __) => const SizedBox.shrink(),
-                data: (battlegrounds) => _buildNetworkBattlegroundsStrip(battlegrounds),
-              ),
-              const SizedBox(height: 28),
+                const SizedBox(height: 28),
 
-              // 3. Friends Are Currently Binging Carousel
-              friendsBingingAsync.when(
-                loading: () => const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(16),
-                    child: CircularProgressIndicator(color: TellyColors.phosphorLime),
+                // 3. Friends Are Currently Binging Carousel
+                friendsBingingAsync.when(
+                  loading: () => const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(16),
+                      child: CircularProgressIndicator(color: TellyColors.phosphorLime),
+                    ),
                   ),
+                  error: (_, __) => const SizedBox.shrink(),
+                  data: (binging) => _buildFriendsBingingSection(binging),
                 ),
-                error: (_, __) => const SizedBox.shrink(),
-                data: (binging) => _buildFriendsBingingSection(binging),
-              ),
-              const SizedBox(height: 28),
+                const SizedBox(height: 28),
 
-              // 4. Curated Canons
-              _buildCuratedCanonsSection(curatedCanons),
-              const SizedBox(height: 40),
+                // 4. Curated Canons
+                _buildCuratedCanonsSection(curatedCanons),
+                const SizedBox(height: 40),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

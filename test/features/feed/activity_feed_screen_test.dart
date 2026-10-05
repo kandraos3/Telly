@@ -43,9 +43,16 @@ void main() {
       expect(find.text('route:/squads'), findsOneWidget);
     });
 
+    testWidgets('the header search button opens Explore with a search request (FE-HEADER-01)', (tester) async {
+      await pump(tester);
+      await tester.tap(find.byKey(const Key('feed_search_button')));
+      await tester.pumpAndSettle();
+      expect(find.textContaining(RegExp(r'^route:/explore\?search=\d+$')), findsOneWidget);
+    });
+
     testWidgets('renders the tabs, an upset card and standard cards from the repository', (tester) async {
       await pump(tester);
-      expect(find.text('TELLY'), findsOneWidget);
+      expect(find.text('Feed'), findsOneWidget);
       for (final tab in ['Following', 'Squads', 'Global']) {
         expect(find.text(tab), findsOneWidget);
       }
