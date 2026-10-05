@@ -55,8 +55,8 @@ class SquadHubScreen extends ConsumerWidget {
             PopupMenuButton<String>(
               key: const Key('squad_menu_button'),
               tooltip: 'Squad options',
-              color: TellyColors.backgroundCard,
-              icon: const Icon(Icons.more_vert_rounded, color: TellyColors.textPrimary),
+              color: TellyColors.cardOf(context),
+              icon: Icon(Icons.more_vert_rounded, color: TellyColors.textPrimaryOf(context)),
               onSelected: (_) => _deleteOrLeave(context, ref),
               itemBuilder: (_) {
                 final owner = ref.read(squadHubProvider(squadId).notifier).isOwner;
@@ -103,13 +103,13 @@ class SquadHubScreen extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        backgroundColor: TellyColors.backgroundCard,
-        title: Text(owner ? 'Delete $name?' : 'Leave $name?', style: TellyTypography.titleMedium()),
+        backgroundColor: TellyColors.cardOf(context),
+        title: Text(owner ? 'Delete $name?' : 'Leave $name?', style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context))),
         content: Text(
           owner
               ? 'This permanently removes the squad, its leaderboard and its watchlist for every member.'
               : "You'll stop seeing this squad's leaderboard and watchlist. An admin can invite you back.",
-          style: TellyTypography.bodyMedium(),
+          style: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context)),
         ),
         actions: [
           TextButton(
@@ -211,8 +211,8 @@ class _InviteDialogState extends State<_InviteDialog> {
   Widget build(BuildContext context) {
     final invitee = _checking ? null : _result.invitee;
     return AlertDialog(
-      backgroundColor: TellyColors.backgroundCard,
-      title: Text('Invite to squad', style: TellyTypography.titleMedium()),
+      backgroundColor: TellyColors.cardOf(context),
+      title: Text('Invite to squad', style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context))),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -227,12 +227,12 @@ class _InviteDialogState extends State<_InviteDialog> {
             decoration: InputDecoration(
               hintText: '@handle or email',
               suffixIcon: _checking
-                  ? const Padding(
-                      padding: EdgeInsets.all(14),
+                  ? Padding(
+                      padding: const EdgeInsets.all(14),
                       child: SizedBox(
                         width: 16,
                         height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: TellyColors.textTertiary),
+                        child: CircularProgressIndicator(strokeWidth: 2, color: TellyColors.textTertiaryOf(context)),
                       ),
                     )
                   : invitee != null
@@ -400,16 +400,16 @@ class _MembersRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: TellyColors.backgroundSurface,
+        color: TellyColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: TellyColors.borderGlass),
+        border: Border.all(color: TellyColors.borderGlassOf(context)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'MEMBERS (${members.length})',
-            style: TellyTypography.caption(color: TellyColors.textTertiary).copyWith(fontWeight: FontWeight.w700),
+            style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)).copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 10),
           SizedBox(
@@ -435,7 +435,7 @@ class _MembersRow extends StatelessWidget {
                           children: [
                             CircleAvatar(
                               radius: 16,
-                              backgroundColor: TellyColors.backgroundCard,
+                              backgroundColor: TellyColors.cardOf(context),
                               child: Text(
                                 member.displayName.isNotEmpty ? member.displayName[0] : '?',
                                 style: TellyTypography.caption(color: TellyColors.phosphorLime)
@@ -445,7 +445,7 @@ class _MembersRow extends StatelessWidget {
                             const SizedBox(width: 6),
                             Text(
                               member.displayName,
-                              style: TellyTypography.caption(color: TellyColors.textSecondary)
+                              style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context))
                                   .copyWith(fontWeight: FontWeight.w600),
                             ),
                           ],
@@ -482,15 +482,15 @@ class _CanonSwitcher extends StatelessWidget {
               constraints: const BoxConstraints(minHeight: 48),
               padding: const EdgeInsets.symmetric(vertical: 6),
               decoration: BoxDecoration(
-                color: selected == mediaType ? TellyColors.backgroundCard : Colors.transparent,
+                color: selected == mediaType ? TellyColors.cardOf(context) : Colors.transparent,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: selected == mediaType ? TellyColors.borderGlass : Colors.transparent),
+                border: Border.all(color: selected == mediaType ? TellyColors.borderGlassOf(context) : Colors.transparent),
               ),
               alignment: Alignment.center,
               child: Text(
                 label,
                 style: TellyTypography.caption(
-                  color: selected == mediaType ? TellyColors.phosphorLime : TellyColors.textTertiary,
+                  color: selected == mediaType ? TellyColors.phosphorLime : TellyColors.textTertiaryOf(context),
                 ).copyWith(fontWeight: FontWeight.bold),
               ),
             ),
@@ -499,9 +499,9 @@ class _CanonSwitcher extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: TellyColors.backgroundSurface,
+        color: TellyColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: TellyColors.borderGlass),
+        border: Border.all(color: TellyColors.borderGlassOf(context)),
       ),
       child: Row(children: [option('movie', 'Movies'), option('tv', 'TV Shows')]),
     );
@@ -534,7 +534,7 @@ class _HotDebateCard extends StatelessWidget {
           Text(
             'Divergence: ${(item.lowestRank - item.championRank).abs()} ranks between '
             '${item.championDisplayName} (#${item.championRank}) and ${item.lowestDisplayName} (#${item.lowestRank})',
-            style: TellyTypography.caption(color: TellyColors.textSecondary),
+            style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)),
           ),
         ],
       ),
@@ -554,9 +554,9 @@ class _ConsensusCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: TellyColors.backgroundSurface,
+        color: TellyColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: TellyColors.borderGlass),
+        border: Border.all(color: TellyColors.borderGlassOf(context)),
       ),
       child: Row(
         children: [
@@ -565,13 +565,13 @@ class _ConsensusCard extends StatelessWidget {
             height: 32,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: top ? TellyColors.phosphorLime.withValues(alpha: 0.15) : TellyColors.backgroundCard,
+              color: top ? TellyColors.phosphorLime.withValues(alpha: 0.15) : TellyColors.cardOf(context),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: top ? TellyColors.phosphorLime : TellyColors.borderGlass),
+              border: Border.all(color: top ? TellyColors.phosphorLime : TellyColors.borderGlassOf(context)),
             ),
             child: Text(
               '#${item.consensusRank}',
-              style: TellyTypography.monoDigits(color: top ? TellyColors.phosphorLime : TellyColors.textSecondary)
+              style: TellyTypography.monoDigits(color: top ? TellyColors.phosphorLime : TellyColors.textSecondaryOf(context))
                   .copyWith(fontWeight: FontWeight.bold, fontSize: 13),
             ),
           ),
@@ -585,7 +585,7 @@ class _ConsensusCard extends StatelessWidget {
                     Flexible(
                       child: Text(
                         item.title,
-                        style: TellyTypography.bodyLarge(color: TellyColors.textPrimary)
+                        style: TellyTypography.bodyLarge(color: TellyColors.textPrimaryOf(context))
                             .copyWith(fontWeight: FontWeight.bold),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -603,7 +603,7 @@ class _ConsensusCard extends StatelessWidget {
                 Text(
                   'Champion: ${item.championDisplayName} (#${item.championRank}) • '
                   'Lowest: ${item.lowestDisplayName} (#${item.lowestRank})',
-                  style: TellyTypography.caption(color: TellyColors.textTertiary).copyWith(fontSize: 11),
+                  style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)).copyWith(fontSize: 11),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -625,10 +625,10 @@ class _WatchlistTile extends StatelessWidget {
     return ListTile(
       key: Key('squad_watch_${item.mediaType}_${item.titleId}'),
       contentPadding: EdgeInsets.zero,
-      title: Text(item.title, style: TellyTypography.bodyLarge(color: TellyColors.textPrimary)),
+      title: Text(item.title, style: TellyTypography.bodyLarge(color: TellyColors.textPrimaryOf(context))),
       subtitle: Text(
         item.everyone ? 'Everyone wants to watch' : '${item.queuedBy} of ${item.memberCount} want to watch',
-        style: TellyTypography.caption(color: item.everyone ? TellyColors.phosphorLime : TellyColors.textSecondary),
+        style: TellyTypography.caption(color: item.everyone ? TellyColors.phosphorLime : TellyColors.textSecondaryOf(context)),
       ),
       onTap: () => context.push(Routes.title(item.mediaType, item.titleId)),
     );

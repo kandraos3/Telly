@@ -88,6 +88,8 @@ abstract class TellyColors {
   static Color strokeOf(BuildContext context) =>
       Theme.of(context).brightness == Brightness.light ? lightStrokeSubtle : strokeSubtle;
 
+  static Color strokeSubtleOf(BuildContext context) => strokeOf(context);
+
   static Color strokeStrongOf(BuildContext context) =>
       Theme.of(context).brightness == Brightness.light ? lightStrokeStrong : strokeStrong;
 

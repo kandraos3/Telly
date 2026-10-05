@@ -47,24 +47,24 @@ class TellyTextField extends StatelessWidget {
       onChanged: onChanged,
       onFieldSubmitted: onSubmitted,
       validator: validator,
-      style: TellyTypography.bodyLarge(color: TellyColors.textPrimary),
-      cursorColor: TellyColors.phosphorLime,
+      style: TellyTypography.bodyLarge(color: TellyColors.textPrimaryOf(context)),
+      cursorColor: TellyColors.primaryAccentOf(context),
       decoration: InputDecoration(
         filled: true,
-        fillColor: TellyColors.backgroundCard, // #1A1D27
+        fillColor: TellyColors.cardOf(context),
         hintText: hintText,
-        hintStyle: TellyTypography.bodyMedium(color: TellyColors.textTertiary),
+        hintStyle: TellyTypography.bodyMedium(color: TellyColors.textTertiaryOf(context)),
         labelText: labelText,
-        labelStyle: TellyTypography.bodyMedium(color: TellyColors.textSecondary),
+        labelStyle: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context)),
         errorText: errorText,
-        errorStyle: TellyTypography.caption(color: TellyColors.neonCoral),
+        errorStyle: TellyTypography.caption(color: TellyColors.neonCoralOf(context)),
         prefixIcon: prefixIcon,
         suffixIcon: suffixIcon,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: TellyColors.strokeSubtle, // #242938
+          borderSide: BorderSide(
+            color: TellyColors.strokeOf(context),
             width: 1.0,
           ),
         ),

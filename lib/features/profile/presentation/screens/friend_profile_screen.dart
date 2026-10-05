@@ -146,11 +146,11 @@ class _Body extends ConsumerWidget {
             children: [
               CircleAvatar(
                 radius: 28,
-                backgroundColor: TellyColors.backgroundCard,
+                backgroundColor: TellyColors.cardOf(context),
                 foregroundImage: profile.avatarUrl == null ? null : NetworkImage(profile.avatarUrl!),
                 child: Text(
                   profile.displayName.isNotEmpty ? profile.displayName[0] : '?',
-                  style: const TextStyle(fontSize: 22, color: TellyColors.textPrimary, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 22, color: TellyColors.textPrimaryOf(context), fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(width: 14),
@@ -158,10 +158,10 @@ class _Body extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(profile.displayName, style: TellyTypography.headlineSmall(color: TellyColors.textPrimary)),
+                    Text(profile.displayName, style: TellyTypography.headlineSmall(color: TellyColors.textPrimaryOf(context))),
                     if (profile.bio != null && profile.bio!.isNotEmpty) ...[
                       const SizedBox(height: 2),
-                      Text(profile.bio!, style: TellyTypography.caption(color: TellyColors.textTertiary)),
+                      Text(profile.bio!, style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context))),
                     ],
                   ],
                 ),

@@ -332,7 +332,7 @@ class DualCanonProfileScreen extends ConsumerWidget {
   Future<void> _showEntryActions(BuildContext context, CanonEntry entry, WidgetRef ref, CanonType selectedCanon) async {
     final action = await showModalBottomSheet<String>(
       context: context,
-      backgroundColor: TellyColors.backgroundCard,
+      backgroundColor: TellyColors.cardOf(context),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -343,10 +343,10 @@ class DualCanonProfileScreen extends ConsumerWidget {
             ListTile(
               key: const Key('reset_duels_action'),
               leading: const Icon(Icons.refresh, color: TellyColors.phosphorLime),
-              title: Text('Re-duel & Recalibrate Rank', style: TellyTypography.bodyLarge()),
-              subtitle: const Text(
+              title: Text('Re-duel & Recalibrate Rank', style: TellyTypography.bodyLarge(color: TellyColors.textPrimaryOf(context))),
+              subtitle: Text(
                 'Play comparison duels to organically calibrate position',
-                style: TextStyle(color: TellyColors.textTertiary, fontSize: 12),
+                style: TextStyle(color: TellyColors.textTertiaryOf(context), fontSize: 12),
               ),
               onTap: () => Navigator.of(ctx).pop('reset'),
             ),
@@ -372,11 +372,11 @@ class DualCanonProfileScreen extends ConsumerWidget {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (dialogCtx) => AlertDialog(
-          backgroundColor: TellyColors.backgroundCard,
-          title: const Text('Remove from List?', style: TextStyle(color: TellyColors.textPrimary)),
+          backgroundColor: TellyColors.cardOf(context),
+          title: Text('Remove from List?', style: TextStyle(color: TellyColors.textPrimaryOf(context))),
           content: Text(
             'Are you sure you want to remove "${entry.title}"? Your remaining rankings and scores will be recalculated automatically.',
-            style: const TextStyle(color: TellyColors.textSecondary),
+            style: TextStyle(color: TellyColors.textSecondaryOf(context)),
           ),
           actions: [
             TextButton(
@@ -403,7 +403,7 @@ class DualCanonProfileScreen extends ConsumerWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Removed "${entry.title}" from your list'),
-              backgroundColor: TellyColors.backgroundCard,
+              backgroundColor: TellyColors.cardOf(context),
             ),
           );
         }

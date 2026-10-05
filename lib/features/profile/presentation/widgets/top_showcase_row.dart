@@ -33,7 +33,7 @@ class TopShowcaseRow extends StatelessWidget {
             children: [
               Text(
                 '━ TOP 3 SHOWCASE ',
-                style: TellyTypography.caption(color: TellyColors.textTertiary).copyWith(
+                style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)).copyWith(
                   letterSpacing: 1.5,
                   fontWeight: FontWeight.bold,
                 ),
@@ -41,7 +41,7 @@ class TopShowcaseRow extends StatelessWidget {
               Expanded(
                 child: Container(
                   height: 1,
-                  color: TellyColors.borderGlass,
+                  color: TellyColors.borderGlassOf(context),
                 ),
               ),
             ],
@@ -59,7 +59,7 @@ class TopShowcaseRow extends StatelessWidget {
                     padding: EdgeInsets.only(
                       right: index < 2 ? 10 : 0,
                     ),
-                    child: _buildShowcaseCard(item, index + 1),
+                    child: _buildShowcaseCard(context, item, index + 1),
                   ),
                 );
               } else {
@@ -68,7 +68,7 @@ class TopShowcaseRow extends StatelessWidget {
                     padding: EdgeInsets.only(
                       right: index < 2 ? 10 : 0,
                     ),
-                    child: _buildEmptyCard(index + 1),
+                    child: _buildEmptyCard(context, index + 1),
                   ),
                 );
               }
@@ -79,18 +79,18 @@ class TopShowcaseRow extends StatelessWidget {
     );
   }
 
-  Widget _buildShowcaseCard(CanonEntry item, int rank) {
+  Widget _buildShowcaseCard(BuildContext context, CanonEntry item, int rank) {
     return GestureDetector(
       onTap: () => onTapEntry?.call(item),
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: TellyColors.backgroundCard,
+          color: TellyColors.cardOf(context),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: rank == 1
                 ? TellyColors.phosphorLime.withValues(alpha: 0.6)
-                : TellyColors.borderGlass,
+                : TellyColors.borderGlassOf(context),
             width: rank == 1 ? 1.5 : 1.0,
           ),
           boxShadow: rank == 1
@@ -112,10 +112,10 @@ class TopShowcaseRow extends StatelessWidget {
                   child: Container(
                     height: 110,
                     width: double.infinity,
-                    color: TellyColors.backgroundSurface,
+                    color: TellyColors.surfaceOf(context),
                     child: PosterImage(
                       posterPath: item.posterPath,
-                      fallback: _posterFallback(item),
+                      fallback: _posterFallback(context, item),
                     ),
                   ),
                 ),
@@ -127,13 +127,13 @@ class TopShowcaseRow extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: rank == 1
                           ? TellyColors.phosphorLime
-                          : TellyColors.backgroundPrimary.withValues(alpha: 0.8),
+                          : TellyColors.cardOf(context).withValues(alpha: 0.8),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
                       '#$rank',
                       style: TellyTypography.caption(
-                        color: rank == 1 ? Colors.black : TellyColors.textPrimary,
+                        color: rank == 1 ? Colors.black : TellyColors.textPrimaryOf(context),
                       ).copyWith(fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -146,7 +146,7 @@ class TopShowcaseRow extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
-              style: TellyTypography.caption(color: TellyColors.textPrimary).copyWith(
+              style: TellyTypography.caption(color: TellyColors.textPrimaryOf(context)).copyWith(
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -154,7 +154,7 @@ class TopShowcaseRow extends StatelessWidget {
             Text(
               item.calculatedScore.toStringAsFixed(2),
               style: TellyTypography.scoreMono(
-                color: rank == 1 ? TellyColors.phosphorLime : TellyColors.textSecondary,
+                color: rank == 1 ? TellyColors.phosphorLime : TellyColors.textSecondaryOf(context),
               ).copyWith(fontSize: 12),
             ),
           ],
@@ -163,28 +163,28 @@ class TopShowcaseRow extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyCard(int rank) {
+  Widget _buildEmptyCard(BuildContext context, int rank) {
     return Container(
       height: 160,
       decoration: BoxDecoration(
-        color: TellyColors.backgroundCard.withValues(alpha: 0.5),
+        color: TellyColors.cardOf(context).withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: TellyColors.strokeSubtle),
+        border: Border.all(color: TellyColors.strokeSubtleOf(context)),
       ),
       child: Center(
         child: Text(
           '#$rank',
-          style: TellyTypography.titleMedium(color: TellyColors.textSecondary),
+          style: TellyTypography.titleMedium(color: TellyColors.textSecondaryOf(context)),
         ),
       ),
     );
   }
 
-  Widget _posterFallback(CanonEntry item) {
+  Widget _posterFallback(BuildContext context, CanonEntry item) {
     return Center(
       child: Icon(
         item.mediaType == 'movie' ? Icons.movie_outlined : Icons.tv_outlined,
-        color: TellyColors.textTertiary,
+        color: TellyColors.textTertiaryOf(context),
         size: 28,
       ),
     );

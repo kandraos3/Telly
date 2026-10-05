@@ -90,7 +90,7 @@ class _SpoilerShieldSheetState extends State<SpoilerShieldSheet> {
       ..showSnackBar(
         SnackBar(
           content: Text('Muted "$title" — all posts shielded until unmuted.'),
-          backgroundColor: TellyColors.backgroundCard,
+          backgroundColor: TellyColors.cardOf(context),
         ),
       );
   }
@@ -122,13 +122,13 @@ class _SpoilerShieldSheetState extends State<SpoilerShieldSheet> {
     return Container(
       height: MediaQuery.of(context).size.height * 0.75,
       padding: EdgeInsets.fromLTRB(20, 16, 20, 20 + bottomInset),
-      decoration: const BoxDecoration(
-        color: TellyColors.backgroundCanvasOled,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: TellyColors.surfaceOf(context),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         border: Border(
-          top: BorderSide(color: TellyColors.borderGlass),
-          left: BorderSide(color: TellyColors.borderGlass),
-          right: BorderSide(color: TellyColors.borderGlass),
+          top: BorderSide(color: TellyColors.borderGlassOf(context)),
+          left: BorderSide(color: TellyColors.borderGlassOf(context)),
+          right: BorderSide(color: TellyColors.borderGlassOf(context)),
         ),
       ),
       child: Column(
@@ -140,7 +140,7 @@ class _SpoilerShieldSheetState extends State<SpoilerShieldSheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: TellyColors.strokeSubtle,
+                color: TellyColors.strokeSubtleOf(context),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -153,20 +153,20 @@ class _SpoilerShieldSheetState extends State<SpoilerShieldSheet> {
             children: [
               Text(
                 '🛡️ SPOILER SHIELD',
-                style: TellyTypography.titleMedium(color: TellyColors.textPrimary).copyWith(
+                style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context)).copyWith(
                   letterSpacing: 1.2,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.close, color: TellyColors.textSecondary, size: 20),
+                icon: Icon(Icons.close, color: TellyColors.textSecondaryOf(context), size: 20),
                 onPressed: () => Navigator.of(context).pop(_mutedTitles),
               ),
             ],
           ),
           Text(
             'Proactively mute titles to hide all reviews, reactions, and feed cards until you finish watching.',
-            style: TellyTypography.caption(color: TellyColors.textSecondary),
+            style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)),
           ),
           const SizedBox(height: 16),
 
@@ -176,22 +176,22 @@ class _SpoilerShieldSheetState extends State<SpoilerShieldSheet> {
               Expanded(
                 child: TextField(
                   controller: _searchController,
-                  style: const TextStyle(color: TellyColors.textPrimary, fontSize: 13),
+                  style: TextStyle(color: TellyColors.textPrimaryOf(context), fontSize: 13),
                   onSubmitted: (_) => _addCustomTitle(),
                   decoration: InputDecoration(
                     hintText: 'Mute a show (e.g. Severance S2)...',
-                    hintStyle: const TextStyle(color: TellyColors.textTertiary, fontSize: 12),
+                    hintStyle: TextStyle(color: TellyColors.textTertiaryOf(context), fontSize: 12),
                     filled: true,
-                    fillColor: TellyColors.backgroundCard,
-                    prefixIcon: const Icon(Icons.search, color: TellyColors.textTertiary, size: 18),
+                    fillColor: TellyColors.cardOf(context),
+                    prefixIcon: Icon(Icons.search, color: TellyColors.textTertiaryOf(context), size: 18),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: TellyColors.borderGlass),
+                      borderSide: BorderSide(color: TellyColors.borderGlassOf(context)),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: TellyColors.borderGlass),
+                      borderSide: BorderSide(color: TellyColors.borderGlassOf(context)),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -213,7 +213,7 @@ class _SpoilerShieldSheetState extends State<SpoilerShieldSheet> {
           // Quick Trending Mute Suggestions
           Text(
             'POPULAR TITLES TO SHIELD',
-            style: TellyTypography.labelSmall(color: TellyColors.textSecondary).copyWith(
+            style: TellyTypography.labelSmall(color: TellyColors.textSecondaryOf(context)).copyWith(
               fontWeight: FontWeight.bold,
               letterSpacing: 0.8,
             ),
@@ -230,17 +230,17 @@ class _SpoilerShieldSheetState extends State<SpoilerShieldSheet> {
                     avatar: Icon(
                       isMuted ? Icons.check : Icons.shield_outlined,
                       size: 14,
-                      color: isMuted ? TellyColors.phosphorLime : TellyColors.textSecondary,
+                      color: isMuted ? TellyColors.phosphorLime : TellyColors.textSecondaryOf(context),
                     ),
                     label: Text(show['title'] as String),
                     backgroundColor: isMuted
                         ? TellyColors.phosphorLime.withValues(alpha: 0.15)
-                        : TellyColors.backgroundCard,
+                        : TellyColors.cardOf(context),
                     side: BorderSide(
-                      color: isMuted ? TellyColors.phosphorLime : TellyColors.borderGlass,
+                      color: isMuted ? TellyColors.phosphorLime : TellyColors.borderGlassOf(context),
                     ),
                     labelStyle: TextStyle(
-                      color: isMuted ? TellyColors.phosphorLime : TellyColors.textPrimary,
+                      color: isMuted ? TellyColors.phosphorLime : TellyColors.textPrimaryOf(context),
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
                     ),
@@ -268,7 +268,7 @@ class _SpoilerShieldSheetState extends State<SpoilerShieldSheet> {
             children: [
               Text(
                 'CURRENTLY SHIELDED (${_mutedTitles.length})',
-                style: TellyTypography.labelSmall(color: TellyColors.textSecondary).copyWith(
+                style: TellyTypography.labelSmall(color: TellyColors.textSecondaryOf(context)).copyWith(
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.8,
                 ),
@@ -296,7 +296,7 @@ class _SpoilerShieldSheetState extends State<SpoilerShieldSheet> {
                     child: Text(
                       'No titles currently shielded.\nAll feed posts and spoilers are visible.',
                       textAlign: TextAlign.center,
-                      style: TellyTypography.caption(color: TellyColors.textTertiary),
+                      style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)),
                     ),
                   )
                 : ListView.separated(
@@ -307,9 +307,9 @@ class _SpoilerShieldSheetState extends State<SpoilerShieldSheet> {
                       return Container(
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                         decoration: BoxDecoration(
-                          color: TellyColors.backgroundCard,
+                          color: TellyColors.cardOf(context),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: TellyColors.borderGlass),
+                          border: Border.all(color: TellyColors.borderGlassOf(context)),
                         ),
                         child: Row(
                           children: [
@@ -321,11 +321,11 @@ class _SpoilerShieldSheetState extends State<SpoilerShieldSheet> {
                             Expanded(
                               child: Text(
                                 title.title,
-                                style: TellyTypography.bodyMedium(color: TellyColors.textPrimary),
+                                style: TellyTypography.bodyMedium(color: TellyColors.textPrimaryOf(context)),
                               ),
                             ),
                             IconButton(
-                              icon: const Icon(Icons.close, color: TellyColors.textTertiary, size: 18),
+                              icon: Icon(Icons.close, color: TellyColors.textTertiaryOf(context), size: 18),
                               onPressed: () => _removeMutedTitle(title.tmdbId),
                             ),
                           ],

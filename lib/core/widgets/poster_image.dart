@@ -61,11 +61,16 @@ class PosterImage extends StatelessWidget {
       imageUrl: url,
       fit: fit,
       fadeInDuration: const Duration(milliseconds: 150),
-      placeholder: (_, __) => Shimmer.fromColors(
-        baseColor: TellyColors.backgroundSurface,
-        highlightColor: TellyColors.backgroundCard,
-        child: const ColoredBox(color: TellyColors.backgroundSurface),
-      ),
+      placeholder: (ctx, __) {
+        final isLight = Theme.of(ctx).brightness == Brightness.light;
+        final base = isLight ? const Color(0xFFE2E4EC) : TellyColors.backgroundSurface;
+        final highlight = isLight ? const Color(0xFFF0F1F5) : TellyColors.backgroundCard;
+        return Shimmer.fromColors(
+          baseColor: base,
+          highlightColor: highlight,
+          child: ColoredBox(color: base),
+        );
+      },
       errorWidget: (_, __, ___) => fallback,
     );
   }

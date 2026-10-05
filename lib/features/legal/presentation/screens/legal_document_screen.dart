@@ -75,12 +75,12 @@ class _LegalBlockView extends StatelessWidget {
           padding: EdgeInsets.only(top: level == 1 ? 8 : 16, bottom: 8),
           child: Semantics(
             header: true,
-            child: _richText(text, level == 1 ? TellyTypography.titleLarge(color: TellyColors.textPrimaryOf(context)) : TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context))),
+            child: _richText(context, text, level == 1 ? TellyTypography.titleLarge(color: TellyColors.textPrimaryOf(context)) : TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context))),
           ),
         ),
       LegalParagraph(:final text) => Padding(
           padding: const EdgeInsets.only(bottom: 12),
-          child: _richText(text, TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context))),
+          child: _richText(context, text, TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context))),
         ),
       LegalBullet(:final depth, :final text) => Padding(
           padding: EdgeInsets.only(left: 4.0 + depth * 18, bottom: 8),
@@ -88,7 +88,7 @@ class _LegalBlockView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(depth == 0 ? '•  ' : '◦  ', style: TellyTypography.bodyMedium(color: TellyColors.primaryAccentOf(context))),
-              Expanded(child: _richText(text, TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context)))),
+              Expanded(child: _richText(context, text, TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context)))),
             ],
           ),
         ),
@@ -99,7 +99,7 @@ class _LegalBlockView extends StatelessWidget {
     };
   }
 
-  Widget _richText(String text, TextStyle base) {
+  Widget _richText(BuildContext context, String text, TextStyle base) {
     return Text.rich(
       TextSpan(
         style: base,
@@ -109,7 +109,7 @@ class _LegalBlockView extends StatelessWidget {
               text: run.text,
               style: switch (run.style) {
                 LegalInlineStyle.plain => null,
-                LegalInlineStyle.bold => const TextStyle(fontWeight: FontWeight.w700, color: TellyColors.textPrimary),
+                LegalInlineStyle.bold => TextStyle(fontWeight: FontWeight.w700, color: TellyColors.textPrimaryOf(context)),
                 LegalInlineStyle.italic => const TextStyle(fontStyle: FontStyle.italic),
                 LegalInlineStyle.code => TellyTypography.scoreMono().copyWith(fontSize: base.fontSize),
               },

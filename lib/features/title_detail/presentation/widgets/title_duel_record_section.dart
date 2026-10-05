@@ -52,9 +52,9 @@ class _SectionCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: TellyColors.backgroundSurface,
+        color: TellyColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: TellyColors.borderGlass),
+        border: Border.all(color: TellyColors.borderGlassOf(context)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -65,7 +65,7 @@ class _SectionCard extends StatelessWidget {
               const SizedBox(width: 6),
               Text(
                 heading,
-                style: TellyTypography.labelSmall(color: TellyColors.textPrimary)
+                style: TellyTypography.labelSmall(color: TellyColors.textPrimaryOf(context))
                     .copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
               ),
             ],
@@ -95,7 +95,7 @@ class _DuelRecordCard extends StatelessWidget {
           ? Text(
               TitleDuelRecordSection.emptyMessage,
               key: const Key('title_duel_record_empty'),
-              style: TellyTypography.bodyMedium(color: TellyColors.textSecondary),
+              style: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context)),
             )
           : Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -124,9 +124,9 @@ class _DuelRecordCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                     decoration: BoxDecoration(
-                      color: TellyColors.backgroundCard,
+                      color: TellyColors.cardOf(context),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: TellyColors.borderGlass),
+                      border: Border.all(color: TellyColors.borderGlassOf(context)),
                     ),
                     child: Row(
                       children: [
@@ -136,7 +136,7 @@ class _DuelRecordCard extends StatelessWidget {
                           child: Text(
                             'Most often beats ${top.title} '
                             '(${top.count} head-to-head ${top.count == 1 ? 'win' : 'wins'}).',
-                            style: TellyTypography.caption(color: TellyColors.textPrimary),
+                            style: TellyTypography.caption(color: TellyColors.textPrimaryOf(context)),
                           ),
                         ),
                       ],
@@ -164,7 +164,7 @@ class _Stat extends StatelessWidget {
         Text(value,
             style: TellyTypography.monoDigits(color: color).copyWith(fontSize: 22, fontWeight: FontWeight.w900)),
         const SizedBox(height: 2),
-        Text(label, style: TellyTypography.caption(color: TellyColors.textPrimary)),
+        Text(label, style: TellyTypography.caption(color: TellyColors.textPrimaryOf(context))),
       ],
     );
   }
@@ -215,7 +215,7 @@ class _TierDistributionCard extends StatelessWidget {
                     const SizedBox(width: 4),
                     Text(
                       '${bands[i].$1} ${pct[i]}% ${bands[i].$2}',
-                      style: TellyTypography.caption(color: TellyColors.textPrimary)
+                      style: TellyTypography.caption(color: TellyColors.textPrimaryOf(context))
                           .copyWith(fontSize: 10, fontWeight: FontWeight.w700),
                     ),
                   ],

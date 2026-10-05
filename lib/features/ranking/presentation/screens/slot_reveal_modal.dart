@@ -71,9 +71,11 @@ class SlotRevealModal extends ConsumerStatefulWidget {
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
-      barrierColor: TellyColors.backgroundPrimary.withValues(alpha: 0.92),
+      barrierColor: Theme.of(context).brightness == Brightness.light
+          ? Colors.black54
+          : TellyColors.backgroundPrimary.withValues(alpha: 0.92),
       builder: (ctx) => Dialog.fullscreen(
-        backgroundColor: TellyColors.backgroundPrimary,
+        backgroundColor: TellyColors.canvasOf(context),
         child: SlotRevealModal(
           showId: showId,
           title: title,
@@ -164,7 +166,7 @@ class _SlotRevealModalState extends ConsumerState<SlotRevealModal>
     final mediaUnit = _isMovie ? 'Titles' : 'Shows';
 
     return Scaffold(
-      backgroundColor: TellyColors.backgroundPrimary,
+      backgroundColor: TellyColors.canvasOf(context),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -176,7 +178,7 @@ class _SlotRevealModalState extends ConsumerState<SlotRevealModal>
                 children: [
                   IconButton(
                     key: const Key('slot_reveal_close_button'),
-                    icon: const Icon(Icons.close, color: TellyColors.textSecondary),
+                    icon: Icon(Icons.close, color: TellyColors.textSecondaryOf(context)),
                     onPressed: widget.onClose ?? () => Navigator.of(context).maybePop(),
                   ),
                 ],
@@ -196,7 +198,7 @@ class _SlotRevealModalState extends ConsumerState<SlotRevealModal>
                             Text(
                               '🎉 CANON UPDATED!',
                               key: const Key('canon_updated_headline'),
-                              style: TellyTypography.titleLarge(color: TellyColors.textPrimary).copyWith(
+                              style: TellyTypography.titleLarge(color: TellyColors.textPrimaryOf(context)).copyWith(
                                 letterSpacing: 2.0,
                                 fontWeight: FontWeight.w800,
                               ),
@@ -204,7 +206,7 @@ class _SlotRevealModalState extends ConsumerState<SlotRevealModal>
                             const SizedBox(height: 6),
                             Text(
                               'Your personal leaderboard has recalibrated',
-                              style: TellyTypography.bodyMedium(color: TellyColors.textTertiary),
+                              style: TellyTypography.bodyMedium(color: TellyColors.textTertiaryOf(context)),
                             ),
                           ],
                         ),
@@ -222,7 +224,7 @@ class _SlotRevealModalState extends ConsumerState<SlotRevealModal>
                             width: double.infinity,
                             padding: const EdgeInsets.all(20),
                             decoration: BoxDecoration(
-                              color: TellyColors.backgroundSurface,
+                              color: TellyColors.surfaceOf(context),
                               borderRadius: BorderRadius.circular(24),
                               border: Border.all(
                                 color: TellyColors.phosphorLime.withValues(alpha: 0.35),
@@ -247,7 +249,7 @@ class _SlotRevealModalState extends ConsumerState<SlotRevealModal>
                                     height: 120,
                                     child: PosterImage(
                                       posterPath: widget.posterPath,
-                                      fallback: _buildPosterFallback(),
+                                      fallback: _buildPosterFallback(context),
                                     ),
                                   ),
                                 ),
@@ -260,7 +262,7 @@ class _SlotRevealModalState extends ConsumerState<SlotRevealModal>
                                   textAlign: TextAlign.center,
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
-                                  style: TellyTypography.displayXL(color: TellyColors.textPrimary),
+                                  style: TellyTypography.displayXL(color: TellyColors.textPrimaryOf(context)),
                                 ),
 
                                 const SizedBox(height: 10),
@@ -269,14 +271,14 @@ class _SlotRevealModalState extends ConsumerState<SlotRevealModal>
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                                   decoration: BoxDecoration(
-                                    color: TellyColors.backgroundCard,
+                                    color: TellyColors.cardOf(context),
                                     borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(color: TellyColors.borderGlass),
+                                    border: Border.all(color: TellyColors.borderGlassOf(context)),
                                   ),
                                   child: Text(
                                     'Rank: #${widget.rankPosition} of ${widget.totalInCanon} $mediaUnit in your $canonLabel',
                                     key: const Key('slot_reveal_rank_text'),
-                                    style: TellyTypography.labelSmall(color: TellyColors.textSecondary).copyWith(
+                                    style: TellyTypography.labelSmall(color: TellyColors.textSecondaryOf(context)).copyWith(
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -306,7 +308,7 @@ class _SlotRevealModalState extends ConsumerState<SlotRevealModal>
                                     Text(
                                       '/ 10.0',
                                       style: TellyTypography.titleMedium(
-                                        color: TellyColors.textTertiary,
+                                        color: TellyColors.textTertiaryOf(context),
                                       ),
                                     ),
                                   ],
@@ -340,22 +342,22 @@ class _SlotRevealModalState extends ConsumerState<SlotRevealModal>
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                             decoration: BoxDecoration(
-                              color: TellyColors.backgroundCard,
+                              color: TellyColors.cardOf(context),
                               borderRadius: BorderRadius.circular(14),
-                              border: Border.all(color: TellyColors.borderGlass),
+                              border: Border.all(color: TellyColors.borderGlassOf(context)),
                             ),
                             child: Column(
                               children: [
                                 if (widget.justBehindTitles.isNotEmpty) ...[
                                   Row(
                                     children: [
-                                      const Icon(Icons.arrow_upward, size: 14, color: TellyColors.textTertiary),
+                                      Icon(Icons.arrow_upward, size: 14, color: TellyColors.textTertiaryOf(context)),
                                       const SizedBox(width: 8),
                                       Expanded(
                                         child: Text(
                                           'Just behind: ${widget.justBehindTitles.join(", ")}',
                                           key: const Key('just_behind_text'),
-                                          style: TellyTypography.caption(color: TellyColors.textSecondary),
+                                          style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)),
                                           overflow: TextOverflow.ellipsis,
                                         ),
                                       ),
@@ -364,7 +366,7 @@ class _SlotRevealModalState extends ConsumerState<SlotRevealModal>
                                 ],
                                 if (widget.justBehindTitles.isNotEmpty &&
                                     widget.beatingTitles.isNotEmpty) ...[
-                                  const Divider(color: TellyColors.borderGlass, height: 12),
+                                  Divider(color: TellyColors.borderGlassOf(context), height: 12),
                                 ],
                                 if (widget.beatingTitles.isNotEmpty) ...[
                                   Row(
@@ -375,7 +377,7 @@ class _SlotRevealModalState extends ConsumerState<SlotRevealModal>
                                         child: Text(
                                           'Beating: ${widget.beatingTitles.join(", ")}',
                                           key: const Key('beating_text'),
-                                          style: TellyTypography.caption(color: TellyColors.textSecondary),
+                                          style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)),
                                           overflow: TextOverflow.ellipsis,
                                         ),
                                       ),
@@ -415,16 +417,16 @@ class _SlotRevealModalState extends ConsumerState<SlotRevealModal>
                       height: 48,
                       child: OutlinedButton.icon(
                         key: const Key('share_story_button'),
-                        icon: const Icon(Icons.camera_alt_outlined, size: 18, color: TellyColors.textPrimary),
+                        icon: Icon(Icons.camera_alt_outlined, size: 18, color: TellyColors.textPrimaryOf(context)),
                         label: Text(
                           'Share to Instagram Story',
-                          style: TellyTypography.titleMedium(color: TellyColors.textPrimary).copyWith(
+                          style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context)).copyWith(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: TellyColors.strokeSubtle),
+                          side: BorderSide(color: TellyColors.strokeSubtleOf(context)),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14),
                           ),
@@ -444,19 +446,19 @@ class _SlotRevealModalState extends ConsumerState<SlotRevealModal>
 
   }
 
-  Widget _buildPosterFallback() {
+  Widget _buildPosterFallback(BuildContext context) {
     return Container(
       width: 72,
       height: 100,
       decoration: BoxDecoration(
-        color: TellyColors.backgroundCard,
+        color: TellyColors.cardOf(context),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: TellyColors.strokeSubtle),
+        border: Border.all(color: TellyColors.strokeSubtleOf(context)),
       ),
       child: Center(
         child: Icon(
           _isMovie ? Icons.movie_outlined : Icons.tv_outlined,
-          color: TellyColors.textTertiary,
+          color: TellyColors.textTertiaryOf(context),
           size: 32,
         ),
       ),

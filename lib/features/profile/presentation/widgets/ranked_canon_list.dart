@@ -53,10 +53,10 @@ class RankedCanonList extends StatelessWidget {
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
-              color: TellyColors.backgroundCard,
+              color: TellyColors.cardOf(context),
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                color: isTopThree ? TellyColors.phosphorLime.withValues(alpha: 0.25) : TellyColors.borderGlass,
+                color: isTopThree ? TellyColors.phosphorLime.withValues(alpha: 0.25) : TellyColors.borderGlassOf(context),
               ),
             ),
             child: Row(
@@ -68,7 +68,7 @@ class RankedCanonList extends StatelessWidget {
                     '#$rank',
                     key: Key('rank_text_${item.id}'),
                     style: TellyTypography.scoreChip(
-                      color: isTopThree ? TellyColors.phosphorLime : TellyColors.textSecondary,
+                      color: isTopThree ? TellyColors.phosphorLime : TellyColors.textSecondaryOf(context),
                     ).copyWith(fontSize: 15),
                   ),
                 ),
@@ -81,7 +81,7 @@ class RankedCanonList extends StatelessWidget {
                     height: 52,
                     child: PosterImage(
                       posterPath: item.posterPath,
-                      fallback: _posterFallback(item),
+                      fallback: _posterFallback(context, item),
                     ),
                   ),
                 ),
@@ -101,7 +101,7 @@ class RankedCanonList extends StatelessWidget {
                               key: Key('title_text_${item.id}'),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: TellyTypography.titleMedium(color: TellyColors.textPrimary).copyWith(
+                              style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context)).copyWith(
                                 fontSize: 14,
                               ),
                             ),
@@ -132,12 +132,12 @@ class RankedCanonList extends StatelessWidget {
                           '⭐ ${item.mvpCharacter!}',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TellyTypography.caption(color: TellyColors.textTertiary),
+                          style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)),
                         ),
                       ] else if (item.isRolledUp) ...[
                         Text(
                           'Includes: ${item.seasonBreakdown.map((s) => s.seasonTitle ?? 'S${s.seasonNumber}').join(', ')}',
-                          style: TellyTypography.caption(color: TellyColors.textTertiary),
+                          style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)),
                         ),
                       ],
                     ],
@@ -152,16 +152,16 @@ class RankedCanonList extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color:
-                        isTopThree ? TellyColors.phosphorLime.withValues(alpha: 0.15) : TellyColors.backgroundSurface,
+                        isTopThree ? TellyColors.phosphorLime.withValues(alpha: 0.15) : TellyColors.surfaceOf(context),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: isTopThree ? TellyColors.phosphorLime : TellyColors.strokeSubtle,
+                      color: isTopThree ? TellyColors.phosphorLime : TellyColors.strokeSubtleOf(context),
                     ),
                   ),
                   child: Text(
                     item.calculatedScore.toStringAsFixed(2),
                     style: TellyTypography.scoreMono(
-                      color: isTopThree ? TellyColors.phosphorLime : TellyColors.textPrimary,
+                      color: isTopThree ? TellyColors.phosphorLime : TellyColors.textPrimaryOf(context),
                     ).copyWith(fontSize: 13),
                   ),
                 ),
@@ -173,11 +173,11 @@ class RankedCanonList extends StatelessWidget {
     );
   }
 
-  Widget _posterFallback(CanonEntry item) {
+  Widget _posterFallback(BuildContext context, CanonEntry item) {
     return Center(
       child: Icon(
         item.mediaType == 'movie' ? Icons.movie_outlined : Icons.tv_outlined,
-        color: TellyColors.textTertiary,
+        color: TellyColors.textTertiaryOf(context),
         size: 18,
       ),
     );

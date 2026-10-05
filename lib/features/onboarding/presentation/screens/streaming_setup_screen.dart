@@ -59,9 +59,10 @@ class StreamingSetupScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      backgroundColor: TellyColors.backgroundPrimary,
+      backgroundColor: TellyColors.canvasOf(context),
       appBar: AppBar(
-        title: Text('STEP 2 OF 3', style: TellyTypography.caption(color: TellyColors.textPrimary)),
+        backgroundColor: TellyColors.canvasOf(context),
+        title: Text('STEP 2 OF 3', style: TellyTypography.caption(color: TellyColors.textPrimaryOf(context))),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -73,11 +74,11 @@ class StreamingSetupScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text('Where do you watch?', style: TellyTypography.displayXL()),
+                    Text('Where do you watch?', style: TellyTypography.displayXL(color: TellyColors.textPrimaryOf(context))),
                     const SizedBox(height: 8),
                     Text(
                       'Select your active subscriptions so we can tailor streaming badges and co-watching recommendations.',
-                      style: TellyTypography.bodyMedium(color: TellyColors.textSecondary),
+                      style: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context)),
                     ),
                     const SizedBox(height: 24),
 
@@ -101,10 +102,10 @@ class StreamingSetupScreen extends ConsumerWidget {
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 150),
                             decoration: BoxDecoration(
-                              color: isSelected ? TellyColors.backgroundCard : TellyColors.backgroundSurface,
+                              color: isSelected ? TellyColors.cardOf(context) : TellyColors.surfaceOf(context),
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                color: isSelected ? TellyColors.phosphorLime : TellyColors.strokeSubtle,
+                                color: isSelected ? TellyColors.phosphorLime : TellyColors.strokeSubtleOf(context),
                                 width: isSelected ? 1.5 : 1.0,
                               ),
                               boxShadow: isSelected
@@ -126,7 +127,7 @@ class StreamingSetupScreen extends ConsumerWidget {
                                   children: [
                                     Icon(
                                       provider.icon,
-                                      color: isSelected ? TellyColors.phosphorLime : TellyColors.textSecondary,
+                                      color: isSelected ? TellyColors.phosphorLime : TellyColors.textSecondaryOf(context),
                                       size: 24,
                                     ),
                                     Container(
@@ -136,7 +137,7 @@ class StreamingSetupScreen extends ConsumerWidget {
                                         shape: BoxShape.circle,
                                         color: isSelected ? TellyColors.phosphorLime : Colors.transparent,
                                         border: Border.all(
-                                          color: isSelected ? TellyColors.phosphorLime : TellyColors.strokeStrong,
+                                          color: isSelected ? TellyColors.phosphorLime : TellyColors.strokeSubtleOf(context),
                                         ),
                                       ),
                                       child: isSelected
@@ -151,7 +152,7 @@ class StreamingSetupScreen extends ConsumerWidget {
                                     Text(
                                       provider.name,
                                       style: TellyTypography.titleMedium(
-                                        color: isSelected ? Colors.white : TellyColors.textSecondary,
+                                        color: isSelected ? TellyColors.textPrimaryOf(context) : TellyColors.textSecondaryOf(context),
                                       ).copyWith(fontSize: 15),
                                     ),
                                     const SizedBox(height: 2),
@@ -159,7 +160,7 @@ class StreamingSetupScreen extends ConsumerWidget {
                                       provider.tag,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: TellyTypography.caption(color: TellyColors.textTertiary),
+                                      style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)),
                                     ),
                                   ],
                                 ),
@@ -195,7 +196,7 @@ class StreamingSetupScreen extends ConsumerWidget {
                             Expanded(
                               child: Text(
                                 'Include free platforms (Tubi, Pluto, Kanopy)',
-                                style: TellyTypography.bodyMedium(color: TellyColors.textSecondary),
+                                style: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context)),
                               ),
                             ),
                           ],
@@ -210,9 +211,9 @@ class StreamingSetupScreen extends ConsumerWidget {
             // Bottom CTA
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              decoration: const BoxDecoration(
-                color: TellyColors.backgroundPrimary,
-                border: Border(top: BorderSide(color: TellyColors.strokeSubtle)),
+              decoration: BoxDecoration(
+                color: TellyColors.canvasOf(context),
+                border: Border(top: BorderSide(color: TellyColors.strokeSubtleOf(context))),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -229,7 +230,7 @@ class StreamingSetupScreen extends ConsumerWidget {
                     onPressed: setup.saving ? null : navigateForward,
                     child: Text(
                       "I don't have streaming services / Skip for now",
-                      style: TellyTypography.caption(color: TellyColors.textSecondary),
+                      style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)),
                     ),
                   ),
                 ],

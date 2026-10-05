@@ -23,23 +23,23 @@ Future<void> showModerationSheet({
   final messenger = ScaffoldMessenger.of(context);
   final choice = await showModalBottomSheet<Object>(
     context: context,
-    backgroundColor: TellyColors.backgroundCard,
+    backgroundColor: TellyColors.cardOf(context),
     builder: (ctx) => SafeArea(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
-            child: Text('Report', style: TellyTypography.labelLarge(color: TellyColors.textSecondary)),
+            child: Text('Report', style: TellyTypography.labelLarge(color: TellyColors.textSecondaryOf(context))),
           ),
           for (final reason in ReportReason.values)
             ListTile(
               key: Key('report_reason_${reason.name}'),
               leading: const Icon(Icons.flag_outlined, color: TellyColors.neonCoral),
-              title: Text(reason.label, style: TellyTypography.bodyLarge()),
+              title: Text(reason.label, style: TellyTypography.bodyLarge(color: TellyColors.textPrimaryOf(context))),
               onTap: () => Navigator.of(ctx).pop(reason),
             ),
-          const Divider(color: TellyColors.strokeSubtle, height: 1),
+          Divider(color: TellyColors.strokeSubtleOf(context), height: 1),
           ListTile(
             key: const Key('block_user_action'),
             leading: const Icon(Icons.block, color: TellyColors.neonCoral),

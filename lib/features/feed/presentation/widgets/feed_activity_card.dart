@@ -271,9 +271,9 @@ class _FeedActivityCardState extends State<FeedActivityCard> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: TellyColors.backgroundCard,
+                      color: TellyColors.cardOf(context),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: TellyColors.borderGlass),
+                      border: Border.all(color: TellyColors.borderGlassOf(context)),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -283,7 +283,7 @@ class _FeedActivityCardState extends State<FeedActivityCard> {
                         Text(
                           'MVP: ${activity.favoriteCharacter!}',
                           style: TellyTypography.caption(
-                            color: TellyColors.textSecondary,
+                            color: TellyColors.textSecondaryOf(context),
                           ).copyWith(fontWeight: FontWeight.w600),
                         ),
                       ],
@@ -352,7 +352,7 @@ class _FeedActivityCardState extends State<FeedActivityCard> {
     return Text(
       'Ranked ${activity.titleName} $rankText in $canonName',
       style: TellyTypography.bodyMedium(
-        color: TellyColors.textPrimary,
+        color: TellyColors.textPrimaryOf(context),
       ).copyWith(fontWeight: FontWeight.w600),
     );
   }

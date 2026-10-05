@@ -10,7 +10,7 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: TellyColors.backgroundPrimary,
+      backgroundColor: TellyColors.canvasOf(context),
       body: Center(
         child: Text('TELLY', style: TellyTypography.displayXL(color: TellyColors.phosphorLime)),
       ),

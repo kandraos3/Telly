@@ -39,9 +39,9 @@ class _TellyWrappedStudioScreenState extends State<TellyWrappedStudioScreen> {
 
   void _shareStory() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Exporting 1080x1920 Story to Instagram...'),
-        backgroundColor: TellyColors.backgroundCard,
+      SnackBar(
+        content: const Text('Exporting 1080x1920 Story to Instagram...'),
+        backgroundColor: TellyColors.cardOf(context),
       ),
     );
   }
@@ -138,12 +138,12 @@ class _TellyWrappedStudioScreenState extends State<TellyWrappedStudioScreen> {
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         decoration: BoxDecoration(
-          color: TellyColors.backgroundSurface,
+          color: TellyColors.surfaceOf(context),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: TellyColors.borderGlass),
+          border: Border.all(color: TellyColors.borderGlassOf(context)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.6),
+              color: Colors.black.withValues(alpha: 0.15),
               blurRadius: 20,
               offset: const Offset(0, 10),
             ),
@@ -173,7 +173,7 @@ class _TellyWrappedStudioScreenState extends State<TellyWrappedStudioScreen> {
               ),
               Text(
                 '@${widget.username}',
-                style: TellyTypography.titleMedium(color: TellyColors.textPrimary).copyWith(
+                style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context)).copyWith(
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -181,7 +181,7 @@ class _TellyWrappedStudioScreenState extends State<TellyWrappedStudioScreen> {
           ),
           Text(
             subtitle,
-            style: TellyTypography.caption(color: TellyColors.textTertiary),
+            style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)),
           ),
         ],
       ),
@@ -214,9 +214,9 @@ class _TellyWrappedStudioScreenState extends State<TellyWrappedStudioScreen> {
             itemBuilder: (context, idx) {
               return Container(
                 decoration: BoxDecoration(
-                  color: TellyColors.backgroundCard,
+                  color: TellyColors.cardOf(context),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: TellyColors.borderGlass),
+                  border: Border.all(color: TellyColors.borderGlassOf(context)),
                 ),
                 padding: const EdgeInsets.all(6),
                 child: Column(
@@ -226,14 +226,14 @@ class _TellyWrappedStudioScreenState extends State<TellyWrappedStudioScreen> {
                     Text(
                       '#0${idx + 1}',
                       style: TellyTypography.caption(
-                        color: idx == 0 ? TellyColors.warmAmber : TellyColors.textTertiary,
+                        color: idx == 0 ? TellyColors.warmAmber : TellyColors.textTertiaryOf(context),
                       ).copyWith(fontWeight: FontWeight.w900),
                     ),
                     Text(
                       titles[idx],
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(color: TellyColors.textPrimary, fontSize: 10, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: TellyColors.textPrimaryOf(context), fontSize: 10, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -273,9 +273,9 @@ class _TellyWrappedStudioScreenState extends State<TellyWrappedStudioScreen> {
             itemBuilder: (context, idx) {
               return Container(
                 decoration: BoxDecoration(
-                  color: TellyColors.backgroundCard,
+                  color: TellyColors.cardOf(context),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: TellyColors.borderGlass),
+                  border: Border.all(color: TellyColors.borderGlassOf(context)),
                 ),
                 padding: const EdgeInsets.all(6),
                 child: Column(
@@ -285,14 +285,14 @@ class _TellyWrappedStudioScreenState extends State<TellyWrappedStudioScreen> {
                     Text(
                       '#0${idx + 1}',
                       style: TellyTypography.caption(
-                        color: idx == 0 ? TellyColors.warmAmber : TellyColors.textTertiary,
+                        color: idx == 0 ? TellyColors.warmAmber : TellyColors.textTertiaryOf(context),
                       ).copyWith(fontWeight: FontWeight.w900),
                     ),
                     Text(
                       series[idx],
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(color: TellyColors.textPrimary, fontSize: 10, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: TellyColors.textPrimaryOf(context), fontSize: 10, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -320,28 +320,28 @@ class _TellyWrappedStudioScreenState extends State<TellyWrappedStudioScreen> {
               Text(
                 'I ranked Severance OVER Succession.',
                 textAlign: TextAlign.center,
-                style: TellyTypography.titleLarge(color: TellyColors.textPrimary).copyWith(fontWeight: FontWeight.w900),
+                style: TellyTypography.titleLarge(color: TellyColors.textPrimaryOf(context)).copyWith(fontWeight: FontWeight.w900),
               ),
               const SizedBox(height: 12),
               Text(
                 'Severance #1 (10.00) vs Succession #2 (9.82)\n"The Lumon elevator sequence was television history."',
                 textAlign: TextAlign.center,
-                style: TellyTypography.caption(color: TellyColors.textSecondary),
+                style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)),
               ),
               const SizedBox(height: 24),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  color: TellyColors.backgroundCard,
+                  color: TellyColors.cardOf(context),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: TellyColors.borderGlass),
+                  border: Border.all(color: TellyColors.borderGlassOf(context)),
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    Text('Am I crazy?', style: TextStyle(color: TellyColors.textSecondary, fontWeight: FontWeight.bold)),
-                    Text('[ YES ]', style: TextStyle(color: TellyColors.neonCoral, fontWeight: FontWeight.bold)),
-                    Text('[ NO ]', style: TextStyle(color: TellyColors.phosphorLime, fontWeight: FontWeight.bold)),
+                    Text('Am I crazy?', style: TextStyle(color: TellyColors.textSecondaryOf(context), fontWeight: FontWeight.bold)),
+                    const Text('[ YES ]', style: TextStyle(color: TellyColors.neonCoral, fontWeight: FontWeight.bold)),
+                    const Text('[ NO ]', style: TextStyle(color: TellyColors.phosphorLime, fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),
@@ -380,13 +380,13 @@ class _TellyWrappedStudioScreenState extends State<TellyWrappedStudioScreen> {
                     margin: const EdgeInsets.only(bottom: 8),
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
-                      color: TellyColors.backgroundCard,
+                      color: TellyColors.cardOf(context),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(d.$1, style: const TextStyle(color: TellyColors.textPrimary, fontWeight: FontWeight.w600, fontSize: 13)),
+                        Text(d.$1, style: TextStyle(color: TellyColors.textPrimaryOf(context), fontWeight: FontWeight.w600, fontSize: 13)),
                         Text('★ ${d.$2} (${d.$3})', style: const TextStyle(color: TellyColors.warmAmber, fontWeight: FontWeight.bold, fontSize: 11)),
                       ],
                     ),

@@ -39,16 +39,16 @@ class TierViewList extends StatelessWidget {
     return Column(
       children: [
         for (final tier in CanonTier.values)
-          if (grouped[tier] != null) _buildTierGroup(tier.headerLabel, grouped[tier]!, tier.accent),
+          if (grouped[tier] != null) _buildTierGroup(context, tier.headerLabel, grouped[tier]!, tier.accent),
       ],
     );
   }
 
-  Widget _buildTierGroup(String header, List<CanonEntry> items, Color accentColor) {
+  Widget _buildTierGroup(BuildContext context, String header, List<CanonEntry> items, Color accentColor) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: TellyColors.backgroundCard,
+        color: TellyColors.cardOf(context),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: accentColor.withValues(alpha: 0.3)),
       ),
@@ -75,7 +75,7 @@ class TierViewList extends StatelessWidget {
                 ),
                 Text(
                   '${items.length} titles',
-                  style: TellyTypography.caption(color: TellyColors.textTertiary),
+                  style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)),
                 ),
               ],
             ),
@@ -86,8 +86,8 @@ class TierViewList extends StatelessWidget {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: items.length,
-            separatorBuilder: (_, __) => const Divider(
-              color: TellyColors.borderGlass,
+            separatorBuilder: (_, __) => Divider(
+              color: TellyColors.borderGlassOf(context),
               height: 1,
               indent: 16,
               endIndent: 16,
@@ -102,13 +102,13 @@ class TierViewList extends StatelessWidget {
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
                   leading: Text(
                     '#${item.rankPosition}',
-                    style: TellyTypography.scoreChip(color: TellyColors.textSecondary),
+                    style: TellyTypography.scoreChip(color: TellyColors.textSecondaryOf(context)),
                   ),
                   title: Text(
                     item.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TellyTypography.titleMedium(color: TellyColors.textPrimary).copyWith(
+                    style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context)).copyWith(
                       fontSize: 14,
                     ),
                   ),

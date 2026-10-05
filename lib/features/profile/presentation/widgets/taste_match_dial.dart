@@ -84,7 +84,7 @@ class _TasteMatchDialState extends State<TasteMatchDial> with SingleTickerProvid
                     painter: _DialPainter(
                       progress: _progressAnimation.value,
                       glowColor: TellyColors.phosphorLime,
-                      trackColor: TellyColors.strokeSubtle,
+                      trackColor: TellyColors.strokeSubtleOf(context),
                     ),
                   ),
                   Column(
@@ -97,7 +97,7 @@ class _TasteMatchDialState extends State<TasteMatchDial> with SingleTickerProvid
                           Text(
                             '$currentPct',
                             style: TellyTypography.displayXXL(
-                              color: TellyColors.textPrimary,
+                              color: TellyColors.textPrimaryOf(context),
                             ).copyWith(
                               fontSize: widget.size * 0.28,
                               fontWeight: FontWeight.w900,
@@ -119,7 +119,7 @@ class _TasteMatchDialState extends State<TasteMatchDial> with SingleTickerProvid
                       Text(
                         'TASTE MATCH',
                         style: TellyTypography.caption(
-                          color: TellyColors.textTertiary,
+                          color: TellyColors.textTertiaryOf(context),
                         ).copyWith(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,

@@ -54,10 +54,10 @@ class PosterGridView extends StatelessWidget {
                 fit: StackFit.expand,
                 children: [
                   Container(
-                    color: TellyColors.backgroundCard,
+                    color: TellyColors.cardOf(context),
                     child: PosterImage(
                       posterPath: item.posterPath,
-                      fallback: _posterFallback(item),
+                      fallback: _posterFallback(context, item),
                     ),
                   ),
                   // Rank badge
@@ -69,14 +69,14 @@ class PosterGridView extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: rank == 1
                             ? TellyColors.phosphorLime
-                            : TellyColors.backgroundPrimary.withValues(alpha: 0.8),
+                            : TellyColors.cardOf(context).withValues(alpha: 0.8),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
                         '#$rank',
                         key: Key('grid_rank_badge_${item.id}'),
                         style: TellyTypography.caption(
-                          color: rank == 1 ? Colors.black : TellyColors.textPrimary,
+                          color: rank == 1 ? Colors.black : TellyColors.textPrimaryOf(context),
                         ).copyWith(fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -88,9 +88,9 @@ class PosterGridView extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                       decoration: BoxDecoration(
-                        color: TellyColors.backgroundPrimary.withValues(alpha: 0.85),
+                        color: TellyColors.cardOf(context).withValues(alpha: 0.85),
                         borderRadius: BorderRadius.circular(5),
-                        border: Border.all(color: TellyColors.borderGlass),
+                        border: Border.all(color: TellyColors.borderGlassOf(context)),
                       ),
                       child: Text(
                         item.calculatedScore.toStringAsFixed(2),
@@ -108,14 +108,14 @@ class PosterGridView extends StatelessWidget {
     );
   }
 
-  Widget _posterFallback(CanonEntry item) {
+  Widget _posterFallback(BuildContext context, CanonEntry item) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
             item.mediaType == 'movie' ? Icons.movie_outlined : Icons.tv_outlined,
-            color: TellyColors.textTertiary,
+            color: TellyColors.textTertiaryOf(context),
             size: 24,
           ),
           const SizedBox(height: 4),
@@ -126,7 +126,7 @@ class PosterGridView extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
-              style: TellyTypography.caption(color: TellyColors.textSecondary).copyWith(fontSize: 10),
+              style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)).copyWith(fontSize: 10),
             ),
           ),
         ],

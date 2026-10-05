@@ -184,7 +184,7 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen> with SingleTi
     });
 
     return Scaffold(
-      backgroundColor: TellyColors.backgroundPrimary,
+      backgroundColor: TellyColors.canvasOf(context),
       body: SafeArea(
         child: switch (duelState) {
           DuelInitial() => const Center(
@@ -203,7 +203,7 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen> with SingleTi
                   "Couldn't save this ranking. Please try again.",
                   key: const Key('duel_failed_text'),
                   textAlign: TextAlign.center,
-                  style: TellyTypography.bodyLarge(),
+                  style: TellyTypography.bodyLarge(color: TellyColors.textPrimaryOf(context)),
                 ),
               ),
             ),
@@ -246,7 +246,7 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen> with SingleTi
               IconButton(
                 key: const Key('duel_arena_close_button'),
                 tooltip: 'Close duel',
-                icon: const Icon(Icons.close, color: TellyColors.textSecondary),
+                icon: Icon(Icons.close, color: TellyColors.textSecondaryOf(context)),
                 onPressed: widget.onCancel ?? () => Navigator.of(context).maybePop(),
               ),
               Expanded(
@@ -257,7 +257,7 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen> with SingleTi
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TellyTypography.titleMedium(
-                    color: TellyColors.textPrimary,
+                    color: TellyColors.textPrimaryOf(context),
                   ).copyWith(
                     fontWeight: FontWeight.bold,
                     letterSpacing: widget.progressLabel == null ? 1.5 : 0,
@@ -276,7 +276,7 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen> with SingleTi
             child: LinearProgressIndicator(
               value: progressRatio,
               minHeight: 4,
-              backgroundColor: TellyColors.backgroundCard,
+              backgroundColor: TellyColors.cardOf(context),
               valueColor: const AlwaysStoppedAnimation<Color>(TellyColors.phosphorLime),
             ),
           ),
@@ -287,7 +287,7 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen> with SingleTi
           Text(
             'WHICH DID YOU PREFER OVERALL?',
             style: TellyTypography.bodyMedium(
-              color: TellyColors.textSecondary,
+              color: TellyColors.textSecondaryOf(context),
             ).copyWith(
               letterSpacing: 1.2,
               fontWeight: FontWeight.w600,
@@ -328,9 +328,9 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen> with SingleTi
                     key: const Key('duel_vs_badge'),
                     padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
                     decoration: BoxDecoration(
-                      color: TellyColors.backgroundSurface,
+                      color: TellyColors.surfaceOf(context),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: TellyColors.borderGlass),
+                      border: Border.all(color: TellyColors.borderGlassOf(context)),
                       boxShadow: [
                         BoxShadow(
                           color: TellyColors.neonCoral.withValues(alpha: 0.25),
@@ -385,9 +385,9 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen> with SingleTi
               height: 52,
               child: Container(
                 decoration: BoxDecoration(
-                  color: TellyColors.backgroundSurface,
+                  color: TellyColors.surfaceOf(context),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: TellyColors.borderGlass),
+                  border: Border.all(color: TellyColors.borderGlassOf(context)),
                 ),
                 child: TextButton.icon(
                   key: const Key('cant_compare_button'),
@@ -396,15 +396,15 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen> with SingleTi
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                   ),
                   onPressed: hasSelection ? null : _handleSkipOrTie,
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.shuffle_rounded,
-                    color: TellyColors.textSecondary,
+                    color: TellyColors.textSecondaryOf(context),
                     size: 18,
                   ),
                   label: Text(
                     widget.tieLabel,
                     style: TellyTypography.bodyLarge(
-                      color: TellyColors.textSecondary,
+                      color: TellyColors.textSecondaryOf(context),
                     ).copyWith(
                       fontWeight: FontWeight.w600,
                     ),

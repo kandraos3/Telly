@@ -40,8 +40,8 @@ class _AniListUsernameDialogState extends State<AniListUsernameDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: TellyColors.backgroundCard,
-      title: Text('AniList username', style: TellyTypography.titleMedium()),
+      backgroundColor: TellyColors.cardOf(context),
+      title: Text('AniList username', style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context))),
       content: TextField(
         key: const Key('anilist_username_field'),
         controller: _controller,

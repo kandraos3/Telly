@@ -75,12 +75,12 @@ class FeedRecommendationCard extends StatelessWidget {
                       child: Container(
                         width: 60,
                         height: 90,
-                        color: TellyColors.backgroundCard,
+                        color: TellyColors.cardOf(context),
                         child: PosterImage(
                           posterPath: title.posterPath,
                           fallback: Icon(
                             title.mediaType == 'movie' ? Icons.movie_rounded : Icons.tv_rounded,
-                            color: TellyColors.textTertiary,
+                            color: TellyColors.textTertiaryOf(context),
                           ),
                         ),
                       ),
@@ -92,11 +92,11 @@ class FeedRecommendationCard extends StatelessWidget {
                         children: [
                           Text(
                             headline,
-                            style: TellyTypography.labelLarge(color: TellyColors.textPrimary)
+                            style: TellyTypography.labelLarge(color: TellyColors.textPrimaryOf(context))
                                 .copyWith(fontWeight: FontWeight.w800),
                           ),
                           const SizedBox(height: 4),
-                          Text(detail, style: TellyTypography.bodyMedium(color: TellyColors.textSecondary)),
+                          Text(detail, style: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context))),
                           if (title.communityScore != null) ...[
                             const SizedBox(height: 6),
                             Text(
@@ -134,8 +134,8 @@ class FeedRecommendationCard extends StatelessWidget {
                         key: Key('feed_rec_rank_${title.titleId}'),
                         onPressed: onRank,
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: TellyColors.textPrimary,
-                          side: const BorderSide(color: TellyColors.strokeStrong),
+                          foregroundColor: TellyColors.textPrimaryOf(context),
+                          side: BorderSide(color: TellyColors.strokeSubtleOf(context)),
                           minimumSize: const Size.fromHeight(48),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         ),

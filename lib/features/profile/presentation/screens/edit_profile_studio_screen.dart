@@ -24,10 +24,10 @@ class EditProfileStudioScreen extends ConsumerWidget {
   Future<void> _save(BuildContext context, WidgetRef ref) async {
     final messenger = ScaffoldMessenger.of(context);
     final saved = await ref.read(editProfileControllerProvider.notifier).save();
-    if (!saved) return;
+    if (!saved || !context.mounted) return;
     messenger
       ..hideCurrentSnackBar()
-      ..showSnackBar(const SnackBar(content: Text('Profile saved'), backgroundColor: TellyColors.backgroundCard));
+      ..showSnackBar(SnackBar(content: const Text('Profile saved'), backgroundColor: TellyColors.cardOf(context)));
     if (context.mounted) {
       final rootNav = Navigator.of(context, rootNavigator: true);
       if (rootNav.canPop()) {
@@ -222,14 +222,14 @@ class _EditProfileFormState extends ConsumerState<_EditProfileForm> {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: TellyColors.backgroundCard,
+            color: TellyColors.cardOf(context),
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: TellyColors.borderGlass),
+            border: Border.all(color: TellyColors.borderGlassOf(context)),
           ),
           child: Column(
             children: [
               for (final (i, mode) in _visibilityModes.indexed) ...[
-                if (i > 0) const Divider(color: TellyColors.borderGlass),
+                if (i > 0) Divider(color: TellyColors.borderGlassOf(context)),
                 _VisibilityTile(
                   title: mode.$2,
                   subtitle: mode.$3,
@@ -264,7 +264,7 @@ class _EditProfileFormState extends ConsumerState<_EditProfileForm> {
   Future<void> _chooseShowcase(int slot, List<CanonEntry> titles) async {
     final chosen = await showModalBottomSheet<CanonEntry>(
       context: context,
-      backgroundColor: TellyColors.backgroundCard,
+      backgroundColor: TellyColors.cardOf(context),
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (ctx) => SafeArea(
@@ -276,7 +276,7 @@ class _EditProfileFormState extends ConsumerState<_EditProfileForm> {
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
-                child: Text('PIN TO SLOT #${slot + 1}', style: TellyTypography.titleMedium(color: TellyColors.textPrimary)),
+                child: Text('PIN TO SLOT #${slot + 1}', style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(ctx))),
               ),
               if (titles.isEmpty)
                 Padding(
@@ -284,7 +284,7 @@ class _EditProfileFormState extends ConsumerState<_EditProfileForm> {
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
                   child: Text(
                     'Rank a few titles first — your showcase comes from your canon.',
-                    style: TellyTypography.bodyMedium(color: TellyColors.textSecondary),
+                    style: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(ctx)),
                   ),
                 )
               else
@@ -296,10 +296,10 @@ class _EditProfileFormState extends ConsumerState<_EditProfileForm> {
                         ListTile(
                           key: Key('showcase_pick_${t.mediaType}_${t.id}'),
                           leading: Text(t.mediaType == 'movie' ? '🎬' : '📺', style: const TextStyle(fontSize: 20)),
-                          title: Text(t.title, style: TellyTypography.bodyMedium(color: TellyColors.textPrimary)),
+                          title: Text(t.title, style: TellyTypography.bodyMedium(color: TellyColors.textPrimaryOf(ctx))),
                           subtitle: Text(
                             '#${t.rankPosition} · ${t.calculatedScore.toStringAsFixed(2)}',
-                            style: TellyTypography.caption(color: TellyColors.textTertiary),
+                            style: TellyTypography.caption(color: TellyColors.textTertiaryOf(ctx)),
                           ),
                           onTap: () => Navigator.of(ctx).pop(t),
                         ),
@@ -335,15 +335,15 @@ class _AvatarEditor extends StatelessWidget {
             CircleAvatar(
               key: const Key('edit_profile_avatar'),
               radius: 46,
-              backgroundColor: TellyColors.backgroundCard,
+              backgroundColor: TellyColors.cardOf(context),
               backgroundImage: image,
               // An unreachable avatar URL just shows the bare circle.
               onBackgroundImageError: image == null ? null : (_, __) {},
-              child: image == null ? const Icon(Icons.person, size: 44, color: TellyColors.textTertiary) : null,
+              child: image == null ? Icon(Icons.person, size: 44, color: TellyColors.textTertiaryOf(context)) : null,
             ),
             Material(
               color: TellyColors.phosphorLime,
-              shape: const CircleBorder(side: BorderSide(color: TellyColors.backgroundCanvasOled, width: 2)),
+              shape: CircleBorder(side: BorderSide(color: TellyColors.canvasOf(context), width: 2)),
               child: InkWell(
                 customBorder: const CircleBorder(),
                 onTap: onPick,
@@ -362,7 +362,7 @@ class _AvatarEditor extends StatelessWidget {
           child: Text('Change Photo', style: TellyTypography.caption(color: TellyColors.phosphorLime)),
         ),
         if (draft.pendingAvatar != null)
-          Text('New photo will upload when you save.', style: TellyTypography.caption(color: TellyColors.textTertiary)),
+          Text('New photo will upload when you save.', style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context))),
       ],
     );
   }
@@ -391,9 +391,9 @@ class _ShowcaseSlot extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
       decoration: BoxDecoration(
-        color: TellyColors.backgroundCard,
+        color: TellyColors.cardOf(context),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: TellyColors.borderGlass),
+        border: Border.all(color: TellyColors.borderGlassOf(context)),
       ),
       child: Row(
         children: [
@@ -402,20 +402,20 @@ class _ShowcaseSlot extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: TellyTypography.bodyMedium(color: pick == null ? TellyColors.textTertiary : TellyColors.textPrimary),
+              style: TellyTypography.bodyMedium(color: pick == null ? TellyColors.textTertiaryOf(context) : TellyColors.textPrimaryOf(context)),
             ),
           ),
           if (pick != null)
             IconButton(
               key: Key('showcase_clear_$slot'),
               tooltip: 'Remove',
-              icon: const Icon(Icons.close, color: TellyColors.textTertiary, size: 18),
+              icon: Icon(Icons.close, color: TellyColors.textTertiaryOf(context), size: 18),
               onPressed: onClear,
             ),
           IconButton(
             key: Key('showcase_edit_$slot'),
             tooltip: 'Choose title',
-            icon: const Icon(Icons.edit, color: TellyColors.textTertiary, size: 18),
+            icon: Icon(Icons.edit, color: TellyColors.textTertiaryOf(context), size: 18),
             onPressed: onEdit,
           ),
         ],
@@ -441,7 +441,7 @@ class _VisibilityTile extends StatelessWidget {
           children: [
             Icon(
               selected ? Icons.radio_button_checked : Icons.radio_button_off,
-              color: selected ? TellyColors.phosphorLime : TellyColors.textTertiary,
+              color: selected ? TellyColors.phosphorLime : TellyColors.textTertiaryOf(context),
               size: 20,
             ),
             const SizedBox(width: 12),
@@ -451,11 +451,11 @@ class _VisibilityTile extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: TellyTypography.bodyMedium(color: selected ? TellyColors.phosphorLime : TellyColors.textPrimary)
+                    style: TellyTypography.bodyMedium(color: selected ? TellyColors.phosphorLime : TellyColors.textPrimaryOf(context))
                         .copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 2),
-                  Text(subtitle, style: TellyTypography.caption(color: TellyColors.textSecondary)),
+                  Text(subtitle, style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context))),
                 ],
               ),
             ),
@@ -475,7 +475,7 @@ class _FieldHeader extends StatelessWidget {
         padding: const EdgeInsets.only(left: 4, bottom: 6),
         child: Text(
           title,
-          style: TellyTypography.labelSmall(color: TellyColors.textSecondary)
+          style: TellyTypography.labelSmall(color: TellyColors.textSecondaryOf(context))
               .copyWith(letterSpacing: 1.0, fontWeight: FontWeight.bold),
         ),
       );
@@ -490,7 +490,7 @@ class _SectionTitle extends StatelessWidget {
         padding: const EdgeInsets.only(left: 4, bottom: 8),
         child: Text(
           title,
-          style: TellyTypography.labelLarge(color: TellyColors.textPrimary)
+          style: TellyTypography.labelLarge(color: TellyColors.textPrimaryOf(context))
               .copyWith(letterSpacing: 1.0, fontWeight: FontWeight.bold),
         ),
       );
@@ -519,17 +519,17 @@ class _TellyTextField extends StatelessWidget {
       controller: controller,
       maxLines: maxLines,
       maxLength: maxLength,
-      style: const TextStyle(color: TellyColors.textPrimary),
+      style: TextStyle(color: TellyColors.textPrimaryOf(context)),
       onChanged: onChanged,
       decoration: InputDecoration(
         filled: true,
-        fillColor: TellyColors.backgroundCard,
+        fillColor: TellyColors.cardOf(context),
         hintText: hint,
-        hintStyle: const TextStyle(color: TellyColors.textTertiary),
-        counterStyle: const TextStyle(color: TellyColors.textTertiary),
+        hintStyle: TextStyle(color: TellyColors.textTertiaryOf(context)),
+        counterStyle: TextStyle(color: TellyColors.textTertiaryOf(context)),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        border: border(TellyColors.borderGlass),
-        enabledBorder: border(TellyColors.borderGlass),
+        border: border(TellyColors.borderGlassOf(context)),
+        enabledBorder: border(TellyColors.borderGlassOf(context)),
         focusedBorder: border(TellyColors.phosphorLime),
       ),
     );

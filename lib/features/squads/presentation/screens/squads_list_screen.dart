@@ -92,8 +92,8 @@ class _CreateSquadDialogState extends State<_CreateSquadDialog> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-        backgroundColor: TellyColors.backgroundCard,
-        title: Text('Name your squad', style: TellyTypography.titleMedium()),
+        backgroundColor: TellyColors.cardOf(context),
+        title: Text('Name your squad', style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context))),
         content: TextField(
           key: const Key('squad_name_field'),
           controller: _controller,

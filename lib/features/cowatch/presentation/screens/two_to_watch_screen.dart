@@ -53,18 +53,18 @@ class TwoToWatchScreen extends ConsumerWidget {
     final canSwipe = state.readyForPicks && state.recommendations.length >= 2;
 
     return Scaffold(
-      backgroundColor: TellyColors.backgroundCanvasOled,
+      backgroundColor: TellyColors.canvasOf(context),
       appBar: AppBar(
-        backgroundColor: TellyColors.backgroundCanvasOled,
+        backgroundColor: TellyColors.canvasOf(context),
         elevation: 0,
         leading: IconButton(
           tooltip: 'Close',
-          icon: const Icon(Icons.close, color: TellyColors.textPrimary),
+          icon: Icon(Icons.close, color: TellyColors.textPrimaryOf(context)),
           onPressed: () => Navigator.of(context).maybePop(),
         ),
         title: Text(
           'TWO-TO-WATCH',
-          style: TellyTypography.titleMedium(color: TellyColors.textPrimary).copyWith(letterSpacing: 1.2),
+          style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context)).copyWith(letterSpacing: 1.2),
         ),
       ),
       body: ListView(
@@ -162,9 +162,9 @@ class _StepCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: TellyColors.backgroundSurface,
+        color: TellyColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: TellyColors.borderGlass),
+        border: Border.all(color: TellyColors.borderGlassOf(context)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -178,12 +178,12 @@ class _StepCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: done ? TellyColors.phosphorLime : Colors.transparent,
-                  border: Border.all(color: done ? TellyColors.phosphorLime : TellyColors.strokeStrong),
+                  border: Border.all(color: done ? TellyColors.phosphorLime : TellyColors.strokeStrongOf(context)),
                 ),
                 child: Text(
                   '$step',
                   style: TellyTypography.caption(
-                    color: done ? TellyColors.backgroundCanvasOled : TellyColors.textTertiary,
+                    color: done ? (Theme.of(context).brightness == Brightness.light ? Colors.white : TellyColors.backgroundCanvasOled) : TellyColors.textTertiaryOf(context),
                   ).copyWith(fontWeight: FontWeight.w900),
                 ),
               ),
@@ -191,7 +191,7 @@ class _StepCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: TellyTypography.labelSmall(color: TellyColors.textPrimary)
+                  style: TellyTypography.labelSmall(color: TellyColors.textPrimaryOf(context))
                       .copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
                 ),
               ),
@@ -231,7 +231,7 @@ class _PreselectedBanner extends StatelessWidget {
                 TextSpan(text: candidate.title, style: const TextStyle(fontWeight: FontWeight.w800)),
                 const TextSpan(text: '? It stays at the top of your picks.'),
               ]),
-              style: TellyTypography.caption(color: TellyColors.textPrimary),
+              style: TellyTypography.caption(color: TellyColors.textPrimaryOf(context)),
             ),
           ),
         ],
@@ -257,9 +257,9 @@ class _CouchStep extends StatelessWidget {
       return Row(
         children: [
           const _Avatar(label: 'You'),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 6),
-            child: Icon(Icons.add, size: 14, color: TellyColors.textTertiary),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            child: Icon(Icons.add, size: 14, color: TellyColors.textTertiaryOf(context)),
           ),
           _Avatar(label: partner.label, url: partner.avatarUrl, accent: true),
           const SizedBox(width: 10),
@@ -271,10 +271,10 @@ class _CouchStep extends StatelessWidget {
                   partner.label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TellyTypography.labelLarge(color: TellyColors.textPrimary).copyWith(fontWeight: FontWeight.w800),
+                  style: TellyTypography.labelLarge(color: TellyColors.textPrimaryOf(context)).copyWith(fontWeight: FontWeight.w800),
                 ),
                 if (partner.username.isNotEmpty)
-                  Text('@${partner.username}', style: TellyTypography.caption(color: TellyColors.textTertiary)),
+                  Text('@${partner.username}', style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context))),
               ],
             ),
           ),
@@ -290,7 +290,7 @@ class _CouchStep extends StatelessWidget {
             IconButton(
               key: const Key('cowatch_change_partner'),
               tooltip: 'Watch with someone else',
-              icon: const Icon(Icons.swap_horiz, color: TellyColors.textSecondary),
+              icon: Icon(Icons.swap_horiz, color: TellyColors.textSecondaryOf(context)),
               onPressed: () => _showPicker(context),
             ),
         ],
@@ -302,7 +302,7 @@ class _CouchStep extends StatelessWidget {
     if (partners.isEmpty) {
       return Text(
         'Follow friends to decide what to watch together.',
-        style: TellyTypography.bodyMedium(color: TellyColors.textTertiary),
+        style: TellyTypography.bodyMedium(color: TellyColors.textTertiaryOf(context)),
       );
     }
     return SizedBox(
@@ -325,7 +325,7 @@ class _CouchStep extends StatelessWidget {
                   partners[i].label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TellyTypography.caption(color: TellyColors.textSecondary),
+                  style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)),
                 ),
               ],
             ),
@@ -338,7 +338,7 @@ class _CouchStep extends StatelessWidget {
   void _showPicker(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: TellyColors.backgroundCard,
+      backgroundColor: TellyColors.cardOf(context),
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (ctx) => SafeArea(
         child: ListView(
@@ -349,8 +349,8 @@ class _CouchStep extends StatelessWidget {
               ListTile(
                 key: Key('cowatch_pick_${p.username}'),
                 leading: _Avatar(label: p.label, url: p.avatarUrl),
-                title: Text(p.label, style: TellyTypography.labelLarge(color: TellyColors.textPrimary)),
-                subtitle: Text('@${p.username}', style: TellyTypography.caption(color: TellyColors.textTertiary)),
+                title: Text(p.label, style: TellyTypography.labelLarge(color: TellyColors.textPrimaryOf(context))),
+                subtitle: Text('@${p.username}', style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context))),
                 trailing: p.userId == state.partner?.userId
                     ? const Icon(Icons.check, color: TellyColors.phosphorLime)
                     : null,
@@ -431,7 +431,7 @@ class _MoodStep extends StatelessWidget {
           const SizedBox(height: 14),
           Text(
             shared.isEmpty ? 'No streaming services in common' : 'ON SERVICES YOU BOTH HAVE',
-            style: TellyTypography.caption(color: TellyColors.textTertiary).copyWith(fontWeight: FontWeight.w700),
+            style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)).copyWith(fontWeight: FontWeight.w700),
           ),
           if (shared.isNotEmpty) ...[
             const SizedBox(height: 8),
@@ -508,9 +508,9 @@ class _PickCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: TellyColors.backgroundCard,
+          color: TellyColors.cardOf(context),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: TellyColors.borderGlass),
+          border: Border.all(color: TellyColors.borderGlassOf(context)),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -525,14 +525,14 @@ class _PickCard extends StatelessWidget {
                     c.title,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: TellyTypography.titleMedium(color: TellyColors.textPrimary).copyWith(fontWeight: FontWeight.w800),
+                    style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context)).copyWith(fontWeight: FontWeight.w800),
                   ),
                   if (meta.isNotEmpty) ...[
                     const SizedBox(height: 2),
                     Text(meta, style: TellyTypography.caption(color: TellyColors.warmAmber)),
                   ],
                   const SizedBox(height: 6),
-                  Text(rec.matchReason, style: TellyTypography.caption(color: TellyColors.textSecondary)),
+                  Text(rec.matchReason, style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context))),
                   if (provider != null) ...[
                     const SizedBox(height: 8),
                     TextButton.icon(
@@ -564,7 +564,7 @@ class _PickCard extends StatelessWidget {
               onPressed: c.inWatchlistA ? null : onQueue,
               icon: Icon(
                 c.inWatchlistA ? Icons.bookmark : Icons.bookmark_add_outlined,
-                color: c.inWatchlistA ? TellyColors.phosphorLime : TellyColors.textSecondary,
+                color: c.inWatchlistA ? TellyColors.phosphorLime : TellyColors.textSecondaryOf(context),
               ),
             ),
           ],
@@ -588,14 +588,14 @@ class _Poster extends StatelessWidget {
       child: Container(
         width: width,
         height: width * 1.5,
-        color: TellyColors.backgroundCardAlt,
+        color: TellyColors.surfaceOf(context),
         child: PosterImage(
           posterPath: path,
           fallback: Center(
             child: Icon(
               mediaType == 'movie' ? Icons.movie_outlined : Icons.tv_outlined,
               size: width / 2.5,
-              color: TellyColors.textTertiary,
+              color: TellyColors.textTertiaryOf(context),
             ),
           ),
         ),
@@ -617,12 +617,12 @@ class _Avatar extends StatelessWidget {
     final initial = label.replaceFirst('@', '');
     return CircleAvatar(
       radius: radius,
-      backgroundColor: TellyColors.backgroundCard,
+      backgroundColor: TellyColors.cardOf(context),
       foregroundImage: url != null && url!.isNotEmpty ? NetworkImage(url!) : null,
       child: Text(
         initial.isEmpty ? '?' : initial[0].toUpperCase(),
         style: TextStyle(
-          color: accent ? TellyColors.phosphorLime : TellyColors.textPrimary,
+          color: accent ? TellyColors.phosphorLime : TellyColors.textPrimaryOf(context),
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -646,13 +646,13 @@ class _Segment extends StatelessWidget {
         constraints: const BoxConstraints(minHeight: 48),
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: selected ? TellyColors.phosphorLime.withValues(alpha: 0.12) : TellyColors.backgroundCard,
+          color: selected ? TellyColors.phosphorLime.withValues(alpha: 0.12) : TellyColors.cardOf(context),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: selected ? TellyColors.phosphorLime : TellyColors.borderGlass),
+          border: Border.all(color: selected ? TellyColors.phosphorLime : TellyColors.borderGlassOf(context)),
         ),
         child: Text(
           label,
-          style: TellyTypography.labelLarge(color: selected ? TellyColors.phosphorLime : TellyColors.textSecondary)
+          style: TellyTypography.labelLarge(color: selected ? TellyColors.phosphorLime : TellyColors.textSecondaryOf(context))
               .copyWith(fontWeight: FontWeight.w700),
         ),
       ),
@@ -675,11 +675,11 @@ class _Chip extends StatelessWidget {
       selected: selected,
       showCheckmark: false,
       onSelected: (_) => onTap(),
-      backgroundColor: TellyColors.backgroundCard,
+      backgroundColor: TellyColors.cardOf(context),
       selectedColor: color.withValues(alpha: 0.18),
-      side: BorderSide(color: selected ? color : TellyColors.borderGlass),
+      side: BorderSide(color: selected ? color : TellyColors.borderGlassOf(context)),
       labelStyle: TextStyle(
-        color: selected ? color : TellyColors.textSecondary,
+        color: selected ? color : TellyColors.textSecondaryOf(context),
         fontSize: 12,
         fontWeight: FontWeight.w600,
       ),
@@ -710,5 +710,5 @@ class _Muted extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) =>
-      Text(text, style: TellyTypography.bodyMedium(color: TellyColors.textTertiary));
+      Text(text, style: TellyTypography.bodyMedium(color: TellyColors.textTertiaryOf(context)));
 }

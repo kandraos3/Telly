@@ -78,7 +78,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
           SnackBar(
             content: Text('Added "${title.title}" to your Watchlist'),
             duration: const Duration(seconds: 2),
-            backgroundColor: TellyColors.backgroundCard,
+            backgroundColor: TellyColors.cardOf(context),
           ),
         );
       }
@@ -93,7 +93,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
           SnackBar(
             content: Text('Removed "${title.title}" from your Watchlist'),
             duration: const Duration(seconds: 2),
-            backgroundColor: TellyColors.backgroundCard,
+            backgroundColor: TellyColors.cardOf(context),
           ),
         );
       }
@@ -170,7 +170,11 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
   }
 
   Widget _buildScaffold(TitleDetail title) {
+    final canvasColor = Theme.of(context).brightness == Brightness.light
+        ? TellyColors.lightBackgroundPrimary
+        : TellyColors.backgroundCanvasOled;
     return Scaffold(
+      backgroundColor: canvasColor,
       body: CustomScrollView(
         slivers: [
           // 1. 16:9 Backdrop with Gradient Fade and Top Actions
@@ -266,20 +270,23 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
   }
 
   Widget _buildBackdropAppBar(TitleDetail title) {
+    final canvasColor = Theme.of(context).brightness == Brightness.light
+        ? TellyColors.lightBackgroundPrimary
+        : TellyColors.backgroundCanvasOled;
     return SliverAppBar(
-      backgroundColor: TellyColors.backgroundCanvasOled,
+      backgroundColor: canvasColor,
       expandedHeight: 220,
       pinned: true,
       leading: IconButton(
         tooltip: 'Back',
-        icon: const Icon(Icons.arrow_back, color: TellyColors.textPrimary),
+        icon: Icon(Icons.arrow_back, color: TellyColors.textPrimaryOf(context)),
         onPressed: () => context.canPop() ? context.pop() : context.go(Routes.feed),
       ),
       actions: [
         IconButton(
           icon: Icon(
             _isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-            color: _isBookmarked ? TellyColors.phosphorLime : TellyColors.textPrimary,
+            color: _isBookmarked ? TellyColors.phosphorLime : TellyColors.textPrimaryOf(context),
           ),
           tooltip: _isBookmarked ? 'In Watchlist' : 'Add to Watchlist',
           onPressed: () => _toggleBookmark(title),
@@ -291,20 +298,20 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
           children: [
             // Backdrop image or placeholder
             Container(
-              color: TellyColors.backgroundCardAlt,
+              color: TellyColors.cardOf(context),
               child: title.backdropPath != null
                   ? Image.network(
                       TmdbImages.backdrop(title.backdropPath) ?? title.backdropPath!,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const Center(
-                        child: Icon(Icons.movie_outlined, size: 48, color: TellyColors.textTertiary),
+                      errorBuilder: (_, __, ___) => Center(
+                        child: Icon(Icons.movie_outlined, size: 48, color: TellyColors.textTertiaryOf(context)),
                       ),
                     )
-                  : const Center(
-                      child: Icon(Icons.movie_outlined, size: 48, color: TellyColors.textTertiary),
+                  : Center(
+                      child: Icon(Icons.movie_outlined, size: 48, color: TellyColors.textTertiaryOf(context)),
                     ),
             ),
-            // Gradient fade to Void Canvas
+            // Gradient fade to Canvas
             DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -313,8 +320,8 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                   colors: [
                     Colors.black.withValues(alpha: 0.3),
                     Colors.transparent,
-                    TellyColors.backgroundCanvasOled.withValues(alpha: 0.8),
-                    TellyColors.backgroundCanvasOled,
+                    canvasColor.withValues(alpha: 0.8),
+                    canvasColor,
                   ],
                   stops: const [0.0, 0.4, 0.85, 1.0],
                 ),
@@ -340,14 +347,14 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
             width: 100,
             height: 150,
             decoration: BoxDecoration(
-              color: TellyColors.backgroundCard,
-              border: Border.all(color: TellyColors.borderGlass),
+              color: TellyColors.cardOf(context),
+              border: Border.all(color: TellyColors.borderGlassOf(context)),
               borderRadius: BorderRadius.circular(12),
             ),
             child: PosterImage(
               posterPath: title.posterPath,
-              fallback: const Center(
-                child: Icon(Icons.movie_outlined, size: 36, color: TellyColors.textTertiary),
+              fallback: Center(
+                child: Icon(Icons.movie_outlined, size: 36, color: TellyColors.textTertiaryOf(context)),
               ),
             ),
           ),
@@ -393,8 +400,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                   ),
                   const SizedBox(width: 8),
                   TellyNeonBadge(
-                    label: tier.label.toUpperCase(),
-                    icon: ExcludeSemantics(child: Text(tier.emoji, style: const TextStyle(fontSize: 11))),
+                    label: '${tier.emoji} ${tier.label.toUpperCase()}',
                     variant: tier == CanonTier.god
                         ? TellyBadgeVariant.godTier
                         : TellyBadgeVariant.tasteMatch,
@@ -436,7 +442,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
   void _showScoreExplanationDialog(BuildContext context, double score, CanonTier tier) {
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: TellyColors.backgroundCard,
+      backgroundColor: TellyColors.cardOf(context),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -586,9 +592,9 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
               constraints: const BoxConstraints(minHeight: 52),
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
             decoration: BoxDecoration(
-              color: TellyColors.backgroundSurface,
+              color: TellyColors.surfaceOf(context),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: TellyColors.borderGlass),
+              border: Border.all(color: TellyColors.borderGlassOf(context)),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -600,7 +606,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                   label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TellyTypography.caption(color: TellyColors.textPrimary).copyWith(
+                  style: TellyTypography.caption(color: TellyColors.textPrimaryOf(context)).copyWith(
                     fontWeight: FontWeight.bold,
                     fontSize: 11,
                   ),
@@ -629,9 +635,9 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: TellyColors.backgroundSurface,
+        color: TellyColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: TellyColors.borderGlass),
+        border: Border.all(color: TellyColors.borderGlassOf(context)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -643,7 +649,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
               Text(
                 'STREAMING NOW',
                 style: TellyTypography.labelSmall(
-                  color: TellyColors.textPrimary,
+                  color: TellyColors.textPrimaryOf(context),
                 ).copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
               ),
             ],
@@ -652,7 +658,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
           if (providers.isEmpty)
             Text(
               'No streaming services currently available for this title.',
-              style: TellyTypography.bodyMedium(color: TellyColors.textPrimary).copyWith(fontSize: 14),
+              style: TellyTypography.bodyMedium(color: TellyColors.textPrimaryOf(context)).copyWith(fontSize: 14),
             )
           else
             Wrap(
@@ -669,9 +675,9 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: TellyColors.backgroundCard,
+                    backgroundColor: TellyColors.cardOf(context),
                     foregroundColor: TellyColors.phosphorLime,
-                    side: const BorderSide(color: TellyColors.borderGlass),
+                    side: BorderSide(color: TellyColors.borderGlassOf(context)),
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
@@ -702,12 +708,12 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: TellyColors.backgroundSurface,
+        color: TellyColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isRanked
               ? TellyColors.phosphorLime.withValues(alpha: 0.3)
-              : TellyColors.borderGlass,
+              : TellyColors.borderGlassOf(context),
         ),
       ),
       child: Column(
@@ -716,7 +722,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
           Text(
             'YOUR STATUS',
             style: TellyTypography.labelSmall(
-              color: TellyColors.textSecondary,
+              color: TellyColors.textSecondaryOf(context),
             ).copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
           ),
           const SizedBox(height: 12),
@@ -814,15 +820,15 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
               return Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  color: TellyColors.backgroundSurface,
+                  color: TellyColors.surfaceOf(context),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: TellyColors.borderGlass),
+                  border: Border.all(color: TellyColors.borderGlassOf(context)),
                 ),
                 child: Row(
                   children: [
                     CircleAvatar(
                       radius: 18,
-                      backgroundColor: TellyColors.backgroundCard,
+                      backgroundColor: TellyColors.cardOf(context),
                       child: Text(
                         f.displayName.isNotEmpty ? f.displayName[0].toUpperCase() : '?',
                         style: const TextStyle(
@@ -839,7 +845,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                         Text(
                           f.displayName,
                           style: TellyTypography.labelMedium(
-                            color: TellyColors.textPrimary,
+                            color: TellyColors.textPrimaryOf(context),
                           ).copyWith(fontWeight: FontWeight.w700),
                         ),
                         Text(
@@ -874,7 +880,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: TellyColors.backgroundCard,
+        color: TellyColors.cardOf(context),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: TellyColors.neonCoral.withValues(alpha: 0.3)),
       ),
@@ -963,9 +969,9 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                   child: Container(
                     width: 110,
                     decoration: BoxDecoration(
-                      color: TellyColors.backgroundSurface,
+                      color: TellyColors.surfaceOf(context),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: TellyColors.borderGlass),
+                      border: Border.all(color: TellyColors.borderGlassOf(context)),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -990,7 +996,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TellyTypography.caption(
-                              color: TellyColors.textPrimary,
+                              color: TellyColors.textPrimaryOf(context),
                             ).copyWith(fontWeight: FontWeight.bold),
                           ),
                         ),
@@ -1027,7 +1033,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
             Text(
               'COMMUNITY HOT TAKES',
               style: TellyTypography.labelSmall(
-                color: TellyColors.textPrimary,
+                color: TellyColors.textPrimaryOf(context),
               ).copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
             ),
           ],
@@ -1039,16 +1045,16 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
               margin: const EdgeInsets.only(bottom: 8),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: TellyColors.backgroundSurface,
+                color: TellyColors.surfaceOf(context),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: TellyColors.borderGlass),
+                border: Border.all(color: TellyColors.borderGlassOf(context)),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   CircleAvatar(
                     radius: 14,
-                    backgroundColor: TellyColors.backgroundCard,
+                    backgroundColor: TellyColors.cardOf(context),
                     child: Text(
                       take.$1[0].toUpperCase(),
                       style: const TextStyle(
@@ -1067,7 +1073,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                           children: [
                             Text(
                               '@${take.$1}',
-                              style: TellyTypography.caption(color: TellyColors.textPrimary).copyWith(
+                              style: TellyTypography.caption(color: TellyColors.textPrimaryOf(context)).copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -1082,7 +1088,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                                 '#${take.$3} • ${take.$4.toStringAsFixed(2)}',
                                 style: TellyTypography.monoDigits(
                                   color: TellyColors.phosphorLime,
-                                ).copyWith(fontSize: 10, fontWeight: FontWeight.bold),
+                                 ).copyWith(fontSize: 10, fontWeight: FontWeight.bold),
                               ),
                             ),
                           ],
@@ -1091,7 +1097,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                         Text(
                           '“${take.$2}”',
                           style: TellyTypography.caption(
-                            color: TellyColors.textPrimary,
+                            color: TellyColors.textPrimaryOf(context),
                           ).copyWith(fontStyle: FontStyle.italic),
                         ),
                       ],
@@ -1124,7 +1130,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
             Text(
               'SEASONS ACCORDION',
               style: TellyTypography.labelSmall(
-                color: TellyColors.textPrimary,
+                color: TellyColors.textPrimaryOf(context),
               ).copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
             ),
           ],
@@ -1135,9 +1141,9 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
           return Container(
             margin: const EdgeInsets.only(bottom: 8),
             decoration: BoxDecoration(
-              color: TellyColors.backgroundSurface,
+              color: TellyColors.surfaceOf(context),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: TellyColors.borderGlass),
+              border: Border.all(color: TellyColors.borderGlassOf(context)),
             ),
             child: Column(
               children: [
@@ -1168,13 +1174,13 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                             child: Text(
                               season.name,
                               style: TellyTypography.labelLarge(
-                                color: TellyColors.textPrimary,
+                                color: TellyColors.textPrimaryOf(context),
                               ).copyWith(fontWeight: FontWeight.w700),
                             ),
                           ),
                           Text(
                             '${season.episodeCount} Episodes',
-                            style: TellyTypography.caption(color: TellyColors.textSecondary),
+                            style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)),
                           ),
                         ],
                       ),
@@ -1187,7 +1193,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                     child: Text(
                       season.overview!,
                       style: TellyTypography.bodyMedium(
-                        color: TellyColors.textSecondary,
+                        color: TellyColors.textSecondaryOf(context),
                       ).copyWith(height: 1.4),
                     ),
                   ),
@@ -1205,9 +1211,9 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: TellyColors.backgroundSurface,
+        color: TellyColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: TellyColors.borderGlass),
+        border: Border.all(color: TellyColors.borderGlassOf(context)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1219,7 +1225,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
               Text(
                 'COMMUNITY SURVIVAL RATE',
                 style: TellyTypography.labelSmall(
-                  color: TellyColors.textPrimary,
+                  color: TellyColors.textPrimaryOf(context),
                 ).copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
               ),
             ],
@@ -1239,7 +1245,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                       ),
                       TextSpan(
                         text: ' completed all seasons',
-                        style: TellyTypography.caption(color: TellyColors.textSecondary),
+                        style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)),
                       ),
                     ],
                   ),
@@ -1257,7 +1263,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
               value: completedPct / 100.0,
-              backgroundColor: TellyColors.backgroundCard,
+              backgroundColor: TellyColors.cardOf(context),
               color: TellyColors.phosphorLime,
               minHeight: 6,
             ),

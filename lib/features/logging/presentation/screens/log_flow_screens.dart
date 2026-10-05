@@ -77,7 +77,7 @@ class _LogDuelScreenState extends ConsumerState<LogDuelScreen> {
     final request = ref.watch(loggingSessionProvider.select((d) => d.duelRequest));
     if (request == null) {
       _restartLogging(context);
-      return const Scaffold(backgroundColor: TellyColors.backgroundPrimary);
+      return Scaffold(backgroundColor: TellyColors.canvasOf(context));
     }
     return DuelArenaScreen(
       request: request,
@@ -116,10 +116,10 @@ class LogRevealScreen extends ConsumerWidget {
     final commit = ref.watch(loggingSessionProvider.select((d) => d.commit));
     if (commit == null) {
       _restartLogging(context);
-      return const Scaffold(backgroundColor: TellyColors.backgroundPrimary);
+      return Scaffold(backgroundColor: TellyColors.canvasOf(context));
     }
     return Scaffold(
-      backgroundColor: TellyColors.backgroundPrimary,
+      backgroundColor: TellyColors.canvasOf(context),
       body: SlotRevealModal(
         showId: commit.candidate.titleId,
         title: commit.candidate.title,

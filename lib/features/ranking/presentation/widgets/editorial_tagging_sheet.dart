@@ -170,12 +170,12 @@ class _EditorialTaggingSheetState extends ConsumerState<EditorialTaggingSheet> {
           children: [
             IconButton(
               key: const Key('editorial_back_button'),
-              icon: const Icon(Icons.arrow_back, color: TellyColors.textSecondary),
+              icon: Icon(Icons.arrow_back, color: TellyColors.textSecondaryOf(context)),
               onPressed: widget.onBack ?? () => Navigator.of(context).maybePop(),
             ),
             Text(
               'DETAILS & NOTES',
-              style: TellyTypography.titleMedium(color: TellyColors.textPrimary).copyWith(
+              style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context)).copyWith(
                 fontWeight: FontWeight.w700,
                 letterSpacing: 1.2,
               ),
@@ -185,7 +185,7 @@ class _EditorialTaggingSheetState extends ConsumerState<EditorialTaggingSheet> {
               onPressed: widget.onSkip ?? () => Navigator.of(context).maybePop(),
               child: Text(
                 'Skip',
-                style: TellyTypography.bodyMedium(color: TellyColors.textTertiary).copyWith(
+                style: TellyTypography.bodyMedium(color: TellyColors.textTertiaryOf(context)).copyWith(
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -201,16 +201,16 @@ class _EditorialTaggingSheetState extends ConsumerState<EditorialTaggingSheet> {
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           decoration: BoxDecoration(
-            color: TellyColors.backgroundCard,
+            color: TellyColors.cardOf(context),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: TellyColors.borderGlass),
+            border: Border.all(color: TellyColors.borderGlassOf(context)),
           ),
           child: RichText(
             text: TextSpan(
               children: [
                 TextSpan(
                   text: '${widget.title.toUpperCase()} • ',
-                  style: TellyTypography.labelSmall(color: TellyColors.textSecondary).copyWith(
+                  style: TellyTypography.labelSmall(color: TellyColors.textSecondaryOf(context)).copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -222,7 +222,7 @@ class _EditorialTaggingSheetState extends ConsumerState<EditorialTaggingSheet> {
                 ),
                 TextSpan(
                   text: 'in Your ${_isMovie ? 'Movie' : 'Series'} Canon!',
-                  style: TellyTypography.labelSmall(color: TellyColors.textTertiary),
+                  style: TellyTypography.labelSmall(color: TellyColors.textTertiaryOf(context)),
                 ),
               ],
             ),
@@ -367,7 +367,7 @@ class _EditorialTaggingSheetState extends ConsumerState<EditorialTaggingSheet> {
                       style: TellyTypography.caption(
                         color: _selectedVibes.length == 3
                             ? TellyColors.phosphorLime
-                            : TellyColors.textTertiary,
+                            : TellyColors.textTertiaryOf(context),
                       ),
                     ),
                   ],
@@ -399,7 +399,7 @@ class _EditorialTaggingSheetState extends ConsumerState<EditorialTaggingSheet> {
                       avatar: Icon(
                         Icons.movie_creation_outlined,
                         size: 16,
-                        color: _selectedDirector != null ? TellyColors.phosphorLime : TellyColors.textTertiary,
+                        color: _selectedDirector != null ? TellyColors.phosphorLime : TellyColors.textTertiaryOf(context),
                       ),
                       label: Text(
                         _selectedDirector != null ? 'Director: ${widget.director}' : '+ Tag Director (${widget.director})',
@@ -411,10 +411,10 @@ class _EditorialTaggingSheetState extends ConsumerState<EditorialTaggingSheet> {
                           _selectedDirector = selected ? widget.director : null;
                         });
                       },
-                      backgroundColor: TellyColors.backgroundCard,
+                      backgroundColor: TellyColors.cardOf(context),
                       selectedColor: TellyColors.phosphorLime.withValues(alpha: 0.15),
                       labelStyle: TextStyle(
-                        color: _selectedDirector != null ? TellyColors.phosphorLime : TellyColors.textSecondary,
+                        color: _selectedDirector != null ? TellyColors.phosphorLime : TellyColors.textSecondaryOf(context),
                         fontWeight: _selectedDirector != null ? FontWeight.bold : FontWeight.normal,
                         fontSize: 12,
                       ),
@@ -426,27 +426,27 @@ class _EditorialTaggingSheetState extends ConsumerState<EditorialTaggingSheet> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
                   decoration: BoxDecoration(
-                    color: TellyColors.backgroundCard,
+                    color: TellyColors.cardOf(context),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: TellyColors.strokeSubtle),
+                    border: Border.all(color: TellyColors.strokeSubtleOf(context)),
                   ),
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String?>(
                       key: const Key('mvp_character_dropdown'),
                       value: _selectedMvpCharacter,
                       isExpanded: true,
-                      dropdownColor: TellyColors.backgroundSurface,
+                      dropdownColor: TellyColors.surfaceOf(context),
                       icon: const Icon(Icons.arrow_drop_down, color: TellyColors.phosphorLime),
                       hint: Text(
                         'Select MVP Standout Performance (Optional)',
-                        style: TellyTypography.bodyMedium(color: TellyColors.textTertiary),
+                        style: TellyTypography.bodyMedium(color: TellyColors.textTertiaryOf(context)),
                       ),
                       items: [
                         DropdownMenuItem<String?>(
                           value: null,
                           child: Text(
                             'None (Optional)',
-                            style: TellyTypography.bodyMedium(color: TellyColors.textTertiary),
+                            style: TellyTypography.bodyMedium(color: TellyColors.textTertiaryOf(context)),
                           ),
                         ),
                         ...widget.castMembers.map((cast) {
@@ -454,7 +454,7 @@ class _EditorialTaggingSheetState extends ConsumerState<EditorialTaggingSheet> {
                             value: cast,
                             child: Text(
                               cast,
-                              style: TellyTypography.bodyMedium(color: TellyColors.textPrimary),
+                              style: TellyTypography.bodyMedium(color: TellyColors.textPrimaryOf(context)),
                               overflow: TextOverflow.ellipsis,
                             ),
                           );
@@ -483,7 +483,7 @@ class _EditorialTaggingSheetState extends ConsumerState<EditorialTaggingSheet> {
                           style: TellyTypography.caption(
                             color: value.text.length > 280
                                 ? TellyColors.neonCoral
-                                : TellyColors.textTertiary,
+                                : TellyColors.textTertiaryOf(context),
                           ),
                         );
                       },
@@ -499,18 +499,18 @@ class _EditorialTaggingSheetState extends ConsumerState<EditorialTaggingSheet> {
                   minLines: 3,
                   buildCounter: (context, {required currentLength, required isFocused, maxLength}) =>
                       null, // Hide default counter; using custom counter above
-                  style: TellyTypography.bodyLarge(color: TellyColors.textPrimary),
+                  style: TellyTypography.bodyLarge(color: TellyColors.textPrimaryOf(context)),
                   cursorColor: TellyColors.phosphorLime,
                   decoration: InputDecoration(
                     filled: true,
-                    fillColor: TellyColors.backgroundCard,
+                    fillColor: TellyColors.cardOf(context),
                     hintText:
                         'Write a crisp hot take or memorable scene (e.g., "The docking scene in IMAX 70mm was pure cinematic transcendence...").',
-                    hintStyle: TellyTypography.bodyMedium(color: TellyColors.textTertiary),
+                    hintStyle: TellyTypography.bodyMedium(color: TellyColors.textTertiaryOf(context)),
                     contentPadding: const EdgeInsets.all(14),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: TellyColors.strokeSubtle),
+                      borderSide: BorderSide(color: TellyColors.strokeSubtleOf(context)),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -540,7 +540,7 @@ class _EditorialTaggingSheetState extends ConsumerState<EditorialTaggingSheet> {
   Widget _buildSectionHeader(String title) {
     return Text(
       title,
-      style: TellyTypography.labelSmall(color: TellyColors.textTertiary).copyWith(
+      style: TellyTypography.labelSmall(color: TellyColors.textTertiaryOf(context)).copyWith(
         fontWeight: FontWeight.w700,
         letterSpacing: 1.1,
       ),
@@ -562,10 +562,10 @@ class _EditorialTaggingSheetState extends ConsumerState<EditorialTaggingSheet> {
         decoration: BoxDecoration(
           color: isSelected
               ? TellyColors.phosphorLime.withValues(alpha: 0.15)
-              : TellyColors.backgroundCard,
+              : TellyColors.cardOf(context),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? TellyColors.phosphorLime : TellyColors.strokeSubtle,
+            color: isSelected ? TellyColors.phosphorLime : TellyColors.strokeSubtleOf(context),
             width: isSelected ? 1.5 : 1.0,
           ),
           boxShadow: isSelected
@@ -580,7 +580,7 @@ class _EditorialTaggingSheetState extends ConsumerState<EditorialTaggingSheet> {
         child: Text(
           label,
           style: TellyTypography.bodyMedium(
-            color: isSelected ? TellyColors.phosphorLime : TellyColors.textSecondary,
+            color: isSelected ? TellyColors.phosphorLime : TellyColors.textSecondaryOf(context),
           ).copyWith(
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
           ),
@@ -595,9 +595,9 @@ class _EditorialTaggingSheetState extends ConsumerState<EditorialTaggingSheet> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: TellyColors.backgroundCard,
+        color: TellyColors.cardOf(context),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: TellyColors.strokeSubtle),
+        border: Border.all(color: TellyColors.strokeSubtleOf(context)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -605,7 +605,7 @@ class _EditorialTaggingSheetState extends ConsumerState<EditorialTaggingSheet> {
           IconButton(
             key: const Key('rewatch_decrement_button'),
             icon: const Icon(Icons.remove, size: 16),
-            color: onDecrement != null ? TellyColors.textPrimary : TellyColors.textDisabled,
+            color: onDecrement != null ? TellyColors.textPrimaryOf(context) : TellyColors.textDisabledOf(context),
             onPressed: onDecrement,
             constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
             padding: EdgeInsets.zero,

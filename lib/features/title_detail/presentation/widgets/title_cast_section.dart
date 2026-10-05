@@ -44,7 +44,7 @@ class TitleCastSection extends ConsumerWidget {
             const SizedBox(width: 8),
             Text(
               'CAST & CREW',
-              style: TellyTypography.labelSmall(color: TellyColors.textPrimary)
+              style: TellyTypography.labelSmall(color: TellyColors.textPrimaryOf(context))
                   .copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
             ),
             if (leads.isNotEmpty) ...[
@@ -56,9 +56,9 @@ class TitleCastSection extends ConsumerWidget {
                     key: const Key('title_cast_lead_chip'),
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: TellyColors.backgroundCard,
+                      color: TellyColors.cardOf(context),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: TellyColors.borderGlass),
+                      border: Border.all(color: TellyColors.borderGlassOf(context)),
                     ),
                     child: Text(
                       '${isMovie ? 'Dir' : (leads.length > 1 ? 'Showrunners' : 'Showrunner')}: ${leads.join(', ')}',
@@ -94,11 +94,11 @@ class TitleCastSection extends ConsumerWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: TellyColors.backgroundSurface,
+                color: TellyColors.surfaceOf(context),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: TellyColors.borderGlass),
+                border: Border.all(color: TellyColors.borderGlassOf(context)),
               ),
-              child: Text(emptyMessage, style: TellyTypography.caption(color: TellyColors.textPrimary)),
+              child: Text(emptyMessage, style: TellyTypography.caption(color: TellyColors.textPrimaryOf(context))),
             ),
         },
       ],
@@ -123,11 +123,11 @@ class _CastCard extends StatelessWidget {
               child: PosterImage(
                 posterPath: member.profilePath,
                 fallback: ColoredBox(
-                  color: TellyColors.backgroundCard,
+                  color: TellyColors.cardOf(context),
                   child: Center(
                     child: Text(
                       member.name.isEmpty ? '?' : member.name.characters.first.toUpperCase(),
-                      style: TellyTypography.titleLarge(color: TellyColors.textSecondary),
+                      style: TellyTypography.titleLarge(color: TellyColors.textSecondaryOf(context)),
                     ),
                   ),
                 ),
@@ -140,7 +140,7 @@ class _CastCard extends StatelessWidget {
             maxLines: 2,
             textAlign: TextAlign.center,
             overflow: TextOverflow.ellipsis,
-            style: TellyTypography.labelMedium(color: TellyColors.textPrimary).copyWith(fontWeight: FontWeight.bold),
+            style: TellyTypography.labelMedium(color: TellyColors.textPrimaryOf(context)).copyWith(fontWeight: FontWeight.bold),
           ),
           if (member.character.isNotEmpty)
             Text(
@@ -148,7 +148,7 @@ class _CastCard extends StatelessWidget {
               maxLines: 1,
               textAlign: TextAlign.center,
               overflow: TextOverflow.ellipsis,
-              style: TellyTypography.caption(color: TellyColors.textSecondary).copyWith(fontSize: 11),
+              style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)).copyWith(fontSize: 11),
             ),
         ],
       ),

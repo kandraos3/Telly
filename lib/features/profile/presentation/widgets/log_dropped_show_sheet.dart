@@ -74,13 +74,13 @@ class _LogDroppedShowSheetState extends ConsumerState<LogDroppedShowSheet> {
 
     return Container(
       margin: EdgeInsets.only(bottom: bottomInset),
-      decoration: const BoxDecoration(
-        color: TellyColors.backgroundSurface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: TellyColors.surfaceOf(context),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         border: Border(
-          top: BorderSide(color: TellyColors.borderGlass),
-          left: BorderSide(color: TellyColors.borderGlass),
-          right: BorderSide(color: TellyColors.borderGlass),
+          top: BorderSide(color: TellyColors.borderGlassOf(context)),
+          left: BorderSide(color: TellyColors.borderGlassOf(context)),
+          right: BorderSide(color: TellyColors.borderGlassOf(context)),
         ),
       ),
       child: SafeArea(
@@ -97,7 +97,7 @@ class _LogDroppedShowSheetState extends ConsumerState<LogDroppedShowSheet> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: TellyColors.strokeSubtle,
+                    color: TellyColors.strokeSubtleOf(context),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -110,14 +110,14 @@ class _LogDroppedShowSheetState extends ConsumerState<LogDroppedShowSheet> {
                   const SizedBox(width: 8),
                   Text(
                     'BURY IN TV GRAVEYARD',
-                    style: TellyTypography.labelLarge(color: TellyColors.textPrimary).copyWith(
+                    style: TellyTypography.labelLarge(color: TellyColors.textPrimaryOf(context)).copyWith(
                       fontWeight: FontWeight.w900,
                       letterSpacing: 1.1,
                     ),
                   ),
                   const Spacer(),
                   IconButton(
-                    icon: const Icon(Icons.close_rounded, color: TellyColors.textTertiary),
+                    icon: Icon(Icons.close_rounded, color: TellyColors.textTertiaryOf(context)),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -127,20 +127,20 @@ class _LogDroppedShowSheetState extends ConsumerState<LogDroppedShowSheet> {
               // Title banner
               Text(
                 '${widget.title} (${widget.releaseYear})',
-                style: TellyTypography.titleMedium(color: TellyColors.textPrimary).copyWith(
+                style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context)).copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
               Text(
                 'Moved out of active canon into dropped tracker',
-                style: TellyTypography.caption(color: TellyColors.textTertiary),
+                style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)),
               ),
               const SizedBox(height: 20),
 
               // 2. Drop Point Steppers (Season & Episode)
               Text(
                 'DROP POINT (WHERE DID YOU GIVE UP?)',
-                style: TellyTypography.caption(color: TellyColors.textTertiary).copyWith(
+                style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)).copyWith(
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.8,
                 ),
@@ -153,15 +153,15 @@ class _LogDroppedShowSheetState extends ConsumerState<LogDroppedShowSheet> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       decoration: BoxDecoration(
-                        color: TellyColors.backgroundCard,
+                        color: TellyColors.cardOf(context),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: TellyColors.borderGlass),
+                        border: Border.all(color: TellyColors.borderGlassOf(context)),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           IconButton(
-                            icon: const Icon(Icons.remove, size: 16, color: TellyColors.textPrimary),
+                            icon: Icon(Icons.remove, size: 16, color: TellyColors.textPrimaryOf(context)),
                             onPressed: _form.season > 1
                                 ? () {
                                     HapticsService.selectionClick();
@@ -171,12 +171,12 @@ class _LogDroppedShowSheetState extends ConsumerState<LogDroppedShowSheet> {
                           ),
                           Text(
                             'Season ${_form.season}',
-                            style: TellyTypography.bodyMedium(color: TellyColors.textPrimary).copyWith(
+                            style: TellyTypography.bodyMedium(color: TellyColors.textPrimaryOf(context)).copyWith(
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.add, size: 16, color: TellyColors.textPrimary),
+                            icon: Icon(Icons.add, size: 16, color: TellyColors.textPrimaryOf(context)),
                             onPressed: () {
                               HapticsService.selectionClick();
                               _edit.set(_form.copyWith(season: _form.season + 1));
@@ -193,15 +193,15 @@ class _LogDroppedShowSheetState extends ConsumerState<LogDroppedShowSheet> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       decoration: BoxDecoration(
-                        color: TellyColors.backgroundCard,
+                        color: TellyColors.cardOf(context),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: TellyColors.borderGlass),
+                        border: Border.all(color: TellyColors.borderGlassOf(context)),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           IconButton(
-                            icon: const Icon(Icons.remove, size: 16, color: TellyColors.textPrimary),
+                            icon: Icon(Icons.remove, size: 16, color: TellyColors.textPrimaryOf(context)),
                             onPressed: (_form.episode ?? 1) > 1
                                 ? () {
                                     HapticsService.selectionClick();
@@ -211,12 +211,12 @@ class _LogDroppedShowSheetState extends ConsumerState<LogDroppedShowSheet> {
                           ),
                           Text(
                             'Episode ${_form.episode ?? 1}',
-                            style: TellyTypography.bodyMedium(color: TellyColors.textPrimary).copyWith(
+                            style: TellyTypography.bodyMedium(color: TellyColors.textPrimaryOf(context)).copyWith(
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.add, size: 16, color: TellyColors.textPrimary),
+                            icon: Icon(Icons.add, size: 16, color: TellyColors.textPrimaryOf(context)),
                             onPressed: () {
                               HapticsService.selectionClick();
                               _edit.set(_form.copyWith(episode: (_form.episode ?? 0) + 1));
@@ -233,7 +233,7 @@ class _LogDroppedShowSheetState extends ConsumerState<LogDroppedShowSheet> {
               // 3. Primary Reason Taxonomy Chips
               Text(
                 'PRIMARY DROP REASON',
-                style: TellyTypography.caption(color: TellyColors.textTertiary).copyWith(
+                style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)).copyWith(
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.8,
                 ),
@@ -257,10 +257,10 @@ class _LogDroppedShowSheetState extends ConsumerState<LogDroppedShowSheet> {
                       decoration: BoxDecoration(
                         color: isSelected
                             ? TellyColors.neonCoral.withValues(alpha: 0.15)
-                            : TellyColors.backgroundCard,
+                            : TellyColors.cardOf(context),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: isSelected ? TellyColors.neonCoral : TellyColors.borderGlass,
+                          color: isSelected ? TellyColors.neonCoral : TellyColors.borderGlassOf(context),
                         ),
                       ),
                       child: Row(
@@ -271,7 +271,7 @@ class _LogDroppedShowSheetState extends ConsumerState<LogDroppedShowSheet> {
                           Text(
                             reason,
                             style: TellyTypography.caption(
-                              color: isSelected ? TellyColors.neonCoral : TellyColors.textSecondary,
+                              color: isSelected ? TellyColors.neonCoral : TellyColors.textSecondaryOf(context),
                             ).copyWith(fontWeight: isSelected ? FontWeight.bold : FontWeight.w500),
                           ),
                         ],
@@ -285,7 +285,7 @@ class _LogDroppedShowSheetState extends ConsumerState<LogDroppedShowSheet> {
               // 4. "Would You Revisit?" Binary Switch
               Text(
                 'WOULD YOU REVISIT?',
-                style: TellyTypography.caption(color: TellyColors.textTertiary).copyWith(
+                style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)).copyWith(
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.8,
                 ),
@@ -304,18 +304,18 @@ class _LogDroppedShowSheetState extends ConsumerState<LogDroppedShowSheet> {
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         decoration: BoxDecoration(
                           color: !_form.willingToRevisit
-                              ? TellyColors.backgroundCard
+                              ? TellyColors.cardOf(context)
                               : Colors.transparent,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: !_form.willingToRevisit ? TellyColors.borderGlass : Colors.transparent,
+                            color: !_form.willingToRevisit ? TellyColors.borderGlassOf(context) : Colors.transparent,
                           ),
                         ),
                         alignment: Alignment.center,
                         child: Text(
                           '🚪 Dead & Buried',
                           style: TellyTypography.caption(
-                            color: !_form.willingToRevisit ? TellyColors.textPrimary : TellyColors.textTertiary,
+                            color: !_form.willingToRevisit ? TellyColors.textPrimaryOf(context) : TellyColors.textTertiaryOf(context),
                           ).copyWith(fontWeight: FontWeight.bold),
                         ),
                       ),
@@ -344,7 +344,7 @@ class _LogDroppedShowSheetState extends ConsumerState<LogDroppedShowSheet> {
                         child: Text(
                           '🔄 Willing to Revisit',
                           style: TellyTypography.caption(
-                            color: _form.willingToRevisit ? TellyColors.phosphorLime : TellyColors.textTertiary,
+                            color: _form.willingToRevisit ? TellyColors.phosphorLime : TellyColors.textTertiaryOf(context),
                           ).copyWith(fontWeight: FontWeight.bold),
                         ),
                       ),
@@ -370,7 +370,7 @@ class _LogDroppedShowSheetState extends ConsumerState<LogDroppedShowSheet> {
                     Expanded(
                       child: Text(
                         'Notify me if next season receives ≥ 90% critical acclaim',
-                        style: TellyTypography.caption(color: TellyColors.textSecondary),
+                        style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)),
                       ),
                     ),
                   ],
@@ -381,7 +381,7 @@ class _LogDroppedShowSheetState extends ConsumerState<LogDroppedShowSheet> {
               // 5. Hot Take Notes
               Text(
                 'NOTES / HOT TAKE (OPTIONAL)',
-                style: TellyTypography.caption(color: TellyColors.textTertiary).copyWith(
+                style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)).copyWith(
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.8,
                 ),
@@ -391,20 +391,20 @@ class _LogDroppedShowSheetState extends ConsumerState<LogDroppedShowSheet> {
                 controller: _notesController,
                 maxLength: 280,
                 maxLines: 2,
-                style: TellyTypography.bodyMedium(color: TellyColors.textPrimary),
+                style: TellyTypography.bodyMedium(color: TellyColors.textPrimaryOf(context)),
                 decoration: InputDecoration(
                   hintText: 'e.g. Lost the mystery once they left the park...',
-                  hintStyle: TellyTypography.bodyMedium(color: TellyColors.textTertiary),
+                  hintStyle: TellyTypography.bodyMedium(color: TellyColors.textTertiaryOf(context)),
                   filled: true,
-                  fillColor: TellyColors.backgroundCard,
-                  counterStyle: TellyTypography.caption(color: TellyColors.textTertiary),
+                  fillColor: TellyColors.cardOf(context),
+                  counterStyle: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: TellyColors.borderGlass),
+                    borderSide: BorderSide(color: TellyColors.borderGlassOf(context)),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: TellyColors.borderGlass),
+                    borderSide: BorderSide(color: TellyColors.borderGlassOf(context)),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),

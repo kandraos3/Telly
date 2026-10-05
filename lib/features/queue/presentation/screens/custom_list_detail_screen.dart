@@ -32,7 +32,7 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Share link copied: $shareUrl'),
-        backgroundColor: TellyColors.backgroundCard,
+        backgroundColor: TellyColors.cardOf(context),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -43,29 +43,29 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: TellyColors.backgroundSurface,
+        backgroundColor: TellyColors.surfaceOf(context),
         title: Text(
           'Add Collaborator',
-          style: TellyTypography.titleMedium(color: TellyColors.textPrimary),
+          style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context)),
         ),
         content: TextField(
           controller: controller,
-          style: const TextStyle(color: TellyColors.textPrimary),
+          style: TextStyle(color: TellyColors.textPrimaryOf(context)),
           decoration: InputDecoration(
             hintText: 'Enter @handle',
-            hintStyle: const TextStyle(color: TellyColors.textTertiary),
+            hintStyle: TextStyle(color: TellyColors.textTertiaryOf(context)),
             filled: true,
-            fillColor: TellyColors.backgroundCard,
+            fillColor: TellyColors.cardOf(context),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: TellyColors.borderGlass),
+              borderSide: BorderSide(color: TellyColors.borderGlassOf(context)),
             ),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel', style: TextStyle(color: TellyColors.textSecondary)),
+            child: Text('Cancel', style: TextStyle(color: TellyColors.textSecondaryOf(context))),
           ),
           ElevatedButton(
             onPressed: () {
@@ -287,15 +287,15 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
                                         .copyWith(fontSize: 11, fontWeight: FontWeight.w700),
                                   ),
                                 ),
-                              if (isOwner)
+                               if (isOwner)
                                 InkWell(
                                   onTap: () => _showAddCollaboratorDialog(list),
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                     decoration: BoxDecoration(
-                                      color: TellyColors.backgroundCard,
+                                      color: TellyColors.cardOf(context),
                                       borderRadius: BorderRadius.circular(6),
-                                      border: Border.all(color: TellyColors.borderGlass),
+                                      border: Border.all(color: TellyColors.borderGlassOf(context)),
                                     ),
                                     child: const Text(
                                       '+ Add',
@@ -463,15 +463,15 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                         decoration: BoxDecoration(
-                          color: TellyColors.backgroundCard,
+                          color: TellyColors.cardOf(context),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
                           item.mediaType == 'movie' ? 'MOVIE' : 'SERIES',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.w800,
-                            color: TellyColors.textTertiary,
+                            color: TellyColors.textTertiaryOf(context),
                           ),
                         ),
                       ),
@@ -479,7 +479,7 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
                         const SizedBox(width: 6),
                         Text(
                           'by ${item.addedByHandle}',
-                          style: TellyTypography.caption(color: TellyColors.textTertiary)
+                          style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context))
                               .copyWith(fontSize: 10),
                         ),
                       ],
@@ -500,7 +500,7 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text('Removed "${item.title}" from list'),
-                    backgroundColor: TellyColors.backgroundCard,
+                    backgroundColor: TellyColors.cardOf(context),
                     behavior: SnackBarBehavior.floating,
                   ),
                 );
@@ -511,9 +511,9 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
           if (isOwner)
             ReorderableDragStartListener(
               index: index,
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8),
-                child: Icon(Icons.drag_handle, color: TellyColors.textTertiary, size: 20),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Icon(Icons.drag_handle, color: TellyColors.textTertiaryOf(context), size: 20),
               ),
             ),
         ],

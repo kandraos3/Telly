@@ -40,9 +40,10 @@ class SeedGridScreen extends ConsumerWidget {
     const minimum = SeedSelectionState.minimumPicks;
 
     return Scaffold(
-      backgroundColor: TellyColors.backgroundPrimary,
+      backgroundColor: TellyColors.canvasOf(context),
       appBar: AppBar(
-        title: Text('STEP 3 OF 3', style: TellyTypography.caption(color: TellyColors.textPrimary)),
+        backgroundColor: TellyColors.canvasOf(context),
+        title: Text('STEP 3 OF 3', style: TellyTypography.caption(color: TellyColors.textPrimaryOf(context))),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -59,21 +60,21 @@ class SeedGridScreen extends ConsumerWidget {
                         children: [
                           Text(
                             "Tap movies, series & anime you've watched.",
-                            style: TellyTypography.displayXL(),
+                            style: TellyTypography.displayXL(color: TellyColors.textPrimaryOf(context)),
                           ),
                           const SizedBox(height: 6),
                           Text(
                             'Select at least $minimum to calibrate your Movie and Series canons in a few quick duels.',
-                            style: TellyTypography.bodyMedium(color: TellyColors.textSecondary),
+                            style: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context)),
                           ),
                           const SizedBox(height: 16),
 
                           // 1-Click Importer Buttons
                           Material(
-                            color: TellyColors.backgroundCard,
+                            color: TellyColors.cardOf(context),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
-                              side: const BorderSide(color: TellyColors.strokeSubtle),
+                              side: BorderSide(color: TellyColors.strokeSubtleOf(context)),
                             ),
                             clipBehavior: Clip.antiAlias,
                             child: ListTile(
@@ -81,23 +82,23 @@ class SeedGridScreen extends ConsumerWidget {
                               title: Text(
                                 'Import from Letterboxd',
                                 style:
-                                    TellyTypography.titleMedium(color: TellyColors.textPrimary).copyWith(fontSize: 14),
+                                    TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context)).copyWith(fontSize: 14),
                               ),
                               subtitle: Text(
                                 'Upload diary.csv or sync public profile',
-                                style: TellyTypography.caption(color: TellyColors.textSecondary),
+                                style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)),
                               ),
-                              trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: TellyColors.textTertiary),
+                              trailing: Icon(Icons.arrow_forward_ios, size: 14, color: TellyColors.textTertiaryOf(context)),
                               key: const Key('import_letterboxd'),
                               onTap: () => _importLetterboxd(context, ref),
                             ),
                           ),
                           const SizedBox(height: 8),
                           Material(
-                            color: TellyColors.backgroundCard,
+                            color: TellyColors.cardOf(context),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
-                              side: const BorderSide(color: TellyColors.strokeSubtle),
+                              side: BorderSide(color: TellyColors.strokeSubtleOf(context)),
                             ),
                             clipBehavior: Clip.antiAlias,
                             child: ListTile(
@@ -105,13 +106,13 @@ class SeedGridScreen extends ConsumerWidget {
                               title: Text(
                                 'Import from AniList / MyAnimeList',
                                 style:
-                                    TellyTypography.titleMedium(color: TellyColors.textPrimary).copyWith(fontSize: 14),
+                                    TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context)).copyWith(fontSize: 14),
                               ),
                               subtitle: Text(
                                 'Instant username sync without password',
-                                style: TellyTypography.caption(color: TellyColors.textSecondary),
+                                style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)),
                               ),
-                              trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: TellyColors.textTertiary),
+                              trailing: Icon(Icons.arrow_forward_ios, size: 14, color: TellyColors.textTertiaryOf(context)),
                               key: const Key('import_anilist'),
                               onTap: () => _importAniList(context, ref),
                             ),
@@ -180,10 +181,10 @@ class SeedGridScreen extends ConsumerWidget {
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 150),
                                 decoration: BoxDecoration(
-                                  color: TellyColors.backgroundCard,
+                                  color: TellyColors.cardOf(context),
                                   borderRadius: BorderRadius.circular(10),
                                   border: Border.all(
-                                    color: isSelected ? TellyColors.phosphorLime : TellyColors.strokeSubtle,
+                                    color: isSelected ? TellyColors.phosphorLime : TellyColors.strokeSubtleOf(context),
                                     width: isSelected ? 2.0 : 1.0,
                                   ),
                                   boxShadow: isSelected
@@ -203,7 +204,7 @@ class SeedGridScreen extends ConsumerWidget {
                                     PosterImage(
                                       posterPath: item.posterPath,
                                       fallback: Container(
-                                        color: TellyColors.backgroundSurface,
+                                        color: TellyColors.surfaceOf(context),
                                         padding: const EdgeInsets.all(6),
                                         child: Column(
                                           mainAxisAlignment: MainAxisAlignment.center,
@@ -219,7 +220,7 @@ class SeedGridScreen extends ConsumerWidget {
                                               maxLines: 2,
                                               overflow: TextOverflow.ellipsis,
                                               style: TellyTypography.labelSmall().copyWith(
-                                                color: Colors.white,
+                                                color: TellyColors.textPrimaryOf(context),
                                                 fontWeight: FontWeight.w600,
                                                 fontSize: 11,
                                               ),
@@ -227,7 +228,7 @@ class SeedGridScreen extends ConsumerWidget {
                                             const SizedBox(height: 4),
                                             Text(
                                               item.releaseYear,
-                                              style: TellyTypography.caption(color: TellyColors.textSecondary)
+                                              style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context))
                                                   .copyWith(fontSize: 10),
                                             ),
                                           ],
@@ -295,9 +296,9 @@ class SeedGridScreen extends ConsumerWidget {
             // Bottom Sticky Bar
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              decoration: const BoxDecoration(
-                color: TellyColors.backgroundPrimary,
-                border: Border(top: BorderSide(color: TellyColors.strokeSubtle)),
+              decoration: BoxDecoration(
+                color: TellyColors.canvasOf(context),
+                border: Border(top: BorderSide(color: TellyColors.strokeSubtleOf(context))),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -379,16 +380,16 @@ class _FilterChip extends StatelessWidget {
           alignment: Alignment.center,
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
-            color: isSelected ? TellyColors.phosphorLime : TellyColors.backgroundCard,
+            color: isSelected ? TellyColors.phosphorLime : TellyColors.cardOf(context),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: isSelected ? TellyColors.phosphorLime : TellyColors.strokeSubtle,
+              color: isSelected ? TellyColors.phosphorLime : TellyColors.strokeSubtleOf(context),
             ),
           ),
           child: Text(
             label,
             style: TextStyle(
-              color: isSelected ? Colors.black : TellyColors.textSecondary,
+              color: isSelected ? Colors.black : TellyColors.textSecondaryOf(context),
               fontSize: 12,
               fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
             ),

@@ -165,14 +165,14 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (context, setModalState) => AlertDialog(
-          backgroundColor: TellyColors.backgroundSurface,
+          backgroundColor: TellyColors.surfaceOf(context),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
-            side: const BorderSide(color: TellyColors.borderGlass),
+            side: BorderSide(color: TellyColors.borderGlassOf(context)),
           ),
           title: Text(
             'Create Custom List',
-            style: TellyTypography.titleMedium(color: TellyColors.textPrimary)
+            style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context))
                 .copyWith(fontWeight: FontWeight.w800),
           ),
           content: SingleChildScrollView(
@@ -182,47 +182,47 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
               children: [
                 Text(
                   'LIST NAME',
-                  style: TellyTypography.caption(color: TellyColors.textTertiary)
+                  style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context))
                       .copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
                 ),
                 const SizedBox(height: 6),
                 TextField(
                   key: const Key('create_list_title_field'),
                   controller: titleController,
-                  style: const TextStyle(color: TellyColors.textPrimary),
+                  style: TextStyle(color: TellyColors.textPrimaryOf(context)),
                   decoration: InputDecoration(
                     hintText: 'e.g. Criterion Must-Sees',
-                    hintStyle: const TextStyle(color: TellyColors.textTertiary),
+                    hintStyle: TextStyle(color: TellyColors.textTertiaryOf(context)),
                     filled: true,
-                    fillColor: TellyColors.backgroundCard,
+                    fillColor: TellyColors.cardOf(context),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: TellyColors.borderGlass),
+                      borderSide: BorderSide(color: TellyColors.borderGlassOf(context)),
                     ),
                   ),
                 ),
                 const SizedBox(height: 14),
                 Text(
                   'DESCRIPTION (OPTIONAL)',
-                  style: TellyTypography.caption(color: TellyColors.textTertiary)
+                  style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context))
                       .copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
                 ),
                 const SizedBox(height: 6),
                 TextField(
                   key: const Key('create_list_desc_field'),
                   controller: descController,
-                  style: const TextStyle(color: TellyColors.textPrimary),
+                  style: TextStyle(color: TellyColors.textPrimaryOf(context)),
                   maxLines: 2,
                   decoration: InputDecoration(
                     hintText: 'What makes this list special...',
-                    hintStyle: const TextStyle(color: TellyColors.textTertiary),
+                    hintStyle: TextStyle(color: TellyColors.textTertiaryOf(context)),
                     filled: true,
-                    fillColor: TellyColors.backgroundCard,
+                    fillColor: TellyColors.cardOf(context),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: TellyColors.borderGlass),
+                      borderSide: BorderSide(color: TellyColors.borderGlassOf(context)),
                     ),
                   ),
                 ),
@@ -230,9 +230,9 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: TellyColors.backgroundCard,
+                    color: TellyColors.cardOf(context),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: TellyColors.borderGlass),
+                    border: Border.all(color: TellyColors.borderGlassOf(context)),
                   ),
                   child: Row(
                     children: [
@@ -248,8 +248,8 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
                           children: [
                             Text(
                               isPrivate ? 'Private List' : 'Public List',
-                              style: const TextStyle(
-                                color: TellyColors.textPrimary,
+                              style: TextStyle(
+                                color: TellyColors.textPrimaryOf(context),
                                 fontWeight: FontWeight.w700,
                                 fontSize: 13,
                               ),
@@ -258,8 +258,8 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
                               isPrivate
                                   ? 'Only you can view and edit'
                                   : 'Visible on your profile & shareable',
-                              style: const TextStyle(
-                                color: TellyColors.textTertiary,
+                              style: TextStyle(
+                                color: TellyColors.textTertiaryOf(context),
                                 fontSize: 11,
                               ),
                             ),
@@ -285,7 +285,7 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel', style: TextStyle(color: TellyColors.textSecondary)),
+              child: Text('Cancel', style: TextStyle(color: TellyColors.textSecondaryOf(context))),
             ),
             ElevatedButton(
               key: const Key('create_list_submit_button'),
@@ -293,6 +293,7 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
                 final title = titleController.text.trim();
                 if (title.isNotEmpty) {
                   final messenger = ScaffoldMessenger.of(context);
+                  final cardBg = TellyColors.cardOf(context);
                   final desc = descController.text.trim();
                   await ref.read(userCustomListsProvider.notifier).createList(
                         title: title,
@@ -303,7 +304,7 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
                   messenger.showSnackBar(
                     SnackBar(
                       content: Text('Created list "$title"'),
-                      backgroundColor: TellyColors.backgroundCard,
+                      backgroundColor: cardBg,
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
@@ -311,7 +312,7 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: TellyColors.phosphorLime,
-                foregroundColor: TellyColors.backgroundCanvasOled,
+                foregroundColor: Colors.black,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),
               child: const Text('Create List', style: TextStyle(fontWeight: FontWeight.w800)),
@@ -730,7 +731,7 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
                       ),
                       child: Text(
                         '🎬 ${list.movieCount} Movies • 📺 ${list.seriesCount} Series',
-                        style: TellyTypography.caption(color: TellyColors.textSecondary)
+                        style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context))
                             .copyWith(fontWeight: FontWeight.w700),
                       ),
                     ),
@@ -744,7 +745,7 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text('Saved "${list.title}" to your lists!'),
-                              backgroundColor: TellyColors.backgroundCard,
+                              backgroundColor: TellyColors.cardOf(context),
                               behavior: SnackBarBehavior.floating,
                             ),
                           );
@@ -767,7 +768,7 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.bookmark_outline, size: 48, color: TellyColors.textTertiary),
+            Icon(Icons.bookmark_outline, size: 48, color: TellyColors.textTertiaryOf(context)),
             const SizedBox(height: 12),
             Text(
               'Your queue is clear!',
@@ -948,12 +949,12 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text('Marked "${item.title}" as Seen!'),
-                            backgroundColor: TellyColors.backgroundCard,
+                            backgroundColor: TellyColors.cardOf(context),
                           ),
                         );
                       },
                       style: TextButton.styleFrom(
-                        foregroundColor: TellyColors.textSecondary,
+                        foregroundColor: TellyColors.textSecondaryOf(context),
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                         minimumSize: Size.zero,
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,

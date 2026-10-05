@@ -30,12 +30,12 @@ class LetterboxdMigrationCard extends StatelessWidget {
       height: 640, // 9:16 ratio preview
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: TellyColors.backgroundSurface,
+        color: TellyColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: TellyColors.borderGlass),
+        border: Border.all(color: TellyColors.borderGlassOf(context)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.6),
+            color: Colors.black.withValues(alpha: 0.15),
             blurRadius: 24,
             offset: const Offset(0, 12),
           ),
@@ -69,9 +69,9 @@ class LetterboxdMigrationCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8),
-                    child: Icon(Icons.arrow_forward, size: 14, color: TellyColors.textTertiary),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Icon(Icons.arrow_forward, size: 14, color: TellyColors.textTertiaryOf(context)),
                   ),
                   TellyNeonBadge.winner(label: 'TELLY CANON'),
                 ],
@@ -80,13 +80,13 @@ class LetterboxdMigrationCard extends StatelessWidget {
               Text(
                 'Imported $importedCount Films',
                 style: TellyTypography.headlineSmall(
-                  color: TellyColors.textPrimary,
+                  color: TellyColors.textPrimaryOf(context),
                 ).copyWith(fontWeight: FontWeight.w900),
               ),
               const SizedBox(height: 4),
               Text(
                 'After pairwise sorting, here is my true #1:',
-                style: TellyTypography.caption(color: TellyColors.textSecondary),
+                style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)),
               ),
             ],
           ),
@@ -96,7 +96,7 @@ class LetterboxdMigrationCard extends StatelessWidget {
             width: 220,
             height: 320,
             decoration: BoxDecoration(
-              color: TellyColors.backgroundCard,
+              color: TellyColors.cardOf(context),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: TellyColors.warmAmber.withValues(alpha: 0.4), width: 1.5),
               boxShadow: [
@@ -115,7 +115,7 @@ class LetterboxdMigrationCard extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.movie_filter_outlined, size: 64, color: TellyColors.textTertiary),
+                        Icon(Icons.movie_filter_outlined, size: 64, color: TellyColors.textTertiaryOf(context)),
                         const SizedBox(height: 12),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -125,7 +125,7 @@ class LetterboxdMigrationCard extends StatelessWidget {
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: TellyTypography.titleLarge(
-                              color: TellyColors.textPrimary,
+                              color: TellyColors.textPrimaryOf(context),
                             ).copyWith(fontWeight: FontWeight.w900),
                           ),
                         ),
@@ -185,12 +185,12 @@ class LetterboxdMigrationCard extends StatelessWidget {
             children: [
               Text(
                 'Curated by @$username',
-                style: TellyTypography.titleMedium(color: TellyColors.textPrimary).copyWith(fontWeight: FontWeight.w700),
+                style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context)).copyWith(fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 4),
               Text(
                 'Compare your taste with me on telly.app/@$username',
-                style: TellyTypography.caption(color: TellyColors.textTertiary).copyWith(fontSize: 10),
+                style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)).copyWith(fontSize: 10),
               ),
             ],
           ),

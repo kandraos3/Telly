@@ -20,16 +20,17 @@ class TellyFrostedSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
         child: Container(
           decoration: BoxDecoration(
-            color: const Color(0xD9141419), // rgba(20, 20, 25, 0.85)
+            color: isLight ? const Color(0xF2FFFFFF) : const Color(0xD9141419), // frosted white or dark
             borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
             border: Border.all(
-              color: TellyColors.borderGlass,
+              color: TellyColors.borderGlassOf(context),
               width: 1.0,
             ),
           ),
@@ -44,7 +45,7 @@ class TellyFrostedSheet extends StatelessWidget {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: TellyColors.strokeStrong, // #3D435C
+                      color: TellyColors.strokeStrongOf(context),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),

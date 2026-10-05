@@ -40,7 +40,7 @@ class _SpoilerMaskState extends State<SpoilerMask> {
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(10),
-              color: TellyColors.backgroundCard,
+              color: TellyColors.cardOf(context),
               child: widget.child,
             ),
             if (!_revealed)

@@ -82,9 +82,9 @@ class _ReportContentSheetState extends State<ReportContentSheet> {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
-        const SnackBar(
-          content: Text('Report submitted to moderation queue. Thank you.'),
-          backgroundColor: TellyColors.backgroundCard,
+        SnackBar(
+          content: const Text('Report submitted to moderation queue. Thank you.'),
+          backgroundColor: TellyColors.cardOf(context),
         ),
       );
 
@@ -97,13 +97,13 @@ class _ReportContentSheetState extends State<ReportContentSheet> {
 
     return Container(
       padding: EdgeInsets.fromLTRB(20, 16, 20, 20 + bottomInset),
-      decoration: const BoxDecoration(
-        color: TellyColors.backgroundCanvasOled,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: TellyColors.surfaceOf(context),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         border: Border(
-          top: BorderSide(color: TellyColors.borderGlass),
-          left: BorderSide(color: TellyColors.borderGlass),
-          right: BorderSide(color: TellyColors.borderGlass),
+          top: BorderSide(color: TellyColors.borderGlassOf(context)),
+          left: BorderSide(color: TellyColors.borderGlassOf(context)),
+          right: BorderSide(color: TellyColors.borderGlassOf(context)),
         ),
       ),
       child: SingleChildScrollView(
@@ -117,7 +117,7 @@ class _ReportContentSheetState extends State<ReportContentSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: TellyColors.strokeSubtle,
+                  color: TellyColors.strokeSubtleOf(context),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -136,20 +136,20 @@ class _ReportContentSheetState extends State<ReportContentSheet> {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close, color: TellyColors.textSecondary, size: 20),
+                  icon: Icon(Icons.close, color: TellyColors.textSecondaryOf(context), size: 20),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
               ],
             ),
             Text(
               'Reporting @${widget.authorUsername}\'s take on ${widget.titleName}',
-              style: TellyTypography.caption(color: TellyColors.textSecondary),
+              style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)),
             ),
             const SizedBox(height: 16),
 
             Text(
               'WHAT IS WRONG WITH THIS POST?',
-              style: TellyTypography.labelSmall(color: TellyColors.textSecondary).copyWith(
+              style: TellyTypography.labelSmall(color: TellyColors.textSecondaryOf(context)).copyWith(
                 fontWeight: FontWeight.bold,
                 letterSpacing: 0.8,
               ),
@@ -162,10 +162,10 @@ class _ReportContentSheetState extends State<ReportContentSheet> {
               return Container(
                 margin: const EdgeInsets.only(bottom: 8),
                 decoration: BoxDecoration(
-                  color: TellyColors.backgroundCard,
+                  color: TellyColors.cardOf(context),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: isSelected ? TellyColors.neonCoral : TellyColors.borderGlass,
+                    color: isSelected ? TellyColors.neonCoral : TellyColors.borderGlassOf(context),
                   ),
                 ),
                 child: InkWell(
@@ -177,7 +177,7 @@ class _ReportContentSheetState extends State<ReportContentSheet> {
                       children: [
                         Icon(
                           isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
-                          color: isSelected ? TellyColors.neonCoral : TellyColors.textTertiary,
+                          color: isSelected ? TellyColors.neonCoral : TellyColors.textTertiaryOf(context),
                           size: 20,
                         ),
                         const SizedBox(width: 12),
@@ -188,7 +188,7 @@ class _ReportContentSheetState extends State<ReportContentSheet> {
                               Text(
                                 reason.label,
                                 style: TextStyle(
-                                  color: isSelected ? TellyColors.textPrimary : TellyColors.textSecondary,
+                                  color: isSelected ? TellyColors.textPrimaryOf(context) : TellyColors.textSecondaryOf(context),
                                   fontWeight: FontWeight.bold,
                                   fontSize: 13,
                                 ),
@@ -196,8 +196,8 @@ class _ReportContentSheetState extends State<ReportContentSheet> {
                               const SizedBox(height: 2),
                               Text(
                                 reason.description,
-                                style: const TextStyle(
-                                  color: TellyColors.textTertiary,
+                                style: TextStyle(
+                                  color: TellyColors.textTertiaryOf(context),
                                   fontSize: 11,
                                 ),
                               ),
@@ -215,7 +215,7 @@ class _ReportContentSheetState extends State<ReportContentSheet> {
             // Optional Details
             Text(
               'OPTIONAL DETAILS',
-              style: TellyTypography.labelSmall(color: TellyColors.textSecondary).copyWith(
+              style: TellyTypography.labelSmall(color: TellyColors.textSecondaryOf(context)).copyWith(
                 fontWeight: FontWeight.bold,
                 letterSpacing: 0.8,
               ),
@@ -224,20 +224,20 @@ class _ReportContentSheetState extends State<ReportContentSheet> {
             TextField(
               controller: _detailsController,
               maxLines: 2,
-              style: const TextStyle(color: TellyColors.textPrimary, fontSize: 13),
+              style: TextStyle(color: TellyColors.textPrimaryOf(context), fontSize: 13),
               decoration: InputDecoration(
                 hintText: 'Provide additional context (e.g. spoiled ending in line 2)...',
-                hintStyle: const TextStyle(color: TellyColors.textTertiary, fontSize: 12),
+                hintStyle: TextStyle(color: TellyColors.textTertiaryOf(context), fontSize: 12),
                 filled: true,
-                fillColor: TellyColors.backgroundCard,
+                fillColor: TellyColors.cardOf(context),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: TellyColors.borderGlass),
+                  borderSide: BorderSide(color: TellyColors.borderGlassOf(context)),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: TellyColors.borderGlass),
+                  borderSide: BorderSide(color: TellyColors.borderGlassOf(context)),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -250,7 +250,7 @@ class _ReportContentSheetState extends State<ReportContentSheet> {
             // Immediate Protective Actions
             Text(
               'ACTIONS FOR YOU',
-              style: TellyTypography.labelSmall(color: TellyColors.textSecondary).copyWith(
+              style: TellyTypography.labelSmall(color: TellyColors.textSecondaryOf(context)).copyWith(
                 fontWeight: FontWeight.bold,
                 letterSpacing: 0.8,
               ),
@@ -258,9 +258,9 @@ class _ReportContentSheetState extends State<ReportContentSheet> {
             const SizedBox(height: 6),
             Container(
               decoration: BoxDecoration(
-                color: TellyColors.backgroundCard,
+                color: TellyColors.cardOf(context),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: TellyColors.borderGlass),
+                border: Border.all(color: TellyColors.borderGlassOf(context)),
               ),
               child: Column(
                 children: [
@@ -269,13 +269,13 @@ class _ReportContentSheetState extends State<ReportContentSheet> {
                     value: _muteAuthor,
                     onChanged: (val) => setState(() => _muteAuthor = val ?? false),
                   ),
-                  const Divider(color: TellyColors.borderGlass, height: 1),
+                  Divider(color: TellyColors.borderGlassOf(context), height: 1),
                   _buildActionCheckbox(
                     title: 'Block @${widget.authorUsername} completely',
                     value: _blockAuthor,
                     onChanged: (val) => setState(() => _blockAuthor = val ?? false),
                   ),
-                  const Divider(color: TellyColors.borderGlass, height: 1),
+                  Divider(color: TellyColors.borderGlassOf(context), height: 1),
                   _buildActionCheckbox(
                     title: 'Hide "${widget.titleName}" from feed until I finish',
                     value: _muteTitle,
@@ -317,7 +317,7 @@ class _ReportContentSheetState extends State<ReportContentSheet> {
             Expanded(
               child: Text(
                 title,
-                style: const TextStyle(color: TellyColors.textPrimary, fontSize: 13),
+                style: TextStyle(color: TellyColors.textPrimaryOf(context), fontSize: 13),
               ),
             ),
           ],

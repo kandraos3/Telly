@@ -17,9 +17,9 @@ class RevealLeaderboardSnippet extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: TellyColors.backgroundCard,
+        color: TellyColors.cardOf(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: TellyColors.borderGlass),
+        border: Border.all(color: TellyColors.borderGlassOf(context)),
       ),
       child: Column(
         children: [for (final e in entries) _Row(entry: e)],
@@ -54,7 +54,7 @@ class _Row extends StatelessWidget {
               width: 36,
               child: Text(
                 '#${entry.rank}',
-                style: TellyTypography.scoreMono(color: isNew ? TellyColors.phosphorLime : TellyColors.textTertiary)
+                style: TellyTypography.scoreMono(color: isNew ? TellyColors.phosphorLime : TellyColors.textTertiaryOf(context))
                     .copyWith(fontSize: 14),
               ),
             ),
@@ -65,7 +65,7 @@ class _Row extends StatelessWidget {
                 height: 42,
                 child: PosterImage(
                   posterPath: entry.posterPath,
-                  fallback: const ColoredBox(color: TellyColors.backgroundSurface),
+                  fallback: ColoredBox(color: TellyColors.surfaceOf(context)),
                 ),
               ),
             ),
@@ -75,14 +75,14 @@ class _Row extends StatelessWidget {
                 entry.title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TellyTypography.bodyMedium(color: isNew ? TellyColors.textPrimary : TellyColors.textSecondary)
+                style: TellyTypography.bodyMedium(color: isNew ? TellyColors.textPrimaryOf(context) : TellyColors.textSecondaryOf(context))
                     .copyWith(fontWeight: isNew ? FontWeight.w700 : FontWeight.w500),
               ),
             ),
             const SizedBox(width: 8),
             Text(
               entry.score.toStringAsFixed(2),
-              style: TellyTypography.scoreMono(color: isNew ? TellyColors.phosphorLime : TellyColors.textSecondary)
+              style: TellyTypography.scoreMono(color: isNew ? TellyColors.phosphorLime : TellyColors.textSecondaryOf(context))
                   .copyWith(fontSize: 14),
             ),
           ],

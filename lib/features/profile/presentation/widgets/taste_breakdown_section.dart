@@ -26,9 +26,9 @@ class DualTasteMatchBreakdown extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: TellyColors.backgroundSurface,
+        color: TellyColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: TellyColors.borderGlass),
+        border: Border.all(color: TellyColors.borderGlassOf(context)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,11 +39,11 @@ class DualTasteMatchBreakdown extends StatelessWidget {
               Text(
                 'CANON TASTE BREAKDOWN',
                 style: TellyTypography.labelSmall(
-                  color: TellyColors.textTertiary,
+                  color: TellyColors.textTertiaryOf(context),
                 ).copyWith(fontWeight: FontWeight.w700, letterSpacing: 1.0),
               ),
               IconButton(
-                icon: const Icon(Icons.info_outline, size: 16, color: TellyColors.textTertiary),
+                icon: Icon(Icons.info_outline, size: 16, color: TellyColors.textTertiaryOf(context)),
                 onPressed: onInfoTap ?? () => _showMathExplanationDialog(context),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
@@ -55,6 +55,7 @@ class DualTasteMatchBreakdown extends StatelessWidget {
             children: [
               Expanded(
                 child: _buildCanonPill(
+                  context,
                   icon: '🎬',
                   label: 'Movie Alignment',
                   percentage: movieMatchPercentage,
@@ -65,6 +66,7 @@ class DualTasteMatchBreakdown extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: _buildCanonPill(
+                  context,
                   icon: '📺',
                   label: 'Series Alignment',
                   percentage: seriesMatchPercentage,
@@ -79,7 +81,8 @@ class DualTasteMatchBreakdown extends StatelessWidget {
     );
   }
 
-  Widget _buildCanonPill({
+  Widget _buildCanonPill(
+    BuildContext context, {
     required String icon,
     required String label,
     required int? percentage,
@@ -90,7 +93,7 @@ class DualTasteMatchBreakdown extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: TellyColors.backgroundCard,
+        color: TellyColors.cardOf(context),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
@@ -106,7 +109,7 @@ class DualTasteMatchBreakdown extends StatelessWidget {
                   label,
                   overflow: TextOverflow.ellipsis,
                   style: TellyTypography.caption(
-                    color: TellyColors.textSecondary,
+                    color: TellyColors.textSecondaryOf(context),
                   ).copyWith(fontSize: 11, fontWeight: FontWeight.w600),
                 ),
               ),
@@ -123,7 +126,7 @@ class DualTasteMatchBreakdown extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               '$count shared ${count == 1 ? 'title' : 'titles'}',
-              style: TellyTypography.caption(color: TellyColors.textTertiary).copyWith(fontSize: 11),
+              style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)).copyWith(fontSize: 11),
             ),
           ],
         ],
@@ -135,15 +138,15 @@ class DualTasteMatchBreakdown extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: TellyColors.backgroundCard,
+        backgroundColor: TellyColors.cardOf(context),
         title: Text(
           'How Taste Match Works',
-          style: TellyTypography.headlineSmall(color: TellyColors.textPrimary),
+          style: TellyTypography.headlineSmall(color: TellyColors.textPrimaryOf(context)),
         ),
         content: Text(
           'Telly uses the Spearman Rank Correlation coefficient (ρ) combined with Bayesian confidence shrinkage (k₀ = 5).\n\n'
           'Movie and Series Canons are computed independently to prevent short-form features from skewing long-form TV alignments.',
-          style: TellyTypography.bodyMedium(color: TellyColors.textSecondary),
+          style: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context)),
         ),
         actions: [
           TextButton(
@@ -185,37 +188,37 @@ class TasteComparisonsSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // 1. Where You Agree
-        _buildSectionHeader('🤝 WHERE YOU AGREE', TellyColors.phosphorLime),
+        _buildSectionHeader(context, '🤝 WHERE YOU AGREE', TellyColors.phosphorLime),
         const SizedBox(height: 8),
         if (agreements.isEmpty)
-          _buildEmptyText('No mutual agreements yet.')
+          _buildEmptyText(context, 'No mutual agreements yet.')
         else
           ...agreements.map((item) => _buildAgreementTile(context, item)),
 
         const SizedBox(height: 20),
 
         // 2. Spiciest Clashes
-        _buildSectionHeader('⚡ SPICIEST CLASHES', TellyColors.neonCoral),
+        _buildSectionHeader(context, '⚡ SPICIEST CLASHES', TellyColors.neonCoral),
         const SizedBox(height: 8),
         if (clashes.isEmpty)
-          _buildEmptyText('No major ranking disagreements yet.')
+          _buildEmptyText(context, 'No major ranking disagreements yet.')
         else
           ...clashes.map((item) => _buildClashTile(context, item)),
 
         const SizedBox(height: 20),
 
         // 3. Unwatched Gems
-        _buildSectionHeader('💡 UNWATCHED GEMS $friendHandle LOVES', TellyColors.warmAmber),
+        _buildSectionHeader(context, '💡 UNWATCHED GEMS $friendHandle LOVES', TellyColors.warmAmber),
         const SizedBox(height: 8),
         if (unwatchedGems.isEmpty)
-          _buildEmptyText('No unwatched recommendations right now.')
+          _buildEmptyText(context, 'No unwatched recommendations right now.')
         else
           ...unwatchedGems.map((gem) => _buildGemTile(context, gem)),
       ],
     );
   }
 
-  Widget _buildSectionHeader(String title, Color color) {
+  Widget _buildSectionHeader(BuildContext context, String title, Color color) {
     return Row(
       children: [
         Container(
@@ -230,19 +233,19 @@ class TasteComparisonsSection extends StatelessWidget {
         Text(
           title,
           style: TellyTypography.labelSmall(
-            color: TellyColors.textPrimary,
+            color: TellyColors.textPrimaryOf(context),
           ).copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
         ),
       ],
     );
   }
 
-  Widget _buildEmptyText(String text) {
+  Widget _buildEmptyText(BuildContext context, String text) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Text(
         text,
-        style: TellyTypography.caption(color: TellyColors.textTertiary),
+        style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)),
       ),
     );
   }
@@ -261,9 +264,9 @@ class TasteComparisonsSection extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: TellyColors.backgroundSurface,
+          color: TellyColors.surfaceOf(context),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: TellyColors.borderGlass),
+          border: Border.all(color: TellyColors.borderGlassOf(context)),
         ),
         child: Row(
           children: [
@@ -274,14 +277,14 @@ class TasteComparisonsSection extends StatelessWidget {
                   Text(
                     item.title,
                     style: TellyTypography.headlineSmall(
-                      color: TellyColors.textPrimary,
+                      color: TellyColors.textPrimaryOf(context),
                     ).copyWith(fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'You: #${item.rankA} (★${item.scoreA.toStringAsFixed(1)}) • $friendHandle: #${item.rankB} (★${item.scoreB.toStringAsFixed(1)})',
                     style: TellyTypography.caption(
-                      color: TellyColors.textSecondary,
+                      color: TellyColors.textSecondaryOf(context),
                     ),
                   ),
                 ],
@@ -320,7 +323,7 @@ class TasteComparisonsSection extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: TellyColors.backgroundSurface,
+          color: TellyColors.surfaceOf(context),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: TellyColors.neonCoral.withValues(alpha: 0.2)),
         ),
@@ -333,14 +336,14 @@ class TasteComparisonsSection extends StatelessWidget {
                   Text(
                     item.title,
                     style: TellyTypography.headlineSmall(
-                      color: TellyColors.textPrimary,
+                      color: TellyColors.textPrimaryOf(context),
                     ).copyWith(fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'You: #${item.rankA} (★${item.scoreA.toStringAsFixed(1)}) • $friendHandle: #${item.rankB} (★${item.scoreB.toStringAsFixed(1)})',
                     style: TellyTypography.caption(
-                      color: TellyColors.textSecondary,
+                      color: TellyColors.textSecondaryOf(context),
                     ),
                   ),
                 ],
@@ -370,9 +373,9 @@ class TasteComparisonsSection extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: TellyColors.backgroundSurface,
+        color: TellyColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: TellyColors.borderGlass),
+        border: Border.all(color: TellyColors.borderGlassOf(context)),
       ),
       child: Row(
         children: [
@@ -383,7 +386,7 @@ class TasteComparisonsSection extends StatelessWidget {
                 Text(
                   gem.title,
                   style: TellyTypography.headlineSmall(
-                    color: TellyColors.textPrimary,
+                    color: TellyColors.textPrimaryOf(context),
                   ).copyWith(fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 4),
@@ -399,7 +402,7 @@ class TasteComparisonsSection extends StatelessWidget {
           ElevatedButton.icon(
             onPressed: () => onAddGemToQueue?.call(gem),
             style: ElevatedButton.styleFrom(
-              backgroundColor: TellyColors.backgroundCard,
+              backgroundColor: TellyColors.cardOf(context),
               foregroundColor: TellyColors.phosphorLime,
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               minimumSize: Size.zero,
@@ -420,7 +423,7 @@ class TasteComparisonsSection extends StatelessWidget {
   void _showDetailSheet(BuildContext context, RankedTitleComparison item) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: TellyColors.backgroundCard,
+      backgroundColor: TellyColors.cardOf(context),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -432,7 +435,7 @@ class TasteComparisonsSection extends StatelessWidget {
           children: [
             Text(
               item.title,
-              style: TellyTypography.headlineSmall(color: TellyColors.textPrimary),
+              style: TellyTypography.headlineSmall(color: TellyColors.textPrimaryOf(context)),
             ),
             const SizedBox(height: 12),
             Row(
@@ -441,13 +444,13 @@ class TasteComparisonsSection extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: TellyColors.backgroundSurface,
+                      color: TellyColors.surfaceOf(context),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
                       children: [
-                        const Text('YOU', style: TextStyle(color: TellyColors.textTertiary, fontSize: 11)),
-                        Text('#${item.rankA}', style: const TextStyle(color: TellyColors.textPrimary, fontSize: 20, fontWeight: FontWeight.bold)),
+                        Text('YOU', style: TextStyle(color: TellyColors.textTertiaryOf(context), fontSize: 11)),
+                        Text('#${item.rankA}', style: TextStyle(color: TellyColors.textPrimaryOf(context), fontSize: 20, fontWeight: FontWeight.bold)),
                         Text('★${item.scoreA.toStringAsFixed(1)}', style: const TextStyle(color: TellyColors.warmAmber, fontSize: 12)),
                       ],
                     ),
@@ -458,13 +461,13 @@ class TasteComparisonsSection extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: TellyColors.backgroundSurface,
+                      color: TellyColors.surfaceOf(context),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
                       children: [
-                        Text(friendHandle.toUpperCase(), style: const TextStyle(color: TellyColors.textTertiary, fontSize: 11)),
-                        Text('#${item.rankB}', style: const TextStyle(color: TellyColors.textPrimary, fontSize: 20, fontWeight: FontWeight.bold)),
+                        Text(friendHandle.toUpperCase(), style: TextStyle(color: TellyColors.textTertiaryOf(context), fontSize: 11)),
+                        Text('#${item.rankB}', style: TextStyle(color: TellyColors.textPrimaryOf(context), fontSize: 20, fontWeight: FontWeight.bold)),
                         Text('★${item.scoreB.toStringAsFixed(1)}', style: const TextStyle(color: TellyColors.warmAmber, fontSize: 12)),
                       ],
                     ),
@@ -476,7 +479,7 @@ class TasteComparisonsSection extends StatelessWidget {
               const SizedBox(height: 16),
               Text(
                 '$friendHandle\'s note: "${item.reviewB}"',
-                style: TellyTypography.bodyMedium(color: TellyColors.textSecondary).copyWith(fontStyle: FontStyle.italic),
+                style: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context)).copyWith(fontStyle: FontStyle.italic),
               ),
             ],
             const SizedBox(height: 20),

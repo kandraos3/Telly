@@ -156,9 +156,9 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
                       margin: const EdgeInsets.only(bottom: 12),
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: TellyColors.backgroundSurface,
+                        color: TellyColors.surfaceOf(context),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: TellyColors.borderGlass),
+                        border: Border.all(color: TellyColors.borderGlassOf(context)),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -170,7 +170,7 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
                                 style: TellyTypography.titleMedium(
                                   color: index == 1
                                       ? TellyColors.warmAmber
-                                      : TellyColors.textTertiary,
+                                      : TellyColors.textTertiaryOf(context),
                                 ).copyWith(fontWeight: FontWeight.w800),
                               ),
                               const SizedBox(width: 12),
@@ -178,7 +178,7 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
                                 child: Text(
                                   net.network,
                                   style: TellyTypography.titleMedium(
-                                    color: TellyColors.textPrimary,
+                                    color: TellyColors.textPrimaryOf(context),
                                   ).copyWith(fontWeight: FontWeight.w800),
                                 ),
                               ),
@@ -299,9 +299,9 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
                           margin: const EdgeInsets.only(bottom: 8),
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: TellyColors.backgroundSurface,
+                            color: TellyColors.surfaceOf(context),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: TellyColors.borderGlass),
+                            border: Border.all(color: TellyColors.borderGlassOf(context)),
                           ),
                           child: Row(
                             children: [
@@ -311,11 +311,11 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
                                 child: Text(
                                   title,
                                   style: TellyTypography.labelLarge(
-                                    color: TellyColors.textPrimary,
+                                    color: TellyColors.textPrimaryOf(context),
                                   ).copyWith(fontWeight: FontWeight.w700),
                                 ),
                               ),
-                              const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: TellyColors.textTertiary),
+                              Icon(Icons.arrow_forward_ios_rounded, size: 14, color: TellyColors.textTertiaryOf(context)),
                             ],
                           ),
                         ),
@@ -519,13 +519,13 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
       label: Text(label),
       selected: isSelected,
       onSelected: (_) => setState(() => _activeTab = tab),
-      backgroundColor: TellyColors.backgroundSurface,
+      backgroundColor: TellyColors.surfaceOf(context),
       selectedColor: TellyColors.phosphorLime.withValues(alpha: 0.2),
       side: BorderSide(
-        color: isSelected ? TellyColors.phosphorLime : TellyColors.borderGlass,
+        color: isSelected ? TellyColors.phosphorLime : TellyColors.borderGlassOf(context),
       ),
       labelStyle: TextStyle(
-        color: isSelected ? TellyColors.phosphorLime : TellyColors.textSecondary,
+        color: isSelected ? TellyColors.phosphorLime : TellyColors.textSecondaryOf(context),
         fontWeight: FontWeight.w700,
         fontSize: 12,
       ),
@@ -543,9 +543,9 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: TellyColors.backgroundSurface,
+          color: TellyColors.surfaceOf(context),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: TellyColors.borderGlass),
+          border: Border.all(color: TellyColors.borderGlassOf(context)),
         ),
         child: Row(
           children: [
@@ -556,8 +556,8 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
                 height: 64,
                 child: PosterImage(
                   posterPath: title.posterPath,
-                  fallback: const Center(
-                    child: Icon(Icons.movie_outlined, size: 20, color: TellyColors.textTertiary),
+                  fallback: Center(
+                    child: Icon(Icons.movie_outlined, size: 20, color: TellyColors.textTertiaryOf(context)),
                   ),
                 ),
               ),
@@ -569,18 +569,18 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
                 children: [
                   Text(
                     title.title,
-                    style: TellyTypography.titleMedium(color: TellyColors.textPrimary)
+                    style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context))
                         .copyWith(fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     '${title.mediaType.toUpperCase()}${title.releaseYear.isNotEmpty ? ' • ${title.releaseYear}' : ''}',
-                    style: TellyTypography.caption(color: TellyColors.textTertiary),
+                    style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, color: TellyColors.textTertiary),
+            Icon(Icons.chevron_right, color: TellyColors.textTertiaryOf(context)),
           ],
         ),
       ),
@@ -609,15 +609,15 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: TellyColors.backgroundSurface,
+          color: TellyColors.surfaceOf(context),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: TellyColors.borderGlass),
+          border: Border.all(color: TellyColors.borderGlassOf(context)),
         ),
         child: Row(
           children: [
             CircleAvatar(
               radius: 18,
-              backgroundColor: TellyColors.backgroundCard,
+              backgroundColor: TellyColors.cardOf(context),
               child: Text(
                 user.displayName.isNotEmpty ? user.displayName[0].toUpperCase() : '?',
                 style: const TextStyle(
@@ -633,12 +633,12 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
                 children: [
                   Text(
                     user.displayName,
-                    style: TellyTypography.titleMedium(color: TellyColors.textPrimary)
+                    style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context))
                         .copyWith(fontWeight: FontWeight.w700),
                   ),
                   Text(
                     '@${user.username}',
-                    style: TellyTypography.caption(color: TellyColors.textTertiary),
+                    style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)),
                   ),
                 ],
               ),
@@ -740,9 +740,9 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
                   onPressed: () => _runSearch(q),
                   onDeleted: () => ref.read(recentSearchesProvider.notifier).remove(q),
                   deleteIcon: const Icon(Icons.close, size: 14),
-                  backgroundColor: TellyColors.backgroundSurface,
-                  side: const BorderSide(color: TellyColors.borderGlass),
-                  labelStyle: TellyTypography.labelMedium(color: TellyColors.textSecondary),
+                  backgroundColor: TellyColors.surfaceOf(context),
+                  side: BorderSide(color: TellyColors.borderGlassOf(context)),
+                  labelStyle: TellyTypography.labelMedium(color: TellyColors.textSecondaryOf(context)),
                 ),
             ],
           ),
@@ -753,7 +753,7 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
         if (trending.isEmpty)
           Text(
             'Start typing to search titles and people.',
-            style: TellyTypography.bodyMedium(color: TellyColors.textTertiary),
+            style: TellyTypography.bodyMedium(color: TellyColors.textTertiaryOf(context)),
           )
         else
           for (final (i, t) in trending.indexed)
@@ -769,7 +769,7 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
                       width: 28,
                       child: Text(
                         '${i + 1}',
-                        style: TellyTypography.titleMedium(color: TellyColors.textTertiary)
+                        style: TellyTypography.titleMedium(color: TellyColors.textTertiaryOf(context))
                             .copyWith(fontWeight: FontWeight.w800),
                       ),
                     ),
@@ -780,8 +780,8 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
                         height: 54,
                         child: PosterImage(
                           posterPath: t.posterPath,
-                          fallback: const Center(
-                            child: Icon(Icons.movie_outlined, size: 16, color: TellyColors.textTertiary),
+                          fallback: Center(
+                            child: Icon(Icons.movie_outlined, size: 16, color: TellyColors.textTertiaryOf(context)),
                           ),
                         ),
                       ),
@@ -795,7 +795,7 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
                             t.title,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TellyTypography.titleMedium(color: TellyColors.textPrimary)
+                            style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context))
                                 .copyWith(fontWeight: FontWeight.w700),
                           ),
                           const SizedBox(height: 2),
@@ -805,7 +805,7 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
                               if (t.releaseYear != null) '${t.releaseYear}',
                               if (t.network != null && t.mediaType == 'tv') t.network!,
                             ].join(' • '),
-                            style: TellyTypography.caption(color: TellyColors.textTertiary),
+                            style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)),
                           ),
                         ],
                       ),
@@ -829,9 +829,9 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: TellyColors.backgroundSurface,
+        color: TellyColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: TellyColors.borderGlass),
+        border: Border.all(color: TellyColors.borderGlassOf(context)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -849,7 +849,7 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
               const SizedBox(width: 8),
               Text(
                 'NETWORK BATTLEGROUNDS',
-                style: TellyTypography.labelSmall(color: TellyColors.textPrimary)
+                style: TellyTypography.labelSmall(color: TellyColors.textPrimaryOf(context))
                     .copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
               ),
             ],
@@ -866,7 +866,7 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
                   children: [
                     Text(
                       '$emoji ${b.network}',
-                      style: TellyTypography.labelMedium(color: TellyColors.textPrimary)
+                      style: TellyTypography.labelMedium(color: TellyColors.textPrimaryOf(context))
                           .copyWith(fontWeight: FontWeight.w800),
                       textAlign: TextAlign.center,
                       maxLines: 1,
@@ -948,9 +948,9 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
                   width: 220,
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: TellyColors.backgroundSurface,
+                    color: TellyColors.surfaceOf(context),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: TellyColors.borderGlass),
+                    border: Border.all(color: TellyColors.borderGlassOf(context)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -965,8 +965,8 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
                               height: 75,
                               child: PosterImage(
                                 posterPath: item.posterPath,
-                                fallback: const Center(
-                                  child: Icon(Icons.movie_outlined, size: 24, color: TellyColors.textTertiary),
+                                fallback: Center(
+                                  child: Icon(Icons.movie_outlined, size: 24, color: TellyColors.textTertiaryOf(context)),
                                 ),
                               ),
                             ),
@@ -978,7 +978,7 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
                               children: [
                                 Text(
                                   item.title,
-                                  style: TellyTypography.titleMedium(color: TellyColors.textPrimary)
+                                  style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context))
                                       .copyWith(fontWeight: FontWeight.w800),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
@@ -987,7 +987,7 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
                                   const SizedBox(height: 2),
                                   Text(
                                     item.network!,
-                                    style: TellyTypography.caption(color: TellyColors.textTertiary),
+                                    style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)),
                                   ),
                                 ],
                               ],
@@ -1005,7 +1005,7 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
                               '${item.activeFriendCount} watching',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: TellyTypography.caption(color: TellyColors.textSecondary)
+                              style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context))
                                   .copyWith(fontWeight: FontWeight.w600),
                             ),
                           ),
@@ -1044,7 +1044,7 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
             const SizedBox(width: 8),
             Text(
               'CURATED CANONS',
-              style: TellyTypography.labelSmall(color: TellyColors.textPrimary)
+              style: TellyTypography.labelSmall(color: TellyColors.textPrimaryOf(context))
                   .copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
             ),
           ],
@@ -1057,9 +1057,9 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
                 margin: const EdgeInsets.only(bottom: 12),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: TellyColors.backgroundSurface,
+                  color: TellyColors.surfaceOf(context),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: TellyColors.borderGlass),
+                  border: Border.all(color: TellyColors.borderGlassOf(context)),
                 ),
                 child: Row(
                   children: [
@@ -1067,7 +1067,7 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
-                        color: TellyColors.backgroundCard,
+                        color: TellyColors.cardOf(context),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Center(
@@ -1081,18 +1081,18 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
                         children: [
                           Text(
                             canon.title,
-                            style: TellyTypography.titleMedium(color: TellyColors.textPrimary)
+                            style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context))
                                 .copyWith(fontWeight: FontWeight.w800),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             canon.subtitle,
-                            style: TellyTypography.caption(color: TellyColors.textTertiary),
+                            style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)),
                           ),
                         ],
                       ),
                     ),
-                    const Icon(Icons.chevron_right, color: TellyColors.textTertiary),
+                    Icon(Icons.chevron_right, color: TellyColors.textTertiaryOf(context)),
                   ],
                 ),
               ),
@@ -1128,13 +1128,13 @@ class _RecommendedTitleCard extends StatelessWidget {
                     width: 124,
                     height: 180,
                     decoration: BoxDecoration(
-                      color: TellyColors.backgroundSurface,
-                      border: Border.all(color: TellyColors.borderGlass),
+                      color: TellyColors.surfaceOf(context),
+                      border: Border.all(color: TellyColors.borderGlassOf(context)),
                     ),
                     child: PosterImage(
                       posterPath: item.posterPath,
-                      fallback: const Center(
-                        child: Icon(Icons.movie_outlined, size: 28, color: TellyColors.textTertiary),
+                      fallback: Center(
+                        child: Icon(Icons.movie_outlined, size: 28, color: TellyColors.textTertiaryOf(context)),
                       ),
                     ),
                   ),

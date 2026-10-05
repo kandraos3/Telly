@@ -39,7 +39,7 @@ class DuelArenaCard extends StatelessWidget {
         ? TellyColors.phosphorLime
         : isLoser
             ? Colors.transparent
-            : Color.lerp(TellyColors.borderGlass, TellyColors.phosphorLime, highlight)!;
+            : Color.lerp(TellyColors.borderGlassOf(context), TellyColors.phosphorLime, highlight)!;
 
     final double targetOpacity = isLoser ? 0.20 : 1.0;
     final double targetScale = isWinner ? 1.04 : (isLoser ? 0.96 : 1.0);
@@ -63,7 +63,7 @@ class DuelArenaCard extends StatelessWidget {
               duration: highlight > 0 ? Duration.zero : const Duration(milliseconds: 220),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: TellyColors.backgroundCard,
+                color: TellyColors.cardOf(context),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
                   color: borderColor,
@@ -79,7 +79,7 @@ class DuelArenaCard extends StatelessWidget {
                       ]
                     : [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.40),
+                          color: Colors.black.withValues(alpha: Theme.of(context).brightness == Brightness.light ? 0.06 : 0.40),
                           blurRadius: 12,
                           offset: const Offset(0, 4),
                         ),
@@ -95,7 +95,7 @@ class DuelArenaCard extends StatelessWidget {
                       height: 108,
                       child: PosterImage(
                         posterPath: posterPath,
-                        fallback: _buildPosterPlaceholder(),
+                        fallback: _buildPosterPlaceholder(context),
                       ),
                     ),
                   ),
@@ -110,7 +110,7 @@ class DuelArenaCard extends StatelessWidget {
                         Text(
                           title,
                           style: TellyTypography.titleMedium(
-                            color: TellyColors.textPrimary,
+                            color: TellyColors.textPrimaryOf(context),
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -120,7 +120,7 @@ class DuelArenaCard extends StatelessWidget {
                           Text(
                             subtitle!,
                             style: TellyTypography.bodyMedium(
-                              color: TellyColors.textSecondary,
+                              color: TellyColors.textSecondaryOf(context),
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -133,13 +133,13 @@ class DuelArenaCard extends StatelessWidget {
                             Icon(
                               Icons.touch_app_rounded,
                               size: 14,
-                              color: isWinner ? TellyColors.phosphorLime : TellyColors.textTertiary,
+                              color: isWinner ? TellyColors.phosphorLime : TellyColors.textTertiaryOf(context),
                             ),
                             const SizedBox(width: 4),
                             Text(
                               actionPrompt,
                               style: TellyTypography.caption(
-                                color: isWinner ? TellyColors.phosphorLime : TellyColors.textTertiary,
+                                color: isWinner ? TellyColors.phosphorLime : TellyColors.textTertiaryOf(context),
                               ).copyWith(
                                 fontWeight: FontWeight.w600,
                                 letterSpacing: 0.8,
@@ -159,11 +159,11 @@ class DuelArenaCard extends StatelessWidget {
     );
   }
 
-  Widget _buildPosterPlaceholder() {
-    return const Center(
+  Widget _buildPosterPlaceholder(BuildContext context) {
+    return Center(
       child: Icon(
         Icons.movie_outlined,
-        color: TellyColors.textTertiary,
+        color: TellyColors.textTertiaryOf(context),
         size: 32,
       ),
     );

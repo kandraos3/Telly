@@ -31,19 +31,19 @@ class FeedBookmarkButton extends StatelessWidget {
 }
 
 /// The snackbar shown after saving a title from a feed card.
-SnackBar feedQueuedSnackBar({Color? accent}) => SnackBar(
-      backgroundColor: TellyColors.backgroundCard,
+SnackBar feedQueuedSnackBar({BuildContext? context, Color? accent}) => SnackBar(
+      backgroundColor: context != null ? TellyColors.cardOf(context) : TellyColors.backgroundCard,
       behavior: SnackBarBehavior.floating,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: accent ?? TellyColors.borderGlass),
+        side: BorderSide(color: accent ?? (context != null ? TellyColors.borderGlassOf(context) : TellyColors.borderGlass)),
       ),
       content: Row(
         children: [
           Icon(Icons.bookmark_rounded, color: accent ?? TellyColors.phosphorLime, size: 20),
           const SizedBox(width: 10),
           Expanded(
-            child: Text('Added to your Watchlist', style: TellyTypography.caption(color: TellyColors.textPrimary)),
+            child: Text('Added to your Watchlist', style: TellyTypography.caption(color: context != null ? TellyColors.textPrimaryOf(context) : TellyColors.textPrimary)),
           ),
         ],
       ),
@@ -181,7 +181,7 @@ class _ReactionPill extends StatelessWidget {
                     Text(
                       '$count',
                       style: TellyTypography.caption(
-                        color: selected ? TellyColors.phosphorLime : TellyColors.textSecondary,
+                        color: selected ? TellyColors.phosphorLime : TellyColors.textSecondaryOf(context),
                       ).copyWith(fontWeight: FontWeight.bold, fontSize: 11),
                     ),
                   ],
@@ -209,7 +209,7 @@ Future<FeedReaction?> showFeedEmojiPicker(BuildContext context, {FeedReaction? c
   return showModalBottomSheet<FeedReaction>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: TellyColors.backgroundCard,
+    backgroundColor: TellyColors.cardOf(context),
     shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
     builder: (ctx) => SafeArea(
       child: SingleChildScrollView(
@@ -220,7 +220,7 @@ Future<FeedReaction?> showFeedEmojiPicker(BuildContext context, {FeedReaction? c
           children: [
             Text(
               'REACT',
-              style: TellyTypography.labelSmall(color: TellyColors.textTertiary)
+              style: TellyTypography.labelSmall(color: TellyColors.textTertiaryOf(context))
                   .copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
             ),
             const SizedBox(height: 8),
@@ -234,16 +234,16 @@ Future<FeedReaction?> showFeedEmojiPicker(BuildContext context, {FeedReaction? c
                     avatar: Text(t.emoji),
                     label: Text(t.label),
                     onPressed: () => Navigator.of(ctx).pop(FeedReaction(t)),
-                    backgroundColor: TellyColors.backgroundSurface,
-                    side: const BorderSide(color: TellyColors.borderGlass),
-                    labelStyle: TellyTypography.labelMedium(color: TellyColors.textSecondary),
+                    backgroundColor: TellyColors.surfaceOf(context),
+                    side: BorderSide(color: TellyColors.borderGlassOf(context)),
+                    labelStyle: TellyTypography.labelMedium(color: TellyColors.textSecondaryOf(context)),
                   ),
               ],
             ),
             const SizedBox(height: 16),
             Text(
               current == null ? 'OR PICK ANY EMOJI' : 'SWAP YOUR EMOJI (${current.emoji})',
-              style: TellyTypography.labelSmall(color: TellyColors.textTertiary)
+              style: TellyTypography.labelSmall(color: TellyColors.textTertiaryOf(context))
                   .copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
             ),
             const SizedBox(height: 4),

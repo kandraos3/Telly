@@ -104,9 +104,9 @@ class _QuickSwipeDeckModalState extends ConsumerState<QuickSwipeDeckModal> {
         if (!_isMatched && mounted) {
           // Time expired without mutual match
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Time expired! Returning to recommendation list.'),
-              backgroundColor: TellyColors.backgroundCard,
+            SnackBar(
+              content: const Text('Time expired! Returning to recommendation list.'),
+              backgroundColor: TellyColors.cardOf(context),
             ),
           );
           Navigator.of(context).pop();
@@ -155,9 +155,9 @@ class _QuickSwipeDeckModalState extends ConsumerState<QuickSwipeDeckModal> {
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       child: Container(
         decoration: BoxDecoration(
-          color: TellyColors.backgroundSurface,
+          color: TellyColors.surfaceOf(context),
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: TellyColors.borderGlass),
+          border: Border.all(color: TellyColors.borderGlassOf(context)),
         ),
         padding: const EdgeInsets.all(20),
         child: _isMatched ? _buildMatchView() : _buildSwiperView(),
@@ -186,7 +186,7 @@ class _QuickSwipeDeckModalState extends ConsumerState<QuickSwipeDeckModal> {
                   children: [
                     Text(
                       'With ${widget.friendHandle}',
-                      style: TellyTypography.caption(color: TellyColors.textTertiary),
+                      style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)),
                     ),
                     const SizedBox(width: 6),
                     Container(
@@ -195,7 +195,7 @@ class _QuickSwipeDeckModalState extends ConsumerState<QuickSwipeDeckModal> {
                       decoration: BoxDecoration(
                         color: _isPartnerConnected
                             ? TellyColors.phosphorLime
-                            : TellyColors.textTertiary,
+                            : TellyColors.textTertiaryOf(context),
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -205,7 +205,7 @@ class _QuickSwipeDeckModalState extends ConsumerState<QuickSwipeDeckModal> {
                       style: TellyTypography.caption(
                         color: _isPartnerConnected
                             ? TellyColors.phosphorLime
-                            : TellyColors.textTertiary,
+                            : TellyColors.textTertiaryOf(context),
                       ).copyWith(fontSize: 10),
                     ),
                   ],
@@ -215,10 +215,10 @@ class _QuickSwipeDeckModalState extends ConsumerState<QuickSwipeDeckModal> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: _secondsLeft <= 5 ? TellyColors.neonCoral.withValues(alpha: 0.2) : TellyColors.backgroundCard,
+                color: _secondsLeft <= 5 ? TellyColors.neonCoral.withValues(alpha: 0.2) : TellyColors.cardOf(context),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: _secondsLeft <= 5 ? TellyColors.neonCoral : TellyColors.strokeSubtle,
+                  color: _secondsLeft <= 5 ? TellyColors.neonCoral : TellyColors.strokeSubtleOf(context),
                 ),
               ),
               child: Row(
@@ -226,13 +226,13 @@ class _QuickSwipeDeckModalState extends ConsumerState<QuickSwipeDeckModal> {
                   Icon(
                     Icons.timer_outlined,
                     size: 14,
-                    color: _secondsLeft <= 5 ? TellyColors.neonCoral : TellyColors.textSecondary,
+                    color: _secondsLeft <= 5 ? TellyColors.neonCoral : TellyColors.textSecondaryOf(context),
                   ),
                   const SizedBox(width: 4),
                   Text(
                     '${_secondsLeft}s',
                     style: TellyTypography.labelMedium(
-                      color: _secondsLeft <= 5 ? TellyColors.neonCoral : TellyColors.textPrimary,
+                      color: _secondsLeft <= 5 ? TellyColors.neonCoral : TellyColors.textPrimaryOf(context),
                     ).copyWith(fontWeight: FontWeight.w800),
                   ),
                 ],
@@ -249,7 +249,7 @@ class _QuickSwipeDeckModalState extends ConsumerState<QuickSwipeDeckModal> {
               ? Center(
                   child: Text(
                     'No candidates left to swipe!',
-                    style: TellyTypography.bodyMedium(color: TellyColors.textSecondary),
+                    style: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context)),
                   ),
                 )
               : CardSwiper(
@@ -272,7 +272,7 @@ class _QuickSwipeDeckModalState extends ConsumerState<QuickSwipeDeckModal> {
           children: [
             FloatingActionButton.small(
               heroTag: 'pass_btn',
-              backgroundColor: TellyColors.backgroundCard,
+              backgroundColor: TellyColors.cardOf(context),
               foregroundColor: TellyColors.neonCoral,
               onPressed: () => _swiperController.swipe(CardSwiperDirection.left),
               child: const Icon(Icons.close, size: 20),
@@ -281,7 +281,7 @@ class _QuickSwipeDeckModalState extends ConsumerState<QuickSwipeDeckModal> {
             FloatingActionButton(
               heroTag: 'watch_btn',
               backgroundColor: TellyColors.phosphorLime,
-              foregroundColor: TellyColors.backgroundCanvasOled,
+              foregroundColor: Theme.of(context).brightness == Brightness.light ? Colors.white : TellyColors.backgroundCanvasOled,
               onPressed: () => _swiperController.swipe(CardSwiperDirection.right),
               child: const Icon(Icons.check, size: 28),
             ),
@@ -294,12 +294,12 @@ class _QuickSwipeDeckModalState extends ConsumerState<QuickSwipeDeckModal> {
   Widget _buildSwipeCard(CoWatchCandidate item) {
     return Container(
       decoration: BoxDecoration(
-        color: TellyColors.backgroundCard,
+        color: TellyColors.cardOf(context),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: TellyColors.borderGlass),
+        border: Border.all(color: TellyColors.borderGlassOf(context)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.5),
+            color: Colors.black.withValues(alpha: Theme.of(context).brightness == Brightness.light ? 0.08 : 0.5),
             blurRadius: 16,
             offset: const Offset(0, 8),
           ),
@@ -312,7 +312,7 @@ class _QuickSwipeDeckModalState extends ConsumerState<QuickSwipeDeckModal> {
           children: [
             Expanded(
               child: Container(
-                color: TellyColors.backgroundCardAlt,
+                color: TellyColors.surfaceOf(context),
                 // FE-COWATCH-01: the contender's real TMDB poster, the icon only as fallback.
                 child: PosterImage(
                   key: Key('quick_swipe_poster_${item.showId}'),
@@ -324,7 +324,7 @@ class _QuickSwipeDeckModalState extends ConsumerState<QuickSwipeDeckModal> {
                         Icon(
                           item.mediaType == 'movie' ? Icons.movie_outlined : Icons.tv_outlined,
                           size: 64,
-                          color: TellyColors.textTertiary,
+                          color: TellyColors.textTertiaryOf(context),
                         ),
                         const SizedBox(height: 8),
                         Text(
@@ -349,7 +349,7 @@ class _QuickSwipeDeckModalState extends ConsumerState<QuickSwipeDeckModal> {
                     item.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TellyTypography.headlineSmall(color: TellyColors.textPrimary),
+                    style: TellyTypography.headlineSmall(color: TellyColors.textPrimaryOf(context)),
                   ),
                   const SizedBox(height: 4),
                   Row(
@@ -357,7 +357,7 @@ class _QuickSwipeDeckModalState extends ConsumerState<QuickSwipeDeckModal> {
                       if (item.runtimeMinutes != null)
                         Text(
                           '${item.runtimeMinutes} min • ',
-                          style: TellyTypography.caption(color: TellyColors.textSecondary),
+                          style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)),
                         ),
                       Text(
                         '★ ${item.communityScore.toStringAsFixed(1)} Community',
@@ -410,13 +410,13 @@ class _QuickSwipeDeckModalState extends ConsumerState<QuickSwipeDeckModal> {
         const SizedBox(height: 6),
         Text(
           'You and ${widget.friendHandle} both swiped right!',
-          style: TellyTypography.bodyMedium(color: TellyColors.textSecondary),
+          style: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context)),
         ),
         const SizedBox(height: 20),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: TellyColors.backgroundCard,
+            color: TellyColors.cardOf(context),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: TellyColors.phosphorLime.withValues(alpha: 0.3)),
           ),
@@ -425,11 +425,11 @@ class _QuickSwipeDeckModalState extends ConsumerState<QuickSwipeDeckModal> {
             children: [
               Text(
                 matched.title,
-                style: TellyTypography.titleLarge(color: TellyColors.textPrimary).copyWith(fontWeight: FontWeight.w800),
+                style: TellyTypography.titleLarge(color: TellyColors.textPrimaryOf(context)).copyWith(fontWeight: FontWeight.w800),
               ),
               if (details.isNotEmpty) ...[
                 const SizedBox(height: 6),
-                Text(details, style: TellyTypography.caption(color: TellyColors.textSecondary)),
+                Text(details, style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context))),
               ],
             ],
           ),
@@ -446,7 +446,7 @@ class _QuickSwipeDeckModalState extends ConsumerState<QuickSwipeDeckModal> {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: TellyColors.phosphorLime,
-              foregroundColor: TellyColors.backgroundCanvasOled,
+              foregroundColor: Theme.of(context).brightness == Brightness.light ? Colors.white : TellyColors.backgroundCanvasOled,
               minimumSize: const Size.fromHeight(48),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
@@ -460,7 +460,7 @@ class _QuickSwipeDeckModalState extends ConsumerState<QuickSwipeDeckModal> {
           onPressed: () => Navigator.of(context).pop(),
           child: Text(
             'Close',
-            style: TellyTypography.labelMedium(color: TellyColors.textTertiary),
+            style: TellyTypography.labelMedium(color: TellyColors.textTertiaryOf(context)),
           ),
         ),
       ],

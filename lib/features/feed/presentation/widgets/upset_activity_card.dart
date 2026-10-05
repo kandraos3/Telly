@@ -156,7 +156,7 @@ class _UpsetActivityCardState extends State<UpsetActivityCard>
                     Text(
                       activity.relativeTime,
                       style: TellyTypography.caption(
-                        color: TellyColors.textTertiary,
+                        color: TellyColors.textTertiaryOf(context),
                       ).copyWith(fontSize: 11),
                     ),
                     // Compact "Want to Watch" (FE-FEED-01).
@@ -174,7 +174,7 @@ class _UpsetActivityCardState extends State<UpsetActivityCard>
                   children: [
                     CircleAvatar(
                       radius: 14,
-                      backgroundColor: TellyColors.backgroundCard,
+                      backgroundColor: TellyColors.cardOf(context),
                       backgroundImage: (activity.userAvatarUrl != null && activity.userAvatarUrl!.isNotEmpty)
                           ? NetworkImage(activity.userAvatarUrl!)
                           : null,
@@ -193,7 +193,7 @@ class _UpsetActivityCardState extends State<UpsetActivityCard>
                     Flexible(
                       child: RichText(
                         text: TextSpan(
-                          style: TellyTypography.bodyMedium(color: TellyColors.textPrimary),
+                          style: TellyTypography.bodyMedium(color: TellyColors.textPrimaryOf(context)),
                           children: [
                             TextSpan(
                               text: activity.userDisplayName,
@@ -212,9 +212,9 @@ class _UpsetActivityCardState extends State<UpsetActivityCard>
                             const TextSpan(text: ' over '),
                             TextSpan(
                               text: (activity.upsetOverTitleName ?? 'Consensus Titan').toUpperCase(),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: TellyColors.textSecondary,
+                                color: TellyColors.textSecondaryOf(context),
                                 decoration: TextDecoration.lineThrough,
                                 decorationColor: TellyColors.neonCoral,
                               ),
@@ -233,9 +233,9 @@ class _UpsetActivityCardState extends State<UpsetActivityCard>
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: TellyColors.backgroundCard,
+                    color: TellyColors.cardOf(context),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: TellyColors.borderGlass),
+                    border: Border.all(color: TellyColors.borderGlassOf(context)),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -257,7 +257,7 @@ class _UpsetActivityCardState extends State<UpsetActivityCard>
                               width: 60,
                               height: 85,
                               decoration: BoxDecoration(
-                                color: TellyColors.backgroundSurface,
+                                color: TellyColors.surfaceOf(context),
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(color: TellyColors.phosphorLime, width: 2),
                               ),
@@ -333,9 +333,9 @@ class _UpsetActivityCardState extends State<UpsetActivityCard>
                               width: 60,
                               height: 85,
                               decoration: BoxDecoration(
-                                color: TellyColors.backgroundSurface,
+                                color: TellyColors.surfaceOf(context),
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: TellyColors.borderGlass),
+                                border: Border.all(color: TellyColors.borderGlassOf(context)),
                               ),
                               clipBehavior: Clip.antiAlias,
                               child: Stack(
@@ -347,7 +347,7 @@ class _UpsetActivityCardState extends State<UpsetActivityCard>
                                     fallback: Center(
                                       child: Icon(
                                         Icons.tv_rounded,
-                                        color: TellyColors.textTertiary.withValues(alpha: 0.6),
+                                        color: TellyColors.textTertiaryOf(context).withValues(alpha: 0.6),
                                         size: 28,
                                       ),
                                     ),

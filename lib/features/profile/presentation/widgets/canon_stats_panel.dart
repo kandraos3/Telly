@@ -64,9 +64,9 @@ class CanonStatsPanel extends StatelessWidget {
         key: const Key('canon_stats_panel'),
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          color: TellyColors.backgroundSurface,
+          color: TellyColors.surfaceOf(context),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: TellyColors.borderGlass),
+          border: Border.all(color: TellyColors.borderGlassOf(context)),
         ),
         child: Column(
           children: [
@@ -98,14 +98,14 @@ class _StatTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(label.toUpperCase(),
-                style: TellyTypography.caption(color: TellyColors.textTertiary)
+                style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context))
                     .copyWith(fontWeight: FontWeight.w700, letterSpacing: 0.8, fontSize: 10)),
             const SizedBox(height: 4),
             Text(
               value,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TellyTypography.titleMedium(color: TellyColors.textPrimary).copyWith(fontWeight: FontWeight.w700),
+              style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context)).copyWith(fontWeight: FontWeight.w700),
             ),
             if (detail != null)
               Text(detail!,

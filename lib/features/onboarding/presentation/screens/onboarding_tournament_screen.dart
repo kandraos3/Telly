@@ -26,14 +26,14 @@ class OnboardingTournamentScreen extends ConsumerWidget {
     if (state.done) return const StarterCanonReveal();
     if (state.error != null) {
       return Scaffold(
-        backgroundColor: TellyColors.backgroundPrimary,
+        backgroundColor: TellyColors.canvasOf(context),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(state.error!, textAlign: TextAlign.center, style: TellyTypography.bodyLarge()),
+                Text(state.error!, textAlign: TextAlign.center, style: TellyTypography.bodyLarge(color: TellyColors.textPrimaryOf(context))),
                 const SizedBox(height: 16),
                 TellyPrimaryButton(
                   label: 'TRY AGAIN',
@@ -110,7 +110,7 @@ class _StarterCanonRevealState extends ConsumerState<StarterCanonReveal> with Si
     final label = canon == 'movie' ? 'Top Movies' : 'Top Series & Anime';
 
     return Scaffold(
-      backgroundColor: TellyColors.backgroundPrimary,
+      backgroundColor: TellyColors.canvasOf(context),
       body: Stack(
         children: [
           SafeArea(
@@ -119,7 +119,7 @@ class _StarterCanonRevealState extends ConsumerState<StarterCanonReveal> with Si
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text('Your Dual Canons, Unveiled', style: TellyTypography.displayXL(), textAlign: TextAlign.center),
+                  Text('Your Dual Canons, Unveiled', style: TellyTypography.displayXL(color: TellyColors.textPrimaryOf(context)), textAlign: TextAlign.center),
                   const SizedBox(height: 16),
                   Row(
                     children: [
@@ -142,7 +142,7 @@ class _StarterCanonRevealState extends ConsumerState<StarterCanonReveal> with Si
                   Expanded(
                     child: top.isEmpty
                         ? Center(
-                            child: Text('Nothing ranked in this canon yet.', style: TellyTypography.bodyMedium()),
+                            child: Text('Nothing ranked in this canon yet.', style: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context))),
                           )
                         : ListView(
                             children: [for (final e in top) _RevealRow(entry: e)],
@@ -159,7 +159,7 @@ class _StarterCanonRevealState extends ConsumerState<StarterCanonReveal> with Si
                     key: const Key('share_starter_canon_button'),
                     onPressed: top.isEmpty ? null : () => _share(top, label),
                     child: Text('Share to Instagram Story',
-                        style: TellyTypography.labelMedium(color: TellyColors.textSecondary)),
+                        style: TellyTypography.labelMedium(color: TellyColors.textSecondaryOf(context))),
                   ),
                 ],
               ),
@@ -197,14 +197,14 @@ class _CanonToggle extends StatelessWidget {
           alignment: Alignment.center,
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
           decoration: BoxDecoration(
-            color: selected ? TellyColors.phosphorLime : TellyColors.backgroundSurface,
+            color: selected ? TellyColors.phosphorLime : TellyColors.surfaceOf(context),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: selected ? TellyColors.phosphorLime : TellyColors.strokeSubtle),
+            border: Border.all(color: selected ? TellyColors.phosphorLime : TellyColors.strokeSubtleOf(context)),
           ),
           child: Text(
             label,
             textAlign: TextAlign.center,
-            style: TellyTypography.labelMedium(color: selected ? Colors.black : TellyColors.textSecondary),
+            style: TellyTypography.labelMedium(color: selected ? Colors.black : TellyColors.textSecondaryOf(context)),
           ),
         ),
       ),
@@ -224,15 +224,15 @@ class _RevealRow extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: TellyColors.backgroundSurface,
+        color: TellyColors.cardOf(context),
         borderRadius: BorderRadius.circular(14),
         // #1 gets the gold-foil border (features/01 Screen 5).
-        border: Border.all(color: first ? TellyColors.warmAmber : TellyColors.strokeSubtle, width: first ? 2 : 1),
+        border: Border.all(color: first ? TellyColors.warmAmber : TellyColors.strokeSubtleOf(context), width: first ? 2 : 1),
       ),
       child: Row(
         children: [
-          SizedBox(width: 36, child: Text('#${entry.rankPosition}', style: TellyTypography.scoreChip())),
-          Expanded(child: Text(entry.title, style: TellyTypography.titleMedium(), overflow: TextOverflow.ellipsis)),
+          SizedBox(width: 36, child: Text('#${entry.rankPosition}', style: TellyTypography.scoreChip(color: TellyColors.textSecondaryOf(context)))),
+          Expanded(child: Text(entry.title, style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context)), overflow: TextOverflow.ellipsis)),
           Text(
             entry.calculatedScore.toStringAsFixed(2),
             style: TellyTypography.scoreMono(color: first ? TellyColors.warmAmber : TellyColors.phosphorLime),
