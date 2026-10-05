@@ -28,8 +28,9 @@ abstract final class Routes {
   static String profile(String handle) => '/u/$handle'; // SCR-15
   static String twoToWatch(String handle) => '/u/$handle/two-to-watch'; // SCR-16
   static const cowatch = '/cowatch'; // SCR-16
-  static String cowatchWithTitle(int titleId, {String? friendHandle}) =>
-      '/cowatch?titleId=$titleId${friendHandle != null ? '&friend=$friendHandle' : ''}';
+  static String cowatchWithTitle(int titleId, {String? mediaType, String? friendHandle}) =>
+      '/cowatch?titleId=$titleId${mediaType != null ? '&mediaType=$mediaType' : ''}'
+      '${friendHandle != null ? '&friend=$friendHandle' : ''}';
   static const squads = '/squads'; // SCR-17 list
   static String squad(String id) => '/squads/$id'; // SCR-17
   static const graveyard = '/canon/graveyard'; // SCR-18

@@ -17,6 +17,8 @@ import 'package:telly_app/features/auth/data/auth_repository.dart';
 import 'package:telly_app/features/auth/domain/user_profile.dart';
 import 'package:telly_app/features/auth/presentation/screens/auth_screen.dart';
 import 'package:telly_app/features/auth/presentation/screens/handle_reservation_screen.dart';
+import 'package:telly_app/features/cowatch/data/co_watch_repository.dart';
+import 'package:telly_app/features/cowatch/domain/two_to_watch_engine.dart';
 import 'package:telly_app/features/cowatch/presentation/screens/two_to_watch_screen.dart';
 import 'package:telly_app/features/discovery/data/discovery_repository.dart';
 import 'package:telly_app/features/discovery/presentation/screens/explore_discover_screen.dart';
@@ -51,6 +53,7 @@ import 'package:telly_app/features/squads/presentation/screens/squads_list_scree
 import 'package:telly_app/features/title_detail/domain/title_detail_models.dart';
 import 'package:telly_app/features/title_detail/presentation/screens/show_detail_screen.dart';
 
+import '../fakes/fake_co_watch_repository.dart';
 import '../fakes/fake_auth_repository.dart';
 import '../fakes/fake_graveyard_repository.dart';
 import '../fakes/fake_onboarding_repository.dart';
@@ -207,6 +210,15 @@ void main() {
       hapticsEnabledProvider.overrideWith((ref) => false),
       storyShareServiceProvider.overrideWithValue(FakeStoryShareService()),
       discoveryRepositoryProvider.overrideWithValue(FakeDiscoveryRepository()),
+      coWatchRepositoryProvider.overrideWithValue(FakeCoWatchRepository(
+        partners: const [CoWatchPartner(userId: 'u-jordan', username: 'jordan', displayName: 'Jordan M.')],
+        pools: {
+          'movie': const [
+            CoWatchCandidate(showId: 496243, title: 'Parasite', mediaType: 'movie', network: 'Neon', runtimeMinutes: 132),
+            CoWatchCandidate(showId: 157336, title: 'Interstellar', mediaType: 'movie', network: 'Paramount'),
+          ],
+        },
+      )),
       ...overrides,
     ];
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:telly_app/core/theme/telly_theme.dart';
+import 'package:telly_app/core/widgets/poster_image.dart';
 import 'package:telly_app/features/cowatch/data/co_watch_repository.dart';
 import 'package:telly_app/features/cowatch/domain/two_to_watch_engine.dart';
 import 'package:telly_app/features/cowatch/presentation/widgets/quick_swipe_deck_modal.dart';
@@ -109,7 +110,7 @@ void main() {
       // Mutual match triggered!
       expect(find.text('IT\'S A MATCH! 🍿'), findsOneWidget);
       expect(find.text('You and @maya both swiped right!'), findsOneWidget);
-      expect(find.text('▶ Watch on MAX'), findsOneWidget);
+      expect(find.text('▶ Watch on Max'), findsOneWidget);
 
       sessionClient.dispose();
     });
@@ -164,6 +165,45 @@ void main() {
       await tester.pump();
 
       expect(find.text('Connected'), findsOneWidget);
+
+      sessionClient.dispose();
+    });
+
+    testWidgets('FE-COWATCH-01: contender cards render the real TMDB poster', (tester) async {
+      final sessionClient = FakeCoWatchSessionClient(sessionId: 'test-session', currentUserId: 'my-id');
+      await tester.pumpWidget(createTestWidget(
+        sessionClient: sessionClient,
+        candidates: const [
+          CoWatchCandidate(showId: 496243, title: 'Parasite', mediaType: 'movie', network: 'Neon', posterPath: '/parasite.jpg'),
+          CoWatchCandidate(showId: 129, title: 'Spirited Away', mediaType: 'movie', network: 'Ghibli', posterPath: '/spirited.jpg'),
+        ],
+      ));
+      await tester.pump();
+
+      final poster = tester.widget<PosterImage>(find.byKey(const Key('quick_swipe_poster_496243')));
+      expect(poster.posterPath, '/parasite.jpg');
+      expect(poster.fit, BoxFit.cover);
+
+      sessionClient.dispose();
+    });
+
+    testWidgets('FE-COWATCH-01: a match never invents a service or runtime', (tester) async {
+      final sessionClient = FakeCoWatchSessionClient(sessionId: 'test-session', currentUserId: 'my-id');
+      await tester.pumpWidget(createTestWidget(
+        sessionClient: sessionClient,
+        candidates: const [CoWatchCandidate(showId: 7, title: 'Indie Gem', mediaType: 'movie', network: 'A24')],
+      ));
+      await tester.pump();
+      sessionClient.simulatePartnerSwipe(
+        const CoWatchSwipeEvent(userId: 'maya-id', titleId: 7, direction: SwipeDirection.right),
+      );
+      await tester.tap(find.byIcon(Icons.check));
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(find.text("IT'S A MATCH! 🍿"), findsOneWidget);
+      expect(find.textContaining('Watch on'), findsNothing);
+      expect(find.textContaining('120m'), findsNothing);
 
       sessionClient.dispose();
     });

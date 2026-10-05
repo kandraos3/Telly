@@ -75,6 +75,15 @@ class StreamingPlatform {
       logoUrl: 'assets/icons/providers/crunchyroll.png',
     ),
   ];
+
+  /// Display name for a platform id (`apple_tv_plus` → `Apple TV+`); unknown ids are
+  /// title-cased (`paramount_plus` → `Paramount Plus`).
+  static String labelFor(String id) {
+    for (final p in standardPlatforms) {
+      if (p.id == id) return p.displayName;
+    }
+    return id.split('_').map((w) => w.isEmpty ? w : '${w[0].toUpperCase()}${w.substring(1)}').join(' ');
+  }
 }
 
 class ShowStreamingAvailability {

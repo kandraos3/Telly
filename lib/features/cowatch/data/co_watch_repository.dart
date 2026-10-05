@@ -260,11 +260,63 @@ class SupabaseCoWatchSessionClient implements CoWatchSessionClient {
   }
 }
 
+/// Someone I can co-watch with: a person I follow (`get_co_watch_partners`, FE-COWATCH-01).
+class CoWatchPartner {
+  final String userId;
+  final String username;
+  final String displayName;
+  final String? avatarUrl;
+
+  const CoWatchPartner({
+    required this.userId,
+    required this.username,
+    required this.displayName,
+    this.avatarUrl,
+  });
+
+  String get label => displayName.isEmpty ? '@$username' : displayName;
+
+  factory CoWatchPartner.fromJson(Map<String, dynamic> json) => CoWatchPartner(
+        userId: json['id'] as String,
+        username: (json['username'] as String?) ?? '',
+        displayName: (json['display_name'] as String?) ?? '',
+        avatarUrl: json['avatar_url'] as String?,
+      );
+}
+
+/// Streaming services both of us subscribe to (`get_shared_streaming_platforms`).
+class SharedStreaming {
+  final Set<String> shared;
+
+  /// Whether each side has set up any services. When either hasn't, the overlap says
+  /// nothing about what we can watch, so the streaming filter is skipped.
+  final bool mineSet;
+  final bool partnerSet;
+
+  const SharedStreaming({this.shared = const {}, this.mineSet = false, this.partnerSet = false});
+
+  static const unknown = SharedStreaming();
+
+  bool get known => mineSet && partnerSet;
+
+  factory SharedStreaming.fromJson(Map<String, dynamic> json) => SharedStreaming(
+        shared: {for (final p in (json['shared'] as List? ?? const [])) p.toString()},
+        mineSet: json['mine_set'] == true,
+        partnerSet: json['partner_set'] == true,
+      );
+}
+
 abstract interface class CoWatchRepository {
   Future<List<CoWatchCandidate>> fetchCandidates({
     required String partnerId,
     required String mediaType,
   });
+
+  /// People I follow, for the "Who's watching?" step (FE-COWATCH-01).
+  Future<List<CoWatchPartner>> fetchPartners();
+
+  /// Services both of us subscribe to; [SharedStreaming.unknown] when unavailable.
+  Future<SharedStreaming> fetchSharedStreaming(String partnerId);
 
   CoWatchSessionClient createSessionClient({
     required String sessionId,
@@ -295,6 +347,18 @@ class SupabaseCoWatchRepository implements CoWatchRepository {
     return response
         .map((row) => CoWatchCandidate.fromJson(Map<String, dynamic>.from(row as Map)))
         .toList();
+  }
+
+  @override
+  Future<List<CoWatchPartner>> fetchPartners() async {
+    final rows = await _client.rpc('get_co_watch_partners') as List;
+    return [for (final r in rows) CoWatchPartner.fromJson(Map<String, dynamic>.from(r as Map))];
+  }
+
+  @override
+  Future<SharedStreaming> fetchSharedStreaming(String partnerId) async {
+    final res = await _client.rpc('get_shared_streaming_platforms', params: {'p_partner_id': partnerId});
+    return res is Map ? SharedStreaming.fromJson(Map<String, dynamic>.from(res)) : SharedStreaming.unknown;
   }
 
   @override

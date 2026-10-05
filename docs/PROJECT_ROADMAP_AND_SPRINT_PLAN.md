@@ -2077,6 +2077,18 @@ Tickets ingested through the `issue-manager` skill. Each entry mirrors its GitHu
 - **Testing & Verification**:
   - [x] Widget tests: invite by handle, invite by email, unknown / malformed / existing-member errors with Add disabled, debounce. Default canon and order. Repository request-shape test; input-shape unit tests. pgTAP `016_squad_invitee_lookup.test.sql` (runs in CI).
 
+#### `FE-COWATCH-01`: Two-to-Watch Streamlined Flow, Quick Swipe Posters & Real Title Data (#27)
+- **Spec Reference**: [**`features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md) §3, §3.2; `SCR-16`
+- **Granular Tasks**:
+  - [x] Migration `20261010001400_co_watch_context.sql`: `get_co_watch_partners()` (accepted follows) and `get_shared_streaming_platforms(p_partner_id)`, which returns only the subscription intersection plus whether each side has set any services up.
+  - [x] `TwoToWatchController` (`NotifierProvider.autoDispose.family`) replaces the screen's `setState` business state. It resolves the friend (route args, or handle via `lookup_profile_card`), loads the real taste match per canon, the shared-service overlap and per-canon `get_co_watch_candidates` pools, and pins a pre-selected title loaded from `titles`.
+  - [x] Removed the hardcoded fallback titles (ids 101–203 behind the mock "Show Detail (tv/201)"), the fake "Pre-Selected Title", the hardcoded provider sets, and the 88% / 92% / 84% match defaults. The router no longer passes a handle or `'friend'` as a user id. Title Detail's Co-Watch passes the title's media type.
+  - [x] SCR-16 is three step cards: 1 Who's watching (friend picker when opened without one, swap friend), 2 The mood (format, runtime, vibes, shared services), 3 Tonight's top picks (poster, real score, reason, "Watch on <service>"; tap opens the real SCR-08). Loading, error and empty states replace mock data.
+  - [x] Quick Swipe cards render the real TMDB poster; the match view no longer invents a `max` provider or a 120m runtime, and service ids show as display names (`StreamingPlatform.labelFor`).
+  - [ ] Apply the migration to `telly-prod` via `supabase-deploy` → `push` *(not deployed in this session)*.
+- **Testing & Verification**:
+  - [x] Widget tests: three steps with real match and picks, poster paths, pick → `/title/movie/496243`, format switch, friend picker, handle resolution, partner swap, no follows, shared-service filtering, empty and error states, pinned pre-selected title, Quick Swipe opening. Quick Swipe poster and no-invented-service tests; a11y audit with the fake pool. pgTAP `017_co_watch_context.test.sql` (runs in CI).
+
 ---
 
 ## 🏆 Sprint Deliverables Summary Matrix

@@ -2,249 +2,56 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:telly_app/core/router/routes.dart';
-import 'package:telly_app/core/network/supabase_providers.dart';
 import 'package:telly_app/core/services/streaming_deep_link_factory.dart';
 import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/theme/telly_typography.dart';
+import 'package:telly_app/core/widgets/poster_image.dart';
 import 'package:telly_app/core/widgets/telly_neon_badge.dart';
-import 'package:telly_app/core/widgets/telly_primary_button.dart';
+import 'package:telly_app/features/auth/data/auth_repository.dart';
 import 'package:telly_app/features/cowatch/data/co_watch_repository.dart';
 import 'package:telly_app/features/cowatch/domain/two_to_watch_engine.dart';
+import 'package:telly_app/features/cowatch/presentation/controllers/two_to_watch_controller.dart';
 import 'package:telly_app/features/cowatch/presentation/widgets/quick_swipe_deck_modal.dart';
+import 'package:telly_app/features/queue/domain/streaming_models.dart';
 
-/// SCR-16: "Two-to-Watch" Co-Watching Decider Hub.
-/// Conforms to `FE-404`, `FE-405` and
-/// `docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md` §16.
-class TwoToWatchScreen extends ConsumerStatefulWidget {
-  final String friendId;
-  final String friendHandle;
-  final String friendDisplayName;
-  final int matchPercentage;
-  final int? movieMatchPercentage;
-  final int? seriesMatchPercentage;
-  final List<CoWatchCandidate>? initialCandidates;
+/// SCR-16: "Two-to-Watch" Co-Watching Decider.
+///
+/// FE-COWATCH-01 streamlines the hub into three steps (Who's watching → The mood →
+/// Tonight's picks) backed by [TwoToWatchController]: real follows, the real shared
+/// streaming overlap, real taste match and the real `get_co_watch_candidates` pool.
+/// Conforms to `docs/features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md` §3.
+class TwoToWatchScreen extends ConsumerWidget {
+  final String? friendId;
+  final String? friendHandle;
+  final String? friendDisplayName;
   final int? preselectedTitleId;
+  final String? preselectedMediaType;
 
   const TwoToWatchScreen({
     super.key,
-    required this.friendId,
-    required this.friendHandle,
-    required this.friendDisplayName,
-    this.matchPercentage = 88,
-    this.movieMatchPercentage = 92,
-    this.seriesMatchPercentage = 84,
-    this.initialCandidates,
+    this.friendId,
+    this.friendHandle,
+    this.friendDisplayName,
     this.preselectedTitleId,
+    this.preselectedMediaType,
   });
 
-  @override
-  ConsumerState<TwoToWatchScreen> createState() => _TwoToWatchScreenState();
-}
-
-class _TwoToWatchScreenState extends ConsumerState<TwoToWatchScreen> {
-  CoWatchFormat _selectedFormat = CoWatchFormat.movieNight;
-  RuntimeBudget? _selectedRuntimeBudget;
-  late final Set<String> _userAProviders;
-  late final Set<String> _userBProviders;
-  late Set<String> _activeSharedProviders;
-  final Set<String> _selectedVibes = {};
-  List<ScoredRecommendation> _recommendations = [];
-  bool _hasSearched = false;
-
-  late List<CoWatchCandidate> _allCandidates;
-
-  static const List<CoWatchCandidate> _defaultFallbackCandidates = [
-    CoWatchCandidate(
-      showId: 101,
-      title: 'Parasite',
-      mediaType: 'movie',
-      runtimeMinutes: 132,
-      network: 'Neon',
-      availableProviders: ['max'],
-      vibeTags: ['thriller', 'festival_darling'],
-      inWatchlistA: true,
-      inWatchlistB: true,
-      communityScore: 9.7,
-      overview: 'Greed and class discrimination threaten the newly formed symbiotic relationship.',
-    ),
-    CoWatchCandidate(
-      showId: 102,
-      title: 'Past Lives',
-      mediaType: 'movie',
-      runtimeMinutes: 106,
-      network: 'A24',
-      availableProviders: ['netflix'],
-      vibeTags: ['festival_darling'],
-      inWatchlistA: true,
-      inWatchlistB: false,
-      ratingB: 9.4,
-      communityScore: 9.2,
-      overview: 'Nora and Hae Sung, two deeply connected childhood friends, are reunited.',
-    ),
-    CoWatchCandidate(
-      showId: 103,
-      title: 'Run Lola Run',
-      mediaType: 'movie',
-      runtimeMinutes: 81,
-      network: 'Sony',
-      availableProviders: ['max'],
-      vibeTags: ['thriller'],
-      communityScore: 8.4,
-      overview: 'After a botched money delivery, Lola has 20 minutes to find 100,000 marks.',
-    ),
-    CoWatchCandidate(
-      showId: 201,
-      title: 'Chernobyl',
-      mediaType: 'tv',
-      network: 'HBO',
-      availableProviders: ['max'],
-      vibeTags: ['thriller', 'miniseries'],
-      inWatchlistA: true,
-      inWatchlistB: true,
-      communityScore: 9.8,
-      overview: 'In April 1986, an explosion at the Chernobyl nuclear power plant occurs.',
-    ),
-    CoWatchCandidate(
-      showId: 202,
-      title: 'Severance',
-      mediaType: 'tv',
-      network: 'Apple TV+',
-      availableProviders: ['apple_tv_plus'],
-      vibeTags: ['sci_fi', 'thriller'],
-      ratingA: 9.5,
-      ratingB: 9.5,
-      communityScore: 9.4,
-      overview: 'Mark leads a team whose memories have been surgically divided.',
-    ),
-    CoWatchCandidate(
-      showId: 203,
-      title: 'The Bear',
-      mediaType: 'tv',
-      network: 'FX',
-      availableProviders: ['hulu'],
-      vibeTags: ['comedy', 'prestige'],
-      communityScore: 9.1,
-      overview: 'A young chef from the fine dining world comes home to Chicago.',
-    ),
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    // Default shared streaming providers: Netflix, Max, Apple TV+
-    _userAProviders = {'netflix', 'max', 'apple_tv_plus', 'prime_video'};
-    _userBProviders = {'netflix', 'max', 'apple_tv_plus', 'hulu'};
-    _activeSharedProviders = TwoToWatchEngine.computeSharedProviders(
-      providersA: _userAProviders,
-      providersB: _userBProviders,
-    );
-
-    _allCandidates = List.of(widget.initialCandidates ?? _defaultFallbackCandidates);
-    if (widget.preselectedTitleId != null) {
-      final exists = _allCandidates.any((c) => c.showId == widget.preselectedTitleId);
-      if (!exists) {
-        _allCandidates.insert(
-          0,
-          CoWatchCandidate(
-            showId: widget.preselectedTitleId!,
-            title: 'Pre-Selected Title',
-            mediaType: 'movie',
-            network: 'Telly',
-            availableProviders: _activeSharedProviders.toList(),
-            communityScore: 9.5,
-            inWatchlistA: true,
-            inWatchlistB: true,
-          ),
-        );
-      }
-    }
-    _calculateRecommendations();
-
-    if (widget.initialCandidates == null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _loadRemoteCandidates();
-      });
-    }
-  }
-
-  Future<void> _loadRemoteCandidates() async {
-    try {
-      final repo = ref.read(coWatchRepositoryProvider);
-      final remote = await repo.fetchCandidates(
-        partnerId: widget.friendId,
-        mediaType: _selectedFormat.mediaType,
+  TwoToWatchArgs get _args => (
+        friendId: friendId,
+        friendHandle: friendHandle,
+        friendDisplayName: friendDisplayName,
+        titleId: preselectedTitleId,
+        titleMediaType: preselectedMediaType,
       );
-      if (mounted && remote.isNotEmpty) {
-        setState(() {
-          _allCandidates = remote;
-          _calculateRecommendations();
-        });
-      }
-    } catch (_) {
-      // Offline fallback already present in _allCandidates
-    }
-  }
-
-  void _calculateRecommendations() {
-    final scored = TwoToWatchEngine.scoreCandidates(
-      candidates: _allCandidates,
-      activeSharedProviders: _activeSharedProviders,
-      format: _selectedFormat,
-      runtimeBudget: _selectedRuntimeBudget,
-      selectedVibes: _selectedVibes.toList(),
-      tasteMatchPercentage: widget.matchPercentage,
-    );
-
-    if (widget.preselectedTitleId != null) {
-      scored.sort((a, b) {
-        if (a.candidate.showId == widget.preselectedTitleId) return -1;
-        if (b.candidate.showId == widget.preselectedTitleId) return 1;
-        return b.score.compareTo(a.score);
-      });
-    }
-
-    setState(() {
-      _recommendations = scored;
-      _hasSearched = true;
-    });
-  }
-
-  void _selectFormat(CoWatchFormat format) {
-    if (_selectedFormat == format) return;
-    setState(() {
-      _selectedFormat = format;
-      _calculateRecommendations();
-    });
-    if (widget.initialCandidates == null) {
-      _loadRemoteCandidates();
-    }
-  }
-
-  void _openQuickSwipeMode() {
-    final formatCandidates = _allCandidates.where((c) => c.mediaType == _selectedFormat.mediaType).toList();
-    String? currentUserId;
-    try {
-      currentUserId = ref.read(supabaseClientProvider).auth.currentUser?.id;
-    } catch (_) {}
-    final myId = currentUserId ?? 'me';
-    final sorted = [myId, widget.friendId]..sort();
-    final sessionId = 'cowatch-${sorted.join('-')}';
-
-    showDialog(
-      context: context,
-      barrierColor: Colors.black87,
-      builder: (ctx) => QuickSwipeDeckModal(
-        candidates: formatCandidates,
-        friendHandle: '@${widget.friendHandle}',
-        friendId: widget.friendId,
-        sessionId: sessionId,
-        sharedProviders: _activeSharedProviders,
-      ),
-    );
-  }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final provider = twoToWatchProvider(_args);
+    final state = ref.watch(provider);
+    final controller = ref.read(provider.notifier);
+    final picks = state.recommendations.take(3).toList();
+    final canSwipe = state.partner != null && state.recommendations.length >= 2;
+
     return Scaffold(
       backgroundColor: TellyColors.backgroundCanvasOled,
       appBar: AppBar(
@@ -253,102 +60,95 @@ class _TwoToWatchScreenState extends ConsumerState<TwoToWatchScreen> {
         leading: IconButton(
           tooltip: 'Close',
           icon: const Icon(Icons.close, color: TellyColors.textPrimary),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => Navigator.of(context).maybePop(),
         ),
         title: Text(
           'TWO-TO-WATCH',
           style: TellyTypography.titleMedium(color: TellyColors.textPrimary).copyWith(letterSpacing: 1.2),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.bolt, color: TellyColors.phosphorLime),
-            tooltip: '15s Quick Swipe Mode',
-            onPressed: _openQuickSwipeMode,
-          ),
-        ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (widget.preselectedTitleId != null)
-              Container(
-                key: const Key('cowatch_preselected_badge'),
-                margin: const EdgeInsets.only(bottom: 16),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                decoration: BoxDecoration(
-                  color: TellyColors.electricViolet.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: TellyColors.electricViolet.withValues(alpha: 0.4)),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.movie_filter_outlined, color: TellyColors.electricViolet, size: 20),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        'Pre-selected Title (#${widget.preselectedTitleId}) prioritized for co-watching',
-                        style: TellyTypography.bodyMedium(color: TellyColors.textPrimary)
-                            .copyWith(fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-            // 1. Who's on the Couch Header
-            _buildCouchHeader(),
-            const SizedBox(height: 20),
-
-            // 2. Format Selection (Movie Night vs Series)
-            _buildFormatSelector(),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+        children: [
+          if (state.preselected != null) ...[
+            _PreselectedBanner(candidate: state.preselected!),
             const SizedBox(height: 16),
-
-            // 3. Runtime Budget Filters (Active for Movie Night)
-            if (_selectedFormat == CoWatchFormat.movieNight) ...[
-              _buildRuntimeBudgetSelector(),
-              const SizedBox(height: 16),
-            ],
-
-            // 4. Shared Streaming Services
-            _buildStreamingFilter(),
-            const SizedBox(height: 16),
-
-            // 5. What's the Vibe? Chips
-            _buildVibeSelector(),
-            const SizedBox(height: 24),
-
-            // 6. Action Button: Find What to Watch
-            TellyPrimaryButton(
-              label: '🎲 FIND WHAT TO WATCH TONIGHT',
-              onPressed: _calculateRecommendations,
-            ),
-            const SizedBox(height: 12),
-
-            // Secondary Quick Swipe Trigger
-            Center(
-              child: TextButton.icon(
-                onPressed: _openQuickSwipeMode,
-                icon: const Icon(Icons.swipe, size: 16, color: TellyColors.phosphorLime),
-                label: Text(
-                  'Can\'t agree? Try 15-Second Quick Swipe Mode',
-                  style: TellyTypography.caption(color: TellyColors.phosphorLime).copyWith(fontWeight: FontWeight.w700),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // 7. Results Section
-            if (_hasSearched) _buildRecommendationsSection(),
-            const SizedBox(height: 32),
           ],
-        ),
+          _StepCard(
+            key: const Key('cowatch_step_couch'),
+            step: 1,
+            title: "WHO'S WATCHING?",
+            done: state.partner != null,
+            child: _CouchStep(state: state, onPick: (p) => controller.selectPartner(p)),
+          ),
+          const SizedBox(height: 12),
+          _StepCard(
+            key: const Key('cowatch_step_mood'),
+            step: 2,
+            title: 'WHAT ARE YOU IN THE MOOD FOR?',
+            done: state.partner != null,
+            child: _MoodStep(state: state, controller: controller),
+          ),
+          const SizedBox(height: 12),
+          _StepCard(
+            key: const Key('cowatch_step_picks'),
+            step: 3,
+            title: "TONIGHT'S TOP PICKS",
+            done: picks.isNotEmpty,
+            child: _PicksStep(state: state, picks: picks),
+          ),
+          if (canSwipe) ...[
+            const SizedBox(height: 16),
+            OutlinedButton.icon(
+              key: const Key('cowatch_quick_swipe_btn'),
+              onPressed: () => _openQuickSwipe(context, ref, state),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: TellyColors.phosphorLime,
+                side: BorderSide(color: TellyColors.phosphorLime.withValues(alpha: 0.5)),
+                minimumSize: const Size.fromHeight(48),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              icon: const Icon(Icons.swipe, size: 18),
+              label: Text(
+                "Can't agree? 15-second Quick Swipe",
+                style: TellyTypography.labelMedium(color: TellyColors.phosphorLime).copyWith(fontWeight: FontWeight.w800),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
 
-  Widget _buildCouchHeader() {
+  void _openQuickSwipe(BuildContext context, WidgetRef ref, TwoToWatchState state) {
+    final partner = state.partner!;
+    final myId = ref.read(authRepositoryProvider).currentUserId ?? 'me';
+    final sorted = [myId, partner.userId]..sort();
+    showDialog<void>(
+      context: context,
+      barrierColor: Colors.black87,
+      builder: (_) => QuickSwipeDeckModal(
+        // Spec 05 §3.2: both phones get the same five cards.
+        candidates: [for (final r in state.recommendations.take(5)) r.candidate],
+        friendHandle: '@${partner.username}',
+        friendId: partner.userId,
+        sessionId: 'cowatch-${sorted.join('-')}',
+        sharedProviders: state.streaming.known ? state.activeProviders : const {},
+      ),
+    );
+  }
+}
+
+class _StepCard extends StatelessWidget {
+  const _StepCard({super.key, required this.step, required this.title, required this.done, required this.child});
+
+  final int step;
+  final String title;
+  final bool done;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -359,419 +159,539 @@ class _TwoToWatchScreenState extends ConsumerState<TwoToWatchScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'WHO\'S ON THE COUCH?',
-            style: TellyTypography.labelSmall(
-              color: TellyColors.textTertiary,
-            ).copyWith(fontWeight: FontWeight.w700, letterSpacing: 1.0),
-          ),
-          const SizedBox(height: 10),
           Row(
             children: [
-              const CircleAvatar(
-                radius: 18,
-                backgroundColor: TellyColors.backgroundCard,
-                child: Text('Y', style: TextStyle(color: TellyColors.textPrimary, fontWeight: FontWeight.bold)),
-              ),
-              const SizedBox(width: 8),
-              const Text('You', style: TextStyle(color: TellyColors.textPrimary, fontWeight: FontWeight.w700)),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8),
-                child: Text('+', style: TextStyle(color: TellyColors.textPrimary, fontSize: 16)),
-              ),
-              CircleAvatar(
-                radius: 18,
-                backgroundColor: TellyColors.backgroundCard,
+              Container(
+                width: 22,
+                height: 22,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: done ? TellyColors.phosphorLime : Colors.transparent,
+                  border: Border.all(color: done ? TellyColors.phosphorLime : TellyColors.strokeStrong),
+                ),
                 child: Text(
-                  widget.friendDisplayName.isNotEmpty ? widget.friendDisplayName[0] : 'F',
-                  style: const TextStyle(color: TellyColors.phosphorLime, fontWeight: FontWeight.bold),
+                  '$step',
+                  style: TellyTypography.caption(
+                    color: done ? TellyColors.backgroundCanvasOled : TellyColors.textTertiary,
+                  ).copyWith(fontWeight: FontWeight.w900),
                 ),
               ),
-              const SizedBox(width: 8),
-              Text(
-                widget.friendDisplayName,
-                style: const TextStyle(color: TellyColors.textPrimary, fontWeight: FontWeight.w700),
-              ),
-              const Spacer(),
-              TellyNeonBadge(
-                label: '${widget.matchPercentage}% MATCH',
-                variant: TellyBadgeVariant.tasteMatch,
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  title,
+                  style: TellyTypography.labelSmall(color: TellyColors.textPrimary)
+                      .copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
+                ),
               ),
             ],
+          ),
+          const SizedBox(height: 14),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+class _PreselectedBanner extends StatelessWidget {
+  const _PreselectedBanner({required this.candidate});
+
+  final CoWatchCandidate candidate;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: const Key('cowatch_preselected_badge'),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: TellyColors.electricViolet.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: TellyColors.electricViolet.withValues(alpha: 0.4)),
+      ),
+      child: Row(
+        children: [
+          _Poster(path: candidate.posterPath, mediaType: candidate.mediaType, width: 32),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text.rich(
+              TextSpan(children: [
+                const TextSpan(text: 'Deciding on '),
+                TextSpan(text: candidate.title, style: const TextStyle(fontWeight: FontWeight.w800)),
+                const TextSpan(text: '? It stays at the top of your picks.'),
+              ]),
+              style: TellyTypography.caption(color: TellyColors.textPrimary),
+            ),
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildFormatSelector() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'FORMAT SELECTION',
-          style: TellyTypography.labelSmall(
-            color: TellyColors.textTertiary,
-          ).copyWith(fontWeight: FontWeight.w700, letterSpacing: 1.0),
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: _buildFormatPill(
-                format: CoWatchFormat.movieNight,
-                icon: '🎬',
-                title: 'Movie Night',
-                subtitle: 'Single sitting',
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildFormatPill(
-                format: CoWatchFormat.series,
-                icon: '📺',
-                title: 'TV Series',
-                subtitle: 'Multi-episode run',
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
+class _CouchStep extends StatelessWidget {
+  const _CouchStep({required this.state, required this.onPick});
 
-  Widget _buildFormatPill({
-    required CoWatchFormat format,
-    required String icon,
-    required String title,
-    required String subtitle,
-  }) {
-    final isSelected = _selectedFormat == format;
-    return InkWell(
-      onTap: () => _selectFormat(format),
-      borderRadius: BorderRadius.circular(14),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? TellyColors.phosphorLime.withValues(alpha: 0.12) : TellyColors.backgroundSurface,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: isSelected ? TellyColors.phosphorLime : TellyColors.borderGlass,
-            width: isSelected ? 1.5 : 1,
+  final TwoToWatchState state;
+  final ValueChanged<CoWatchPartner> onPick;
+
+  @override
+  Widget build(BuildContext context) {
+    final partner = state.partner;
+    if (state.resolvingPartner) {
+      return const _Loading();
+    }
+    if (partner != null) {
+      final match = state.matchPercentage;
+      return Row(
+        children: [
+          const _Avatar(label: 'You'),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 6),
+            child: Icon(Icons.add, size: 14, color: TellyColors.textTertiary),
           ),
-        ),
-        child: Row(
-          children: [
-            Text(icon, style: const TextStyle(fontSize: 20)),
-            const SizedBox(width: 10),
-            Column(
+          _Avatar(label: partner.label, url: partner.avatarUrl, accent: true),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
-                  style: TellyTypography.labelLarge(
-                    color: isSelected ? TellyColors.phosphorLime : TellyColors.textPrimary,
-                  ).copyWith(fontWeight: FontWeight.w700),
+                  partner.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TellyTypography.labelLarge(color: TellyColors.textPrimary).copyWith(fontWeight: FontWeight.w800),
                 ),
+                if (partner.username.isNotEmpty)
+                  Text('@${partner.username}', style: TellyTypography.caption(color: TellyColors.textTertiary)),
+              ],
+            ),
+          ),
+          if (match != null) ...[
+            TellyNeonBadge(
+              key: const Key('cowatch_match_badge'),
+              label: '$match% MATCH',
+              variant: TellyBadgeVariant.tasteMatch,
+            ),
+            const SizedBox(width: 4),
+          ],
+          if ((state.partners ?? const []).length > 1)
+            IconButton(
+              key: const Key('cowatch_change_partner'),
+              tooltip: 'Watch with someone else',
+              icon: const Icon(Icons.swap_horiz, color: TellyColors.textSecondary),
+              onPressed: () => _showPicker(context),
+            ),
+        ],
+      );
+    }
+
+    final partners = state.partners;
+    if (partners == null) return const _Loading();
+    if (partners.isEmpty) {
+      return Text(
+        'Follow friends to decide what to watch together.',
+        style: TellyTypography.bodyMedium(color: TellyColors.textTertiary),
+      );
+    }
+    return SizedBox(
+      height: 84,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: partners.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 14),
+        itemBuilder: (_, i) => InkWell(
+          key: Key('cowatch_partner_${partners[i].username}'),
+          borderRadius: BorderRadius.circular(12),
+          onTap: () => onPick(partners[i]),
+          child: SizedBox(
+            width: 64,
+            child: Column(
+              children: [
+                _Avatar(label: partners[i].label, url: partners[i].avatarUrl, radius: 24),
+                const SizedBox(height: 6),
                 Text(
-                  subtitle,
-                  style: TellyTypography.caption(color: TellyColors.textTertiary).copyWith(fontSize: 10),
+                  partners[i].label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TellyTypography.caption(color: TellyColors.textSecondary),
                 ),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildRuntimeBudgetSelector() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'RUNTIME BUDGET',
-          style: TellyTypography.labelSmall(
-            color: TellyColors.textTertiary,
-          ).copyWith(fontWeight: FontWeight.w700, letterSpacing: 1.0),
-        ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          children: RuntimeBudget.values.map((budget) {
-            final isSelected = _selectedRuntimeBudget == budget;
-            return ChoiceChip(
-              label: Text(budget.label),
-              selected: isSelected,
-              onSelected: (selected) {
-                setState(() {
-                  _selectedRuntimeBudget = selected ? budget : null;
-                  _calculateRecommendations();
-                });
-              },
-              backgroundColor: TellyColors.backgroundSurface,
-              selectedColor: TellyColors.warmAmber.withValues(alpha: 0.2),
-              side: BorderSide(
-                color: isSelected ? TellyColors.warmAmber : TellyColors.borderGlass,
-              ),
-              labelStyle: TextStyle(
-                color: isSelected ? TellyColors.warmAmber : TellyColors.textSecondary,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
-            );
-          }).toList(),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStreamingFilter() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  void _showPicker(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: TellyColors.backgroundCard,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          padding: const EdgeInsets.symmetric(vertical: 12),
           children: [
-            Text(
-              'SHARED STREAMING SERVICES',
-              style: TellyTypography.labelSmall(
-                color: TellyColors.textTertiary,
-              ).copyWith(fontWeight: FontWeight.w700, letterSpacing: 1.0),
-            ),
-            Text(
-              'Auto-detected overlap',
-              style: TellyTypography.caption(color: TellyColors.phosphorLime).copyWith(fontSize: 10),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          children: ['netflix', 'max', 'apple_tv_plus'].map((service) {
-            final isSelected = _activeSharedProviders.contains(service);
-            return FilterChip(
-              label: Text(service.toUpperCase()),
-              selected: isSelected,
-              onSelected: (selected) {
-                setState(() {
-                  if (selected) {
-                    _activeSharedProviders.add(service);
-                  } else {
-                    _activeSharedProviders.remove(service);
-                  }
-                  _calculateRecommendations();
-                });
-              },
-              backgroundColor: TellyColors.backgroundSurface,
-              selectedColor: TellyColors.phosphorLime.withValues(alpha: 0.2),
-              side: BorderSide(
-                color: isSelected ? TellyColors.phosphorLime : TellyColors.borderGlass,
-              ),
-              labelStyle: TextStyle(
-                color: isSelected ? TellyColors.phosphorLime : TellyColors.textSecondary,
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-              ),
-            );
-          }).toList(),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildVibeSelector() {
-    const vibes = [
-      ('thriller', 'Thriller / Mystery'),
-      ('sci_fi', 'Mind-Bending Sci-Fi'),
-      ('comedy', 'Laugh-Out-Loud'),
-      ('festival_darling', 'Oscar / Festival Darling'),
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'WHAT\'S THE VIBE?',
-          style: TellyTypography.labelSmall(
-            color: TellyColors.textTertiary,
-          ).copyWith(fontWeight: FontWeight.w700, letterSpacing: 1.0),
-        ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: vibes.map((vibe) {
-            final isSelected = _selectedVibes.contains(vibe.$1);
-            return FilterChip(
-              label: Text(vibe.$2),
-              selected: isSelected,
-              onSelected: (selected) {
-                setState(() {
-                  if (selected) {
-                    _selectedVibes.add(vibe.$1);
-                  } else {
-                    _selectedVibes.remove(vibe.$1);
-                  }
-                  _calculateRecommendations();
-                });
-              },
-              backgroundColor: TellyColors.backgroundSurface,
-              selectedColor: TellyColors.electricViolet.withValues(alpha: 0.2),
-              side: BorderSide(
-                color: isSelected ? TellyColors.electricViolet : TellyColors.borderGlass,
-              ),
-              labelStyle: TextStyle(
-                color: isSelected ? TellyColors.electricViolet : TellyColors.textSecondary,
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-              ),
-            );
-          }).toList(),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildRecommendationsSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Container(
-              width: 3,
-              height: 14,
-              decoration: BoxDecoration(
-                color: TellyColors.phosphorLime,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'TOP PICKS FOR TONIGHT (${_recommendations.length})',
-              style: TellyTypography.labelSmall(
-                color: TellyColors.textPrimary,
-              ).copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        if (_recommendations.isEmpty)
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: TellyColors.backgroundSurface,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Center(
-              child: Text(
-                'No titles found matching current filters.\nTry selecting more streaming services or widening runtime.',
-                textAlign: TextAlign.center,
-                style: TellyTypography.bodyMedium(color: TellyColors.textTertiary),
-              ),
-            ),
-          )
-        else
-          ..._recommendations.take(3).map((rec) => _buildRecommendationCard(rec)),
-      ],
-    );
-  }
-
-  Widget _buildRecommendationCard(ScoredRecommendation rec) {
-    final candidate = rec.candidate;
-    final primaryProvider = rec.matchedProviders.isNotEmpty ? rec.matchedProviders.first : 'max';
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: TellyColors.backgroundSurface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: TellyColors.borderGlass),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () => context.push(Routes.title(candidate.mediaType, candidate.showId)),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 48),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          candidate.title,
-                          style: TellyTypography.titleMedium(color: TellyColors.textPrimary).copyWith(fontWeight: FontWeight.w800),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${candidate.network} • ${candidate.runtimeMinutes != null ? '${candidate.runtimeMinutes}m • ' : ''}★ ${candidate.communityScore.toStringAsFixed(1)}',
-                          style: TellyTypography.caption(color: TellyColors.warmAmber),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: TellyColors.phosphorLime.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '${rec.score.toStringAsFixed(0)} PTS',
-                      style: TellyTypography.caption(
-                        color: TellyColors.phosphorLime,
-                      ).copyWith(fontWeight: FontWeight.w800),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            rec.matchReason,
-            style: TellyTypography.caption(color: TellyColors.textPrimary),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              TellyNeonBadge(
-                label: 'ON ${primaryProvider.toUpperCase()}',
-                variant: TellyBadgeVariant.winner,
-              ),
-              ElevatedButton.icon(
-                onPressed: () {
-                  StreamingDeepLinkFactory.launchPlayback(
-                    providerId: primaryProvider,
-                    externalShowId: '${candidate.showId}',
-                    showSlug: candidate.title.toLowerCase().replaceAll(' ', '-'),
-                  );
+            for (final p in state.partners ?? const <CoWatchPartner>[])
+              ListTile(
+                key: Key('cowatch_pick_${p.username}'),
+                leading: _Avatar(label: p.label, url: p.avatarUrl),
+                title: Text(p.label, style: TellyTypography.labelLarge(color: TellyColors.textPrimary)),
+                subtitle: Text('@${p.username}', style: TellyTypography.caption(color: TellyColors.textTertiary)),
+                trailing: p.userId == state.partner?.userId
+                    ? const Icon(Icons.check, color: TellyColors.phosphorLime)
+                    : null,
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  onPick(p);
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: TellyColors.phosphorLime,
-                  foregroundColor: TellyColors.backgroundCanvasOled,
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                  minimumSize: const Size(48, 48),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-                icon: const Icon(Icons.play_arrow, size: 16),
-                label: Text(
-                  'Watch on ${primaryProvider.toUpperCase()}',
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MoodStep extends StatelessWidget {
+  const _MoodStep({required this.state, required this.controller});
+
+  final TwoToWatchState state;
+  final TwoToWatchController controller;
+
+  static const _vibes = [
+    ('thriller', 'Thriller / Mystery'),
+    ('sci_fi', 'Mind-Bending Sci-Fi'),
+    ('comedy', 'Laugh-Out-Loud'),
+    ('festival_darling', 'Oscar / Festival Darling'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final shared = state.streaming.shared.toList()..sort();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            for (final (format, label) in const [
+              (CoWatchFormat.movieNight, 'Movie Night'),
+              (CoWatchFormat.series, 'TV Series'),
+            ]) ...[
+              Expanded(
+                child: _Segment(
+                  key: Key('cowatch_format_${format.mediaType}'),
+                  label: label,
+                  selected: state.format == format,
+                  onTap: () => controller.selectFormat(format),
                 ),
               ),
+              if (format == CoWatchFormat.movieNight) const SizedBox(width: 8),
+            ],
+          ],
+        ),
+        if (state.format == CoWatchFormat.movieNight) ...[
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final budget in RuntimeBudget.values)
+                _Chip(
+                  label: budget.label,
+                  selected: state.runtimeBudget == budget,
+                  color: TellyColors.warmAmber,
+                  onTap: () => controller.selectRuntime(state.runtimeBudget == budget ? null : budget),
+                ),
             ],
           ),
         ],
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final (id, label) in _vibes)
+              _Chip(
+                key: Key('cowatch_vibe_$id'),
+                label: label,
+                selected: state.vibes.contains(id),
+                color: TellyColors.electricViolet,
+                onTap: () => controller.toggleVibe(id),
+              ),
+          ],
+        ),
+        if (state.streaming.known) ...[
+          const SizedBox(height: 14),
+          Text(
+            shared.isEmpty ? 'No streaming services in common' : 'ON SERVICES YOU BOTH HAVE',
+            style: TellyTypography.caption(color: TellyColors.textTertiary).copyWith(fontWeight: FontWeight.w700),
+          ),
+          if (shared.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final id in shared)
+                  _Chip(
+                    key: Key('cowatch_provider_$id'),
+                    label: StreamingPlatform.labelFor(id),
+                    selected: state.activeProviders.contains(id),
+                    color: TellyColors.phosphorLime,
+                    onTap: () => controller.toggleProvider(id),
+                  ),
+              ],
+            ),
+          ],
+        ],
+      ],
+    );
+  }
+}
+
+class _PicksStep extends StatelessWidget {
+  const _PicksStep({required this.state, required this.picks});
+
+  final TwoToWatchState state;
+  final List<ScoredRecommendation> picks;
+
+  @override
+  Widget build(BuildContext context) {
+    if (state.partner == null) {
+      return _Muted(state.resolvingPartner ? 'Finding your friend…' : "Pick who you're watching with first.");
+    }
+    final pool = state.candidates;
+    if (pool == null) return const _Loading();
+    if (state.candidatesFailed) return const _Muted("Couldn't load picks. Check your connection and try again.");
+    if (pool.isEmpty) {
+      return const _Muted('Nothing on either of your queues yet. Queue a few titles and come back.');
+    }
+    if (picks.isEmpty) {
+      return const _Muted('No picks match these filters. Try another vibe or runtime.');
+    }
+    return Column(children: [for (final rec in picks) _PickCard(rec: rec)]);
+  }
+}
+
+class _PickCard extends StatelessWidget {
+  const _PickCard({required this.rec});
+
+  final ScoredRecommendation rec;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = rec.candidate;
+    final provider = rec.matchedProviders.firstOrNull;
+    final meta = [
+      if (c.network.isNotEmpty) c.network,
+      if (c.runtimeMinutes != null) '${c.runtimeMinutes}m',
+      if (c.communityScore > 0) '★ ${c.communityScore.toStringAsFixed(1)}',
+    ].join(' • ');
+
+    return InkWell(
+      key: Key('cowatch_pick_${c.showId}'),
+      borderRadius: BorderRadius.circular(12),
+      onTap: () => context.push(Routes.title(c.mediaType, c.showId)),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: TellyColors.backgroundCard,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: TellyColors.borderGlass),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _Poster(path: c.posterPath, mediaType: c.mediaType, width: 60),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    c.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TellyTypography.titleMedium(color: TellyColors.textPrimary).copyWith(fontWeight: FontWeight.w800),
+                  ),
+                  if (meta.isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    Text(meta, style: TellyTypography.caption(color: TellyColors.warmAmber)),
+                  ],
+                  const SizedBox(height: 6),
+                  Text(rec.matchReason, style: TellyTypography.caption(color: TellyColors.textSecondary)),
+                  if (provider != null) ...[
+                    const SizedBox(height: 8),
+                    TextButton.icon(
+                      key: Key('cowatch_watch_${c.showId}'),
+                      onPressed: () => StreamingDeepLinkFactory.launchPlayback(
+                        providerId: provider,
+                        externalShowId: '${c.showId}',
+                        showSlug: c.title.toLowerCase().replaceAll(' ', '-'),
+                      ),
+                      style: TextButton.styleFrom(
+                        foregroundColor: TellyColors.phosphorLime,
+                        padding: EdgeInsets.zero,
+                        minimumSize: const Size(48, 48),
+                        alignment: Alignment.centerLeft,
+                      ),
+                      icon: const Icon(Icons.play_arrow_rounded, size: 18),
+                      label: Text(
+                        'Watch on ${StreamingPlatform.labelFor(provider)}',
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
+}
+
+class _Poster extends StatelessWidget {
+  const _Poster({required this.path, required this.mediaType, required this.width});
+
+  final String? path;
+  final String mediaType;
+  final double width;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        width: width,
+        height: width * 1.5,
+        color: TellyColors.backgroundCardAlt,
+        child: PosterImage(
+          posterPath: path,
+          fallback: Center(
+            child: Icon(
+              mediaType == 'movie' ? Icons.movie_outlined : Icons.tv_outlined,
+              size: width / 2.5,
+              color: TellyColors.textTertiary,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Avatar extends StatelessWidget {
+  const _Avatar({required this.label, this.url, this.accent = false, this.radius = 18});
+
+  final String label;
+  final String? url;
+  final bool accent;
+  final double radius;
+
+  @override
+  Widget build(BuildContext context) {
+    final initial = label.replaceFirst('@', '');
+    return CircleAvatar(
+      radius: radius,
+      backgroundColor: TellyColors.backgroundCard,
+      foregroundImage: url != null && url!.isNotEmpty ? NetworkImage(url!) : null,
+      child: Text(
+        initial.isEmpty ? '?' : initial[0].toUpperCase(),
+        style: TextStyle(
+          color: accent ? TellyColors.phosphorLime : TellyColors.textPrimary,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+}
+
+class _Segment extends StatelessWidget {
+  const _Segment({super.key, required this.label, required this.selected, required this.onTap});
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 48),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: selected ? TellyColors.phosphorLime.withValues(alpha: 0.12) : TellyColors.backgroundCard,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: selected ? TellyColors.phosphorLime : TellyColors.borderGlass),
+        ),
+        child: Text(
+          label,
+          style: TellyTypography.labelLarge(color: selected ? TellyColors.phosphorLime : TellyColors.textSecondary)
+              .copyWith(fontWeight: FontWeight.w700),
+        ),
+      ),
+    );
+  }
+}
+
+class _Chip extends StatelessWidget {
+  const _Chip({super.key, required this.label, required this.selected, required this.color, required this.onTap});
+
+  final String label;
+  final bool selected;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return FilterChip(
+      label: Text(label),
+      selected: selected,
+      showCheckmark: false,
+      onSelected: (_) => onTap(),
+      backgroundColor: TellyColors.backgroundCard,
+      selectedColor: color.withValues(alpha: 0.18),
+      side: BorderSide(color: selected ? color : TellyColors.borderGlass),
+      labelStyle: TextStyle(
+        color: selected ? color : TellyColors.textSecondary,
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
+      ),
+    );
+  }
+}
+
+class _Loading extends StatelessWidget {
+  const _Loading();
+
+  @override
+  Widget build(BuildContext context) => const Padding(
+        padding: EdgeInsets.all(12),
+        child: Center(
+          child: SizedBox(
+            width: 22,
+            height: 22,
+            child: CircularProgressIndicator(strokeWidth: 2, color: TellyColors.phosphorLime),
+          ),
+        ),
+      );
+}
+
+class _Muted extends StatelessWidget {
+  const _Muted(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) =>
+      Text(text, style: TellyTypography.bodyMedium(color: TellyColors.textTertiary));
 }

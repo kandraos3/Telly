@@ -174,14 +174,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: rootNavigatorKey,
         builder: (_, state) {
           final titleId = int.tryParse(state.uri.queryParameters['titleId'] ?? '');
-          final friend = state.uri.queryParameters['friend'] ?? 'friend';
+          final mediaType = state.uri.queryParameters['mediaType'];
+          final friend = state.uri.queryParameters['friend'];
           final extra = state.extra;
           final friendArgs = extra is FriendRouteArgs ? extra : null;
+          // Without a friend SCR-16 opens on its "Who's watching?" picker (FE-COWATCH-01).
           return TwoToWatchScreen(
-            friendId: friendArgs?.userId ?? friend,
+            friendId: friendArgs?.userId,
             friendHandle: friend,
-            friendDisplayName: friendArgs?.displayName ?? '@$friend',
+            friendDisplayName: friendArgs?.displayName,
             preselectedTitleId: titleId,
+            preselectedMediaType: mediaType == 'movie' || mediaType == 'tv' ? mediaType : null,
           );
         },
       ),
@@ -204,10 +207,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               final args = state.extra;
               final handle = state.pathParameters['handle']!;
               final titleId = int.tryParse(state.uri.queryParameters['titleId'] ?? '');
+              // Without route args the handle is resolved to a user by the controller.
               return TwoToWatchScreen(
-                friendId: args is FriendRouteArgs ? args.userId : handle,
+                friendId: args is FriendRouteArgs ? args.userId : null,
                 friendHandle: handle,
-                friendDisplayName: args is FriendRouteArgs ? args.displayName : '@$handle',
+                friendDisplayName: args is FriendRouteArgs ? args.displayName : null,
                 preselectedTitleId: titleId,
               );
             },

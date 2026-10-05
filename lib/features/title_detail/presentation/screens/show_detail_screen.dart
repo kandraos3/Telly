@@ -545,7 +545,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
               final friendHandle = (title.socialSummary != null && title.socialSummary!.friends.isNotEmpty)
                   ? title.socialSummary!.friends.first.username
                   : null;
-              context.push(Routes.cowatchWithTitle(title.id, friendHandle: friendHandle));
+              context.push(Routes.cowatchWithTitle(title.id, mediaType: title.mediaType, friendHandle: friendHandle));
             },
           ),
           // 4. Share Taste Card

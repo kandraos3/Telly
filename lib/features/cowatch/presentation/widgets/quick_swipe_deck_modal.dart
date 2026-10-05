@@ -5,9 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:telly_app/core/services/streaming_deep_link_factory.dart';
 import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/theme/telly_typography.dart';
+import 'package:telly_app/core/widgets/poster_image.dart';
 import 'package:telly_app/core/widgets/telly_neon_badge.dart';
 import 'package:telly_app/features/cowatch/data/co_watch_repository.dart';
 import 'package:telly_app/features/cowatch/domain/two_to_watch_engine.dart';
+import 'package:telly_app/features/queue/domain/streaming_models.dart';
 
 /// 15-Second "Rapid Swipe" Duel Mode Modal.
 /// Conforms to `FE-406`, `FE-610` and `docs/features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md` §3.2.
@@ -311,24 +313,29 @@ class _QuickSwipeDeckModalState extends ConsumerState<QuickSwipeDeckModal> {
             Expanded(
               child: Container(
                 color: TellyColors.backgroundCardAlt,
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        item.mediaType == 'movie' ? Icons.movie_outlined : Icons.tv_outlined,
-                        size: 64,
-                        color: TellyColors.textTertiary,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        item.network.toUpperCase(),
-                        style: TellyTypography.caption(color: TellyColors.warmAmber).copyWith(
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1.2,
+                // FE-COWATCH-01: the contender's real TMDB poster, the icon only as fallback.
+                child: PosterImage(
+                  key: Key('quick_swipe_poster_${item.showId}'),
+                  posterPath: item.posterPath,
+                  fallback: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          item.mediaType == 'movie' ? Icons.movie_outlined : Icons.tv_outlined,
+                          size: 64,
+                          color: TellyColors.textTertiary,
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 8),
+                        Text(
+                          item.network.toUpperCase(),
+                          style: TellyTypography.caption(color: TellyColors.warmAmber).copyWith(
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -364,7 +371,7 @@ class _QuickSwipeDeckModalState extends ConsumerState<QuickSwipeDeckModal> {
                     children: item.availableProviders
                         .map<Widget>(
                           (p) => TellyNeonBadge(
-                            label: p.toUpperCase(),
+                            label: StreamingPlatform.labelFor(p).toUpperCase(),
                             variant: TellyBadgeVariant.tasteMatch,
                           ),
                         )
@@ -381,7 +388,13 @@ class _QuickSwipeDeckModalState extends ConsumerState<QuickSwipeDeckModal> {
 
   Widget _buildMatchView() {
     final matched = _matchedTitle!;
-    final primaryProvider = matched.availableProviders.isNotEmpty ? matched.availableProviders.first : 'max';
+    // Prefer a service we both have; never invent one the title isn't on.
+    final primaryProvider = matched.availableProviders.where(widget.sharedProviders.contains).firstOrNull ??
+        matched.availableProviders.firstOrNull;
+    final details = [
+      if (primaryProvider != null) 'Available on ${StreamingPlatform.labelFor(primaryProvider)}',
+      if (matched.runtimeMinutes != null) '${matched.runtimeMinutes}m',
+    ].join(' • ');
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -414,34 +427,34 @@ class _QuickSwipeDeckModalState extends ConsumerState<QuickSwipeDeckModal> {
                 matched.title,
                 style: TellyTypography.titleLarge(color: TellyColors.textPrimary).copyWith(fontWeight: FontWeight.w800),
               ),
-              const SizedBox(height: 6),
-              Text(
-                'Available on ${primaryProvider.toUpperCase()} • ${matched.runtimeMinutes ?? 120}m',
-                style: TellyTypography.caption(color: TellyColors.textSecondary),
-              ),
+              if (details.isNotEmpty) ...[
+                const SizedBox(height: 6),
+                Text(details, style: TellyTypography.caption(color: TellyColors.textSecondary)),
+              ],
             ],
           ),
         ),
         const SizedBox(height: 24),
-        ElevatedButton(
-          onPressed: () {
-            StreamingDeepLinkFactory.launchPlayback(
-              providerId: primaryProvider,
-              externalShowId: '${matched.showId}',
-              showSlug: matched.title.toLowerCase().replaceAll(' ', '-'),
-            );
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: TellyColors.phosphorLime,
-            foregroundColor: TellyColors.backgroundCanvasOled,
-            minimumSize: const Size.fromHeight(48),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        if (primaryProvider != null)
+          ElevatedButton(
+            onPressed: () {
+              StreamingDeepLinkFactory.launchPlayback(
+                providerId: primaryProvider,
+                externalShowId: '${matched.showId}',
+                showSlug: matched.title.toLowerCase().replaceAll(' ', '-'),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: TellyColors.phosphorLime,
+              foregroundColor: TellyColors.backgroundCanvasOled,
+              minimumSize: const Size.fromHeight(48),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: Text(
+              '▶ Watch on ${StreamingPlatform.labelFor(primaryProvider)}',
+              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+            ),
           ),
-          child: Text(
-            '▶ Watch on ${primaryProvider.toUpperCase()}',
-            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
-          ),
-        ),
         const SizedBox(height: 10),
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
