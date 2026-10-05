@@ -400,12 +400,100 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                         ? TellyBadgeVariant.winner
                         : TellyBadgeVariant.tasteMatch,
                   ),
+                  const SizedBox(width: 6),
+                  Semantics(
+                    button: true,
+                    label: 'Score and tier explanation',
+                    child: Tooltip(
+                      message: 'Percentile grade (1.00–10.00) calculated from duels. Tiers: God (9.20+), Prestige (8.50+), Great (7.80+), Good (7.00+), Mid (5.50+).',
+                      triggerMode: TooltipTriggerMode.tap,
+                      child: InkWell(
+                        key: const Key('show_detail_score_info_button'),
+                        onTap: () => _showScoreExplanationDialog(context, communityScore, tier),
+                        borderRadius: BorderRadius.circular(12),
+                        child: const Padding(
+                          padding: EdgeInsets.all(4.0),
+                          child: Icon(
+                            Icons.info_outline_rounded,
+                            size: 16,
+                            color: TellyColors.textTertiary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ],
           ),
         ),
       ],
+    );
+  }
+
+  void _showScoreExplanationDialog(BuildContext context, double score, CanonTier tier) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: TellyColors.backgroundCard,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    '★ ${score.toStringAsFixed(2)}',
+                    style: TellyTypography.titleLarge(color: TellyColors.warmAmber).copyWith(fontWeight: FontWeight.w900),
+                  ),
+                  const SizedBox(width: 8),
+                  TellyNeonBadge(
+                    label: '${tier.emoji} ${tier.label.toUpperCase()}',
+                    variant: tier == CanonTier.god ? TellyBadgeVariant.winner : TellyBadgeVariant.tasteMatch,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'How is this score calculated?',
+                style: TellyTypography.titleMedium(color: TellyColors.textPrimary).copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Telly grades are dynamic percentile scores (1.00–10.00) calculated from head-to-head tournament duels across the community and your personal canon.',
+                style: TellyTypography.bodyMedium(color: TellyColors.textSecondary),
+              ),
+              const SizedBox(height: 14),
+              Text(
+                'Score Tiers:',
+                style: TellyTypography.labelLarge(color: TellyColors.textPrimary).copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                '👑 God Tier: 9.20 – 10.00\n✨ Prestige: 8.50 – 9.19\n⚡ Great: 7.80 – 8.49\n👍 Good: 7.00 – 7.79\n📺 Mid: 5.50 – 6.99\n🚫 Dropped / DNF: < 5.50',
+                style: TellyTypography.caption(color: TellyColors.textSecondary).copyWith(height: 1.4),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                key: const Key('score_info_dismiss_button'),
+                onPressed: () => Navigator.of(ctx).pop(),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: TellyColors.phosphorLime,
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                child: const Text('Got it', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -434,7 +522,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
           // 1. Queue / Watchlist Toggle
           _buildQuickActionButton(
             icon: _isBookmarked ? Icons.playlist_add_check_rounded : Icons.playlist_add_rounded,
-            label: _isBookmarked ? 'In Queue' : '+ Queue',
+            label: _isBookmarked ? 'In Queue' : 'Add to Queue',
             accentColor: _isBookmarked ? TellyColors.phosphorLime : TellyColors.textSecondary,
             onTap: () => _toggleBookmark(title),
           ),

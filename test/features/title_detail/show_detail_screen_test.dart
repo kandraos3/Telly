@@ -277,5 +277,32 @@ void main() {
       // Season 1 overview collapsed
       expect(find.text('Mark Scout leads a team at Lumon Industries.'), findsNothing);
     });
+
+    testWidgets('FE-DETAIL-01: renders Add to Queue label and score explanation dialog', (tester) async {
+      await tester.pumpWidget(createTestWidget(title: testTvShow));
+      await tester.pumpAndSettle();
+
+      // Check quick action queue button label
+      expect(find.text('Add to Queue'), findsOneWidget);
+      expect(find.text('+ Queue'), findsNothing);
+
+      // Check score info button
+      final infoBtn = find.byKey(const Key('show_detail_score_info_button'));
+      expect(infoBtn, findsOneWidget);
+
+      await tester.tap(infoBtn);
+      await tester.pumpAndSettle();
+
+      // Explanation sheet opened
+      expect(find.text('How is this score calculated?'), findsOneWidget);
+      expect(find.textContaining('Telly grades are dynamic percentile scores'), findsOneWidget);
+      expect(find.textContaining('👑 God Tier: 9.20 – 10.00'), findsOneWidget);
+
+      // Dismiss dialog
+      await tester.tap(find.byKey(const Key('score_info_dismiss_button')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('How is this score calculated?'), findsNothing);
+    });
   });
 }
