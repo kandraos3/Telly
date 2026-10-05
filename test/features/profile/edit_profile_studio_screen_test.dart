@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:telly_app/core/widgets/telly_primary_button.dart';
 import 'package:telly_app/features/auth/data/auth_repository.dart';
 import 'package:telly_app/features/auth/domain/user_profile.dart';
 import 'package:telly_app/features/profile/data/avatar_picker.dart';
@@ -171,6 +172,16 @@ void main() {
       await tester.tap(find.byKey(const Key('edit_profile_save')));
       await tester.pumpAndSettle();
       expect(profiles.updates.single['pinned_showcase'], isEmpty);
+    });
+
+    testWidgets('tapping bottom Save Profile Changes button saves and pops back (FE-SETTINGS-01)', (tester) async {
+      await open(tester);
+      await tester.ensureVisible(find.widgetWithText(TellyPrimaryButton, 'Save Profile Changes'));
+      await tester.tap(find.widgetWithText(TellyPrimaryButton, 'Save Profile Changes'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('host page'), findsOneWidget);
+      expect(find.text('Profile saved'), findsOneWidget);
     });
   });
 }

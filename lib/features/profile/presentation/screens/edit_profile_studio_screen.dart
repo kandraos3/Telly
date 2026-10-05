@@ -2,6 +2,7 @@ library edit_profile_studio;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
@@ -22,13 +23,23 @@ class EditProfileStudioScreen extends ConsumerWidget {
 
   Future<void> _save(BuildContext context, WidgetRef ref) async {
     final messenger = ScaffoldMessenger.of(context);
-    final navigator = Navigator.of(context);
     final saved = await ref.read(editProfileControllerProvider.notifier).save();
     if (!saved) return;
     messenger
       ..hideCurrentSnackBar()
       ..showSnackBar(const SnackBar(content: Text('Profile saved'), backgroundColor: TellyColors.backgroundCard));
-    await navigator.maybePop();
+    if (context.mounted) {
+      final rootNav = Navigator.of(context, rootNavigator: true);
+      if (rootNav.canPop()) {
+        rootNav.pop();
+      } else if (Navigator.of(context).canPop()) {
+        Navigator.of(context).pop();
+      } else {
+        try {
+          context.pop();
+        } catch (_) {}
+      }
+    }
   }
 
   @override
@@ -45,7 +56,18 @@ class EditProfileStudioScreen extends ConsumerWidget {
         leading: IconButton(
           tooltip: 'Cancel',
           icon: const Icon(Icons.close, color: TellyColors.textPrimary),
-          onPressed: () => Navigator.of(context).maybePop(),
+          onPressed: () {
+            final rootNav = Navigator.of(context, rootNavigator: true);
+            if (rootNav.canPop()) {
+              rootNav.pop();
+            } else if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            } else {
+              try {
+                context.pop();
+              } catch (_) {}
+            }
+          },
         ),
         title: Text(
           'EDIT PROFILE',
