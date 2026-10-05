@@ -1,0 +1,154 @@
+# Copy and structure of the Telly website (WEB-03).
+#
+# Colors, type and screenshots are NOT set here: they come from the app on every
+# build (lib/core/theme/, tool/site/src/scenes.dart). This file holds words,
+# which screenshot goes where, and links.
+#
+# - `screenshot` must be the id of a scene in tool/site/src/scenes.dart.
+# - `accent` must be a color token from lib/core/theme/telly_colors.dart
+#   (camelCase name, e.g. phosphorLime, neonCoral).
+# - Build locally: bash tool/site/build.sh, then open build/site/index.html.
+
+site:
+  name: Telly
+  # Absolute URL the site is served from, with a trailing slash. Change it when
+  # a custom domain is set up (and add a CNAME file under site/static/).
+  url: https://kandraos3.github.io/Telly/
+  title: Telly — Rank every movie and show you watch
+  description: >-
+    Telly turns what you watch into a ranked canon. Head-to-head duels place
+    every movie and series, friends compare taste, and picking tonight's watch
+    takes seconds.
+  contact_email: karlandraos@gmail.com
+  copyright_holder: Telly
+
+# Store listings. Leave a link null until the listing is live: the page shows a
+# "Coming soon" badge instead. Paste the full listing URL to switch it on.
+stores:
+  app_store: null
+  play_store: null
+
+hero:
+  eyebrow: Movies · Series · Anime
+  headline: Rank what you watch.
+  tagline: Your personal TV canon. Ranked, shared, settled.
+  body: >-
+    Star ratings drift. Telly asks one question instead: which did you like
+    more? A few quick duels and every title lands in its exact place, scored
+    from 1.00 to 10.00.
+  screenshot: canon
+
+features:
+  - id: duels
+    eyebrow: Pairwise ranking
+    title: Duels, not stars
+    accent: phosphorLime
+    screenshot: duel
+    body: >-
+      Just finished something? Telly pits it against titles already in your
+      canon. Tap the one you liked more, and binary search finds the right
+      slot in a handful of picks, even in a canon of hundreds.
+    points:
+      - Movies only ever duel movies, and series duel series
+      - Can't decide? Call it a tie and move on
+      - Anime sits in your series canon, seasons and all
+
+  - id: scores
+    eyebrow: Scores that mean something
+    title: Your rank becomes your score
+    accent: warmAmber
+    screenshot: reveal
+    body: >-
+      Every placement recalculates your canon. Scores come from rank, so a
+      9.61 is always above a 9.42, and they never pile up at 8 out of 10. Share
+      the reveal straight to your story.
+
+  - id: canon
+    eyebrow: The dual canon
+    title: Two canons, in tiers
+    accent: electricViolet
+    screenshot: tiers
+    body: >-
+      Your Movie Canon and Series Canon live side by side and are never mixed.
+      Browse them as a ranked list, in tiers from God Tier down, or as a 3×3
+      grid ready to share.
+    show_tiers: true
+
+  - id: feed
+    eyebrow: Friends feed
+    title: Upsets worth arguing about
+    accent: neonCoral
+    screenshot: feed
+    body: >-
+      See what friends rank the moment they rank it. When someone puts
+      Severance above Succession, Telly flags the upset, and the reactions
+      take care of the rest. Bookmark anything to your queue in one tap.
+
+  - id: taste-match
+    eyebrow: Taste Match
+    title: Find out who really shares your taste
+    accent: electricViolet
+    screenshot: taste-match
+    body: >-
+      Taste Match compares the order of every title you've both ranked, for
+      movies and series separately. See where you agree, where you clash, and
+      the gems they love that you haven't seen.
+
+  - id: two-to-watch
+    eyebrow: Two-to-Watch
+    title: Settle movie night in seconds
+    accent: phosphorLime
+    screenshot: two-to-watch
+    body: >-
+      Pick who's watching and the mood. Telly suggests titles you'll both
+      enjoy on the services you share, starting with the ones already on both
+      your watchlists. Still split? A 15-second Quick Swipe settles it.
+
+  - id: squads
+    eyebrow: Squads
+    title: Your group's consensus canon
+    accent: warmAmber
+    screenshot: squad
+    body: >-
+      Start a squad for the group chat, the film club or the couch. Everyone's
+      rankings merge into one leaderboard, and the titles that split you most
+      rise to the top as debates.
+
+  - id: queue
+    eyebrow: Smart Queue
+    title: A watchlist that knows where to stream
+    accent: electricCyan
+    screenshot: queue
+    body: >-
+      Save titles from the feed, a friend's profile or Explore. Your queue
+      shows friends' scores, who recommended it, where it's streaming, and
+      what's about to leave your services.
+
+gallery:
+  title: Straight from the app
+  body: These screens are rendered from the app's own code on every update, so what you see here is what ships.
+  items:
+    - screenshot: canon
+      caption: Your canon
+    - screenshot: explore
+      caption: Explore
+    - screenshot: title
+      caption: Title pages
+    - screenshot: graveyard
+      caption: TV Graveyard
+    - screenshot: wrapped
+      caption: Story studio
+    - screenshot: reveal
+      caption: Canon reveal
+
+extras:
+  - title: Bring your history
+    body: Import your Letterboxd diary or AniList library and start with a full canon.
+  - title: Works offline
+    body: Rank on the subway. Duels save instantly and sync when you're back online.
+  - title: Your data, exportable
+    body: Export your canon to CSV or Letterboxd format whenever you like.
+
+cta:
+  title: Your canon is waiting.
+  body: Telly is coming soon to iPhone and Android.

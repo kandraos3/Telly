@@ -37,4 +37,4 @@ You have the full right to access, export, or delete your data:
 - **Data Export:** You can export your entire TV history to CSV or Notion format directly from the Settings menu.
 - **Account Deletion:** You can delete your account at **Settings $\rightarrow$ Delete Account**. This initiates an immediate deactivation followed by permanent, irreversible cryptographic deletion after 30 days.
 
-For privacy inquiries: `privacy@telly.app`.
+For privacy inquiries: `karlandraos@gmail.com`.

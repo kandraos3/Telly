@@ -24,4 +24,4 @@ Telly is a community for passionate television discussion and friendly debate. T
 - You may terminate your account at any time via in-app Settings.
 - Optional **Telly Pro** subscriptions are billed via Apple In-App Purchase or Google Play Billing and can be managed directly through your App Store or Play Store account settings.
 
-For legal inquiries: `legal@telly.app`.
+For legal inquiries: `karlandraos@gmail.com`.

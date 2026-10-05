@@ -24,11 +24,11 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 6 — Integration, Wiring & Audit Remediation** (COMPLETED: 32 / 32 tickets complete)
-- **Current Active Ticket**: `WEB-03` (Marketing Website track: `WEB-01` ✅ → `WEB-02` ✅ → `WEB-03` → `WEB-04`; 2 / 4 complete) — Sprint 6: 32 / 32 tickets complete
+- **Current Active Ticket**: `WEB-04` (Marketing Website track: `WEB-01` ✅ → `WEB-02` ✅ → `WEB-03` ✅ → `WEB-04`; 3 / 4 complete) — Sprint 6: 32 / 32 tickets complete
 - **Overall Roadmap Progress**: All 32/32 Sprint 6 architecture, integration, algorithm, and QA remediation tickets fully implemented and verified.
 - **Human-Only Tasks**: Tasks marked `👤 [TO BE DONE BY HUMAN]` (cloud deployment, secrets provisioning, store submission, physical-device profile runs). Client application codebase is 100% complete and self-contained.
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (682 / 682 pass; 100% golden, a11y, integration, and algorithmic parity suites pass; coverage 86.81% overall / 97.04% ranking)
-- **Last Updated**: 2026-10-05 (`WEB-02` automated app screenshots for the site)
+- **Last Updated**: 2026-10-05 (`WEB-03` static site build: landing, legal, support, attribution)
 
 | Sprint | Status | Total Tickets | Audit Verdict |
 | :---: | :---: | :---: | :--- |
@@ -2295,14 +2295,14 @@ A promotional site at `https://kandraos3.github.io/Telly/` that hosts the Privac
 - **Spec Reference**: [**`DESIGN_DOCUMENT.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/DESIGN_DOCUMENT.md) §1–§4 (positioning and features); [**`design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md) §1, §4, §7 (brand mark usage); [**`legal/PRIVACY_POLICY.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/legal/PRIVACY_POLICY.md), [**`legal/TERMS_OF_SERVICE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/legal/TERMS_OF_SERVICE.md)
 - **Scope & Objectives**: `dart run tool/site/build.dart` assembles `build/site/` from `site/content.yaml`, `site/static/`, the generated tokens and screenshots, and `docs/legal/`.
 - **Granular Tasks**:
-  - [ ] `site/content.yaml`: tagline, feature rows (screenshot, accent, copy), gallery, store links (`null` → "Coming soon" badge), contact email.
-  - [ ] Landing page: sticky glass nav, hero with phone mockup, tier strip, alternating feature rows, screen gallery, closing CTA, footer.
-  - [ ] `/privacy/` and `/terms/` rendered with the app's own legal Markdown parser (`parseLegalMarkdown`), so they always match the in-app text. Support page with the contact email.
-  - [ ] Footer: © year, TMDB attribution ("not endorsed or certified by TMDB"), JustWatch and AniList credits, Apple / Google trademark notices, font licenses (SIL OFL), Twemoji (CC-BY 4.0) credit.
-  - [ ] Hand-written `site.css` uses `var(--…)` tokens only; hex literals are rejected. Favicon and social image from `assets/brand/`.
-  - [ ] Legal contact addresses point to `karlandraos@gmail.com` (the `telly.app` addresses don't exist).
+  - [x] `site/content.yaml`: tagline, feature rows (screenshot, accent, copy), gallery, store links (`null` → "Coming soon" badge), contact email.
+  - [x] Landing page: sticky glass nav, hero with phone mockup, tier strip, alternating feature rows, screen gallery, closing CTA, footer.
+  - [x] `/privacy/` and `/terms/` rendered with the app's own legal Markdown parser (`parseLegalMarkdown`), so they always match the in-app text. Support page with the contact email.
+  - [x] Footer: © year, TMDB attribution ("not endorsed or certified by TMDB"), JustWatch and AniList credits, Apple / Google trademark notices, font licenses (SIL OFL), Twemoji (CC-BY 4.0) credit.
+  - [x] Hand-written `site.css` uses `var(--…)` tokens only; hex literals are rejected. Favicon and social image from `assets/brand/`. Score-tier strip from the app's `CanonTier` and tier gradient tokens.
+  - [x] Legal contact addresses point to `karlandraos@gmail.com` (the `telly.app` addresses don't exist).
 - **Testing & Verification**:
-  - [ ] Unit tests: content parsing and validation, store badge live vs. placeholder, legal Markdown → HTML (escaping, bullets, inline styles), page output contains every feature and attribution line, CSS guard (no hex, every `var()` defined), internal link check.
+  - [x] Unit tests: content parsing and validation, store badge live vs. placeholder, legal Markdown → HTML (escaping, bullets, inline styles), page output contains every feature and attribution line, CSS guard (no hex, every `var()` defined), internal link check.
 - **Dependencies**: `WEB-01`, `WEB-02`.
 
 #### `WEB-04`: GitHub Pages Auto-Deploy on Relevant Changes
