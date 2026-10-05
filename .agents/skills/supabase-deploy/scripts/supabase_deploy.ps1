@@ -9,7 +9,7 @@
     Actions:
       status     (default) Login + link check, migration status, edge function drift, secret presence.
       plan       status + `supabase db push --dry-run`.
-      push       plan + backup (when Docker is running) + `supabase db push --linked --yes` + verify.
+      push       plan + `supabase db push --linked --yes` + verify.
       functions  Deploy edge functions (-Functions changed | all | name1,name2) with --use-api.
       deploy     push, then functions.
       test       Local pgTAP suite (`supabase test db`), needs Docker Desktop.
@@ -33,9 +33,6 @@ param(
 
     # telly-prod. A different linked ref is refused unless passed explicitly.
     [string]$ProjectRef = "cdbfixrttnysqvtulufm",
-
-    # Proceed without a pg_dump backup when Docker is unavailable (platform daily backups still apply).
-    [switch]$SkipBackup,
 
     # Allow pushing into a remote with NO migration history (would run the whole schema).
     [switch]$AllowFullSchema
@@ -172,27 +169,6 @@ function Assert-SafeToPush($state) {
     }
 }
 
-function Invoke-Backup {
-    $dir = Join-Path $RepoRoot "supabase\backups"
-    New-Item -ItemType Directory -Force -Path $dir | Out-Null
-    if (-not (Test-Docker)) {
-        if ($SkipBackup) {
-            Write-Warn "Docker not running: skipping pg_dump backup (-SkipBackup). Platform daily backups remain available."
-            return
-        }
-        Write-Fail "Docker Desktop is not running, so no pre-push backup can be taken. Start Docker, or re-run with -SkipBackup."
-        exit 3
-    }
-    $stamp = Get-Date -Format "yyyyMMdd_HHmmss"
-    $schema = Join-Path $dir "$($stamp)_schema.sql"
-    $data = Join-Path $dir "$($stamp)_data.sql"
-    Write-Info "Backing up schema -> supabase/backups/$(Split-Path $schema -Leaf)"
-    Invoke-Sb @("db", "dump", "--linked", "-f", $schema) | Out-Null
-    Write-Info "Backing up data   -> supabase/backups/$(Split-Path $data -Leaf)"
-    Invoke-Sb @("db", "dump", "--linked", "--data-only", "-f", $data) | Out-Null
-    Write-Ok "Backup written (gitignored)."
-}
-
 function Invoke-Push {
     $state = Get-MigrationState
     Show-Migrations $state
@@ -203,9 +179,6 @@ function Invoke-Push {
     Invoke-Sb @("db", "push", "--linked", "--dry-run") -Stream
 
     if ($Action -eq "plan") { return }
-
-    Write-Step "Backup"
-    Invoke-Backup
 
     Write-Step "Applying $($state.Pending.Count) migration(s)"
     Invoke-Sb @("db", "push", "--linked", "--yes") -Stream

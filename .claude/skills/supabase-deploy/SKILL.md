@@ -1,6 +1,6 @@
 ---
 name: supabase-deploy
-description: Safe, non-interactive deployment of Telly's Supabase backend (telly-prod) — status checks, migration dry-runs and pushes with backups and safety guards, edge-function deploys with secret checks, and local pgTAP runs. Use whenever a change touches supabase/migrations, supabase/functions or supabase secrets, when asked to deploy/apply/push the backend, or to check what is live. Also defines how to author migrations so they deploy safely.
+description: Safe, non-interactive deployment of Telly's Supabase backend (telly-prod) — status checks, migration dry-runs and pushes with safety guards, edge-function deploys with secret checks, and local pgTAP runs. Use whenever a change touches supabase/migrations, supabase/functions or supabase secrets, when asked to deploy/apply/push the backend, or to check what is live. Also defines how to author migrations so they deploy safely.
 ---
 
 # Supabase Deploy Skill: Telly Backend Deployment Guide
@@ -14,7 +14,6 @@ One script does every remote operation. **The only manual step is `supabase logi
 | Migrations | `supabase/migrations/YYYYMMDDHHMMSS_<snake_name>.sql` |
 | DB tests | `supabase/tests/database/NNN_<name>.test.sql` (pgTAP, run in CI) |
 | Edge functions | `supabase/functions/<name>/index.ts` + `handler.ts`; shared code in `_shared/`; Deno tests in `tests/` (CI) |
-| Backups | `supabase/backups/` (gitignored, never commit) |
 
 ---
 
@@ -26,7 +25,7 @@ Run from the repo root:
 $S = ".agents/skills/supabase-deploy/scripts/supabase_deploy.ps1"
 powershell -ExecutionPolicy Bypass -File $S                       # status (read-only)
 powershell -ExecutionPolicy Bypass -File $S -Action plan          # + db push --dry-run (read-only)
-powershell -ExecutionPolicy Bypass -File $S -Action push          # backup + apply pending migrations + verify
+powershell -ExecutionPolicy Bypass -File $S -Action push          # apply pending migrations + verify
 powershell -ExecutionPolicy Bypass -File $S -Action functions     # deploy changed edge functions
 powershell -ExecutionPolicy Bypass -File $S -Action functions -Functions tmdb-details,tmdb-search
 powershell -ExecutionPolicy Bypass -File $S -Action deploy        # push, then changed functions
@@ -37,7 +36,6 @@ powershell -ExecutionPolicy Bypass -File $S -Action test          # local pgTAP 
 |---|---|
 | `-Functions changed` (default) | Deploys functions that were never deployed, or whose folder or `_shared/` has a commit or uncommitted edit newer than the live version. |
 | `-Functions all` / `name1,name2` | Explicit selection. |
-| `-SkipBackup` | Push without a `pg_dump` backup when Docker isn't running. Use only with the user's OK. |
 | `-AllowFullSchema` | Allows a push into a remote with **no** migration history. Only for a brand-new project. |
 | `-ProjectRef <ref>` | Targets a different project deliberately. |
 
@@ -55,7 +53,7 @@ Exit codes:
   - the remote has migrations missing locally (drift);
   - a pending migration is older than the newest remote one (out of order);
   - the remote history is empty (would re-run the whole schema).
-- **Safe push sequence.** It always dry-runs first, then takes a schema and data backup into `supabase/backups/` when Docker is running, then pushes and re-lists to confirm nothing is still pending.
+- **Safe push sequence.** It always dry-runs first, then pushes and re-lists to confirm nothing is still pending. Supabase's platform daily backups are the recovery path; the script takes no local backup.
 - **Edge functions.** It bundles with `--use-api`, so Docker isn't needed. It checks each function's `Deno.env.get(...)` secrets against `supabase secrets list` and skips any function whose secret is missing. `TMDB_ACCESS_TOKEN` or `TMDB_API_KEY` satisfies the TMDB requirement; `WATCHMODE_API_KEY` is optional; the `SUPABASE_*` variables are provided by the platform.
 
 ## 3. Agent protocol
@@ -72,7 +70,6 @@ Exit codes:
    - `supabase functions deploy --prune`
    - `supabase migration repair`, unless the user explicitly asks
    - hand-written SQL in the dashboard as a substitute for a migration
-   - committing anything in `supabase/backups/`
 
 ## 4. Authoring migrations so they deploy safely
 
@@ -108,6 +105,5 @@ Exit codes:
 | Exit 3 "linked to …" | The repo is linked elsewhere. Confirm the intended target with the user, then pass `-ProjectRef`. |
 | Exit 3 "REMOTE-ONLY" | Someone applied a migration not in this branch. Pull it (`git pull`, or `supabase migration fetch --linked` with the user's OK) before pushing. |
 | Exit 3 "older than the newest remote" | Rename the pending file to a newer timestamp (it isn't applied yet, so renaming is safe). |
-| "Docker Desktop is not running" on push | Ask the user to start Docker for the backup, or get their OK for `-SkipBackup` (the platform's daily backups still exist). |
 | Function shows "missing secret" | See §3.5. |
 | `-Action test` fails to start | Docker Desktop must be running; ports come from `supabase/config.toml` (643xx). |
