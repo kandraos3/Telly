@@ -4,8 +4,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:telly_app/core/theme/telly_theme.dart';
 import 'package:telly_app/core/widgets/poster_image.dart';
 import 'package:telly_app/features/queue/data/watchlist_repository.dart';
+import 'package:telly_app/features/title_detail/data/title_detail_repository.dart';
 import 'package:telly_app/features/title_detail/domain/title_detail_models.dart';
 import 'package:telly_app/features/title_detail/presentation/screens/show_detail_screen.dart';
+import 'package:telly_app/features/title_detail/presentation/widgets/title_duel_record_section.dart';
 
 import '../../helpers/router_harness.dart';
 
@@ -136,10 +138,14 @@ void main() {
   Widget createTestWidget({
     required TitleDetail title,
     WatchlistRepository? watchlistRepo,
+    TitleDuelStats? duelStats,
   }) {
+    final detailRepo = FakeTitleDetailRepository([title]);
+    if (duelStats != null) detailRepo.duelStats[(title.id, title.mediaType)] = duelStats;
     return ProviderScope(
       overrides: [
         posterNetworkImagesProvider.overrideWithValue(false),
+        titleDetailRepositoryProvider.overrideWithValue(detailRepo),
         if (watchlistRepo != null)
           watchlistRepositoryProvider.overrideWithValue(watchlistRepo),
       ],
@@ -190,8 +196,43 @@ void main() {
 
       // Community Survival Rate
       expect(find.text('COMMUNITY SURVIVAL RATE'), findsOneWidget);
-      expect(find.text('82% Completed'), findsOneWidget);
+      expect(find.text('82% completed all seasons', findRichText: true), findsOneWidget);
       expect(find.text('Drop point: S1E04'), findsOneWidget);
+    });
+
+    testWidgets('FE-DETAIL-02: live duel record and tier distribution replace placeholders', (tester) async {
+      await tester.pumpWidget(createTestWidget(
+        title: testTvShow,
+        duelStats: const TitleDuelStats(
+          totalDuels: 40,
+          wins: 31,
+          topDefeated: TopDefeatedOpponent(titleId: 76331, title: 'Succession', count: 6),
+          tiers: TierDistribution(god: 5, prestige: 3, great: 1, other: 1),
+        ),
+      ));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.byKey(const Key('title_tier_distribution')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('78%'), findsOneWidget); // 31 / 40
+      expect(find.text('40'), findsOneWidget);
+      expect(find.text('Duels Fought'), findsOneWidget);
+      expect(find.text('Most often beats Succession (6 head-to-head wins).'), findsOneWidget);
+      expect(find.text('👑 50% God'), findsOneWidget);
+      expect(find.text('💤 10% Other'), findsOneWidget);
+      expect(find.text('1477'), findsNothing);
+      expect(find.textContaining('Matches Contested'), findsNothing);
+    });
+
+    testWidgets('FE-DETAIL-02: an unduelled title shows the honest empty state', (tester) async {
+      await tester.pumpWidget(createTestWidget(title: testMovie));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.byKey(const Key('title_duel_record_empty')));
+      await tester.pumpAndSettle();
+
+      expect(find.text(TitleDuelRecordSection.emptyMessage), findsOneWidget);
+      expect(find.byKey(const Key('title_tier_distribution')), findsNothing);
+      expect(find.text('Duel Win Rate'), findsNothing);
     });
 
     testWidgets('renders Movie with unranked status and no seasons accordion', (tester) async {

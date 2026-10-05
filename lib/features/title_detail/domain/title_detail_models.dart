@@ -295,3 +295,86 @@ class CommonDropPoint {
     );
   }
 }
+
+/// Live community duel record and canon tier spread from `get_title_duel_stats` (FE-DETAIL-02).
+class TitleDuelStats {
+  final int totalDuels;
+  final int wins;
+  final TopDefeatedOpponent? topDefeated;
+  final TierDistribution tiers;
+
+  const TitleDuelStats({
+    required this.totalDuels,
+    required this.wins,
+    this.topDefeated,
+    this.tiers = const TierDistribution(),
+  });
+
+  static const empty = TitleDuelStats(totalDuels: 0, wins: 0);
+
+  bool get hasDuels => totalDuels > 0;
+
+  /// Whole-percent win rate, or null before the first duel.
+  int? get winRatePct => hasDuels ? (100 * wins / totalDuels).round() : null;
+
+  factory TitleDuelStats.fromJson(Map<String, dynamic> json) {
+    final top = json['top_defeated'];
+    final tiers = json['tiers'];
+    return TitleDuelStats(
+      totalDuels: (json['total_duels'] as num?)?.toInt() ?? 0,
+      wins: (json['wins'] as num?)?.toInt() ?? 0,
+      topDefeated: top is Map ? TopDefeatedOpponent.fromJson(Map<String, dynamic>.from(top)) : null,
+      tiers: tiers is Map ? TierDistribution.fromJson(Map<String, dynamic>.from(tiers)) : const TierDistribution(),
+    );
+  }
+}
+
+class TopDefeatedOpponent {
+  final int titleId;
+  final String title;
+  final int count;
+
+  const TopDefeatedOpponent({required this.titleId, required this.title, required this.count});
+
+  factory TopDefeatedOpponent.fromJson(Map<String, dynamic> json) => TopDefeatedOpponent(
+        titleId: (json['title_id'] as num).toInt(),
+        title: json['title'] as String,
+        count: (json['count'] as num).toInt(),
+      );
+}
+
+/// How many rankers place the title in each canon tier (style guide §2.2 bands).
+class TierDistribution {
+  final int god;
+  final int prestige;
+  final int great;
+  final int other;
+
+  const TierDistribution({this.god = 0, this.prestige = 0, this.great = 0, this.other = 0});
+
+  int get total => god + prestige + great + other;
+
+  /// Whole percentages that always sum to 100 (largest-remainder rounding); null when empty.
+  List<int>? get percentages {
+    final counts = [god, prestige, great, other];
+    if (total == 0) return null;
+    final exact = [for (final c in counts) 100 * c / total];
+    final floors = [for (final e in exact) e.floor()];
+    var remainder = 100 - floors.fold<int>(0, (a, b) => a + b);
+    final order = List.generate(counts.length, (i) => i)
+      ..sort((a, b) => (exact[b] - floors[b]).compareTo(exact[a] - floors[a]));
+    for (final i in order) {
+      if (remainder == 0) break;
+      floors[i]++;
+      remainder--;
+    }
+    return floors;
+  }
+
+  factory TierDistribution.fromJson(Map<String, dynamic> json) => TierDistribution(
+        god: (json['god'] as num?)?.toInt() ?? 0,
+        prestige: (json['prestige'] as num?)?.toInt() ?? 0,
+        great: (json['great'] as num?)?.toInt() ?? 0,
+        other: (json['other'] as num?)?.toInt() ?? 0,
+      );
+}

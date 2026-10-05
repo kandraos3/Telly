@@ -16,6 +16,7 @@ import 'package:telly_app/features/queue/data/watchlist_repository.dart';
 import 'package:telly_app/features/ranking/domain/canon_tier.dart';
 import '../../data/title_detail_repository.dart';
 import '../../domain/title_detail_models.dart';
+import '../widgets/title_duel_record_section.dart';
 
 /// SCR-08: Show Detail Page (FE-611).
 /// Conforms to `docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md` §SCR-08
@@ -231,9 +232,10 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                   ],
 
                   // COMMUNITY SURVIVAL RATE section (TV Series)
-                  if (title.isTv &&
-                      title.socialSummary?.survival != null) ...[
-                    _buildSurvivalRateSection(title.socialSummary!.survival!),
+                  // Hidden until someone has finished, watched or dropped it (FE-DETAIL-02).
+                  if (title.isTv && title.socialSummary?.survival?.completedPct != null) ...[
+                    _buildSurvivalRateSection(
+                        title.socialSummary!.survival!, title.socialSummary!.survival!.completedPct!),
                     const SizedBox(height: 32),
                   ],
 
@@ -241,12 +243,8 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                   _buildCastAndDirectorSection(title),
                   const SizedBox(height: 28),
 
-                  // TOURNAMENT & DUEL RECORD
-                  _buildTournamentDuelStatsSection(title),
-                  const SizedBox(height: 28),
-
-                  // CANON TIER DISTRIBUTION
-                  _buildTierDistributionSection(title),
+                  // TOURNAMENT & DUEL RECORD + CANON TIER DISTRIBUTION (live, FE-DETAIL-02)
+                  TitleDuelRecordSection(titleId: title.id, mediaType: title.mediaType),
                   const SizedBox(height: 28),
 
                   // IDEAL DOUBLE FEATURE / COMPANION PAIRINGS (Movies only)
@@ -872,207 +870,6 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
     );
   }
 
-  Widget _buildTournamentDuelStatsSection(TitleDetail title) {
-    final score = title.communityScore ?? 8.5;
-    final winRate = ((score - 5.0) / 5.0 * 60 + 40).clamp(48.0, 96.0).round();
-    final totalDuels = 920 + (title.id % 880);
-    final isMasterpiece = winRate >= 82;
-    final controversy = isMasterpiece ? 'Consensus Masterpiece' : 'High Debate Index';
-    final upsetOverTitle = title.isMovie ? 'The Dark Knight' : 'Breaking Bad';
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: TellyColors.backgroundSurface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: TellyColors.borderGlass),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.bolt_rounded, size: 16, color: TellyColors.phosphorLime),
-              const SizedBox(width: 6),
-              Text(
-                'TOURNAMENT & DUEL RECORD',
-                style: TellyTypography.labelSmall(
-                  color: TellyColors.textPrimary,
-                ).copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              // Win Rate
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '$winRate%',
-                      style: TellyTypography.monoDigits(
-                        color: TellyColors.phosphorLime,
-                      ).copyWith(fontSize: 22, fontWeight: FontWeight.w900),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Duel Win Rate',
-                      style: TellyTypography.caption(color: TellyColors.textPrimary),
-                    ),
-                  ],
-                ),
-              ),
-              // Total Duels
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '$totalDuels',
-                      style: TellyTypography.monoDigits(
-                        color: TellyColors.warmAmber,
-                      ).copyWith(fontSize: 22, fontWeight: FontWeight.w900),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Matches Contested',
-                      style: TellyTypography.caption(color: TellyColors.textPrimary),
-                    ),
-                  ],
-                ),
-              ),
-              // Controversy / Variance
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      isMasterpiece ? 'Low Var' : 'Spicy',
-                      style: TellyTypography.labelMedium(
-                        color: isMasterpiece ? TellyColors.phosphorLime : TellyColors.neonCoral,
-                      ).copyWith(fontWeight: FontWeight.w900),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      controversy,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TellyTypography.caption(color: TellyColors.textPrimary),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            decoration: BoxDecoration(
-              color: TellyColors.backgroundCard,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: TellyColors.borderGlass),
-            ),
-            child: Row(
-              children: [
-                const Text('⚡', style: TextStyle(fontSize: 13)),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Defeated $upsetOverTitle in 24 head-to-head tournament matchups.',
-                    style: TellyTypography.caption(color: TellyColors.textPrimary),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTierDistributionSection(TitleDetail title) {
-    final score = title.communityScore ?? 8.5;
-    final godPct = (score >= 9.2 ? 65 : (score >= 8.5 ? 30 : 10)).clamp(5, 80);
-    final prestigePct = (score >= 8.5 ? 45 : 35).clamp(10, 50);
-    final greatPct = (100 - godPct - prestigePct - 5).clamp(5, 40);
-    final midPct = (100 - godPct - prestigePct - greatPct).clamp(1, 20);
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: TellyColors.backgroundSurface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: TellyColors.borderGlass),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.bar_chart_rounded, size: 16, color: TellyColors.phosphorLime),
-              const SizedBox(width: 6),
-              Text(
-                'CANON TIER DISTRIBUTION',
-                style: TellyTypography.labelSmall(
-                  color: TellyColors.textPrimary,
-                ).copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          // Stacked distribution bar
-          ClipRRect(
-            borderRadius: BorderRadius.circular(6),
-            child: SizedBox(
-              height: 12,
-              child: Row(
-                children: [
-                  Expanded(flex: godPct, child: Container(color: TellyColors.phosphorLime)),
-                  Expanded(flex: prestigePct, child: Container(color: TellyColors.electricViolet)),
-                  Expanded(flex: greatPct, child: Container(color: TellyColors.warmAmber)),
-                  Expanded(flex: midPct, child: Container(color: TellyColors.strokeSubtle)),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildTierLegendChip('👑 $godPct%', 'God', TellyColors.phosphorLime),
-              _buildTierLegendChip('🎖️ $prestigePct%', 'Prestige', TellyColors.electricViolet),
-              _buildTierLegendChip('✨ $greatPct%', 'Great', TellyColors.warmAmber),
-              _buildTierLegendChip('💤 $midPct%', 'Other', TellyColors.textTertiary),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTierLegendChip(String pct, String tier, Color color) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
-        const SizedBox(width: 4),
-        Text(
-          '$pct $tier',
-          style: TellyTypography.caption(color: TellyColors.textPrimary).copyWith(
-            fontSize: 10,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildFriendsWhoRankedSection(List<FriendTitleRanking> friends) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1493,8 +1290,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
     );
   }
 
-  Widget _buildSurvivalRateSection(CommunitySurvivalSummary survival) {
-    final completedPct = survival.completedPct ?? 85;
+  Widget _buildSurvivalRateSection(CommunitySurvivalSummary survival, int completedPct) {
     final dropPoint = survival.commonDropPoint;
 
     return Container(
@@ -1522,13 +1318,24 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
           const SizedBox(height: 12),
           Row(
             children: [
-              Text(
-                '$completedPct% Completed',
-                style: TellyTypography.titleMedium(
-                  color: TellyColors.phosphorLime,
-                ).copyWith(fontWeight: FontWeight.w800),
+              Expanded(
+                child: Text.rich(
+                  key: const Key('survival_completed_text'),
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: '$completedPct%',
+                        style: TellyTypography.titleMedium(color: TellyColors.phosphorLime)
+                            .copyWith(fontWeight: FontWeight.w800),
+                      ),
+                      TextSpan(
+                        text: ' completed all seasons',
+                        style: TellyTypography.caption(color: TellyColors.textSecondary),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              const Spacer(),
               if (dropPoint?.season != null)
                 Text(
                   'Drop point: S${dropPoint!.season}E${(dropPoint.episode ?? 1).toString().padLeft(2, '0')}',

@@ -1992,6 +1992,15 @@ Tickets ingested through the `issue-manager` skill. Each entry mirrors its GitHu
 - **Testing & Verification**:
   - [x] Window unit tests, offscreen PNG dimension test, service share test, SCR-09→SCR-12 flow test incl. share.
 
+#### `FE-DETAIL-02`: TitleDetail Live Duel Record or Clean Empty State (#12)
+- **Spec Reference**: `SCR-08` in [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md); style guide §2.2 tier bands
+- **Granular Tasks**:
+  - [x] Migration `20261010001000_title_duel_stats.sql`: `get_title_duel_stats` (duels, wins, most-defeated opponent, tier counts).
+  - [x] `TitleDuelRecordSection` renders the live record + tier distribution, or *"Not enough duel data yet. Duel this title to establish its record!"*.
+  - [x] Removed the fabricated win rate / match count / upset line / tier chart; survival hidden without data and labelled "completed all seasons" (TV only).
+- **Testing & Verification**:
+  - [x] Model unit tests (parsing, percentages sum to 100), widget tests for live and empty states, pgTAP `013_title_duel_stats.test.sql` (runs in CI).
+
 ---
 
 ## 🏆 Sprint Deliverables Summary Matrix

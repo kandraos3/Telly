@@ -9,6 +9,9 @@ abstract interface class TitleDetailRepository {
     required int id,
     required String mediaType,
   });
+
+  /// Community duel record and tier spread (FE-DETAIL-02); [TitleDuelStats.empty] when none.
+  Future<TitleDuelStats> fetchDuelStats({required int id, required String mediaType});
 }
 
 class SupabaseTitleDetailRepository implements TitleDetailRepository {
@@ -75,10 +78,19 @@ class SupabaseTitleDetailRepository implements TitleDetailRepository {
       socialSummaryJson: socialSummaryJson,
     );
   }
+
+  @override
+  Future<TitleDuelStats> fetchDuelStats({required int id, required String mediaType}) async {
+    final res = await _client.rpc('get_title_duel_stats', params: {'p_title_id': id, 'p_media_type': mediaType});
+    return res is Map ? TitleDuelStats.fromJson(Map<String, dynamic>.from(res)) : TitleDuelStats.empty;
+  }
 }
 
 class FakeTitleDetailRepository implements TitleDetailRepository {
   final Map<(int, String), TitleDetail> _titles = {};
+
+  /// Duel stats by title; titles without an entry report [TitleDuelStats.empty].
+  final Map<(int, String), TitleDuelStats> duelStats = {};
 
   FakeTitleDetailRepository([List<TitleDetail> initial = const []]) {
     for (final t in initial) {
@@ -97,6 +109,10 @@ class FakeTitleDetailRepository implements TitleDetailRepository {
   }) async {
     return _titles[(id, mediaType)];
   }
+
+  @override
+  Future<TitleDuelStats> fetchDuelStats({required int id, required String mediaType}) async =>
+      duelStats[(id, mediaType)] ?? TitleDuelStats.empty;
 }
 
 final titleDetailRepositoryProvider = Provider<TitleDetailRepository>((ref) {
@@ -109,4 +125,9 @@ final titleDetailFutureProvider = FutureProvider.family<TitleDetail?, (int, Stri
         id: id,
         mediaType: mediaType,
       );
+});
+
+final titleDuelStatsProvider = FutureProvider.family<TitleDuelStats, (int, String)>((ref, args) {
+  final (id, mediaType) = args;
+  return ref.watch(titleDetailRepositoryProvider).fetchDuelStats(id: id, mediaType: mediaType);
 });
