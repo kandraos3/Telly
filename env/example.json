@@ -5,7 +5,6 @@
   "SENTRY_DSN": "",
   "POSTHOG_API_KEY": "",
   "POSTHOG_HOST": "https://app.posthog.com",
-  "PRIVACY_POLICY_URL": "https://telly.app/privacy",
-  "TERMS_URL": "https://telly.app/terms",
+  "APP_SHARE_URL": "https://play.google.com/store/apps/details?id=app.telly.mobile",
   "AUTH_REDIRECT_URL": "app.telly.mobile://login-callback"
 }

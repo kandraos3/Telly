@@ -1,5 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+/// Store listing used as the public share link while telly.app is not deployed.
+const kDefaultShareUrl = 'https://play.google.com/store/apps/details?id=app.telly.mobile';
+
 /// Runtime configuration injected at build time with
 /// `flutter run --dart-define-from-file=env/dev.json` (FE-601).
 ///
@@ -12,8 +15,10 @@ class AppConfig {
   final String sentryDsn;
   final String posthogApiKey;
   final String posthogHost;
-  final String privacyPolicyUrl;
-  final String termsUrl;
+
+  /// Link appended to shared captions. Defaults to the store listing until the
+  /// telly.app landing page is live (FE-LEGAL-01); override with `APP_SHARE_URL`.
+  final String shareUrl;
 
   /// Deep link the OAuth providers redirect back to (registered in iOS/Android in FE-602).
   final String authRedirectUrl;
@@ -25,8 +30,7 @@ class AppConfig {
     this.sentryDsn = '',
     this.posthogApiKey = '',
     this.posthogHost = 'https://app.posthog.com',
-    this.privacyPolicyUrl = 'https://telly.app/privacy',
-    this.termsUrl = 'https://telly.app/terms',
+    this.shareUrl = kDefaultShareUrl,
     this.authRedirectUrl = 'app.telly.mobile://login-callback',
   });
 
@@ -37,8 +41,7 @@ class AppConfig {
         sentryDsn: String.fromEnvironment('SENTRY_DSN'),
         posthogApiKey: String.fromEnvironment('POSTHOG_API_KEY'),
         posthogHost: String.fromEnvironment('POSTHOG_HOST', defaultValue: 'https://app.posthog.com'),
-        privacyPolicyUrl: String.fromEnvironment('PRIVACY_POLICY_URL', defaultValue: 'https://telly.app/privacy'),
-        termsUrl: String.fromEnvironment('TERMS_URL', defaultValue: 'https://telly.app/terms'),
+        shareUrl: String.fromEnvironment('APP_SHARE_URL', defaultValue: kDefaultShareUrl),
         authRedirectUrl: String.fromEnvironment('AUTH_REDIRECT_URL', defaultValue: 'app.telly.mobile://login-callback'),
       );
 

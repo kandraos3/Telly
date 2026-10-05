@@ -2019,6 +2019,14 @@ Tickets ingested through the `issue-manager` skill. Each entry mirrors its GitHu
 - **Testing & Verification**:
   - [x] Verified against `telly-prod`: `status` and `plan` (read-only); dry-run with a throwaway migration; out-of-order guard refuses with exit 3.
 
+#### `FE-LEGAL-01`: Settings Legal Links Open the In-App Viewer; Share Link Falls Back to the Store (#39)
+- **Spec Reference**: [**`legal/TERMS_OF_SERVICE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/legal/TERMS_OF_SERVICE.md), [**`legal/PRIVACY_POLICY.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/legal/PRIVACY_POLICY.md); `SCR-20`
+- **Granular Tasks**:
+  - [x] SCR-20 Terms of Service / Privacy Policy rows push `LegalDocumentScreen` (bundled Markdown) instead of launching `telly.app`.
+  - [x] `AppConfig.shareUrl` (`APP_SHARE_URL`, default: Play Store listing) replaces the unused legal URLs; starter-canon share captions use it instead of `https://telly.app`.
+- **Testing & Verification**:
+  - [x] Settings widget tests open both documents in the viewer and assert no `telly.app` text; share caption test asserts the store link.
+
 ---
 
 ## 🏆 Sprint Deliverables Summary Matrix

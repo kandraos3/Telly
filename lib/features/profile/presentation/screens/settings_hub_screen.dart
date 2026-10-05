@@ -10,7 +10,8 @@ import '../../../../core/services/biometrics_service.dart';
 import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
-import 'package:url_launcher/url_launcher.dart';
+import '../../../legal/domain/legal_markdown.dart';
+import '../../../legal/presentation/screens/legal_document_screen.dart';
 import '../../../onboarding/presentation/screens/streaming_setup_screen.dart';
 import '../../data/profile_repository.dart';
 import '../../data/settings_services.dart';
@@ -290,17 +291,17 @@ class SettingsHubScreen extends ConsumerWidget {
             _Tile(
               key: const Key('settings_terms'),
               title: 'Terms of Service',
-              subtitle: 'telly.app/terms',
-              trailing: const Icon(Icons.open_in_new, color: TellyColors.textTertiary, size: 18),
-              onTap: () => _launchLegalUrl('https://telly.app/terms'),
+              subtitle: 'Read in app',
+              trailing: const Icon(Icons.chevron_right, color: TellyColors.textTertiary, size: 20),
+              onTap: () => LegalDocumentScreen.open(context, LegalDocument.terms),
             ),
             const Divider(color: TellyColors.borderGlass),
             _Tile(
               key: const Key('settings_privacy'),
               title: 'Privacy Policy',
-              subtitle: 'telly.app/privacy',
-              trailing: const Icon(Icons.open_in_new, color: TellyColors.textTertiary, size: 18),
-              onTap: () => _launchLegalUrl('https://telly.app/privacy'),
+              subtitle: 'Read in app',
+              trailing: const Icon(Icons.chevron_right, color: TellyColors.textTertiary, size: 20),
+              onTap: () => LegalDocumentScreen.open(context, LegalDocument.privacy),
             ),
             const Divider(color: TellyColors.borderGlass),
             _Tile(
@@ -322,13 +323,6 @@ class SettingsHubScreen extends ConsumerWidget {
         ],
       ),
     );
-  }
-
-  Future<void> _launchLegalUrl(String url) async {
-    final uri = Uri.parse(url);
-    try {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } catch (_) {}
   }
 
   Future<void> _confirmAccountDeletion(BuildContext context, WidgetRef ref) async {

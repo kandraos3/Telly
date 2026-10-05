@@ -7,6 +7,8 @@ import 'package:telly_app/core/database/database.dart';
 import 'package:telly_app/core/database/database_provider.dart';
 import 'package:telly_app/core/services/biometrics_service.dart';
 import 'package:telly_app/features/auth/data/auth_repository.dart';
+import 'package:telly_app/features/legal/domain/legal_markdown.dart';
+import 'package:telly_app/features/legal/presentation/screens/legal_document_screen.dart';
 import 'package:telly_app/features/onboarding/data/onboarding_repository.dart';
 import 'package:telly_app/features/profile/data/profile_repository.dart';
 import 'package:telly_app/features/profile/data/settings_services.dart';
@@ -190,12 +192,22 @@ void main() {
 
       expect(terms, findsOneWidget);
       expect(find.descendant(of: terms, matching: find.text('Terms of Service')), findsOneWidget);
-      expect(find.descendant(of: terms, matching: find.text('telly.app/terms')), findsOneWidget);
-
       expect(privacy, findsOneWidget);
       expect(find.descendant(of: privacy, matching: find.text('Privacy Policy')), findsOneWidget);
-      expect(find.descendant(of: privacy, matching: find.text('telly.app/privacy')), findsOneWidget);
+      expect(find.textContaining('telly.app'), findsNothing, reason: 'FE-LEGAL-01: no links to the undeployed site');
     });
+
+    for (final (key, doc) in [('settings_terms', LegalDocument.terms), ('settings_privacy', LegalDocument.privacy)]) {
+      testWidgets('${doc.title} opens the in-app legal viewer (FE-LEGAL-01)', (tester) async {
+        await pump(tester);
+        await tester.tap(find.byKey(Key(key)));
+        await tester.pumpAndSettle();
+
+        final viewer = tester.widget<LegalDocumentScreen>(find.byType(LegalDocumentScreen));
+        expect(viewer.document, doc);
+        expect(find.descendant(of: find.byType(AppBar), matching: find.text(doc.title)), findsOneWidget);
+      });
+    }
 
     testWidgets('account deletion cancelled preserves local database and session (LEGAL-601)', (tester) async {
       await seedCanon(db, 'tv', ['Succession']);

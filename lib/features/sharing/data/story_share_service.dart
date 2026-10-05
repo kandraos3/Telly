@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../core/config/app_config.dart';
 import '../domain/reveal_story.dart';
 import '../presentation/widgets/reveal_story_card.dart';
 import '../presentation/widgets/story_card_renderer.dart';
@@ -21,10 +22,12 @@ abstract interface class StoryShareService {
 class SharePlusStoryShareService implements StoryShareService {
   final Future<void> Function(ShareParams params) _share;
   final Future<Uint8List> Function(RevealStory story) _renderReveal;
+  final String shareUrl;
 
   SharePlusStoryShareService({
     Future<void> Function(ShareParams params)? share,
     Future<Uint8List> Function(RevealStory story)? renderReveal,
+    this.shareUrl = kDefaultShareUrl,
   })  : _share = share ?? ((params) => SharePlus.instance.share(params)),
         _renderReveal = renderReveal ?? ((story) => StoryCardRenderer.renderOffscreen(RevealStoryCard(story: story)));
 
@@ -37,7 +40,7 @@ class SharePlusStoryShareService implements StoryShareService {
     for (var i = 0; i < topTitles.length; i++) {
       buffer.writeln('#${i + 1} ${topTitles[i]}');
     }
-    buffer.writeln('\nRank your own favorites on Telly: https://telly.app');
+    buffer.writeln('\nRank your own favorites on Telly: $shareUrl');
     await _share(ShareParams(text: buffer.toString(), subject: 'My $canonLabel Top Shows'));
   }
 
@@ -69,4 +72,5 @@ class FakeStoryShareService implements StoryShareService {
   Future<void> shareRankReveal(RevealStory story) async => sharedReveals.add(story);
 }
 
-final storyShareServiceProvider = Provider<StoryShareService>((ref) => SharePlusStoryShareService());
+final storyShareServiceProvider = Provider<StoryShareService>(
+    (ref) => SharePlusStoryShareService(shareUrl: ref.watch(appConfigProvider).shareUrl));

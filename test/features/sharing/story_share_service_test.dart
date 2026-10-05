@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:telly_app/core/config/app_config.dart';
 import 'package:telly_app/features/sharing/data/story_share_service.dart';
 import 'package:telly_app/features/sharing/domain/reveal_story.dart';
 import 'package:telly_app/features/sharing/presentation/widgets/story_card_renderer.dart';
@@ -29,7 +30,8 @@ void main() {
       expect(capturedText, contains('#1 The Wire'));
       expect(capturedText, contains('#2 Succession'));
       expect(capturedText, contains('#3 Severance'));
-      expect(capturedText, contains('https://telly.app'));
+      expect(capturedText, contains(kDefaultShareUrl));
+      expect(capturedText, isNot(contains('telly.app')), reason: 'FE-LEGAL-01: telly.app is not deployed yet');
     });
 
     test('FakeStoryShareService records shared stories without platform channels', () async {
