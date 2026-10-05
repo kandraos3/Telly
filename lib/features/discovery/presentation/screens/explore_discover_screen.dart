@@ -32,12 +32,33 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
   String _searchQuery = '';
   SearchFilterTab _activeTab = SearchFilterTab.all;
   bool _isSearching = false;
+  bool _searchFocused = false;
 
   List<TitleSearchResult> _titleResults = [];
   List<UserSearchResult> _userResults = [];
 
   @override
+  void initState() {
+    super.initState();
+    _searchFocusNode.addListener(_onSearchFocusChanged);
+  }
+
+  void _onSearchFocusChanged() {
+    if (_searchFocused != _searchFocusNode.hasFocus) {
+      setState(() => _searchFocused = _searchFocusNode.hasFocus);
+    }
+  }
+
+  /// Runs [query] as if typed, e.g. from a recent-search chip.
+  void _runSearch(String query) {
+    _searchController.text = query;
+    _searchController.selection = TextSelection.collapsed(offset: query.length);
+    _onSearchChanged(query);
+  }
+
+  @override
   void dispose() {
+    _searchFocusNode.removeListener(_onSearchFocusChanged);
     _searchController.dispose();
     _searchFocusNode.dispose();
     super.dispose();
@@ -355,7 +376,12 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
             // If user is searching, render Search Results
             if (_searchQuery.isNotEmpty)
               _buildSearchResults()
+            else if (_searchFocused)
+              _buildSearchZeroState()
             else ...[
+              // 2. Recommended for You (FE-EXPLORE-03)
+              _buildRecommendedSection(),
+
               // 2. Network Battlegrounds Strip
               battlegroundsAsync.when(
                 loading: () => const Center(
@@ -403,6 +429,8 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
         controller: _searchController,
         focusNode: _searchFocusNode,
         onChanged: _onSearchChanged,
+        onSubmitted: (q) => ref.read(recentSearchesProvider.notifier).add(q),
+        textInputAction: TextInputAction.search,
         style: const TextStyle(color: TellyColors.textPrimary, fontSize: 14),
         decoration: InputDecoration(
           hintText: 'Search shows, actors, showrunners, friends...',
@@ -508,7 +536,10 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
 
   Widget _buildTitleResultTile(TitleSearchResult title) {
     return InkWell(
-      onTap: () => context.push(Routes.title(title.mediaType, title.id)),
+      onTap: () {
+        ref.read(recentSearchesProvider.notifier).add(_searchQuery);
+        context.push(Routes.title(title.mediaType, title.id));
+      },
       borderRadius: BorderRadius.circular(12),
       child: Container(
         margin: const EdgeInsets.only(bottom: 8),
@@ -568,6 +599,7 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
     return InkWell(
       key: Key('user_result_tile_${user.username}'),
       onTap: () {
+        ref.read(recentSearchesProvider.notifier).add(_searchQuery);
         if (isMe) {
           context.go(Routes.canon);
         } else {
@@ -617,6 +649,176 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _sectionHeader(String label, Color accent, {Widget? trailing}) {
+    return Row(
+      children: [
+        Container(
+          width: 3,
+          height: 14,
+          decoration: BoxDecoration(
+            color: accent,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            label,
+            style: TellyTypography.labelSmall(color: TellyColors.textPrimary)
+                .copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
+          ),
+        ),
+        if (trailing != null) trailing,
+      ],
+    );
+  }
+
+  /// "Recommended for You" carousel (FE-EXPLORE-03), fed by `get_recommended_titles`.
+  Widget _buildRecommendedSection() {
+    final recommended = ref.watch(recommendedTitlesProvider).valueOrNull ?? const [];
+    if (recommended.isEmpty) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 28),
+      child: Column(
+        key: const Key('explore_recommended_section'),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _sectionHeader('RECOMMENDED FOR YOU', TellyColors.phosphorLime),
+          const SizedBox(height: 14),
+          SizedBox(
+            height: 248,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: recommended.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              itemBuilder: (context, index) => _RecommendedTitleCard(
+                item: recommended[index],
+                onTap: () => context.push(
+                  Routes.title(recommended[index].mediaType, recommended[index].titleId),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Shown while the search field is focused but empty: recent searches + trending.
+  Widget _buildSearchZeroState() {
+    final recent = ref.watch(recentSearchesProvider);
+    final trending = ref.watch(trendingTitlesProvider).valueOrNull ?? const [];
+
+    return Column(
+      key: const Key('explore_search_zero_state'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (recent.isNotEmpty) ...[
+          _sectionHeader(
+            'RECENT SEARCHES',
+            TellyColors.electricViolet,
+            trailing: TextButton(
+              key: const Key('explore_clear_recent_btn'),
+              onPressed: () => ref.read(recentSearchesProvider.notifier).clear(),
+              child: Text(
+                'Clear',
+                style: TellyTypography.labelMedium(color: TellyColors.textTertiary),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final q in recent)
+                InputChip(
+                  key: Key('recent_search_$q'),
+                  label: Text(q),
+                  onPressed: () => _runSearch(q),
+                  onDeleted: () => ref.read(recentSearchesProvider.notifier).remove(q),
+                  deleteIcon: const Icon(Icons.close, size: 14),
+                  backgroundColor: TellyColors.backgroundSurface,
+                  side: const BorderSide(color: TellyColors.borderGlass),
+                  labelStyle: TellyTypography.labelMedium(color: TellyColors.textSecondary),
+                ),
+            ],
+          ),
+          const SizedBox(height: 24),
+        ],
+        _sectionHeader('TRENDING NOW', TellyColors.neonCoral),
+        const SizedBox(height: 12),
+        if (trending.isEmpty)
+          Text(
+            'Start typing to search titles and people.',
+            style: TellyTypography.bodyMedium(color: TellyColors.textTertiary),
+          )
+        else
+          for (final (i, t) in trending.indexed)
+            InkWell(
+              key: Key('trending_title_${t.titleId}'),
+              borderRadius: BorderRadius.circular(12),
+              onTap: () => context.push(Routes.title(t.mediaType, t.titleId)),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 28,
+                      child: Text(
+                        '${i + 1}',
+                        style: TellyTypography.titleMedium(color: TellyColors.textTertiary)
+                            .copyWith(fontWeight: FontWeight.w800),
+                      ),
+                    ),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: SizedBox(
+                        width: 36,
+                        height: 54,
+                        child: PosterImage(
+                          posterPath: t.posterPath,
+                          fallback: const Center(
+                            child: Icon(Icons.movie_outlined, size: 16, color: TellyColors.textTertiary),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            t.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TellyTypography.titleMedium(color: TellyColors.textPrimary)
+                                .copyWith(fontWeight: FontWeight.w700),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            [
+                              t.mediaType == 'movie' ? 'Movie' : 'TV Show',
+                              if (t.releaseYear != null) '${t.releaseYear}',
+                              if (t.network != null && t.mediaType == 'tv') t.network!,
+                            ].join(' • '),
+                            style: TellyTypography.caption(color: TellyColors.textTertiary),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.trending_up, size: 18, color: TellyColors.neonCoral),
+                  ],
+                ),
+              ),
+            ),
+        const SizedBox(height: 24),
+      ],
     );
   }
 
@@ -898,6 +1100,80 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
               ),
             )),
       ],
+    );
+  }
+}
+
+/// Poster card in the "Recommended for You" carousel (FE-EXPLORE-03).
+class _RecommendedTitleCard extends StatelessWidget {
+  const _RecommendedTitleCard({required this.item, required this.onTap});
+
+  final RecommendedTitle item;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      key: Key('recommended_title_${item.titleId}'),
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: SizedBox(
+        width: 124,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    width: 124,
+                    height: 180,
+                    decoration: BoxDecoration(
+                      color: TellyColors.backgroundSurface,
+                      border: Border.all(color: TellyColors.borderGlass),
+                    ),
+                    child: PosterImage(
+                      posterPath: item.posterPath,
+                      fallback: const Center(
+                        child: Icon(Icons.movie_outlined, size: 28, color: TellyColors.textTertiary),
+                      ),
+                    ),
+                  ),
+                ),
+                if (item.communityScore != null)
+                  Positioned(
+                    top: 6,
+                    right: 6,
+                    child: TellyNeonBadge(
+                      label: item.communityScore!.toStringAsFixed(1),
+                      variant: TellyBadgeVariant.winner,
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              item.title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TellyTypography.labelLarge(color: TellyColors.textPrimary)
+                  .copyWith(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              item.reasonLabel,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TellyTypography.caption(
+                color: item.reason == RecommendationReason.becauseYouLoved
+                    ? TellyColors.phosphorLime
+                    : TellyColors.textTertiary,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

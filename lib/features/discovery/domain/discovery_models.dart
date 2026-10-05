@@ -167,3 +167,62 @@ class UserSearchResult {
   }
 }
 
+
+/// Why a title is recommended (FE-EXPLORE-03), mirroring `reason_kind` from
+/// `get_recommended_titles`.
+enum RecommendationReason { becauseYouLoved, trending, topRated }
+
+/// A title from `get_recommended_titles` / `get_trending_titles` (FE-EXPLORE-03).
+class RecommendedTitle {
+  final int titleId;
+  final String mediaType;
+  final String title;
+  final String? posterPath;
+  final String? network;
+  final double? communityScore;
+  final int? releaseYear;
+  final RecommendationReason reason;
+
+  /// The loved title this pick resembles, when [reason] is [RecommendationReason.becauseYouLoved].
+  final String? reasonTitle;
+
+  const RecommendedTitle({
+    required this.titleId,
+    required this.mediaType,
+    required this.title,
+    this.posterPath,
+    this.network,
+    this.communityScore,
+    this.releaseYear,
+    this.reason = RecommendationReason.topRated,
+    this.reasonTitle,
+  });
+
+  factory RecommendedTitle.fromJson(Map<String, dynamic> json) {
+    final reasonTitle = json['reason_title']?.toString();
+    return RecommendedTitle(
+      titleId: (json['title_id'] as num?)?.toInt() ?? 0,
+      mediaType: json['media_type']?.toString() ?? 'tv',
+      title: json['title']?.toString() ?? '',
+      posterPath: json['poster_path']?.toString(),
+      network: json['original_network']?.toString(),
+      communityScore: (json['global_community_score'] as num?)?.toDouble(),
+      releaseYear: (json['release_year'] as num?)?.toInt(),
+      reason: switch (json['reason_kind']?.toString()) {
+        'because_you_loved' when reasonTitle != null => RecommendationReason.becauseYouLoved,
+        'trending' => RecommendationReason.trending,
+        _ => (json['recent_rankings'] as num? ?? 0) > 0
+            ? RecommendationReason.trending
+            : RecommendationReason.topRated,
+      },
+      reasonTitle: reasonTitle,
+    );
+  }
+
+  /// One-line explanation shown under the poster.
+  String get reasonLabel => switch (reason) {
+        RecommendationReason.becauseYouLoved => 'Because you loved $reasonTitle',
+        RecommendationReason.trending => 'Trending on Telly',
+        RecommendationReason.topRated => 'Top rated on Telly',
+      };
+}

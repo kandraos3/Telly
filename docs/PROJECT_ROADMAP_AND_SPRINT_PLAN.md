@@ -2055,6 +2055,17 @@ Tickets ingested through the `issue-manager` skill. Each entry mirrors its GitHu
 - **Testing & Verification**:
   - [x] Widget tests: owner delete, member leave, cancel, rejected delete; repository request-shape tests; Feed header navigation test.
 
+#### `FE-EXPLORE-03`: "Recommended for You" Carousel & Search Zero-State (#24)
+- **Spec Reference**: [**`features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md) §5; `SCR-07`
+- **Granular Tasks**:
+  - [x] Migration `20261010001200_title_recommendations.sql`: `get_recommended_titles(p_media_type, p_limit)` scores unranked, unqueued, unmuted titles by genre affinity with my loved titles (score ≥ 7.80), plus a director / network bonus, and returns a "Because you loved …" reason; it falls back to trending, then community score. `get_trending_titles` ranks by community rankings in the last 14 days.
+  - [x] `RecommendedTitle` model, `DiscoveryRepository.fetchRecommendedTitles` / `fetchTrendingTitles`, `recommendedTitlesProvider`, `trendingTitlesProvider`.
+  - [x] SCR-07 "Recommended for You" poster carousel (community score badge and reason line) above Network Battlegrounds; hidden when empty.
+  - [x] Focusing the empty search field shows a zero-state with Recent Searches chips (session-scoped `RecentSearchesController`, re-run on tap, clearable) and a numbered Trending Now list.
+  - [ ] Apply the migration to `telly-prod` via `supabase-deploy` → `push` *(not deployed in this session)*.
+- **Testing & Verification**:
+  - [x] Widget tests: carousel and reasons, navigation, hidden when empty, zero-state on focus, recent search recorded and re-run, clear. Unit tests for the controller, model parsing and RPC request shape. pgTAP `015_title_recommendations.test.sql` (runs in CI).
+
 ---
 
 ## 🏆 Sprint Deliverables Summary Matrix

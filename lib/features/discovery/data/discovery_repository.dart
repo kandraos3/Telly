@@ -18,6 +18,13 @@ abstract interface class DiscoveryRepository {
 
   Future<List<UserSearchResult>> searchUsers(String query);
 
+  /// Personalised picks from `get_recommended_titles` (FE-EXPLORE-03); a null
+  /// `mediaType` mixes both canons.
+  Future<List<RecommendedTitle>> fetchRecommendedTitles({String? mediaType, int limit = 10});
+
+  /// What the community is ranking right now, from `get_trending_titles`.
+  Future<List<RecommendedTitle>> fetchTrendingTitles({String? mediaType, int limit = 10});
+
   List<CuratedCanonItem> getCuratedCanons();
 }
 
@@ -95,6 +102,29 @@ class SupabaseDiscoveryRepository implements DiscoveryRepository {
   }
 
   @override
+  Future<List<RecommendedTitle>> fetchRecommendedTitles({String? mediaType, int limit = 10}) =>
+      _titleList('get_recommended_titles', mediaType, limit);
+
+  @override
+  Future<List<RecommendedTitle>> fetchTrendingTitles({String? mediaType, int limit = 10}) =>
+      _titleList('get_trending_titles', mediaType, limit);
+
+  Future<List<RecommendedTitle>> _titleList(String rpc, String? mediaType, int limit) async {
+    try {
+      final response = await _client.rpc(rpc, params: {
+        'p_media_type': mediaType,
+        'p_limit': limit,
+      });
+      if (response is List) {
+        return response
+            .map((r) => RecommendedTitle.fromJson(Map<String, dynamic>.from(r as Map)))
+            .toList();
+      }
+    } catch (_) {}
+    return const [];
+  }
+
+  @override
   List<CuratedCanonItem> getCuratedCanons() {
     return const [
       CuratedCanonItem(
@@ -137,8 +167,45 @@ class FakeDiscoveryRepository implements DiscoveryRepository {
   List<NetworkBattleground> battlegrounds;
   List<FriendBingingItem> friendsBinging;
   List<UserSearchResult> users;
+  List<RecommendedTitle> recommended;
+  List<RecommendedTitle> trending;
 
   FakeDiscoveryRepository({
+    this.recommended = const [
+      RecommendedTitle(
+        titleId: 60059,
+        mediaType: 'tv',
+        title: 'Better Call Saul',
+        network: 'AMC',
+        communityScore: 9.48,
+        reason: RecommendationReason.becauseYouLoved,
+        reasonTitle: 'Breaking Bad',
+      ),
+      RecommendedTitle(
+        titleId: 27205,
+        mediaType: 'movie',
+        title: 'Inception',
+        communityScore: 9.55,
+        reason: RecommendationReason.trending,
+      ),
+    ],
+    this.trending = const [
+      RecommendedTitle(
+        titleId: 126308,
+        mediaType: 'tv',
+        title: 'Shogun',
+        network: 'FX',
+        releaseYear: 2024,
+        reason: RecommendationReason.trending,
+      ),
+      RecommendedTitle(
+        titleId: 693134,
+        mediaType: 'movie',
+        title: 'Dune: Part Two',
+        releaseYear: 2024,
+        reason: RecommendationReason.trending,
+      ),
+    ],
     this.battlegrounds = const [
       NetworkBattleground(
         network: 'HBO',
@@ -238,6 +305,14 @@ class FakeDiscoveryRepository implements DiscoveryRepository {
   }
 
   @override
+  Future<List<RecommendedTitle>> fetchRecommendedTitles({String? mediaType, int limit = 10}) async =>
+      recommended.where((t) => mediaType == null || t.mediaType == mediaType).take(limit).toList();
+
+  @override
+  Future<List<RecommendedTitle>> fetchTrendingTitles({String? mediaType, int limit = 10}) async =>
+      trending.where((t) => mediaType == null || t.mediaType == mediaType).take(limit).toList();
+
+  @override
   List<CuratedCanonItem> getCuratedCanons() {
     return const [
       CuratedCanonItem(
@@ -275,3 +350,35 @@ final friendsBingingProvider = FutureProvider<List<FriendBingingItem>>((ref) {
   return ref.watch(discoveryRepositoryProvider).fetchFriendsBinging();
 });
 
+
+final recommendedTitlesProvider = FutureProvider<List<RecommendedTitle>>((ref) {
+  return ref.watch(discoveryRepositoryProvider).fetchRecommendedTitles();
+});
+
+final trendingTitlesProvider = FutureProvider<List<RecommendedTitle>>((ref) {
+  return ref.watch(discoveryRepositoryProvider).fetchTrendingTitles(limit: 8);
+});
+
+/// Recent Explore searches, newest first, kept for the app session (FE-EXPLORE-03).
+class RecentSearchesController extends Notifier<List<String>> {
+  static const maxEntries = 6;
+
+  @override
+  List<String> build() => const [];
+
+  void add(String query) {
+    final q = query.trim();
+    if (q.isEmpty) return;
+    state = [
+      q,
+      ...state.where((s) => s.toLowerCase() != q.toLowerCase()),
+    ].take(maxEntries).toList();
+  }
+
+  void remove(String query) => state = state.where((s) => s != query).toList();
+
+  void clear() => state = const [];
+}
+
+final recentSearchesProvider =
+    NotifierProvider<RecentSearchesController, List<String>>(RecentSearchesController.new);
