@@ -24,11 +24,11 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 6 — Integration, Wiring & Audit Remediation** (COMPLETED: 32 / 32 tickets complete)
-- **Current Active Ticket**: `FE-SQUADS-03` (Squads redesign: `FE-UI-01` ✅ → `FE-SQUADS-03` → `FE-SQUADS-04`) — Sprint 6: 32 / 32 tickets complete
+- **Current Active Ticket**: `FE-SQUADS-04` (Squads redesign: `FE-UI-01` ✅ → `FE-SQUADS-03` ✅ → `FE-SQUADS-04`) — Sprint 6: 32 / 32 tickets complete
 - **Overall Roadmap Progress**: All 32/32 Sprint 6 architecture, integration, algorithm, and QA remediation tickets fully implemented and verified.
 - **Human-Only Tasks**: Tasks marked `👤 [TO BE DONE BY HUMAN]` (cloud deployment, secrets provisioning, store submission, physical-device profile runs). Client application codebase is 100% complete and self-contained.
-- **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (670 / 670 pass; 100% golden, a11y, integration, and algorithmic parity suites pass; coverage 86.81% overall / 97.04% ranking)
-- **Last Updated**: 2026-10-05 (`FE-UI-01` shared switchers, empty state, section header and avatars complete)
+- **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (675 / 675 pass; 100% golden, a11y, integration, and algorithmic parity suites pass; coverage 86.81% overall / 97.04% ranking)
+- **Last Updated**: 2026-10-05 (`FE-SQUADS-03` My Squads redesign and `get_my_squads` complete)
 
 | Sprint | Status | Total Tickets | Audit Verdict |
 | :---: | :---: | :---: | :--- |
@@ -2174,6 +2174,18 @@ Tickets ingested through the `issue-manager` skill. Each entry mirrors its GitHu
   - [x] Migration applied to `telly-prod` via `supabase-deploy` → `push` (2026-10-04).
 - **Testing & Verification**:
   - [x] Widget tests: invite by handle, invite by email, unknown / malformed / existing-member errors with Add disabled, debounce. Default canon and order. Repository request-shape test; input-shape unit tests. pgTAP `016_squad_invitee_lookup.test.sql` (runs in CI).
+
+#### `FE-SQUADS-03`: My Squads Redesign — Squad Cards with Members & Roles, Create Sheet
+- **Spec Reference**: [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) `SCR-17a`, §0.2; [**`design_system/02_COMPONENT_LIBRARY_AND_PATTERNS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/02_COMPONENT_LIBRARY_AND_PATTERNS.md) §5.5–§5.7, §6, §7.2; [**`features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md) §4
+- **Scope & Objectives**: My Squads was a bare `ListTile` list with a floating button and a one-sentence empty state, unlike every other screen. It now uses the Queue card style and shows who's in each squad and my role.
+- **Granular Tasks**:
+  - [x] Migration `20261010001700_my_squads_overview.sql`: `get_my_squads()` returns my squads (newest first) with `my_role`, the active `member_count` and up to four `member_previews` (owner first; deleted users left out; friends-only members visible to squad-mates, as in `get_squad_members`).
+  - [x] `Squad.memberTotal` / `Squad.myRole`; `SupabaseSquadRepository.mySquads` reads the RPC; `create` returns the squad with me as its one owner.
+  - [x] SCR-17a: section header, squad cards (`SquadMonogram`, `SquadRoleBadge`, `TellyAvatarStack`, member count), header + replaces the floating button, frosted create sheet with `TellyTextField` (new `maxLength`) and `TellyPrimaryButton`, shared empty and error states, pull to refresh.
+  - [x] Migration applied to `telly-prod` via `supabase-deploy` → `push` (2026-10-05).
+- **Testing & Verification**:
+  - [x] Widget tests: cards (monogram, OWNER / ADMIN, description, "+N", full count, no floating button), empty state → create sheet with blank names refused, error → Retry. Unit tests for monogram initials and the `get_my_squads` mapping. a11y audit (dark and light) with a role badge and description. pgTAP `020_my_squads_overview.test.sql` (runs in CI).
+- **Dependencies**: `FE-UI-01`, `FE-SQUADS-02`.
 
 #### `FE-COWATCH-01`: Two-to-Watch Streamlined Flow, Quick Swipe Posters & Real Title Data (#27)
 - **Spec Reference**: [**`features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md) §3, §3.2; `SCR-16`

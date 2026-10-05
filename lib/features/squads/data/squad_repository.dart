@@ -28,7 +28,8 @@ class SharedWatchlistItem {
 
 /// `SCR-17` Squads (features/04 §4, FE-608).
 abstract interface class SquadRepository {
-  /// Squads I belong to (members not loaded).
+  /// Squads I belong to, newest first, with my role, the member count and up to four
+  /// member previews (`get_my_squads`, FE-SQUADS-03).
   Future<List<Squad>> mySquads();
 
   /// The squad with its members.
@@ -64,11 +65,18 @@ class SupabaseSquadRepository implements SquadRepository {
 
   @override
   Future<List<Squad>> mySquads() async {
-    final rows = await _client
-        .from('squads')
-        .select('id, name, description, avatar_url, created_by, created_at')
-        .order('created_at', ascending: false);
-    return [for (final r in rows) _squad(r)];
+    final rows = await _client.rpc('get_my_squads') as List;
+    return [
+      for (final r in rows.cast<Map<String, dynamic>>())
+        _squad(
+          r,
+          members: [
+            for (final m in ((r['member_previews'] as List?) ?? const []).cast<Map<String, dynamic>>()) _member(m),
+          ],
+          memberTotal: (r['member_count'] as num?)?.toInt(),
+          myRole: r['my_role'] == null ? null : SquadRole.fromString(r['my_role'] as String),
+        ),
+    ];
   }
 
   @override
@@ -79,17 +87,7 @@ class SupabaseSquadRepository implements SquadRepository {
         .eq('id', squadId)
         .single();
     final members = await _client.rpc('get_squad_members', params: {'p_squad_id': squadId}) as List;
-    return _squad(row, members: [
-      for (final m in members.cast<Map<String, dynamic>>())
-        SquadMember(
-          userId: m['user_id'] as String,
-          username: (m['username'] as String?) ?? '',
-          displayName: (m['display_name'] as String?) ?? '',
-          avatarUrl: m['avatar_url'] as String?,
-          role: SquadRole.fromString(m['role'] as String),
-          joinedAt: DateTime.parse(m['joined_at'] as String).toLocal(),
-        ),
-    ]);
+    return _squad(row, members: [for (final m in members.cast<Map<String, dynamic>>()) _member(m)]);
   }
 
   @override
@@ -145,7 +143,8 @@ class SupabaseSquadRepository implements SquadRepository {
         .insert({'name': name, 'description': description, 'created_by': me})
         .select('id, name, description, avatar_url, created_by, created_at')
         .single();
-    return _squad(row);
+    // The squads trigger adds me as the owner, so the new squad has one member: me.
+    return _squad(row, memberTotal: 1, myRole: SquadRole.owner);
   }
 
   @override
@@ -173,7 +172,13 @@ class SupabaseSquadRepository implements SquadRepository {
     if (rows.isEmpty) throw StateError('Not a member of this squad');
   }
 
-  static Squad _squad(Map<String, dynamic> r, {List<SquadMember> members = const []}) => Squad(
+  static Squad _squad(
+    Map<String, dynamic> r, {
+    List<SquadMember> members = const [],
+    int? memberTotal,
+    SquadRole? myRole,
+  }) =>
+      Squad(
         id: r['id'] as String,
         name: r['name'] as String,
         description: r['description'] as String?,
@@ -181,6 +186,18 @@ class SupabaseSquadRepository implements SquadRepository {
         createdBy: r['created_by'] as String,
         members: members,
         createdAt: DateTime.parse(r['created_at'] as String).toLocal(),
+        memberTotal: memberTotal,
+        myRole: myRole,
+      );
+
+  /// A `get_squad_members` row or a `get_my_squads` member preview.
+  static SquadMember _member(Map<String, dynamic> m) => SquadMember(
+        userId: m['user_id'] as String,
+        username: (m['username'] as String?) ?? '',
+        displayName: (m['display_name'] as String?) ?? '',
+        avatarUrl: m['avatar_url'] as String?,
+        role: SquadRole.fromString((m['role'] as String?) ?? 'MEMBER'),
+        joinedAt: DateTime.parse(m['joined_at'] as String).toLocal(),
       );
 }
 

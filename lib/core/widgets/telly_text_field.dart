@@ -18,6 +18,7 @@ class TellyTextField extends StatelessWidget {
   final FormFieldValidator<String>? validator;
   final bool autofocus;
   final FocusNode? focusNode;
+  final int? maxLength;
 
   const TellyTextField({
     super.key,
@@ -34,6 +35,7 @@ class TellyTextField extends StatelessWidget {
     this.validator,
     this.autofocus = false,
     this.focusNode,
+    this.maxLength,
   });
 
   @override
@@ -43,6 +45,7 @@ class TellyTextField extends StatelessWidget {
       focusNode: focusNode,
       autofocus: autofocus,
       obscureText: obscureText,
+      maxLength: maxLength,
       keyboardType: keyboardType,
       onChanged: onChanged,
       onFieldSubmitted: onSubmitted,

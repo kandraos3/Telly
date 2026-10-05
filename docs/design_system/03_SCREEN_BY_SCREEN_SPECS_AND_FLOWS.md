@@ -80,7 +80,7 @@ Every screen opened on top of the tabs uses `TellySubpageAppBar`, the same desig
 | `SCR-12` Canon reveal | ✕ | none | none |
 | `SCR-15` Friend profile | ← | @handle | Follow (accent) or Edit Profile |
 | `SCR-16` Two-to-Watch | ✕ | Two-to-Watch | none |
-| `SCR-17` My Squads / Squad | ← | My Squads / squad name + "N members" | Invite, ⋮ (Delete / Leave) |
+| `SCR-17` My Squads / Squad | ← | My Squads / squad name + "N members" | My Squads: New squad (+). Squad: Invite, ⋮ (Delete / Leave) |
 | `SCR-18` TV Graveyard | ← | TV Graveyard | Log dropped show (+) |
 | `SCR-19` Story studio | ✕ | Story studio | Share |
 | `SCR-20` Settings | ← | Settings | none |
@@ -649,6 +649,31 @@ Every screen opened on top of the tabs uses `TellySubpageAppBar`, the same desig
   - Tap *"Quick Swipe Mode"* $\implies$ Launches 15-second mutual right/left card swiping game.
 
 ---
+
+### `SCR-17a`: My Squads — `FE-SQUADS-03`
+
+```
+┌────────────────────────────────────────────────────────┐
+│ [←]  My Squads                                    [+]  │
+├────────────────────────────────────────────────────────┤
+│ ━ MY SQUADS (3) ─────────────────────────────────────  │
+│ ┌────────────────────────────────────────────────────┐ │
+│ │ ┌──┐ The Apartment                       [OWNER]   │ │
+│ │ │TA│ Roommates who argue about Lost                │ │
+│ │ └──┘ (J)(M)(A)(C)+1   5 members                 ›  │ │
+│ └────────────────────────────────────────────────────┘ │
+│ ┌────────────────────────────────────────────────────┐ │
+│ │ ┌──┐ Sci-Fi Book Club                    [ADMIN]   │ │
+│ │ │BC│ (M)(J)           2 members                 ›  │ │
+│ └────────────────────────────────────────────────────┘ │
+└────────────────────────────────────────────────────────┘
+```
+
+- **Data:** one `get_my_squads()` call: my squads, newest first, with my role, the active member count and up to four member previews (owner first).
+- **Squad card:** the Queue list-card surface (Surface, radius 16, glass border, 16 padding). Left: a 48 px monogram, the squad picture when set or up to two initials from the last two words, on an accent picked from the squad id (lime, violet, amber, cyan or coral at 14%, so a squad keeps its colour). Then the name (`titleMedium` w800, as typed), an OWNER (accent) or ADMIN (violet) badge, the description (2 lines), and an avatar stack with "+N" plus "N members" and a chevron. The whole card opens the squad.
+- **New squad:** the header's + (as Queue's New list) or the empty state's button opens a frosted bottom sheet (§6): "New squad", one line of guidance, a name field (64 characters) and **Create squad**, enabled once the name isn't blank. Creating opens the new squad.
+- **Empty:** the shared empty state (`groups_2` icon, "No squads yet", "Squads rank together…", **Create a squad**).
+- **Error:** the shared empty state ("Couldn't load your squads", **Retry**). Pull to refresh on every state.
 
 ### `SCR-17`: Squads Hub & Consensus Leaderboard
 

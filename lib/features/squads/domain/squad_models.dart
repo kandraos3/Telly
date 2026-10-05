@@ -62,8 +62,16 @@ class Squad {
   final String? description;
   final String? avatarUrl;
   final String createdBy;
+  /// Every member when loaded by `fetchSquad`; on the My Squads list (`get_my_squads`),
+  /// a preview of the first few, with the full count in [memberTotal].
   final List<SquadMember> members;
   final DateTime createdAt;
+
+  /// Active members when [members] is only a preview (FE-SQUADS-03).
+  final int? memberTotal;
+
+  /// My role in this squad, when known (FE-SQUADS-03).
+  final SquadRole? myRole;
 
   const Squad({
     required this.id,
@@ -73,9 +81,11 @@ class Squad {
     required this.createdBy,
     this.members = const [],
     required this.createdAt,
+    this.memberTotal,
+    this.myRole,
   });
 
-  int get memberCount => members.length;
+  int get memberCount => memberTotal ?? members.length;
 }
 
 /// A member of a squad with profile information.

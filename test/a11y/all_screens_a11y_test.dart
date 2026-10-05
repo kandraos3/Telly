@@ -78,6 +78,10 @@ class _FakeSquadRepository implements SquadRepository {
         ),
       ],
       createdAt: DateTime(2026, 1, 1),
+      // FE-SQUADS-03: role badge, description and "+N" avatars are contrast-checked too.
+      description: 'Prestige dramas only',
+      memberTotal: 5,
+      myRole: SquadRole.owner,
     ),
   };
 

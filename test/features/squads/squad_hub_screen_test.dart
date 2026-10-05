@@ -357,9 +357,92 @@ void main() {
       await tester.tap(find.byKey(const Key('create_squad_button')));
       await tester.pumpAndSettle();
       await tester.enterText(find.byKey(const Key('squad_name_field')), 'Sci-Fi Club');
+      await tester.pump(); // Create enables once a name is typed (FE-SQUADS-03).
       await tester.tap(find.byKey(const Key('squad_create_confirm')));
       await tester.pumpAndSettle();
       expect(find.text('route:/squads/sq-new'), findsOneWidget);
+    });
+  });
+
+  group('FE-SQUADS-03: My Squads redesign', () {
+    setUp(() {
+      repo.squads['sq-2'] = Squad(
+        id: 'sq-2',
+        name: 'Sci-Fi Book Club',
+        description: 'Dune twice a year',
+        createdBy: 'u9',
+        members: [member('u9', 'Maya', role: SquadRole.owner), member('u1', 'Jordan', role: SquadRole.admin)],
+        memberTotal: 7,
+        myRole: SquadRole.admin,
+        createdAt: DateTime(2026, 2),
+      );
+    });
+
+    testWidgets('cards show the monogram, role, description, member faces and the full count', (tester) async {
+      repo.squads['sq-1'] = Squad(
+        id: 'sq-1',
+        name: 'The Apartment',
+        createdBy: 'u1',
+        members: [member('u1', 'Jordan', role: SquadRole.owner), member('u3', 'Alex')],
+        myRole: SquadRole.owner,
+        createdAt: DateTime(2026),
+      );
+      await pump(tester, const SquadsListScreen());
+
+      expect(find.text('MY SQUADS (2)'), findsOneWidget);
+      expect(find.text('TA'), findsOneWidget, reason: 'monogram from the last two words');
+      expect(find.text('BC'), findsOneWidget);
+      expect(find.text('OWNER'), findsOneWidget);
+      expect(find.text('ADMIN'), findsOneWidget);
+      expect(find.text('Dune twice a year'), findsOneWidget);
+      expect(tester.widget<Text>(find.byKey(const Key('squad_member_count_sq-2'))).data, '7 members');
+      expect(tester.widget<Text>(find.byKey(const Key('squad_member_count_sq-1'))).data, '2 members');
+      // Two previews of seven: two faces, then +5.
+      expect(find.text('+5'), findsOneWidget);
+      expect(find.byType(FloatingActionButton), findsNothing, reason: 'create lives in the header, as on Queue');
+    });
+
+    testWidgets('no squads shows the empty state, whose button opens the create sheet', (tester) async {
+      repo.squads.clear();
+      await pump(tester, const SquadsListScreen());
+      expect(find.byKey(const Key('squads_empty')), findsOneWidget);
+      expect(find.text('No squads yet'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('create_squad_empty_button')));
+      await tester.pumpAndSettle();
+      expect(find.text('New squad'), findsOneWidget);
+      VoidCallback? createAction() =>
+          tester.widget<InkWell>(find.descendant(of: find.byKey(const Key('squad_create_confirm')), matching: find.byType(InkWell))).onTap;
+      expect(createAction(), isNull, reason: 'a blank name cannot be created');
+
+      await tester.enterText(find.byKey(const Key('squad_name_field')), '   ');
+      await tester.pump();
+      expect(createAction(), isNull);
+
+      await tester.enterText(find.byKey(const Key('squad_name_field')), 'Roomies');
+      await tester.pump();
+      expect(createAction(), isNotNull);
+      await tester.tap(find.byKey(const Key('squad_create_confirm')));
+      await tester.pumpAndSettle();
+      expect(find.text('route:/squads/sq-new'), findsOneWidget);
+    });
+
+    testWidgets('a failed load offers Retry, which reloads the list', (tester) async {
+      repo.failReads = true;
+      await pump(tester, const SquadsListScreen());
+      expect(find.byKey(const Key('squads_error')), findsOneWidget);
+
+      repo.failReads = false;
+      await tester.tap(find.text('Retry'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('squad_row_sq-1')), findsOneWidget);
+    });
+
+    test('monogram initials come from the last two words', () {
+      expect(SquadMonogram.initials('The Apartment'), 'TA');
+      expect(SquadMonogram.initials('Sci-Fi Book Club'), 'BC');
+      expect(SquadMonogram.initials('  roomies '), 'R');
+      expect(SquadMonogram.initials(''), '?');
     });
   });
 
@@ -411,6 +494,33 @@ void main() {
           }),
           authOptions: const AuthClientOptions(autoRefreshToken: false),
         );
+
+    test('mySquads calls get_my_squads and maps role, count and previews (FE-SQUADS-03)', () async {
+      final requests = <http.Request>[];
+      final squads = await SupabaseSquadRepository(clientReturning([
+        {
+          'id': 'sq-1',
+          'name': 'The Apartment',
+          'description': null,
+          'avatar_url': null,
+          'created_by': 'u1',
+          'created_at': '2026-01-01T00:00:00+00:00',
+          'my_role': 'ADMIN',
+          'member_count': 6,
+          'member_previews': [
+            {'user_id': 'u1', 'username': 'jordan', 'display_name': 'Jordan', 'avatar_url': null, 'role': 'OWNER', 'joined_at': '2026-01-01T00:00:00+00:00'},
+            {'user_id': 'u3', 'username': 'alex', 'display_name': 'Alex', 'avatar_url': 'https://a/x.png', 'role': 'MEMBER', 'joined_at': '2026-01-02T00:00:00+00:00'},
+          ],
+        },
+      ], requests))
+          .mySquads();
+      expect(requests.single.url.path, '/rest/v1/rpc/get_my_squads');
+      final squad = squads.single;
+      expect(squad.myRole, SquadRole.admin);
+      expect(squad.memberCount, 6, reason: 'the full count, not the two previews');
+      expect([for (final m in squad.members) (m.username, m.role)], [('jordan', SquadRole.owner), ('alex', SquadRole.member)]);
+      expect(squad.members.last.avatarUrl, 'https://a/x.png');
+    });
 
     test('deleteSquad deletes the squad row and fails when RLS removed nothing (FE-SQUADS-01)', () async {
       final requests = <http.Request>[];
