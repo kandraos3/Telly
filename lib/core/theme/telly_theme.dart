@@ -3,9 +3,12 @@ import 'package:flutter/services.dart';
 import 'telly_colors.dart';
 import 'telly_typography.dart';
 
-/// Master ThemeData configuration for Telly *Midnight Cathode* dark theme.
+/// Master ThemeData configuration for Telly *Midnight Cathode* (Dark) and *Day Cathode* (Light) themes.
+/// Conforms to `docs/design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md` §2 and `FE-THEME-01`.
 abstract class TellyTheme {
   static ThemeData get darkTheme => dark;
+  static ThemeData get lightTheme => light;
+
   static ThemeData get dark {
     const colorScheme = ColorScheme.dark(
       primary: TellyColors.phosphorLime,
@@ -58,5 +61,57 @@ abstract class TellyTheme {
       ),
     );
   }
-}
 
+  static ThemeData get light {
+    const colorScheme = ColorScheme.light(
+      primary: TellyColors.lightPhosphorLime,
+      secondary: TellyColors.lightNeonCoral,
+      tertiary: TellyColors.lightWarmAmber,
+      surface: TellyColors.lightBackgroundSurface,
+      error: TellyColors.lightNeonCoral,
+      onPrimary: Colors.white,
+      onSecondary: Colors.white,
+      onSurface: TellyColors.lightTextPrimary,
+      onError: Colors.white,
+    );
+
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.light,
+      scaffoldBackgroundColor: TellyColors.lightBackgroundPrimary,
+      canvasColor: TellyColors.lightBackgroundPrimary,
+      cardColor: TellyColors.lightBackgroundSurface,
+      colorScheme: colorScheme,
+      appBarTheme: const AppBarTheme(
+        backgroundColor: TellyColors.lightBackgroundPrimary,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: false,
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
+        iconTheme: IconThemeData(color: TellyColors.lightTextPrimary),
+      ),
+      dividerColor: TellyColors.lightStrokeSubtle,
+      dividerTheme: const DividerThemeData(
+        color: TellyColors.lightStrokeSubtle,
+        thickness: 1,
+        space: 1,
+      ),
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: TellyColors.lightBackgroundSurface,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+      ),
+      textTheme: TextTheme(
+        displayLarge: TellyTypography.displayXXL(color: TellyColors.lightTextPrimary),
+        displayMedium: TellyTypography.displayXL(color: TellyColors.lightTextPrimary),
+        titleLarge: TellyTypography.titleLarge(color: TellyColors.lightTextPrimary),
+        titleMedium: TellyTypography.titleMedium(color: TellyColors.lightTextPrimary),
+        bodyLarge: TellyTypography.bodyLarge(color: TellyColors.lightTextPrimary),
+        bodyMedium: TellyTypography.bodyMedium(color: TellyColors.lightTextSecondary),
+        labelSmall: TellyTypography.caption(color: TellyColors.lightTextTertiary),
+      ),
+    );
+  }
+}

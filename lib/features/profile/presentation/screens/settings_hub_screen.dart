@@ -221,6 +221,39 @@ class SettingsHubScreen extends ConsumerWidget {
           ]),
           const SizedBox(height: 20),
 
+          // Appearance & Theme (FE-THEME-01)
+          const _SectionHeader('APPEARANCE & THEME'),
+          _Card(children: [
+            const _Tile(
+              title: 'Color Theme',
+              subtitle: 'Midnight Cathode (Dark) or Day Cathode (Light)',
+            ),
+            const SizedBox(height: 6),
+            SegmentedButton<TellyThemeMode>(
+              key: const Key('settings_theme_mode'),
+              segments: [
+                for (final m in TellyThemeMode.values)
+                  ButtonSegment(
+                    value: m,
+                    label: Text(m.label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                    icon: Icon(
+                      m == TellyThemeMode.system
+                          ? Icons.brightness_auto
+                          : m == TellyThemeMode.dark
+                              ? Icons.dark_mode_outlined
+                              : Icons.light_mode_outlined,
+                      size: 16,
+                    ),
+                  ),
+              ],
+              selected: {prefs.themeMode},
+              onSelectionChanged: (s) =>
+                  _guard(context, () => prefsController.edit((p) => p.copyWith(themeMode: s.single))),
+            ),
+            const SizedBox(height: 4),
+          ]),
+          const SizedBox(height: 20),
+
           // 4. Haptics & motion (S4)
           const _SectionHeader('HAPTICS & MOTION'),
           _Card(children: [

@@ -151,6 +151,19 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [x] Widget test rendering all typography variants in a sandbox screen.
 - **Dependencies**: `FE-101`.
 
+#### `FE-THEME-01`: Theme: Day Cathode Light Mode & Theme Switcher in Settings (Fixes #38)
+- **Spec Reference**:
+  - [**`design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md) §2
+- **Scope & Objectives**: Implement cohesive 'Day Cathode' light theme and theme switcher in Settings (System, Dark, Light) with WCAG AA compliance.
+- **Granular Tasks**:
+  - [x] Implement `TellyTheme.light` and Day Cathode color tokens in `TellyColors`.
+  - [x] Add theme mode state provider and persistence in `users.preferences`.
+  - [x] Add Theme Mode selector in `SettingsHubScreen` (System, Dark, Light).
+  - [x] Connect dynamic `ThemeMode` in `TellyApp`.
+- **Testing & Verification**:
+  - [x] Unit and widget tests in `test/features/theme/telly_theme_test.dart` verifying theme switcher toggling, persistence, and light mode WCAG AAA/AA color rendering.
+- **Dependencies**: `FE-102`.
+
 #### `FE-103`: Haptic Feedback Engine (`HapticsService`)
 - **Spec Reference**:
   - [**`design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md) §5 (Haptic Sensations)

@@ -31,8 +31,22 @@ enum NotificationKind {
   const NotificationKind(this.key, this.label, this.defaultOn);
 }
 
-/// `users.preferences` (settings spec §2; FE-608). Unknown keys are preserved on save.
+/// Theme selection mode (settings spec §2; FE-THEME-01).
+enum TellyThemeMode {
+  system('System'),
+  dark('Dark'),
+  light('Light');
+
+  final String label;
+  const TellyThemeMode(this.label);
+
+  static TellyThemeMode parse(Object? v) =>
+      values.firstWhere((m) => m.name == v, orElse: () => TellyThemeMode.dark);
+}
+
+/// `users.preferences` (settings spec §2; FE-608, FE-THEME-01). Unknown keys are preserved on save.
 class AppPreferences {
+  final TellyThemeMode themeMode;
   final HapticsMode haptics;
   final bool reducedMotion;
   final String region;
@@ -42,6 +56,7 @@ class AppPreferences {
   final Map<NotificationKind, bool> notifications;
 
   const AppPreferences({
+    this.themeMode = TellyThemeMode.dark,
     this.haptics = HapticsMode.full,
     this.reducedMotion = false,
     this.region = 'US',
@@ -58,6 +73,7 @@ class AppPreferences {
   factory AppPreferences.fromJson(Map<String, dynamic> j) {
     final n = (j['notifications'] as Map?) ?? const {};
     return AppPreferences(
+      themeMode: TellyThemeMode.parse(j['theme_mode']),
       haptics: HapticsMode.parse(j['haptics']),
       reducedMotion: (j['reduced_motion'] as bool?) ?? false,
       region: (j['region'] as String?) ?? 'US',
@@ -72,6 +88,7 @@ class AppPreferences {
   }
 
   Map<String, dynamic> toJson() => {
+        'theme_mode': themeMode.name,
         'haptics': haptics.name,
         'reduced_motion': reducedMotion,
         'region': region,
@@ -82,6 +99,7 @@ class AppPreferences {
       };
 
   AppPreferences copyWith({
+    TellyThemeMode? themeMode,
     HapticsMode? haptics,
     bool? reducedMotion,
     String? region,
@@ -91,6 +109,7 @@ class AppPreferences {
     Map<NotificationKind, bool>? notifications,
   }) =>
       AppPreferences(
+        themeMode: themeMode ?? this.themeMode,
         haptics: haptics ?? this.haptics,
         reducedMotion: reducedMotion ?? this.reducedMotion,
         region: region ?? this.region,
@@ -104,8 +123,15 @@ class AppPreferences {
 /// Loads and saves [AppPreferences]; edits are optimistic and roll back on failure.
 class PreferencesController extends AsyncNotifier<AppPreferences> {
   @override
-  Future<AppPreferences> build() async =>
-      AppPreferences.fromJson(await ref.watch(profileRepositoryProvider).fetchPreferences());
+  Future<AppPreferences> build() async {
+    try {
+      final repo = ref.watch(profileRepositoryProvider);
+      final json = await repo.fetchPreferences();
+      return AppPreferences.fromJson(json);
+    } catch (_) {
+      return const AppPreferences();
+    }
+  }
 
   Future<void> edit(AppPreferences Function(AppPreferences) change) async {
     final before = state.valueOrNull ?? const AppPreferences();
