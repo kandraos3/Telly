@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
 import '../../../../core/widgets/poster_image.dart';
+import '../../../../core/widgets/telly_section_header.dart';
 import '../../../ranking/domain/franchise_rollup_service.dart';
 
 /// Top 3 Showcase cards for the user's highest ranked titles.
@@ -27,26 +28,7 @@ class TopShowcaseRow extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            children: [
-              Text(
-                '━ TOP 3 SHOWCASE ',
-                style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)).copyWith(
-                  letterSpacing: 1.5,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Expanded(
-                child: Container(
-                  height: 1,
-                  color: TellyColors.borderGlassOf(context),
-                ),
-              ),
-            ],
-          ),
-        ),
+        const TellySectionHeader(label: 'TOP 3 SHOWCASE'),
         const SizedBox(height: 10),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),

@@ -24,11 +24,11 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 6 — Integration, Wiring & Audit Remediation** (COMPLETED: 32 / 32 tickets complete)
-- **Current Active Ticket**: `ALL_DONE` (Sprint 6 Complete) — Sprint 6: 32 / 32 tickets complete
+- **Current Active Ticket**: `FE-SQUADS-03` (Squads redesign: `FE-UI-01` ✅ → `FE-SQUADS-03` → `FE-SQUADS-04`) — Sprint 6: 32 / 32 tickets complete
 - **Overall Roadmap Progress**: All 32/32 Sprint 6 architecture, integration, algorithm, and QA remediation tickets fully implemented and verified.
 - **Human-Only Tasks**: Tasks marked `👤 [TO BE DONE BY HUMAN]` (cloud deployment, secrets provisioning, store submission, physical-device profile runs). Client application codebase is 100% complete and self-contained.
-- **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (657 / 657 pass; 100% golden, a11y, integration, and algorithmic parity suites pass; coverage 86.81% overall / 97.04% ranking)
-- **Last Updated**: 2026-10-05 (`FE-BRAND-01` app icon, splash and in-app logo complete)
+- **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (670 / 670 pass; 100% golden, a11y, integration, and algorithmic parity suites pass; coverage 86.81% overall / 97.04% ranking)
+- **Last Updated**: 2026-10-05 (`FE-UI-01` shared switchers, empty state, section header and avatars complete)
 
 | Sprint | Status | Total Tickets | Audit Verdict |
 | :---: | :---: | :---: | :--- |
@@ -220,6 +220,20 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [x] `test/core/brand/brand_assets_test.dart`: master and platform icon sizes, no-alpha iOS store icon, adaptive XML without a second inset, Android 12 splash colors, web manifest and title.
   - [x] Auth screen test updated for the logo replacing the "TELLY" title; a11y suite passes in dark and light themes.
 - **Dependencies**: `FE-102`, `FE-AUTH-01`.
+
+#### `FE-UI-01`: Shared Section Switchers, Canon Switcher, Empty State, Section Header & Avatars
+- **Spec Reference**:
+  - [**`design_system/02_COMPONENT_LIBRARY_AND_PATTERNS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/02_COMPONENT_LIBRARY_AND_PATTERNS.md) §5.5–§5.7, §7.2; `SCR-05`, `SCR-13`, `SCR-14`, `SCR-17`
+- **Scope & Objectives**: Feed, Queue and Canon each drew their own switchers and empty states (three section-tab styles, a `TabBar` and a hand-built Movies / TV Shows selector, four empty-state variants with hard-coded dark colours). They now share one set of widgets, which the Squad redesign (`FE-SQUADS-03`, `FE-SQUADS-04`) builds on.
+- **Granular Tasks**:
+  - [x] `lib/core/widgets/`: `TellySegmentedControl` (Feed's style, selected-state semantics, haptic), `TellyCanonSwitcher` (Canon's style, optional counts and subtitle, Movies first), `TellyEmptyState` (§7.2, optional lime action), `TellySectionHeader` (Canon's rule style, heading semantics), `TellyAvatar` / `TellyAvatarStack`.
+  - [x] Feed: filter tabs and the empty state use the shared widgets.
+  - [x] Queue: hub pills become the segmented control; Movies / TV Shows becomes the canon switcher, kept in step with the swipeable list; list group labels use the section header; empty states use the shared widget, with "New list" (My Lists) and "Explore titles" (Watchlist) actions.
+  - [x] Canon: the selector and the "TOP 3 SHOWCASE" label use the shared widgets.
+- **Testing & Verification**:
+  - [x] `test/core/widgets/telly_shared_controls_test.dart`: accent and light-theme colours, 48dp targets, selected semantics, Movies-left order, counts, empty-state action, heading semantics, avatar overflow chip.
+  - [x] Queue tests: the switcher follows a swipe, empty watchlist and empty My Lists actions. Existing Feed, Queue, Canon, a11y (dark and light) and golden suites pass unchanged.
+- **Dependencies**: `FE-HEADER-01`.
 
 #### `FE-103`: Haptic Feedback Engine (`HapticsService`)
 - **Spec Reference**:

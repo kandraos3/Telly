@@ -157,5 +157,31 @@ void main() {
       expect(find.text('SORT BY'), findsNothing);
       expect(y('Fargo'), lessThan(y('Slow Horses')));
     });
+
+    testWidgets('FE-UI-01: swiping the list moves the shared canon switcher with it', (tester) async {
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
+      Color? labelColor(String text) => tester.widget<Text>(find.text(text)).style?.color;
+      // The selected half sits on the accent, so its label uses the dark on-accent colour.
+      expect(labelColor('Movies (1)'), const Color(0xFF08090C));
+
+      // Swipe on empty space below the cards: the cards themselves swipe to remove.
+      final page = tester.getRect(find.byType(TabBarView));
+      await tester.flingFrom(Offset(page.center.dx, page.bottom - 20), const Offset(-600, 0), 2000);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Slow Horses'), findsOneWidget);
+      expect(labelColor('TV Shows (2)'), const Color(0xFF08090C));
+      expect(labelColor('Movies (1)'), isNot(const Color(0xFF08090C)));
+    });
+
+    testWidgets('FE-UI-01: an empty watchlist shows the shared empty state with an Explore action', (tester) async {
+      await tester.pumpWidget(const ProviderScope(
+        child: MaterialApp(home: SmartQueueScreen(testItems: [])),
+      ));
+      await tester.pumpAndSettle();
+      expect(find.text('Your queue is clear!'), findsOneWidget);
+      expect(find.text('Explore titles'), findsOneWidget);
+    });
   });
 }

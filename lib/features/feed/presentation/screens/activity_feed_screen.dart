@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:telly_app/core/services/haptics_service.dart';
 import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/theme/telly_typography.dart';
+import 'package:telly_app/core/widgets/telly_empty_state.dart';
 import 'package:telly_app/core/widgets/telly_screen_header.dart';
+import 'package:telly_app/core/widgets/telly_segmented_control.dart';
 import 'package:telly_app/features/feed/data/social_repository.dart';
 import 'package:telly_app/features/feed/domain/social_models.dart';
 import 'package:telly_app/features/discovery/domain/discovery_models.dart';
@@ -229,56 +231,12 @@ class _ActivityFeedScreenState extends ConsumerState<ActivityFeedScreen> {
     );
   }
 
-  Widget _buildSegmentedFilterBar(FeedFilter currentFilter) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: TellyColors.surfaceOf(context),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: TellyColors.borderGlassOf(context)),
-      ),
-      child: Row(
-        children: FeedFilter.values.map((filter) {
-          final isSelected = filter == currentFilter;
-          return Expanded(
-            child: InkWell(
-              borderRadius: BorderRadius.circular(8),
-              onTap: () {
-                HapticsService.selectionClick();
-                ref.read(feedFilterProvider.notifier).select(filter);
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                constraints: const BoxConstraints(minHeight: 48),
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                decoration: BoxDecoration(
-                  color: isSelected ? TellyColors.cardOf(context) : Colors.transparent,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: isSelected ? TellyColors.borderGlassOf(context) : Colors.transparent,
-                  ),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  filter.displayName,
-                  style: TellyTypography.labelMedium(
-                    color: isSelected
-                        ? (Theme.of(context).brightness == Brightness.light
-                            ? const Color(0xFF233B00)
-                            : TellyColors.phosphorLime)
-                        : TellyColors.textPrimaryOf(context),
-                  ).copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
+  /// FE-UI-01: the shared segmented control (Following / Squads / Global).
+  Widget _buildSegmentedFilterBar(FeedFilter currentFilter) => TellySegmentedControl<FeedFilter>(
+        segments: [for (final filter in FeedFilter.values) TellySegment(value: filter, label: filter.displayName)],
+        selected: currentFilter,
+        onChanged: (filter) => ref.read(feedFilterProvider.notifier).select(filter),
+      );
 
   Widget _buildEmptyState() {
     return ListView(
@@ -286,43 +244,15 @@ class _ActivityFeedScreenState extends ConsumerState<ActivityFeedScreen> {
         parent: BouncingScrollPhysics(),
       ),
       children: [
-        SizedBox(height: MediaQuery.of(context).size.height * 0.2),
-        Center(
-          child: Column(
-            children: [
-              Icon(Icons.people_outline_rounded, size: 56, color: TellyColors.textTertiaryOf(context)),
-              const SizedBox(height: 16),
-              Text(
-                'No Activity Yet',
-                style: TellyTypography.headlineSmall(
-                  color: TellyColors.textPrimaryOf(context),
-                ).copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 40),
-                child: Text(
-                  'Follow friends or join a Squad to see what cinephiles are watching, ranking, and debating!',
-                  style: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context)).copyWith(fontWeight: FontWeight.w600),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: TellyColors.primaryAccentOf(context),
-                  foregroundColor: Theme.of(context).brightness == Brightness.light ? Colors.white : Colors.black,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                onPressed: () {
-                  HapticsService.mediumImpact();
-                },
-                icon: const Icon(Icons.person_add_rounded, size: 18),
-                label: const Text('Find Friends', style: TextStyle(fontWeight: FontWeight.bold)),
-              ),
-            ],
-          ),
+        SizedBox(height: MediaQuery.of(context).size.height * 0.15),
+        // FE-UI-01: the shared empty state.
+        const TellyEmptyState(
+          icon: Icons.people_outline_rounded,
+          title: 'No Activity Yet',
+          message: 'Follow friends or join a Squad to see what cinephiles are watching, ranking, and debating!',
+          actionLabel: 'Find Friends',
+          actionIcon: Icons.person_add_rounded,
+          onAction: HapticsService.mediumImpact,
         ),
       ],
     );

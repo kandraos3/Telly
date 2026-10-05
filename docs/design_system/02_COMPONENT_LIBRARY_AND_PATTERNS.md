@@ -180,6 +180,17 @@ The Duel screen is a distraction-free, full-screen battleground.
 - **Unselected:** `#11131A` background, `#7D8198` text.
 - **Selected:** Electric Violet (`#7C5CFF`) or Phosphor Lime (`#D2FF52`) solid or outline.
 
+### 5.5 Section Switchers — `FE-UI-01`
+Two levels of switcher, each with one look everywhere (`lib/core/widgets/`):
+- **Segmented control** (`TellySegmentedControl`): switches a screen's sections. Feed (Following / Squads / Global), Queue (Watchlist / My Lists / Friends' Lists), Squad hub (Consensus / Watchlist / Debates). Surface `#11131A` track, radius 12, 4px inset; the selected segment lifts onto Overlay `#1A1D27` with a glass border and a Phosphor Lime label (`#233B00` on the light theme). Labels are Plus Jakarta Sans `labelMedium` w800; 48dp targets; selection-click haptic.
+- **Canon switcher** (`TellyCanonSwitcher`): Movies | TV Shows, Movies always on the left. Canon, Queue, Squad hub. Surface track, radius 16, min height 56; the selected half fills with the primary accent (radius 12, 25% accent glow) and its label turns `#08090C` (white on light). Labels carry a count when the screen knows it ("Movies (12)"); Canon adds "Includes anime" under TV Shows.
+
+### 5.6 Section Header — `FE-UI-01`
+`TellySectionHeader`: a 10 × 2 rule, the label in caption w800 caps with 1.5 letter spacing in `textTertiary`, then a hairline glass rule to the edge, with an optional trailing count. Announced as a heading. Used for "TOP 3 SHOWCASE", Queue's list groups and the Squad screens.
+
+### 5.7 Avatars — `FE-UI-01`
+`TellyAvatar` shows the person's photo or their initial in the primary accent on Overlay. `TellyAvatarStack` overlaps up to 4 (step = 1.4 × radius, canvas-coloured ring) and ends with a "+N" chip for the rest.
+
 ---
 
 ## 6. Bottom Sheets & Modal Dialogs
@@ -199,6 +210,7 @@ All modal dialogs in Telly use an **iOS-native Pan-Down Bottom Sheet** pattern:
 - Posters, titles, and score pills maintain exact geometric dimensions to prevent Cumulative Layout Shift (CLS = 0).
 
 ### 7.2 Empty States with High-Conversion Action
+- **Shared component (`FE-UI-01`):** `TellyEmptyState` — a 72px Surface disc with a 32px muted icon, a `titleMedium` w800 title, one line of `bodyMedium` w600 guidance in `textSecondary`, and an optional 48px Phosphor Lime button (max width 260) that leads somewhere useful. Used by Feed, Queue and Squads.
 - **Empty Watchlist:** An illustrated dark TV screen glowing in neon:
   *"Your queue is empty. Explore friends' God Tiers or discover trending shows."*
   `[ Explore Discover Feed → ]`

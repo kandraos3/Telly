@@ -117,6 +117,17 @@ void main() {
       expect(find.text('PRIVATE'), findsWidgets);
     });
 
+    testWidgets('FE-UI-01: an empty My Lists offers New list, which opens the create dialog', (tester) async {
+      await tester.pumpWidget(createHubWidget(customLists: const []));
+      await tester.pumpAndSettle();
+      expect(find.text('No custom lists yet'), findsOneWidget);
+      expect(find.text('MY CURATED LISTS (0)'), findsOneWidget);
+
+      await tester.tap(find.text('New list'));
+      await tester.pumpAndSettle();
+      expect(find.text('Create Custom List'), findsOneWidget);
+    });
+
     testWidgets('header actions follow the hub mode (FE-HEADER-01)', (tester) async {
       await tester.pumpWidget(createHubWidget(initialMode: QueueHubMode.watchlist));
       await tester.pumpAndSettle();

@@ -6,6 +6,7 @@ import '../../../../core/router/routes.dart';
 import '../../../../core/services/haptics_service.dart';
 import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
+import '../../../../core/widgets/telly_canon_switcher.dart';
 import '../../../../core/widgets/telly_screen_header.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../logging/domain/title_search_result.dart';
@@ -130,52 +131,18 @@ class DualCanonProfileScreen extends ConsumerWidget {
 
                 const SizedBox(height: 16),
 
-                // 2. SEGMENTED DUAL-CANON SELECTOR (FE-206)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Container(
-                    constraints: const BoxConstraints(minHeight: 56),
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: TellyColors.surfaceOf(context),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: TellyColors.borderGlassOf(context)),
-                    ),
-                    child: Row(
-                      children: [
-                        // Movie Canon Tab
-                        Expanded(
-                          child: _buildCanonTab(
-                            context: context,
-                            key: const Key('movie_canon_tab'),
-                            label: 'Movies ($moviesCount)',
-                            isSelected: selectedCanon == CanonType.movie,
-                            onTap: () {
-                              ref.read(hapticsServiceProvider).duelSelectCandidate();
-                              ref.read(selectedCanonProvider.notifier).select(CanonType.movie);
-                            },
-                          ),
-                        ),
-
-                        const SizedBox(width: 4),
-
-                        // Series Canon Tab
-                        Expanded(
-                          child: _buildCanonTab(
-                            context: context,
-                            key: const Key('series_canon_tab'),
-                            label: 'TV Shows ($seriesCount)',
-                            subtitle: 'Includes anime',
-                            isSelected: selectedCanon == CanonType.series,
-                            onTap: () {
-                              ref.read(hapticsServiceProvider).duelSelectCandidate();
-                              ref.read(selectedCanonProvider.notifier).select(CanonType.series);
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                // 2. SEGMENTED DUAL-CANON SELECTOR (FE-206), the shared switcher (FE-UI-01)
+                TellyCanonSwitcher(
+                  selected: selectedCanon == CanonType.movie ? 'movie' : 'tv',
+                  movieCount: moviesCount,
+                  seriesCount: seriesCount,
+                  seriesSubtitle: 'Includes anime',
+                  movieKey: const Key('movie_canon_tab'),
+                  seriesKey: const Key('series_canon_tab'),
+                  onSelect: (mediaType) {
+                    ref.read(hapticsServiceProvider).duelSelectCandidate();
+                    ref.read(selectedCanonProvider.notifier).select(mediaType == 'movie' ? CanonType.movie : CanonType.series);
+                  },
                 ),
 
               const SizedBox(height: 12),
@@ -433,73 +400,6 @@ class DualCanonProfileScreen extends ConsumerWidget {
         }
       }
     }
-  }
-
-  Widget _buildCanonTab({
-    required BuildContext context,
-    required Key key,
-    required String label,
-    String? subtitle,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      key: key,
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        constraints: const BoxConstraints(minHeight: 48),
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: isSelected ? TellyColors.primaryAccentOf(context) : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: TellyColors.primaryAccentOf(context).withValues(alpha: 0.25),
-                    blurRadius: 10,
-                  ),
-                ]
-              : null,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TellyTypography.labelSmall(
-                color: isSelected
-                    ? (Theme.of(context).brightness == Brightness.light ? Colors.white : const Color(0xFF08090C))
-                    : TellyColors.textPrimaryOf(context),
-              ).copyWith(
-                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w700,
-                fontSize: 12,
-              ),
-            ),
-            if (subtitle != null) ...[
-              const SizedBox(height: 2),
-              Text(
-                subtitle,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: isSelected
-                      ? (Theme.of(context).brightness == Brightness.light ? Colors.white70 : const Color(0xFF08090C).withValues(alpha: 0.7))
-                      : TellyColors.textSecondaryOf(context),
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
   }
 
   Widget _buildViewModeButton({
