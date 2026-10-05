@@ -32,9 +32,9 @@ void main() {
       upsetOverTitleRank: 4,
       agreementPercentage: 14.0,
       microReview: 'The season 2 finale was the most stressful 60 minutes of television.',
-      reactions: const {
-        FeedReactionType.fire: 18,
-        FeedReactionType.mindBlown: 9,
+      reactions: {
+        FeedReaction.fire: 18,
+        FeedReaction.mindBlown: 9,
       },
       userReactions: const {},
       commentCount: 4,
@@ -67,11 +67,11 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('+ Want to Watch'));
+      await tester.tap(find.byKey(const Key('feed_bookmark')));
       await tester.pumpAndSettle();
 
       expect(inQueue, isTrue);
-      expect(find.text('In Queue'), findsOneWidget);
+      expect(find.byTooltip('In your Watchlist'), findsOneWidget);
     });
   });
 }

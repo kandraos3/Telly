@@ -74,11 +74,21 @@ enum ActivityType {
 
 /// Expressive reaction emojis on activity cards (SCR-05, Feature Spec 04 §5).
 enum FeedReactionType {
+  // SCR-05 presets (FE-FEED-01), in bar order.
+  cinema('🎬', 'Cinema', 'CINEMA'),
+  kudos('👏', 'Kudos', 'KUDOS'),
+  stunned('😮', 'Stunned', 'STUNNED'),
+  heartbreak('💔', 'Heartbreak', 'HEARTBREAK'),
+  masterpiece('🏆', 'Masterpiece', 'MASTERPIECE'),
+
+  // Retired presets: still valid, shown only on posts that already have them.
   fire('🔥', 'Facts / Peak', 'FIRE'),
   mindBlown('🤯', 'Mind Blown', 'MIND_BLOWN'),
   trashTake('🗑️', 'Trash Take', 'TRASH'),
-  heartbreak('💔', 'Heartbreak', 'HEARTBREAK'),
-  tasteTwin('🤝', 'Taste Twin', 'TASTE_TWIN');
+  tasteTwin('🤝', 'Taste Twin', 'TASTE_TWIN'),
+
+  /// A custom emoji from the picker; the emoji itself lives on [FeedReaction.emoji].
+  custom('', 'Emoji', 'EMOJI');
 
   final String emoji;
   final String label;
@@ -88,12 +98,62 @@ enum FeedReactionType {
 
   const FeedReactionType(this.emoji, this.label, this.dbValue);
 
+  /// The reactions offered on every card (FE-FEED-01).
+  static const presets = [cinema, kudos, stunned, heartbreak, masterpiece];
+
   static FeedReactionType? fromDbValue(String value) {
     for (final r in values) {
       if (r.dbValue == value) return r;
     }
     return null;
   }
+}
+
+/// One reaction on a feed post: a preset [FeedReactionType], or a custom emoji
+/// (`EMOJI` with [emoji] set). A user has at most one custom emoji per post.
+@immutable
+class FeedReaction {
+  final FeedReactionType type;
+  final String? emoji;
+
+  const FeedReaction(this.type) : emoji = null;
+  const FeedReaction.custom(String this.emoji) : type = FeedReactionType.custom;
+
+  static const cinema = FeedReaction(FeedReactionType.cinema);
+  static const kudos = FeedReaction(FeedReactionType.kudos);
+  static const stunned = FeedReaction(FeedReactionType.stunned);
+  static const heartbreak = FeedReaction(FeedReactionType.heartbreak);
+  static const masterpiece = FeedReaction(FeedReactionType.masterpiece);
+  static const fire = FeedReaction(FeedReactionType.fire);
+  static const mindBlown = FeedReaction(FeedReactionType.mindBlown);
+
+  bool get isCustom => emoji != null;
+
+  /// What the reaction bar shows.
+  String get glyph => emoji ?? type.emoji;
+
+  String get label => isCustom ? 'React $emoji' : type.label;
+
+  /// Key used by `get_activity_feed` (`reaction_counts`, `my_reactions`).
+  String get dbKey => isCustom ? 'EMOJI:$emoji' : type.dbValue;
+
+  static FeedReaction? fromDbKey(String key) {
+    if (key.startsWith('EMOJI:')) {
+      final emoji = key.substring(6);
+      return emoji.isEmpty ? null : FeedReaction.custom(emoji);
+    }
+    final type = FeedReactionType.fromDbValue(key);
+    return type == null || type == FeedReactionType.custom ? null : FeedReaction(type);
+  }
+
+  @override
+  bool operator ==(Object other) => other is FeedReaction && other.type == type && other.emoji == emoji;
+
+  @override
+  int get hashCode => Object.hash(type, emoji);
+
+  @override
+  String toString() => 'FeedReaction($dbKey)';
 }
 
 /// `report_target_enum` (features/04, TA-02 moderation).
@@ -157,8 +217,8 @@ class ActivityLog {
 
   // Interaction states
   final bool inUserQueue;
-  final Map<FeedReactionType, int> reactions;
-  final Set<FeedReactionType> userReactions;
+  final Map<FeedReaction, int> reactions;
+  final Set<FeedReaction> userReactions;
   final int commentCount;
   final DateTime createdAt;
 
@@ -201,8 +261,8 @@ class ActivityLog {
   /// Returns a copy with updated interaction states.
   ActivityLog copyWith({
     bool? inUserQueue,
-    Map<FeedReactionType, int>? reactions,
-    Set<FeedReactionType>? userReactions,
+    Map<FeedReaction, int>? reactions,
+    Set<FeedReaction>? userReactions,
     int? commentCount,
     int? upsetOverTitleId,
   }) {

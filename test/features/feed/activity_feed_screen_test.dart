@@ -85,9 +85,30 @@ void main() {
 
     testWidgets('a reaction updates instantly and is sent to the server', (tester) async {
       await pump(tester);
-      await tester.tap(find.descendant(of: find.byKey(const Key('feed_card_act-2')), matching: find.textContaining('🤯')).first);
+      await tester.tap(find.descendant(of: find.byKey(const Key('feed_card_act-2')), matching: find.text('😮')).first);
       await tester.pumpAndSettle();
-      expect(repo.reactions.single, ('act-2', FeedReactionType.mindBlown, true));
+      expect(repo.reactions.single, ('act-2', FeedReaction.stunned, true));
+    });
+
+    testWidgets('FE-FEED-01: a new custom emoji replaces my previous one', (tester) async {
+      await pump(tester);
+      final card = find.byKey(const Key('feed_card_act-2'));
+      Future<void> pick(String emoji) async {
+        await tester.tap(find.descendant(of: card, matching: find.byKey(const Key('feed_reaction_more'))));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(Key('feed_picker_emoji_$emoji')));
+        await tester.pumpAndSettle();
+      }
+
+      await pick('🍿');
+      expect(find.descendant(of: card, matching: find.byKey(const Key('feed_reaction_EMOJI:🍿'))), findsOneWidget);
+      await pick('😂');
+      expect(find.descendant(of: card, matching: find.byKey(const Key('feed_reaction_EMOJI:🍿'))), findsNothing);
+      expect(find.descendant(of: card, matching: find.byKey(const Key('feed_reaction_EMOJI:😂'))), findsOneWidget);
+      expect(repo.reactions, [
+        ('act-2', const FeedReaction.custom('🍿'), true),
+        ('act-2', const FeedReaction.custom('😂'), true),
+      ]);
     });
 
     testWidgets('a rejected reaction rolls back and explains', (tester) async {
@@ -100,12 +121,13 @@ void main() {
       expect(find.descendant(of: card, matching: find.textContaining('3')), findsWidgets, reason: 'count restored');
     });
 
-    testWidgets('+ Want to Watch saves to the queue', (tester) async {
+    testWidgets('the bookmark saves to the queue', (tester) async {
       await pump(tester);
-      await tester.tap(find.descendant(of: find.byKey(const Key('feed_card_act-2')), matching: find.text('+ Want to Watch')));
+      final card = find.byKey(const Key('feed_card_act-2'));
+      await tester.tap(find.descendant(of: card, matching: find.byKey(const Key('feed_bookmark'))));
       await tester.pumpAndSettle();
       expect(repo.queued.single, (2, true));
-      expect(find.descendant(of: find.byKey(const Key('feed_card_act-2')), matching: find.text('In Queue')), findsOneWidget);
+      expect(find.descendant(of: card, matching: find.byTooltip('In your Watchlist')), findsOneWidget);
     });
 
     testWidgets('long-press → report hides the post for me', (tester) async {

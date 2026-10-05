@@ -40,7 +40,8 @@ abstract interface class SocialRepository {
   /// Adds a title to my queue, optionally crediting the friend who recommended it.
   Future<void> queueTitle({required int titleId, required String mediaType, String? recommendedBy});
 
-  Future<void> setReaction({required String activityId, required FeedReactionType reaction, required bool active});
+  /// Adds or removes my [reaction]. Adding a custom emoji replaces my previous one.
+  Future<void> setReaction({required String activityId, required FeedReaction reaction, required bool active});
 
   Future<List<RankingComment>> getComments(String activityId);
 
@@ -145,11 +146,29 @@ class SupabaseSocialRepository implements SocialRepository {
   }
 
   @override
-  Future<void> setReaction({required String activityId, required FeedReactionType reaction, required bool active}) async {
+  Future<void> setReaction({required String activityId, required FeedReaction reaction, required bool active}) async {
     final me = _me;
+    if (reaction.isCustom) {
+      // One EMOJI row per user per post (UNIQUE activity/user/type): replace, don't stack.
+      await _client
+          .from('feed_reactions')
+          .delete()
+          .eq('activity_id', activityId)
+          .eq('user_id', me)
+          .eq('reaction_type', FeedReactionType.custom.dbValue);
+      if (active) {
+        await _client.from('feed_reactions').insert({
+          'activity_id': activityId,
+          'user_id': me,
+          'reaction_type': FeedReactionType.custom.dbValue,
+          'emoji': reaction.emoji,
+        });
+      }
+      return;
+    }
     if (active) {
       await _client.from('feed_reactions').upsert(
-        {'activity_id': activityId, 'user_id': me, 'reaction_type': reaction.dbValue},
+        {'activity_id': activityId, 'user_id': me, 'reaction_type': reaction.type.dbValue},
         onConflict: 'activity_id,user_id,reaction_type',
         ignoreDuplicates: true,
       );
@@ -159,7 +178,7 @@ class SupabaseSocialRepository implements SocialRepository {
           .delete()
           .eq('activity_id', activityId)
           .eq('user_id', me)
-          .eq('reaction_type', reaction.dbValue);
+          .eq('reaction_type', reaction.type.dbValue);
     }
   }
 
@@ -309,11 +328,11 @@ ActivityLog activityFromFeedRow(Map<String, dynamic> r) {
     inUserQueue: (r['in_my_queue'] as bool?) ?? false,
     reactions: {
       for (final MapEntry(:key, :value) in counts.entries)
-        if (FeedReactionType.fromDbValue(key as String) case final reaction?) reaction: (value as num).toInt(),
+        if (FeedReaction.fromDbKey(key as String) case final reaction?) reaction: (value as num).toInt(),
     },
     userReactions: {
       for (final v in (r['my_reactions'] as List? ?? const []))
-        if (FeedReactionType.fromDbValue(v as String) case final reaction?) reaction,
+        if (FeedReaction.fromDbKey(v as String) case final reaction?) reaction,
     },
     commentCount: (r['comment_count'] as num?)?.toInt() ?? 0,
     createdAt: DateTime.parse(r['created_at'] as String).toLocal(),

@@ -27,7 +27,7 @@ ActivityLog fakeActivity(
       upsetDelta: upset ? 0.31 : 0,
       upsetOverTitleName: upset ? 'Succession' : null,
       upsetOverTitleRank: upset ? 4 : null,
-      reactions: const {FeedReactionType.fire: 3},
+      reactions: {FeedReaction.fire: 3},
       createdAt: DateTime(2026, 10, 3, 12).subtract(Duration(minutes: minutesAgo)),
     );
 
@@ -46,7 +46,7 @@ class FakeSocialRepository implements SocialRepository {
   final comments = <String, List<RankingComment>>{};
 
   final pageRequests = <(FeedFilter, String?)>[];
-  final reactions = <(String, FeedReactionType, bool)>[];
+  final reactions = <(String, FeedReaction, bool)>[];
   final queued = <(int, bool)>[];
   final reports = <(ReportTarget, String, ReportReason)>[];
   final blocked = <String>[];
@@ -82,7 +82,7 @@ class FakeSocialRepository implements SocialRepository {
   }
 
   @override
-  Future<void> setReaction({required String activityId, required FeedReactionType reaction, required bool active}) async {
+  Future<void> setReaction({required String activityId, required FeedReaction reaction, required bool active}) async {
     _maybeFail();
     reactions.add((activityId, reaction, active));
   }

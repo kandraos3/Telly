@@ -2098,6 +2098,17 @@ Tickets ingested through the `issue-manager` skill. Each entry mirrors its GitHu
 - **Testing & Verification**:
   - [x] Widget tests: picks locked until a vibe is chosen, friend still required, vibe changes re-filter (sci-fi → thriller → thriller OR comedy → none), watchlist add with snackbar and saved state. Engine unit tests for genre matching, `requireVibe`, *Anything good*, and the bonus-only default.
 
+#### `FE-FEED-01`: Compact Want-to-Watch Bookmark & Modernized Reaction Bar (#30)
+- **Spec Reference**: [**`features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md) §2–§3; `SCR-05`
+- **Granular Tasks**:
+  - [x] A 48 dp bookmark icon in the top-right of the standard and upset cards (`FeedBookmarkButton`) replaces the "+ Want to Watch" banner. The confirmation no longer claims "(available on Netflix)".
+  - [x] Migration `20261010001500_feed_reaction_presets.sql`: presets `CINEMA` 🎬, `KUDOS` 👏, `STUNNED` 😮, `MASTERPIECE` 🏆 (+ existing `HEARTBREAK` 💔), and `EMOJI` with `feed_reactions.emoji` (one custom emoji per user per post; the shipped `UNIQUE (activity_id, user_id, reaction_type)` is kept). `get_activity_feed` reports custom emoji as `EMOJI:<emoji>` keys; old apps ignore them.
+  - [x] `FeedReaction` value type (preset or custom emoji) replaces `FeedReactionType` keys on `ActivityLog`. Picking a new emoji replaces my previous one, optimistically and via delete + insert in `SupabaseSocialRepository`.
+  - [x] Shared `FeedActionBar`: the five presets, any other reactions a post already has (retired 🔥 🤯 🗑️ 🤝 and custom emoji, by count), and a `+` that opens a bottom-sheet picker (labelled presets + 40 curated emoji).
+- **Testing & Verification**:
+  - [x] Widget tests: bookmark size, position and toggle, presets and extras rendering, picker returns preset or emoji, custom emoji swap through the controller. Repository tests for `EMOJI:` key parsing and the delete-then-insert write. a11y audit (contrast, 48 dp targets). pgTAP `018_feed_reaction_presets.test.sql` (runs in CI).
+  - [ ] Apply the migration to `telly-prod` via `supabase-deploy` → `push` *(not deployed in this session)*.
+
 ---
 
 ## 🏆 Sprint Deliverables Summary Matrix

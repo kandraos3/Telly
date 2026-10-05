@@ -62,21 +62,31 @@ class FeedController extends FamilyAsyncNotifier<FeedState, FeedFilter> {
     }
   }
 
-  Future<void> toggleReaction(String activityId, FeedReactionType reaction) async {
+  Future<void> toggleReaction(String activityId, FeedReaction reaction) async {
     final before = _find(activityId);
     if (before == null) return;
     final active = !before.userReactions.contains(reaction);
-    final counts = Map<FeedReactionType, int>.of(before.reactions);
-    final next = (counts[reaction] ?? 0) + (active ? 1 : -1);
-    if (next > 0) {
-      counts[reaction] = next;
-    } else {
-      counts.remove(reaction);
+    final counts = Map<FeedReaction, int>.of(before.reactions);
+    final mine = {...before.userReactions};
+    void bump(FeedReaction r, int by) {
+      final next = (counts[r] ?? 0) + by;
+      if (next > 0) {
+        counts[r] = next;
+      } else {
+        counts.remove(r);
+      }
     }
-    _replace(before.copyWith(
-      reactions: counts,
-      userReactions: active ? {...before.userReactions, reaction} : ({...before.userReactions}..remove(reaction)),
-    ));
+
+    // A new custom emoji replaces my previous one (FE-FEED-01).
+    if (active && reaction.isCustom) {
+      for (final old in mine.where((r) => r.isCustom).toList()) {
+        bump(old, -1);
+        mine.remove(old);
+      }
+    }
+    bump(reaction, active ? 1 : -1);
+    active ? mine.add(reaction) : mine.remove(reaction);
+    _replace(before.copyWith(reactions: counts, userReactions: mine));
     try {
       await _repo.setReaction(activityId: activityId, reaction: reaction, active: active);
     } catch (_) {

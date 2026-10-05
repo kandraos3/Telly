@@ -48,23 +48,23 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('+ Want to Watch'), findsOneWidget);
+      expect(find.byTooltip('Want to Watch'), findsOneWidget);
       expect(await fakeWatchlist.isInWatchlist(110492, 'tv'), isFalse);
 
       // 1-Tap add to queue
-      await tester.tap(find.text('+ Want to Watch'));
+      await tester.tap(find.byKey(const Key('feed_bookmark')));
       await tester.pumpAndSettle();
 
-      expect(find.text('In Queue'), findsOneWidget);
+      expect(find.byTooltip('In your Watchlist'), findsOneWidget);
       expect(await fakeWatchlist.isInWatchlist(110492, 'tv'), isTrue);
       expect(fakeWatchlist.items.single.title, 'Severance');
       expect(fakeWatchlist.items.single.mediaType, 'tv');
 
       // 1-Tap remove from queue
-      await tester.tap(find.text('In Queue'));
+      await tester.tap(find.byKey(const Key('feed_bookmark')));
       await tester.pumpAndSettle();
 
-      expect(find.text('+ Want to Watch'), findsOneWidget);
+      expect(find.byTooltip('Want to Watch'), findsOneWidget);
       expect(await fakeWatchlist.isInWatchlist(110492, 'tv'), isFalse);
     });
   });

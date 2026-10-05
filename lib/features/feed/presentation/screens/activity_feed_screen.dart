@@ -66,7 +66,7 @@ class _ActivityFeedScreenState extends ConsumerState<ActivityFeedScreen> {
     }
   }
 
-  void _handleReactionToggle(ActivityLog activity, FeedReactionType reaction) =>
+  void _handleReactionToggle(ActivityLog activity, FeedReaction reaction) =>
       _guard(() => _feed.toggleReaction(activity.id, reaction));
 
   void _handleQueueToggle(ActivityLog activity, bool inQueue) => _guard(() => _feed.setQueued(activity.id, inQueue));

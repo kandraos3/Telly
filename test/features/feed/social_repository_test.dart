@@ -34,8 +34,8 @@ Map<String, dynamic> feedRow({String id = 'a1', String createdAt = '2026-10-03T1
       'upset_over_rank': 4,
       'metadata': {'loser_title_id': 76331},
       'created_at': createdAt,
-      'reaction_counts': {'FIRE': 18, 'MIND_BLOWN': 9, 'UNKNOWN': 1},
-      'my_reactions': ['FIRE'],
+      'reaction_counts': {'FIRE': 18, 'MIND_BLOWN': 9, 'UNKNOWN': 1, 'EMOJI:🍿': 2},
+      'my_reactions': ['FIRE', 'EMOJI:🍿'],
       'comment_count': 7,
       'in_my_queue': true,
     };
@@ -82,8 +82,8 @@ void main() {
       expect(a.upsetOverTitleName, 'Succession');
       expect(a.upsetOverTitleRank, 4);
       expect(a.vibeTags, ['Mind-Bending']);
-      expect(a.reactions, {FeedReactionType.fire: 18, FeedReactionType.mindBlown: 9});
-      expect(a.userReactions, {FeedReactionType.fire});
+      expect(a.reactions, {FeedReaction.fire: 18, FeedReaction.mindBlown: 9, const FeedReaction.custom('🍿'): 2});
+      expect(a.userReactions, {FeedReaction.fire, const FeedReaction.custom('🍿')});
       expect(a.inUserQueue, isTrue);
       expect(a.commentCount, 7);
     });
@@ -148,10 +148,34 @@ void main() {
     });
 
     test('reactions write the server enum value', () async {
-      await repo().setReaction(activityId: 'a1', reaction: FeedReactionType.trashTake, active: true);
-      await repo().setReaction(activityId: 'a1', reaction: FeedReactionType.trashTake, active: false);
-      expect(jsonDecode(requests[0].body), {'activity_id': 'a1', 'user_id': 'u-me', 'reaction_type': 'TRASH'});
-      expect(requests[1].url.queryParameters['reaction_type'], 'eq.TRASH');
+      await repo().setReaction(activityId: 'a1', reaction: FeedReaction.masterpiece, active: true);
+      await repo().setReaction(activityId: 'a1', reaction: FeedReaction.masterpiece, active: false);
+      expect(jsonDecode(requests[0].body), {'activity_id': 'a1', 'user_id': 'u-me', 'reaction_type': 'MASTERPIECE'});
+      expect(requests[1].url.queryParameters['reaction_type'], 'eq.MASTERPIECE');
+    });
+
+    test('FE-FEED-01: a custom emoji replaces my previous one', () async {
+      await repo().setReaction(activityId: 'a1', reaction: const FeedReaction.custom('🍿'), active: true);
+      expect(requests[0].method, 'DELETE');
+      expect(requests[0].url.queryParameters['reaction_type'], 'eq.EMOJI');
+      expect(requests[0].url.queryParameters['user_id'], 'eq.u-me');
+      expect(requests[1].method, 'POST');
+      expect(jsonDecode(requests[1].body),
+          {'activity_id': 'a1', 'user_id': 'u-me', 'reaction_type': 'EMOJI', 'emoji': '🍿'});
+
+      requests.clear();
+      await repo().setReaction(activityId: 'a1', reaction: const FeedReaction.custom('🍿'), active: false);
+      expect(requests.single.method, 'DELETE');
+    });
+
+    test('FE-FEED-01: reaction keys round-trip', () {
+      expect(FeedReaction.fromDbKey('CINEMA'), FeedReaction.cinema);
+      expect(FeedReaction.fromDbKey('EMOJI:😂'), const FeedReaction.custom('😂'));
+      expect(FeedReaction.fromDbKey('EMOJI:'), isNull);
+      expect(FeedReaction.fromDbKey('EMOJI'), isNull, reason: 'a bare EMOJI type has no glyph');
+      expect(FeedReaction.fromDbKey('NOPE'), isNull);
+      expect(const FeedReaction.custom('😂').dbKey, 'EMOJI:😂');
+      expect(FeedReaction.kudos.glyph, '👏');
     });
 
     test('comments load with their author and post with the spoiler flag', () async {

@@ -29,8 +29,8 @@ void main() {
       favoriteCharacter: 'Paul Atreides',
       vibeTags: const ['Masterpiece Acting'],
       microReview: 'Hans Zimmer score vibrating in IMAX was religious.',
-      reactions: const {
-        FeedReactionType.fire: 24,
+      reactions: {
+        FeedReaction.fire: 24,
       },
       userReactions: const {},
       commentCount: 7,
@@ -53,7 +53,7 @@ void main() {
       expect(find.text('“Hans Zimmer score vibrating in IMAX was religious.”'), findsOneWidget);
     });
 
-    testWidgets('tapping 1-tap queue button toggles state and calls callback', (tester) async {
+    testWidgets('FE-FEED-01: the compact bookmark toggles state and calls back', (tester) async {
       bool? toggledState;
 
       await tester.pumpWidget(buildTestableWidget(
@@ -64,18 +64,61 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      expect(find.text('+ Want to Watch'), findsOneWidget);
+      expect(find.text('+ Want to Watch'), findsNothing, reason: 'the big banner button is gone');
+      final bookmark = find.byKey(const Key('feed_bookmark'));
+      expect(bookmark, findsOneWidget);
+      expect(tester.getSize(bookmark).width, lessThanOrEqualTo(48));
+      expect(find.byTooltip('Want to Watch'), findsOneWidget);
+      // Top-right corner: level with the author, right of the name.
+      expect(tester.getCenter(bookmark).dy, closeTo(tester.getCenter(find.text('Alex Rivera')).dy, 24));
+      expect(tester.getCenter(bookmark).dx, greaterThan(tester.getCenter(find.text('Alex Rivera')).dx));
 
-      await tester.tap(find.text('+ Want to Watch'));
+      await tester.tap(bookmark);
       await tester.pumpAndSettle();
 
       expect(toggledState, isTrue);
-      expect(find.text('In Queue'), findsOneWidget);
-      expect(find.text('Added to your Watchlist (available on Netflix)'), findsOneWidget);
+      expect(find.byTooltip('In your Watchlist'), findsOneWidget);
+      expect(find.text('Added to your Watchlist'), findsOneWidget);
+      expect(find.textContaining('Netflix'), findsNothing, reason: 'no invented streaming service');
+    });
+
+    testWidgets('FE-FEED-01: the bar shows the five presets, the post\'s other reactions and a picker', (tester) async {
+      await tester.pumpWidget(buildTestableWidget(FeedActivityCard(activity: sampleActivity)));
+      await tester.pumpAndSettle();
+
+      for (final t in FeedReactionType.presets) {
+        expect(find.byKey(Key('feed_reaction_${t.dbValue}')), findsOneWidget, reason: t.label);
+      }
+      // A retired preset the post already has still shows, with its count.
+      expect(find.byKey(const Key('feed_reaction_FIRE')), findsOneWidget);
+      expect(find.text('24'), findsOneWidget);
+      expect(find.byKey(const Key('feed_reaction_MIND_BLOWN')), findsNothing);
+      expect(find.byKey(const Key('feed_reaction_more')), findsOneWidget);
+    });
+
+    testWidgets('FE-FEED-01: the picker returns a preset or any emoji', (tester) async {
+      final picked = <FeedReaction>[];
+      await tester.pumpWidget(buildTestableWidget(
+        FeedActivityCard(activity: sampleActivity, onReactionToggle: picked.add),
+      ));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('feed_reaction_more')));
+      await tester.pumpAndSettle();
+      expect(find.text('Masterpiece'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('feed_picker_emoji_🍿')));
+      await tester.pumpAndSettle();
+      expect(picked, [const FeedReaction.custom('🍿')]);
+
+      await tester.tap(find.byKey(const Key('feed_reaction_more')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('feed_picker_KUDOS')));
+      await tester.pumpAndSettle();
+      expect(picked.last, FeedReaction.kudos);
     });
 
     testWidgets('tapping reaction invokes onReactionToggle callback', (tester) async {
-      FeedReactionType? selectedReaction;
+      FeedReaction? selectedReaction;
 
       await tester.pumpWidget(buildTestableWidget(
         FeedActivityCard(
@@ -88,7 +131,7 @@ void main() {
       await tester.tap(find.text('🔥'));
       await tester.pumpAndSettle();
 
-      expect(selectedReaction, equals(FeedReactionType.fire));
+      expect(selectedReaction, equals(FeedReaction.fire));
     });
 
     testWidgets('tapping comment bubble invokes onCommentTap', (tester) async {

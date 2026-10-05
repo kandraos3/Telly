@@ -6,6 +6,7 @@ import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/theme/telly_typography.dart';
 import 'package:telly_app/core/widgets/poster_image.dart';
 import 'package:telly_app/features/feed/domain/social_models.dart';
+import 'package:telly_app/features/feed/presentation/widgets/feed_card_actions.dart';
 import 'package:telly_app/features/onboarding/data/top_50_seeds.dart';
 
 /// Standard activity feed card component (FE-302, FE-304).
@@ -16,7 +17,7 @@ class FeedActivityCard extends StatefulWidget {
   final ActivityLog activity;
   final VoidCallback? onCardTap;
   final VoidCallback? onCommentTap;
-  final ValueChanged<FeedReactionType>? onReactionToggle;
+  final ValueChanged<FeedReaction>? onReactionToggle;
   final ValueChanged<bool>? onQueueToggle;
   final VoidCallback? onTapTitle;
 
@@ -59,29 +60,7 @@ class _FeedActivityCardState extends State<FeedActivityCard> {
     widget.onQueueToggle?.call(_inQueue);
 
     if (_inQueue) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: TellyColors.backgroundCard,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: const BorderSide(color: TellyColors.borderGlass),
-          ),
-          content: Row(
-            children: [
-              const Icon(Icons.bookmark_added_rounded, color: TellyColors.phosphorLime, size: 20),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  'Added to your Watchlist (available on Netflix)',
-                  style: TellyTypography.caption(color: TellyColors.textPrimary),
-                ),
-              ),
-            ],
-          ),
-          duration: const Duration(seconds: 2),
-        ),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(feedQueuedSnackBar());
     }
   }
 
@@ -158,6 +137,8 @@ class _FeedActivityCardState extends State<FeedActivityCard> {
                         ],
                       ),
                     ),
+                    // Compact "Want to Watch" (FE-FEED-01).
+                    FeedBookmarkButton(inQueue: _inQueue, onPressed: _handleQueueToggle),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -342,47 +323,11 @@ class _FeedActivityCardState extends State<FeedActivityCard> {
                 const Divider(color: TellyColors.borderGlass, height: 1),
                 const SizedBox(height: 10),
 
-                // 7. Action Bar: 1-Tap Queue Button + Reactions + Comments
-                Row(
-                  children: [
-                    // 1-Tap Queue Button (FE-304)
-                    _buildQueueButton(),
-                    const Spacer(),
-
-                    // Reactions Row
-                    _buildReactionsRow(activity),
-                    const SizedBox(width: 12),
-
-                    // Comments Bubble
-                    InkWell(
-                      borderRadius: BorderRadius.circular(8),
-                      onTap: widget.onCommentTap,
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(
-                                Icons.chat_bubble_outline_rounded,
-                                size: 16,
-                                color: TellyColors.textTertiary,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                '${activity.commentCount}',
-                                style: TellyTypography.caption(
-                                  color: TellyColors.textSecondary,
-                                ).copyWith(fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                // 7. Reactions + Comments (FE-FEED-01)
+                FeedActionBar(
+                  activity: activity,
+                  onReactionToggle: widget.onReactionToggle,
+                  onCommentTap: widget.onCommentTap,
                 ),
               ],
             ),
@@ -409,104 +354,6 @@ class _FeedActivityCardState extends State<FeedActivityCard> {
       style: TellyTypography.bodyMedium(
         color: TellyColors.textPrimary,
       ).copyWith(fontWeight: FontWeight.w600),
-    );
-  }
-
-  Widget _buildQueueButton() {
-    return InkWell(
-      borderRadius: BorderRadius.circular(8),
-      onTap: _handleQueueToggle,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: 48),
-        child: Container(
-          alignment: Alignment.center,
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          decoration: BoxDecoration(
-            color: _inQueue
-                ? TellyColors.phosphorLime.withValues(alpha: 0.15)
-                : TellyColors.backgroundCard,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: _inQueue ? TellyColors.phosphorLime : TellyColors.borderGlass,
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                _inQueue ? Icons.bookmark_added_rounded : Icons.bookmark_add_outlined,
-                size: 15,
-                color: _inQueue ? TellyColors.phosphorLime : TellyColors.textSecondary,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                _inQueue ? 'In Queue' : '+ Want to Watch',
-                style: TellyTypography.caption(
-                  color: _inQueue ? TellyColors.phosphorLime : TellyColors.textSecondary,
-                ).copyWith(fontWeight: FontWeight.bold, fontSize: 11),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildReactionsRow(ActivityLog activity) {
-    final defaultReactions = [
-      FeedReactionType.fire,
-      FeedReactionType.mindBlown,
-      FeedReactionType.trashTake,
-    ];
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: defaultReactions.map((reaction) {
-        final count = activity.reactions[reaction] ?? 0;
-        final isSelected = activity.userReactions.contains(reaction);
-
-        return Padding(
-          padding: const EdgeInsets.only(right: 6),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(8),
-            onTap: () {
-              HapticsService.selectionClick();
-              widget.onReactionToggle?.call(reaction);
-            },
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
-              child: Container(
-                alignment: Alignment.center,
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? TellyColors.phosphorLime.withValues(alpha: 0.15)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: isSelected ? TellyColors.phosphorLime : Colors.transparent,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(reaction.emoji, style: const TextStyle(fontSize: 14, color: TellyColors.textPrimary)),
-                    if (count > 0) ...[
-                      const SizedBox(width: 3),
-                      Text(
-                        '$count',
-                        style: TellyTypography.caption(
-                          color: isSelected ? TellyColors.phosphorLime : TellyColors.textSecondary,
-                        ).copyWith(fontWeight: FontWeight.bold, fontSize: 11),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      }).toList(),
     );
   }
 }
