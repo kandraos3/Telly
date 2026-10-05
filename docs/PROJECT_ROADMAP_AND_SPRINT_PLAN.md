@@ -2046,6 +2046,15 @@ Tickets ingested through the `issue-manager` skill. Each entry mirrors its GitHu
 - **Testing & Verification**:
   - [x] Model parsing / hour-format unit tests; widget tests for movie stats, tab switch and offline fallback; pgTAP `014_canon_stats.test.sql` (runs in CI).
 
+#### `FE-SQUADS-01`: Squads in the Main Navigation & Delete / Leave Squad (#25)
+- **Spec Reference**: [**`features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md) §4; `SCR-17a`, `SCR-17b`
+- **Granular Tasks**:
+  - [x] "My Squads" button in the SCR-05 Feed header opens the squads list (alongside the SCR-14 profile shortcut).
+  - [x] `SquadRepository.deleteSquad` (owner, RLS `squads_delete`, cascades memberships) and `leaveSquad` (own membership, RLS `squad_members_delete`); both fail loudly when RLS removed nothing.
+  - [x] SCR-17b options menu: Delete Squad for the owner, Leave Squad for members, each behind a confirmation dialog; on success the squad leaves the list and the app returns to `/squads`.
+- **Testing & Verification**:
+  - [x] Widget tests: owner delete, member leave, cancel, rejected delete; repository request-shape tests; Feed header navigation test.
+
 ---
 
 ## 🏆 Sprint Deliverables Summary Matrix

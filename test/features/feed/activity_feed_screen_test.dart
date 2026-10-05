@@ -36,6 +36,13 @@ void main() {
   }
 
   group('FE-301 / FE-607: SCR-05 ActivityFeedScreen', () {
+    testWidgets('the Squads button in the header opens my squads (FE-SQUADS-01)', (tester) async {
+      await pump(tester);
+      await tester.tap(find.byKey(const Key('feed_squads_button')));
+      await tester.pumpAndSettle();
+      expect(find.text('route:/squads'), findsOneWidget);
+    });
+
     testWidgets('renders the tabs, an upset card and standard cards from the repository', (tester) async {
       await pump(tester);
       expect(find.text('TELLY'), findsOneWidget);

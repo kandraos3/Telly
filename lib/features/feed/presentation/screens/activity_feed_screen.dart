@@ -130,6 +130,27 @@ class _ActivityFeedScreenState extends ConsumerState<ActivityFeedScreen> {
           ],
         ),
         actions: [
+          // FE-SQUADS-01: Squads one tap from the home tab, not only behind the profile icon.
+          Center(
+            child: OutlinedButton.icon(
+              key: const Key('feed_squads_button'),
+              onPressed: () {
+                HapticsService.selectionClick();
+                context.push(Routes.squads);
+              },
+              style: OutlinedButton.styleFrom(
+                foregroundColor: TellyColors.phosphorLime,
+                side: BorderSide(color: TellyColors.phosphorLime.withValues(alpha: 0.4)),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                minimumSize: const Size(48, 48),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+              ),
+              icon: const Icon(Icons.groups_2_outlined, size: 18),
+              label: Text('My Squads',
+                  style: TellyTypography.labelMedium(color: TellyColors.phosphorLime)
+                      .copyWith(fontWeight: FontWeight.w700)),
+            ),
+          ),
           IconButton(
             tooltip: 'Search',
             icon: const Icon(Icons.search_rounded, color: TellyColors.textPrimary),

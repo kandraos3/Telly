@@ -112,6 +112,12 @@ class _FakeSquadRepository implements SquadRepository {
 
   @override
   Future<void> addMember({required String squadId, required String userId}) async {}
+
+  @override
+  Future<void> deleteSquad(String squadId) async => squads.remove(squadId);
+
+  @override
+  Future<void> leaveSquad(String squadId) async => squads.remove(squadId);
 }
 
 class _SeededProfileCanon extends ProfileCanonNotifier {

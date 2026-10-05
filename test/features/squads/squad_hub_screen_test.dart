@@ -41,7 +41,10 @@ class FakeSquadRepository implements SquadRepository {
   List<SharedWatchlistItem> watchlist = const [];
   final consensusCalls = <String>[];
   final added = <(String, String)>[];
+  final deleted = <String>[];
+  final left = <String>[];
   bool failReads = false;
+  bool failWrites = false;
 
   @override
   Future<List<Squad>> mySquads() async {
@@ -81,6 +84,19 @@ class FakeSquadRepository implements SquadRepository {
       members: [...s.members, member(userId, 'Maya')],
       createdAt: s.createdAt,
     );
+  }
+  @override
+  Future<void> deleteSquad(String squadId) async {
+    if (failWrites) throw Exception('rejected');
+    deleted.add(squadId);
+    squads.remove(squadId);
+  }
+
+  @override
+  Future<void> leaveSquad(String squadId) async {
+    if (failWrites) throw Exception('rejected');
+    left.add(squadId);
+    squads.remove(squadId);
   }
 }
 
@@ -176,6 +192,69 @@ void main() {
     });
   });
 
+  group('FE-SQUADS-01: delete and leave squad', () {
+    Future<void> openMenu(WidgetTester tester) async {
+      await tester.tap(find.byKey(const Key('squad_menu_button')));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('the owner sees Delete Squad, confirms, and returns to the squads list', (tester) async {
+      await pump(tester, const SquadHubScreen(squadId: 'sq-1'));
+      await openMenu(tester);
+      expect(find.byKey(const Key('squad_leave')), findsNothing);
+      await tester.tap(find.byKey(const Key('squad_delete')));
+      await tester.pumpAndSettle();
+      expect(find.text('Delete The Apartment?'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('squad_destructive_confirm')));
+      await tester.pumpAndSettle();
+
+      expect(repo.deleted, ['sq-1']);
+      expect(repo.left, isEmpty);
+      expect(find.text('route:/squads'), findsOneWidget);
+    });
+
+    testWidgets('a member sees Leave Squad and leaves after confirming', (tester) async {
+      await pump(tester, const SquadHubScreen(squadId: 'sq-1'), me: 'u3');
+      await openMenu(tester);
+      expect(find.byKey(const Key('squad_delete')), findsNothing);
+      await tester.tap(find.byKey(const Key('squad_leave')));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('squad_destructive_confirm')));
+      await tester.pumpAndSettle();
+
+      expect(repo.left, ['sq-1']);
+      expect(repo.deleted, isEmpty);
+      expect(find.text('route:/squads'), findsOneWidget);
+    });
+
+    testWidgets('cancelling keeps the squad', (tester) async {
+      await pump(tester, const SquadHubScreen(squadId: 'sq-1'));
+      await openMenu(tester);
+      await tester.tap(find.byKey(const Key('squad_delete')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('squad_destructive_cancel')));
+      await tester.pumpAndSettle();
+
+      expect(repo.deleted, isEmpty);
+      expect(find.text('THE APARTMENT (2)'), findsOneWidget);
+    });
+
+    testWidgets('a rejected delete stays on the hub and says so', (tester) async {
+      repo.failWrites = true;
+      await pump(tester, const SquadHubScreen(squadId: 'sq-1'));
+      await openMenu(tester);
+      await tester.tap(find.byKey(const Key('squad_delete')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('squad_destructive_confirm')));
+      await tester.pumpAndSettle();
+
+      expect(find.text("Couldn't delete the squad. Try again."), findsOneWidget);
+      expect(find.text('THE APARTMENT (2)'), findsOneWidget);
+    });
+  });
+
   group('FE-608: SquadsListScreen', () {
     testWidgets('lists my squads and creates a new one', (tester) async {
       await pump(tester, const SquadsListScreen());
@@ -232,6 +311,37 @@ void main() {
       expect(jsonDecode(requests.single.body), {'p_squad_id': 'sq-1', 'p_media_type': 'tv'});
       expect((board.single.championDisplayName, board.single.lowestDisplayName), ('Jordan', 'Alex'));
       expect(board.single.posterUrl, 'https://image.tmdb.org/t/p/w342/bb.jpg');
+    });
+  
+    SupabaseClient clientReturning(List<Object> body, List<http.Request> requests) => SupabaseClient(
+          'http://supabase.test',
+          'anon-key',
+          httpClient: MockClient((req) async {
+            requests.add(req);
+            return http.Response(jsonEncode(body), 200,
+                headers: {'content-type': 'application/json'}, request: req);
+          }),
+          authOptions: const AuthClientOptions(autoRefreshToken: false),
+        );
+
+    test('deleteSquad deletes the squad row and fails when RLS removed nothing (FE-SQUADS-01)', () async {
+      final requests = <http.Request>[];
+      await SupabaseSquadRepository(clientReturning([{'id': 'sq-1'}], requests)).deleteSquad('sq-1');
+      expect(requests.single.method, 'DELETE');
+      expect(requests.single.url.path, '/rest/v1/squads');
+      expect(requests.single.url.queryParameters['id'], 'eq.sq-1');
+
+      expect(() => SupabaseSquadRepository(clientReturning([], [])).deleteSquad('sq-1'), throwsStateError);
+    });
+
+    test('leaveSquad deletes only my membership (FE-SQUADS-01)', () async {
+      final requests = <http.Request>[];
+      await SupabaseSquadRepository(clientReturning([{'squad_id': 'sq-1'}], requests), currentUserId: () => 'u3')
+          .leaveSquad('sq-1');
+      expect(requests.single.method, 'DELETE');
+      expect(requests.single.url.path, '/rest/v1/squad_members');
+      expect(requests.single.url.queryParameters, containsPair('squad_id', 'eq.sq-1'));
+      expect(requests.single.url.queryParameters, containsPair('user_id', 'eq.u3'));
     });
   });
 }

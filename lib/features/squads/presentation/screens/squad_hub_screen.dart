@@ -51,6 +51,30 @@ class SquadHubScreen extends ConsumerWidget {
                 style: TellyTypography.caption(color: TellyColors.phosphorLime).copyWith(fontWeight: FontWeight.bold),
               ),
             ),
+          if (hub != null)
+            PopupMenuButton<String>(
+              key: const Key('squad_menu_button'),
+              tooltip: 'Squad options',
+              color: TellyColors.backgroundCard,
+              icon: const Icon(Icons.more_vert_rounded, color: TellyColors.textPrimary),
+              onSelected: (_) => _deleteOrLeave(context, ref),
+              itemBuilder: (_) {
+                final owner = ref.read(squadHubProvider(squadId).notifier).isOwner;
+                return [
+                  PopupMenuItem(
+                    key: Key(owner ? 'squad_delete' : 'squad_leave'),
+                    value: owner ? 'delete' : 'leave',
+                    child: Row(children: [
+                      Icon(owner ? Icons.delete_forever_rounded : Icons.logout_rounded,
+                          color: TellyColors.neonCoral, size: 20),
+                      const SizedBox(width: 12),
+                      Text(owner ? 'Delete Squad' : 'Leave Squad',
+                          style: TellyTypography.bodyMedium(color: TellyColors.neonCoral)),
+                    ]),
+                  ),
+                ];
+              },
+            ),
         ],
       ),
       body: SafeArea(
@@ -70,6 +94,49 @@ class SquadHubScreen extends ConsumerWidget {
         },
       ),
     );
+  }
+
+  Future<void> _deleteOrLeave(BuildContext context, WidgetRef ref) async {
+    final controller = ref.read(squadHubProvider(squadId).notifier);
+    final owner = controller.isOwner;
+    final name = ref.read(squadHubProvider(squadId)).valueOrNull?.squad.name ?? 'this squad';
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: TellyColors.backgroundCard,
+        title: Text(owner ? 'Delete $name?' : 'Leave $name?', style: TellyTypography.titleMedium()),
+        content: Text(
+          owner
+              ? 'This permanently removes the squad, its leaderboard and its watchlist for every member.'
+              : "You'll stop seeing this squad's leaderboard and watchlist. An admin can invite you back.",
+          style: TellyTypography.bodyMedium(),
+        ),
+        actions: [
+          TextButton(
+            key: const Key('squad_destructive_cancel'),
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            key: const Key('squad_destructive_confirm'),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(owner ? 'Delete' : 'Leave', style: const TextStyle(color: TellyColors.neonCoral)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    final router = GoRouter.of(context);
+    try {
+      await controller.deleteOrLeave();
+      HapticsService.mediumImpact();
+      messenger.showSnackBar(SnackBar(content: Text(owner ? 'Deleted $name' : 'You left $name')));
+      router.go(Routes.squads);
+    } catch (_) {
+      messenger.showSnackBar(
+          SnackBar(content: Text(owner ? "Couldn't delete the squad. Try again." : "Couldn't leave the squad. Try again.")));
+    }
   }
 
   Future<void> _invite(BuildContext context, WidgetRef ref) async {

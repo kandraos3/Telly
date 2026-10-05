@@ -43,6 +43,12 @@ abstract interface class SquadRepository {
 
   /// Owners/admins add a member (RLS `squad_members_insert`).
   Future<void> addMember({required String squadId, required String userId});
+
+  /// Owner only: deletes the squad and, by cascade, its memberships (RLS `squads_delete`).
+  Future<void> deleteSquad(String squadId);
+
+  /// Removes my own membership (RLS `squad_members_delete`).
+  Future<void> leaveSquad(String squadId);
 }
 
 class SupabaseSquadRepository implements SquadRepository {
@@ -141,6 +147,21 @@ class SupabaseSquadRepository implements SquadRepository {
   @override
   Future<void> addMember({required String squadId, required String userId}) =>
       _client.from('squad_members').insert({'squad_id': squadId, 'user_id': userId});
+
+  @override
+  Future<void> deleteSquad(String squadId) async {
+    // RLS hides rows I may not delete, so an empty result means nothing was removed.
+    final rows = await _client.from('squads').delete().eq('id', squadId).select('id');
+    if (rows.isEmpty) throw StateError('Only the owner can delete this squad');
+  }
+
+  @override
+  Future<void> leaveSquad(String squadId) async {
+    final me = _currentUserId() ?? (throw StateError('Not signed in'));
+    final rows =
+        await _client.from('squad_members').delete().eq('squad_id', squadId).eq('user_id', me).select('squad_id');
+    if (rows.isEmpty) throw StateError('Not a member of this squad');
+  }
 
   static Squad _squad(Map<String, dynamic> r, {List<SquadMember> members = const []}) => Squad(
         id: r['id'] as String,

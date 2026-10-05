@@ -15,6 +15,12 @@ class SquadsListController extends AsyncNotifier<List<Squad>> {
     state = AsyncData([squad, ...?state.valueOrNull]);
     return squad;
   }
+
+  /// Drops a squad I deleted or left from the list without refetching.
+  void remove(String squadId) {
+    final current = state.valueOrNull;
+    if (current != null) state = AsyncData([...current.where((s) => s.id != squadId)]);
+  }
 }
 
 final squadsListProvider = AsyncNotifierProvider<SquadsListController, List<Squad>>(SquadsListController.new);
@@ -88,6 +94,26 @@ class SquadHubController extends AutoDisposeFamilyAsyncNotifier<SquadHubState, S
     final me = ref.read(authRepositoryProvider).currentUserId;
     final members = state.valueOrNull?.squad.members ?? const <SquadMember>[];
     return members.any((m) => m.userId == me && m.role.canInvite);
+  }
+
+  /// Owners delete the squad; everyone else can leave it (FE-SQUADS-01).
+  bool get isOwner {
+    final me = ref.read(authRepositoryProvider).currentUserId;
+    final squad = state.valueOrNull?.squad;
+    if (squad == null) return false;
+    return squad.createdBy == me || squad.members.any((m) => m.userId == me && m.role == SquadRole.owner);
+  }
+
+  /// Deletes the squad (owner) or leaves it (member), then drops it from my list.
+  Future<void> deleteOrLeave() async {
+    final squad = state.valueOrNull?.squad;
+    if (squad == null) return;
+    if (isOwner) {
+      await _repo.deleteSquad(squad.id);
+    } else {
+      await _repo.leaveSquad(squad.id);
+    }
+    if (ref.exists(squadsListProvider)) ref.read(squadsListProvider.notifier).remove(squad.id);
   }
 
   Future<void> selectCanon(String mediaType) async {
