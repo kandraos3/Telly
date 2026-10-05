@@ -6,6 +6,7 @@ import 'package:telly_app/features/cowatch/data/co_watch_repository.dart';
 import 'package:telly_app/features/cowatch/domain/two_to_watch_engine.dart';
 import 'package:telly_app/features/cowatch/presentation/screens/two_to_watch_screen.dart';
 import 'package:telly_app/features/profile/data/profile_repository.dart';
+import 'package:telly_app/features/queue/data/watchlist_repository.dart';
 import 'package:telly_app/features/queue/domain/streaming_models.dart';
 import 'package:telly_app/features/title_detail/data/title_detail_repository.dart';
 import 'package:telly_app/features/title_detail/domain/title_detail_models.dart';
@@ -13,6 +14,7 @@ import 'package:telly_app/features/title_detail/domain/title_detail_models.dart'
 import '../../fakes/fake_auth_repository.dart';
 import '../../fakes/fake_co_watch_repository.dart';
 import '../../fakes/fake_profile_repository.dart';
+import '../../fakes/fake_watchlist_repository.dart';
 import '../../helpers/router_harness.dart';
 
 const maya = CoWatchPartner(userId: 'u-maya', username: 'maya', displayName: 'Maya Lin');
@@ -58,6 +60,7 @@ void main() {
   late FakeCoWatchRepository coWatch;
   late FakeProfileRepository profiles;
   late FakeTitleDetailRepository titles;
+  late FakeWatchlistRepository watchlist;
 
   setUp(() {
     coWatch = FakeCoWatchRepository(
@@ -71,9 +74,12 @@ void main() {
     profiles.matches[('u-maya', 'movie')] = const CanonMatch(92, 14);
     profiles.matches[('u-maya', 'tv')] = const CanonMatch(84, 9);
     titles = FakeTitleDetailRepository();
+    watchlist = FakeWatchlistRepository();
   });
 
-  Future<void> pump(WidgetTester tester, TwoToWatchScreen screen) async {
+  /// Pumps SCR-16; picks only show once a vibe is chosen (FE-COWATCH-02), so tests
+  /// about the picks choose "Anything good" unless told otherwise.
+  Future<void> pump(WidgetTester tester, TwoToWatchScreen screen, {String? vibe = 'any'}) async {
     tester.view.physicalSize = const Size(800, 2000);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -83,8 +89,22 @@ void main() {
       profileRepositoryProvider.overrideWithValue(profiles),
       titleDetailRepositoryProvider.overrideWithValue(titles),
       authRepositoryProvider.overrideWithValue(FakeAuthRepository(signedInUserId: 'u-me')),
+      watchlistRepositoryProvider.overrideWithValue(watchlist),
     ]));
     await tester.pumpAndSettle();
+    if (vibe != null) {
+      await tester.tap(find.byKey(Key('cowatch_vibe_$vibe')));
+      await tester.pumpAndSettle();
+    }
+  }
+
+  /// Ids of the rendered pick cards, top to bottom.
+  List<int> pickIds(WidgetTester tester) {
+    final pick = RegExp(r'^cowatch_pick_(\d+)$');
+    return [
+      for (final e in find.byWidgetPredicate((w) => w.key is ValueKey<String>).evaluate())
+        if (pick.firstMatch((e.widget.key! as ValueKey<String>).value) case final m?) int.parse(m.group(1)!),
+    ];
   }
 
   const withMaya = TwoToWatchScreen(friendId: 'u-maya', friendHandle: 'maya', friendDisplayName: 'Maya Lin');
@@ -131,6 +151,7 @@ void main() {
       await pump(tester, const TwoToWatchScreen());
 
       expect(find.text("Pick who you're watching with first."), findsOneWidget);
+      expect(find.byKey(const Key('cowatch_picks_locked')), findsNothing);
       expect(coWatch.candidateCalls, isEmpty);
 
       await tester.tap(find.byKey(const Key('cowatch_partner_maya')));
@@ -228,6 +249,60 @@ void main() {
       expect(find.byKey(const Key('quick_swipe_poster_496243')), findsOneWidget);
       Navigator.of(tester.element(find.text('QUICK SWIPE DUEL'))).pop();
       await tester.pumpAndSettle();
+    });
+  });
+
+  group('FE-COWATCH-02: gated picks, vibe filtering and watchlist', () {
+    testWidgets('Top Picks stay hidden until a vibe is chosen', (tester) async {
+      await pump(tester, withMaya, vibe: null);
+
+      expect(find.byKey(const Key('cowatch_picks_locked')), findsOneWidget);
+      expect(find.byKey(const Key('cowatch_pick_496243')), findsNothing);
+      expect(find.byKey(const Key('cowatch_quick_swipe_btn')), findsNothing);
+
+      await tester.tap(find.byKey(const Key('cowatch_vibe_any')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('cowatch_picks_locked')), findsNothing);
+      expect(find.byKey(const Key('cowatch_pick_496243')), findsOneWidget);
+      expect(find.byKey(const Key('cowatch_quick_swipe_btn')), findsOneWidget);
+    });
+
+    testWidgets('a vibe without a friend still asks for the friend first', (tester) async {
+      await pump(tester, const TwoToWatchScreen(), vibe: 'thriller');
+      expect(find.text("Pick who you're watching with first."), findsOneWidget);
+      expect(find.byKey(const Key('cowatch_pick_496243')), findsNothing);
+    });
+
+    testWidgets('changing vibes re-filters the picks by genre', (tester) async {
+      await pump(tester, withMaya, vibe: 'sci_fi');
+      expect(pickIds(tester), [157336]);
+
+      await tester.tap(find.byKey(const Key('cowatch_vibe_sci_fi')));
+      await tester.tap(find.byKey(const Key('cowatch_vibe_thriller')));
+      await tester.pumpAndSettle();
+      expect(pickIds(tester), [496243]);
+
+      await tester.tap(find.byKey(const Key('cowatch_vibe_comedy')));
+      await tester.pumpAndSettle();
+      expect(pickIds(tester), [496243], reason: 'thriller OR comedy');
+
+      await tester.tap(find.byKey(const Key('cowatch_vibe_thriller')));
+      await tester.pumpAndSettle();
+      expect(find.text('No picks match these filters. Try another vibe or runtime.'), findsOneWidget);
+    });
+
+    testWidgets('Add to Watchlist queues the title and marks it saved', (tester) async {
+      await pump(tester, withMaya);
+      expect(find.byTooltip('Add to Watchlist'), findsOneWidget, reason: 'Parasite is already queued');
+
+      await tester.tap(find.byKey(const Key('cowatch_queue_157336')));
+      await tester.pumpAndSettle();
+
+      expect(watchlist.items.single.titleId, 157336);
+      expect(watchlist.items.single.mediaType, 'movie');
+      expect(find.text('Added Interstellar to your watchlist'), findsOneWidget);
+      expect(find.byTooltip('Add to Watchlist'), findsNothing);
+      expect(find.byTooltip('In your watchlist'), findsNWidgets(2));
     });
   });
 }

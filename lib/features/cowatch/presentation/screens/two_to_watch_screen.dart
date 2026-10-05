@@ -49,8 +49,8 @@ class TwoToWatchScreen extends ConsumerWidget {
     final provider = twoToWatchProvider(_args);
     final state = ref.watch(provider);
     final controller = ref.read(provider.notifier);
-    final picks = state.recommendations.take(3).toList();
-    final canSwipe = state.partner != null && state.recommendations.length >= 2;
+    final picks = state.readyForPicks ? state.recommendations.take(3).toList() : const <ScoredRecommendation>[];
+    final canSwipe = state.readyForPicks && state.recommendations.length >= 2;
 
     return Scaffold(
       backgroundColor: TellyColors.backgroundCanvasOled,
@@ -86,7 +86,7 @@ class TwoToWatchScreen extends ConsumerWidget {
             key: const Key('cowatch_step_mood'),
             step: 2,
             title: 'WHAT ARE YOU IN THE MOOD FOR?',
-            done: state.partner != null,
+            done: state.vibes.isNotEmpty,
             child: _MoodStep(state: state, controller: controller),
           ),
           const SizedBox(height: 12),
@@ -95,7 +95,7 @@ class TwoToWatchScreen extends ConsumerWidget {
             step: 3,
             title: "TONIGHT'S TOP PICKS",
             done: picks.isNotEmpty,
-            child: _PicksStep(state: state, picks: picks),
+            child: _PicksStep(state: state, picks: picks, onQueue: (c) => _queue(context, controller, c)),
           ),
           if (canSwipe) ...[
             const SizedBox(height: 16),
@@ -118,6 +118,16 @@ class TwoToWatchScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _queue(BuildContext context, TwoToWatchController controller, CoWatchCandidate c) async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await controller.addToWatchlist(c);
+      messenger.showSnackBar(SnackBar(content: Text('Added ${c.title} to your watchlist')));
+    } catch (_) {
+      messenger.showSnackBar(const SnackBar(content: Text("Couldn't add it. Try again.")));
+    }
   }
 
   void _openQuickSwipe(BuildContext context, WidgetRef ref, TwoToWatchState state) {
@@ -362,13 +372,6 @@ class _MoodStep extends StatelessWidget {
   final TwoToWatchState state;
   final TwoToWatchController controller;
 
-  static const _vibes = [
-    ('thriller', 'Thriller / Mystery'),
-    ('sci_fi', 'Mind-Bending Sci-Fi'),
-    ('comedy', 'Laugh-Out-Loud'),
-    ('festival_darling', 'Oscar / Festival Darling'),
-  ];
-
   @override
   Widget build(BuildContext context) {
     final shared = state.streaming.shared.toList()..sort();
@@ -414,13 +417,13 @@ class _MoodStep extends StatelessWidget {
           spacing: 8,
           runSpacing: 8,
           children: [
-            for (final (id, label) in _vibes)
+            for (final vibe in CoWatchVibe.values)
               _Chip(
-                key: Key('cowatch_vibe_$id'),
-                label: label,
-                selected: state.vibes.contains(id),
+                key: Key('cowatch_vibe_${vibe.id}'),
+                label: vibe.label,
+                selected: state.vibes.contains(vibe.id),
                 color: TellyColors.electricViolet,
-                onTap: () => controller.toggleVibe(id),
+                onTap: () => controller.toggleVibe(vibe.id),
               ),
           ],
         ),
@@ -454,15 +457,19 @@ class _MoodStep extends StatelessWidget {
 }
 
 class _PicksStep extends StatelessWidget {
-  const _PicksStep({required this.state, required this.picks});
+  const _PicksStep({required this.state, required this.picks, required this.onQueue});
 
   final TwoToWatchState state;
   final List<ScoredRecommendation> picks;
+  final ValueChanged<CoWatchCandidate> onQueue;
 
   @override
   Widget build(BuildContext context) {
     if (state.partner == null) {
       return _Muted(state.resolvingPartner ? 'Finding your friend…' : "Pick who you're watching with first.");
+    }
+    if (state.vibes.isEmpty) {
+      return const _Muted('Pick a vibe above to reveal tonight\'s top picks.', key: Key('cowatch_picks_locked'));
     }
     final pool = state.candidates;
     if (pool == null) return const _Loading();
@@ -473,14 +480,15 @@ class _PicksStep extends StatelessWidget {
     if (picks.isEmpty) {
       return const _Muted('No picks match these filters. Try another vibe or runtime.');
     }
-    return Column(children: [for (final rec in picks) _PickCard(rec: rec)]);
+    return Column(children: [for (final rec in picks) _PickCard(rec: rec, onQueue: () => onQueue(rec.candidate))]);
   }
 }
 
 class _PickCard extends StatelessWidget {
-  const _PickCard({required this.rec});
+  const _PickCard({required this.rec, required this.onQueue});
 
   final ScoredRecommendation rec;
+  final VoidCallback onQueue;
 
   @override
   Widget build(BuildContext context) {
@@ -548,6 +556,15 @@ class _PickCard extends StatelessWidget {
                     ),
                   ],
                 ],
+              ),
+            ),
+            IconButton(
+              key: Key('cowatch_queue_${c.showId}'),
+              tooltip: c.inWatchlistA ? 'In your watchlist' : 'Add to Watchlist',
+              onPressed: c.inWatchlistA ? null : onQueue,
+              icon: Icon(
+                c.inWatchlistA ? Icons.bookmark : Icons.bookmark_add_outlined,
+                color: c.inWatchlistA ? TellyColors.phosphorLime : TellyColors.textSecondary,
               ),
             ),
           ],
@@ -687,7 +704,7 @@ class _Loading extends StatelessWidget {
 }
 
 class _Muted extends StatelessWidget {
-  const _Muted(this.text);
+  const _Muted(this.text, {super.key});
 
   final String text;
 

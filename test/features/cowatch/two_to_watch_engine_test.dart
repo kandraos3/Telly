@@ -262,5 +262,70 @@ void main() {
       expect(results[2].matchReason, isNot(contains('Saved on watchlist')));
     });
   });
-}
 
+  group('FE-COWATCH-02: vibes match TMDB genres and can filter', () {
+    const heat = CoWatchCandidate(
+        showId: 949, title: 'Heat', mediaType: 'movie', network: 'WB', vibeTags: ['Action', 'Crime', 'Drama'], communityScore: 8.9);
+    const arrival = CoWatchCandidate(
+        showId: 329865, title: 'Arrival', mediaType: 'movie', network: 'Paramount', vibeTags: ['Science Fiction', 'Drama']);
+    const parasite = CoWatchCandidate(
+        showId: 496243, title: 'Parasite', mediaType: 'movie', network: 'Neon', vibeTags: ['Comedy', 'Thriller', 'Drama'], communityScore: 9.7);
+
+    test('each vibe matches its genres case-insensitively, plus its own id', () {
+      expect(CoWatchVibe.thriller.matches(heat), isTrue, reason: 'Crime');
+      expect(CoWatchVibe.sciFi.matches(arrival), isTrue);
+      expect(CoWatchVibe.sciFi.matches(heat), isFalse);
+      expect(CoWatchVibe.comedy.matches(parasite), isTrue);
+      expect(CoWatchVibe.any.matches(arrival), isTrue);
+      expect(CoWatchVibe.festivalDarling.matches(parasite), isTrue, reason: 'acclaimed drama');
+      expect(CoWatchVibe.festivalDarling.matches(heat), isFalse);
+      expect(
+        CoWatchVibe.thriller.matches(const CoWatchCandidate(showId: 1, title: 'x', mediaType: 'movie', network: '', vibeTags: ['thriller'])),
+        isTrue,
+      );
+    });
+
+    test('requireVibe drops titles outside the selected vibes', () {
+      final results = TwoToWatchEngine.scoreCandidates(
+        candidates: [heat, arrival, parasite],
+        activeSharedProviders: const {},
+        format: CoWatchFormat.movieNight,
+        selectedVibes: ['sci_fi'],
+        requireVibe: true,
+      );
+      expect(results.map((r) => r.candidate.title), ['Arrival']);
+      expect(results.single.matchReason, contains('Matches selected vibe'));
+    });
+
+    test('"Anything good" keeps every title without awarding the vibe bonus', () {
+      final results = TwoToWatchEngine.scoreCandidates(
+        candidates: [heat, arrival],
+        activeSharedProviders: const {},
+        format: CoWatchFormat.movieNight,
+        selectedVibes: ['any'],
+        requireVibe: true,
+      );
+      expect(results, hasLength(2));
+      expect(results.every((r) => !r.matchReason.contains('Matches selected vibe')), isTrue);
+    });
+
+    test('without requireVibe a vibe is only a bonus (Spec 05 §3.1)', () {
+      final results = TwoToWatchEngine.scoreCandidates(
+        candidates: [heat, arrival],
+        activeSharedProviders: const {},
+        format: CoWatchFormat.movieNight,
+        selectedVibes: ['sci_fi'],
+      );
+      expect(results, hasLength(2));
+      expect(results.first.candidate.title, 'Arrival');
+    });
+
+    test('queuedByMe marks my watchlist without touching the rest', () {
+      const c = CoWatchCandidate(showId: 9, title: 'Dune', mediaType: 'movie', network: 'WB', inWatchlistB: true, ratingB: 9.3);
+      final queued = c.queuedByMe();
+      expect(queued.inWatchlistA, isTrue);
+      expect(queued.inBothWatchlists, isTrue);
+      expect(queued.ratingB, 9.3);
+    });
+  });
+}

@@ -117,6 +117,7 @@ For each candidate title $s \in C$:
      where $\text{PopularityFactor}(s) = \text{clamp}(\text{community\_score} / 10.0, 0.0, 1.0) \in [0.0, 1.0]$.
    - **God-Tier Recommendation Bonus (+35 points):** If one participant ranked the title God Tier ($\ge 9.20$, via `CanonTier.god`) and the partner has not seen it (or vice versa), $+35$ bonus points are added.
    - **Vibe Match Bonus (+20 points):** $+20$ points if the title matches any selected vibe or genre tag.
+4. **Vibe Gate & Filter (FE-COWATCH-02):** SCR-16 shows Top Picks only once a friend *and* a vibe are chosen. A selected vibe filters the pool to titles whose TMDB genres fit it (e.g. *Thriller / Mystery* = Thriller, Mystery or Crime; see `CoWatchVibe`); several vibes are OR-ed. *Anything good* keeps every title and earns no vibe bonus.
 
 ### 3.2 The 15-Second "Rapid Swipe" Duel Mode
 If the group still can't pick from the top 3 recommendations, they launch **"Quick Swipe Mode"**:

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../profile/data/profile_repository.dart';
+import '../../../queue/data/watchlist_repository.dart';
 import '../../../title_detail/data/title_detail_repository.dart';
 import '../../data/co_watch_repository.dart';
 import '../../domain/two_to_watch_engine.dart';
@@ -61,6 +62,9 @@ class TwoToWatchState {
 
   int? get matchPercentage => matchByMediaType[format.mediaType];
 
+  /// Top picks stay hidden until both a friend and a vibe are chosen (FE-COWATCH-02).
+  bool get readyForPicks => partner != null && vibes.isNotEmpty;
+
   /// Null while the pool for the selected format is loading.
   List<CoWatchCandidate>? get candidates {
     final pool = candidatesByMediaType[format.mediaType];
@@ -84,6 +88,7 @@ class TwoToWatchState {
       runtimeBudget: runtimeBudget,
       selectedVibes: vibes.toList(),
       tasteMatchPercentage: matchPercentage ?? 50,
+      requireVibe: true,
     );
     final pinnedId = preselected?.showId;
     if (pinnedId != null) {
@@ -280,6 +285,28 @@ class TwoToWatchController extends AutoDisposeFamilyNotifier<TwoToWatchState, Tw
     final vibes = {...state.vibes};
     if (!vibes.remove(vibe)) vibes.add(vibe);
     state = state.copyWith(vibes: vibes);
+  }
+
+  /// Adds [candidate] to my watchlist and marks it queued in the pool, so the
+  /// "On both of your watchlists" bonus applies straight away (FE-COWATCH-02).
+  Future<void> addToWatchlist(CoWatchCandidate candidate) async {
+    await ref.read(watchlistRepositoryProvider).add(
+          titleId: candidate.showId,
+          mediaType: candidate.mediaType,
+          title: candidate.title,
+          posterPath: candidate.posterPath,
+        );
+    if (!_alive) return;
+    CoWatchCandidate mark(CoWatchCandidate c) =>
+        c.showId == candidate.showId && c.mediaType == candidate.mediaType ? c.queuedByMe() : c;
+    final pools = {
+      for (final e in state.candidatesByMediaType.entries) e.key: [for (final c in e.value) mark(c)],
+    };
+    final pinned = state.preselected;
+    state = state.copyWith(
+      candidatesByMediaType: pools,
+      preselected: pinned == null ? null : mark(pinned),
+    );
   }
 
   void toggleProvider(String platformId) {

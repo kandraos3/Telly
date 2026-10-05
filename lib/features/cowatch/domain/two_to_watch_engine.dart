@@ -30,6 +30,45 @@ enum RuntimeBudget {
   }
 }
 
+/// SCR-16 vibe chips (FE-COWATCH-02). Candidates carry their TMDB genres as
+/// `vibe_tags`, so each vibe matches a set of genre names (case-insensitive) as well
+/// as its own id.
+enum CoWatchVibe {
+  any('any', 'Anything good', {}),
+  thriller('thriller', 'Thriller / Mystery', {'thriller', 'mystery', 'crime'}),
+  sciFi('sci_fi', 'Mind-Bending Sci-Fi', {'science fiction', 'sci-fi & fantasy', 'fantasy'}),
+  comedy('comedy', 'Laugh-Out-Loud', {'comedy'}),
+  prestigeDrama('prestige_drama', 'Prestige Drama', {'drama'}),
+  festivalDarling('festival_darling', 'Oscar / Festival Darling', {'history', 'war', 'documentary'});
+
+  final String id;
+  final String label;
+  final Set<String> genres;
+  const CoWatchVibe(this.id, this.label, this.genres);
+
+  static CoWatchVibe? fromId(String id) {
+    for (final v in values) {
+      if (v.id == id) return v;
+    }
+    return null;
+  }
+
+  bool matches(CoWatchCandidate c) {
+    if (this == any) return true;
+    if (this == festivalDarling && c.communityScore >= 9.0 && c.vibeTags.any((t) => t.toLowerCase() == 'drama')) {
+      return true;
+    }
+    return c.vibeTags.any((t) {
+      final tag = t.toLowerCase();
+      return tag == id || genres.contains(tag);
+    });
+  }
+}
+
+/// Whether [c] fits the vibe [vibeId]: a [CoWatchVibe] id, or any raw tag.
+bool candidateMatchesVibe(CoWatchCandidate c, String vibeId) =>
+    CoWatchVibe.fromId(vibeId)?.matches(c) ?? c.vibeTags.any((t) => t.toLowerCase() == vibeId.toLowerCase());
+
 class CoWatchCandidate {
   final int showId;
   final String title;
@@ -64,6 +103,24 @@ class CoWatchCandidate {
   });
 
   bool get inBothWatchlists => inWatchlistA && inWatchlistB;
+
+  /// This candidate after I add it to my watchlist (FE-COWATCH-02).
+  CoWatchCandidate queuedByMe() => CoWatchCandidate(
+        showId: showId,
+        title: title,
+        mediaType: mediaType,
+        runtimeMinutes: runtimeMinutes,
+        posterPath: posterPath,
+        network: network,
+        availableProviders: availableProviders,
+        vibeTags: vibeTags,
+        inWatchlistA: true,
+        inWatchlistB: inWatchlistB,
+        ratingA: ratingA,
+        ratingB: ratingB,
+        communityScore: communityScore,
+        overview: overview,
+      );
 
   factory CoWatchCandidate.fromJson(Map<String, dynamic> json) {
     return CoWatchCandidate(
@@ -123,6 +180,7 @@ class TwoToWatchEngine {
     RuntimeBudget? runtimeBudget,
     List<String> selectedVibes = const [],
     int tasteMatchPercentage = 88,
+    bool requireVibe = false,
   }) {
     final scoredList = <ScoredRecommendation>[];
 
@@ -137,6 +195,12 @@ class TwoToWatchEngine {
         if (!runtimeBudget.matches(c.runtimeMinutes)) {
           continue;
         }
+      }
+
+      // 2b. Vibe filter (FE-COWATCH-02): when required, only titles fitting a selected vibe.
+      final matchesVibe = selectedVibes.any((v) => candidateMatchesVibe(c, v));
+      if (requireVibe && selectedVibes.isNotEmpty && !matchesVibe) {
+        continue;
       }
 
       // 3. Shared streaming intersection filter
@@ -167,13 +231,11 @@ class TwoToWatchEngine {
         reasons.add('Partner rated it ★${c.ratingB!.toStringAsFixed(1)} (God Tier)');
       }
 
-      // Vibe tag match (+20 points)
-      if (selectedVibes.isNotEmpty) {
-        final matchesVibe = c.vibeTags.any((v) => selectedVibes.contains(v));
-        if (matchesVibe) {
-          score += 20.0;
-          reasons.add('Matches selected vibe');
-        }
+      // Vibe tag match (+20 points); "Anything good" is no vibe in particular.
+      final specificVibes = selectedVibes.where((v) => v != CoWatchVibe.any.id);
+      if (specificVibes.any((v) => candidateMatchesVibe(c, v))) {
+        score += 20.0;
+        reasons.add('Matches selected vibe');
       }
 
       // w2 * TasteMatch * UserRating (w2 = 2.5)

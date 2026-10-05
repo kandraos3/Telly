@@ -2089,6 +2089,15 @@ Tickets ingested through the `issue-manager` skill. Each entry mirrors its GitHu
 - **Testing & Verification**:
   - [x] Widget tests: three steps with real match and picks, poster paths, pick → `/title/movie/496243`, format switch, friend picker, handle resolution, partner swap, no follows, shared-service filtering, empty and error states, pinned pre-selected title, Quick Swipe opening. Quick Swipe poster and no-invented-service tests; a11y audit with the fake pool. pgTAP `017_co_watch_context.test.sql` (runs in CI).
 
+#### `FE-COWATCH-02`: Gate Top Picks Behind Friend + Vibe, Genre-Based Vibe Filtering & Add to Watchlist (#28)
+- **Spec Reference**: [**`features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md) §3.1 (step 4 added); `SCR-16`
+- **Granular Tasks**:
+  - [x] Top Picks and Quick Swipe appear only once a friend and a vibe are chosen (`TwoToWatchState.readyForPicks`); until then step 3 reads "Pick a vibe above to reveal tonight's top picks."
+  - [x] `CoWatchVibe` maps each chip to TMDB genres (the candidate pool's `vibe_tags` are genres, so the old `thriller` / `sci_fi` ids never matched and vibes did nothing). Adds *Prestige Drama* and *Anything good*. `scoreCandidates(requireVibe: true)` filters on every chip change; several vibes are OR-ed. The +20 bonus is kept for specific vibes.
+  - [x] Each pick card has an Add to Watchlist bookmark (`watchlistRepositoryProvider.add`, offline-first). The pick then shows as saved, and the "On both of your watchlists" bonus applies at once (`CoWatchCandidate.queuedByMe`).
+- **Testing & Verification**:
+  - [x] Widget tests: picks locked until a vibe is chosen, friend still required, vibe changes re-filter (sci-fi → thriller → thriller OR comedy → none), watchlist add with snackbar and saved state. Engine unit tests for genre matching, `requireVibe`, *Anything good*, and the bonus-only default.
+
 ---
 
 ## 🏆 Sprint Deliverables Summary Matrix
