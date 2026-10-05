@@ -9,6 +9,8 @@ import 'package:telly_app/core/widgets/telly_logo.dart';
 import 'package:telly_app/features/auth/presentation/screens/auth_screen.dart';
 import 'package:telly_app/features/auth/presentation/screens/reset_password_screen.dart';
 import 'package:telly_app/features/auth/presentation/widgets/auth_poster_backdrop.dart';
+import 'package:telly_app/features/legal/domain/legal_markdown.dart';
+import 'package:telly_app/features/legal/presentation/screens/legal_document_screen.dart';
 
 void main() {
   group('SCR-01 AuthScreen Widget & Flow Tests (FE-106)', () {
@@ -257,5 +259,26 @@ void main() {
       await tester.pumpAndSettle();
       expect(fakeRepo.updatedPassword, 'n3w-secret');
     });
+
+    for (final doc in LegalDocument.values) {
+      testWidgets('tapping ${doc.title} opens the in-app legal viewer (FE-AUTH-04)', (tester) async {
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [authRepositoryProvider.overrideWithValue(FakeAuthRepository())],
+            child: const MaterialApp(home: AuthScreen()),
+          ),
+        );
+
+        await tester.tap(find.widgetWithText(TextButton, doc.title));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(LegalDocumentScreen), findsOneWidget);
+        expect(find.textContaining('Last Updated', findRichText: true), findsOneWidget);
+
+        await tester.pageBack();
+        await tester.pumpAndSettle();
+        expect(find.byType(LegalDocumentScreen), findsNothing);
+      });
+    }
   });
 }

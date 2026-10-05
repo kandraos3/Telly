@@ -1948,6 +1948,15 @@ Tickets ingested through the `issue-manager` skill. Each entry mirrors its GitHu
 - **Testing & Verification**:
   - [x] Repository request-shape test, controller recovery tests, redirect tests, widget tests for the sheet and `ResetPasswordScreen`.
 
+#### `FE-AUTH-04`: In-App Terms of Service & Privacy Policy Navigation (#5)
+- **Spec Reference**: [**`legal/TERMS_OF_SERVICE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/legal/TERMS_OF_SERVICE.md), [**`legal/PRIVACY_POLICY.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/legal/PRIVACY_POLICY.md)
+- **Granular Tasks**:
+  - [x] Bundle `docs/legal/` as Flutter assets (single source of truth).
+  - [x] `LegalDocumentScreen` renders the legal Markdown subset natively (headings, rules, nested bullets, bold/italic/code).
+  - [x] SCR-01 disclaimer exposes tappable `Terms of Service` / `Privacy Policy` links (48dp targets).
+- **Testing & Verification**:
+  - [x] Parser unit tests (incl. both bundled docs), viewer widget tests, AuthScreen navigation tests; SCR-01 a11y audits pass.
+
 ---
 
 ## 🏆 Sprint Deliverables Summary Matrix

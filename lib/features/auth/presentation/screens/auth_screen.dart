@@ -6,6 +6,8 @@ import '../../../../core/widgets/telly_frosted_sheet.dart';
 import '../../../../core/widgets/telly_logo.dart';
 import '../../../../core/widgets/telly_primary_button.dart';
 import '../../../../core/widgets/telly_text_field.dart';
+import '../../../legal/domain/legal_markdown.dart';
+import '../../../legal/presentation/screens/legal_document_screen.dart';
 import '../controllers/auth_controller.dart';
 import '../widgets/auth_poster_backdrop.dart';
 import '../widgets/forgot_password_sheet.dart';
@@ -170,18 +172,44 @@ class AuthScreen extends ConsumerWidget {
                   const SizedBox(height: 24),
 
                   // Disclaimer
-                  Center(
-                    child: Text(
-                      'By continuing, you agree to our Terms & Privacy.',
-                      style: TellyTypography.caption(color: TellyColors.textPrimary),
-                    ),
+                  Text(
+                    'By continuing, you agree to our',
+                    textAlign: TextAlign.center,
+                    style: TellyTypography.caption(color: TellyColors.textPrimary),
                   ),
-                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const _LegalLink(document: LegalDocument.terms),
+                      Text('&', style: TellyTypography.caption(color: TellyColors.textPrimary)),
+                      const _LegalLink(document: LegalDocument.privacy),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
                 ],
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Opens a bundled legal document in the in-app viewer (FE-AUTH-04).
+class _LegalLink extends StatelessWidget {
+  final LegalDocument document;
+
+  const _LegalLink({required this.document});
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      onPressed: () => LegalDocumentScreen.open(context, document),
+      style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 6), minimumSize: const Size(48, 48)),
+      child: Text(
+        document.title,
+        style: TellyTypography.caption(color: TellyColors.phosphorLime).copyWith(fontWeight: FontWeight.w700),
       ),
     );
   }
