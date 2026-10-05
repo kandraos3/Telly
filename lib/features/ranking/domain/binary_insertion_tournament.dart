@@ -23,6 +23,15 @@ class BinaryInsertionTournament<T> {
   final int? _tiedNeighborIndex;
   final int? _originalMidBeforeTie;
 
+  /// The searched index range. A slot on its edge is only accepted after the candidate has
+  /// faced the adjacent title just outside it (FE-ALGO-01); until then it is unverified.
+  final int _windowLow;
+  final int _windowHigh;
+
+  /// Smallest seeded search window, so a placement — including #1 or last — never rests on
+  /// a single duel once the canon holds at least this many titles (FE-ALGO-01).
+  static const minWindowSize = 3;
+
   const BinaryInsertionTournament._({
     required this.existingCanon,
     required this.candidate,
@@ -34,9 +43,13 @@ class BinaryInsertionTournament<T> {
     required this.totalEstimatedRounds,
     required this.isComplete,
     required this.insertionIndex,
+    required int windowLow,
+    required int windowHigh,
     int? tiedNeighborIndex,
     int? originalMidBeforeTie,
-  })  : _tiedNeighborIndex = tiedNeighborIndex,
+  })  : _windowLow = windowLow,
+        _windowHigh = windowHigh,
+        _tiedNeighborIndex = tiedNeighborIndex,
         _originalMidBeforeTie = originalMidBeforeTie;
 
   /// Factory constructor to initialize a tournament for inserting [candidate] into [existingCanon].
@@ -53,6 +66,8 @@ class BinaryInsertionTournament<T> {
         existingCanon: existingCanon,
         candidate: candidate,
         seedBracket: seedBracket,
+        windowLow: 0,
+        windowHigh: -1,
         low: 0,
         high: -1,
         currentComparisonIndex: 0,
@@ -71,6 +86,12 @@ class BinaryInsertionTournament<T> {
       final bounds = _calculateBracketBounds(n, seedBracket);
       initialLow = bounds.$1;
       initialHigh = bounds.$2;
+      // Widen tiny windows (e.g. Masterpiece in a 5-title canon is just [0, 0]).
+      final target = minWindowSize < n ? minWindowSize : n;
+      while (initialHigh - initialLow + 1 < target) {
+        if (initialLow > 0) initialLow--;
+        if (initialHigh - initialLow + 1 < target && initialHigh < n - 1) initialHigh++;
+      }
     }
 
     final initialMid = (initialLow + initialHigh) ~/ 2;
@@ -80,6 +101,8 @@ class BinaryInsertionTournament<T> {
       existingCanon: existingCanon,
       candidate: candidate,
       seedBracket: seedBracket,
+      windowLow: initialLow,
+      windowHigh: initialHigh,
       low: initialLow,
       high: initialHigh,
       currentComparisonIndex: initialMid,
@@ -92,8 +115,7 @@ class BinaryInsertionTournament<T> {
 
   /// The opponent title at the current comparison midpoint.
   /// Returns null if the tournament is already complete.
-  T? get currentOpponent =>
-      isComplete ? null : existingCanon[currentComparisonIndex];
+  T? get currentOpponent => isComplete ? null : existingCanon[currentComparisonIndex];
 
   /// The 1-indexed target rank position once the tournament completes.
   /// Returns null while tournament is active.
@@ -172,26 +194,15 @@ class BinaryInsertionTournament<T> {
     final newHigh = baseIndex - 1;
     final newLow = low;
 
-    if (newLow > newHigh) {
-      return BinaryInsertionTournament._(
-        existingCanon: existingCanon,
-        candidate: candidate,
-        seedBracket: seedBracket,
-        low: newLow,
-        high: newHigh,
-        currentComparisonIndex: baseIndex,
-        roundNumber: roundNumber,
-        totalEstimatedRounds: totalEstimatedRounds,
-        isComplete: true,
-        insertionIndex: newLow,
-      );
-    }
+    if (newLow > newHigh) return _settleAt(newLow, newHigh, baseIndex);
 
     final nextMid = (newLow + newHigh) ~/ 2;
     return BinaryInsertionTournament._(
       existingCanon: existingCanon,
       candidate: candidate,
       seedBracket: seedBracket,
+      windowLow: _windowLow,
+      windowHigh: _windowHigh,
       low: newLow,
       high: newHigh,
       currentComparisonIndex: nextMid,
@@ -213,26 +224,15 @@ class BinaryInsertionTournament<T> {
     final newLow = baseIndex + 1;
     final newHigh = high;
 
-    if (newLow > newHigh) {
-      return BinaryInsertionTournament._(
-        existingCanon: existingCanon,
-        candidate: candidate,
-        seedBracket: seedBracket,
-        low: newLow,
-        high: newHigh,
-        currentComparisonIndex: baseIndex,
-        roundNumber: roundNumber,
-        totalEstimatedRounds: totalEstimatedRounds,
-        isComplete: true,
-        insertionIndex: newLow,
-      );
-    }
+    if (newLow > newHigh) return _settleAt(newLow, newHigh, baseIndex);
 
     final nextMid = (newLow + newHigh) ~/ 2;
     return BinaryInsertionTournament._(
       existingCanon: existingCanon,
       candidate: candidate,
       seedBracket: seedBracket,
+      windowLow: _windowLow,
+      windowHigh: _windowHigh,
       low: newLow,
       high: newHigh,
       currentComparisonIndex: nextMid,
@@ -240,6 +240,50 @@ class BinaryInsertionTournament<T> {
       totalEstimatedRounds: totalEstimatedRounds,
       isComplete: false,
       insertionIndex: null,
+    );
+  }
+
+  /// The search has narrowed to slot [k]. Commits it unless [k] sits on a window edge whose
+  /// outside neighbour was never faced; then that neighbour is duelled first, and a win
+  /// against it reopens the binary search beyond the window (FE-ALGO-01).
+  BinaryInsertionTournament<T> _settleAt(int k, int emptyHigh, int lastIndex) {
+    final n = existingCanon.length;
+    final verifyAbove = k == _windowLow && k > 0;
+    final verifyBelow = !verifyAbove && k == _windowHigh + 1 && k < n;
+    if (verifyAbove || verifyBelow) {
+      final low = verifyAbove ? 0 : k;
+      final high = verifyAbove ? k - 1 : n - 1;
+      // The edge duel itself, then a binary search over the rest of the reopened range.
+      final remaining = 1 + _calculateMaxComparisons(high - low);
+      return BinaryInsertionTournament._(
+        existingCanon: existingCanon,
+        candidate: candidate,
+        seedBracket: seedBracket,
+        windowLow: verifyAbove ? 0 : _windowLow,
+        windowHigh: verifyBelow ? n - 1 : _windowHigh,
+        low: low,
+        high: high,
+        currentComparisonIndex: verifyAbove ? k - 1 : k,
+        roundNumber: roundNumber + 1,
+        totalEstimatedRounds:
+            totalEstimatedRounds > roundNumber + remaining ? totalEstimatedRounds : roundNumber + remaining,
+        isComplete: false,
+        insertionIndex: null,
+      );
+    }
+    return BinaryInsertionTournament._(
+      existingCanon: existingCanon,
+      candidate: candidate,
+      seedBracket: seedBracket,
+      windowLow: _windowLow,
+      windowHigh: _windowHigh,
+      low: k,
+      high: emptyHigh,
+      currentComparisonIndex: lastIndex,
+      roundNumber: roundNumber,
+      totalEstimatedRounds: totalEstimatedRounds,
+      isComplete: true,
+      insertionIndex: k,
     );
   }
 
@@ -259,6 +303,8 @@ class BinaryInsertionTournament<T> {
         existingCanon: existingCanon,
         candidate: candidate,
         seedBracket: seedBracket,
+        windowLow: _windowLow,
+        windowHigh: _windowHigh,
         low: low,
         high: high,
         currentComparisonIndex: currentComparisonIndex,
@@ -270,15 +316,15 @@ class BinaryInsertionTournament<T> {
     }
 
     // First tie: attempt to step to an adjacent neighbor within [low, high]
-    final int? neighborIndex = (currentComparisonIndex + 1 <= high)
-        ? currentComparisonIndex + 1
-        : null;
+    final int? neighborIndex = (currentComparisonIndex + 1 <= high) ? currentComparisonIndex + 1 : null;
 
     if (neighborIndex != null) {
       return BinaryInsertionTournament._(
         existingCanon: existingCanon,
         candidate: candidate,
         seedBracket: seedBracket,
+        windowLow: _windowLow,
+        windowHigh: _windowHigh,
         low: low,
         high: high,
         currentComparisonIndex: neighborIndex,
@@ -297,6 +343,8 @@ class BinaryInsertionTournament<T> {
       existingCanon: existingCanon,
       candidate: candidate,
       seedBracket: seedBracket,
+      windowLow: _windowLow,
+      windowHigh: _windowHigh,
       low: low,
       high: high,
       currentComparisonIndex: currentComparisonIndex,

@@ -74,10 +74,12 @@ When inserting a new show $X$:
      Show $X$ is better than $s_{mid} \implies high = mid - 1$
    - If user chooses $s_{mid} \succ X$:
      Show $X$ is worse than $s_{mid} \implies low = mid + 1$
-3. **Insertion:**
+3. **Edge Verification (FE-ALGO-01):**
+   Brackets are hints, not proofs. A window narrower than 3 titles is widened to 3 (when $n \ge 3$), so no placement — #1 and last included — rests on a single duel. If the loop ends on a window edge ($low$ equals the window's lower edge with $low > 0$, or the slot just past its upper edge with $low < n$), $X$ first duels the adjacent title just outside the window. Losing that duel confirms the slot; winning it reopens the binary search over the rest of the canon beyond the window.
+4. **Insertion:**
    Insert $X$ at index $low$. All subsequent elements shift by +1 rank.
-4. **Complexity:**
-   Total comparisons needed:
+5. **Complexity:**
+   Total comparisons needed (one extra duel when the edge is verified):
    $$K \le \lceil \log_2(high - low + 1) \rceil \le \lceil \log_2(0.40 \cdot N) \rceil \approx 3 \text{ to } 5 \text{ duels}$$
 
 ### 3.2 Deadlock & "Can't Compare" Handling

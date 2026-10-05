@@ -124,8 +124,7 @@ void main() {
         }
 
         // Must terminate in <= ceil(log2(101)) = 7 comparisons
-        expect(comparisons, lessThanOrEqualTo(7),
-            reason: 'Target slot $targetSlot exceeded 7 comparisons');
+        expect(comparisons, lessThanOrEqualTo(7), reason: 'Target slot $targetSlot exceeded 7 comparisons');
         expect(tournament.insertionIndex, equals(targetSlot),
             reason: 'Target slot $targetSlot resolved to incorrect index ${tournament.insertionIndex}');
         expect(tournament.finalRank, equals(targetSlot + 1));
@@ -227,6 +226,77 @@ void main() {
       );
 
       expect(() => t.updatedCanon, throwsStateError);
+    });
+  });
+
+  group('FE-ALGO-01: minimum verification duels', () {
+    /// Plays a tournament where the candidate truly belongs at [slot] of a canon of size [n].
+    (int index, int duels, List<int> faced) play(int n, int slot, SentimentBracket? bracket) {
+      final canon = List.generate(n, (i) => i); // index i = rank i + 1
+      var t = BinaryInsertionTournament<int>(existingCanon: canon, candidate: -1, seedBracket: bracket);
+      final faced = <int>[];
+      while (!t.isComplete) {
+        final opponent = t.currentOpponent!;
+        faced.add(opponent);
+        t = slot <= opponent ? t.onCandidateWins() : t.onOpponentWins();
+        expect(faced.length, lessThan(n + 2), reason: 'must terminate');
+      }
+      return (t.insertionIndex!, faced.length, faced);
+    }
+
+    test('every bracket finds the true slot, even outside its window, for every canon size', () {
+      for (final bracket in [null, ...SentimentBracket.values]) {
+        for (final n in [1, 2, 3, 4, 5, 7, 10, 20, 37, 100]) {
+          for (var slot = 0; slot <= n; slot++) {
+            final (index, _, _) = play(n, slot, bracket);
+            expect(index, slot, reason: '$bracket n=$n slot=$slot');
+          }
+        }
+      }
+    });
+
+    test('with 3+ titles no placement rests on a single duel, top and bottom included', () {
+      for (final bracket in [null, ...SentimentBracket.values]) {
+        for (final n in [3, 4, 5, 10, 20, 100]) {
+          for (var slot = 0; slot <= n; slot++) {
+            final (_, duels, _) = play(n, slot, bracket);
+            expect(duels, greaterThanOrEqualTo(2), reason: '$bracket n=$n slot=$slot');
+          }
+        }
+      }
+    });
+
+    test('a Masterpiece #1 in a 5-title canon faces both of the top two titles', () {
+      final (index, duels, faced) = play(5, 0, SentimentBracket.masterpiece);
+      expect(index, 0);
+      expect(duels, 2);
+      expect(faced.toSet(), {0, 1});
+    });
+
+    test('a window-edge placement duels the adjacent title just outside the window', () {
+      // Loved in a 100-title canon searches [10, 35]; a candidate that truly ranks 11th
+      // must still be checked against #10 (index 9) before committing.
+      final (index, _, faced) = play(100, 10, SentimentBracket.loved);
+      expect(index, 10);
+      expect(faced.last, 9);
+    });
+
+    test('Regret with a bottom-of-canon result is verified against the last two titles', () {
+      final (index, duels, faced) = play(10, 10, SentimentBracket.regret);
+      expect(index, 10);
+      expect(duels, greaterThanOrEqualTo(2));
+      expect(faced, containsAll([8, 9]));
+    });
+
+    test('the progress estimate never falls behind the round counter', () {
+      final canon = List.generate(100, (i) => i);
+      var t = BinaryInsertionTournament<int>(
+          existingCanon: canon, candidate: -1, seedBracket: SentimentBracket.masterpiece);
+      while (!t.isComplete) {
+        expect(t.totalEstimatedRounds, greaterThanOrEqualTo(t.roundNumber));
+        t = 60 <= t.currentOpponent! ? t.onCandidateWins() : t.onOpponentWins(); // truly ranks 61st
+      }
+      expect(t.insertionIndex, 60);
     });
   });
 }

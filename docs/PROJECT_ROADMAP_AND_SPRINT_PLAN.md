@@ -1967,6 +1967,14 @@ Tickets ingested through the `issue-manager` skill. Each entry mirrors its GitHu
 - **Testing & Verification**:
   - [x] Controller, repository, transport and widget tests; pgTAP `012_private_logging.test.sql` (runs in CI).
 
+#### `FE-ALGO-01`: Minimum Verification Duel Threshold for Placement Stability (#8)
+- **Spec Reference**: [**`features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md) §3.1 (step 3 added)
+- **Granular Tasks**:
+  - [x] Seeded bracket windows are widened to ≥ 3 titles, guaranteeing ≥ 2 duels for every placement once the canon holds 3+ titles.
+  - [x] A slot on a bracket-window edge is verified against the adjacent title outside the window; a contradiction reopens the search beyond the window.
+- **Testing & Verification**:
+  - [x] Exhaustive property tests over every bracket, canon size and true slot (correct slot, ≥ 2 duels, edge neighbour faced, progress estimate monotone).
+
 ---
 
 ## 🏆 Sprint Deliverables Summary Matrix
