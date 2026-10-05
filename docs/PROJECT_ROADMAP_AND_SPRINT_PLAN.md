@@ -1957,6 +1957,16 @@ Tickets ingested through the `issue-manager` skill. Each entry mirrors its GitHu
 - **Testing & Verification**:
   - [x] Parser unit tests (incl. both bundled docs), viewer widget tests, AuthScreen navigation tests; SCR-01 a11y audits pass.
 
+#### `FE-LOG-02`: LoggingStudio Star Rating, Streamlined Layout & Feed Broadcast Checkbox (#7)
+- **Spec Reference**: [**`features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/02_PAIRWISE_RANKING_ENGINE_AND_LOGGING.md) §2–§3; `SCR-09` in [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md)
+- **Granular Tasks**:
+  - [x] Half-star `StarRatingSelector` replaces the four bracket cards; the rating derives the duel search bracket (`fromStarRating`).
+  - [x] `Broadcast to Feed` checkbox (default on) carried via `DuelRequest` → `log_title` mutation → `p_broadcast`.
+  - [x] Migration `20261010000900_private_logging.sql`: `insert_user_ranking_atomic(p_broadcast)` suppresses the `RANKING_CREATED` activity.
+  - [x] SCR-11 primary action relabelled `Publish`; wider section spacing on SCR-09.
+- **Testing & Verification**:
+  - [x] Controller, repository, transport and widget tests; pgTAP `012_private_logging.test.sql` (runs in CI).
+
 ---
 
 ## 🏆 Sprint Deliverables Summary Matrix

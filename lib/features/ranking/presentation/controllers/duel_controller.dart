@@ -68,7 +68,10 @@ class DuelRequest {
   final SentimentBracket bracket;
   final WatchStatus status;
 
-  const DuelRequest({required this.candidate, required this.bracket, required this.status});
+  /// False logs privately: ranked, but no feed post (FE-LOG-02).
+  final bool broadcast;
+
+  const DuelRequest({required this.candidate, required this.bracket, required this.status, this.broadcast = true});
 
   @override
   bool operator ==(Object other) =>
@@ -76,10 +79,11 @@ class DuelRequest {
       other.candidate.titleId == candidate.titleId &&
       other.candidate.mediaType == candidate.mediaType &&
       other.bracket == bracket &&
-      other.status == status;
+      other.status == status &&
+      other.broadcast == broadcast;
 
   @override
-  int get hashCode => Object.hash(candidate.titleId, candidate.mediaType, bracket, status);
+  int get hashCode => Object.hash(candidate.titleId, candidate.mediaType, bracket, status, broadcast);
 }
 
 /// What the arena (`SCR-10`, reused by `SCR-04`) can ask of a duel loop.
@@ -180,6 +184,7 @@ class DuelController extends AutoDisposeFamilyNotifier<DuelState, DuelRequest> i
         status: arg.status.serverStatus,
         isRewatch: arg.status.isRewatch,
         bracket: arg.bracket.name,
+        broadcast: arg.broadcast,
       );
       if (!_disposed) state = DuelComplete(commit);
     } catch (e) {

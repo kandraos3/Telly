@@ -32,6 +32,7 @@ class SupabaseMutationTransport implements MutationTransport {
           'p_status': p['status'] ?? 'COMPLETED',
           'p_is_rewatch': p['is_rewatch'] ?? false,
           'p_client_mutation_id': m.id,
+          'p_broadcast': p['broadcast'] ?? true,
         });
         await _duels(p);
       case MutationKind.move:

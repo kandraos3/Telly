@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:telly_app/core/widgets/telly_primary_button.dart';
 import 'package:telly_app/core/services/haptics_service.dart';
 import 'package:telly_app/features/ranking/domain/editorial_tagging.dart';
 import 'package:telly_app/features/ranking/presentation/widgets/editorial_tagging_sheet.dart';
@@ -46,6 +47,7 @@ void main() {
       expect(find.text('DETAILS & NOTES'), findsOneWidget);
       expect(find.byKey(const Key('placed_canon_banner')), findsOneWidget);
       expect(find.byKey(const Key('publish_editorial_button')), findsOneWidget);
+      expect(find.widgetWithText(TellyPrimaryButton, 'Publish'), findsOneWidget, reason: 'FE-LOG-02 label');
       expect(find.byKey(const Key('micro_review_input')), findsOneWidget);
       expect(find.byKey(const Key('micro_review_counter')), findsOneWidget);
       expect(find.text('(0/280)'), findsOneWidget);

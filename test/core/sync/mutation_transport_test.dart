@@ -62,8 +62,20 @@ void main() {
         'p_status': 'COMPLETED',
         'p_is_rewatch': false,
         'p_client_mutation_id': 'mut-1',
+        'p_broadcast': true, // payloads queued before FE-LOG-02 keep broadcasting
       });
       expect((body(requests[1])['p_duels'] as List).single, containsPair('client_mutation_id', 'd1'));
+    });
+
+    test('FE-LOG-02: a private log forwards p_broadcast = false', () async {
+      await transport().apply(mutation(MutationKind.logTitle, {
+        'title_id': 136315,
+        'media_type': 'tv',
+        'target_rank': 1,
+        'broadcast': false,
+        'duels': [],
+      }));
+      expect(body(requests.single), containsPair('p_broadcast', false));
     });
 
     test('a placement without duels makes no duel call', () async {

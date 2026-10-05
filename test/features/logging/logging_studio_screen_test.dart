@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:telly_app/core/database/database.dart';
 import 'package:telly_app/core/database/database_provider.dart';
 import 'package:telly_app/features/profile/data/graveyard_repository.dart';
 import 'package:telly_app/core/widgets/telly_primary_button.dart';
 import 'package:telly_app/features/logging/data/title_repository.dart';
+import 'package:telly_app/features/logging/presentation/controllers/logging_session_controller.dart';
 import 'package:telly_app/features/logging/presentation/screens/logging_studio_screen.dart';
 
 import '../../fakes/fake_graveyard_repository.dart';
@@ -83,17 +85,18 @@ void main() {
       expect(find.byKey(const Key('logging_offline_notice')), findsOneWidget);
     });
 
-    testWidgets('CTA stays disabled until a title and a bracket are chosen', (tester) async {
+    testWidgets('CTA stays disabled until a title and a star rating are chosen', (tester) async {
       await pumpStudio(tester);
       expect(find.byKey(const Key('begin_duels_button')), findsNothing);
 
       await searchAndPick(tester, 'bear', 'search_result_tv_136315');
       expect(find.text('Selected: THE BEAR (2022)'), findsOneWidget);
-      expect(cta(tester).onPressed, isNull, reason: 'no bracket yet');
+      expect(cta(tester).onPressed, isNull, reason: 'no rating yet');
 
-      await tester.tap(find.byKey(const Key('bracket_loved')));
+      await tester.ensureVisible(find.byKey(const Key('star_4')));
+      await tester.tap(find.byKey(const Key('star_4')));
       await tester.pumpAndSettle();
-      expect(find.byKey(const Key('bracket_selected_check')), findsOneWidget);
+      expect(find.byKey(const Key('logging_rating_caption')), findsOneWidget);
       expect(cta(tester).onPressed, isNotNull);
 
       await tester.tap(find.byKey(const Key('begin_duels_button')));
@@ -101,16 +104,51 @@ void main() {
       expect(find.text('route:/log/duel'), findsOneWidget);
     });
 
-    testWidgets('a series shows the 4 series statuses and the 4 SCR-09 bracket cards', (tester) async {
+    testWidgets('FE-LOG-02: tapping the left half of a star picks a half star and sets the bracket', (tester) async {
+      await pumpStudio(tester);
+      await searchAndPick(tester, 'bear', 'search_result_tv_136315');
+      final star = find.byKey(const Key('star_5'));
+      await tester.ensureVisible(star);
+
+      await tester.tapAt(tester.getCenter(star) - Offset(tester.getSize(star).width / 4, 0));
+      await tester.pumpAndSettle();
+      expect(find.text('4.5 / 5  ·  👑 Masterpiece / Top 10%'), findsOneWidget);
+      expect(find.byIcon(Icons.star_half_rounded), findsOneWidget);
+
+      await tester.tapAt(tester.getCenter(find.byKey(const Key('star_3'))) + const Offset(10, 0));
+      await tester.pumpAndSettle();
+      expect(find.text('3 / 5  ·  👍 Liked It / Middle 40%'), findsOneWidget);
+      expect(find.byIcon(Icons.star_half_rounded), findsNothing);
+    });
+
+    testWidgets('FE-LOG-02: the redesigned studio drops the bracket cards for stars + sharing', (tester) async {
       await pumpStudio(tester);
       await searchAndPick(tester, 'bear', 'search_result_tv_136315');
       for (final s in ['finished', 'upToDate', 'season', 'dropped']) {
         expect(find.byKey(Key('status_$s')), findsOneWidget, reason: s);
       }
       expect(find.byKey(const Key('status_firstTime')), findsNothing);
-      expect(find.text('👑 Masterpiece / Top 10%'), findsOneWidget);
-      expect(find.text('🤷 Meh / Bottom 25%'), findsOneWidget);
-      expect(find.byKey(const Key('bracket_regret')), findsNothing);
+      expect(find.byKey(const Key('bracket_loved')), findsNothing);
+      expect(find.byKey(const Key('logging_star_rating')), findsOneWidget);
+      expect(find.text('Broadcast to Feed'), findsOneWidget);
+    });
+
+    testWidgets('FE-LOG-02: Broadcast to Feed is on by default and unchecking logs privately', (tester) async {
+      await pumpStudio(tester);
+      await searchAndPick(tester, 'bear', 'search_result_tv_136315');
+      final container = ProviderScope.containerOf(tester.element(find.byType(LoggingStudioScreen)));
+      final checkbox = find.byKey(const Key('logging_broadcast_checkbox'));
+      await tester.ensureVisible(checkbox);
+
+      expect(tester.widget<CheckboxListTile>(checkbox).value, isTrue);
+      await tester.tap(checkbox);
+      await tester.pumpAndSettle();
+      expect(tester.widget<CheckboxListTile>(checkbox).value, isFalse);
+      expect(find.textContaining('Private'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('star_4')));
+      await tester.pumpAndSettle();
+      expect(container.read(loggingSessionProvider).duelRequest!.broadcast, isFalse);
     });
 
     testWidgets('a movie selection shows movie statuses only', (tester) async {

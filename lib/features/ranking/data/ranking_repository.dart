@@ -103,6 +103,7 @@ class RankingRepository {
     String status = 'COMPLETED',
     bool isRewatch = false,
     String? bracket,
+    bool broadcast = true,
   }) {
     final mediaType = candidate.mediaType;
     _requireCanon(mediaType);
@@ -146,6 +147,7 @@ class RankingRepository {
               'target_rank': index + 1,
               'status': status,
               'is_rewatch': isRewatch,
+              'broadcast': broadcast,
               'duels': duelPayload,
             })
           : await _queue.enqueue(MutationKind.move, {

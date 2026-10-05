@@ -20,6 +20,12 @@ class LoggingDraft {
   final int seasonNumber;
   final SentimentBracket? bracket;
 
+  /// 0.5–5.0 in half steps; picks [bracket] via `SentimentBracketExtension.fromStarRating` (FE-LOG-02).
+  final double? starRating;
+
+  /// Whether the log posts to followers' feeds; false ranks it privately (FE-LOG-02).
+  final bool broadcast;
+
   /// Set once `SCR-10` commits the placement; read by `SCR-12`.
   final RankingCommit? commit;
 
@@ -30,6 +36,8 @@ class LoggingDraft {
     this.status,
     this.seasonNumber = 1,
     this.bracket,
+    this.starRating,
+    this.broadcast = true,
     this.commit,
   });
 
@@ -47,6 +55,7 @@ class LoggingDraft {
           ),
           bracket: bracket!,
           status: status!,
+          broadcast: broadcast,
         )
       : null;
 
@@ -57,6 +66,8 @@ class LoggingDraft {
     WatchStatus? Function()? status,
     int? seasonNumber,
     SentimentBracket? Function()? bracket,
+    double? Function()? starRating,
+    bool? broadcast,
   }) =>
       LoggingDraft(
         query: query ?? this.query,
@@ -65,6 +76,8 @@ class LoggingDraft {
         status: status != null ? status() : this.status,
         seasonNumber: seasonNumber ?? this.seasonNumber,
         bracket: bracket != null ? bracket() : this.bracket,
+        starRating: starRating != null ? starRating() : this.starRating,
+        broadcast: broadcast ?? this.broadcast,
         commit: commit,
       );
 }
@@ -106,10 +119,11 @@ class LoggingSessionController extends AutoDisposeNotifier<LoggingDraft> {
       search: state.search,
       title: title,
       status: WatchStatus.defaultFor(title.mediaType),
+      broadcast: state.broadcast,
     );
   }
 
-  void clearTitle() => state = LoggingDraft(query: state.query, search: state.search);
+  void clearTitle() => state = LoggingDraft(query: state.query, search: state.search, broadcast: state.broadcast);
 
   void setStatus(WatchStatus status) {
     final title = state.title;
@@ -123,6 +137,17 @@ class LoggingSessionController extends AutoDisposeNotifier<LoggingDraft> {
 
   void setBracket(SentimentBracket bracket) => state = state._with(bracket: () => bracket);
 
+  /// Snaps to the nearest half star in 0.5–5.0 and derives the duel search bracket.
+  void setStarRating(double stars) {
+    final snapped = ((stars * 2).round() / 2).clamp(0.5, 5.0).toDouble();
+    state = state._with(
+      starRating: () => snapped,
+      bracket: () => SentimentBracketExtension.fromStarRating(snapped),
+    );
+  }
+
+  void setBroadcast(bool broadcast) => state = state._with(broadcast: broadcast);
+
   void recordCommit(RankingCommit commit) => state = LoggingDraft(
         query: state.query,
         search: state.search,
@@ -130,6 +155,8 @@ class LoggingSessionController extends AutoDisposeNotifier<LoggingDraft> {
         status: state.status,
         seasonNumber: state.seasonNumber,
         bracket: state.bracket,
+        starRating: state.starRating,
+        broadcast: state.broadcast,
         commit: commit,
       );
 }

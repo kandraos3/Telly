@@ -60,6 +60,20 @@ void main() {
       expect(payloadOf(m), {'title_id': 4, 'media_type': 'tv', 'new_rank': 1});
     });
 
+    test('FE-LOG-02: commitPlacement queues the broadcast choice with a new log', () async {
+      await repo.commitPlacement(
+        candidate: const CanonCandidate(titleId: 7, mediaType: 'tv', title: 'Quiet'),
+        targetRank: 1,
+        broadcast: false,
+      );
+      await repo.commitPlacement(
+        candidate: const CanonCandidate(titleId: 8, mediaType: 'tv', title: 'Loud'),
+        targetRank: 1,
+      );
+      final logs = (await queue()).where((m) => m.kind == MutationKind.logTitle).map(payloadOf).toList();
+      expect(logs.map((p) => p['broadcast']), [false, true]);
+    });
+
     test('moving an unknown title is a no-op', () async {
       await seedCanon(db, 'tv', ['A'], baseId: 1);
       await repo.move(mediaType: 'tv', titleId: 99, newRank: 1);

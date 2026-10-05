@@ -12,10 +12,12 @@ import '../../../ranking/domain/sentiment_bracket.dart';
 import '../../domain/title_search_result.dart';
 import '../../domain/watch_status.dart';
 import '../controllers/logging_session_controller.dart';
+import '../widgets/star_rating_selector.dart';
 
-/// `SCR-09` The Logging Studio & Sentiment Bracket Selector (FE-603).
+/// `SCR-09` The Logging Studio (FE-603, redesigned in FE-LOG-02).
 ///
-/// Search (150 ms debounce) → selected title → watch status → sentiment bracket →
+/// Search (150 ms debounce) → selected title → watch status → half-star rating (sets the
+/// sentiment bracket) → broadcast opt-out →
 /// `BEGIN PAIRWISE DUELS` pushes `SCR-10` with the draft held by [loggingSessionProvider].
 class LoggingStudioScreen extends ConsumerStatefulWidget {
   /// Pre-selects a title, e.g. "Reset Duels for This Show" (features/02 §7.2).
@@ -260,16 +262,22 @@ class _DraftPane extends ConsumerWidget {
                   )
                 : null,
           ),
-        const SizedBox(height: 24),
-        const _SectionHeader('2. INITIAL SENTIMENT BRACKET'),
-        Text('Where does this roughly belong in your taste canon?', style: TellyTypography.bodyMedium()),
+        const SizedBox(height: 32),
+        const _SectionHeader('2. YOUR RATING'),
+        Text('Half stars count. Your rating sets where the duels start.', style: TellyTypography.bodyMedium()),
         const SizedBox(height: 12),
-        for (final bracket in SentimentBracketExtension.studioBrackets)
-          _BracketCard(
-            bracket: bracket,
-            selected: draft.bracket == bracket,
-            onTap: () => session.setBracket(bracket),
+        Center(
+          child: StarRatingSelector(
+            key: const Key('logging_star_rating'),
+            value: draft.starRating,
+            onChanged: session.setStarRating,
           ),
+        ),
+        const SizedBox(height: 8),
+        _RatingCaption(stars: draft.starRating, bracket: draft.bracket),
+        const SizedBox(height: 32),
+        const _SectionHeader('3. SHARING'),
+        _BroadcastToggle(value: draft.broadcast, onChanged: session.setBroadcast),
       ],
     );
   }
@@ -349,55 +357,51 @@ class _SeasonStepper extends StatelessWidget {
   }
 }
 
-class _BracketCard extends StatelessWidget {
-  final SentimentBracket bracket;
-  final bool selected;
-  final VoidCallback onTap;
-  const _BracketCard({required this.bracket, required this.selected, required this.onTap});
+class _RatingCaption extends StatelessWidget {
+  final double? stars;
+  final SentimentBracket? bracket;
+  const _RatingCaption({required this.stars, required this.bracket});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Semantics(
-        button: true,
-        selected: selected,
-        child: InkWell(
-          key: Key('bracket_${bracket.name}'),
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(14),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: selected ? TellyColors.phosphorLime.withValues(alpha: 0.08) : TellyColors.backgroundSurface,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: selected ? TellyColors.phosphorLime : TellyColors.strokeSubtle,
-                width: selected ? 1.5 : 1,
-              ),
-              boxShadow: selected
-                  ? [BoxShadow(color: TellyColors.phosphorLime.withValues(alpha: 0.25), blurRadius: 12)]
-                  : null,
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(bracket.studioTitle, style: TellyTypography.titleMedium()),
-                      const SizedBox(height: 4),
-                      Text('“${bracket.studioTagline}”', style: TellyTypography.caption()),
-                    ],
-                  ),
-                ),
-                if (selected)
-                  const Icon(Icons.check_circle, key: Key('bracket_selected_check'), color: TellyColors.phosphorLime),
-              ],
-            ),
-          ),
-        ),
+    final stars = this.stars;
+    final bracket = this.bracket;
+    if (stars == null || bracket == null) {
+      return Text('Tap a star to rate', textAlign: TextAlign.center, style: TellyTypography.caption());
+    }
+    final value = stars == stars.roundToDouble() ? stars.toStringAsFixed(0) : stars.toStringAsFixed(1);
+    return Column(
+      key: const Key('logging_rating_caption'),
+      children: [
+        Text('$value / 5  ·  ${bracket.studioTitle}',
+            textAlign: TextAlign.center, style: TellyTypography.titleMedium(color: TellyColors.warmAmber)),
+        const SizedBox(height: 4),
+        Text('“${bracket.studioTagline}”', textAlign: TextAlign.center, style: TellyTypography.caption()),
+      ],
+    );
+  }
+}
+
+class _BroadcastToggle extends StatelessWidget {
+  final bool value;
+  final ValueChanged<bool> onChanged;
+  const _BroadcastToggle({required this.value, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return CheckboxListTile(
+      key: const Key('logging_broadcast_checkbox'),
+      value: value,
+      onChanged: (v) => onChanged(v ?? true),
+      contentPadding: EdgeInsets.zero,
+      controlAffinity: ListTileControlAffinity.leading,
+      activeColor: TellyColors.phosphorLime,
+      checkColor: TellyColors.backgroundPrimary,
+      side: const BorderSide(color: TellyColors.strokeStrong, width: 1.5),
+      title: Text('Broadcast to Feed', style: TellyTypography.bodyLarge()),
+      subtitle: Text(
+        value ? 'Friends will see this log in their feed.' : 'Private: ranked in your canon, hidden from the feed.',
+        style: TellyTypography.caption(),
       ),
     );
   }

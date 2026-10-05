@@ -529,7 +529,7 @@ class _EditorialTaggingSheetState extends ConsumerState<EditorialTaggingSheet> {
         // 4. BOTTOM ACTION: PUBLISH BUTTON
         TellyPrimaryButton(
           key: const Key('publish_editorial_button'),
-          label: 'PUBLISH TO CANON & BROADCAST FEED  →',
+          label: 'Publish',
           onPressed: _handlePublish,
         ),
         const SizedBox(height: 8),
