@@ -208,8 +208,8 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                     Text(
                       title.overview!,
                       style: TellyTypography.bodyMedium(
-                        color: TellyColors.textSecondary,
-                      ).copyWith(height: 1.5),
+                        color: TellyColors.textPrimaryOf(context),
+                      ).copyWith(height: 1.5, fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 24),
                   ],
@@ -368,7 +368,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
               Text(
                 title.title,
                 style: TellyTypography.headlineSmall(
-                  color: TellyColors.textPrimary,
+                  color: TellyColors.textPrimaryOf(context),
                 ).copyWith(fontWeight: FontWeight.w900),
               ),
               const SizedBox(height: 6),
@@ -376,15 +376,15 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
               Text(
                 _formatMetaLine(title),
                 style: TellyTypography.bodyMedium(
-                  color: TellyColors.textSecondary,
-                ),
+                  color: TellyColors.textPrimaryOf(context),
+                ).copyWith(fontWeight: FontWeight.w600),
               ),
               if (title.director != null && title.director!.isNotEmpty) ...[
                 const SizedBox(height: 4),
                 Text(
                   title.isMovie ? 'Director: ${title.director}' : 'Creator: ${title.director}',
                   style: TellyTypography.caption(
-                    color: TellyColors.textSecondary,
+                    color: TellyColors.textSecondaryOf(context),
                   ),
                 ),
               ],
@@ -395,7 +395,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                   Text(
                     '★ ${communityScore.toStringAsFixed(2)}',
                     style: TellyTypography.titleMedium(
-                      color: TellyColors.warmAmber,
+                      color: TellyColors.warmAmberOf(context),
                     ).copyWith(fontWeight: FontWeight.w800),
                   ),
                   const SizedBox(width: 8),
@@ -416,14 +416,14 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                         key: const Key('show_detail_score_info_button'),
                         onTap: () => _showScoreExplanationDialog(context, communityScore, tier),
                         borderRadius: BorderRadius.circular(12),
-                        child: const SizedBox(
+                        child: SizedBox(
                           width: 48,
                           height: 48,
                           child: Center(
                             child: Icon(
                               Icons.info_outline_rounded,
                               size: 16,
-                              color: TellyColors.textTertiary,
+                              color: TellyColors.textTertiaryOf(context),
                             ),
                           ),
                         ),
@@ -457,7 +457,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                 children: [
                   Text(
                     '★ ${score.toStringAsFixed(2)}',
-                    style: TellyTypography.titleLarge(color: TellyColors.warmAmber).copyWith(fontWeight: FontWeight.w900),
+                    style: TellyTypography.titleLarge(color: TellyColors.warmAmberOf(ctx)).copyWith(fontWeight: FontWeight.w900),
                   ),
                   const SizedBox(width: 8),
                   TellyNeonBadge(
@@ -469,30 +469,30 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
               const SizedBox(height: 12),
               Text(
                 'How is this score calculated?',
-                style: TellyTypography.titleMedium(color: TellyColors.textPrimary).copyWith(fontWeight: FontWeight.bold),
+                style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(ctx)).copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
                 'Telly grades are dynamic percentile scores (1.00–10.00) calculated from head-to-head tournament duels across the community and your personal canon.',
-                style: TellyTypography.bodyMedium(color: TellyColors.textSecondary),
+                style: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(ctx)),
               ),
               const SizedBox(height: 14),
               Text(
                 'Score Tiers:',
-                style: TellyTypography.labelLarge(color: TellyColors.textPrimary).copyWith(fontWeight: FontWeight.bold),
+                style: TellyTypography.labelLarge(color: TellyColors.textPrimaryOf(ctx)).copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 6),
               Text(
                 '👑 God Tier: 9.20 – 10.00\n✨ Prestige: 8.50 – 9.19\n⚡ Great: 7.80 – 8.49\n👍 Good: 7.00 – 7.79\n📺 Mid: 5.50 – 6.99\n🚫 Dropped / DNF: < 5.50',
-                style: TellyTypography.caption(color: TellyColors.textSecondary).copyWith(height: 1.4),
+                style: TellyTypography.caption(color: TellyColors.textSecondaryOf(ctx)).copyWith(height: 1.4),
               ),
               const SizedBox(height: 20),
               ElevatedButton(
                 key: const Key('score_info_dismiss_button'),
                 onPressed: () => Navigator.of(ctx).pop(),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: TellyColors.phosphorLime,
-                  foregroundColor: Colors.black,
+                  backgroundColor: TellyColors.primaryAccentOf(ctx),
+                  foregroundColor: Theme.of(ctx).brightness == Brightness.light ? Colors.white : Colors.black,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
@@ -531,21 +531,21 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
           _buildQuickActionButton(
             icon: _isBookmarked ? Icons.playlist_add_check_rounded : Icons.playlist_add_rounded,
             label: _isBookmarked ? 'In Queue' : 'Add to Queue',
-            accentColor: _isBookmarked ? TellyColors.phosphorLime : TellyColors.textSecondary,
+            accentColor: _isBookmarked ? TellyColors.primaryAccentOf(context) : TellyColors.textSecondaryOf(context),
             onTap: () => _toggleBookmark(title),
           ),
           // 2. Rank / Re-Duel
           _buildQuickActionButton(
             icon: Icons.emoji_events_outlined,
             label: title.socialSummary?.myRanking != null ? 'Re-Duel' : 'Rank Title',
-            accentColor: TellyColors.phosphorLime,
+            accentColor: TellyColors.primaryAccentOf(context),
             onTap: () => _onReDuel(title),
           ),
           // 3. Two-to-Watch (Co-Watch)
           _buildQuickActionButton(
             icon: Icons.people_outline_rounded,
             label: 'Co-Watch',
-            accentColor: TellyColors.electricViolet,
+            accentColor: TellyColors.electricVioletOf(context),
             onTap: () {
               final friendHandle = (title.socialSummary != null && title.socialSummary!.friends.isNotEmpty)
                   ? title.socialSummary!.friends.first.username
@@ -557,7 +557,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
           _buildQuickActionButton(
             icon: Icons.share_outlined,
             label: 'Share',
-            accentColor: TellyColors.warmAmber,
+            accentColor: TellyColors.warmAmberOf(context),
             onTap: () {
               final scoreStr = title.communityScore != null ? ' ★ ${title.communityScore!.toStringAsFixed(2)}' : '';
               SharePlus.instance.share(
@@ -644,7 +644,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
         children: [
           Row(
             children: [
-              const Icon(Icons.play_circle_fill, size: 16, color: TellyColors.phosphorLime),
+              Icon(Icons.play_circle_fill, size: 16, color: TellyColors.primaryAccentOf(context)),
               const SizedBox(width: 6),
               Text(
                 'STREAMING NOW',
@@ -658,7 +658,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
           if (providers.isEmpty)
             Text(
               'No streaming services currently available for this title.',
-              style: TellyTypography.bodyMedium(color: TellyColors.textPrimaryOf(context)).copyWith(fontSize: 14),
+              style: TellyTypography.bodyMedium(color: TellyColors.textPrimaryOf(context)).copyWith(fontSize: 14, fontWeight: FontWeight.w600),
             )
           else
             Wrap(
@@ -676,7 +676,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: TellyColors.cardOf(context),
-                    foregroundColor: TellyColors.phosphorLime,
+                    foregroundColor: TellyColors.primaryAccentOf(context),
                     side: BorderSide(color: TellyColors.borderGlassOf(context)),
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -712,7 +712,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isRanked
-              ? TellyColors.phosphorLime.withValues(alpha: 0.3)
+              ? TellyColors.primaryAccentOf(context).withValues(alpha: 0.3)
               : TellyColors.borderGlassOf(context),
         ),
       ),
@@ -729,7 +729,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
           if (isRanked) ...[
             Row(
               children: [
-                const Icon(Icons.star, color: TellyColors.warmAmber, size: 22),
+                Icon(Icons.star, color: TellyColors.warmAmberOf(context), size: 22),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Column(
@@ -738,12 +738,12 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                       Text(
                         'Ranked #${myRanking.rankPosition} in Your ${title.isMovie ? 'Movie' : 'TV'} Canon',
                         style: TellyTypography.titleMedium(
-                          color: TellyColors.textPrimary,
+                          color: TellyColors.textPrimaryOf(context),
                         ).copyWith(fontWeight: FontWeight.w800),
                       ),
                       Text(
                         'Calculated Score: ${myRanking.calculatedScore.toStringAsFixed(2)} / 10.0',
-                        style: TellyTypography.caption(color: TellyColors.warmAmber),
+                        style: TellyTypography.caption(color: TellyColors.warmAmberOf(context)),
                       ),
                     ],
                   ),
@@ -758,8 +758,8 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
             OutlinedButton.icon(
               onPressed: () => _onReDuel(title),
               style: OutlinedButton.styleFrom(
-                foregroundColor: TellyColors.phosphorLime,
-                side: const BorderSide(color: TellyColors.phosphorLime),
+                foregroundColor: TellyColors.primaryAccentOf(context),
+                side: BorderSide(color: TellyColors.primaryAccentOf(context)),
                 minimumSize: const Size.fromHeight(42),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
@@ -772,7 +772,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
           ] else ...[
             Text(
               'You have not ranked this ${title.isMovie ? 'movie' : 'show'} yet.',
-              style: TellyTypography.bodyMedium(color: TellyColors.textPrimary).copyWith(fontSize: 14),
+              style: TellyTypography.bodyMedium(color: TellyColors.textPrimaryOf(context)).copyWith(fontSize: 14),
             ),
             const SizedBox(height: 12),
             TellyPrimaryButton(
@@ -795,7 +795,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
               width: 3,
               height: 14,
               decoration: BoxDecoration(
-                color: TellyColors.electricViolet,
+                color: TellyColors.electricVioletOf(context),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -803,7 +803,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
             Text(
               'FRIENDS WHO RANKED THIS (${friends.length})',
               style: TellyTypography.labelSmall(
-                color: TellyColors.textPrimary,
+                color: TellyColors.textPrimaryOf(context),
               ).copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
             ),
           ],
@@ -831,8 +831,8 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                       backgroundColor: TellyColors.cardOf(context),
                       child: Text(
                         f.displayName.isNotEmpty ? f.displayName[0].toUpperCase() : '?',
-                        style: const TextStyle(
-                          color: TellyColors.phosphorLime,
+                        style: TextStyle(
+                          color: TellyColors.primaryAccentOf(context),
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -851,7 +851,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                         Text(
                           '#${f.rankPosition} • ★ ${f.calculatedScore.toStringAsFixed(1)}',
                           style: TellyTypography.caption(
-                            color: TellyColors.warmAmber,
+                            color: TellyColors.warmAmberOf(context),
                           ),
                         ),
                       ],
@@ -896,13 +896,13 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                 Text(
                   'FRIEND CANON DIVERGENCE',
                   style: TellyTypography.caption(
-                    color: TellyColors.neonCoral,
+                    color: TellyColors.neonCoralOf(context),
                   ).copyWith(fontWeight: FontWeight.w800, fontSize: 11),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   '@${highest.username} ranked this #${highest.rankPosition} (${highest.calculatedScore.toStringAsFixed(2)}) vs @${lowest.username} at #${lowest.rankPosition} (${lowest.calculatedScore.toStringAsFixed(2)}) — a spread of $spread rank spots.',
-                  style: TellyTypography.caption(color: TellyColors.textPrimary),
+                  style: TellyTypography.caption(color: TellyColors.textPrimaryOf(context)),
                 ),
               ],
             ),
@@ -933,7 +933,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
               width: 3,
               height: 14,
               decoration: BoxDecoration(
-                color: TellyColors.electricViolet,
+                color: TellyColors.electricVioletOf(context),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -941,7 +941,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
             Text(
               'IDEAL DOUBLE FEATURE',
               style: TellyTypography.labelSmall(
-                color: TellyColors.textPrimary,
+                color: TellyColors.textPrimaryOf(context),
               ).copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
             ),
           ],
@@ -949,7 +949,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
         const SizedBox(height: 4),
         Text(
           'Frequently paired together in community Top 10 Canons',
-          style: TellyTypography.caption(color: TellyColors.textPrimary),
+          style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)),
         ),
         const SizedBox(height: 12),
         SizedBox(
@@ -983,8 +983,8 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                             width: double.infinity,
                             child: PosterImage(
                               posterPath: comp.posterPath,
-                              fallback: const Center(
-                                child: Icon(Icons.movie_outlined, color: TellyColors.textTertiary),
+                              fallback: Center(
+                                child: Icon(Icons.movie_outlined, color: TellyColors.textTertiaryOf(context)),
                               ),
                             ),
                           ),
@@ -1025,7 +1025,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
               width: 3,
               height: 14,
               decoration: BoxDecoration(
-                color: TellyColors.neonCoral,
+                color: TellyColors.neonCoralOf(context),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -1057,8 +1057,8 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                     backgroundColor: TellyColors.cardOf(context),
                     child: Text(
                       take.$1[0].toUpperCase(),
-                      style: const TextStyle(
-                        color: TellyColors.phosphorLime,
+                      style: TextStyle(
+                        color: TellyColors.primaryAccentOf(context),
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
                       ),
@@ -1081,13 +1081,13 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
-                                color: TellyColors.phosphorLime.withValues(alpha: 0.15),
+                                color: TellyColors.primaryAccentOf(context).withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
                                 '#${take.$3} • ${take.$4.toStringAsFixed(2)}',
                                 style: TellyTypography.monoDigits(
-                                  color: TellyColors.phosphorLime,
+                                  color: TellyColors.primaryAccentOf(context),
                                  ).copyWith(fontSize: 10, fontWeight: FontWeight.bold),
                               ),
                             ),
@@ -1122,7 +1122,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
               width: 3,
               height: 14,
               decoration: BoxDecoration(
-                color: TellyColors.phosphorLime,
+                color: TellyColors.primaryAccentOf(context),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -1167,7 +1167,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                         children: [
                           Icon(
                             isExpanded ? Icons.arrow_drop_down : Icons.arrow_right,
-                            color: TellyColors.phosphorLime,
+                            color: TellyColors.primaryAccentOf(context),
                           ),
                           const SizedBox(width: 6),
                           Expanded(
@@ -1220,7 +1220,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
         children: [
           Row(
             children: [
-              const Icon(Icons.analytics_outlined, size: 16, color: TellyColors.neonCoral),
+              Icon(Icons.analytics_outlined, size: 16, color: TellyColors.neonCoralOf(context)),
               const SizedBox(width: 6),
               Text(
                 'COMMUNITY SURVIVAL RATE',
@@ -1240,7 +1240,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                     children: [
                       TextSpan(
                         text: '$completedPct%',
-                        style: TellyTypography.titleMedium(color: TellyColors.phosphorLime)
+                        style: TellyTypography.titleMedium(color: TellyColors.primaryAccentOf(context))
                             .copyWith(fontWeight: FontWeight.w800),
                       ),
                       TextSpan(
@@ -1254,7 +1254,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
               if (dropPoint?.season != null)
                 Text(
                   'Drop point: S${dropPoint!.season}E${(dropPoint.episode ?? 1).toString().padLeft(2, '0')}',
-                  style: TellyTypography.caption(color: TellyColors.neonCoral).copyWith(fontWeight: FontWeight.w700),
+                  style: TellyTypography.caption(color: TellyColors.neonCoralOf(context)).copyWith(fontWeight: FontWeight.w700),
                 ),
             ],
           ),
@@ -1264,7 +1264,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
             child: LinearProgressIndicator(
               value: completedPct / 100.0,
               backgroundColor: TellyColors.cardOf(context),
-              color: TellyColors.phosphorLime,
+              color: TellyColors.primaryAccentOf(context),
               minHeight: 6,
             ),
           ),

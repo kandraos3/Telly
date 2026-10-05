@@ -45,10 +45,10 @@ class SquadHubScreen extends ConsumerWidget {
             TextButton.icon(
               key: const Key('squad_invite_button'),
               onPressed: () => _invite(context, ref),
-              icon: const Icon(Icons.person_add_outlined, size: 16, color: TellyColors.phosphorLime),
+              icon: Icon(Icons.person_add_outlined, size: 16, color: TellyColors.primaryAccentOf(context)),
               label: Text(
                 'Invite',
-                style: TellyTypography.caption(color: TellyColors.phosphorLime).copyWith(fontWeight: FontWeight.bold),
+                style: TellyTypography.caption(color: TellyColors.primaryAccentOf(context)).copyWith(fontWeight: FontWeight.bold),
               ),
             ),
           if (hub != null)
@@ -66,10 +66,10 @@ class SquadHubScreen extends ConsumerWidget {
                     value: owner ? 'delete' : 'leave',
                     child: Row(children: [
                       Icon(owner ? Icons.delete_forever_rounded : Icons.logout_rounded,
-                          color: TellyColors.neonCoral, size: 20),
+                          color: TellyColors.neonCoralOf(context), size: 20),
                       const SizedBox(width: 12),
                       Text(owner ? 'Delete Squad' : 'Leave Squad',
-                          style: TellyTypography.bodyMedium(color: TellyColors.neonCoral)),
+                          style: TellyTypography.bodyMedium(color: TellyColors.neonCoralOf(context))),
                     ]),
                   ),
                 ];
@@ -85,12 +85,12 @@ class SquadHubScreen extends ConsumerWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text("Couldn't load this squad.", style: TellyTypography.bodyMedium()),
+                  Text("Couldn't load this squad.", style: TellyTypography.bodyMedium(color: TellyColors.textPrimaryOf(context))),
                   TextButton(onPressed: () => ref.invalidate(squadHubProvider(squadId)), child: const Text('Retry')),
                 ],
               ),
             ),
-          _ => const Center(child: CircularProgressIndicator(color: TellyColors.phosphorLime)),
+          _ => Center(child: CircularProgressIndicator(color: TellyColors.primaryAccentOf(context))),
         },
       ),
     );
@@ -236,9 +236,9 @@ class _InviteDialogState extends State<_InviteDialog> {
                       ),
                     )
                   : invitee != null
-                      ? const Icon(Icons.check_circle, key: Key('squad_invite_valid'), color: TellyColors.phosphorLime)
+                      ? Icon(Icons.check_circle, key: const Key('squad_invite_valid'), color: TellyColors.primaryAccentOf(context))
                       : _result.error != null
-                          ? const Icon(Icons.error_outline, key: Key('squad_invite_invalid'), color: TellyColors.neonCoral)
+                          ? Icon(Icons.error_outline, key: const Key('squad_invite_invalid'), color: TellyColors.neonCoralOf(context))
                           : null,
             ),
           ),
@@ -249,13 +249,13 @@ class _InviteDialogState extends State<_InviteDialog> {
                 ? Text(
                     '${invitee.displayName.isEmpty ? '@${invitee.username}' : invitee.displayName} · @${invitee.username}',
                     key: const Key('squad_invite_match'),
-                    style: TellyTypography.caption(color: TellyColors.phosphorLime).copyWith(fontWeight: FontWeight.w700),
+                    style: TellyTypography.caption(color: TellyColors.primaryAccentOf(context)).copyWith(fontWeight: FontWeight.w700),
                   )
                 : !_checking && _result.error != null
                     ? Text(
                         _result.error!,
                         key: const Key('squad_invite_error'),
-                        style: TellyTypography.caption(color: TellyColors.neonCoral),
+                        style: TellyTypography.caption(color: TellyColors.neonCoralOf(context)),
                       )
                     : null,
           ),
@@ -309,7 +309,7 @@ class _Hub extends ConsumerWidget {
                     decoration: BoxDecoration(
                       border: Border(
                         bottom: BorderSide(
-                          color: hub.tab == tab ? TellyColors.phosphorLime : Colors.transparent,
+                          color: hub.tab == tab ? TellyColors.primaryAccentOf(context) : Colors.transparent,
                           width: 2,
                         ),
                       ),
@@ -318,7 +318,7 @@ class _Hub extends ConsumerWidget {
                     child: Text(
                       label,
                       style: TellyTypography.caption(
-                        color: hub.tab == tab ? TellyColors.phosphorLime : TellyColors.textTertiary,
+                        color: hub.tab == tab ? TellyColors.primaryAccentOf(context) : TellyColors.textTertiaryOf(context),
                       ).copyWith(fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -332,9 +332,9 @@ class _Hub extends ConsumerWidget {
           const SizedBox(height: 16),
         ],
         if (hub.loadingCanon)
-          const Padding(
-            padding: EdgeInsets.all(24),
-            child: Center(child: CircularProgressIndicator(color: TellyColors.phosphorLime)),
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: Center(child: CircularProgressIndicator(color: TellyColors.primaryAccentOf(context))),
           )
         else
           ...switch (hub.tab) {
@@ -344,11 +344,11 @@ class _Hub extends ConsumerWidget {
                   children: [
                     Text(
                       'CONSENSUS LEADERBOARD (BORDA COUNT)',
-                      style: TellyTypography.caption(color: TellyColors.textTertiary)
+                      style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context))
                           .copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
                     ),
                     const Spacer(),
-                    Text('${hub.leaderboard.length} Titles', style: TellyTypography.caption()),
+                    Text('${hub.leaderboard.length} Titles', style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context))),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -359,9 +359,9 @@ class _Hub extends ConsumerWidget {
               ],
             SquadTab.watchlist => [
                 if (hub.watchlist == null)
-                  const Padding(
-                    padding: EdgeInsets.all(24),
-                    child: Center(child: CircularProgressIndicator(color: TellyColors.phosphorLime)),
+                  Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Center(child: CircularProgressIndicator(color: TellyColors.primaryAccentOf(context))),
                   )
                 else if (hub.watchlist!.isEmpty)
                   const _Empty('No title is on more than one member’s queue yet.')
@@ -387,7 +387,12 @@ class _Empty extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.all(24),
-        child: Text(text, textAlign: TextAlign.center, style: TellyTypography.bodyMedium()),
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          style: TellyTypography.bodyMedium(color: TellyColors.textPrimaryOf(context))
+              .copyWith(fontWeight: FontWeight.w600),
+        ),
       );
 }
 
@@ -438,7 +443,7 @@ class _MembersRow extends StatelessWidget {
                               backgroundColor: TellyColors.cardOf(context),
                               child: Text(
                                 member.displayName.isNotEmpty ? member.displayName[0] : '?',
-                                style: TellyTypography.caption(color: TellyColors.phosphorLime)
+                                style: TellyTypography.caption(color: TellyColors.primaryAccentOf(context))
                                     .copyWith(fontWeight: FontWeight.bold),
                               ),
                             ),
@@ -490,7 +495,7 @@ class _CanonSwitcher extends StatelessWidget {
               child: Text(
                 label,
                 style: TellyTypography.caption(
-                  color: selected == mediaType ? TellyColors.phosphorLime : TellyColors.textTertiaryOf(context),
+                  color: selected == mediaType ? TellyColors.primaryAccentOf(context) : TellyColors.textTertiaryOf(context),
                 ).copyWith(fontWeight: FontWeight.bold),
               ),
             ),
@@ -518,16 +523,16 @@ class _HotDebateCard extends StatelessWidget {
       key: Key('squad_debate_${item.titleId}'),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: TellyColors.neonCoral.withValues(alpha: 0.1),
+        color: TellyColors.neonCoralOf(context).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: TellyColors.neonCoral.withValues(alpha: 0.4)),
+        border: Border.all(color: TellyColors.neonCoralOf(context).withValues(alpha: 0.4)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             "🔥 SQUAD'S BIGGEST DEBATE: ${item.title.toUpperCase()}",
-            style: TellyTypography.caption(color: TellyColors.neonCoral)
+            style: TellyTypography.caption(color: TellyColors.neonCoralOf(context))
                 .copyWith(fontWeight: FontWeight.w900, letterSpacing: 0.8),
           ),
           const SizedBox(height: 6),
@@ -565,13 +570,13 @@ class _ConsensusCard extends StatelessWidget {
             height: 32,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: top ? TellyColors.phosphorLime.withValues(alpha: 0.15) : TellyColors.cardOf(context),
+              color: top ? TellyColors.primaryAccentOf(context).withValues(alpha: 0.15) : TellyColors.cardOf(context),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: top ? TellyColors.phosphorLime : TellyColors.borderGlassOf(context)),
+              border: Border.all(color: top ? TellyColors.primaryAccentOf(context) : TellyColors.borderGlassOf(context)),
             ),
             child: Text(
               '#${item.consensusRank}',
-              style: TellyTypography.monoDigits(color: top ? TellyColors.phosphorLime : TellyColors.textSecondaryOf(context))
+              style: TellyTypography.monoDigits(color: top ? TellyColors.primaryAccentOf(context) : TellyColors.textSecondaryOf(context))
                   .copyWith(fontWeight: FontWeight.bold, fontSize: 13),
             ),
           ),
@@ -594,7 +599,7 @@ class _ConsensusCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     Text(
                       '${item.totalBordaPoints} pts',
-                      style: TellyTypography.monoDigits(color: TellyColors.phosphorLime)
+                      style: TellyTypography.monoDigits(color: TellyColors.primaryAccentOf(context))
                           .copyWith(fontWeight: FontWeight.bold, fontSize: 10),
                     ),
                   ],
@@ -628,7 +633,7 @@ class _WatchlistTile extends StatelessWidget {
       title: Text(item.title, style: TellyTypography.bodyLarge(color: TellyColors.textPrimaryOf(context))),
       subtitle: Text(
         item.everyone ? 'Everyone wants to watch' : '${item.queuedBy} of ${item.memberCount} want to watch',
-        style: TellyTypography.caption(color: item.everyone ? TellyColors.phosphorLime : TellyColors.textSecondaryOf(context)),
+        style: TellyTypography.caption(color: item.everyone ? TellyColors.primaryAccentOf(context) : TellyColors.textSecondaryOf(context)),
       ),
       onTap: () => context.push(Routes.title(item.mediaType, item.titleId)),
     );

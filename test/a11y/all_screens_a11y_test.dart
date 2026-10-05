@@ -190,7 +190,9 @@ void main() {
     List<Override> overrides = const [],
     Size size = const Size(1080, 2400),
     double pixelRatio = 2.0,
+    ThemeData? theme,
   }) async {
+    final activeTheme = theme ?? TellyTheme.darkTheme;
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = pixelRatio;
     addTearDown(tester.view.reset);
@@ -228,7 +230,7 @@ void main() {
         GoRoute(
           path: '/',
           builder: (context, state) => Scaffold(
-            backgroundColor: const Color(0xFF08090C),
+            backgroundColor: activeTheme.scaffoldBackgroundColor,
             body: screen,
           ),
         ),
@@ -248,7 +250,7 @@ void main() {
         ProviderScope(
           overrides: defaultOverrides,
           child: MaterialApp.router(
-            theme: TellyTheme.darkTheme,
+            theme: activeTheme,
             routerConfig: router,
           ),
         ),
@@ -272,20 +274,40 @@ void main() {
       await runA11yAudit(tester, const SplashScreen());
     });
 
+    testWidgets('01b. SplashScreen meets guidelines in Light Theme', (tester) async {
+      await runA11yAudit(tester, const SplashScreen(), theme: TellyTheme.lightTheme);
+    });
+
     testWidgets('02. SCR-01 AuthScreen meets guidelines', (tester) async {
       await runA11yAudit(tester, const AuthScreen());
+    });
+
+    testWidgets('02b. SCR-01 AuthScreen meets guidelines in Light Theme', (tester) async {
+      await runA11yAudit(tester, const AuthScreen(), theme: TellyTheme.lightTheme);
     });
 
     testWidgets('03. HandleReservationScreen meets guidelines', (tester) async {
       await runA11yAudit(tester, const HandleReservationScreen());
     });
 
+    testWidgets('03b. HandleReservationScreen meets guidelines in Light Theme', (tester) async {
+      await runA11yAudit(tester, const HandleReservationScreen(), theme: TellyTheme.lightTheme);
+    });
+
     testWidgets('04. SCR-02 StreamingSetupScreen meets guidelines', (tester) async {
       await runA11yAudit(tester, const StreamingSetupScreen());
     });
 
+    testWidgets('04b. SCR-02 StreamingSetupScreen meets guidelines in Light Theme', (tester) async {
+      await runA11yAudit(tester, const StreamingSetupScreen(), theme: TellyTheme.lightTheme);
+    });
+
     testWidgets('05. SCR-03 SeedGridScreen meets guidelines', (tester) async {
       await runA11yAudit(tester, const SeedGridScreen());
+    });
+
+    testWidgets('05b. SCR-03 SeedGridScreen meets guidelines in Light Theme', (tester) async {
+      await runA11yAudit(tester, const SeedGridScreen(), theme: TellyTheme.lightTheme);
     });
 
     testWidgets('06. SCR-04 OnboardingTournamentScreen meets guidelines', (tester) async {
@@ -302,8 +324,27 @@ void main() {
       );
     });
 
+    testWidgets('06b. SCR-04 OnboardingTournamentScreen meets guidelines in Light Theme', (tester) async {
+      await runA11yAudit(
+        tester,
+        const OnboardingTournamentScreen(),
+        theme: TellyTheme.lightTheme,
+        overrides: [
+          seedSelectionProvider.overrideWith(
+            () => _FakeSeedSelectionController(
+              const SeedSelectionState(selected: {'tv:76331', 'tv:110492'}),
+            ),
+          ),
+        ],
+      );
+    });
+
     testWidgets('07. SCR-05 ActivityFeedScreen meets guidelines', (tester) async {
       await runA11yAudit(tester, const ActivityFeedScreen());
+    });
+
+    testWidgets('07b. SCR-05 ActivityFeedScreen meets guidelines in Light Theme', (tester) async {
+      await runA11yAudit(tester, const ActivityFeedScreen(), theme: TellyTheme.lightTheme);
     });
 
     testWidgets('08. SCR-06 CommentThreadScreen meets guidelines', (tester) async {
@@ -311,8 +352,17 @@ void main() {
       await runA11yAudit(tester, CommentThreadScreen(activity: act));
     });
 
+    testWidgets('08b. SCR-06 CommentThreadScreen meets guidelines in Light Theme', (tester) async {
+      final act = fakeActivity('act-comment-1', minutesAgo: 5);
+      await runA11yAudit(tester, CommentThreadScreen(activity: act), theme: TellyTheme.lightTheme);
+    });
+
     testWidgets('09. SCR-07 ExploreDiscoverScreen meets guidelines', (tester) async {
       await runA11yAudit(tester, const ExploreDiscoverScreen());
+    });
+
+    testWidgets('09b. SCR-07 ExploreDiscoverScreen meets guidelines in Light Theme', (tester) async {
+      await runA11yAudit(tester, const ExploreDiscoverScreen(), theme: TellyTheme.lightTheme);
     });
 
     testWidgets('10. SCR-08 ShowDetailScreen meets guidelines', (tester) async {
@@ -340,20 +390,62 @@ void main() {
       );
     });
 
+    testWidgets('10b. SCR-08 ShowDetailScreen meets guidelines in Light Theme', (tester) async {
+      final testTitle = TitleDetail(
+        id: 1396,
+        mediaType: 'tv',
+        title: 'Severance',
+        overview: 'Mark leads a team of office workers whose memories have been surgically divided.',
+        communityScore: 9.34,
+        numberOfSeasons: 2,
+        numberOfEpisodes: 19,
+        releaseDate: DateTime(2022, 2, 18),
+        seasons: const [
+          TitleSeasonDetail(
+            seasonNumber: 1,
+            name: 'Season 1',
+            episodeCount: 9,
+            airDate: '2022-02-18',
+          ),
+        ],
+      );
+      await runA11yAudit(
+        tester,
+        ShowDetailScreen(titleId: 1396, mediaType: 'tv', initialTitle: testTitle),
+        theme: TellyTheme.lightTheme,
+      );
+    });
+
     testWidgets('11. SCR-09 LoggingStudioScreen meets guidelines', (tester) async {
       await runA11yAudit(tester, const LoggingStudioScreen());
+    });
+
+    testWidgets('11b. SCR-09 LoggingStudioScreen meets guidelines in Light Theme', (tester) async {
+      await runA11yAudit(tester, const LoggingStudioScreen(), theme: TellyTheme.lightTheme);
     });
 
     testWidgets('12. SCR-10 LogDuelScreen meets guidelines', (tester) async {
       await runA11yAudit(tester, const LogDuelScreen());
     });
 
+    testWidgets('12b. SCR-10 LogDuelScreen meets guidelines in Light Theme', (tester) async {
+      await runA11yAudit(tester, const LogDuelScreen(), theme: TellyTheme.lightTheme);
+    });
+
     testWidgets('13. SCR-12 LogRevealScreen meets guidelines', (tester) async {
       await runA11yAudit(tester, const LogRevealScreen());
     });
 
+    testWidgets('13b. SCR-12 LogRevealScreen meets guidelines in Light Theme', (tester) async {
+      await runA11yAudit(tester, const LogRevealScreen(), theme: TellyTheme.lightTheme);
+    });
+
     testWidgets('14. SCR-13 SmartQueueScreen meets guidelines', (tester) async {
       await runA11yAudit(tester, const SmartQueueScreen());
+    });
+
+    testWidgets('14b. SCR-13 SmartQueueScreen meets guidelines in Light Theme', (tester) async {
+      await runA11yAudit(tester, const SmartQueueScreen(), theme: TellyTheme.lightTheme);
     });
 
     testWidgets('15. SCR-14 DualCanonProfileScreen meets guidelines', (tester) async {
@@ -372,8 +464,29 @@ void main() {
       );
     });
 
+    testWidgets('15b. SCR-14 DualCanonProfileScreen meets guidelines in Light Theme', (tester) async {
+      final movies = [
+        const CanonEntry(id: 1, title: 'Interstellar', mediaType: 'movie', rankPosition: 1, calculatedScore: 9.5),
+      ];
+      final series = [
+        const CanonEntry(id: 2, title: 'Severance', mediaType: 'tv', rankPosition: 1, calculatedScore: 9.7),
+      ];
+      await runA11yAudit(
+        tester,
+        const DualCanonProfileScreen(),
+        theme: TellyTheme.lightTheme,
+        overrides: [
+          profileCanonProvider.overrideWith(() => _SeededProfileCanon(movies, series)),
+        ],
+      );
+    });
+
     testWidgets('16. SCR-15 FriendProfileScreen meets guidelines', (tester) async {
       await runA11yAudit(tester, const FriendProfileScreen(handle: 'jordan'));
+    });
+
+    testWidgets('16b. SCR-15 FriendProfileScreen meets guidelines in Light Theme', (tester) async {
+      await runA11yAudit(tester, const FriendProfileScreen(handle: 'jordan'), theme: TellyTheme.lightTheme);
     });
 
     testWidgets('17. SCR-16 TwoToWatchScreen meets guidelines', (tester) async {
@@ -383,28 +496,60 @@ void main() {
       );
     });
 
+    testWidgets('17b. SCR-16 TwoToWatchScreen meets guidelines in Light Theme', (tester) async {
+      await runA11yAudit(
+        tester,
+        const TwoToWatchScreen(friendId: 'u-jordan', friendHandle: 'jordan', friendDisplayName: 'Jordan M.'),
+        theme: TellyTheme.lightTheme,
+      );
+    });
+
     testWidgets('18. SCR-17a SquadsListScreen meets guidelines', (tester) async {
       await runA11yAudit(tester, const SquadsListScreen());
+    });
+
+    testWidgets('18b. SCR-17a SquadsListScreen meets guidelines in Light Theme', (tester) async {
+      await runA11yAudit(tester, const SquadsListScreen(), theme: TellyTheme.lightTheme);
     });
 
     testWidgets('19. SCR-17b SquadHubScreen meets guidelines', (tester) async {
       await runA11yAudit(tester, const SquadHubScreen(squadId: 'sq-1'));
     });
 
+    testWidgets('19b. SCR-17b SquadHubScreen meets guidelines in Light Theme', (tester) async {
+      await runA11yAudit(tester, const SquadHubScreen(squadId: 'sq-1'), theme: TellyTheme.lightTheme);
+    });
+
     testWidgets('20. SCR-18 TvGraveyardScreen meets guidelines', (tester) async {
       await runA11yAudit(tester, const TvGraveyardScreen());
+    });
+
+    testWidgets('20b. SCR-18 TvGraveyardScreen meets guidelines in Light Theme', (tester) async {
+      await runA11yAudit(tester, const TvGraveyardScreen(), theme: TellyTheme.lightTheme);
     });
 
     testWidgets('21. SCR-19 TellyWrappedStudioScreen meets guidelines', (tester) async {
       await runA11yAudit(tester, const TellyWrappedStudioScreen());
     });
 
+    testWidgets('21b. SCR-19 TellyWrappedStudioScreen meets guidelines in Light Theme', (tester) async {
+      await runA11yAudit(tester, const TellyWrappedStudioScreen(), theme: TellyTheme.lightTheme);
+    });
+
     testWidgets('22. SCR-20 SettingsHubScreen meets guidelines', (tester) async {
       await runA11yAudit(tester, const SettingsHubScreen());
     });
 
+    testWidgets('22b. SCR-20 SettingsHubScreen meets guidelines in Light Theme', (tester) async {
+      await runA11yAudit(tester, const SettingsHubScreen(), theme: TellyTheme.lightTheme);
+    });
+
     testWidgets('23. EditProfileStudioScreen meets guidelines', (tester) async {
       await runA11yAudit(tester, const EditProfileStudioScreen());
+    });
+
+    testWidgets('23b. EditProfileStudioScreen meets guidelines in Light Theme', (tester) async {
+      await runA11yAudit(tester, const EditProfileStudioScreen(), theme: TellyTheme.lightTheme);
     });
   });
 }

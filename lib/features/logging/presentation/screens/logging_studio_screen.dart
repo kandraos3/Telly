@@ -129,10 +129,18 @@ class _Header extends StatelessWidget {
             child: TextButton(
               key: const Key('logging_cancel'),
               onPressed: onCancel,
-              child: Text('✕ Cancel', style: TellyTypography.labelMedium(color: TellyColors.textSecondaryOf(context))),
+              child: Text(
+                '✕ Cancel',
+                style: TellyTypography.labelLarge(color: TellyColors.textPrimaryOf(context))
+                    .copyWith(fontWeight: FontWeight.w800),
+              ),
             ),
           ),
-          Text('LOG A SHOW', style: TellyTypography.labelLarge()),
+          Text(
+            'LOG A SHOW',
+            style: TellyTypography.labelLarge(color: TellyColors.textPrimaryOf(context))
+                .copyWith(fontWeight: FontWeight.w800),
+          ),
         ],
       ),
     );
@@ -174,7 +182,7 @@ class _SearchPane extends ConsumerWidget {
         Expanded(
           child: switch (search) {
             null => const SizedBox.shrink(),
-            AsyncLoading() => const Center(child: CircularProgressIndicator(color: TellyColors.phosphorLime)),
+            AsyncLoading() => Center(child: CircularProgressIndicator(color: TellyColors.primaryAccentOf(context))),
             AsyncError() => const _Message('Search failed. Check your connection and try again.'),
             AsyncData(:final value) when value.results.isEmpty => _Message('No titles found for “${draft.query}”.'),
             AsyncData(:final value) => ListView(
@@ -184,16 +192,16 @@ class _SearchPane extends ConsumerWidget {
                       key: const Key('logging_offline_notice'),
                       padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
                       child: Text('Offline: showing saved titles',
-                          style: TellyTypography.caption(color: TellyColors.warmAmber)),
+                          style: TellyTypography.caption(color: TellyColors.warmAmberOf(context))),
                     ),
                   for (final r in value.results)
                     ListTile(
                       key: Key('search_result_${r.mediaType}_${r.id}'),
                       onTap: () => session.selectTitle(r),
-                      title: Text(r.title, style: TellyTypography.titleMedium()),
+                      title: Text(r.title, style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context))),
                       subtitle: Text(
                         [if (r.releaseYear.isNotEmpty) r.releaseYear, _kind(r)].join(' · '),
-                        style: TellyTypography.caption(),
+                        style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)),
                       ),
                     ),
                 ],
@@ -237,13 +245,13 @@ class _DraftPane extends ConsumerWidget {
               child: Text(
                 'Selected: ${title.title.toUpperCase()}${title.releaseYear.isEmpty ? '' : ' (${title.releaseYear})'}',
                 key: const Key('logging_selected_title'),
-                style: TellyTypography.titleMedium(),
+                style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context)),
               ),
             ),
             TextButton(
               key: const Key('logging_change_title'),
               onPressed: session.clearTitle,
-              child: Text('Change', style: TellyTypography.labelMedium(color: TellyColors.phosphorLime)),
+              child: Text('Change', style: TellyTypography.labelMedium(color: TellyColors.primaryAccentOf(context))),
             ),
           ],
         ),
@@ -263,7 +271,8 @@ class _DraftPane extends ConsumerWidget {
           ),
         const SizedBox(height: 32),
         const _SectionHeader('2. YOUR RATING'),
-        Text('Half stars count. Your rating sets where the duels start.', style: TellyTypography.bodyMedium()),
+        Text('Half stars count. Your rating sets where the duels start.',
+            style: TellyTypography.bodyMedium(color: TellyColors.textPrimaryOf(context)).copyWith(fontWeight: FontWeight.w600)),
         const SizedBox(height: 12),
         Center(
           child: StarRatingSelector(
@@ -289,7 +298,7 @@ class _SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.only(bottom: 8),
-        child: Text(text, style: TellyTypography.labelLarge(color: TellyColors.textSecondaryOf(context))),
+        child: Text(text, style: TellyTypography.labelLarge(color: TellyColors.textPrimaryOf(context)).copyWith(fontWeight: FontWeight.w800)),
       );
 }
 
@@ -314,11 +323,11 @@ class _StatusOption extends StatelessWidget {
             children: [
               Icon(
                 selected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                color: selected ? TellyColors.phosphorLime : TellyColors.textTertiary,
+                color: selected ? TellyColors.primaryAccentOf(context) : TellyColors.textTertiaryOf(context),
                 size: 20,
               ),
               const SizedBox(width: 12),
-              Expanded(child: Text(status.label, style: TellyTypography.bodyLarge())),
+              Expanded(child: Text(status.label, style: TellyTypography.bodyLarge(color: TellyColors.textPrimaryOf(context)))),
               if (trailing != null) trailing!,
             ],
           ),
@@ -342,14 +351,14 @@ class _SeasonStepper extends StatelessWidget {
           key: const Key('season_decrement'),
           onPressed: season > 1 ? () => onChanged(season - 1) : null,
           icon: const Icon(Icons.remove, size: 18),
-          color: TellyColors.textSecondary,
+          color: TellyColors.textPrimaryOf(context),
         ),
-        Text('Season $season', key: const Key('season_label'), style: TellyTypography.labelMedium()),
+        Text('Season $season', key: const Key('season_label'), style: TellyTypography.labelMedium(color: TellyColors.textPrimaryOf(context)).copyWith(fontWeight: FontWeight.w700)),
         IconButton(
           key: const Key('season_increment'),
           onPressed: () => onChanged(season + 1),
           icon: const Icon(Icons.add, size: 18),
-          color: TellyColors.textSecondary,
+          color: TellyColors.textPrimaryOf(context),
         ),
       ],
     );
@@ -366,16 +375,16 @@ class _RatingCaption extends StatelessWidget {
     final stars = this.stars;
     final bracket = this.bracket;
     if (stars == null || bracket == null) {
-      return Text('Tap a star to rate', textAlign: TextAlign.center, style: TellyTypography.caption());
+      return Text('Tap a star to rate', textAlign: TextAlign.center, style: TellyTypography.caption(color: TellyColors.textPrimaryOf(context)).copyWith(fontWeight: FontWeight.w600));
     }
     final value = stars == stars.roundToDouble() ? stars.toStringAsFixed(0) : stars.toStringAsFixed(1);
     return Column(
       key: const Key('logging_rating_caption'),
       children: [
         Text('$value / 5  ·  ${bracket.studioTitle}',
-            textAlign: TextAlign.center, style: TellyTypography.titleMedium(color: TellyColors.warmAmber)),
+            textAlign: TextAlign.center, style: TellyTypography.titleMedium(color: TellyColors.warmAmberOf(context))),
         const SizedBox(height: 4),
-        Text('“${bracket.studioTagline}”', textAlign: TextAlign.center, style: TellyTypography.caption()),
+        Text('“${bracket.studioTagline}”', textAlign: TextAlign.center, style: TellyTypography.caption(color: TellyColors.textPrimaryOf(context)).copyWith(fontWeight: FontWeight.w600)),
       ],
     );
   }
@@ -394,13 +403,13 @@ class _BroadcastToggle extends StatelessWidget {
       onChanged: (v) => onChanged(v ?? true),
       contentPadding: EdgeInsets.zero,
       controlAffinity: ListTileControlAffinity.leading,
-      activeColor: TellyColors.phosphorLime,
-      checkColor: TellyColors.backgroundPrimary,
-      side: const BorderSide(color: TellyColors.strokeStrong, width: 1.5),
-      title: Text('Broadcast to Feed', style: TellyTypography.bodyLarge()),
+      activeColor: TellyColors.primaryAccentOf(context),
+      checkColor: Theme.of(context).brightness == Brightness.light ? Colors.white : Colors.black,
+      side: BorderSide(color: TellyColors.strokeStrongOf(context), width: 1.5),
+      title: Text('Broadcast to Feed', style: TellyTypography.bodyLarge(color: TellyColors.textPrimaryOf(context))),
       subtitle: Text(
         value ? 'Friends will see this log in their feed.' : 'Private: ranked in your canon, hidden from the feed.',
-        style: TellyTypography.caption(),
+        style: TellyTypography.caption(color: TellyColors.textPrimaryOf(context)).copyWith(fontWeight: FontWeight.w600),
       ),
     );
   }

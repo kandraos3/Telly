@@ -46,7 +46,7 @@ class TvGraveyardScreen extends ConsumerWidget {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.add_rounded, color: TellyColors.neonCoral),
+            icon: Icon(Icons.add_rounded, color: TellyColors.neonCoralOf(context)),
             tooltip: 'Log Dropped Show',
             key: const Key('graveyard_add_button'),
             onPressed: () {
@@ -70,12 +70,13 @@ class TvGraveyardScreen extends ConsumerWidget {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.info_outline_rounded, color: TellyColors.neonCoral, size: 18),
+                  ExcludeSemantics(child: Icon(Icons.info_outline_rounded, color: TellyColors.neonCoralOf(context), size: 18)),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       'Shows you abandoned and why (${droppedShows.length} Total). Dropped shows do not affect active canon percentiles.',
-                      style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)),
+                      style: TellyTypography.bodyMedium(color: TellyColors.textPrimaryOf(context))
+                          .copyWith(fontSize: 13.0, fontWeight: FontWeight.w700),
                     ),
                   ),
                 ],
@@ -85,9 +86,9 @@ class TvGraveyardScreen extends ConsumerWidget {
 
             // Dropped Cards List
             if (async.isLoading && !async.hasValue)
-              const Padding(
-                padding: EdgeInsets.all(32),
-                child: Center(child: CircularProgressIndicator(color: TellyColors.neonCoral)),
+              Padding(
+                padding: const EdgeInsets.all(32),
+                child: Center(child: CircularProgressIndicator(color: TellyColors.neonCoralOf(context))),
               )
             else if (async.hasError && !async.hasValue)
               Padding(
@@ -98,7 +99,7 @@ class TvGraveyardScreen extends ConsumerWidget {
                     Text("Couldn't load your Graveyard.", style: TellyTypography.bodyMedium(color: TellyColors.textPrimaryOf(context))),
                     TextButton(
                       onPressed: () => ref.invalidate(graveyardControllerProvider),
-                      child: const Text('Retry'),
+                      child: Text('Retry', style: TextStyle(color: TellyColors.neonCoralOf(context))),
                     ),
                   ],
                 ),
@@ -147,7 +148,7 @@ class TvGraveyardScreen extends ConsumerWidget {
                       const SizedBox(height: 2),
                       Text(
                         '${show.releaseYear} • ${show.milestoneText}',
-                        style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)),
+                        style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)),
                       ),
                     ],
                   ),
@@ -156,29 +157,33 @@ class TvGraveyardScreen extends ConsumerWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: show.willingToRevisit
-                        ? TellyColors.phosphorLime.withValues(alpha: 0.15)
+                        ? TellyColors.primaryAccentOf(context).withValues(alpha: 0.15)
                         : TellyColors.strokeSubtleOf(context),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: show.willingToRevisit
-                          ? TellyColors.phosphorLime
+                          ? TellyColors.primaryAccentOf(context)
                           : TellyColors.borderGlassOf(context),
                     ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        show.willingToRevisit ? '🔄' : '🚪',
-                        style: const TextStyle(fontSize: 12),
+                      ExcludeSemantics(
+                        child: Text(
+                          show.willingToRevisit ? '🔄' : '🚪',
+                          style: const TextStyle(fontSize: 12),
+                        ),
                       ),
                       const SizedBox(width: 4),
                       Text(
                         show.willingToRevisit ? 'Willing to Revisit' : 'Dead & Buried',
                         style: TellyTypography.caption(
                           color: show.willingToRevisit
-                              ? TellyColors.phosphorLime
-                              : TellyColors.textTertiaryOf(context),
+                              ? (Theme.of(context).brightness == Brightness.light
+                                  ? const Color(0xFF233B00)
+                                  : TellyColors.phosphorLime)
+                              : TellyColors.textSecondaryOf(context),
                         ).copyWith(fontWeight: FontWeight.bold, fontSize: 10),
                       ),
                     ],
@@ -192,18 +197,18 @@ class TvGraveyardScreen extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: TellyColors.neonCoral.withValues(alpha: 0.1),
+                color: TellyColors.neonCoralOf(context).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: TellyColors.neonCoral.withValues(alpha: 0.3)),
+                border: Border.all(color: TellyColors.neonCoralOf(context).withValues(alpha: 0.3)),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(reasonIcon, style: const TextStyle(fontSize: 14)),
+                  ExcludeSemantics(child: Text(reasonIcon, style: const TextStyle(fontSize: 14))),
                   const SizedBox(width: 6),
                   Text(
                     'Reason: “${show.reason}”',
-                    style: TellyTypography.caption(color: TellyColors.neonCoral).copyWith(
+                    style: TellyTypography.caption(color: TellyColors.neonCoralOf(context)).copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -227,13 +232,14 @@ class TvGraveyardScreen extends ConsumerWidget {
               const SizedBox(height: 10),
               Row(
                 children: [
-                  const Icon(Icons.notifications_active_outlined,
-                      size: 14, color: TellyColors.warmAmber),
+                  Icon(Icons.notifications_active_outlined,
+                      size: 14, color: TellyColors.warmAmberOf(context)),
                   const SizedBox(width: 6),
                   Text(
                     'Alert enabled: Notify if next season reaches ≥ 90% acclaim',
-                    style: TellyTypography.caption(color: TellyColors.warmAmber).copyWith(
-                      fontSize: 10,
+                    style: TellyTypography.caption(color: TellyColors.warmAmberOf(context)).copyWith(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
@@ -252,7 +258,7 @@ class TvGraveyardScreen extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(vertical: 40),
         child: Column(
           children: [
-            Icon(Icons.hotel_class_outlined, size: 48, color: TellyColors.textTertiaryOf(context)),
+            Icon(Icons.hotel_class_outlined, size: 48, color: TellyColors.textSecondaryOf(context)),
             const SizedBox(height: 12),
             Text(
               'Your TV Graveyard is Empty',
@@ -263,7 +269,7 @@ class TvGraveyardScreen extends ConsumerWidget {
             const SizedBox(height: 6),
             Text(
               'Never finished a show? Log your abandoned series here!',
-              style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)),
+              style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)),
             ),
           ],
         ),

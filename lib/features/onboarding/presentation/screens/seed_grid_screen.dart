@@ -43,7 +43,11 @@ class SeedGridScreen extends ConsumerWidget {
       backgroundColor: TellyColors.canvasOf(context),
       appBar: AppBar(
         backgroundColor: TellyColors.canvasOf(context),
-        title: Text('STEP 3 OF 3', style: TellyTypography.caption(color: TellyColors.textPrimaryOf(context))),
+        title: Text(
+          'STEP 3 OF 3',
+          style: TellyTypography.caption(color: TellyColors.textPrimaryOf(context))
+              .copyWith(fontWeight: FontWeight.w700),
+        ),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -65,7 +69,8 @@ class SeedGridScreen extends ConsumerWidget {
                           const SizedBox(height: 6),
                           Text(
                             'Select at least $minimum to calibrate your Movie and Series canons in a few quick duels.',
-                            style: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context)),
+                            style: TellyTypography.bodyMedium(color: TellyColors.textPrimaryOf(context))
+                                .copyWith(fontWeight: FontWeight.w600),
                           ),
                           const SizedBox(height: 16),
 

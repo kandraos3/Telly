@@ -202,9 +202,9 @@ class _UpsetActivityCardState extends State<UpsetActivityCard>
                             const TextSpan(text: ' ranked '),
                             TextSpan(
                               text: activity.titleName.toUpperCase(),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: TellyColors.phosphorLime,
+                                color: TellyColors.primaryAccentOf(context),
                               ),
                             ),
                             if (activity.rankPosition != null)
@@ -216,7 +216,7 @@ class _UpsetActivityCardState extends State<UpsetActivityCard>
                                 fontWeight: FontWeight.bold,
                                 color: TellyColors.textSecondaryOf(context),
                                 decoration: TextDecoration.lineThrough,
-                                decorationColor: TellyColors.neonCoral,
+                                decorationColor: TellyColors.neonCoralOf(context),
                               ),
                             ),
                             if (activity.upsetOverTitleRank != null)
@@ -259,14 +259,14 @@ class _UpsetActivityCardState extends State<UpsetActivityCard>
                               decoration: BoxDecoration(
                                 color: TellyColors.surfaceOf(context),
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: TellyColors.phosphorLime, width: 2),
+                                border: Border.all(color: TellyColors.primaryAccentOf(context), width: 2),
                               ),
                               clipBehavior: Clip.antiAlias,
                               child: PosterImage(
                                 posterPath: activity.titlePosterUrl ??
                                     TmdbImages.poster(findSeedPoster(activity.titleId, activity.mediaType, activity.titleName)),
-                                fallback: const Center(
-                                  child: Icon(Icons.tv_rounded, color: TellyColors.phosphorLime, size: 28),
+                                fallback: Center(
+                                  child: Icon(Icons.tv_rounded, color: TellyColors.primaryAccentOf(context), size: 28),
                                 ),
                               ),
                             ),
@@ -274,14 +274,14 @@ class _UpsetActivityCardState extends State<UpsetActivityCard>
                             Text(
                               activity.titleName,
                               style: TellyTypography.caption(
-                                color: TellyColors.phosphorLime,
+                                color: TellyColors.primaryAccentOf(context),
                               ).copyWith(fontWeight: FontWeight.bold),
                             ),
                             Text(
                               'WINNER • #${activity.rankPosition ?? 1}',
                               style: TellyTypography.caption(
-                                color: TellyColors.textTertiary,
-                              ).copyWith(fontSize: 10),
+                                color: TellyColors.textPrimaryOf(context),
+                              ).copyWith(fontSize: 10, fontWeight: FontWeight.w600),
                             ),
                           ],
                         ),
@@ -293,14 +293,14 @@ class _UpsetActivityCardState extends State<UpsetActivityCard>
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: TellyColors.neonCoral.withValues(alpha: 0.2),
+                              color: TellyColors.neonCoralOf(context).withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: TellyColors.neonCoral),
+                              border: Border.all(color: TellyColors.neonCoralOf(context)),
                             ),
                             child: Text(
                               '⚡ OVER',
                               style: TellyTypography.caption(
-                                color: TellyColors.neonCoral,
+                                color: TellyColors.neonCoralOf(context),
                               ).copyWith(fontWeight: FontWeight.w900, fontSize: 10),
                             ),
                           ),
@@ -360,14 +360,14 @@ class _UpsetActivityCardState extends State<UpsetActivityCard>
                             Text(
                               activity.upsetOverTitleName ?? 'Titan',
                               style: TellyTypography.caption(
-                                color: TellyColors.textTertiary,
+                                color: TellyColors.textPrimaryOf(context),
                               ).copyWith(fontWeight: FontWeight.w600),
                             ),
                             Text(
                               '#${activity.upsetOverTitleRank ?? 4}',
                               style: TellyTypography.caption(
-                                color: TellyColors.textTertiary,
-                              ).copyWith(fontSize: 10),
+                                color: TellyColors.textPrimaryOf(context),
+                              ).copyWith(fontSize: 10, fontWeight: FontWeight.w600),
                             ),
                           ],
                         ),
@@ -382,15 +382,15 @@ class _UpsetActivityCardState extends State<UpsetActivityCard>
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
-                    color: TellyColors.neonCoral.withValues(alpha: 0.1),
+                    color: TellyColors.neonCoralOf(context).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: TellyColors.neonCoral.withValues(alpha: 0.3)),
+                    border: Border.all(color: TellyColors.neonCoralOf(context).withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.people_outline_rounded,
-                          color: TellyColors.neonCoral, size: 16),
+                      Icon(Icons.people_outline_rounded,
+                          color: TellyColors.neonCoralOf(context), size: 16),
                       const SizedBox(width: 6),
                       Flexible(
                         child: Text(
@@ -402,7 +402,7 @@ class _UpsetActivityCardState extends State<UpsetActivityCard>
                           key: const Key('upset_consensus_text'),
                           textAlign: TextAlign.center,
                           style: TellyTypography.caption(
-                            color: TellyColors.neonCoral,
+                            color: TellyColors.neonCoralOf(context),
                           ).copyWith(fontWeight: FontWeight.bold),
                         ),
                       ),
@@ -416,13 +416,13 @@ class _UpsetActivityCardState extends State<UpsetActivityCard>
                   Text(
                     '“${activity.microReview!}”',
                     style: TellyTypography.bodyMedium(
-                      color: TellyColors.textSecondary,
+                      color: TellyColors.textPrimaryOf(context),
                     ).copyWith(fontStyle: FontStyle.italic),
                   ),
                 ],
 
                 const SizedBox(height: 14),
-                const Divider(color: TellyColors.borderGlass, height: 1),
+                Divider(color: TellyColors.borderGlassOf(context), height: 1),
                 const SizedBox(height: 10),
 
                 // 6. Reactions + Comments (FE-FEED-01)

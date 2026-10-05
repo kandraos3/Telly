@@ -132,9 +132,9 @@ class _ActivityFeedScreenState extends ConsumerState<ActivityFeedScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: TellyColors.phosphorLime.withValues(alpha: 0.15),
+                color: TellyColors.primaryAccentOf(context).withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: TellyColors.phosphorLime.withValues(alpha: 0.4)),
+                border: Border.all(color: TellyColors.primaryAccentOf(context).withValues(alpha: 0.4)),
               ),
               child: Row(
                 children: [
@@ -143,7 +143,7 @@ class _ActivityFeedScreenState extends ConsumerState<ActivityFeedScreen> {
                   Text(
                     'TELLY',
                     style: TellyTypography.labelLarge(
-                      color: TellyColors.phosphorLime,
+                      color: TellyColors.primaryAccentOf(context),
                     ).copyWith(
                       fontWeight: FontWeight.w900,
                       letterSpacing: 1.5,
@@ -164,15 +164,15 @@ class _ActivityFeedScreenState extends ConsumerState<ActivityFeedScreen> {
                 context.push(Routes.squads);
               },
               style: OutlinedButton.styleFrom(
-                foregroundColor: TellyColors.phosphorLime,
-                side: BorderSide(color: TellyColors.phosphorLime.withValues(alpha: 0.4)),
+                foregroundColor: TellyColors.primaryAccentOf(context),
+                side: BorderSide(color: TellyColors.primaryAccentOf(context).withValues(alpha: 0.4)),
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 minimumSize: const Size(48, 48),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
               ),
               icon: const Icon(Icons.groups_2_outlined, size: 18),
               label: Text('My Squads',
-                  style: TellyTypography.labelMedium(color: TellyColors.phosphorLime)
+                  style: TellyTypography.labelMedium(color: TellyColors.primaryAccentOf(context))
                       .copyWith(fontWeight: FontWeight.w700)),
             ),
           ),
@@ -218,10 +218,10 @@ class _ActivityFeedScreenState extends ConsumerState<ActivityFeedScreen> {
                       itemCount: entries.length + (feed.hasMore ? 1 : 0),
                       itemBuilder: (context, index) {
                         if (index == entries.length) {
-                          return const Padding(
-                            key: Key('feed_page_loader'),
-                            padding: EdgeInsets.all(24),
-                            child: Center(child: CircularProgressIndicator(color: TellyColors.phosphorLime)),
+                          return Padding(
+                            key: const Key('feed_page_loader'),
+                            padding: const EdgeInsets.all(24),
+                            child: Center(child: CircularProgressIndicator(color: TellyColors.primaryAccentOf(context))),
                           );
                         }
                         final entry = entries[index];
@@ -258,8 +258,8 @@ class _ActivityFeedScreenState extends ConsumerState<ActivityFeedScreen> {
                       },
                     );
                   },
-                  loading: () => const Center(
-                    child: CircularProgressIndicator(color: TellyColors.phosphorLime),
+                  loading: () => Center(
+                    child: CircularProgressIndicator(color: TellyColors.primaryAccentOf(context)),
                   ),
                   error: (e, _) => ListView(
                     children: [
@@ -315,10 +315,14 @@ class _ActivityFeedScreenState extends ConsumerState<ActivityFeedScreen> {
                 alignment: Alignment.center,
                 child: Text(
                   filter.displayName,
-                  style: TellyTypography.labelSmall(
-                    color: isSelected ? TellyColors.primaryAccentOf(context) : TellyColors.textPrimaryOf(context),
+                  style: TellyTypography.labelMedium(
+                    color: isSelected
+                        ? (Theme.of(context).brightness == Brightness.light
+                            ? const Color(0xFF233B00)
+                            : TellyColors.phosphorLime)
+                        : TellyColors.textPrimaryOf(context),
                   ).copyWith(
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ),
@@ -339,12 +343,12 @@ class _ActivityFeedScreenState extends ConsumerState<ActivityFeedScreen> {
         Center(
           child: Column(
             children: [
-              const Icon(Icons.people_outline_rounded, size: 56, color: TellyColors.textTertiary),
+              Icon(Icons.people_outline_rounded, size: 56, color: TellyColors.textTertiaryOf(context)),
               const SizedBox(height: 16),
               Text(
                 'No Activity Yet',
                 style: TellyTypography.headlineSmall(
-                  color: TellyColors.textPrimary,
+                  color: TellyColors.textPrimaryOf(context),
                 ).copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
@@ -352,15 +356,15 @@ class _ActivityFeedScreenState extends ConsumerState<ActivityFeedScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 40),
                 child: Text(
                   'Follow friends or join a Squad to see what cinephiles are watching, ranking, and debating!',
-                  style: TellyTypography.bodyMedium(color: TellyColors.textTertiary),
+                  style: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context)).copyWith(fontWeight: FontWeight.w600),
                   textAlign: TextAlign.center,
                 ),
               ),
               const SizedBox(height: 24),
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: TellyColors.phosphorLime,
-                  foregroundColor: Colors.black,
+                  backgroundColor: TellyColors.primaryAccentOf(context),
+                  foregroundColor: Theme.of(context).brightness == Brightness.light ? Colors.white : Colors.black,
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),

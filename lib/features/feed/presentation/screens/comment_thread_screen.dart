@@ -123,8 +123,8 @@ class _CommentThreadScreenState extends ConsumerState<CommentThreadScreen> {
                           Text(
                             'No comments yet. Be the first to share your take!',
                             style: TellyTypography.bodyMedium(
-                              color: TellyColors.textSecondaryOf(context),
-                            ),
+                              color: TellyColors.textPrimaryOf(context),
+                            ).copyWith(fontWeight: FontWeight.w600),
                           ),
                         ],
                       ),
@@ -141,8 +141,8 @@ class _CommentThreadScreenState extends ConsumerState<CommentThreadScreen> {
                     },
                   );
                 },
-                loading: () => const Center(
-                  child: CircularProgressIndicator(color: TellyColors.phosphorLime),
+                loading: () => Center(
+                  child: CircularProgressIndicator(color: TellyColors.primaryAccentOf(context)),
                 ),
                 error: (e, _) => Center(
                   child: Text("Couldn't load comments.", style: TellyTypography.bodyMedium()),
@@ -179,7 +179,7 @@ class _CommentThreadScreenState extends ConsumerState<CommentThreadScreen> {
                   ? Text(
                       activity.userDisplayName.isNotEmpty ? activity.userDisplayName[0] : '?',
                       style: TellyTypography.caption(
-                        color: activity.isUpset ? TellyColors.neonCoral : TellyColors.phosphorLime,
+                        color: activity.isUpset ? TellyColors.neonCoralOf(context) : TellyColors.primaryAccentOf(context),
                       ).copyWith(fontWeight: FontWeight.bold),
                     )
                   : null,
@@ -201,7 +201,7 @@ class _CommentThreadScreenState extends ConsumerState<CommentThreadScreen> {
                         ? 'Ranked ${activity.titleName} over ${activity.upsetOverTitleName ?? 'Titan'}'
                         : 'Ranked ${activity.titleName} at #${activity.rankPosition ?? 1}',
                     style: TellyTypography.caption(
-                      color: activity.isUpset ? TellyColors.neonCoral : TellyColors.phosphorLime,
+                      color: activity.isUpset ? TellyColors.neonCoralOf(context) : TellyColors.primaryAccentOf(context),
                     ).copyWith(fontWeight: FontWeight.w600),
                   ),
                   if (activity.microReview != null) ...[
@@ -209,7 +209,7 @@ class _CommentThreadScreenState extends ConsumerState<CommentThreadScreen> {
                     Text(
                       '“${activity.microReview}”',
                       style: TellyTypography.caption(
-                        color: TellyColors.textSecondaryOf(context),
+                        color: TellyColors.textPrimaryOf(context),
                       ).copyWith(fontStyle: FontStyle.italic),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -297,14 +297,14 @@ class _CommentThreadScreenState extends ConsumerState<CommentThreadScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: TellyColors.neonCoral.withValues(alpha: 0.15),
+                          color: TellyColors.neonCoralOf(context).withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(4),
-                          border: Border.all(color: TellyColors.neonCoral.withValues(alpha: 0.4)),
+                          border: Border.all(color: TellyColors.neonCoralOf(context).withValues(alpha: 0.4)),
                         ),
                         child: Text(
                           'SPOILER',
                           style: TellyTypography.caption(
-                            color: TellyColors.neonCoral,
+                            color: TellyColors.neonCoralOf(context),
                           ).copyWith(fontSize: 9, fontWeight: FontWeight.w900),
                         ),
                       ),
@@ -351,10 +351,10 @@ class _CommentThreadScreenState extends ConsumerState<CommentThreadScreen> {
                     alignment: Alignment.center,
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
-                      color: containsSpoilers ? TellyColors.neonCoral.withValues(alpha: 0.2) : TellyColors.cardOf(context),
+                      color: containsSpoilers ? TellyColors.neonCoralOf(context).withValues(alpha: 0.2) : TellyColors.cardOf(context),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: containsSpoilers ? TellyColors.neonCoral : TellyColors.borderGlassOf(context),
+                        color: containsSpoilers ? TellyColors.neonCoralOf(context) : TellyColors.borderGlassOf(context),
                       ),
                     ),
                     child: Row(
@@ -362,13 +362,13 @@ class _CommentThreadScreenState extends ConsumerState<CommentThreadScreen> {
                         Icon(
                           Icons.warning_amber_rounded,
                           size: 14,
-                          color: containsSpoilers ? TellyColors.neonCoral : TellyColors.textSecondaryOf(context),
+                          color: containsSpoilers ? TellyColors.neonCoralOf(context) : TellyColors.textPrimaryOf(context),
                         ),
                         const SizedBox(width: 4),
                         Text(
                           'Contains Spoilers',
                           style: TellyTypography.caption(
-                            color: containsSpoilers ? TellyColors.neonCoral : TellyColors.textSecondaryOf(context),
+                            color: containsSpoilers ? TellyColors.neonCoralOf(context) : TellyColors.textPrimaryOf(context),
                           ).copyWith(fontWeight: FontWeight.bold, fontSize: 11),
                         ),
                       ],
@@ -405,7 +405,7 @@ class _CommentThreadScreenState extends ConsumerState<CommentThreadScreen> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20),
-                      borderSide: const BorderSide(color: TellyColors.phosphorLime),
+                      borderSide: BorderSide(color: TellyColors.primaryAccentOf(context)),
                     ),
                   ),
                   onSubmitted: (_) => _handleSubmitComment(),
@@ -417,15 +417,15 @@ class _CommentThreadScreenState extends ConsumerState<CommentThreadScreen> {
                 tooltip: 'Send comment',
                 onPressed: composer.submitting ? null : _handleSubmitComment,
                 icon: composer.submitting
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: TellyColors.phosphorLime,
+                          color: TellyColors.primaryAccentOf(context),
                         ),
                       )
-                    : const Icon(Icons.send_rounded, color: TellyColors.phosphorLime),
+                    : Icon(Icons.send_rounded, color: TellyColors.primaryAccentOf(context)),
               ),
             ],
           ),

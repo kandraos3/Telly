@@ -28,20 +28,21 @@ class SquadsListScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(squadsListProvider);
     return Scaffold(
+      backgroundColor: TellyColors.canvasOf(context),
       appBar: AppBar(
         title: Text('MY SQUADS', style: TellyTypography.labelLarge(color: TellyColors.textPrimaryOf(context))),
         centerTitle: true,
       ),
       floatingActionButton: FloatingActionButton.extended(
         key: const Key('create_squad_button'),
-        backgroundColor: TellyColors.phosphorLime,
-        foregroundColor: Colors.black,
+        backgroundColor: TellyColors.primaryAccentOf(context),
+        foregroundColor: Theme.of(context).brightness == Brightness.light ? Colors.white : Colors.black,
         onPressed: () => _create(context, ref),
         icon: const Icon(Icons.group_add),
         label: const Text('New Squad'),
       ),
       body: async.when(
-        loading: () => const Center(child: CircularProgressIndicator(color: TellyColors.phosphorLime)),
+        loading: () => Center(child: CircularProgressIndicator(color: TellyColors.primaryAccentOf(context))),
         error: (_, __) => Center(
           key: const Key('squads_error'),
           child: TextButton(onPressed: () => ref.invalidate(squadsListProvider), child: const Text('Retry')),
@@ -53,7 +54,8 @@ class SquadsListScreen extends ConsumerWidget {
                   child: Text(
                     'Squads rank together: roommates, a book club, the group chat. Create one to start a consensus canon.',
                     textAlign: TextAlign.center,
-                    style: TellyTypography.bodyMedium(),
+                    style: TellyTypography.bodyMedium(color: TellyColors.textPrimaryOf(context))
+                        .copyWith(fontWeight: FontWeight.w600),
                   ),
                 ),
               )
@@ -62,9 +64,11 @@ class SquadsListScreen extends ConsumerWidget {
                   for (final s in squads)
                     ListTile(
                       key: Key('squad_row_${s.id}'),
-                      leading: const Icon(Icons.groups_2_outlined, color: TellyColors.phosphorLime),
-                      title: Text(s.name, style: TellyTypography.titleMedium()),
-                      subtitle: s.description == null ? null : Text(s.description!, style: TellyTypography.caption()),
+                      leading: Icon(Icons.groups_2_outlined, color: TellyColors.primaryAccentOf(context)),
+                      title: Text(s.name, style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context))),
+                      subtitle: s.description == null
+                          ? null
+                          : Text(s.description!, style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context))),
                       onTap: () => context.push(Routes.squad(s.id)),
                     ),
                 ],

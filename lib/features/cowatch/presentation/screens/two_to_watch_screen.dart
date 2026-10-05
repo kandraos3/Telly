@@ -103,15 +103,15 @@ class TwoToWatchScreen extends ConsumerWidget {
               key: const Key('cowatch_quick_swipe_btn'),
               onPressed: () => _openQuickSwipe(context, ref, state),
               style: OutlinedButton.styleFrom(
-                foregroundColor: TellyColors.phosphorLime,
-                side: BorderSide(color: TellyColors.phosphorLime.withValues(alpha: 0.5)),
+                foregroundColor: TellyColors.primaryAccentOf(context),
+                side: BorderSide(color: TellyColors.primaryAccentOf(context).withValues(alpha: 0.5)),
                 minimumSize: const Size.fromHeight(48),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
               icon: const Icon(Icons.swipe, size: 18),
               label: Text(
                 "Can't agree? 15-second Quick Swipe",
-                style: TellyTypography.labelMedium(color: TellyColors.phosphorLime).copyWith(fontWeight: FontWeight.w800),
+                style: TellyTypography.labelMedium(color: TellyColors.primaryAccentOf(context)).copyWith(fontWeight: FontWeight.w800),
               ),
             ),
           ],
@@ -406,7 +406,7 @@ class _MoodStep extends StatelessWidget {
                 _Chip(
                   label: budget.label,
                   selected: state.runtimeBudget == budget,
-                  color: TellyColors.warmAmber,
+                  color: TellyColors.warmAmberOf(context),
                   onTap: () => controller.selectRuntime(state.runtimeBudget == budget ? null : budget),
                 ),
             ],
@@ -422,7 +422,7 @@ class _MoodStep extends StatelessWidget {
                 key: Key('cowatch_vibe_${vibe.id}'),
                 label: vibe.label,
                 selected: state.vibes.contains(vibe.id),
-                color: TellyColors.electricViolet,
+                color: TellyColors.electricVioletOf(context),
                 onTap: () => controller.toggleVibe(vibe.id),
               ),
           ],
@@ -444,7 +444,7 @@ class _MoodStep extends StatelessWidget {
                     key: Key('cowatch_provider_$id'),
                     label: StreamingPlatform.labelFor(id),
                     selected: state.activeProviders.contains(id),
-                    color: TellyColors.phosphorLime,
+                    color: TellyColors.primaryAccentOf(context),
                     onTap: () => controller.toggleProvider(id),
                   ),
               ],
@@ -622,7 +622,7 @@ class _Avatar extends StatelessWidget {
       child: Text(
         initial.isEmpty ? '?' : initial[0].toUpperCase(),
         style: TextStyle(
-          color: accent ? TellyColors.phosphorLime : TellyColors.textPrimaryOf(context),
+          color: accent ? TellyColors.primaryAccentOf(context) : TellyColors.textPrimaryOf(context),
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -639,6 +639,7 @@ class _Segment extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final accent = TellyColors.primaryAccentOf(context);
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(10),
@@ -646,14 +647,17 @@ class _Segment extends StatelessWidget {
         constraints: const BoxConstraints(minHeight: 48),
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: selected ? TellyColors.phosphorLime.withValues(alpha: 0.12) : TellyColors.cardOf(context),
+          color: selected ? accent.withValues(alpha: 0.14) : TellyColors.cardOf(context),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: selected ? TellyColors.phosphorLime : TellyColors.borderGlassOf(context)),
+          border: Border.all(color: selected ? accent : TellyColors.borderGlassOf(context)),
         ),
         child: Text(
           label,
-          style: TellyTypography.labelLarge(color: selected ? TellyColors.phosphorLime : TellyColors.textSecondaryOf(context))
-              .copyWith(fontWeight: FontWeight.w700),
+          style: TellyTypography.labelLarge(
+            color: selected
+                ? (Theme.of(context).brightness == Brightness.light ? const Color(0xFF233B00) : accent)
+                : TellyColors.textPrimaryOf(context),
+          ).copyWith(fontWeight: FontWeight.w800),
         ),
       ),
     );
@@ -679,9 +683,9 @@ class _Chip extends StatelessWidget {
       selectedColor: color.withValues(alpha: 0.18),
       side: BorderSide(color: selected ? color : TellyColors.borderGlassOf(context)),
       labelStyle: TextStyle(
-        color: selected ? color : TellyColors.textSecondaryOf(context),
+        color: selected ? color : TellyColors.textPrimaryOf(context),
         fontSize: 12,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700,
       ),
     );
   }
@@ -691,13 +695,13 @@ class _Loading extends StatelessWidget {
   const _Loading();
 
   @override
-  Widget build(BuildContext context) => const Padding(
-        padding: EdgeInsets.all(12),
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.all(12),
         child: Center(
           child: SizedBox(
             width: 22,
             height: 22,
-            child: CircularProgressIndicator(strokeWidth: 2, color: TellyColors.phosphorLime),
+            child: CircularProgressIndicator(strokeWidth: 2, color: TellyColors.primaryAccentOf(context)),
           ),
         ),
       );

@@ -32,9 +32,9 @@ class TitleDuelRecordSection extends ConsumerWidget {
         ),
       // Offline or failed: the record is optional context, so show the empty state.
       AsyncError() => const _DuelRecordCard(stats: TitleDuelStats.empty),
-      _ => const SizedBox(
+      _ => SizedBox(
           height: 96,
-          child: Center(child: CircularProgressIndicator(strokeWidth: 2, color: TellyColors.phosphorLime)),
+          child: Center(child: CircularProgressIndicator(strokeWidth: 2, color: TellyColors.primaryAccentOf(context))),
         ),
     };
   }
@@ -61,7 +61,7 @@ class _SectionCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, size: 16, color: TellyColors.phosphorLime),
+              Icon(icon, size: 16, color: TellyColors.primaryAccentOf(context)),
               const SizedBox(width: 6),
               Text(
                 heading,
@@ -102,19 +102,19 @@ class _DuelRecordCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Expanded(child: _Stat(value: '$winRate%', label: 'Duel Win Rate', color: TellyColors.phosphorLime)),
+                    Expanded(child: _Stat(value: '$winRate%', label: 'Duel Win Rate', color: TellyColors.primaryAccentOf(context))),
                     Expanded(
                       child: _Stat(
                         value: '${stats.totalDuels}',
                         label: stats.totalDuels == 1 ? 'Duel Fought' : 'Duels Fought',
-                        color: TellyColors.warmAmber,
+                        color: TellyColors.warmAmberOf(context),
                       ),
                     ),
                     Expanded(
                       child: _Stat(
                         value: '${stats.tiers.total}',
                         label: stats.tiers.total == 1 ? 'Ranker' : 'Rankers',
-                        color: TellyColors.electricViolet,
+                        color: TellyColors.electricVioletOf(context),
                       ),
                     ),
                   ],
@@ -178,11 +178,11 @@ class _TierDistributionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pct = tiers.percentages!;
-    const bands = [
-      ('👑', 'God', TellyColors.phosphorLime),
-      ('🎖️', 'Prestige', TellyColors.electricViolet),
-      ('✨', 'Great', TellyColors.warmAmber),
-      ('💤', 'Other', TellyColors.strokeStrong),
+    final bands = [
+      ('👑', 'God', TellyColors.primaryAccentOf(context)),
+      ('🎖️', 'Prestige', TellyColors.electricVioletOf(context)),
+      ('✨', 'Great', TellyColors.warmAmberOf(context)),
+      ('💤', 'Other', TellyColors.strokeStrongOf(context)),
     ];
     return _SectionCard(
       key: const Key('title_tier_distribution'),

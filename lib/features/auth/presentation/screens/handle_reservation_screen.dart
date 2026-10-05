@@ -66,9 +66,13 @@ class _HandleReservationScreenState extends ConsumerState<HandleReservationScree
     final reservation = ref.watch(handleReservationProvider);
 
     return Scaffold(
-      backgroundColor: TellyColors.backgroundPrimary,
+      backgroundColor: TellyColors.canvasOf(context),
       appBar: AppBar(
-        title: Text('STEP 1 OF 3', style: TellyTypography.caption(color: TellyColors.textPrimary)),
+        title: Text(
+          'STEP 1 OF 3',
+          style: TellyTypography.caption(color: TellyColors.textPrimaryOf(context))
+              .copyWith(fontWeight: FontWeight.w700),
+        ),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -79,12 +83,13 @@ class _HandleReservationScreenState extends ConsumerState<HandleReservationScree
             children: [
               Text(
                 'Claim your Telly handle',
-                style: TellyTypography.displayXL(),
+                style: TellyTypography.displayXL(color: TellyColors.textPrimaryOf(context)),
               ),
               const SizedBox(height: 8),
               Text(
                 'This is how friends will find you, duel you, and compare taste.',
-                style: TellyTypography.bodyMedium(color: TellyColors.textSecondary),
+                style: TellyTypography.bodyMedium(color: TellyColors.textPrimaryOf(context))
+                    .copyWith(fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 32),
 
@@ -94,9 +99,16 @@ class _HandleReservationScreenState extends ConsumerState<HandleReservationScree
                 hintText: 'jordan',
                 labelText: 'USERNAME',
                 autofocus: true,
-                prefixIcon: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 14, vertical: 16),
-                  child: Text('@', style: TextStyle(color: TellyColors.textPrimary, fontSize: 16)),
+                prefixIcon: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+                  child: Text(
+                    '@',
+                    style: TextStyle(
+                      color: TellyColors.textPrimaryOf(context),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
                 suffixIcon: _buildSuffixIcon(reservation.availability),
                 errorText: reservation.error,
@@ -107,11 +119,12 @@ class _HandleReservationScreenState extends ConsumerState<HandleReservationScree
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    const Icon(Icons.bolt, size: 16, color: TellyColors.phosphorLime),
+                    Icon(Icons.bolt, size: 16, color: TellyColors.primaryAccentOf(context)),
                     const SizedBox(width: 4),
                     Text(
                       'Nice! @${reservation.handle} is available.',
-                      style: TellyTypography.caption(color: TellyColors.phosphorLime),
+                      style: TellyTypography.caption(color: TellyColors.primaryAccentOf(context))
+                          .copyWith(fontWeight: FontWeight.w700),
                     ),
                   ],
                 ),
@@ -124,7 +137,7 @@ class _HandleReservationScreenState extends ConsumerState<HandleReservationScree
                 controller: _displayNameController,
                 hintText: 'Jordan Miller',
                 labelText: 'DISPLAY NAME',
-                prefixIcon: const Icon(Icons.person_outline, color: TellyColors.textTertiary),
+                prefixIcon: Icon(Icons.person_outline, color: TellyColors.textTertiaryOf(context)),
               ),
 
               const Spacer(),

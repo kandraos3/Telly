@@ -62,7 +62,11 @@ class StreamingSetupScreen extends ConsumerWidget {
       backgroundColor: TellyColors.canvasOf(context),
       appBar: AppBar(
         backgroundColor: TellyColors.canvasOf(context),
-        title: Text('STEP 2 OF 3', style: TellyTypography.caption(color: TellyColors.textPrimaryOf(context))),
+        title: Text(
+          'STEP 2 OF 3',
+          style: TellyTypography.caption(color: TellyColors.textPrimaryOf(context))
+              .copyWith(fontWeight: FontWeight.w700),
+        ),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -78,7 +82,8 @@ class StreamingSetupScreen extends ConsumerWidget {
                     const SizedBox(height: 8),
                     Text(
                       'Select your active subscriptions so we can tailor streaming badges and co-watching recommendations.',
-                      style: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context)),
+                      style: TellyTypography.bodyMedium(color: TellyColors.textPrimaryOf(context))
+                          .copyWith(fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 24),
 
@@ -230,7 +235,8 @@ class StreamingSetupScreen extends ConsumerWidget {
                     onPressed: setup.saving ? null : navigateForward,
                     child: Text(
                       "I don't have streaming services / Skip for now",
-                      style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)),
+                      style: TellyTypography.bodyMedium(color: TellyColors.textPrimaryOf(context))
+                          .copyWith(fontWeight: FontWeight.w600),
                     ),
                   ),
                 ],

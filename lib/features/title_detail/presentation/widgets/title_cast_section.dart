@@ -39,7 +39,7 @@ class TitleCastSection extends ConsumerWidget {
             Container(
               width: 3,
               height: 14,
-              decoration: BoxDecoration(color: TellyColors.warmAmber, borderRadius: BorderRadius.circular(2)),
+              decoration: BoxDecoration(color: TellyColors.warmAmberOf(context), borderRadius: BorderRadius.circular(2)),
             ),
             const SizedBox(width: 8),
             Text(
@@ -65,7 +65,7 @@ class TitleCastSection extends ConsumerWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style:
-                          TellyTypography.caption(color: TellyColors.warmAmber).copyWith(fontWeight: FontWeight.w700),
+                          TellyTypography.caption(color: TellyColors.warmAmberOf(context)).copyWith(fontWeight: FontWeight.w700),
                     ),
                   ),
                 ),
@@ -85,9 +85,9 @@ class TitleCastSection extends ConsumerWidget {
                 itemBuilder: (_, i) => _CastCard(member: value.members[i]),
               ),
             ),
-          AsyncLoading() => const SizedBox(
+          AsyncLoading() => SizedBox(
               height: 148,
-              child: Center(child: CircularProgressIndicator(strokeWidth: 2, color: TellyColors.phosphorLime)),
+              child: Center(child: CircularProgressIndicator(strokeWidth: 2, color: TellyColors.primaryAccentOf(context))),
             ),
           _ => Container(
               key: const Key('title_cast_empty'),

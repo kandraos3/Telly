@@ -216,22 +216,22 @@ class _FeedActivityCardState extends State<FeedActivityCard> {
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                     decoration: BoxDecoration(
-                                      color: TellyColors.phosphorLime.withValues(alpha: 0.15),
+                                      color: TellyColors.primaryAccentOf(context).withValues(alpha: 0.15),
                                       borderRadius: BorderRadius.circular(6),
                                       border: Border.all(
-                                        color: TellyColors.phosphorLime.withValues(alpha: 0.5),
+                                        color: TellyColors.primaryAccentOf(context).withValues(alpha: 0.5),
                                       ),
                                     ),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        const Icon(Icons.star_rounded,
-                                            color: TellyColors.phosphorLime, size: 14),
+                                        Icon(Icons.star_rounded,
+                                            color: TellyColors.primaryAccentOf(context), size: 14),
                                         const SizedBox(width: 4),
                                         Text(
                                           activity.calculatedScore!.toStringAsFixed(2),
                                           style: TellyTypography.monoDigits(
-                                            color: TellyColors.phosphorLime,
+                                            color: TellyColors.primaryAccentOf(context),
                                           ).copyWith(fontWeight: FontWeight.bold, fontSize: 12),
                                         ),
                                       ],
@@ -242,16 +242,16 @@ class _FeedActivityCardState extends State<FeedActivityCard> {
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                     decoration: BoxDecoration(
-                                      color: TellyColors.warmAmber.withValues(alpha: 0.15),
+                                      color: TellyColors.warmAmberOf(context).withValues(alpha: 0.15),
                                       borderRadius: BorderRadius.circular(6),
                                       border: Border.all(
-                                        color: TellyColors.warmAmber.withValues(alpha: 0.5),
+                                        color: TellyColors.warmAmberOf(context).withValues(alpha: 0.5),
                                       ),
                                     ),
                                     child: Text(
                                       activity.culturalTier!,
                                       style: TellyTypography.caption(
-                                        color: TellyColors.warmAmber,
+                                        color: TellyColors.warmAmberOf(context),
                                       ).copyWith(fontWeight: FontWeight.bold, fontSize: 11),
                                     ),
                                   ),
@@ -278,12 +278,12 @@ class _FeedActivityCardState extends State<FeedActivityCard> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.stars_rounded, color: TellyColors.warmAmber, size: 14),
+                        Icon(Icons.stars_rounded, color: TellyColors.warmAmberOf(context), size: 14),
                         const SizedBox(width: 6),
                         Text(
                           'MVP: ${activity.favoriteCharacter!}',
                           style: TellyTypography.caption(
-                            color: TellyColors.textSecondaryOf(context),
+                            color: TellyColors.textPrimaryOf(context),
                           ).copyWith(fontWeight: FontWeight.w600),
                         ),
                       ],
@@ -301,8 +301,8 @@ class _FeedActivityCardState extends State<FeedActivityCard> {
                       return Text(
                         '#$tag',
                         style: TellyTypography.caption(
-                          color: TellyColors.electricCyan,
-                        ).copyWith(fontWeight: FontWeight.w500),
+                          color: TellyColors.electricCyanOf(context),
+                        ).copyWith(fontWeight: FontWeight.w600),
                       );
                     }).toList(),
                   ),
@@ -314,13 +314,13 @@ class _FeedActivityCardState extends State<FeedActivityCard> {
                   Text(
                     '“${activity.microReview!}”',
                     style: TellyTypography.bodyMedium(
-                      color: TellyColors.textSecondary,
+                      color: TellyColors.textPrimaryOf(context),
                     ).copyWith(fontStyle: FontStyle.italic),
                   ),
                 ],
 
                 const SizedBox(height: 14),
-                const Divider(color: TellyColors.borderGlass, height: 1),
+                Divider(color: TellyColors.borderGlassOf(context), height: 1),
                 const SizedBox(height: 10),
 
                 // 7. Reactions + Comments (FE-FEED-01)
@@ -342,7 +342,7 @@ class _FeedActivityCardState extends State<FeedActivityCard> {
       return Text(
         'Dropped at S${activity.droppedSeason ?? 1}:E${activity.droppedEpisode ?? 1} • Reason: “${activity.dropReason ?? 'Lost interest'}”',
         style: TellyTypography.bodyMedium(
-          color: TellyColors.neonCoral,
+          color: TellyColors.neonCoralOf(context),
         ).copyWith(fontWeight: FontWeight.w600),
       );
     }

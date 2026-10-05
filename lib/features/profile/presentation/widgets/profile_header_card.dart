@@ -191,8 +191,8 @@ class ProfileHeaderCard extends StatelessWidget {
               '$movieCount Movies  •  $seriesCount Series',
               key: const Key('profile_stats_summary_text'),
               textAlign: TextAlign.center,
-              style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)).copyWith(
-                fontWeight: FontWeight.w600,
+              style: TellyTypography.caption(color: TellyColors.textPrimaryOf(context)).copyWith(
+                fontWeight: FontWeight.w700,
                 letterSpacing: 0.2,
               ),
             ),

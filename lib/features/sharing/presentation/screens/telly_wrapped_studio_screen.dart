@@ -63,7 +63,7 @@ class _TellyWrappedStudioScreenState extends State<TellyWrappedStudioScreen> {
         actions: [
           IconButton(
             tooltip: 'Share story',
-            icon: const Icon(Icons.share, color: TellyColors.phosphorLime),
+            icon: Icon(Icons.share, color: TellyColors.primaryAccentOf(context)),
             onPressed: _shareStory,
           ),
         ],
@@ -76,8 +76,8 @@ class _TellyWrappedStudioScreenState extends State<TellyWrappedStudioScreen> {
             child: Text(
               _templateTitles[_currentPage].toUpperCase(),
               style: TellyTypography.labelSmall(
-                color: TellyColors.phosphorLime,
-              ).copyWith(letterSpacing: 1.2, fontWeight: FontWeight.w800),
+                color: TellyColors.primaryAccentOf(context),
+              ).copyWith(letterSpacing: 1.2, fontWeight: FontWeight.w800, fontSize: 12.0),
             ),
           ),
 
@@ -110,7 +110,7 @@ class _TellyWrappedStudioScreenState extends State<TellyWrappedStudioScreen> {
                 width: isSelected ? 20 : 6,
                 height: 6,
                 decoration: BoxDecoration(
-                  color: isSelected ? TellyColors.phosphorLime : TellyColors.strokeSubtle,
+                  color: isSelected ? TellyColors.primaryAccentOf(context) : TellyColors.strokeSubtleOf(context),
                   borderRadius: BorderRadius.circular(3),
                 ),
               );
@@ -166,7 +166,7 @@ class _TellyWrappedStudioScreenState extends State<TellyWrappedStudioScreen> {
             children: [
               Text(
                 'TELLY CANON',
-                style: TellyTypography.caption(color: TellyColors.phosphorLime).copyWith(
+                style: TellyTypography.caption(color: TellyColors.primaryAccentOf(context)).copyWith(
                   fontWeight: FontWeight.w900,
                   letterSpacing: 1.5,
                 ),
@@ -226,7 +226,7 @@ class _TellyWrappedStudioScreenState extends State<TellyWrappedStudioScreen> {
                     Text(
                       '#0${idx + 1}',
                       style: TellyTypography.caption(
-                        color: idx == 0 ? TellyColors.warmAmber : TellyColors.textTertiaryOf(context),
+                        color: idx == 0 ? TellyColors.warmAmberOf(context) : TellyColors.textSecondaryOf(context),
                       ).copyWith(fontWeight: FontWeight.w900),
                     ),
                     Text(
@@ -285,7 +285,7 @@ class _TellyWrappedStudioScreenState extends State<TellyWrappedStudioScreen> {
                     Text(
                       '#0${idx + 1}',
                       style: TellyTypography.caption(
-                        color: idx == 0 ? TellyColors.warmAmber : TellyColors.textTertiaryOf(context),
+                        color: idx == 0 ? TellyColors.warmAmberOf(context) : TellyColors.textSecondaryOf(context),
                       ).copyWith(fontWeight: FontWeight.w900),
                     ),
                     Text(
@@ -340,8 +340,8 @@ class _TellyWrappedStudioScreenState extends State<TellyWrappedStudioScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     Text('Am I crazy?', style: TextStyle(color: TellyColors.textSecondaryOf(context), fontWeight: FontWeight.bold)),
-                    const Text('[ YES ]', style: TextStyle(color: TellyColors.neonCoral, fontWeight: FontWeight.bold)),
-                    const Text('[ NO ]', style: TextStyle(color: TellyColors.phosphorLime, fontWeight: FontWeight.bold)),
+                    Text('[ YES ]', style: TextStyle(color: TellyColors.neonCoralOf(context), fontWeight: FontWeight.bold)),
+                    Text('[ NO ]', style: TextStyle(color: TellyColors.primaryAccentOf(context), fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),
@@ -373,7 +373,7 @@ class _TellyWrappedStudioScreenState extends State<TellyWrappedStudioScreen> {
             children: [
               Text(
                 'TOP DIRECTORS',
-                style: TellyTypography.caption(color: TellyColors.warmAmber).copyWith(fontWeight: FontWeight.w800),
+                style: TellyTypography.caption(color: TellyColors.warmAmberOf(context)).copyWith(fontWeight: FontWeight.w800),
               ),
               const SizedBox(height: 12),
               ...directors.map((d) => Container(
@@ -387,7 +387,7 @@ class _TellyWrappedStudioScreenState extends State<TellyWrappedStudioScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(d.$1, style: TextStyle(color: TellyColors.textPrimaryOf(context), fontWeight: FontWeight.w600, fontSize: 13)),
-                        Text('★ ${d.$2} (${d.$3})', style: const TextStyle(color: TellyColors.warmAmber, fontWeight: FontWeight.bold, fontSize: 11)),
+                        Text('★ ${d.$2} (${d.$3})', style: TextStyle(color: TellyColors.warmAmberOf(context), fontWeight: FontWeight.bold, fontSize: 11)),
                       ],
                     ),
                   )),
@@ -410,21 +410,21 @@ class _TellyWrappedStudioScreenState extends State<TellyWrappedStudioScreen> {
               Container(
                 width: 8,
                 height: 8,
-                decoration: const BoxDecoration(
-                  color: TellyColors.phosphorLime,
+                decoration: BoxDecoration(
+                  color: TellyColors.primaryAccentOf(context),
                   shape: BoxShape.circle,
                 ),
               ),
               const SizedBox(width: 6),
               Text(
                 'telly.app/@${widget.username}',
-                style: TellyTypography.caption(color: TellyColors.textTertiary).copyWith(fontSize: 10),
+                style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)).copyWith(fontSize: 10, fontWeight: FontWeight.w600),
               ),
             ],
           ),
           Text(
             'The Beli for Television',
-            style: TellyTypography.caption(color: TellyColors.textTertiary).copyWith(fontSize: 9),
+            style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)).copyWith(fontSize: 10),
           ),
         ],
       ),

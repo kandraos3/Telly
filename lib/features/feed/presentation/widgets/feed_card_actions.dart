@@ -16,14 +16,14 @@ class FeedBookmarkButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = accent ?? TellyColors.phosphorLime;
+    final color = accent ?? TellyColors.primaryAccentOf(context);
     return IconButton(
       key: const Key('feed_bookmark'),
       tooltip: inQueue ? 'In your Watchlist' : 'Want to Watch',
       onPressed: onPressed,
       icon: Icon(
         inQueue ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
-        color: inQueue ? color : TellyColors.textSecondary,
+        color: inQueue ? color : TellyColors.textSecondaryOf(context),
         size: 22,
       ),
     );
@@ -40,7 +40,7 @@ SnackBar feedQueuedSnackBar({BuildContext? context, Color? accent}) => SnackBar(
       ),
       content: Row(
         children: [
-          Icon(Icons.bookmark_rounded, color: accent ?? TellyColors.phosphorLime, size: 20),
+          Icon(Icons.bookmark_rounded, color: accent ?? (context != null ? TellyColors.primaryAccentOf(context) : TellyColors.phosphorLime), size: 20),
           const SizedBox(width: 10),
           Expanded(
             child: Text('Added to your Watchlist', style: TellyTypography.caption(color: context != null ? TellyColors.textPrimaryOf(context) : TellyColors.textPrimary)),
@@ -109,7 +109,7 @@ class FeedActionBar extends StatelessWidget {
                     key: const Key('feed_reaction_more'),
                     tooltip: 'More reactions',
                     onPressed: () => _pick(context),
-                    icon: const Icon(Icons.add_reaction_outlined, size: 20, color: TellyColors.textTertiary),
+                    icon: Icon(Icons.add_reaction_outlined, size: 20, color: TellyColors.textTertiaryOf(context)),
                   ),
                 ),
               ],
@@ -128,11 +128,11 @@ class FeedActionBar extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.chat_bubble_outline_rounded, size: 16, color: TellyColors.textTertiary),
+                  Icon(Icons.chat_bubble_outline_rounded, size: 16, color: TellyColors.textTertiaryOf(context)),
                   const SizedBox(width: 4),
                   Text(
                     '${activity.commentCount}',
-                    style: TellyTypography.caption(color: TellyColors.textSecondary)
+                    style: TellyTypography.caption(color: TellyColors.textPrimaryOf(context))
                         .copyWith(fontWeight: FontWeight.bold),
                   ),
                 ],
@@ -155,6 +155,7 @@ class _ReactionPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final accent = TellyColors.primaryAccentOf(context);
     return Tooltip(
       message: reaction.label,
       child: InkWell(
@@ -168,20 +169,22 @@ class _ReactionPill extends StatelessWidget {
               duration: const Duration(milliseconds: 150),
               padding: EdgeInsets.symmetric(horizontal: count > 0 ? 8 : 6, vertical: 4),
               decoration: BoxDecoration(
-                color: selected ? TellyColors.phosphorLime.withValues(alpha: 0.14) : Colors.transparent,
+                color: selected ? accent.withValues(alpha: 0.14) : Colors.transparent,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: selected ? TellyColors.phosphorLime : Colors.transparent),
+                border: Border.all(color: selected ? accent : Colors.transparent),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(reaction.glyph, style: const TextStyle(fontSize: 16, color: TellyColors.textPrimary)),
+                  ExcludeSemantics(
+                    child: Text(reaction.glyph, style: TextStyle(fontSize: 16, color: TellyColors.textPrimaryOf(context))),
+                  ),
                   if (count > 0) ...[
                     const SizedBox(width: 4),
                     Text(
                       '$count',
                       style: TellyTypography.caption(
-                        color: selected ? TellyColors.phosphorLime : TellyColors.textSecondaryOf(context),
+                        color: selected ? accent : TellyColors.textPrimaryOf(context),
                       ).copyWith(fontWeight: FontWeight.bold, fontSize: 11),
                     ),
                   ],

@@ -70,22 +70,22 @@ class TellyTextField extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: TellyColors.phosphorLime,
+          borderSide: BorderSide(
+            color: TellyColors.primaryAccentOf(context),
             width: 1.5,
           ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: TellyColors.neonCoral,
+          borderSide: BorderSide(
+            color: TellyColors.neonCoralOf(context),
             width: 1.0,
           ),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: TellyColors.neonCoral,
+          borderSide: BorderSide(
+            color: TellyColors.neonCoralOf(context),
             width: 1.5,
           ),
         ),

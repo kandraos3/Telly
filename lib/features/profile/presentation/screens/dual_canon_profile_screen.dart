@@ -124,6 +124,7 @@ class DualCanonProfileScreen extends ConsumerWidget {
                         // Movie Canon Tab
                         Expanded(
                           child: _buildCanonTab(
+                            context: context,
                             key: const Key('movie_canon_tab'),
                             label: 'Movies ($moviesCount)',
                             isSelected: selectedCanon == CanonType.movie,
@@ -139,6 +140,7 @@ class DualCanonProfileScreen extends ConsumerWidget {
                         // Series Canon Tab
                         Expanded(
                           child: _buildCanonTab(
+                            context: context,
                             key: const Key('series_canon_tab'),
                             label: 'TV Shows ($seriesCount)',
                             subtitle: 'Includes anime',
@@ -412,6 +414,7 @@ class DualCanonProfileScreen extends ConsumerWidget {
   }
 
   Widget _buildCanonTab({
+    required BuildContext context,
     required Key key,
     required String label,
     String? subtitle,
@@ -427,12 +430,12 @@ class DualCanonProfileScreen extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: isSelected ? TellyColors.phosphorLime : Colors.transparent,
+          color: isSelected ? TellyColors.primaryAccentOf(context) : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: TellyColors.phosphorLime.withValues(alpha: 0.25),
+                    color: TellyColors.primaryAccentOf(context).withValues(alpha: 0.25),
                     blurRadius: 10,
                   ),
                 ]
@@ -447,9 +450,11 @@ class DualCanonProfileScreen extends ConsumerWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TellyTypography.labelSmall(
-                color: isSelected ? const Color(0xFF08090C) : TellyColors.textSecondary,
+                color: isSelected
+                    ? (Theme.of(context).brightness == Brightness.light ? Colors.white : const Color(0xFF08090C))
+                    : TellyColors.textPrimaryOf(context),
               ).copyWith(
-                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w700,
                 fontSize: 12,
               ),
             ),
@@ -460,9 +465,11 @@ class DualCanonProfileScreen extends ConsumerWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  color: isSelected ? const Color(0xFF08090C).withValues(alpha: 0.7) : TellyColors.textTertiary,
+                  color: isSelected
+                      ? (Theme.of(context).brightness == Brightness.light ? Colors.white70 : const Color(0xFF08090C).withValues(alpha: 0.7))
+                      : TellyColors.textSecondaryOf(context),
                   fontSize: 10,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w600,
                   fontStyle: FontStyle.italic,
                 ),
               ),
@@ -498,14 +505,14 @@ class DualCanonProfileScreen extends ConsumerWidget {
             Icon(
               icon,
               size: 15,
-              color: isSelected ? TellyColors.primaryAccentOf(context) : TellyColors.textSecondaryOf(context),
+              color: isSelected ? TellyColors.primaryAccentOf(context) : TellyColors.textPrimaryOf(context),
             ),
             const SizedBox(width: 4),
             Text(
               label,
-              style: TellyTypography.caption(
-                color: TellyColors.textPrimaryOf(context),
-              ).copyWith(fontWeight: isSelected ? FontWeight.bold : FontWeight.w500),
+              style: TellyTypography.labelSmall(
+                color: isSelected ? TellyColors.primaryAccentOf(context) : TellyColors.textPrimaryOf(context),
+              ).copyWith(fontWeight: FontWeight.w800, fontSize: 12),
             ),
           ],
         ),

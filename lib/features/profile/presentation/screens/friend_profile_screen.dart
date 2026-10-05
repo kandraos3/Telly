@@ -51,7 +51,7 @@ class FriendProfileScreen extends ConsumerWidget {
         ],
       ),
       body: async.when(
-        loading: () => const Center(child: CircularProgressIndicator(color: TellyColors.phosphorLime)),
+        loading: () => Center(child: CircularProgressIndicator(color: TellyColors.primaryAccentOf(context))),
         error: (e, _) => _Message(
           key: const Key('friend_profile_error'),
           text: e is ProfileNotFound ? "We couldn't find @$handle." : "Couldn't load @$handle. Pull to retry.",
@@ -79,8 +79,8 @@ class _FollowButton extends ConsumerWidget {
             key: const Key('edit_profile_button'),
             onPressed: () => context.push(Routes.editProfile),
             style: OutlinedButton.styleFrom(
-              foregroundColor: TellyColors.phosphorLime,
-              side: const BorderSide(color: TellyColors.phosphorLime),
+              foregroundColor: TellyColors.primaryAccentOf(context),
+              side: BorderSide(color: TellyColors.primaryAccentOf(context)),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
               minimumSize: Size.zero,
@@ -114,8 +114,8 @@ class _FollowButton extends ConsumerWidget {
             }
           },
           style: OutlinedButton.styleFrom(
-            foregroundColor: following ? TellyColors.textSecondary : TellyColors.phosphorLime,
-            side: BorderSide(color: following ? TellyColors.strokeSubtle : TellyColors.phosphorLime),
+            foregroundColor: following ? TellyColors.textPrimaryOf(context) : TellyColors.primaryAccentOf(context),
+            side: BorderSide(color: following ? TellyColors.strokeStrongOf(context) : TellyColors.primaryAccentOf(context)),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
             minimumSize: Size.zero,
@@ -236,7 +236,11 @@ class _Message extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(text, textAlign: TextAlign.center, style: TellyTypography.bodyMedium()),
+            Text(
+              text,
+              textAlign: TextAlign.center,
+              style: TellyTypography.bodyMedium(color: TellyColors.textPrimaryOf(context)).copyWith(fontWeight: FontWeight.w600),
+            ),
             if (onRetry != null) ...[
               const SizedBox(height: 12),
               TextButton(onPressed: onRetry, child: const Text('Retry')),

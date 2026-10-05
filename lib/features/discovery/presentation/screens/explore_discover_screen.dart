@@ -665,7 +665,7 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
         Expanded(
           child: Text(
             label,
-            style: TellyTypography.labelSmall(color: TellyColors.textPrimary)
+            style: TellyTypography.labelSmall(color: TellyColors.textPrimaryOf(context))
                 .copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
           ),
         ),
@@ -875,7 +875,7 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
                     const SizedBox(height: 4),
                     Text(
                       '★ ${b.avgScore.toStringAsFixed(2)}',
-                      style: TellyTypography.caption(color: TellyColors.warmAmber)
+                      style: TellyTypography.caption(color: TellyColors.warmAmberOf(context))
                           .copyWith(fontWeight: FontWeight.w700),
                     ),
                   ],
@@ -894,11 +894,11 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
                 children: [
                   Text(
                     'See Full Network Rankings',
-                    style: TellyTypography.labelMedium(color: TellyColors.phosphorLime)
+                    style: TellyTypography.labelMedium(color: TellyColors.primaryAccentOf(context))
                         .copyWith(fontWeight: FontWeight.w800),
                   ),
                   const SizedBox(width: 4),
-                  const Icon(Icons.arrow_forward, size: 14, color: TellyColors.phosphorLime),
+                  Icon(Icons.arrow_forward, size: 14, color: TellyColors.primaryAccentOf(context)),
                 ],
               ),
             ),
@@ -920,14 +920,14 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
               width: 3,
               height: 14,
               decoration: BoxDecoration(
-                color: TellyColors.electricViolet,
+                color: TellyColors.electricVioletOf(context),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
             const SizedBox(width: 8),
             Text(
               'FRIENDS ARE CURRENTLY BINGING',
-              style: TellyTypography.labelSmall(color: TellyColors.textPrimary)
+              style: TellyTypography.labelSmall(color: TellyColors.textPrimaryOf(context))
                   .copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
             ),
           ],

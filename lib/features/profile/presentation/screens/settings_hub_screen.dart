@@ -76,7 +76,7 @@ class SettingsHubScreen extends ConsumerWidget {
                 children: [
                   Expanded(
                     child: Text("Couldn't load your preferences; showing defaults.",
-                        style: TellyTypography.caption(color: TellyColors.warmAmber)),
+                        style: TellyTypography.caption(color: TellyColors.warmAmberOf(context))),
                   ),
                   TextButton(onPressed: () => ref.invalidate(preferencesProvider), child: const Text('Retry')),
                 ],
@@ -90,7 +90,7 @@ class SettingsHubScreen extends ConsumerWidget {
               key: const Key('settings_edit_profile'),
               title: me?.displayName.isNotEmpty == true ? me!.displayName : 'Your profile',
               subtitle: me?.username == null ? 'Edit Profile & Showcases' : '@${me!.username} • Edit Profile & Showcases',
-              trailing: const Icon(Icons.chevron_right, color: TellyColors.textTertiary, size: 20),
+              trailing: Icon(Icons.chevron_right, color: TellyColors.textTertiaryOf(context), size: 20),
               onTap: () => context.push(Routes.editProfile),
             ),
             const Divider(),
@@ -308,7 +308,7 @@ class SettingsHubScreen extends ConsumerWidget {
               key: const Key('settings_export_csv'),
               title: 'Export My Canon (CSV)',
               subtitle: 'Both canons, shared as a spreadsheet',
-              trailing: const Icon(Icons.ios_share, color: TellyColors.phosphorLime, size: 20),
+              trailing: Icon(Icons.ios_share, color: TellyColors.primaryAccentOf(context), size: 20),
               onTap: () => _guard(context, () => ref.read(canonExportServiceProvider).exportCsv()),
             ),
             const Divider(),
@@ -352,7 +352,7 @@ class SettingsHubScreen extends ConsumerWidget {
               key: const Key('settings_delete_account'),
               title: 'Delete Account…',
               subtitle: '30-day soft deletion grace period',
-              trailing: const Icon(Icons.delete_forever, color: TellyColors.neonCoral, size: 20),
+              trailing: Icon(Icons.delete_forever, color: TellyColors.neonCoralOf(context), size: 20),
               onTap: () => _confirmAccountDeletion(context, ref),
             ),
           ]),
@@ -378,7 +378,7 @@ class SettingsHubScreen extends ConsumerWidget {
             children: [
               Text(
                 'Delete Account?',
-                style: TellyTypography.titleLarge(color: TellyColors.neonCoral)
+                style: TellyTypography.titleLarge(color: TellyColors.neonCoralOf(context))
                     .copyWith(fontWeight: FontWeight.w900),
               ),
               const SizedBox(height: 12),
@@ -407,7 +407,7 @@ class SettingsHubScreen extends ConsumerWidget {
                       key: const Key('delete_account_confirm_button'),
                       onPressed: () => Navigator.of(ctx).pop(true),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: TellyColors.neonCoral,
+                        backgroundColor: TellyColors.neonCoralOf(context),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
                       child: const Text(
@@ -486,8 +486,8 @@ class _SectionHeader extends StatelessWidget {
         padding: const EdgeInsets.only(left: 4, bottom: 8),
         child: Text(
           title,
-          style: TellyTypography.labelSmall(color: TellyColors.textTertiaryOf(context))
-              .copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
+          style: TellyTypography.labelSmall(color: TellyColors.textSecondaryOf(context))
+              .copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0, fontSize: 11.5),
         ),
       );
 }
@@ -565,7 +565,7 @@ class _ImportWatchHistoryCard extends ConsumerWidget {
           ],
         ImportFailed(:final message) => [
             const SizedBox(height: 10),
-            Text(message, key: const Key('settings_import_error'), style: TellyTypography.caption(color: TellyColors.neonCoral)),
+            Text(message, key: const Key('settings_import_error'), style: TellyTypography.caption(color: TellyColors.neonCoralOf(context))),
           ],
       },
     ]);
@@ -666,7 +666,7 @@ class _Tile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(title, style: TellyTypography.bodyLarge(color: TellyColors.textPrimaryOf(context))),
-                    if (subtitle != null) Text(subtitle!, style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context))),
+                    if (subtitle != null) Text(subtitle!, style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context))),
                   ],
                 ),
               ),
@@ -687,10 +687,25 @@ class _SwitchTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) => SwitchListTile(
         contentPadding: EdgeInsets.zero,
-        title: Text(title, style: TellyTypography.bodyLarge(color: TellyColors.textPrimaryOf(context))),
-        subtitle: subtitle == null ? null : Text(subtitle!, style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context))),
+        title: Text(
+          title,
+          style: TellyTypography.bodyLarge(color: TellyColors.textPrimaryOf(context))
+              .copyWith(fontWeight: FontWeight.w700, fontSize: 16.0),
+        ),
+        subtitle: subtitle == null
+            ? null
+            : Text(
+                subtitle!,
+                style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)),
+              ),
         value: value,
-        activeThumbColor: TellyColors.primaryAccentOf(context),
+        activeTrackColor: TellyColors.primaryAccentOf(context),
+        activeThumbColor: Colors.white,
+        inactiveTrackColor: TellyColors.strokeOf(context),
+        inactiveThumbColor: TellyColors.textSecondaryOf(context),
+        trackOutlineColor: WidgetStateProperty.resolveWith(
+          (states) => TellyColors.strokeOf(context),
+        ),
         onChanged: onChanged,
       );
 }

@@ -144,11 +144,11 @@ class _EditProfileFormState extends ConsumerState<_EditProfileForm> {
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: TellyColors.neonCoral.withValues(alpha: 0.12),
+              color: TellyColors.neonCoralOf(context).withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: TellyColors.neonCoral.withValues(alpha: 0.5)),
+              border: Border.all(color: TellyColors.neonCoralOf(context).withValues(alpha: 0.5)),
             ),
-            child: Text(draft.error!, style: TellyTypography.bodyMedium(color: TellyColors.neonCoral)),
+            child: Text(draft.error!, style: TellyTypography.bodyMedium(color: TellyColors.neonCoralOf(context))),
           ),
 
         // 1. Avatar (spec §2.1: photo library + 1:1 circular crop)
@@ -161,7 +161,6 @@ class _EditProfileFormState extends ConsumerState<_EditProfileForm> {
           key: const Key('edit_profile_display_name'),
           controller: _displayName,
           hint: 'Your display name',
-          maxLength: 40,
           onChanged: _controller.setDisplayName,
         ),
         const SizedBox(height: 8),
@@ -173,7 +172,7 @@ class _EditProfileFormState extends ConsumerState<_EditProfileForm> {
           child: Text(
             draft.username.isEmpty ? 'No handle reserved yet' : '@${draft.username}',
             key: const Key('edit_profile_handle'),
-            style: TellyTypography.bodyMedium(color: TellyColors.phosphorLime).copyWith(fontWeight: FontWeight.bold),
+            style: TellyTypography.bodyMedium(color: TellyColors.primaryAccentOf(context)).copyWith(fontWeight: FontWeight.bold),
           ),
         ),
         const SizedBox(height: 16),
@@ -204,7 +203,8 @@ class _EditProfileFormState extends ConsumerState<_EditProfileForm> {
         const _SectionTitle('TOP 3 PROFILE SHOWCASE'),
         Text(
           'Pinned to the top of your profile. Pick from titles you have ranked.',
-          style: TellyTypography.caption(color: TellyColors.textSecondary),
+          style: TellyTypography.bodyMedium(color: TellyColors.textPrimaryOf(context))
+              .copyWith(fontSize: 13.0, fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 12),
         for (var slot = 0; slot < EditProfileDraft.maxShowcase; slot++)
@@ -342,14 +342,17 @@ class _AvatarEditor extends StatelessWidget {
               child: image == null ? Icon(Icons.person, size: 44, color: TellyColors.textTertiaryOf(context)) : null,
             ),
             Material(
-              color: TellyColors.phosphorLime,
+              color: TellyColors.primaryAccentOf(context),
               shape: CircleBorder(side: BorderSide(color: TellyColors.canvasOf(context), width: 2)),
               child: InkWell(
                 customBorder: const CircleBorder(),
                 onTap: onPick,
-                child: const Padding(
-                  padding: EdgeInsets.all(6),
-                  child: Icon(Icons.camera_alt, color: Colors.black, size: 16, semanticLabel: 'Change photo'),
+                child: Padding(
+                  padding: const EdgeInsets.all(6),
+                  child: Icon(Icons.camera_alt,
+                      color: Theme.of(context).brightness == Brightness.light ? Colors.white : Colors.black,
+                      size: 16,
+                      semanticLabel: 'Change photo'),
                 ),
               ),
             ),
@@ -359,7 +362,9 @@ class _AvatarEditor extends StatelessWidget {
         TextButton(
           key: const Key('edit_profile_change_photo'),
           onPressed: onPick,
-          child: Text('Change Photo', style: TellyTypography.caption(color: TellyColors.phosphorLime)),
+          child: Text('Change Photo',
+              style: TellyTypography.caption(color: TellyColors.primaryAccentOf(context))
+                  .copyWith(fontWeight: FontWeight.w800, fontSize: 12.0)),
         ),
         if (draft.pendingAvatar != null)
           Text('New photo will upload when you save.', style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context))),
@@ -441,7 +446,7 @@ class _VisibilityTile extends StatelessWidget {
           children: [
             Icon(
               selected ? Icons.radio_button_checked : Icons.radio_button_off,
-              color: selected ? TellyColors.phosphorLime : TellyColors.textTertiaryOf(context),
+              color: selected ? TellyColors.primaryAccentOf(context) : TellyColors.textTertiaryOf(context),
               size: 20,
             ),
             const SizedBox(width: 12),
@@ -451,7 +456,7 @@ class _VisibilityTile extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: TellyTypography.bodyMedium(color: selected ? TellyColors.phosphorLime : TellyColors.textPrimaryOf(context))
+                    style: TellyTypography.bodyMedium(color: selected ? TellyColors.primaryAccentOf(context) : TellyColors.textPrimaryOf(context))
                         .copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 2),
@@ -476,7 +481,7 @@ class _FieldHeader extends StatelessWidget {
         child: Text(
           title,
           style: TellyTypography.labelSmall(color: TellyColors.textSecondaryOf(context))
-              .copyWith(letterSpacing: 1.0, fontWeight: FontWeight.bold),
+              .copyWith(letterSpacing: 1.0, fontWeight: FontWeight.w800, fontSize: 11.5),
         ),
       );
 }
@@ -519,18 +524,24 @@ class _TellyTextField extends StatelessWidget {
       controller: controller,
       maxLines: maxLines,
       maxLength: maxLength,
-      style: TextStyle(color: TellyColors.textPrimaryOf(context)),
+      buildCounter: maxLength == null
+          ? null
+          : (context, {required currentLength, required isFocused, maxLength}) => Text(
+                '$currentLength/$maxLength',
+                style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context))
+                    .copyWith(fontWeight: FontWeight.w700, fontSize: 12.0),
+              ),
+      style: TextStyle(color: TellyColors.textPrimaryOf(context), fontSize: 16.0, fontWeight: FontWeight.w600),
       onChanged: onChanged,
       decoration: InputDecoration(
         filled: true,
         fillColor: TellyColors.cardOf(context),
         hintText: hint,
-        hintStyle: TextStyle(color: TellyColors.textTertiaryOf(context)),
-        counterStyle: TextStyle(color: TellyColors.textTertiaryOf(context)),
+        hintStyle: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context)),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        border: border(TellyColors.borderGlassOf(context)),
-        enabledBorder: border(TellyColors.borderGlassOf(context)),
-        focusedBorder: border(TellyColors.phosphorLime),
+        border: border(TellyColors.strokeOf(context)),
+        enabledBorder: border(TellyColors.strokeOf(context)),
+        focusedBorder: border(TellyColors.primaryAccentOf(context)),
       ),
     );
   }
