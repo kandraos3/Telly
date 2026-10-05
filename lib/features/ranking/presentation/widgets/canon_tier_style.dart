@@ -12,6 +12,7 @@ extension CanonTierStyle on CanonTier {
         CanonTier.great => TellyColors.tierGreatStart,
         CanonTier.good => TellyColors.tierGoodStart,
         CanonTier.mid => TellyColors.tierMidStart,
+        CanonTier.lower => const Color(0xFF64748B),
         CanonTier.dropped => TellyColors.tierDroppedStart,
       };
 
@@ -21,6 +22,7 @@ extension CanonTierStyle on CanonTier {
         CanonTier.great => TellyColors.tierGreatEnd,
         CanonTier.good => TellyColors.tierGoodEnd,
         CanonTier.mid => TellyColors.tierMidEnd,
+        CanonTier.lower => const Color(0xFF475569),
         CanonTier.dropped => TellyColors.tierDroppedEnd,
       };
 

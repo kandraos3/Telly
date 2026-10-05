@@ -8,7 +8,8 @@ enum CanonTier {
   great(label: 'Great Tier', emoji: '👍', minScore: 7.80),
   good(label: 'Good / Fun', emoji: '🍿', minScore: 7.00),
   mid(label: 'Mid / Filler', emoji: '🤷', minScore: 5.50),
-  dropped(label: 'Dropped / DNF', emoji: '💀', minScore: 1.00);
+  lower(label: 'Lower Tier', emoji: '📉', minScore: 1.00),
+  dropped(label: 'Dropped / DNF', emoji: '💀', minScore: 0.00);
 
   final String label;
   final String emoji;
@@ -23,17 +24,22 @@ enum CanonTier {
   }
 
   /// Human-readable range, e.g. `8.50 – 9.19` or `< 5.50`.
-  String get rangeLabel => this == CanonTier.dropped
-      ? '< ${CanonTier.mid.minScore.toStringAsFixed(2)}'
-      : '${minScore.toStringAsFixed(2)} – ${maxScore.toStringAsFixed(2)}';
+  String get rangeLabel {
+    if (this == CanonTier.dropped) return 'DNF';
+    if (this == CanonTier.lower) return '< ${CanonTier.mid.minScore.toStringAsFixed(2)}';
+    return '${minScore.toStringAsFixed(2)} – ${maxScore.toStringAsFixed(2)}';
+  }
 
   /// Classifies a score. Scores are compared at 2-decimal display precision so a
   /// stored `9.20` is always God Tier regardless of floating-point noise.
-  static CanonTier fromScore(double score) {
+  /// Completed canon entries are never assigned [CanonTier.dropped] unless [isAbandoned] is true.
+  static CanonTier fromScore(double score, {bool isAbandoned = false}) {
+    if (isAbandoned) return CanonTier.dropped;
     final s = (score * 100).round() / 100;
     for (final tier in CanonTier.values) {
+      if (tier == CanonTier.dropped) continue;
       if (s >= tier.minScore) return tier;
     }
-    return CanonTier.dropped;
+    return CanonTier.lower;
   }
 }

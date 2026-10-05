@@ -92,7 +92,7 @@ void main() {
       }
     });
 
-    test('CanonTier uses style guide §2.2 thresholds with inclusive lower bounds', () {
+    test('CanonTier uses style guide §2.2 thresholds with inclusive lower bounds and lower tier decoupling (ALGO-SCORE-01)', () {
       expect(CanonTier.fromScore(10.00), CanonTier.god);
       expect(CanonTier.fromScore(9.20), CanonTier.god);
       expect(CanonTier.fromScore(9.19), CanonTier.prestige);
@@ -103,15 +103,20 @@ void main() {
       expect(CanonTier.fromScore(7.00), CanonTier.good);
       expect(CanonTier.fromScore(6.99), CanonTier.mid);
       expect(CanonTier.fromScore(5.50), CanonTier.mid);
-      expect(CanonTier.fromScore(5.49), CanonTier.dropped);
-      expect(CanonTier.fromScore(1.00), CanonTier.dropped);
+      // Completed titles receive lower tier, not dropped/dnf (ALGO-SCORE-01)
+      expect(CanonTier.fromScore(5.49), CanonTier.lower);
+      expect(CanonTier.fromScore(1.00), CanonTier.lower);
+      expect(CanonTier.fromScore(5.49, isAbandoned: true), CanonTier.dropped);
+      expect(CanonTier.fromScore(1.00, isAbandoned: true), CanonTier.dropped);
       // Floating-point noise around a boundary resolves at display precision.
       expect(CanonTier.fromScore(9.199999999), CanonTier.god);
 
       expect(CanonTier.prestige.rangeLabel, '8.50 – 9.19');
-      expect(CanonTier.dropped.rangeLabel, '< 5.50');
+      expect(CanonTier.lower.rangeLabel, '< 5.50');
+      expect(CanonTier.dropped.rangeLabel, 'DNF');
       expect(ScoreCurveCalculator.getTier(1, 100), CanonTier.god);
-      expect(ScoreCurveCalculator.getTier(100, 100), CanonTier.dropped);
+      expect(ScoreCurveCalculator.getTier(100, 100), CanonTier.lower);
+      expect(ScoreCurveCalculator.getTier(100, 100, isAbandoned: true), CanonTier.dropped);
     });
 
     test('Property-based testing: 10,000 generated datasets obey invariants', () {

@@ -72,17 +72,22 @@ class ScoreCurveCalculator {
   }
 
   /// Returns the [CanonTier] for a given rank and canon size.
+  /// Completed canon entries are never assigned [CanonTier.dropped] unless [isAbandoned] is true.
   static CanonTier getTier(
     int rank,
     int totalCount, {
     double exponent = defaultExponent,
     bool applyBayesianPrior = true,
+    bool isAbandoned = false,
   }) {
-    return CanonTier.fromScore(calculateRoundedScore(
-      rank,
-      totalCount,
-      exponent: exponent,
-      applyBayesianPrior: applyBayesianPrior,
-    ));
+    return CanonTier.fromScore(
+      calculateRoundedScore(
+        rank,
+        totalCount,
+        exponent: exponent,
+        applyBayesianPrior: applyBayesianPrior,
+      ),
+      isAbandoned: isAbandoned,
+    );
   }
 }
