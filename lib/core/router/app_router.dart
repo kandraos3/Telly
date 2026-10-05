@@ -21,6 +21,7 @@ import '../../features/profile/presentation/screens/edit_profile_studio_screen.d
 import '../../features/profile/presentation/screens/friend_profile_screen.dart';
 import '../../features/profile/presentation/screens/settings_hub_screen.dart';
 import '../../features/profile/presentation/screens/tv_graveyard_screen.dart';
+import '../../features/queue/presentation/screens/custom_list_detail_screen.dart';
 import '../../features/queue/presentation/screens/smart_queue_screen.dart';
 import '../../features/sharing/presentation/screens/telly_wrapped_studio_screen.dart';
 import '../../features/squads/presentation/screens/squad_hub_screen.dart';
@@ -106,7 +107,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ),
           ]),
           StatefulShellBranch(routes: [
-            GoRoute(path: Routes.queue, builder: (_, __) => const SmartQueueScreen()),
+            GoRoute(
+              path: Routes.queue,
+              builder: (_, __) => const SmartQueueScreen(),
+              routes: [
+                GoRoute(
+                  path: 'list/:id',
+                  parentNavigatorKey: rootNavigatorKey,
+                  builder: (_, state) => CustomListDetailScreen(
+                    listId: state.pathParameters['id'] ?? '',
+                  ),
+                ),
+              ],
+            ),
           ]),
           StatefulShellBranch(routes: [
             GoRoute(

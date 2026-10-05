@@ -37,4 +37,5 @@ abstract final class Routes {
   static const wrapped = '/canon/wrapped'; // SCR-19
   static const settings = '/canon/settings'; // SCR-20
   static const editProfile = '/canon/edit';
+  static String customList(String id) => '/queue/list/$id';
 }

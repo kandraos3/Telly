@@ -1055,6 +1055,20 @@ Solve couch indecision by deploying the Spearman Rank Taste Match % algorithm, t
   - [x] Widget test verifying queue filters out unsubscribed titles when toggle is ON.
 - **Dependencies**: `FE-104`, `FE-407`.
 
+#### `FE-LISTS-01`: `SCR-13` Custom User Lists, Privacy Controls & Shared Friend Lists (Fixes #29)
+- **Spec Reference**:
+  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §13 (`SCR-13`)
+  - [**`features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md) §1
+- **Scope & Objectives**: Overhaul Queue into a comprehensive 'Lists & Queue' hub with custom user lists, privacy controls (public/private), shared friend lists, and list detail view with reorder, delete, and deep link sharing.
+- **Granular Tasks**:
+  - [x] Implement `CustomList` & `CustomListItem` domain models and `CustomListRepository`.
+  - [x] Add list mode selector in `SmartQueueScreen` (`Watchlist`, `My Lists`, `Friends' Lists`).
+  - [x] Implement custom list creation dialog with title, description, and public/private toggle.
+  - [x] Implement `CustomListDetailScreen` with reordering, deletion, and deep-link sharing.
+- **Testing & Verification**:
+  - [x] Widget and unit tests in `test/features/queue/custom_lists_test.dart` verifying creation, privacy toggle, reordering, deletion, and sharing.
+- **Dependencies**: `FE-408`.
+
 ---
 
 ### Track 4: Sprint 4 Quality Assurance & Testing
