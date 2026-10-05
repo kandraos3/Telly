@@ -269,23 +269,12 @@ class DualCanonProfileScreen extends ConsumerWidget {
 
               const SizedBox(height: 12),
 
-              // 5. VIEW MODE CONTENT (FE-207, FE-209)
+              // 5. VIEW MODE CONTENT (FE-207, FE-ALGO-02)
               switch (viewMode) {
                 CanonViewMode.rankedList => RankedCanonList(
                     entries: entries,
                     onTapEntry: handleTap,
                     onLongPressEntry: (entry) => _showEntryActions(context, entry, ref, selectedCanon),
-                    onReorder: (oldIndex, newIndex) {
-                      // Map list indices to canon ranks so this also works on the rolled-up list.
-                      final target = newIndex > oldIndex ? newIndex - 1 : newIndex;
-                      if (target == oldIndex || target >= entries.length) return;
-                      ref.read(hapticsServiceProvider).rankSlotTick();
-                      ref.read(profileCanonProvider.notifier).moveTitle(
-                            canon: selectedCanon,
-                            titleId: entries[oldIndex].id,
-                            newRank: entries[target].rankPosition,
-                          );
-                    },
                   ),
                 CanonViewMode.tierView => TierViewList(
                     entries: entries,
@@ -332,7 +321,11 @@ class DualCanonProfileScreen extends ConsumerWidget {
             ListTile(
               key: const Key('reset_duels_action'),
               leading: const Icon(Icons.refresh, color: TellyColors.phosphorLime),
-              title: Text('Reset Duels for This Show', style: TellyTypography.bodyLarge()),
+              title: Text('Re-duel & Recalibrate Rank', style: TellyTypography.bodyLarge()),
+              subtitle: const Text(
+                'Play comparison duels to organically calibrate position',
+                style: TextStyle(color: TellyColors.textTertiary, fontSize: 12),
+              ),
               onTap: () => Navigator.of(ctx).pop('reset'),
             ),
             ListTile(

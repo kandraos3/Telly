@@ -4,21 +4,18 @@ import '../../../../core/theme/telly_typography.dart';
 import '../../../../core/widgets/poster_image.dart';
 import '../../../ranking/domain/franchise_rollup_service.dart';
 
-/// Mode 1: Ranked Canon List with drag-and-drop manual re-indexing.
+/// Mode 1: Ranked Canon List with mathematical tournament calibration.
 /// Conforms to:
 /// - `docs/features/06_PROFILE_THE_CANON_AND_STATS.md` §3.1
-/// - `docs/design_system/04_USER_INTERACTION_FLOWS_AND_GESTURES.md` §3 (Canon Reordering)
-/// - Tickets: FE-207, FE-209
+/// - Tickets: FE-207, FE-ALGO-02
 class RankedCanonList extends StatelessWidget {
   final List<CanonEntry> entries;
-  final void Function(int oldIndex, int newIndex) onReorder;
   final ValueChanged<CanonEntry>? onTapEntry;
   final ValueChanged<CanonEntry>? onLongPressEntry;
 
   const RankedCanonList({
     super.key,
     required this.entries,
-    required this.onReorder,
     this.onTapEntry,
     this.onLongPressEntry,
   });
@@ -38,13 +35,10 @@ class RankedCanonList extends StatelessWidget {
       );
     }
 
-    return ReorderableListView.builder(
+    return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      buildDefaultDragHandles: false,
       itemCount: entries.length,
-      // ignore: deprecated_member_use
-      onReorder: onReorder,
       itemBuilder: (context, index) {
         final item = entries[index];
         final rank = item.rankPosition;
@@ -169,22 +163,6 @@ class RankedCanonList extends StatelessWidget {
                     style: TellyTypography.scoreMono(
                       color: isTopThree ? TellyColors.phosphorLime : TellyColors.textPrimary,
                     ).copyWith(fontSize: 13),
-                  ),
-                ),
-
-                const SizedBox(width: 8),
-
-                // 5. Drag Handle for Reordering (FE-209)
-                ReorderableDragStartListener(
-                  index: index,
-                  key: Key('drag_handle_${item.id}'),
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-                    child: Icon(
-                      Icons.drag_handle_rounded,
-                      color: TellyColors.textTertiary,
-                      size: 20,
-                    ),
                   ),
                 ),
               ],

@@ -381,38 +381,32 @@ void main() {
     });
   });
 
-  group('FE-209: Reorderable Drag-and-Drop Manual Re-Indexing Tests', () {
-    testWidgets('drag handles are rendered for each ranked row', (tester) async {
+  group('FE-ALGO-02: RankingEngine Arbitrary Drag-and-Drop Removed in Favor of Re-dueling', () {
+    testWidgets('manual drag handles are removed from ranked rows', (tester) async {
       await tester.pumpWidget(buildTestableProfileScreen(
         initialViewMode: CanonViewMode.rankedList,
       ));
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('drag_handle_1')), findsOneWidget);
-      expect(find.byKey(const Key('drag_handle_2')), findsOneWidget);
-      expect(find.byKey(const Key('drag_handle_3')), findsOneWidget);
+      expect(find.byKey(const Key('drag_handle_1')), findsNothing);
+      expect(find.byKey(const Key('drag_handle_2')), findsNothing);
+      expect(find.byKey(const Key('drag_handle_3')), findsNothing);
     });
 
-    testWidgets('moving an entry re-ranks and re-scores the list immediately', (tester) async {
-      final container = ProviderContainer(
-        overrides: [
-          databaseProvider.overrideWithValue(db),
-          profileCanonProvider.overrideWith(() => SeededProfileCanon(sampleMovies, sampleSeries)),
-        ],
-      );
-      addTearDown(container.dispose);
+    testWidgets('long press entry offers Re-duel & Recalibrate Rank action', (tester) async {
+      await tester.pumpWidget(buildTestableProfileScreen(
+        initialCanon: CanonType.movie,
+      ));
+      await tester.pumpAndSettle();
 
-      // Move Dune (id 3, rank 3) to #1
-      await container.read(profileCanonProvider.notifier).moveTitle(canon: CanonType.movie, titleId: 3, newRank: 1);
+      final rowFinder = find.byKey(const ValueKey('ranked_row_1'));
+      await tester.ensureVisible(rowFinder);
+      await tester.pumpAndSettle();
+      await tester.longPress(rowFinder);
+      await tester.pumpAndSettle();
 
-      final movies = container.read(profileCanonProvider).movies;
-      expect(movies[0].title, equals('Dune: Part Two'));
-      expect(movies[0].rankPosition, equals(1));
-      expect(movies[0].calculatedScore, equals(10.00));
-      expect(movies[1].title, equals('Interstellar'));
-      expect(movies[1].rankPosition, equals(2));
-      expect(movies[2].title, equals('Parasite'));
-      expect(movies[2].rankPosition, equals(3));
+      expect(find.text('Re-duel & Recalibrate Rank'), findsOneWidget);
+      expect(find.text('Play comparison duels to organically calibrate position'), findsOneWidget);
     });
   });
 }

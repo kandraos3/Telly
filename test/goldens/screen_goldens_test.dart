@@ -396,7 +396,6 @@ void main() {
             body: SingleChildScrollView(
               child: RankedCanonList(
                 entries: entries,
-                onReorder: (_, __) {},
               ),
             ),
           ),
