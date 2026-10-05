@@ -13,11 +13,14 @@ class FakeTitleRepository implements TitleRepository {
 
   TitleCredits credits = const TitleCredits(
     director: 'Christopher Storer',
-    cast: ['Jeremy Allen White as Carmy Berzatto', 'Ayo Edebiri as Sydney Adamu'],
+    members: [
+      TitleCastMember(name: 'Jeremy Allen White', character: 'Carmy Berzatto'),
+      TitleCastMember(name: 'Ayo Edebiri', character: 'Sydney Adamu'),
+    ],
   );
 
   @override
-  Future<TitleCredits> fetchCredits(int id, String mediaType) async => credits;
+  Future<TitleCredits> fetchCredits(int id, String mediaType, {Duration? timeout}) async => credits;
 
   @override
   Future<TitleSearchOutcome> search(String query) async {

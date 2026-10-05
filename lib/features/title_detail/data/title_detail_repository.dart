@@ -2,6 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/network/supabase_providers.dart';
+import '../../logging/data/title_repository.dart';
+import '../../logging/domain/title_search_result.dart';
+import '../../queue/data/streaming_availability_repository.dart';
+import '../../queue/domain/streaming_models.dart';
 import '../domain/title_detail_models.dart';
 
 abstract interface class TitleDetailRepository {
@@ -131,3 +135,18 @@ final titleDuelStatsProvider = FutureProvider.family<TitleDuelStats, (int, Strin
   final (id, mediaType) = args;
   return ref.watch(titleDetailRepositoryProvider).fetchDuelStats(id: id, mediaType: mediaType);
 });
+
+/// SCR-08 cast & crew from TMDB via `tmdb-details` (BE-DETAIL-01). The detail page can
+/// afford a longer wait than the logging flow's 3 s editorial budget.
+final titleCreditsProvider = FutureProvider.family<TitleCredits, (int, String)>((ref, args) {
+  final (id, mediaType) = args;
+  return ref.watch(titleRepositoryProvider).fetchCredits(id, mediaType, timeout: const Duration(seconds: 10));
+});
+
+/// Live US streaming availability via `streaming-availability` (TMDB / JustWatch, or
+/// Watchmode when configured). Empty on failure; SCR-08 then falls back to cached rows.
+final titleStreamingProvider = FutureProvider.family<List<ShowStreamingAvailability>, (int, String)>((ref, args) {
+  final (id, mediaType) = args;
+  return ref.watch(streamingAvailabilityRepositoryProvider).getAvailability(titleId: id, mediaType: mediaType);
+});
+

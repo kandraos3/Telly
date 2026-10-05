@@ -54,9 +54,17 @@ const validDate = (d: unknown): string | null => (typeof d === "string" && /^\d{
 export function normalizeDetails(raw: Record<string, unknown>, mediaType: MediaType): TitleDetails {
   const genres = ((raw.genres as { name: string }[] | undefined) ?? []).map((g) => g.name);
   const credits = (raw.credits as { cast?: Record<string, unknown>[]; crew?: Record<string, unknown>[] }) ?? {};
-  const cast = (credits.cast ?? []).slice(0, 10).map((c) => ({
+  // Series: aggregate_credits spans every season (credits only lists the latest one), and
+  // its characters live under roles[] (BE-DETAIL-01).
+  const aggregate = (raw.aggregate_credits as { cast?: Record<string, unknown>[] } | undefined)?.cast;
+  const castSource = mediaType === "tv" && aggregate && aggregate.length > 0
+    ? [...aggregate].sort((a, b) => Number(a.order ?? 0) - Number(b.order ?? 0))
+    : credits.cast ?? [];
+  const cast = castSource.slice(0, 10).map((c) => ({
     name: String(c.name ?? ""),
-    character: String(c.character ?? ""),
+    character: String(
+      c.character ?? (c.roles as { character?: string }[] | undefined)?.[0]?.character ?? "",
+    ),
     profile_path: (c.profile_path as string) || null,
   }));
   const director = (credits.crew ?? []).find((c) => c.job === "Director")?.name as string | undefined;
@@ -143,7 +151,8 @@ export async function handleDetails(req: Request, deps: DetailsDeps): Promise<Re
   if (!deps.tmdbToken) return json({ error: "Server configuration error: TMDB token not configured" }, 500);
 
   try {
-    const upstream = await deps.fetch(`${TMDB_API_BASE}/${mediaType}/${id}?append_to_response=credits`, {
+    const append = mediaType === "tv" ? "credits,aggregate_credits" : "credits";
+    const upstream = await deps.fetch(`${TMDB_API_BASE}/${mediaType}/${id}?append_to_response=${append}`, {
       headers: tmdbHeaders(deps.tmdbToken),
     });
     if (upstream.status === 404) return json({ error: "Title not found" }, 404);

@@ -54,23 +54,46 @@ class TitleSearchOutcome {
   const TitleSearchOutcome(this.results, {this.fromLocalCache = false});
 }
 
-/// Credits used by `SCR-11` (MVP dropdown, director auto-tag), from `tmdb-details`.
+/// One billed performer from `tmdb-details` (series cast spans every season).
+class TitleCastMember {
+  final String name;
+  final String character;
+  final String? profilePath;
+
+  const TitleCastMember({required this.name, this.character = '', this.profilePath});
+}
+
+/// Credits from `tmdb-details`: `SCR-11` (MVP dropdown, director auto-tag) and the `SCR-08`
+/// cast carousel (BE-DETAIL-01).
 class TitleCredits {
   final String? director;
 
-  /// "Actor as Character" labels in billing order.
-  final List<String> cast;
+  /// Series creators (TV has no single director).
+  final List<String> creators;
 
-  const TitleCredits({this.director, this.cast = const []});
+  /// Billing order, with character names and TMDB profile photos.
+  final List<TitleCastMember> members;
+
+  const TitleCredits({this.director, this.creators = const [], this.members = const []});
 
   static const empty = TitleCredits();
 
+  /// "Actor as Character" labels in billing order.
+  List<String> get cast => [
+        for (final m in members) m.character.isEmpty ? m.name : '${m.name} as ${m.character}',
+      ];
+
   factory TitleCredits.fromDetailsJson(Map<String, dynamic> json) => TitleCredits(
         director: json['director'] as String?,
-        cast: [
+        creators: [for (final c in (json['creators'] as List? ?? const [])) c as String],
+        members: [
           for (final c in (json['cast'] as List? ?? const []).cast<Map<String, dynamic>>())
             if ((c['name'] as String? ?? '').isNotEmpty)
-              (c['character'] as String? ?? '').isEmpty ? c['name'] as String : '${c['name']} as ${c['character']}',
+              TitleCastMember(
+                name: c['name'] as String,
+                character: c['character'] as String? ?? '',
+                profilePath: c['profile_path'] as String?,
+              ),
         ],
       );
 }

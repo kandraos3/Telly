@@ -16,7 +16,9 @@ import 'package:telly_app/features/queue/data/watchlist_repository.dart';
 import 'package:telly_app/features/ranking/domain/canon_tier.dart';
 import '../../data/title_detail_repository.dart';
 import '../../domain/title_detail_models.dart';
+import '../widgets/title_cast_section.dart';
 import '../widgets/title_duel_record_section.dart';
+import 'package:telly_app/features/queue/domain/streaming_models.dart';
 
 /// SCR-08: Show Detail Page (FE-611).
 /// Conforms to `docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md` §SCR-08
@@ -240,7 +242,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                   ],
 
                   // CAST & CREW SHOWCASE
-                  _buildCastAndDirectorSection(title),
+                  TitleCastSection(titleId: title.id, mediaType: title.mediaType, fallbackDirector: title.director),
                   const SizedBox(height: 28),
 
                   // TOURNAMENT & DUEL RECORD + CANON TIER DISTRIBUTION (live, FE-DETAIL-02)
@@ -614,7 +616,16 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
 }
 
   Widget _buildStreamingNowSection(TitleDetail title) {
-    final providers = title.availabilities;
+    // Live availability first (BE-DETAIL-01); cached `title_availability` rows otherwise.
+    final live = ref.watch(titleStreamingProvider((title.id, title.mediaType))).valueOrNull ?? const [];
+    final providers = live.isNotEmpty
+        ? [
+            for (final p in live)
+              // "Streaming now" means watchable without buying or renting.
+              if (p.monetizationType == MonetizationType.flatrate || p.monetizationType == MonetizationType.free)
+                (id: p.platformId, name: p.platformName),
+          ]
+        : [for (final a in title.availabilities) (id: a.platformId, name: _platformName(a.platformId))];
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -648,12 +659,12 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: providers.map((avail) {
-                final platform = avail.platformId.toUpperCase();
+              children: {for (final p in providers) p.id: p}.values.map((avail) {
+                final platform = avail.name;
                 return ElevatedButton.icon(
                   onPressed: () {
                     StreamingDeepLinkFactory.launchPlayback(
-                      providerId: avail.platformId,
+                      providerId: avail.id,
                       externalShowId: '${title.id}',
                       showSlug: title.title.toLowerCase().replaceAll(' ', '-'),
                     );
@@ -676,6 +687,13 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
         ],
       ),
     );
+  }
+
+  static String _platformName(String platformId) {
+    for (final p in StreamingPlatform.standardPlatforms) {
+      if (p.id == platformId) return p.displayName;
+    }
+    return platformId.replaceAll('_', ' ').toUpperCase();
   }
 
   Widget _buildYourStatusSection(TitleDetail title) {
@@ -759,114 +777,6 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
           ],
         ],
       ),
-    );
-  }
-
-  Widget _buildCastAndDirectorSection(TitleDetail title) {
-    final seedCast = _kSeedCast[title.id] ?? const [];
-    final directorName = title.director;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Container(
-              width: 3,
-              height: 14,
-              decoration: BoxDecoration(
-                color: TellyColors.warmAmber,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'CAST & CREW',
-              style: TellyTypography.labelSmall(
-                color: TellyColors.textPrimary,
-              ).copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
-            ),
-            if (directorName != null && directorName.isNotEmpty) ...[
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: TellyColors.backgroundCard,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: TellyColors.borderGlass),
-                ),
-                child: Text(
-                  title.isMovie ? 'Dir: $directorName' : 'Showrunner: $directorName',
-                  style: TellyTypography.caption(color: TellyColors.warmAmber).copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
-        const SizedBox(height: 12),
-        if (seedCast.isEmpty)
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: TellyColors.backgroundSurface,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: TellyColors.borderGlass),
-            ),
-            child: Text(
-              directorName != null
-                  ? 'Key creative leadership: $directorName. Full cast list syncing from TMDB.'
-                  : 'Cast and crew information syncing from TMDB.',
-              style: TellyTypography.caption(color: TellyColors.textPrimary),
-            ),
-          )
-        else
-          SizedBox(
-            height: 84,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: seedCast.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 10),
-              itemBuilder: (context, index) {
-                final member = seedCast[index];
-                return Container(
-                  width: 145,
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: TellyColors.backgroundSurface,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: TellyColors.borderGlass),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        member.$1,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TellyTypography.labelMedium(
-                          color: TellyColors.textPrimary,
-                        ).copyWith(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        member.$2,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TellyTypography.caption(
-                          color: TellyColors.textPrimary,
-                        ).copyWith(fontSize: 11),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-      ],
     );
   }
 
@@ -1358,72 +1268,6 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
     );
   }
 }
-
-const Map<int, List<(String, String)>> _kSeedCast = {
-  101: [
-    ('Song Kang-ho', 'Kim Ki-taek'),
-    ('Lee Sun-kyun', 'Park Dong-ik'),
-    ('Cho Yeo-jeong', 'Park Yeon-kyo'),
-    ('Choi Woo-shik', 'Kim Ki-woo'),
-    ('Park So-dam', 'Kim Ki-jung'),
-  ],
-  496243: [
-    ('Song Kang-ho', 'Kim Ki-taek'),
-    ('Lee Sun-kyun', 'Park Dong-ik'),
-    ('Cho Yeo-jeong', 'Park Yeon-kyo'),
-    ('Choi Woo-shik', 'Kim Ki-woo'),
-    ('Park So-dam', 'Kim Ki-jung'),
-  ],
-  157336: [
-    ('Matthew McConaughey', 'Cooper'),
-    ('Anne Hathaway', 'Brand'),
-    ('Jessica Chastain', 'Murph'),
-    ('Michael Caine', 'Professor Brand'),
-    ('Matt Damon', 'Dr. Mann'),
-  ],
-  27205: [
-    ('Leonardo DiCaprio', 'Dom Cobb'),
-    ('Joseph Gordon-Levitt', 'Arthur'),
-    ('Elliot Page', 'Ariadne'),
-    ('Tom Hardy', 'Eames'),
-    ('Ken Watanabe', 'Saito'),
-  ],
-  155: [
-    ('Christian Bale', 'Bruce Wayne / Batman'),
-    ('Heath Ledger', 'Joker'),
-    ('Aaron Eckhart', 'Harvey Dent'),
-    ('Michael Caine', 'Alfred'),
-    ('Gary Oldman', 'Jim Gordon'),
-  ],
-  238: [
-    ('Marlon Brando', 'Vito Corleone'),
-    ('Al Pacino', 'Michael Corleone'),
-    ('James Caan', 'Sonny Corleone'),
-    ('Robert Duvall', 'Tom Hagen'),
-    ('Diane Keaton', 'Kay Adams'),
-  ],
-  872585: [
-    ('Cillian Murphy', 'J. Robert Oppenheimer'),
-    ('Emily Blunt', 'Kitty Oppenheimer'),
-    ('Matt Damon', 'Leslie Groves'),
-    ('Robert Downey Jr.', 'Lewis Strauss'),
-    ('Florence Pugh', 'Jean Tatlock'),
-  ],
-  1396: [
-    ('Adam Scott', 'Mark Scout'),
-    ('Zach Cherry', 'Dylan George'),
-    ('Britt Lower', 'Helly Riggs'),
-    ('Patricia Arquette', 'Harmony Cobel'),
-    ('John Turturro', 'Irving Bailiff'),
-  ],
-  110492: [
-    ('Adam Scott', 'Mark Scout'),
-    ('Zach Cherry', 'Dylan George'),
-    ('Britt Lower', 'Helly Riggs'),
-    ('Patricia Arquette', 'Harmony Cobel'),
-    ('John Turturro', 'Irving Bailiff'),
-  ],
-};
 
 const Map<int, List<(String, String, int, double)>> _kSeedTakes = {
   101: [

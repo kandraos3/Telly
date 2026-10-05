@@ -4,9 +4,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:telly_app/core/theme/telly_theme.dart';
 import 'package:telly_app/core/widgets/poster_image.dart';
 import 'package:telly_app/features/queue/data/watchlist_repository.dart';
+import 'package:telly_app/features/logging/domain/title_search_result.dart';
+import 'package:telly_app/features/queue/domain/streaming_models.dart';
 import 'package:telly_app/features/title_detail/data/title_detail_repository.dart';
 import 'package:telly_app/features/title_detail/domain/title_detail_models.dart';
 import 'package:telly_app/features/title_detail/presentation/screens/show_detail_screen.dart';
+import 'package:telly_app/features/title_detail/presentation/widgets/title_cast_section.dart';
 import 'package:telly_app/features/title_detail/presentation/widgets/title_duel_record_section.dart';
 
 import '../../helpers/router_harness.dart';
@@ -139,6 +142,8 @@ void main() {
     required TitleDetail title,
     WatchlistRepository? watchlistRepo,
     TitleDuelStats? duelStats,
+    TitleCredits credits = TitleCredits.empty,
+    List<ShowStreamingAvailability> streaming = const [],
   }) {
     final detailRepo = FakeTitleDetailRepository([title]);
     if (duelStats != null) detailRepo.duelStats[(title.id, title.mediaType)] = duelStats;
@@ -146,6 +151,8 @@ void main() {
       overrides: [
         posterNetworkImagesProvider.overrideWithValue(false),
         titleDetailRepositoryProvider.overrideWithValue(detailRepo),
+        titleCreditsProvider.overrideWith((ref, _) async => credits),
+        titleStreamingProvider.overrideWith((ref, _) async => streaming),
         if (watchlistRepo != null)
           watchlistRepositoryProvider.overrideWithValue(watchlistRepo),
       ],
@@ -174,7 +181,7 @@ void main() {
 
       // Streaming Now
       expect(find.text('STREAMING NOW'), findsOneWidget);
-      expect(find.text('Watch on APPLE_TV_PLUS'), findsOneWidget);
+      expect(find.text('Watch on Apple TV+'), findsOneWidget);
 
       // Your Status (Ranked State)
       expect(find.text('YOUR STATUS'), findsOneWidget);
@@ -222,6 +229,57 @@ void main() {
       expect(find.text('💤 10% Other'), findsOneWidget);
       expect(find.text('1477'), findsNothing);
       expect(find.textContaining('Matches Contested'), findsNothing);
+    });
+
+    testWidgets('BE-DETAIL-01: live TMDB cast renders photos-or-initials with character names', (tester) async {
+      await tester.pumpWidget(createTestWidget(
+        title: testMovie,
+        credits: const TitleCredits(
+          director: 'Bong Joon-ho',
+          members: [
+            TitleCastMember(name: 'Song Kang-ho', character: 'Kim Ki-taek', profilePath: '/song.jpg'),
+            TitleCastMember(name: 'Cho Yeo-jeong', character: 'Park Yeon-kyo'),
+          ],
+        ),
+      ));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.byKey(const Key('title_cast_carousel')));
+
+      expect(find.text('Song Kang-ho'), findsOneWidget);
+      expect(find.text('Kim Ki-taek'), findsOneWidget);
+      expect(find.text('Park Yeon-kyo'), findsOneWidget);
+      expect(find.text('Dir: Bong Joon-ho'), findsOneWidget);
+      expect(find.textContaining('syncing from TMDB'), findsNothing);
+    });
+
+    testWidgets('BE-DETAIL-01: no TMDB cast shows a clear empty state, never a "syncing" placeholder',
+        (tester) async {
+      await tester.pumpWidget(createTestWidget(title: testTvShow));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.byKey(const Key('title_cast_empty')));
+      expect(find.text(TitleCastSection.emptyMessage), findsOneWidget);
+      expect(find.text('Showrunner: Dan Erickson'), findsOneWidget);
+    });
+
+    testWidgets('BE-DETAIL-01: live streaming availability replaces cached rows; rent/buy are excluded',
+        (tester) async {
+      await tester.pumpWidget(createTestWidget(
+        title: testMovie,
+        streaming: const [
+          ShowStreamingAvailability(
+              platformId: 'netflix', platformName: 'Netflix', monetizationType: MonetizationType.flatrate, webUrl: ''),
+          ShowStreamingAvailability(
+              platformId: 'apple_tv_plus',
+              platformName: 'Apple TV+',
+              monetizationType: MonetizationType.rent,
+              webUrl: ''),
+        ],
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Watch on Netflix'), findsOneWidget);
+      expect(find.text('Watch on Apple TV+'), findsNothing, reason: 'rental is not streaming now');
+      expect(find.text('Watch on Max'), findsNothing, reason: 'stale cached row superseded by live data');
     });
 
     testWidgets('FE-DETAIL-02: an unduelled title shows the honest empty state', (tester) async {

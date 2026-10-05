@@ -29,7 +29,7 @@ class NumberedCatalog implements TitleRepository {
   }
 
   @override
-  Future<TitleCredits> fetchCredits(int id, String mediaType) async => TitleCredits.empty;
+  Future<TitleCredits> fetchCredits(int id, String mediaType, {Duration? timeout}) async => TitleCredits.empty;
 }
 
 void main() {

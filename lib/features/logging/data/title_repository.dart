@@ -12,7 +12,8 @@ abstract interface class TitleRepository {
   Future<TitleSearchOutcome> search(String query);
 
   /// Cast and director for `SCR-11`; [TitleCredits.empty] when unavailable (e.g. offline).
-  Future<TitleCredits> fetchCredits(int id, String mediaType);
+  /// [TitleCredits.empty] on failure or after [timeout].
+  Future<TitleCredits> fetchCredits(int id, String mediaType, {Duration timeout});
 }
 
 /// Searches TMDB through the `tmdb-search` edge function and caches results into Drift
@@ -63,11 +64,11 @@ class SupabaseTitleRepository implements TitleRepository {
   }
 
   @override
-  Future<TitleCredits> fetchCredits(int id, String mediaType) async {
+  Future<TitleCredits> fetchCredits(int id, String mediaType, {Duration timeout = creditsTimeout}) async {
     try {
       final response = await _functions
           .invoke('tmdb-details', method: HttpMethod.get, queryParameters: {'id': '$id', 'media_type': mediaType})
-          .timeout(creditsTimeout);
+          .timeout(timeout);
       return TitleCredits.fromDetailsJson(response.data as Map<String, dynamic>);
     } catch (_) {
       return TitleCredits.empty;

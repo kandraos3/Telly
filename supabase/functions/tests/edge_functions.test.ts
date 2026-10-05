@@ -86,6 +86,30 @@ Deno.test("tmdb-details: tv details upsert title + seasons (specials skipped) an
   assertEquals(store.seasons.map((s) => s.season_number), [1, 2]);
 });
 
+Deno.test("tmdb-details: series cast comes from aggregate_credits across all seasons (BE-DETAIL-01)", async () => {
+  const calls: RecordedCall[] = [];
+  const fetch = fakeFetch({
+    "/tv/1396": () =>
+      jsonResponse({
+        id: 1396,
+        name: "Breaking Bad",
+        credits: { cast: [{ name: "Latest Season Only", character: "Cameo" }], crew: [] },
+        aggregate_credits: {
+          cast: [
+            { name: "Aaron Paul", order: 1, profile_path: "/aaron.jpg", roles: [{ character: "Jesse Pinkman" }] },
+            { name: "Bryan Cranston", order: 0, profile_path: "/bryan.jpg", roles: [{ character: "Walter White" }] },
+          ],
+        },
+      }),
+  }, calls);
+  const body = await (await handleDetails(req("/?id=1396&media_type=tv"), { fetch, tmdbToken: "t", store: null })).json();
+  assert(calls[0].url.includes("append_to_response=credits,aggregate_credits"));
+  assertEquals(body.cast, [
+    { name: "Bryan Cranston", character: "Walter White", profile_path: "/bryan.jpg" },
+    { name: "Aaron Paul", character: "Jesse Pinkman", profile_path: "/aaron.jpg" },
+  ]);
+});
+
 Deno.test("tmdb-details: movie details expose director for FE-204 auto-tagging", async () => {
   const fetch = fakeFetch({
     "/movie/872585": () =>

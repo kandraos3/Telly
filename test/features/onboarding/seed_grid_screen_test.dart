@@ -22,7 +22,7 @@ class EchoTitleRepository implements TitleRepository {
       ]);
 
   @override
-  Future<TitleCredits> fetchCredits(int id, String mediaType) async => TitleCredits.empty;
+  Future<TitleCredits> fetchCredits(int id, String mediaType, {Duration? timeout}) async => TitleCredits.empty;
 }
 
 class FakeAniList extends AniListImporter {

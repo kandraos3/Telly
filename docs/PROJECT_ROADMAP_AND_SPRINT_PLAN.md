@@ -2001,6 +2001,15 @@ Tickets ingested through the `issue-manager` skill. Each entry mirrors its GitHu
 - **Testing & Verification**:
   - [x] Model unit tests (parsing, percentages sum to 100), widget tests for live and empty states, pgTAP `013_title_duel_stats.test.sql` (runs in CI).
 
+#### `BE-DETAIL-01`: Live TMDB Cast & Crew and Real Streaming Availability (#13)
+- **Spec Reference**: [**`technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md) §2–§3; `SCR-08`
+- **Granular Tasks**:
+  - [x] `tmdb-details`: series cast from `aggregate_credits` (all seasons, `roles[].character`), movies from `credits`.
+  - [x] `TitleCredits.members` (name, character, profile photo) + creators; `titleCreditsProvider` feeds the new `TitleCastSection` carousel. Hardcoded `_kSeedCast` and the "syncing from TMDB" placeholder removed.
+  - [x] `titleStreamingProvider` calls `streaming-availability` live (TMDB/JustWatch or Watchmode); SCR-08 shows subscription/free providers by display name, falling back to cached rows.
+- **Testing & Verification**:
+  - [x] Deno edge test for aggregate credits (CI), credits parsing test, widget tests for cast carousel, cast empty state and live streaming badges.
+
 ---
 
 ## 🏆 Sprint Deliverables Summary Matrix

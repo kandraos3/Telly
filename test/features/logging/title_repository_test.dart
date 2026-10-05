@@ -96,9 +96,10 @@ void main() {
             jsonEncode({
               'director': 'Christopher Nolan',
               'cast': [
-                {'name': 'Cillian Murphy', 'character': 'J. Robert Oppenheimer'},
+                {'name': 'Cillian Murphy', 'character': 'J. Robert Oppenheimer', 'profile_path': '/cillian.jpg'},
                 {'name': 'Narrator', 'character': ''},
               ],
+              'creators': <String>[],
             }),
             200,
             headers: {'content-type': 'application/json'},
@@ -112,6 +113,9 @@ void main() {
       expect(seen.url.queryParameters, {'id': '872585', 'media_type': 'movie'});
       expect(credits.director, 'Christopher Nolan');
       expect(credits.cast, ['Cillian Murphy as J. Robert Oppenheimer', 'Narrator']);
+      // BE-DETAIL-01: SCR-08 needs the photo and character separately.
+      expect(credits.members.first.profilePath, '/cillian.jpg');
+      expect(credits.members.first.character, 'J. Robert Oppenheimer');
 
       final offline = SupabaseTitleRepository(
         functions((req) async => throw http.ClientException('offline')),
