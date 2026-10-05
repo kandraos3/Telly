@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
 import '../../../../core/widgets/telly_frosted_sheet.dart';
+import '../../../../core/widgets/telly_logo.dart';
 import '../../../../core/widgets/telly_primary_button.dart';
 import '../../../../core/widgets/telly_text_field.dart';
 import '../controllers/auth_controller.dart';
+import '../widgets/auth_poster_backdrop.dart';
 
 /// SCR-01: Onboarding Splash & Authentication Screen.
 /// Conforms to `docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md` §1 (`SCR-01`).
@@ -29,42 +31,7 @@ class AuthScreen extends ConsumerWidget {
       backgroundColor: TellyColors.backgroundPrimary,
       body: Stack(
         children: [
-          // Background ambient radial glow
-          Positioned(
-            top: -100,
-            right: -100,
-            child: Container(
-              width: 350,
-              height: 350,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    TellyColors.phosphorLime.withValues(alpha: 0.12),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: -80,
-            left: -80,
-            child: Container(
-              width: 320,
-              height: 320,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    TellyColors.neonCoral.withValues(alpha: 0.08),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-            ),
-          ),
-
+          const Positioned.fill(child: AuthPosterBackdrop()),
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -74,23 +41,7 @@ class AuthScreen extends ConsumerWidget {
                   const Spacer(flex: 2),
 
                   // Brand Hero & Tagline
-                  Center(
-                    child: Container(
-                      width: 68,
-                      height: 68,
-                      decoration: BoxDecoration(
-                        color: TellyColors.backgroundCard,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: TellyColors.borderGlass),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          '📺',
-                          style: TextStyle(fontSize: 34),
-                        ),
-                      ),
-                    ),
-                  ),
+                  const Center(child: TellyLogo(size: 72)),
                   const SizedBox(height: 16),
                   Center(
                     child: Text(
@@ -128,9 +79,7 @@ class AuthScreen extends ConsumerWidget {
                       color: Colors.transparent,
                       child: InkWell(
                         borderRadius: BorderRadius.circular(14),
-                        onTap: isBusy
-                            ? null
-                            : () => ref.read(authControllerProvider.notifier).signInWithApple(),
+                        onTap: isBusy ? null : () => ref.read(authControllerProvider.notifier).signInWithApple(),
                         child: Center(
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -163,14 +112,13 @@ class AuthScreen extends ConsumerWidget {
                       color: Colors.transparent,
                       child: InkWell(
                         borderRadius: BorderRadius.circular(14),
-                        onTap: isBusy
-                            ? null
-                            : () => ref.read(authControllerProvider.notifier).signInWithGoogle(),
+                        onTap: isBusy ? null : () => ref.read(authControllerProvider.notifier).signInWithGoogle(),
                         child: Center(
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Text('G', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+                              const Text('G',
+                                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
                               const SizedBox(width: 10),
                               Text(
                                 'Continue with Google',

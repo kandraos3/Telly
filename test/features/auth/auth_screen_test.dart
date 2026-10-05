@@ -4,7 +4,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:telly_app/features/auth/data/auth_repository.dart';
 
 import '../../fakes/fake_auth_repository.dart';
+import 'package:telly_app/core/theme/telly_colors.dart';
+import 'package:telly_app/core/widgets/telly_logo.dart';
 import 'package:telly_app/features/auth/presentation/screens/auth_screen.dart';
+import 'package:telly_app/features/auth/presentation/widgets/auth_poster_backdrop.dart';
 
 void main() {
   group('SCR-01 AuthScreen Widget & Flow Tests (FE-106)', () {
@@ -165,6 +168,29 @@ void main() {
 
       // Signed in through the session stream; navigation is the router's job (FE-602).
       expect(fakeRepo.currentUserId, isNotNull);
+    });
+
+    testWidgets('renders the vector Telly logo over the scrimmed poster mosaic (FE-AUTH-01)', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [authRepositoryProvider.overrideWithValue(FakeAuthRepository())],
+          child: const MaterialApp(home: AuthScreen()),
+        ),
+      );
+
+      expect(find.byType(TellyLogo), findsOneWidget);
+      expect(find.text('📺'), findsNothing);
+      expect(find.byType(AuthPosterBackdrop), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+            (w) => w.key is ValueKey<String> && (w.key! as ValueKey<String>).value.startsWith('auth-backdrop-poster-')),
+        findsNWidgets(AuthPosterBackdrop.columns * AuthPosterBackdrop.rows),
+      );
+
+      final scrim = tester.widget<DecoratedBox>(find.byKey(const ValueKey('auth-backdrop-scrim')));
+      final gradient = (scrim.decoration as BoxDecoration).gradient! as LinearGradient;
+      expect(gradient.colors.first, TellyColors.backgroundPrimary.withValues(alpha: 0.8));
+      expect(gradient.colors.every((c) => c.a >= 0.8), isTrue);
     });
   });
 }

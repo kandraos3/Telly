@@ -1927,6 +1927,20 @@ QA-602 … QA-607 (after their deps) → QA-608
 
 ---
 
+## 🐛 Issue Remediation Track (GitHub Issues, `kandraos3/Telly`)
+
+Tickets ingested through the `issue-manager` skill. Each entry mirrors its GitHub issue; the issue body holds the full acceptance criteria.
+
+#### `FE-AUTH-01`: AuthScreen Official Logo & Dynamic Poster Backdrop (#2)
+- **Spec Reference**: [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) `SCR-01`; style guide §2
+- **Granular Tasks**:
+  - [x] Vector `TellyLogo` (CustomPainter) replaces the 📺 emoji placeholder.
+  - [x] Tilted prestige-poster mosaic (`AuthPosterBackdrop`) under an 80% `#08090C` scrim.
+- **Testing & Verification**:
+  - [x] Widget test: logo renders, 24 mosaic tiles, scrim ≥ 80% opacity.
+
+---
+
 ## 🏆 Sprint Deliverables Summary Matrix
 
 | Sprint | Weeks | Primary Focus | Core Technical Deliverables | Critical Quality Gates |
