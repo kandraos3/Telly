@@ -2062,7 +2062,7 @@ Tickets ingested through the `issue-manager` skill. Each entry mirrors its GitHu
   - [x] `RecommendedTitle` model, `DiscoveryRepository.fetchRecommendedTitles` / `fetchTrendingTitles`, `recommendedTitlesProvider`, `trendingTitlesProvider`.
   - [x] SCR-07 "Recommended for You" poster carousel (community score badge and reason line) above Network Battlegrounds; hidden when empty.
   - [x] Focusing the empty search field shows a zero-state with Recent Searches chips (session-scoped `RecentSearchesController`, re-run on tap, clearable) and a numbered Trending Now list.
-  - [ ] Apply the migration to `telly-prod` via `supabase-deploy` → `push` *(not deployed in this session)*.
+  - [x] Migration applied to `telly-prod` via `supabase-deploy` → `push` (2026-10-04).
 - **Testing & Verification**:
   - [x] Widget tests: carousel and reasons, navigation, hidden when empty, zero-state on focus, recent search recorded and re-run, clear. Unit tests for the controller, model parsing and RPC request shape. pgTAP `015_title_recommendations.test.sql` (runs in CI).
 
@@ -2073,7 +2073,7 @@ Tickets ingested through the `issue-manager` skill. Each entry mirrors its GitHu
   - [x] `SquadRepository.findInvitee`, `SquadInvitee`, `looksLikeEmail` / `looksLikeHandle`; `SquadHubController.checkInvitee` returns an `InviteCheck` (found, or a user-facing reason such as unknown, malformed or already a member); `invite` re-validates before adding.
   - [x] Invite dialog takes "@handle or email", validates as you type (350 ms debounce, stale answers dropped), shows a lime check with the matched name or a coral error, and enables Add only for a valid invitee. Malformed input is rejected locally, without a server call.
   - [x] SCR-17b opens on the Movies canon; the switcher reads Movies | TV Shows (emoji removed), matching SCR-14.
-  - [ ] Apply the migration to `telly-prod` via `supabase-deploy` → `push` *(not deployed in this session)*.
+  - [x] Migration applied to `telly-prod` via `supabase-deploy` → `push` (2026-10-04).
 - **Testing & Verification**:
   - [x] Widget tests: invite by handle, invite by email, unknown / malformed / existing-member errors with Add disabled, debounce. Default canon and order. Repository request-shape test; input-shape unit tests. pgTAP `016_squad_invitee_lookup.test.sql` (runs in CI).
 
@@ -2085,7 +2085,7 @@ Tickets ingested through the `issue-manager` skill. Each entry mirrors its GitHu
   - [x] Removed the hardcoded fallback titles (ids 101–203 behind the mock "Show Detail (tv/201)"), the fake "Pre-Selected Title", the hardcoded provider sets, and the 88% / 92% / 84% match defaults. The router no longer passes a handle or `'friend'` as a user id. Title Detail's Co-Watch passes the title's media type.
   - [x] SCR-16 is three step cards: 1 Who's watching (friend picker when opened without one, swap friend), 2 The mood (format, runtime, vibes, shared services), 3 Tonight's top picks (poster, real score, reason, "Watch on <service>"; tap opens the real SCR-08). Loading, error and empty states replace mock data.
   - [x] Quick Swipe cards render the real TMDB poster; the match view no longer invents a `max` provider or a 120m runtime, and service ids show as display names (`StreamingPlatform.labelFor`).
-  - [ ] Apply the migration to `telly-prod` via `supabase-deploy` → `push` *(not deployed in this session)*.
+  - [x] Migration applied to `telly-prod` via `supabase-deploy` → `push` (2026-10-04).
 - **Testing & Verification**:
   - [x] Widget tests: three steps with real match and picks, poster paths, pick → `/title/movie/496243`, format switch, friend picker, handle resolution, partner swap, no follows, shared-service filtering, empty and error states, pinned pre-selected title, Quick Swipe opening. Quick Swipe poster and no-invented-service tests; a11y audit with the fake pool. pgTAP `017_co_watch_context.test.sql` (runs in CI).
 
@@ -2107,7 +2107,7 @@ Tickets ingested through the `issue-manager` skill. Each entry mirrors its GitHu
   - [x] Shared `FeedActionBar`: the five presets, any other reactions a post already has (retired 🔥 🤯 🗑️ 🤝 and custom emoji, by count), and a `+` that opens a bottom-sheet picker (labelled presets + 40 curated emoji).
 - **Testing & Verification**:
   - [x] Widget tests: bookmark size, position and toggle, presets and extras rendering, picker returns preset or emoji, custom emoji swap through the controller. Repository tests for `EMOJI:` key parsing and the delete-then-insert write. a11y audit (contrast, 48 dp targets). pgTAP `018_feed_reaction_presets.test.sql` (runs in CI).
-  - [ ] Apply the migration to `telly-prod` via `supabase-deploy` → `push` *(not deployed in this session)*.
+  - [x] Migration applied to `telly-prod` via `supabase-deploy` → `push` (2026-10-04).
 
 #### `FE-FEED-02`: Algorithmic Recommendation Cards Between Feed Posts (#31)
 - **Spec Reference**: [**`features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md) §2; [**`features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md); `SCR-05`
@@ -2115,7 +2115,7 @@ Tickets ingested through the `issue-manager` skill. Each entry mirrors its GitHu
   - [x] Migration `20261010001600_recommendation_providers.sql`: `get_recommended_titles` (FE-EXPLORE-03) adds a `providers` array of subscription / free platforms. The JSONB result only gains a key.
   - [x] `FeedRecommendationsController` loads up to 12 picks; `interleaveRecommendations` slots one after every 6 posts (never repeating a pick, never as the last row).
   - [x] `FeedRecommendationCard` ("Picked for you", Electric Violet): reason ("Because you loved Breaking Bad"), "Better Call Saul (AMC) is streaming on Netflix", Telly score, **Add to Queue** (offline-first watchlist, optimistic with rollback) and **Rate / Rank** (opens SCR-09 for the title); tapping the card opens SCR-08.
-  - [ ] Apply the migration to `telly-prod` via `supabase-deploy` → `push` *(not deployed in this session)*.
+  - [x] Migration applied to `telly-prod` via `supabase-deploy` → `push` (2026-10-04).
 - **Testing & Verification**:
   - [x] Unit tests for the interleaving cadence and edge cases. Widget tests: card placement after the sixth post, reason and streaming copy, Add to Queue, Rate / Rank route, open title, no picks. pgTAP `019_recommendation_providers.test.sql` (runs in CI).
 
