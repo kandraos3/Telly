@@ -156,6 +156,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // Pushed detail screens
       GoRoute(
         path: '/title/:mediaType/:id',
+        parentNavigatorKey: rootNavigatorKey,
         redirect: (_, state) {
           final mediaType = state.pathParameters['mediaType'];
           final id = int.tryParse(state.pathParameters['id'] ?? '');
@@ -167,7 +168,24 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(
+        path: Routes.cowatch,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (_, state) {
+          final titleId = int.tryParse(state.uri.queryParameters['titleId'] ?? '');
+          final friend = state.uri.queryParameters['friend'] ?? 'friend';
+          final extra = state.extra;
+          final friendArgs = extra is FriendRouteArgs ? extra : null;
+          return TwoToWatchScreen(
+            friendId: friendArgs?.userId ?? friend,
+            friendHandle: friend,
+            friendDisplayName: friendArgs?.displayName ?? '@$friend',
+            preselectedTitleId: titleId,
+          );
+        },
+      ),
+      GoRoute(
         path: '/u/:handle',
+        parentNavigatorKey: rootNavigatorKey,
         redirect: (_, state) {
           final handle = state.pathParameters['handle'];
           final currentUser = ref.read(authControllerProvider).user;
@@ -183,9 +201,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             builder: (_, state) {
               final args = state.extra;
               final handle = state.pathParameters['handle']!;
-              return args is FriendRouteArgs
-                  ? TwoToWatchScreen(friendId: args.userId, friendHandle: handle, friendDisplayName: args.displayName)
-                  : const PendingScreen(title: 'Two-to-Watch', ticket: 'FE-610');
+              final titleId = int.tryParse(state.uri.queryParameters['titleId'] ?? '');
+              return TwoToWatchScreen(
+                friendId: args is FriendRouteArgs ? args.userId : handle,
+                friendHandle: handle,
+                friendDisplayName: args is FriendRouteArgs ? args.displayName : '@$handle',
+                preselectedTitleId: titleId,
+              );
             },
           ),
         ],

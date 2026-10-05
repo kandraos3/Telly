@@ -123,5 +123,23 @@ void main() {
       expect(find.text('With @maya'), findsOneWidget);
       expect(find.text('15s'), findsOneWidget);
     });
+
+    testWidgets('preselected title displays badge and prioritizes candidate (FE-DETAIL-03)', (tester) async {
+      await tester.pumpWidget(
+        createTestWidget(
+          const TwoToWatchScreen(
+            friendId: 'maya-123',
+            friendHandle: 'maya',
+            friendDisplayName: 'Maya Lin',
+            preselectedTitleId: 103,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('cowatch_preselected_badge')), findsOneWidget);
+      expect(find.textContaining('103'), findsWidgets);
+      expect(find.text('Run Lola Run'), findsOneWidget);
+    });
   });
 }

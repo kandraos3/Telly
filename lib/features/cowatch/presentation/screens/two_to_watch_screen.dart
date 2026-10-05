@@ -23,6 +23,7 @@ class TwoToWatchScreen extends ConsumerStatefulWidget {
   final int? movieMatchPercentage;
   final int? seriesMatchPercentage;
   final List<CoWatchCandidate>? initialCandidates;
+  final int? preselectedTitleId;
 
   const TwoToWatchScreen({
     super.key,
@@ -33,6 +34,7 @@ class TwoToWatchScreen extends ConsumerStatefulWidget {
     this.movieMatchPercentage = 92,
     this.seriesMatchPercentage = 84,
     this.initialCandidates,
+    this.preselectedTitleId,
   });
 
   @override
@@ -137,7 +139,25 @@ class _TwoToWatchScreenState extends ConsumerState<TwoToWatchScreen> {
       providersB: _userBProviders,
     );
 
-    _allCandidates = widget.initialCandidates ?? _defaultFallbackCandidates;
+    _allCandidates = List.of(widget.initialCandidates ?? _defaultFallbackCandidates);
+    if (widget.preselectedTitleId != null) {
+      final exists = _allCandidates.any((c) => c.showId == widget.preselectedTitleId);
+      if (!exists) {
+        _allCandidates.insert(
+          0,
+          CoWatchCandidate(
+            showId: widget.preselectedTitleId!,
+            title: 'Pre-Selected Title',
+            mediaType: 'movie',
+            network: 'Telly',
+            availableProviders: _activeSharedProviders.toList(),
+            communityScore: 9.5,
+            inWatchlistA: true,
+            inWatchlistB: true,
+          ),
+        );
+      }
+    }
     _calculateRecommendations();
 
     if (widget.initialCandidates == null) {
@@ -174,6 +194,14 @@ class _TwoToWatchScreenState extends ConsumerState<TwoToWatchScreen> {
       selectedVibes: _selectedVibes.toList(),
       tasteMatchPercentage: widget.matchPercentage,
     );
+
+    if (widget.preselectedTitleId != null) {
+      scored.sort((a, b) {
+        if (a.candidate.showId == widget.preselectedTitleId) return -1;
+        if (b.candidate.showId == widget.preselectedTitleId) return 1;
+        return b.score.compareTo(a.score);
+      });
+    }
 
     setState(() {
       _recommendations = scored;
@@ -244,6 +272,31 @@ class _TwoToWatchScreenState extends ConsumerState<TwoToWatchScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (widget.preselectedTitleId != null)
+              Container(
+                key: const Key('cowatch_preselected_badge'),
+                margin: const EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: TellyColors.electricViolet.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: TellyColors.electricViolet.withValues(alpha: 0.4)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.movie_filter_outlined, color: TellyColors.electricViolet, size: 20),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Pre-selected Title (#${widget.preselectedTitleId}) prioritized for co-watching',
+                        style: TellyTypography.bodyMedium(color: TellyColors.textPrimary)
+                            .copyWith(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
             // 1. Who's on the Couch Header
             _buildCouchHeader(),
             const SizedBox(height: 20),

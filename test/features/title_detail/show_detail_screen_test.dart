@@ -7,6 +7,8 @@ import 'package:telly_app/features/queue/data/watchlist_repository.dart';
 import 'package:telly_app/features/title_detail/domain/title_detail_models.dart';
 import 'package:telly_app/features/title_detail/presentation/screens/show_detail_screen.dart';
 
+import '../../helpers/router_harness.dart';
+
 class InMemoryWatchlistRepository implements WatchlistRepository {
   final Set<String> _items = {};
 
@@ -303,6 +305,27 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('How is this score calculated?'), findsNothing);
+    });
+
+    testWidgets('FE-DETAIL-03: tapping Co-Watch navigates to cowatch route with preselected title', (tester) async {
+      await tester.pumpWidget(routerHarness(
+        ShowDetailScreen(
+          titleId: testTvShow.id,
+          mediaType: testTvShow.mediaType,
+          initialTitle: testTvShow,
+        ),
+        overrides: [
+          posterNetworkImagesProvider.overrideWithValue(false),
+        ],
+      ));
+      await tester.pumpAndSettle();
+
+      final cowatchButton = find.text('Co-Watch');
+      expect(cowatchButton, findsOneWidget);
+      await tester.tap(cowatchButton);
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('route:/cowatch?titleId=1396'), findsOneWidget);
     });
   });
 }

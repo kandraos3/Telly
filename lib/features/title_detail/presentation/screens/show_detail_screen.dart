@@ -275,7 +275,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
       leading: IconButton(
         tooltip: 'Back',
         icon: const Icon(Icons.arrow_back, color: TellyColors.textPrimary),
-        onPressed: () => context.pop(),
+        onPressed: () => context.canPop() ? context.pop() : context.go(Routes.feed),
       ),
       actions: [
         IconButton(
@@ -541,8 +541,8 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
             onTap: () {
               final friendHandle = (title.socialSummary != null && title.socialSummary!.friends.isNotEmpty)
                   ? title.socialSummary!.friends.first.username
-                  : 'friend';
-              context.push(Routes.twoToWatch(friendHandle));
+                  : null;
+              context.push(Routes.cowatchWithTitle(title.id, friendHandle: friendHandle));
             },
           ),
           // 4. Share Taste Card
