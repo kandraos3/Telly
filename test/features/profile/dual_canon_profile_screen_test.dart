@@ -181,8 +181,9 @@ void main() {
       await tester.pumpWidget(buildTestableProfileScreen());
       await tester.pumpAndSettle();
 
-      expect(find.text('🎬 Movie Canon (3)'), findsOneWidget);
-      expect(find.text('📺 Series & Anime (5)'), findsOneWidget);
+      expect(find.text('🎬 Movies (3)'), findsOneWidget);
+      expect(find.text('📺 TV Shows (5)'), findsOneWidget);
+      expect(find.text('Includes anime'), findsOneWidget);
 
       expect(find.text('Interstellar'), findsWidgets);
       expect(find.text('Parasite'), findsWidgets);
@@ -193,11 +194,11 @@ void main() {
       expect(find.text('The Bear'), findsNothing);
     });
 
-    testWidgets('tapping Series & Anime tab updates list to series titles only', (tester) async {
+    testWidgets('tapping TV Shows tab updates list to series titles only', (tester) async {
       await tester.pumpWidget(buildTestableProfileScreen());
       await tester.pumpAndSettle();
 
-      // Tap Series Canon tab
+      // Tap TV Shows tab
       final seriesTab = find.byKey(const Key('series_canon_tab'));
       await tester.tap(seriesTab);
       await tester.pumpAndSettle();
@@ -209,6 +210,31 @@ void main() {
       // Verify movie items are omitted from Series Canon
       expect(find.text('Interstellar'), findsNothing);
       expect(find.text('Parasite'), findsNothing);
+    });
+
+    testWidgets('FE-PROFILE-01: horizontal swipe switches between Movies and TV Shows', (tester) async {
+      await tester.pumpWidget(buildTestableProfileScreen());
+      await tester.pumpAndSettle();
+
+      // Initially in Movies
+      expect(find.text('Interstellar'), findsWidgets);
+      expect(find.text('Succession'), findsNothing);
+
+      // Swipe left (drag to negative offset with high velocity)
+      await tester.fling(find.byType(SingleChildScrollView), const Offset(-400, 0), 1000);
+      await tester.pumpAndSettle();
+
+      // Now in TV Shows
+      expect(find.text('Succession'), findsWidgets);
+      expect(find.text('Interstellar'), findsNothing);
+
+      // Swipe right (drag to positive offset with high velocity)
+      await tester.fling(find.byType(SingleChildScrollView), const Offset(400, 0), 1000);
+      await tester.pumpAndSettle();
+
+      // Now back in Movies
+      expect(find.text('Interstellar'), findsWidgets);
+      expect(find.text('Succession'), findsNothing);
     });
   });
 

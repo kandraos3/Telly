@@ -64,72 +64,85 @@ class DualCanonProfileScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: TellyColors.backgroundPrimary,
       body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 8),
+        child: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onHorizontalDragEnd: (details) {
+            final velocity = details.primaryVelocity ?? 0;
+            if (velocity < -200 && selectedCanon == CanonType.movie) {
+              ref.read(hapticsServiceProvider).duelSelectCandidate();
+              ref.read(selectedCanonProvider.notifier).select(CanonType.series);
+            } else if (velocity > 200 && selectedCanon == CanonType.series) {
+              ref.read(hapticsServiceProvider).duelSelectCandidate();
+              ref.read(selectedCanonProvider.notifier).select(CanonType.movie);
+            }
+          },
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 8),
 
-              // 1. PROFILE HEADER CARD (Avatar, Handle, Bio, Stats)
-              ProfileHeaderCard(
-                displayName: me?.displayName ?? '',
-                handle: me?.username == null ? '' : '@${me!.username}',
-                bio: me?.bio,
-                avatarUrl: me?.avatarUrl,
-                movieCount: moviesCount,
-                seriesCount: seriesCount,
-                onSettingsTap: onSettingsTap,
-                onSquadsTap: onSquadsTap,
-                onShareTap: onShareTap,
-              ),
+                // 1. PROFILE HEADER CARD (Avatar, Handle, Bio, Stats)
+                ProfileHeaderCard(
+                  displayName: me?.displayName ?? '',
+                  handle: me?.username == null ? '' : '@${me!.username}',
+                  bio: me?.bio,
+                  avatarUrl: me?.avatarUrl,
+                  movieCount: moviesCount,
+                  seriesCount: seriesCount,
+                  onSettingsTap: onSettingsTap,
+                  onSquadsTap: onSquadsTap,
+                  onShareTap: onShareTap,
+                ),
 
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-              // 2. SEGMENTED DUAL-CANON SELECTOR (FE-206)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Container(
-                  constraints: const BoxConstraints(minHeight: 56),
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: TellyColors.backgroundSurface,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: TellyColors.borderGlass),
-                  ),
-                  child: Row(
-                    children: [
-                      // Movie Canon Tab
-                      Expanded(
-                        child: _buildCanonTab(
-                          key: const Key('movie_canon_tab'),
-                          label: '🎬 Movie Canon ($moviesCount)',
-                          isSelected: selectedCanon == CanonType.movie,
-                          onTap: () {
-                            ref.read(hapticsServiceProvider).duelSelectCandidate();
-                            ref.read(selectedCanonProvider.notifier).select(CanonType.movie);
-                          },
+                // 2. SEGMENTED DUAL-CANON SELECTOR (FE-206)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Container(
+                    constraints: const BoxConstraints(minHeight: 56),
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: TellyColors.backgroundSurface,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: TellyColors.borderGlass),
+                    ),
+                    child: Row(
+                      children: [
+                        // Movie Canon Tab
+                        Expanded(
+                          child: _buildCanonTab(
+                            key: const Key('movie_canon_tab'),
+                            label: '🎬 Movies ($moviesCount)',
+                            isSelected: selectedCanon == CanonType.movie,
+                            onTap: () {
+                              ref.read(hapticsServiceProvider).duelSelectCandidate();
+                              ref.read(selectedCanonProvider.notifier).select(CanonType.movie);
+                            },
+                          ),
                         ),
-                      ),
 
-                      const SizedBox(width: 4),
+                        const SizedBox(width: 4),
 
-                      // Series Canon Tab
-                      Expanded(
-                        child: _buildCanonTab(
-                          key: const Key('series_canon_tab'),
-                          label: '📺 Series & Anime ($seriesCount)',
-                          isSelected: selectedCanon == CanonType.series,
-                          onTap: () {
-                            ref.read(hapticsServiceProvider).duelSelectCandidate();
-                            ref.read(selectedCanonProvider.notifier).select(CanonType.series);
-                          },
+                        // Series Canon Tab
+                        Expanded(
+                          child: _buildCanonTab(
+                            key: const Key('series_canon_tab'),
+                            label: '📺 TV Shows ($seriesCount)',
+                            subtitle: 'Includes anime',
+                            isSelected: selectedCanon == CanonType.series,
+                            onTap: () {
+                              ref.read(hapticsServiceProvider).duelSelectCandidate();
+                              ref.read(selectedCanonProvider.notifier).select(CanonType.series);
+                            },
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
 
               const SizedBox(height: 16),
 
@@ -277,7 +290,8 @@ class DualCanonProfileScreen extends ConsumerWidget {
           ),
         ),
       ),
-    );
+    ),
+  );
   }
 
   /// Up to three titles: my pinned picks that belong to the shown canon (in pin order),
@@ -315,6 +329,7 @@ class DualCanonProfileScreen extends ConsumerWidget {
   Widget _buildCanonTab({
     required Key key,
     required String label,
+    String? subtitle,
     required bool isSelected,
     required VoidCallback onTap,
   }) {
@@ -324,6 +339,7 @@ class DualCanonProfileScreen extends ConsumerWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         constraints: const BoxConstraints(minHeight: 48),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: isSelected ? TellyColors.phosphorLime : Colors.transparent,
@@ -337,18 +353,36 @@ class DualCanonProfileScreen extends ConsumerWidget {
                 ]
               : null,
         ),
-        child: Center(
-          child: Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TellyTypography.labelSmall(
-              color: isSelected ? const Color(0xFF08090C) : TellyColors.textSecondary,
-            ).copyWith(
-              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-              fontSize: 12,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TellyTypography.labelSmall(
+                color: isSelected ? const Color(0xFF08090C) : TellyColors.textSecondary,
+              ).copyWith(
+                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                fontSize: 12,
+              ),
             ),
-          ),
+            if (subtitle != null) ...[
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: isSelected ? const Color(0xFF08090C).withValues(alpha: 0.7) : TellyColors.textTertiary,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w500,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );

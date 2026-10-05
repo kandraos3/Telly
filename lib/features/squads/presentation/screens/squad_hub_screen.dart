@@ -355,7 +355,7 @@ class _CanonSwitcher extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: TellyColors.borderGlass),
       ),
-      child: Row(children: [option('tv', '📺 Series Canon'), option('movie', '🎬 Movie Canon')]),
+      child: Row(children: [option('movie', '🎬 Movies'), option('tv', '📺 TV Shows')]),
     );
   }
 }
