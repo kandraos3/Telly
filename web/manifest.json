@@ -1,11 +1,11 @@
 {
-    "name": "telly_app",
-    "short_name": "telly_app",
+    "name": "Telly",
+    "short_name": "Telly",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#08090C",
+    "theme_color": "#08090C",
+    "description": "Rank every show and film you watch, one head-to-head duel at a time.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

@@ -1,0 +1,12 @@
+# Native launch screen (FE-BRAND-01). Spec: docs/design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md §7.3.
+# Run: dart run flutter_native_splash:create
+flutter_native_splash:
+  color: "#08090C"
+  image: assets/brand/splash_logo.png
+  android_12:
+    image: assets/brand/icon_android_foreground.png
+    icon_background_color: "#1A1D27"
+    color: "#08090C"
+  # Web skipped: removing the web splash needs the package as a runtime dependency.
+  web: false
+  fullscreen: false

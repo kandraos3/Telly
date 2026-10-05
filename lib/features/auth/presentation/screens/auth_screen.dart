@@ -44,18 +44,8 @@ class AuthScreen extends ConsumerWidget {
                   const Spacer(flex: 2),
 
                   // Brand Hero & Tagline
-                  const Center(child: TellyLogo(size: 72)),
-                  const SizedBox(height: 16),
-                  Center(
-                    child: Text(
-                      'TELLY',
-                      style: TellyTypography.displayXXL().copyWith(
-                        letterSpacing: 4.0,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
+                  const Center(child: TellyLogo(size: 104)),
+                  const SizedBox(height: 24),
                   Center(
                     child: Text(
                       'Your Personal TV Canon.\nRanked, Shared, Settled.',

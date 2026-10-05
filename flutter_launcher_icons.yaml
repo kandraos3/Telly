@@ -1,0 +1,19 @@
+# App icon generation (FE-BRAND-01). Masters come from tool/brand/generate_brand_assets_test.dart.
+# Spec: docs/design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md §7.3. Run: dart run flutter_launcher_icons
+flutter_launcher_icons:
+  image_path: "assets/brand/icon_1024.png"
+  android: "ic_launcher"
+  min_sdk_android: 21
+  adaptive_icon_background: "assets/brand/icon_android_background.png"
+  adaptive_icon_foreground: "assets/brand/icon_android_foreground.png"
+  adaptive_icon_monochrome: "assets/brand/icon_android_monochrome.png"
+  # The foreground master is already padded to the 72/108 visible area.
+  adaptive_icon_foreground_inset: 0
+  ios: true
+  remove_alpha_ios: true
+  background_color_ios: "#08090C"
+  web:
+    generate: true
+    image_path: "assets/brand/icon_1024.png"
+    background_color: "#08090C"
+    theme_color: "#08090C"

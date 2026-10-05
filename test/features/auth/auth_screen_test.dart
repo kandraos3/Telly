@@ -25,7 +25,7 @@ void main() {
       );
 
       // Verify Brand Title & Tagline
-      expect(find.text('TELLY'), findsOneWidget);
+      expect(find.bySemanticsLabel('Telly'), findsOneWidget);
       expect(find.textContaining('Your Personal TV Canon'), findsOneWidget);
 
       // Verify 3 Auth Buttons

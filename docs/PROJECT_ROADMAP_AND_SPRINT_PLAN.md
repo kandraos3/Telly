@@ -27,8 +27,8 @@
 - **Current Active Ticket**: `ALL_DONE` (Sprint 6 Complete) — Sprint 6: 32 / 32 tickets complete
 - **Overall Roadmap Progress**: All 32/32 Sprint 6 architecture, integration, algorithm, and QA remediation tickets fully implemented and verified.
 - **Human-Only Tasks**: Tasks marked `👤 [TO BE DONE BY HUMAN]` (cloud deployment, secrets provisioning, store submission, physical-device profile runs). Client application codebase is 100% complete and self-contained.
-- **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (462 / 462 pass; 100% golden, a11y, integration, and algorithmic parity suites pass; coverage 86.81% overall / 97.04% ranking)
-- **Last Updated**: 2026-10-05 (`FE-HEADER-01` tab headers and `FE-HEADER-02` pushed-screen headers complete)
+- **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (657 / 657 pass; 100% golden, a11y, integration, and algorithmic parity suites pass; coverage 86.81% overall / 97.04% ranking)
+- **Last Updated**: 2026-10-05 (`FE-BRAND-01` app icon, splash and in-app logo complete)
 
 | Sprint | Status | Total Tickets | Audit Verdict |
 | :---: | :---: | :---: | :--- |
@@ -203,6 +203,23 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
 - **Testing & Verification**:
   - [x] Widget test: hidden at the top and after a small scroll, shown once the page title is under the bar, hidden again back at the top.
 - **Dependencies**: `FE-HEADER-02`.
+
+#### `FE-BRAND-01`: Brand Mark, App Icon & Launch Screen
+- **Spec Reference**:
+  - [**`design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md) §7 (Brand Mark & App Icon), §2, §3
+- **Scope & Objectives**: Every platform still showed the stock Flutter icon, and the app used a different TV-and-bars drawing as its logo. The chosen mark (concept F8: lowercase lime `telly` on a slate tile) is now the app icon on Android, iOS and web, the native launch screen, and the only logo inside the app.
+- **Granular Tasks**:
+  - [x] `lib/core/widgets/telly_logo.dart`: `TellyBrand` geometry constants, `TellyLogoPainter` (tile + wordmark, with layer switches and an inset for adaptive layers), `TellyLogo` (rounded tile) and `TellyWordmark` (text only). Plus Jakarta Sans ExtraBold is registered under `fonts:` so the painter lays out text synchronously.
+  - [x] `tool/brand/generate_brand_assets_test.dart` renders the masters in `assets/brand/` from the painter.
+  - [x] `flutter_launcher_icons`: Android legacy + adaptive (foreground, background, monochrome themed icon) icons, the iOS `AppIcon` set (no alpha), and web favicon + PWA icons.
+  - [x] `flutter_native_splash`: Void Canvas launch screen with the tile on Android < 12 and iOS, and the mark on an `#1A1D27` icon disc on Android 12+.
+  - [x] Web manifest and page renamed from `telly_app` to Telly, with Void Canvas theme colors; iOS home-screen name changed from "Telly App" to "Telly".
+  - [x] In-app: sign-in hero and session splash use `TellyLogo` (the redundant "TELLY" title is removed); the share story card uses `TellyWordmark`.
+- **Testing & Verification**:
+  - [x] `test/core/widgets/telly_logo_test.dart`: semantics label, tile size and corner radius, wordmark style, and pixel checks that the painter puts the lime wordmark where the spec says and keeps adaptive foregrounds transparent.
+  - [x] `test/core/brand/brand_assets_test.dart`: master and platform icon sizes, no-alpha iOS store icon, adaptive XML without a second inset, Android 12 splash colors, web manifest and title.
+  - [x] Auth screen test updated for the logo replacing the "TELLY" title; a11y suite passes in dark and light themes.
+- **Dependencies**: `FE-102`, `FE-AUTH-01`.
 
 #### `FE-103`: Haptic Feedback Engine (`HapticsService`)
 - **Spec Reference**:

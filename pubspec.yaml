@@ -67,6 +67,8 @@ dev_dependencies:
   mockito: ^5.4.4
   http: ^1.2.0
   test: ^1.25.8
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.8
 
 flutter:
   uses-material-design: true
@@ -74,3 +76,9 @@ flutter:
     - assets/fonts/
     - docs/legal/
 
+  fonts:
+    # Brand wordmark (FE-BRAND-01): painted synchronously by TellyLogoPainter.
+    - family: PlusJakartaSans
+      fonts:
+        - asset: assets/fonts/PlusJakartaSans-ExtraBold.ttf
+          weight: 800

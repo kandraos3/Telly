@@ -31,15 +31,7 @@ class RevealStoryCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const TellyLogo(size: 26),
-              const SizedBox(width: 8),
-              Text('TELLY',
-                  style: TellyTypography.labelLarge().copyWith(letterSpacing: 3, fontWeight: FontWeight.w900)),
-            ],
-          ),
+          const Center(child: TellyWordmark(fontSize: 28)),
           const Spacer(),
           Text(
             'JUST RANKED IN MY ${story.canonLabel.toUpperCase()}',
