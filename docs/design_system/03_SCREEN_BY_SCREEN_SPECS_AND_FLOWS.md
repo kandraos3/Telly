@@ -675,38 +675,43 @@ Every screen opened on top of the tabs uses `TellySubpageAppBar`, the same desig
 - **Empty:** the shared empty state (`groups_2` icon, "No squads yet", "Squads rank together…", **Create a squad**).
 - **Error:** the shared empty state ("Couldn't load your squads", **Retry**). Pull to refresh on every state.
 
-### `SCR-17`: Squads Hub & Consensus Leaderboard
+### `SCR-17b`: Squad Hub & Consensus Leaderboard — `FE-SQUADS-04`
 
 ```
 ┌────────────────────────────────────────────────────────┐
 │ [←]  The Apartment                         [👤+]  [⋮]  │
 │      5 members                                         │
 ├────────────────────────────────────────────────────────┤
-│  Members: Jordan, Maya, Alex, Chris, Sam               │
-│                                                        │
-│  [ Consensus Canon ]   [ Squad Watchlist ]   [ Chat ]  │
-│                                                        │
-│  CONSENSUS TOP 5 SHOWS (Borda Count Aggregated)        │
-│  #1  SUCCESSION (490 pts)                              │
-│      Champion: Jordan (#1) • Lowest: Alex (#3)         │
-│                                                        │
-│  #2  SEVERANCE (472 pts)                               │
-│      Champion: Maya (#2) • Lowest: Sam (#5)            │
-│                                                        │
-│  #3  THE BEAR (440 pts)                                │
-│      Champion: Alex (#1) • Lowest: Chris (#9)          │
-│                                                        │
-│  🔥 SQUAD'S BIGGEST DEBATE: LOST                       │
-│  Variance: 64 ranks between Alex (#4) and Sam (#68)    │
-│  [ View Debate Thread (18 comments) → ]                │
+│ ┌────────────────────────────────────────────────────┐ │
+│ │ ┌──┐ The Apartment                                 │ │
+│ │ │TA│ Roommates who argue about Lost                │ │
+│ │ (J)(M)(A)(C)(S)  Jordan and 4 others            ›  │ │
+│ │ ────────────────────────────────────────────────── │ │
+│ │      5            42                3              │ │
+│ │   Members   Ranked together      Debates           │ │
+│ └────────────────────────────────────────────────────┘ │
+│ ┌ Consensus ┬ Watchlist ┬ Debates ┐                    │
+│ ┌ ████ Movies ████ ┬ TV Shows ┐                        │
+│ ━ SQUAD TOP 3 ───────────────────────────────────────  │
+│ [#1 poster]   [#2 poster]   [#3 poster]                │
+│ ┌ 🔥 BIGGEST DEBATE ─────────────────────────────────┐ │
+│ │ [p] Lost                                   64      │ │
+│ │     Alex #4  vs  Sam #68              ranks apart  │ │
+│ └────────────────────────────────────────────────────┘ │
+│ ━ THE RANKING ──────────────────────────── 42 titles   │
+│ #4  [p] Succession                         490 pts     │
+│         🏆 Jordan #1   ↓ Alex #3                       │
+│         Ranked by 4 of 5                               │
 └────────────────────────────────────────────────────────┘
 ```
 
-- **User Actions:**
-  - Tapping any consensus show reveals which squad member ranked it where.
-  - Tapping "Squad Watchlist" filters titles all 5 members want to watch.
-
----
+- **Hero card** (as the Canon's profile card): monogram (56 px, as on SCR-17a), name, description, an avatar stack with "Jordan and 4 others"; tapping it opens a frosted members sheet (avatar, name, @handle, OWNER / ADMIN badge; a row opens the profile). Below a hairline: Members, Ranked together and Debates (coral when any) for the canon shown. Counts only, no derived score.
+- **Section tabs:** the shared segmented control (§5.5): Consensus | Watchlist | Debates.
+- **Canon switcher:** the shared Movies | TV Shows switcher, Movies first, without counts (a canon's size is known only once loaded). Hidden on Watchlist, which spans both canons.
+- **Consensus:** "SQUAD TOP 3" poster cards (the Canon's Top 3 Showcase, #1 in the accent), the biggest debate, then "THE RANKING" from #4 in the Canon's ranked-row style: rank, poster, title, the member who ranks it highest (🏆) and lowest (↓), "Ranked by N of M", Borda points in the accent. Every title opens SCR-08.
+- **Watchlist:** "WANT TO WATCH (N)" Queue-style cards: poster, title, type, a progress bar of members who queued it and "N of M want to watch"; an EVERYONE badge and accent border when all members did.
+- **Debates:** "DEBATES (N)": coral cards (Feed upset styling) with poster, title as typed, "A #4 vs B #68" and the gap in ranks.
+- **Empty states** (shared §7.2): no rankings → "Nothing ranked together yet" with **Rank a title** (SCR-09); no shared picks; no debates.
 
 ### `SCR-18`: TV Graveyard (Dropped / DNF Tracker)
 

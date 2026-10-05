@@ -148,10 +148,14 @@ void main() {
       // FE-HEADER-02: the name as typed, the member count on a quiet second line.
       expect(tester.widget<Text>(find.byKey(const Key('subpage_title'))).data, 'The Apartment');
       expect(tester.widget<Text>(find.byKey(const Key('subpage_subtitle'))).data, '2 members');
-      expect(find.text('MEMBERS (2)'), findsOneWidget);
+      // FE-SQUADS-04: the hero names the members; the debate card is titled as typed.
+      expect(tester.widget<Text>(find.byKey(const Key('squad_members_line'))).data, 'Jordan and Alex');
       expect(find.byKey(const Key('squad_consensus_101')), findsOneWidget);
-      expect(find.textContaining("SQUAD'S BIGGEST DEBATE: LOST"), findsOneWidget);
-      expect(find.textContaining('Divergence: 64 ranks'), findsOneWidget);
+      final debate = find.byKey(const Key('squad_debate_105'));
+      expect(find.descendant(of: debate, matching: find.text('BIGGEST DEBATE')), findsOneWidget);
+      expect(find.descendant(of: debate, matching: find.text('Lost')), findsOneWidget);
+      expect(find.descendant(of: debate, matching: find.text('64')), findsOneWidget);
+      expect(find.descendant(of: debate, matching: find.text('ranks apart')), findsOneWidget);
     });
 
     testWidgets('switching canon loads that canon once', (tester) async {
@@ -216,7 +220,7 @@ void main() {
       await tester.tap(find.byKey(const Key('squad_invite_confirm')));
       await tester.pumpAndSettle();
       expect(repo.added.single, ('sq-1', 'u2'));
-      expect(find.text('MEMBERS (3)'), findsOneWidget);
+      expect(tester.widget<Text>(find.byKey(const Key('squad_members_line'))).data, 'Jordan, Alex and Maya');
       expect(find.text('Added @maya'), findsOneWidget);
     });
 
@@ -277,6 +281,113 @@ void main() {
       repo.failReads = true;
       await pump(tester, const SquadHubScreen(squadId: 'sq-1'));
       expect(find.byKey(const Key('squad_error')), findsOneWidget);
+    });
+  });
+
+  group('FE-SQUADS-04: squad hub redesign', () {
+    setUp(() {
+      repo.boards['movie'] = [
+        for (final (rank, id, title) in [(1, 201, 'Heat'), (2, 202, 'Alien'), (3, 203, 'Ran'), (4, 204, 'Jaws'), (5, 205, 'Up')])
+          item(rank, id, title),
+      ];
+    });
+
+    testWidgets('top three sit on the podium, the rest in ranked rows with who ranked them', (tester) async {
+      await pump(tester, const SquadHubScreen(squadId: 'sq-1'));
+      expect(find.text('SQUAD TOP 3'), findsOneWidget);
+      expect(find.text('THE RANKING'), findsOneWidget);
+      expect(find.text('5 titles'), findsOneWidget);
+      for (final id in [201, 202, 203, 204, 205]) {
+        expect(find.byKey(Key('squad_consensus_$id')), findsOneWidget);
+      }
+      final row4 = find.byKey(const Key('squad_consensus_204'));
+      expect(find.descendant(of: row4, matching: find.text('#4')), findsOneWidget);
+      expect(find.descendant(of: row4, matching: find.text('Jordan #1')), findsOneWidget);
+      expect(find.descendant(of: row4, matching: find.text('Alex #3')), findsOneWidget);
+      expect(find.descendant(of: row4, matching: find.text('Ranked by 3 of 2')), findsOneWidget);
+      // Podium cards are posters, not rows: no champion / lowest line.
+      expect(find.descendant(of: find.byKey(const Key('squad_consensus_201')), matching: find.byKey(const Key('squad_row_lowest'))), findsNothing);
+    });
+
+    testWidgets('consensus titles open their title page', (tester) async {
+      await pump(tester, const SquadHubScreen(squadId: 'sq-1'));
+      await tester.tap(find.byKey(const Key('squad_consensus_204')));
+      await tester.pumpAndSettle();
+      expect(find.text('route:/title/tv/204'), findsOneWidget, reason: 'the fixture items are tagged tv');
+    });
+
+    testWidgets('hero stats follow the canon shown', (tester) async {
+      await pump(tester, const SquadHubScreen(squadId: 'sq-1'));
+      String stat(String key) =>
+          tester.widget<Text>(find.descendant(of: find.byKey(Key(key)), matching: find.byType(Text)).first).data!;
+      expect(stat('squad_stat_members'), '2');
+      expect(stat('squad_stat_titles'), '5');
+      expect(stat('squad_stat_debates'), '0');
+
+      await tester.tap(find.byKey(const Key('squad_canon_tv')));
+      await tester.pumpAndSettle();
+      expect(stat('squad_stat_titles'), '2');
+      expect(stat('squad_stat_debates'), '1');
+    });
+
+    testWidgets('the members row opens the member list, which opens profiles', (tester) async {
+      await pump(tester, const SquadHubScreen(squadId: 'sq-1'));
+      await tester.tap(find.byKey(const Key('squad_members_button')));
+      await tester.pumpAndSettle();
+      expect(find.text('Members (2)'), findsOneWidget);
+      expect(find.descendant(of: find.byKey(const Key('squad_member_u1')), matching: find.text('OWNER')), findsOneWidget);
+      expect(find.text('@alex'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('squad_member_u3')));
+      await tester.pumpAndSettle();
+      expect(find.text('route:/u/alex'), findsOneWidget);
+    });
+
+    testWidgets('an empty canon offers to rank a title', (tester) async {
+      repo.boards['movie'] = [];
+      await pump(tester, const SquadHubScreen(squadId: 'sq-1'));
+      expect(find.byKey(const Key('squad_consensus_empty')), findsOneWidget);
+      expect(find.textContaining('Once members rank a movie'), findsOneWidget);
+      await tester.tap(find.text('Rank a title'));
+      await tester.pumpAndSettle();
+      expect(find.text('route:/log'), findsOneWidget);
+    });
+
+    testWidgets('watchlist cards show how many members want each title', (tester) async {
+      repo.watchlist = const [
+        SharedWatchlistItem(titleId: 1396, mediaType: 'tv', title: 'Breaking Bad', queuedBy: 2, memberCount: 2),
+        SharedWatchlistItem(titleId: 680, mediaType: 'movie', title: 'Pulp Fiction', queuedBy: 2, memberCount: 3),
+      ];
+      await pump(tester, const SquadHubScreen(squadId: 'sq-1'));
+      await tester.tap(find.byKey(const Key('squad_tab_watchlist')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('WANT TO WATCH (2)'), findsOneWidget);
+      expect(find.byKey(const Key('squad_canon_movie')), findsNothing, reason: 'the watchlist spans both canons');
+      final everyone = find.byKey(const Key('squad_watch_tv_1396'));
+      expect(find.descendant(of: everyone, matching: find.text('EVERYONE')), findsOneWidget);
+      final some = find.byKey(const Key('squad_watch_movie_680'));
+      expect(find.descendant(of: some, matching: find.text('2 of 3 want to watch')), findsOneWidget);
+      expect(find.descendant(of: some, matching: find.text('EVERYONE')), findsNothing);
+      expect(
+        tester.widget<LinearProgressIndicator>(find.descendant(of: some, matching: find.byType(LinearProgressIndicator))).value,
+        closeTo(2 / 3, 1e-9),
+      );
+
+      await tester.tap(some);
+      await tester.pumpAndSettle();
+      expect(find.text('route:/title/movie/680'), findsOneWidget);
+    });
+
+    testWidgets('empty watchlist and debates use the shared empty state', (tester) async {
+      await pump(tester, const SquadHubScreen(squadId: 'sq-1'));
+      await tester.tap(find.byKey(const Key('squad_tab_watchlist')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('squad_watchlist_empty')), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('squad_tab_debates')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('squad_debates_empty')), findsOneWidget, reason: 'no hot debates among the movies');
     });
   });
 

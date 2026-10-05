@@ -24,11 +24,11 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 6 — Integration, Wiring & Audit Remediation** (COMPLETED: 32 / 32 tickets complete)
-- **Current Active Ticket**: `FE-SQUADS-04` (Squads redesign: `FE-UI-01` ✅ → `FE-SQUADS-03` ✅ → `FE-SQUADS-04`) — Sprint 6: 32 / 32 tickets complete
+- **Current Active Ticket**: `ALL_DONE` (Squads redesign complete: `FE-UI-01` ✅ → `FE-SQUADS-03` ✅ → `FE-SQUADS-04` ✅) — Sprint 6: 32 / 32 tickets complete
 - **Overall Roadmap Progress**: All 32/32 Sprint 6 architecture, integration, algorithm, and QA remediation tickets fully implemented and verified.
 - **Human-Only Tasks**: Tasks marked `👤 [TO BE DONE BY HUMAN]` (cloud deployment, secrets provisioning, store submission, physical-device profile runs). Client application codebase is 100% complete and self-contained.
-- **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (675 / 675 pass; 100% golden, a11y, integration, and algorithmic parity suites pass; coverage 86.81% overall / 97.04% ranking)
-- **Last Updated**: 2026-10-05 (`FE-SQUADS-03` My Squads redesign and `get_my_squads` complete)
+- **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (682 / 682 pass; 100% golden, a11y, integration, and algorithmic parity suites pass; coverage 86.81% overall / 97.04% ranking)
+- **Last Updated**: 2026-10-05 (`FE-SQUADS-04` squad hub redesign complete)
 
 | Sprint | Status | Total Tickets | Audit Verdict |
 | :---: | :---: | :---: | :--- |
@@ -2186,6 +2186,19 @@ Tickets ingested through the `issue-manager` skill. Each entry mirrors its GitHu
 - **Testing & Verification**:
   - [x] Widget tests: cards (monogram, OWNER / ADMIN, description, "+N", full count, no floating button), empty state → create sheet with blank names refused, error → Retry. Unit tests for monogram initials and the `get_my_squads` mapping. a11y audit (dark and light) with a role badge and description. pgTAP `020_my_squads_overview.test.sql` (runs in CI).
 - **Dependencies**: `FE-UI-01`, `FE-SQUADS-02`.
+
+#### `FE-SQUADS-04`: Squad Hub Redesign — Hero Card, Shared Switchers, Podium, Poster Rows & Debate Cards
+- **Spec Reference**: [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) `SCR-17b`; [**`design_system/02_COMPONENT_LIBRARY_AND_PATTERNS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/02_COMPONENT_LIBRARY_AND_PATTERNS.md) §3.1, §5.5–§5.7, §7.2; [**`features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md) §4
+- **Scope & Objectives**: The squad screen had a thin members strip, underline tabs and a grey switcher found nowhere else, poster-less rows that didn't open anything, an all-caps emoji debate box and plain list tiles. It now uses the same building blocks as Canon, Queue and Feed.
+- **Granular Tasks**:
+  - [x] Hero card: monogram, name, description, avatar stack + members line opening a frosted members sheet (role badges, rows open profiles), and Members / Ranked together / Debates counts for the canon shown.
+  - [x] Shared segmented control (Consensus / Watchlist / Debates) and shared canon switcher (hidden on Watchlist).
+  - [x] Consensus: "SQUAD TOP 3" poster podium, biggest-debate card, "THE RANKING" rows from #4 in the Canon row style with posters, champion / lowest and "Ranked by N of M". Every title opens SCR-08.
+  - [x] Watchlist: Queue-style poster cards with a members-who-queued progress bar and an EVERYONE badge. Debates: coral poster cards with "A #x vs B #y" and the rank gap.
+  - [x] Shared empty states, including **Rank a title** → SCR-09 when nobody has ranked the canon. Theme-aware accents throughout (no fixed lime text on light).
+- **Testing & Verification**:
+  - [x] Widget tests: podium and rows, title navigation, stats per canon, members sheet → profile, empty canon → `/log`, watchlist counts / badge / progress / navigation, empty watchlist and debates. Existing hub, invite and delete / leave tests updated for the hero members line and debate card. a11y audit (dark and light) with a seeded leaderboard and debate.
+- **Dependencies**: `FE-UI-01`, `FE-SQUADS-03`.
 
 #### `FE-COWATCH-01`: Two-to-Watch Streamlined Flow, Quick Swipe Posters & Real Title Data (#27)
 - **Spec Reference**: [**`features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md) §3, §3.2; `SCR-16`

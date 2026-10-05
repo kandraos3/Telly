@@ -92,7 +92,26 @@ class _FakeSquadRepository implements SquadRepository {
   Future<Squad> fetchSquad(String squadId) async => squads[squadId]!;
 
   @override
-  Future<List<SquadConsensusItem>> consensus(Squad squad, String mediaType) async => [];
+  Future<List<SquadConsensusItem>> consensus(Squad squad, String mediaType) async => [
+        // FE-SQUADS-04: podium, ranked rows and a debate card are all audited.
+        for (final (rank, low) in [(1, 2), (2, 30), (3, 4), (4, 6), (5, 7)])
+          SquadConsensusItem(
+            consensusRank: rank,
+            titleId: 900 + rank,
+            title: 'Title $rank',
+            releaseYear: 2020,
+            mediaType: mediaType,
+            totalBordaPoints: 100 - rank,
+            championUserId: 'u-1',
+            championDisplayName: 'Alex',
+            championRank: 1,
+            lowestUserId: 'u-1',
+            lowestDisplayName: 'Alex',
+            lowestRank: low,
+            membersRankedCount: 1,
+            rankVariance: (low - 1).toDouble(),
+          ),
+      ];
 
   @override
   Future<List<SharedWatchlistItem>> sharedWatchlist(String squadId) async => [];
