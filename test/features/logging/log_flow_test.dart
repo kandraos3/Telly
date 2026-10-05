@@ -82,8 +82,8 @@ void main() {
 
       // SCR-11 editorial sheet
       expect(find.byKey(const Key('placed_canon_banner')), findsOneWidget);
-      expect(find.textContaining('Christopher Storer'), findsWidgets, reason: 'director auto-tag from credits');
-      expect(find.textContaining('Jeremy Allen White as Carmy Berzatto'), findsWidgets, reason: 'MVP from cast');
+      expect(find.textContaining('Christopher Storer'), findsWidgets, reason: 'director optional tag available');
+      expect(find.byKey(const Key('mvp_character_dropdown')), findsOneWidget, reason: 'MVP dropdown present and optional');
       await tester.tap(find.byKey(const Key('editorial_skip_button')));
       await tester.pumpAndSettle();
 

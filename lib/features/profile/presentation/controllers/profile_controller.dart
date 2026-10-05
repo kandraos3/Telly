@@ -136,6 +136,26 @@ class ProfileCanonNotifier extends Notifier<ProfileCanonState> {
 
     await ref.read(rankingRepositoryProvider).move(mediaType: canon.dbValue, titleId: titleId, newRank: newRank);
   }
+
+  /// Deletes [titleId] from canon and re-scores immediately, then deletes and closes gap in DB.
+  Future<void> deleteTitle({required CanonType canon, required int titleId}) async {
+    final current = List<CanonEntry>.from(canon == CanonType.movie ? state.movies : state.series);
+    final from = current.indexWhere((e) => e.id == titleId);
+    if (from < 0) return;
+    current.removeAt(from);
+
+    final total = current.length;
+    final rescored = List<CanonEntry>.unmodifiable([
+      for (var i = 0; i < total; i++)
+        current[i].copyWith(
+          rankPosition: i + 1,
+          calculatedScore: total == 0 ? 0.0 : ScoreCurveCalculator.calculateRoundedScore(i + 1, total),
+        ),
+    ]);
+    state = canon == CanonType.movie ? state.copyWith(movies: rescored) : state.copyWith(series: rescored);
+
+    await ref.read(rankingRepositoryProvider).remove(mediaType: canon.dbValue, titleId: titleId);
+  }
 }
 
 final profileCanonProvider = NotifierProvider<ProfileCanonNotifier, ProfileCanonState>(ProfileCanonNotifier.new);

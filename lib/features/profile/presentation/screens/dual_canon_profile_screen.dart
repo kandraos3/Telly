@@ -205,52 +205,64 @@ class DualCanonProfileScreen extends ConsumerWidget {
                       ),
                     ),
 
-                    // Anime Franchise Rollup Toggle (Visible for Series Canon)
-                    if (selectedCanon == CanonType.series) ...[
-                      GestureDetector(
-                        key: const Key('franchise_rollup_toggle'),
-                        onTap: () {
-                          ref.read(hapticsServiceProvider).duelSelectCandidate();
-                          ref.read(franchiseRollupProvider.notifier).select(!rollupAnime);
-                        },
-                        child: Container(
-                          constraints: const BoxConstraints(minHeight: 48),
-                          alignment: Alignment.center,
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: rollupAnime
-                                ? TellyColors.electricViolet.withValues(alpha: 0.15)
-                                : TellyColors.backgroundCard,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: rollupAnime
-                                  ? TellyColors.electricViolet
-                                  : TellyColors.strokeSubtle,
-                            ),
+                    // View Options Overflow Button (relocated Rollup & preferences)
+                    IconButton(
+                      key: const Key('canon_options_button'),
+                      icon: const Icon(Icons.more_vert, color: TellyColors.textSecondary),
+                      tooltip: 'View Options',
+                      onPressed: () {
+                        showModalBottomSheet(
+                          context: context,
+                          backgroundColor: TellyColors.backgroundCard,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                           ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.auto_awesome_mosaic_rounded,
-                                size: 14,
-                                color: rollupAnime
-                                    ? TellyColors.electricViolet
-                                    : TellyColors.textTertiary,
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                rollupAnime ? 'Rollup: ON' : 'Rollup: OFF',
-                                style: TellyTypography.caption(
-                                  color: rollupAnime
-                                      ? TellyColors.electricViolet
-                                      : TellyColors.textTertiary,
-                                ).copyWith(fontWeight: FontWeight.bold),
-                              ),
-                            ],
+                          builder: (sheetCtx) => Consumer(
+                            builder: (ctx, ref, _) {
+                              final currentRollup = ref.watch(franchiseRollupProvider);
+                              return SafeArea(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'VIEW OPTIONS',
+                                        style: TellyTypography.labelSmall(color: TellyColors.textTertiary)
+                                            .copyWith(fontWeight: FontWeight.bold, letterSpacing: 1.0),
+                                      ),
+                                      const SizedBox(height: 12),
+                                      if (selectedCanon == CanonType.series)
+                                        SwitchListTile(
+                                          key: const Key('franchise_rollup_toggle'),
+                                          contentPadding: EdgeInsets.zero,
+                                          title: const Text('Anime Franchise Rollup', style: TextStyle(color: TellyColors.textPrimary)),
+                                          subtitle: const Text(
+                                            'Combine multi-season anime into a single master entry',
+                                            style: TextStyle(color: TellyColors.textTertiary, fontSize: 12),
+                                          ),
+                                          activeThumbColor: TellyColors.phosphorLime,
+                                          value: currentRollup,
+                                          onChanged: (val) {
+                                            ref.read(hapticsServiceProvider).duelSelectCandidate();
+                                            ref.read(franchiseRollupProvider.notifier).select(val);
+                                          },
+                                        )
+                                      else
+                                        const Padding(
+                                          padding: EdgeInsets.symmetric(vertical: 8),
+                                          child: Text('No additional options for Movies.', style: TextStyle(color: TellyColors.textTertiary)),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
                           ),
-                        ),
-                      ),
-                    ],
+                        );
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -262,7 +274,7 @@ class DualCanonProfileScreen extends ConsumerWidget {
                 CanonViewMode.rankedList => RankedCanonList(
                     entries: entries,
                     onTapEntry: handleTap,
-                    onLongPressEntry: (entry) => _showEntryActions(context, entry),
+                    onLongPressEntry: (entry) => _showEntryActions(context, entry, ref, selectedCanon),
                     onReorder: (oldIndex, newIndex) {
                       // Map list indices to canon ranks so this also works on the rolled-up list.
                       final target = newIndex > oldIndex ? newIndex - 1 : newIndex;
@@ -305,25 +317,83 @@ class DualCanonProfileScreen extends ConsumerWidget {
   }
 
   /// Row context menu: "Reset Duels for This Show" re-runs the tournament for the title
-  /// (features/02 §7.2); its notes and tags are kept because it is committed as a move.
-  Future<void> _showEntryActions(BuildContext context, CanonEntry entry) async {
-    final reset = await showModalBottomSheet<bool>(
+  /// (features/02 §7.2); "Remove from List" deletes the entry and rescores the canon.
+  Future<void> _showEntryActions(BuildContext context, CanonEntry entry, WidgetRef ref, CanonType selectedCanon) async {
+    final action = await showModalBottomSheet<String>(
       context: context,
       backgroundColor: TellyColors.backgroundCard,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (ctx) => SafeArea(
-        child: ListTile(
-          key: const Key('reset_duels_action'),
-          leading: const Icon(Icons.refresh, color: TellyColors.phosphorLime),
-          title: Text('🔄 Reset Duels for This Show', style: TellyTypography.bodyLarge()),
-          onTap: () => Navigator.of(ctx).pop(true),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              key: const Key('reset_duels_action'),
+              leading: const Icon(Icons.refresh, color: TellyColors.phosphorLime),
+              title: Text('Reset Duels for This Show', style: TellyTypography.bodyLarge()),
+              onTap: () => Navigator.of(ctx).pop('reset'),
+            ),
+            ListTile(
+              key: const Key('remove_title_action'),
+              leading: const Icon(Icons.delete_outline, color: TellyColors.neonCoral),
+              title: Text('Remove from List', style: TellyTypography.bodyLarge(color: TellyColors.neonCoral)),
+              onTap: () => Navigator.of(ctx).pop('delete'),
+            ),
+          ],
         ),
       ),
     );
-    if (reset != true || !context.mounted) return;
-    context.push(
-      Routes.log,
-      extra: TitleSearchResult(id: entry.id, mediaType: entry.mediaType, title: entry.title, posterPath: entry.posterPath),
-    );
+
+    if (action == null || !context.mounted) return;
+
+    if (action == 'reset') {
+      context.push(
+        Routes.log,
+        extra: TitleSearchResult(id: entry.id, mediaType: entry.mediaType, title: entry.title, posterPath: entry.posterPath),
+      );
+    } else if (action == 'delete') {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogCtx) => AlertDialog(
+          backgroundColor: TellyColors.backgroundCard,
+          title: const Text('Remove from List?', style: TextStyle(color: TellyColors.textPrimary)),
+          content: Text(
+            'Are you sure you want to remove "${entry.title}"? Your remaining rankings and scores will be recalculated automatically.',
+            style: const TextStyle(color: TellyColors.textSecondary),
+          ),
+          actions: [
+            TextButton(
+              key: const Key('cancel_delete_title_button'),
+              onPressed: () => Navigator.of(dialogCtx).pop(false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              key: const Key('confirm_delete_title_button'),
+              style: TextButton.styleFrom(foregroundColor: TellyColors.neonCoral),
+              onPressed: () => Navigator.of(dialogCtx).pop(true),
+              child: const Text('Remove'),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed == true && context.mounted) {
+        await ref.read(profileCanonProvider.notifier).deleteTitle(
+          canon: selectedCanon,
+          titleId: entry.id,
+        );
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Removed "${entry.title}" from your list'),
+              backgroundColor: TellyColors.backgroundCard,
+            ),
+          );
+        }
+      }
+    }
   }
 
   Widget _buildCanonTab({

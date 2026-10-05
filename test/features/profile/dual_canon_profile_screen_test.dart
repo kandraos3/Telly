@@ -298,16 +298,86 @@ void main() {
       expect(find.text('Attack on Titan Season 1'), findsOneWidget);
       expect(find.text('Attack on Titan Season 2'), findsOneWidget);
 
-      // Tap Franchise Rollup toggle
+      // Tap View Options button to open sheet
+      final optionsBtn = find.byKey(const Key('canon_options_button'));
+      expect(optionsBtn, findsOneWidget);
+      await tester.tap(optionsBtn);
+      await tester.pumpAndSettle();
+
+      // Tap Franchise Rollup toggle inside options sheet
       final rollupToggle = find.byKey(const Key('franchise_rollup_toggle'));
       expect(rollupToggle, findsOneWidget);
       await tester.tap(rollupToggle);
+      await tester.pumpAndSettle();
+
+      // Dismiss bottom sheet
+      await tester.tapAt(const Offset(10, 10));
       await tester.pumpAndSettle();
 
       // After rollup: seasons folded into one 'Attack on Titan' entry (ALGO-602)
       expect(find.text('Attack on Titan'), findsOneWidget);
       expect(find.text('Includes: S1, S2'), findsOneWidget);
       expect(find.text('Attack on Titan Season 1'), findsNothing);
+    });
+  });
+
+  group('FE-CANON-01: Delete Title Action and Recalculation', () {
+    testWidgets('deleting an entry re-ranks and re-scores remaining list immediately', (tester) async {
+      final container = ProviderContainer(
+        overrides: [
+          databaseProvider.overrideWithValue(db),
+          profileCanonProvider.overrideWith(() => SeededProfileCanon(sampleMovies, sampleSeries)),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      // Initially 3 movies: Interstellar (#1), Parasite (#2), Dune: Part Two (#3)
+      expect(container.read(profileCanonProvider).movies.length, equals(3));
+
+      // Delete Interstellar (id 1)
+      await container.read(profileCanonProvider.notifier).deleteTitle(canon: CanonType.movie, titleId: 1);
+
+      final movies = container.read(profileCanonProvider).movies;
+      expect(movies.length, equals(2));
+      // Parasite is promoted to #1
+      expect(movies[0].title, equals('Parasite'));
+      expect(movies[0].rankPosition, equals(1));
+      expect(movies[0].calculatedScore, equals(10.00));
+      // Dune is now #2
+      expect(movies[1].title, equals('Dune: Part Two'));
+      expect(movies[1].rankPosition, equals(2));
+    });
+
+    testWidgets('long press entry opens options with remove action and confirmation dialog', (tester) async {
+      await tester.pumpWidget(buildTestableProfileScreen(
+        initialCanon: CanonType.movie,
+      ));
+      await tester.pumpAndSettle();
+
+      final rowFinder = find.byKey(const ValueKey('ranked_row_2'));
+      expect(rowFinder, findsOneWidget);
+      await tester.ensureVisible(rowFinder);
+      await tester.pumpAndSettle();
+
+      // Long press on Parasite row
+      await tester.longPress(rowFinder);
+      await tester.pumpAndSettle();
+
+      // Verify actions sheet shown with Remove from List
+      final removeAction = find.byKey(const Key('remove_title_action'));
+      expect(removeAction, findsOneWidget);
+      await tester.tap(removeAction);
+      await tester.pumpAndSettle();
+
+      // Verify confirmation dialog
+      expect(find.text('Remove from List?'), findsOneWidget);
+      final confirmBtn = find.byKey(const Key('confirm_delete_title_button'));
+      expect(confirmBtn, findsOneWidget);
+      await tester.tap(confirmBtn);
+      await tester.pumpAndSettle();
+
+      // Parasite ranked row should be removed from view
+      expect(find.byKey(const ValueKey('ranked_row_2')), findsNothing);
     });
   });
 

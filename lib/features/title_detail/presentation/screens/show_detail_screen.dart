@@ -397,7 +397,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                   TellyNeonBadge(
                     label: '${tier.emoji} ${tier.label.toUpperCase()}',
                     variant: tier == CanonTier.god
-                        ? TellyBadgeVariant.winner
+                        ? TellyBadgeVariant.godTier
                         : TellyBadgeVariant.tasteMatch,
                   ),
                   const SizedBox(width: 6),
@@ -411,12 +411,15 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                         key: const Key('show_detail_score_info_button'),
                         onTap: () => _showScoreExplanationDialog(context, communityScore, tier),
                         borderRadius: BorderRadius.circular(12),
-                        child: const Padding(
-                          padding: EdgeInsets.all(4.0),
-                          child: Icon(
-                            Icons.info_outline_rounded,
-                            size: 16,
-                            color: TellyColors.textTertiary,
+                        child: const SizedBox(
+                          width: 48,
+                          height: 48,
+                          child: Center(
+                            child: Icon(
+                              Icons.info_outline_rounded,
+                              size: 16,
+                              color: TellyColors.textTertiary,
+                            ),
                           ),
                         ),
                       ),
