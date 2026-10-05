@@ -18,7 +18,17 @@ class PosterGridView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final topNine = entries.take(9).toList();
+    if (entries.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 40),
+          child: Text(
+            'No titles ranked in this Canon yet.',
+            style: TellyTypography.bodyMedium(color: TellyColors.textTertiary),
+          ),
+        ),
+      );
+    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -31,65 +41,68 @@ class PosterGridView extends StatelessWidget {
           mainAxisSpacing: 8,
           childAspectRatio: 2 / 3, // Standard movie poster ratio
         ),
-        itemCount: 9,
+        itemCount: entries.length,
         itemBuilder: (context, index) {
-          if (index < topNine.length) {
-            final item = topNine[index];
-            final rank = index + 1;
-            return GestureDetector(
-              onTap: () => onTapEntry?.call(item),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    Container(
-                      color: TellyColors.backgroundCard,
-                      child: PosterImage(
-                        posterPath: item.posterPath,
-                        fallback: _posterFallback(item),
+          final item = entries[index];
+          final rank = item.rankPosition;
+          return GestureDetector(
+            key: Key('grid_poster_${item.id}'),
+            onTap: () => onTapEntry?.call(item),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Container(
+                    color: TellyColors.backgroundCard,
+                    child: PosterImage(
+                      posterPath: item.posterPath,
+                      fallback: _posterFallback(item),
+                    ),
+                  ),
+                  // Rank badge
+                  Positioned(
+                    top: 6,
+                    left: 6,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: rank == 1
+                            ? TellyColors.phosphorLime
+                            : TellyColors.backgroundPrimary.withValues(alpha: 0.8),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        '#$rank',
+                        key: Key('grid_rank_badge_${item.id}'),
+                        style: TellyTypography.caption(
+                          color: rank == 1 ? Colors.black : TellyColors.textPrimary,
+                        ).copyWith(fontWeight: FontWeight.bold),
                       ),
                     ),
-                    // Rank badge
-                    Positioned(
-                      top: 6,
-                      left: 6,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: rank == 1
-                              ? TellyColors.phosphorLime
-                              : TellyColors.backgroundPrimary.withValues(alpha: 0.8),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          '#$rank',
-                          style: TellyTypography.caption(
-                            color: rank == 1 ? Colors.black : TellyColors.textPrimary,
-                          ).copyWith(fontWeight: FontWeight.bold),
-                        ),
+                  ),
+                  // Score chip
+                  Positioned(
+                    bottom: 6,
+                    right: 6,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: TellyColors.backgroundPrimary.withValues(alpha: 0.85),
+                        borderRadius: BorderRadius.circular(5),
+                        border: Border.all(color: TellyColors.borderGlass),
+                      ),
+                      child: Text(
+                        item.calculatedScore.toStringAsFixed(2),
+                        style: TellyTypography.caption(color: TellyColors.phosphorLime)
+                            .copyWith(fontWeight: FontWeight.bold, fontSize: 10),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            );
-          } else {
-            // Empty placeholder for remaining slots
-            return Container(
-              decoration: BoxDecoration(
-                color: TellyColors.backgroundCard.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: TellyColors.strokeSubtle),
-              ),
-              child: Center(
-                child: Text(
-                  '#${index + 1}',
-                  style: TellyTypography.bodyMedium(color: TellyColors.textDisabled),
-                ),
-              ),
-            );
-          }
+            ),
+          );
         },
       ),
     );

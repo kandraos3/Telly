@@ -409,4 +409,42 @@ void main() {
       expect(find.text('Play comparison duels to organically calibrate position'), findsOneWidget);
     });
   });
+
+  group('FE-CANON-02: Full Poster Grid Display Without 9-Item Limit', () {
+    testWidgets('renders all entries beyond 9 items with rank badge and score chip', (tester) async {
+      final twelveMovies = List.generate(
+        12,
+        (i) => CanonEntry(
+          id: 100 + i,
+          title: 'Movie ${i + 1}',
+          mediaType: 'movie',
+          rankPosition: i + 1,
+          calculatedScore: (10.0 - (i * 0.4)).clamp(1.0, 10.0),
+        ),
+      );
+
+      await tester.pumpWidget(buildTestableProfileScreen(
+        movies: twelveMovies,
+        initialViewMode: CanonViewMode.grid3x3,
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(PosterGridView), findsOneWidget);
+
+      // Verify all 12 items exist in the grid
+      for (int i = 0; i < 12; i++) {
+        expect(find.byKey(Key('grid_poster_${100 + i}')), findsOneWidget);
+        expect(find.byKey(Key('grid_rank_badge_${100 + i}')), findsOneWidget);
+      }
+
+      // Verify #1 rank badge has distinct styling/text in poster grid
+      expect(
+        find.descendant(of: find.byType(PosterGridView), matching: find.text('#1')),
+        findsOneWidget,
+      );
+      expect(find.text('#12'), findsOneWidget);
+      // Verify score chip format
+      expect(find.text('10.00'), findsWidgets);
+    });
+  });
 }
