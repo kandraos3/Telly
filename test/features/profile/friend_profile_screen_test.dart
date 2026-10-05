@@ -158,7 +158,7 @@ void main() {
       expect(find.text('route:/u/maya/two-to-watch'), findsOneWidget);
     });
 
-    testWidgets('viewing own profile shows Edit Profile, hides follow & Two-to-Watch, and navigates to edit profile', (tester) async {
+    testWidgets('viewing own profile shows Edit Profile, 100% Taste Twin match, hides follow & Two-to-Watch, and navigates to edit profile', (tester) async {
       final authRepo = FakeAuthRepository(
         signedInUserId: 'u-maya',
         profile: UserProfile(id: 'u-maya', username: 'maya', displayName: 'Maya Lin', createdAt: DateTime(2026)),
@@ -167,6 +167,11 @@ void main() {
       expect(find.byKey(const Key('follow_button')), findsNothing);
       expect(find.byKey(const Key('edit_profile_button')), findsOneWidget);
       expect(find.textContaining('Two-to-Watch'), findsNothing);
+
+      // ALGO-TASTE-01: Self taste match evaluates to 100% Taste Twins
+      expect(find.text('100'), findsOneWidget);
+      expect(find.text('Taste Twins'), findsOneWidget);
+      expect(find.textContaining('shared'), findsWidgets);
 
       await tester.tap(find.byKey(const Key('edit_profile_button')));
       await tester.pumpAndSettle();

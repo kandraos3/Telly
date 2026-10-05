@@ -8,12 +8,16 @@ import 'package:telly_app/features/cowatch/domain/spearman_taste_match_calculato
 class DualTasteMatchBreakdown extends StatelessWidget {
   final int? movieMatchPercentage;
   final int? seriesMatchPercentage;
+  final int? movieMutualCount;
+  final int? seriesMutualCount;
   final VoidCallback? onInfoTap;
 
   const DualTasteMatchBreakdown({
     super.key,
     this.movieMatchPercentage,
     this.seriesMatchPercentage,
+    this.movieMutualCount,
+    this.seriesMutualCount,
     this.onInfoTap,
   });
 
@@ -52,8 +56,9 @@ class DualTasteMatchBreakdown extends StatelessWidget {
               Expanded(
                 child: _buildCanonPill(
                   icon: '🎬',
-                  label: 'Movie Match',
+                  label: 'Movie Alignment',
                   percentage: movieMatchPercentage,
+                  count: movieMutualCount,
                   color: TellyColors.warmAmber,
                 ),
               ),
@@ -61,8 +66,9 @@ class DualTasteMatchBreakdown extends StatelessWidget {
               Expanded(
                 child: _buildCanonPill(
                   icon: '📺',
-                  label: 'Series Match',
+                  label: 'Series Alignment',
                   percentage: seriesMatchPercentage,
+                  count: seriesMutualCount,
                   color: TellyColors.electricViolet,
                 ),
               ),
@@ -77,6 +83,7 @@ class DualTasteMatchBreakdown extends StatelessWidget {
     required String icon,
     required String label,
     required int? percentage,
+    int? count,
     required Color color,
   }) {
     final hasScore = percentage != null;
@@ -107,11 +114,18 @@ class DualTasteMatchBreakdown extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            hasScore ? '$percentage%' : 'N/A',
+            hasScore ? '$percentage%' : 'None shared',
             style: TellyTypography.titleLarge(
               color: hasScore ? color : TellyColors.textDisabled,
-            ).copyWith(fontWeight: FontWeight.w800),
+            ).copyWith(fontWeight: FontWeight.w800, fontSize: hasScore ? 20 : 15),
           ),
+          if (count != null && count > 0) ...[
+            const SizedBox(height: 2),
+            Text(
+              '$count shared ${count == 1 ? 'title' : 'titles'}',
+              style: TellyTypography.caption(color: TellyColors.textTertiary).copyWith(fontSize: 11),
+            ),
+          ],
         ],
       ),
     );

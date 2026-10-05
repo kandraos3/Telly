@@ -118,12 +118,10 @@ class FriendProfileController extends AutoDisposeFamilyAsyncNotifier<FriendProfi
     final follow = await ref.watch(socialRepositoryProvider).getFollowStatus(profile.id);
     if (!profile.canView) return FriendProfileData(profile: profile, followStatus: follow);
 
+    final me = ref.watch(authRepositoryProvider).currentUserId;
+    final isSelf = me != null && profile.id == me;
+
     final rankings = ref.watch(rankingRepositoryProvider);
-    final results = await Future.wait([
-      profiles.tasteMatch(profile.id, 'movie'),
-      profiles.tasteMatch(profile.id, 'tv'),
-    ]);
-    final theirs = {for (final mt in const ['movie', 'tv']) mt: await profiles.fetchCanon(profile.id, mt)};
     final mine = {
       for (final mt in const ['movie', 'tv'])
         mt: [
@@ -137,6 +135,19 @@ class FriendProfileController extends AutoDisposeFamilyAsyncNotifier<FriendProfi
             ),
         ],
     };
+
+    final results = isSelf
+        ? <CanonMatch?>[
+            (mine['movie']?.isNotEmpty ?? false) ? CanonMatch(100, mine['movie']!.length) : null,
+            (mine['tv']?.isNotEmpty ?? false) ? CanonMatch(100, mine['tv']!.length) : null,
+          ]
+        : await Future.wait([
+            profiles.tasteMatch(profile.id, 'movie'),
+            profiles.tasteMatch(profile.id, 'tv'),
+          ]);
+    final theirs = isSelf
+        ? mine
+        : {for (final mt in const ['movie', 'tv']) mt: await profiles.fetchCanon(profile.id, mt)};
     final lists = TasteComparisons.build(mine: mine, theirs: theirs);
     return FriendProfileData(
       profile: profile,

@@ -180,9 +180,9 @@ class _Body extends ConsumerWidget {
             )
           else ...[
             TasteMatchDial(
-              matchPercentage: blended ?? 50,
+              matchPercentage: blended ?? (isSelf ? 100 : 50),
               mutualTitleCount: data.mutualCount,
-              affinityTier: TasteAffinityTier.fromPercentage(blended ?? 50),
+              affinityTier: TasteAffinityTier.fromPercentage(blended ?? (isSelf ? 100 : 50)),
             ),
             const SizedBox(height: 24),
             if (!isSelf) ...[
@@ -198,6 +198,8 @@ class _Body extends ConsumerWidget {
             DualTasteMatchBreakdown(
               movieMatchPercentage: data.movieMatch?.percentage,
               seriesMatchPercentage: data.seriesMatch?.percentage,
+              movieMutualCount: data.movieMatch?.mutualCount,
+              seriesMutualCount: data.seriesMatch?.mutualCount,
             ),
             const SizedBox(height: 24),
             TasteComparisonsSection(
