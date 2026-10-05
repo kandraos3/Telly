@@ -82,6 +82,22 @@ if (-not $adb) {
     exit 1
 }
 
+# Auto-detect Android Studio JBR for JAVA_HOME if not already in environment
+if (-not $env:JAVA_HOME -or -not (Test-Path $env:JAVA_HOME)) {
+    $jbrCandidates = @(
+        "C:\Program Files\Android\Android Studio\jbr",
+        "$env:LOCALAPPDATA\Programs\Android Studio\jbr",
+        "C:\Program Files\Android\Android Studio\jre"
+    )
+    foreach ($cand in $jbrCandidates) {
+        if (Test-Path $cand) {
+            $env:JAVA_HOME = $cand
+            $env:PATH = "$cand\bin;$env:PATH"
+            break
+        }
+    }
+}
+
 # Locate project root (pubspec.yaml directory)
 $projectRoot = $null
 $candidateRoot = (Resolve-Path "$PSScriptRoot\..\..\..\..").Path
@@ -229,6 +245,10 @@ if ($Mode -eq "release") {
     $buildArgs += "--debug"
 }
 
+if ($targetPlatform) {
+    $buildArgs += "--target-platform=$targetPlatform"
+}
+
 if ($defineArgs) {
     $buildArgs += $defineArgs
 }
@@ -244,6 +264,17 @@ if ($Quick -and $existingApk -and (Test-Path $existingApk)) {
     Write-Info "Quick mode enabled: skipping recompilation, using existing APK."
     $apkFile = $existingApk
 } else {
+    # Clean stale intermediate & generated build files to prevent Windows Gradle locking issue
+    $staleDirs = @(
+        "$projectRoot\build\app\intermediates",
+        "$projectRoot\build\app\generated"
+    )
+    foreach ($d in $staleDirs) {
+        if (Test-Path $d) {
+            Remove-Item -Recurse -Force $d -ErrorAction SilentlyContinue
+        }
+    }
+
     Write-Step "Compiling APK (flutter $($buildArgs -join ' '))..."
     & flutter @buildArgs
 
@@ -301,7 +332,8 @@ Write-Step "Launching app.telly.mobile on phone screen..."
 & $adb -s $targetDevice shell am start -n app.telly.mobile/.MainActivity | Out-Null
 
 Start-Sleep -Seconds 1
-$pidRes = (& $adb -s $targetDevice shell pidof app.telly.mobile).Trim()
+$rawPid = (& $adb -s $targetDevice shell pidof app.telly.mobile)
+$pidRes = if ($rawPid) { "$rawPid".Trim() } else { "Running" }
 
 $totalElapsed = [math]::Round(((Get-Date) - $startTime).TotalSeconds, 1)
 Write-Host ""
