@@ -186,6 +186,9 @@ class RecommendedTitle {
   /// The loved title this pick resembles, when [reason] is [RecommendationReason.becauseYouLoved].
   final String? reasonTitle;
 
+  /// Subscription / free platforms it streams on (FE-FEED-02); empty when unknown.
+  final List<String> providers;
+
   const RecommendedTitle({
     required this.titleId,
     required this.mediaType,
@@ -196,6 +199,7 @@ class RecommendedTitle {
     this.releaseYear,
     this.reason = RecommendationReason.topRated,
     this.reasonTitle,
+    this.providers = const [],
   });
 
   factory RecommendedTitle.fromJson(Map<String, dynamic> json) {
@@ -216,6 +220,7 @@ class RecommendedTitle {
             : RecommendationReason.topRated,
       },
       reasonTitle: reasonTitle,
+      providers: [for (final p in (json['providers'] as List? ?? const [])) p.toString()],
     );
   }
 

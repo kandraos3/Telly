@@ -2109,6 +2109,16 @@ Tickets ingested through the `issue-manager` skill. Each entry mirrors its GitHu
   - [x] Widget tests: bookmark size, position and toggle, presets and extras rendering, picker returns preset or emoji, custom emoji swap through the controller. Repository tests for `EMOJI:` key parsing and the delete-then-insert write. a11y audit (contrast, 48 dp targets). pgTAP `018_feed_reaction_presets.test.sql` (runs in CI).
   - [ ] Apply the migration to `telly-prod` via `supabase-deploy` → `push` *(not deployed in this session)*.
 
+#### `FE-FEED-02`: Algorithmic Recommendation Cards Between Feed Posts (#31)
+- **Spec Reference**: [**`features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md) §2; [**`features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md); `SCR-05`
+- **Granular Tasks**:
+  - [x] Migration `20261010001600_recommendation_providers.sql`: `get_recommended_titles` (FE-EXPLORE-03) adds a `providers` array of subscription / free platforms. The JSONB result only gains a key.
+  - [x] `FeedRecommendationsController` loads up to 12 picks; `interleaveRecommendations` slots one after every 6 posts (never repeating a pick, never as the last row).
+  - [x] `FeedRecommendationCard` ("Picked for you", Electric Violet): reason ("Because you loved Breaking Bad"), "Better Call Saul (AMC) is streaming on Netflix", Telly score, **Add to Queue** (offline-first watchlist, optimistic with rollback) and **Rate / Rank** (opens SCR-09 for the title); tapping the card opens SCR-08.
+  - [ ] Apply the migration to `telly-prod` via `supabase-deploy` → `push` *(not deployed in this session)*.
+- **Testing & Verification**:
+  - [x] Unit tests for the interleaving cadence and edge cases. Widget tests: card placement after the sixth post, reason and streaming copy, Add to Queue, Rate / Rank route, open title, no picks. pgTAP `019_recommendation_providers.test.sql` (runs in CI).
+
 ---
 
 ## 🏆 Sprint Deliverables Summary Matrix

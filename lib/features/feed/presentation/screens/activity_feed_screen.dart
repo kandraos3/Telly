@@ -7,7 +7,11 @@ import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/theme/telly_typography.dart';
 import 'package:telly_app/features/feed/data/social_repository.dart';
 import 'package:telly_app/features/feed/domain/social_models.dart';
+import 'package:telly_app/features/discovery/domain/discovery_models.dart';
 import 'package:telly_app/features/feed/presentation/controllers/feed_controllers.dart';
+import 'package:telly_app/features/feed/presentation/controllers/feed_recommendations.dart';
+import 'package:telly_app/features/logging/domain/title_search_result.dart';
+import 'package:telly_app/features/feed/presentation/widgets/feed_recommendation_card.dart';
 import 'package:telly_app/features/feed/presentation/widgets/moderation_sheet.dart';
 import 'package:telly_app/features/feed/presentation/widgets/feed_activity_card.dart';
 import 'package:telly_app/features/feed/presentation/widgets/upset_activity_card.dart';
@@ -70,6 +74,29 @@ class _ActivityFeedScreenState extends ConsumerState<ActivityFeedScreen> {
       _guard(() => _feed.toggleReaction(activity.id, reaction));
 
   void _handleQueueToggle(ActivityLog activity, bool inQueue) => _guard(() => _feed.setQueued(activity.id, inQueue));
+
+  Widget _buildRecommendation(RecommendedTitle pick, FeedRecommendations recs) {
+    return FeedRecommendationCard(
+      key: Key('feed_rec_${pick.mediaType}_${pick.titleId}'),
+      title: pick,
+      queued: recs.isQueued(pick),
+      onOpen: () => context.push(Routes.title(pick.mediaType, pick.titleId)),
+      onQueue: () {
+        HapticsService.lightImpact();
+        _guard(() => ref.read(feedRecommendationsProvider.notifier).queue(pick));
+      },
+      onRank: () => context.push(
+        Routes.log,
+        extra: TitleSearchResult(
+          id: pick.titleId,
+          mediaType: pick.mediaType,
+          title: pick.title,
+          posterPath: pick.posterPath,
+          releaseYear: pick.releaseYear?.toString() ?? '',
+        ),
+      ),
+    );
+  }
 
   void _openModeration(ActivityLog activity) {
     showModerationSheet(
@@ -179,6 +206,9 @@ class _ActivityFeedScreenState extends ConsumerState<ActivityFeedScreen> {
                     if (activities.isEmpty) {
                       return _buildEmptyState();
                     }
+                    // FE-FEED-02: a "Picked for you" card after every few posts.
+                    final recs = ref.watch(feedRecommendationsProvider).valueOrNull ?? const FeedRecommendations();
+                    final entries = interleaveRecommendations(activities, recs.picks);
 
                     return ListView.builder(
                       key: const Key('feed_list'),
@@ -187,16 +217,23 @@ class _ActivityFeedScreenState extends ConsumerState<ActivityFeedScreen> {
                         parent: BouncingScrollPhysics(),
                       ),
                       padding: const EdgeInsets.only(top: 8, bottom: 120),
-                      itemCount: activities.length + (feed.hasMore ? 1 : 0),
+                      itemCount: entries.length + (feed.hasMore ? 1 : 0),
                       itemBuilder: (context, index) {
-                        if (index == activities.length) {
+                        if (index == entries.length) {
                           return const Padding(
                             key: Key('feed_page_loader'),
                             padding: EdgeInsets.all(24),
                             child: Center(child: CircularProgressIndicator(color: TellyColors.phosphorLime)),
                           );
                         }
-                        final activity = activities[index];
+                        final entry = entries[index];
+                        final ActivityLog activity;
+                        switch (entry) {
+                          case RecommendationEntry(:final title):
+                            return _buildRecommendation(title, recs);
+                          case ActivityEntry(activity: final a):
+                            activity = a;
+                        }
 
                         final Widget card;
                         if (activity.isUpset) {
