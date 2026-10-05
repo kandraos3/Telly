@@ -7,6 +7,8 @@ import '../../../../core/router/routes.dart';
 import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
 import '../../../../core/widgets/telly_primary_button.dart';
+import '../../../auth/data/auth_repository.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../cowatch/domain/spearman_taste_match_calculator.dart';
 import '../../../feed/domain/social_models.dart';
 import '../controllers/friend_profile_controller.dart';
@@ -27,6 +29,12 @@ class FriendProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(friendProfileProvider(handle));
     final data = async.valueOrNull;
+    final currentUserId = ref.watch(authRepositoryProvider).currentUserId;
+    final currentUser = ref.watch(authControllerProvider).user;
+    final isSelf = (currentUser != null &&
+            ((data != null && data.profile.id == currentUser.id) ||
+             (currentUser.username != null && currentUser.username!.toLowerCase() == handle.toLowerCase()))) ||
+        (currentUserId != null && data != null && data.profile.id == currentUserId);
 
     return Scaffold(
       backgroundColor: TellyColors.backgroundCanvasOled,
@@ -39,7 +47,10 @@ class FriendProfileScreen extends ConsumerWidget {
           onPressed: () => context.canPop() ? context.pop() : context.go(Routes.feed),
         ),
         title: Text('@$handle', style: TellyTypography.titleMedium(color: TellyColors.textPrimary)),
-        actions: [if (data != null) _FollowButton(handle: handle, status: data.followStatus)],
+        actions: [
+          if (data != null)
+            _FollowButton(handle: handle, status: data.followStatus, isSelf: isSelf),
+        ],
       ),
       body: async.when(
         loading: () => const Center(child: CircularProgressIndicator(color: TellyColors.phosphorLime)),
@@ -48,7 +59,7 @@ class FriendProfileScreen extends ConsumerWidget {
           text: e is ProfileNotFound ? "We couldn't find @$handle." : "Couldn't load @$handle. Pull to retry.",
           onRetry: e is ProfileNotFound ? null : () => ref.invalidate(friendProfileProvider(handle)),
         ),
-        data: (data) => _Body(handle: handle, data: data),
+        data: (data) => _Body(handle: handle, data: data, isSelf: isSelf),
       ),
     );
   }
@@ -57,10 +68,31 @@ class FriendProfileScreen extends ConsumerWidget {
 class _FollowButton extends ConsumerWidget {
   final String handle;
   final FollowStatus? status;
-  const _FollowButton({required this.handle, required this.status});
+  final bool isSelf;
+  const _FollowButton({required this.handle, required this.status, this.isSelf = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (isSelf) {
+      return Padding(
+        padding: const EdgeInsets.only(right: 16),
+        child: Center(
+          child: OutlinedButton(
+            key: const Key('edit_profile_button'),
+            onPressed: () => context.push(Routes.editProfile),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: TellyColors.phosphorLime,
+              side: const BorderSide(color: TellyColors.phosphorLime),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              minimumSize: Size.zero,
+            ),
+            child: const Text('Edit Profile', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+          ),
+        ),
+      );
+    }
+
     final following = status == FollowStatus.accepted;
     final label = switch (status) {
       FollowStatus.accepted => 'Following',
@@ -100,7 +132,8 @@ class _FollowButton extends ConsumerWidget {
 class _Body extends ConsumerWidget {
   final String handle;
   final FriendProfileData data;
-  const _Body({required this.handle, required this.data});
+  final bool isSelf;
+  const _Body({required this.handle, required this.data, this.isSelf = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -152,14 +185,16 @@ class _Body extends ConsumerWidget {
               affinityTier: TasteAffinityTier.fromPercentage(blended ?? 50),
             ),
             const SizedBox(height: 24),
-            TellyPrimaryButton(
-              label: '🍿 Two-to-Watch with @$handle',
-              onPressed: () => context.push(
-                Routes.twoToWatch(handle),
-                extra: FriendRouteArgs(userId: profile.id, displayName: profile.displayName, avatarUrl: profile.avatarUrl),
+            if (!isSelf) ...[
+              TellyPrimaryButton(
+                label: '🍿 Two-to-Watch with @$handle',
+                onPressed: () => context.push(
+                  Routes.twoToWatch(handle),
+                  extra: FriendRouteArgs(userId: profile.id, displayName: profile.displayName, avatarUrl: profile.avatarUrl),
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
+              const SizedBox(height: 20),
+            ],
             DualTasteMatchBreakdown(
               movieMatchPercentage: data.movieMatch?.percentage,
               seriesMatchPercentage: data.seriesMatch?.percentage,

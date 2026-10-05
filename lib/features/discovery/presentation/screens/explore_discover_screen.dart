@@ -7,6 +7,8 @@ import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/theme/telly_typography.dart';
 import 'package:telly_app/core/widgets/poster_image.dart';
 import 'package:telly_app/core/widgets/telly_neon_badge.dart';
+import 'package:telly_app/features/auth/data/auth_repository.dart';
+import 'package:telly_app/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:telly_app/features/discovery/data/discovery_repository.dart';
 import 'package:telly_app/features/discovery/domain/discovery_models.dart';
 import 'package:telly_app/features/logging/data/title_repository.dart';
@@ -526,8 +528,21 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
   }
 
   Widget _buildUserResultTile(UserSearchResult user) {
+    final currentUserId = ref.watch(authRepositoryProvider).currentUserId;
+    final currentUsername = ref.watch(authControllerProvider).user?.username;
+    final isMe = (currentUsername != null &&
+            currentUsername.toLowerCase() == user.username.toLowerCase()) ||
+        (currentUserId != null && currentUserId == user.id);
+
     return InkWell(
-      onTap: () => context.push(Routes.profile(user.username)),
+      key: Key('user_result_tile_${user.username}'),
+      onTap: () {
+        if (isMe) {
+          context.go(Routes.canon);
+        } else {
+          context.push(Routes.profile(user.username));
+        }
+      },
       borderRadius: BorderRadius.circular(12),
       child: Container(
         margin: const EdgeInsets.only(bottom: 8),

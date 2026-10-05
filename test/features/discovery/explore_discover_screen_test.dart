@@ -7,16 +7,24 @@ import 'package:telly_app/features/discovery/data/discovery_repository.dart';
 import 'package:telly_app/features/discovery/presentation/screens/explore_discover_screen.dart';
 import 'package:telly_app/features/logging/data/title_repository.dart';
 
+import 'package:telly_app/features/auth/data/auth_repository.dart';
+import 'package:telly_app/features/auth/domain/user_profile.dart';
+import '../../fakes/fake_auth_repository.dart';
 import '../../fakes/fake_title_repository.dart';
+import '../../helpers/router_harness.dart';
 
 void main() {
   Widget createTestWidget({
     DiscoveryRepository? discoveryRepo,
     TitleRepository? titleRepo,
+    AuthRepository? authRepo,
   }) {
     return ProviderScope(
       overrides: [
         posterNetworkImagesProvider.overrideWithValue(false),
+        authRepositoryProvider.overrideWithValue(
+          authRepo ?? FakeAuthRepository(signedInUserId: 'u-user'),
+        ),
         discoveryRepositoryProvider.overrideWithValue(
           discoveryRepo ?? FakeDiscoveryRepository(),
         ),
@@ -239,6 +247,41 @@ void main() {
       // Search query reset
       expect(find.text('NETWORK BATTLEGROUNDS'), findsOneWidget);
       expect(find.byKey(const Key('explore_appbar_clear_btn')), findsNothing);
+    });
+
+    testWidgets('tapping own user search result navigates to own canon', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      final fakeAuth = FakeAuthRepository(
+        signedInUserId: 'u-maya',
+        profile: UserProfile(id: 'u-maya', username: 'maya', displayName: 'Maya Lin', createdAt: DateTime(2026)),
+      );
+      await tester.pumpWidget(routerHarness(
+        const ExploreDiscoverScreen(),
+        overrides: [
+          posterNetworkImagesProvider.overrideWithValue(false),
+          authRepositoryProvider.overrideWithValue(fakeAuth),
+          discoveryRepositoryProvider.overrideWithValue(FakeDiscoveryRepository()),
+          titleRepositoryProvider.overrideWithValue(FakeTitleRepository()),
+        ],
+      ));
+      await tester.pumpAndSettle();
+
+      final searchField = find.byType(TextField);
+      await tester.enterText(searchField, 'maya');
+      await tester.pumpAndSettle();
+
+      final userTile = find.byKey(const Key('user_result_tile_maya'));
+      expect(userTile, findsOneWidget);
+      await tester.tap(userTile);
+      await tester.pumpAndSettle();
+
+      expect(find.text('route:/canon'), findsOneWidget);
     });
   });
 }

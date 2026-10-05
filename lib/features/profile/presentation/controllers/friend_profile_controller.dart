@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../auth/data/auth_repository.dart';
 import '../../../cowatch/domain/spearman_taste_match_calculator.dart';
 import '../../../feed/data/social_repository.dart';
 import '../../../feed/domain/social_models.dart';
@@ -152,6 +153,10 @@ class FriendProfileController extends AutoDisposeFamilyAsyncNotifier<FriendProfi
   Future<void> toggleFollow() async {
     final current = state.valueOrNull;
     if (current == null) return;
+    final me = ref.read(authRepositoryProvider).currentUserId;
+    if (me != null && current.profile.id == me) {
+      throw StateError('Cannot follow yourself');
+    }
     final social = ref.read(socialRepositoryProvider);
     if (current.followStatus == null || current.followStatus == FollowStatus.rejected) {
       final status = await social.follow(current.profile.id);

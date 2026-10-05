@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:telly_app/core/database/database.dart';
 import 'package:telly_app/core/database/database_provider.dart';
+import 'package:telly_app/features/auth/data/auth_repository.dart';
+import 'package:telly_app/features/auth/domain/user_profile.dart';
 import 'package:telly_app/features/feed/data/social_repository.dart';
 import 'package:telly_app/features/feed/domain/social_models.dart';
 import 'package:telly_app/features/profile/data/profile_repository.dart';
@@ -11,6 +13,7 @@ import 'package:telly_app/features/profile/presentation/controllers/friend_profi
 import 'package:telly_app/features/profile/presentation/screens/friend_profile_screen.dart';
 import 'package:telly_app/features/ranking/domain/franchise_rollup_service.dart';
 
+import '../../fakes/fake_auth_repository.dart';
 import '../../fakes/fake_profile_repository.dart';
 import '../../fakes/fake_social_repository.dart';
 import '../../helpers/canon_seed.dart';
@@ -30,11 +33,13 @@ void main() {
   late AppDatabase db;
   late FakeProfileRepository profiles;
   late FakeSocialRepository social;
+  late FakeAuthRepository auth;
 
   setUp(() async {
     db = AppDatabase.inMemory();
     profiles = FakeProfileRepository();
     social = FakeSocialRepository();
+    auth = FakeAuthRepository(signedInUserId: 'u-me');
     profiles.profiles['maya'] =
         const PublicProfile(id: 'u-maya', username: 'maya', displayName: 'Maya Lin', bio: 'Severance truther');
     profiles.matches[('u-maya', 'movie')] = const CanonMatch(92, 4);
@@ -54,7 +59,7 @@ void main() {
   });
   tearDown(() => db.close());
 
-  Future<void> pump(WidgetTester tester, {String handle = 'maya', bool settle = true}) async {
+  Future<void> pump(WidgetTester tester, {String handle = 'maya', bool settle = true, AuthRepository? authRepo}) async {
     tester.view.physicalSize = const Size(800, 2400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -62,6 +67,7 @@ void main() {
       databaseProvider.overrideWithValue(db),
       profileRepositoryProvider.overrideWithValue(profiles),
       socialRepositoryProvider.overrideWithValue(social),
+      authRepositoryProvider.overrideWithValue(authRepo ?? auth),
     ]));
     if (settle) await tester.pumpAndSettle();
   }
@@ -150,6 +156,21 @@ void main() {
       await tester.tap(find.text('🍿 Two-to-Watch with @maya'));
       await tester.pumpAndSettle();
       expect(find.text('route:/u/maya/two-to-watch'), findsOneWidget);
+    });
+
+    testWidgets('viewing own profile shows Edit Profile, hides follow & Two-to-Watch, and navigates to edit profile', (tester) async {
+      final authRepo = FakeAuthRepository(
+        signedInUserId: 'u-maya',
+        profile: UserProfile(id: 'u-maya', username: 'maya', displayName: 'Maya Lin', createdAt: DateTime(2026)),
+      );
+      await pump(tester, handle: 'maya', authRepo: authRepo);
+      expect(find.byKey(const Key('follow_button')), findsNothing);
+      expect(find.byKey(const Key('edit_profile_button')), findsOneWidget);
+      expect(find.textContaining('Two-to-Watch'), findsNothing);
+
+      await tester.tap(find.byKey(const Key('edit_profile_button')));
+      await tester.pumpAndSettle();
+      expect(find.text('route:/canon/edit'), findsOneWidget);
     });
   });
 
