@@ -173,7 +173,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Title & Meta
-      expect(find.text('Severance'), findsOneWidget);
+      expect(find.text('Severance'), findsNWidgets(2), reason: 'page title + the pinned bar title (hidden until scrolled)');
       expect(find.text('Apple TV+ • 2 Seasons • 2022'), findsOneWidget);
       expect(find.text('Creator: Dan Erickson'), findsOneWidget);
       expect(find.text('★ 9.34'), findsOneWidget);
@@ -298,7 +298,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Title & Meta
-      expect(find.text('Parasite'), findsOneWidget);
+      expect(find.text('Parasite'), findsNWidgets(2), reason: 'page title + the pinned bar title (hidden until scrolled)');
       expect(find.text('Neon • 132 min • 2019'), findsOneWidget);
       expect(find.text('Director: Bong Joon-ho'), findsOneWidget);
 
@@ -309,6 +309,31 @@ void main() {
       // Dual-Canon Invariant: Movies must NEVER have seasons accordion
       expect(find.text('SEASONS ACCORDION'), findsNothing);
       expect(find.text('COMMUNITY SURVIVAL RATE'), findsNothing);
+    });
+
+    testWidgets('FE-HEADER-03: the pinned bar shows the title once the page title scrolls under it', (tester) async {
+      await tester.pumpWidget(createTestWidget(title: testTvShow));
+      await tester.pumpAndSettle();
+
+      final barTitle = find.byKey(const Key('detail_bar_title'));
+      double opacity() =>
+          tester.widget<AnimatedOpacity>(find.ancestor(of: barTitle, matching: find.byType(AnimatedOpacity))).opacity;
+      final scroll = find.byType(CustomScrollView);
+
+      expect(tester.widget<Text>(barTitle).data, 'Severance');
+      expect(opacity(), 0, reason: 'hidden over the backdrop');
+
+      await tester.drag(scroll, const Offset(0, -80));
+      await tester.pumpAndSettle();
+      expect(opacity(), 0, reason: 'the page title is still visible below the bar');
+
+      await tester.drag(scroll, const Offset(0, -520));
+      await tester.pumpAndSettle();
+      expect(opacity(), 1);
+
+      await tester.drag(scroll, const Offset(0, 600));
+      await tester.pumpAndSettle();
+      expect(opacity(), 0, reason: 'back at the top');
     });
 
     testWidgets('toggles bookmark / watchlist status on tap', (tester) async {

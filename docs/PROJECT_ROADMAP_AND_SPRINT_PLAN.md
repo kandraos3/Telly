@@ -194,6 +194,16 @@ Establish the Supabase PostgreSQL database, local Drift SQLite persistence, auth
   - [x] Screen tests updated for the new titles; custom list delete through the ⋮ menu. Squad header subtitle passes the light-theme a11y contrast audit.
 - **Dependencies**: `FE-HEADER-01`.
 
+#### `FE-HEADER-03`: Title Name in the Collapsed Show Detail Bar
+- **Spec Reference**:
+  - [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) §0.2; `SCR-08`
+- **Scope & Objectives**: Scrolling down a title page collapsed the backdrop into a bare bar (back and bookmark only), so you lost track of which title you were on.
+- **Granular Tasks**:
+  - [x] The pinned `SliverAppBar` fades in the title name (subpage title style) once the in-page title has scrolled under the bar, and fades it out again when it comes back. The title's position is measured after each frame, since scroll notifications fire before the new layout.
+- **Testing & Verification**:
+  - [x] Widget test: hidden at the top and after a small scroll, shown once the page title is under the bar, hidden again back at the top.
+- **Dependencies**: `FE-HEADER-02`.
+
 #### `FE-103`: Haptic Feedback Engine (`HapticsService`)
 - **Spec Reference**:
   - [**`design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md) §5 (Haptic Sensations)

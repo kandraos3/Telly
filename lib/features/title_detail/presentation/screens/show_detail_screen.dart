@@ -44,6 +44,31 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
   bool _isBookmarked = false;
   final Set<int> _expandedSeasons = {1}; // Season 1 expanded by default
 
+  /// The big in-page title; once it scrolls under the pinned bar, the bar shows the name (FE-HEADER-03).
+  final _pageTitleKey = GlobalKey();
+  bool _showBarTitle = false;
+  bool _barTitleCheckScheduled = false;
+
+  /// Scroll notifications fire before the new layout, so the title is measured after the frame.
+  bool _onScroll(ScrollNotification n) {
+    if (n.depth != 0 || _barTitleCheckScheduled) return false;
+    _barTitleCheckScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _barTitleCheckScheduled = false;
+      if (mounted) _updateBarTitle();
+    });
+    return false;
+  }
+
+  void _updateBarTitle() {
+    final box = _pageTitleKey.currentContext?.findRenderObject() as RenderBox?;
+    if (box == null || !box.attached) return;
+    final titleBottom = box.localToGlobal(Offset(0, box.size.height)).dy;
+    final barBottom = MediaQuery.paddingOf(context).top + kToolbarHeight;
+    final show = titleBottom <= barBottom;
+    if (show != _showBarTitle) setState(() => _showBarTitle = show);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -176,96 +201,99 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
         : TellyColors.backgroundCanvasOled;
     return Scaffold(
       backgroundColor: canvasColor,
-      body: CustomScrollView(
-        slivers: [
-          // 1. 16:9 Backdrop with Gradient Fade and Top Actions
-          _buildBackdropAppBar(title),
+      body: NotificationListener<ScrollNotification>(
+        onNotification: _onScroll,
+        child: CustomScrollView(
+          slivers: [
+            // 1. 16:9 Backdrop with Gradient Fade and Top Actions
+            _buildBackdropAppBar(title),
 
-          // 2. Main Content Body
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Hidden router test anchor
-                  ExcludeSemantics(
-                    child: Text(
-                      'Show Detail (${widget.mediaType}/${widget.titleId})',
-                      style: const TextStyle(fontSize: 0, color: Colors.transparent),
+            // 2. Main Content Body
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Hidden router test anchor
+                    ExcludeSemantics(
+                      child: Text(
+                        'Show Detail (${widget.mediaType}/${widget.titleId})',
+                        style: const TextStyle(fontSize: 0, color: Colors.transparent),
+                      ),
                     ),
-                  ),
 
-                  // Title, Poster & Meta
-                  _buildHeaderMeta(title),
-                  const SizedBox(height: 16),
+                    // Title, Poster & Meta
+                    _buildHeaderMeta(title),
+                    const SizedBox(height: 16),
 
-                  // Quick Action Hub (Queue, Rank/Duel, Co-Watch, Share)
-                  _buildQuickActionHub(title),
-                  const SizedBox(height: 24),
-
-                  // Overview / Synopsis
-                  if (title.overview != null && title.overview!.isNotEmpty) ...[
-                    Text(
-                      title.overview!,
-                      style: TellyTypography.bodyMedium(
-                        color: TellyColors.textPrimaryOf(context),
-                      ).copyWith(height: 1.5, fontWeight: FontWeight.w600),
-                    ),
+                    // Quick Action Hub (Queue, Rank/Duel, Co-Watch, Share)
+                    _buildQuickActionHub(title),
                     const SizedBox(height: 24),
-                  ],
 
-                  // STREAMING NOW section
-                  _buildStreamingNowSection(title),
-                  const SizedBox(height: 24),
+                    // Overview / Synopsis
+                    if (title.overview != null && title.overview!.isNotEmpty) ...[
+                      Text(
+                        title.overview!,
+                        style: TellyTypography.bodyMedium(
+                          color: TellyColors.textPrimaryOf(context),
+                        ).copyWith(height: 1.5, fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
 
-                  // YOUR STATUS section (Ranked vs Unranked)
-                  _buildYourStatusSection(title),
-                  const SizedBox(height: 28),
+                    // STREAMING NOW section
+                    _buildStreamingNowSection(title),
+                    const SizedBox(height: 24),
 
-                  // FRIENDS WHO RANKED THIS section
-                  if (title.socialSummary != null &&
-                      title.socialSummary!.friends.isNotEmpty) ...[
-                    _buildFriendsWhoRankedSection(title.socialSummary!.friends),
+                    // YOUR STATUS section (Ranked vs Unranked)
+                    _buildYourStatusSection(title),
+                    const SizedBox(height: 28),
+
+                    // FRIENDS WHO RANKED THIS section
+                    if (title.socialSummary != null &&
+                        title.socialSummary!.friends.isNotEmpty) ...[
+                      _buildFriendsWhoRankedSection(title.socialSummary!.friends),
+                      const SizedBox(height: 28),
+                    ],
+
+                    // SEASONS ACCORDION (TV Series only; omitted for Movies)
+                    if (title.isTv && title.seasons.isNotEmpty) ...[
+                      _buildSeasonsAccordion(title.seasons),
+                      const SizedBox(height: 28),
+                    ],
+
+                    // COMMUNITY SURVIVAL RATE section (TV Series)
+                    // Hidden until someone has finished, watched or dropped it (FE-DETAIL-02).
+                    if (title.isTv && title.socialSummary?.survival?.completedPct != null) ...[
+                      _buildSurvivalRateSection(
+                          title.socialSummary!.survival!, title.socialSummary!.survival!.completedPct!),
+                      const SizedBox(height: 32),
+                    ],
+
+                    // CAST & CREW SHOWCASE
+                    TitleCastSection(titleId: title.id, mediaType: title.mediaType, fallbackDirector: title.director),
+                    const SizedBox(height: 28),
+
+                    // TOURNAMENT & DUEL RECORD + CANON TIER DISTRIBUTION (live, FE-DETAIL-02)
+                    TitleDuelRecordSection(titleId: title.id, mediaType: title.mediaType),
+                    const SizedBox(height: 28),
+
+                    // IDEAL DOUBLE FEATURE / COMPANION PAIRINGS (Movies only)
+                    if (title.isMovie) ...[
+                      _buildDoubleFeatureSection(title),
+                      const SizedBox(height: 28),
+                    ],
+
+                    // COMMUNITY HOT TAKES
+                    _buildCommunityTakesSection(title),
                     const SizedBox(height: 28),
                   ],
-
-                  // SEASONS ACCORDION (TV Series only; omitted for Movies)
-                  if (title.isTv && title.seasons.isNotEmpty) ...[
-                    _buildSeasonsAccordion(title.seasons),
-                    const SizedBox(height: 28),
-                  ],
-
-                  // COMMUNITY SURVIVAL RATE section (TV Series)
-                  // Hidden until someone has finished, watched or dropped it (FE-DETAIL-02).
-                  if (title.isTv && title.socialSummary?.survival?.completedPct != null) ...[
-                    _buildSurvivalRateSection(
-                        title.socialSummary!.survival!, title.socialSummary!.survival!.completedPct!),
-                    const SizedBox(height: 32),
-                  ],
-
-                  // CAST & CREW SHOWCASE
-                  TitleCastSection(titleId: title.id, mediaType: title.mediaType, fallbackDirector: title.director),
-                  const SizedBox(height: 28),
-
-                  // TOURNAMENT & DUEL RECORD + CANON TIER DISTRIBUTION (live, FE-DETAIL-02)
-                  TitleDuelRecordSection(titleId: title.id, mediaType: title.mediaType),
-                  const SizedBox(height: 28),
-
-                  // IDEAL DOUBLE FEATURE / COMPANION PAIRINGS (Movies only)
-                  if (title.isMovie) ...[
-                    _buildDoubleFeatureSection(title),
-                    const SizedBox(height: 28),
-                  ],
-
-                  // COMMUNITY HOT TAKES
-                  _buildCommunityTakesSection(title),
-                  const SizedBox(height: 28),
-                ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -279,6 +307,22 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
       expandedHeight: 220,
       pinned: true,
       leading: TellyNavButton(onPressed: () => context.canPop() ? context.pop() : context.go(Routes.feed)),
+      // FE-HEADER-03: the collapsed bar names the title once the in-page title has scrolled under it.
+      titleSpacing: 4,
+      title: ExcludeSemantics(
+        excluding: !_showBarTitle,
+        child: AnimatedOpacity(
+          opacity: _showBarTitle ? 1 : 0,
+          duration: const Duration(milliseconds: 180),
+          child: Text(
+            title.title,
+            key: const Key('detail_bar_title'),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TellyTypography.subpageTitle(color: TellyColors.textPrimaryOf(context)),
+          ),
+        ),
+      ),
       actions: [
         IconButton(
           icon: Icon(
@@ -364,6 +408,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
             children: [
               Text(
                 title.title,
+                key: _pageTitleKey,
                 style: TellyTypography.headlineSmall(
                   color: TellyColors.textPrimaryOf(context),
                 ).copyWith(fontWeight: FontWeight.w900),

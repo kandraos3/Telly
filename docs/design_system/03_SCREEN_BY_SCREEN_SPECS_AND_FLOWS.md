@@ -70,7 +70,7 @@ Every screen opened on top of the tabs uses `TellySubpageAppBar`, the same desig
 * **Actions:** the same muted 48 dp icons as the tab header. At most one accented action per screen, its primary one (Save on Edit profile, Follow on a friend's profile). Destructive actions (Delete list, Delete / Leave squad) live in a muted ⋮ menu, never as a bare coloured icon.
 * **Scroll behavior:** fixed. Only the four tab headers hide on scroll, so Back / Close is always one tap away.
 * **Theme default:** `TellyTheme`'s `AppBarTheme` uses the same title style, left alignment and canvas background, so an app bar that sets nothing still matches.
-* **Out of scope:** onboarding (`SCR-01` to `SCR-04`) keeps its own step header, and the show detail page (`SCR-08`) keeps its backdrop header with the shared back button.
+* **Out of scope:** onboarding (`SCR-01` to `SCR-04`) keeps its own step header, and the show detail page (`SCR-08`) keeps its backdrop header with the shared back button. Once its in-page title scrolls under the collapsed bar, the bar fades in the title name in the subpage title style (`FE-HEADER-03`).
 
 | Screen | Leading | Title | Actions |
 | :--- | :--- | :--- | :--- |
