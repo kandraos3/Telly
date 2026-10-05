@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../auth/data/auth_repository.dart';
-import '../../../profile/data/profile_repository.dart';
 import '../../data/squad_repository.dart';
 import '../../domain/squad_models.dart';
 
@@ -40,7 +39,7 @@ class SquadHubState {
   const SquadHubState({
     required this.squad,
     this.tab = SquadTab.consensus,
-    this.mediaType = 'tv',
+    this.mediaType = 'movie',
     this.consensus = const {},
     this.watchlist,
     this.loadingCanon = false,
@@ -85,8 +84,9 @@ class SquadHubController extends AutoDisposeFamilyAsyncNotifier<SquadHubState, S
   Future<SquadHubState> build(String arg) async {
     final repo = ref.watch(squadRepositoryProvider);
     final squad = await repo.fetchSquad(arg);
-    final board = await repo.consensus(squad, 'tv');
-    return SquadHubState(squad: squad, consensus: {'tv': board});
+    // Movies first, as everywhere else in the app (FE-PROFILE-01 / FE-SQUADS-02).
+    final board = await repo.consensus(squad, 'movie');
+    return SquadHubState(squad: squad, consensus: {'movie': board});
   }
 
   /// Whether I may invite (owner/admin).
@@ -143,19 +143,57 @@ class SquadHubController extends AutoDisposeFamilyAsyncNotifier<SquadHubState, S
     }
   }
 
-  /// Adds a member by handle; throws [InviteFailure] with a user-facing message.
-  Future<void> invite(String handle) async {
-    final current = state.valueOrNull;
-    if (current == null) return;
-    final profile = await ref.read(profileRepositoryProvider).fetchByHandle(handle.trim().replaceFirst('@', ''));
-    if (profile == null) throw InviteFailure('No one found with @${handle.trim()}.');
-    if (current.squad.members.any((m) => m.userId == profile.id)) {
-      throw InviteFailure('@${profile.username} is already in this squad.');
+  /// Live validation for the invite dialog (FE-SQUADS-02): resolves a handle or email,
+  /// or explains why it can't be invited. Never throws.
+  Future<InviteCheck> checkInvitee(String query) async {
+    final q = query.trim();
+    if (q.isEmpty) return const InviteCheck.empty();
+    final isEmail = looksLikeEmail(q);
+    if (!isEmail && !looksLikeHandle(q)) {
+      return InviteCheck.invalid(q.contains('@') && !q.startsWith('@')
+          ? 'Enter a full email address.'
+          : 'Handles are 3–20 letters, numbers or underscores.');
     }
-    await _repo.addMember(squadId: current.squad.id, userId: profile.id);
+    final SquadInvitee? invitee;
+    try {
+      invitee = await _repo.findInvitee(q);
+    } catch (_) {
+      return const InviteCheck.invalid("Couldn't check that right now.");
+    }
+    if (invitee == null) {
+      return InviteCheck.invalid(isEmail ? 'No Telly account uses that email.' : 'No one found with @${_handle(q)}.');
+    }
+    final members = state.valueOrNull?.squad.members ?? const <SquadMember>[];
+    if (members.any((m) => m.userId == invitee!.userId)) {
+      return InviteCheck.invalid('@${invitee.username} is already in this squad.');
+    }
+    return InviteCheck.found(invitee);
+  }
+
+  /// Adds a member by handle or email; throws [InviteFailure] with a user-facing message.
+  Future<SquadInvitee> invite(String query) async {
+    final check = await checkInvitee(query);
+    final invitee = check.invitee;
+    if (invitee == null) throw InviteFailure(check.error ?? 'Enter a handle or email.');
+    await _repo.addMember(squadId: state.requireValue.squad.id, userId: invitee.userId);
     ref.invalidateSelf();
     await future;
+    return invitee;
   }
+
+  static String _handle(String q) => q.toLowerCase().replaceFirst(RegExp('^@'), '');
+}
+
+/// Result of [SquadHubController.checkInvitee].
+class InviteCheck {
+  final SquadInvitee? invitee;
+  final String? error;
+
+  const InviteCheck.empty()
+      : invitee = null,
+        error = null;
+  const InviteCheck.found(SquadInvitee this.invitee) : error = null;
+  const InviteCheck.invalid(String this.error) : invitee = null;
 }
 
 final squadHubProvider =

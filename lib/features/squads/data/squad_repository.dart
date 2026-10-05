@@ -41,6 +41,10 @@ abstract interface class SquadRepository {
 
   Future<Squad> create({required String name, String? description});
 
+  /// Resolves a handle (`maya`, `@maya`) or an exact email to a user, or null
+  /// (`lookup_squad_invitee`, FE-SQUADS-02).
+  Future<SquadInvitee?> findInvitee(String query);
+
   /// Owners/admins add a member (RLS `squad_members_insert`).
   Future<void> addMember({required String squadId, required String userId});
 
@@ -142,6 +146,12 @@ class SupabaseSquadRepository implements SquadRepository {
         .select('id, name, description, avatar_url, created_by, created_at')
         .single();
     return _squad(row);
+  }
+
+  @override
+  Future<SquadInvitee?> findInvitee(String query) async {
+    final rows = await _client.rpc('lookup_squad_invitee', params: {'p_query': query.trim()}) as List;
+    return rows.isEmpty ? null : SquadInvitee.fromJson(Map<String, dynamic>.from(rows.first as Map));
   }
 
   @override

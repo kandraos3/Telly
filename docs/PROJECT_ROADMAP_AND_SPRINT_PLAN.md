@@ -2066,6 +2066,17 @@ Tickets ingested through the `issue-manager` skill. Each entry mirrors its GitHu
 - **Testing & Verification**:
   - [x] Widget tests: carousel and reasons, navigation, hidden when empty, zero-state on focus, recent search recorded and re-run, clear. Unit tests for the controller, model parsing and RPC request shape. pgTAP `015_title_recommendations.test.sql` (runs in CI).
 
+#### `FE-SQUADS-02`: Squad Invite by Handle or Email with Live Validation; Movies-First Canon Switcher (#26)
+- **Spec Reference**: [**`features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md) §4; `SCR-17b`
+- **Granular Tasks**:
+  - [x] Migration `20261010001300_squad_invitee_lookup.sql`: `lookup_squad_invitee(p_query)` resolves a handle (`@` optional) or an exact, case-insensitive email from `auth.users`. It never returns the email, and it hides deleted, GHOST and blocked users.
+  - [x] `SquadRepository.findInvitee`, `SquadInvitee`, `looksLikeEmail` / `looksLikeHandle`; `SquadHubController.checkInvitee` returns an `InviteCheck` (found, or a user-facing reason such as unknown, malformed or already a member); `invite` re-validates before adding.
+  - [x] Invite dialog takes "@handle or email", validates as you type (350 ms debounce, stale answers dropped), shows a lime check with the matched name or a coral error, and enables Add only for a valid invitee. Malformed input is rejected locally, without a server call.
+  - [x] SCR-17b opens on the Movies canon; the switcher reads Movies | TV Shows (emoji removed), matching SCR-14.
+  - [ ] Apply the migration to `telly-prod` via `supabase-deploy` → `push` *(not deployed in this session)*.
+- **Testing & Verification**:
+  - [x] Widget tests: invite by handle, invite by email, unknown / malformed / existing-member errors with Add disabled, debounce. Default canon and order. Repository request-shape test; input-shape unit tests. pgTAP `016_squad_invitee_lookup.test.sql` (runs in CI).
+
 ---
 
 ## 🏆 Sprint Deliverables Summary Matrix

@@ -16,6 +16,44 @@ enum SquadRole {
   bool get canInvite => this != SquadRole.member;
 }
 
+/// Someone an invite resolved to (`lookup_squad_invitee`, FE-SQUADS-02).
+@immutable
+class SquadInvitee {
+  final String userId;
+  final String username;
+  final String displayName;
+  final String? avatarUrl;
+
+  /// True when the invite was typed as an email address rather than a handle.
+  final bool matchedByEmail;
+
+  const SquadInvitee({
+    required this.userId,
+    required this.username,
+    required this.displayName,
+    this.avatarUrl,
+    this.matchedByEmail = false,
+  });
+
+  factory SquadInvitee.fromJson(Map<String, dynamic> json) => SquadInvitee(
+        userId: json['id'] as String,
+        username: (json['username'] as String?) ?? '',
+        displayName: (json['display_name'] as String?) ?? '',
+        avatarUrl: json['avatar_url'] as String?,
+        matchedByEmail: json['matched_by'] == 'email',
+      );
+}
+
+/// Whether [input] is shaped like an email address (FE-SQUADS-02).
+bool looksLikeEmail(String input) => RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(input.trim());
+
+/// Whether [input] is shaped like a Telly handle, with or without a leading `@`
+/// (`users.username` CHECK: 3–20 of a–z, 0–9, `_`, no `__`).
+bool looksLikeHandle(String input) {
+  final h = input.trim().toLowerCase().replaceFirst(RegExp('^@'), '');
+  return RegExp(r'^[a-z0-9_]{3,20}$').hasMatch(h) && !h.contains('__');
+}
+
 /// A Squad / Circle of friends sharing a collective canon (Feature Spec 04 §4).
 @immutable
 class Squad {

@@ -112,6 +112,8 @@ class _FakeSquadRepository implements SquadRepository {
 
   @override
   Future<void> addMember({required String squadId, required String userId}) async {}
+  @override
+  Future<SquadInvitee?> findInvitee(String query) async => null;
 
   @override
   Future<void> deleteSquad(String squadId) async => squads.remove(squadId);

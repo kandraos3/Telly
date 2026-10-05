@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -141,12 +143,17 @@ class SquadHubScreen extends ConsumerWidget {
 
   Future<void> _invite(BuildContext context, WidgetRef ref) async {
     HapticsService.lightImpact();
-    final handle = await showDialog<String>(context: context, builder: (_) => const _InviteDialog());
-    if (handle == null || handle.trim().isEmpty || !context.mounted) return;
+    final controller = ref.read(squadHubProvider(squadId).notifier);
+    final query = await showDialog<String>(
+      context: context,
+      builder: (_) => _InviteDialog(check: controller.checkInvitee),
+    );
+    if (query == null || query.trim().isEmpty || !context.mounted) return;
     final messenger = ScaffoldMessenger.of(context);
     try {
-      await ref.read(squadHubProvider(squadId).notifier).invite(handle);
-      messenger.showSnackBar(SnackBar(content: Text('Added @${handle.trim().replaceFirst('@', '')}')));
+      final invitee = await controller.invite(query);
+      HapticsService.mediumImpact();
+      messenger.showSnackBar(SnackBar(content: Text('Added @${invitee.username}')));
     } on InviteFailure catch (e) {
       messenger.showSnackBar(SnackBar(content: Text(e.message)));
     } catch (_) {
@@ -155,41 +162,117 @@ class SquadHubScreen extends ConsumerWidget {
   }
 }
 
+/// Invite by handle or email with live validation (FE-SQUADS-02). Pops the typed query
+/// once it resolves to someone who can join.
 class _InviteDialog extends StatefulWidget {
-  const _InviteDialog();
+  const _InviteDialog({required this.check});
+
+  final Future<InviteCheck> Function(String query) check;
 
   @override
   State<_InviteDialog> createState() => _InviteDialogState();
 }
 
 class _InviteDialogState extends State<_InviteDialog> {
+  static const _debounce = Duration(milliseconds: 350);
+
   final _controller = TextEditingController();
+  Timer? _timer;
+  bool _checking = false;
+  InviteCheck _result = const InviteCheck.empty();
 
   @override
   void dispose() {
+    _timer?.cancel();
     _controller.dispose();
     super.dispose();
   }
 
+  void _onChanged(String value) {
+    _timer?.cancel();
+    if (value.trim().isEmpty) {
+      setState(() {
+        _checking = false;
+        _result = const InviteCheck.empty();
+      });
+      return;
+    }
+    setState(() => _checking = true);
+    _timer = Timer(_debounce, () async {
+      final result = await widget.check(value);
+      // Drop answers for text the user has since changed.
+      if (!mounted || _controller.text != value) return;
+      setState(() {
+        _checking = false;
+        _result = result;
+      });
+    });
+  }
+
   @override
-  Widget build(BuildContext context) => AlertDialog(
-        backgroundColor: TellyColors.backgroundCard,
-        title: Text('Invite by handle', style: TellyTypography.titleMedium()),
-        content: TextField(
-          key: const Key('squad_invite_field'),
-          controller: _controller,
-          autofocus: true,
-          decoration: const InputDecoration(hintText: '@maya'),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
-          TextButton(
-            key: const Key('squad_invite_confirm'),
-            onPressed: () => Navigator.of(context).pop(_controller.text),
-            child: const Text('Add'),
+  Widget build(BuildContext context) {
+    final invitee = _checking ? null : _result.invitee;
+    return AlertDialog(
+      backgroundColor: TellyColors.backgroundCard,
+      title: Text('Invite to squad', style: TellyTypography.titleMedium()),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
+            key: const Key('squad_invite_field'),
+            controller: _controller,
+            autofocus: true,
+            autocorrect: false,
+            keyboardType: TextInputType.emailAddress,
+            onChanged: _onChanged,
+            decoration: InputDecoration(
+              hintText: '@handle or email',
+              suffixIcon: _checking
+                  ? const Padding(
+                      padding: EdgeInsets.all(14),
+                      child: SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: TellyColors.textTertiary),
+                      ),
+                    )
+                  : invitee != null
+                      ? const Icon(Icons.check_circle, key: Key('squad_invite_valid'), color: TellyColors.phosphorLime)
+                      : _result.error != null
+                          ? const Icon(Icons.error_outline, key: Key('squad_invite_invalid'), color: TellyColors.neonCoral)
+                          : null,
+            ),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            height: 20,
+            child: invitee != null
+                ? Text(
+                    '${invitee.displayName.isEmpty ? '@${invitee.username}' : invitee.displayName} · @${invitee.username}',
+                    key: const Key('squad_invite_match'),
+                    style: TellyTypography.caption(color: TellyColors.phosphorLime).copyWith(fontWeight: FontWeight.w700),
+                  )
+                : !_checking && _result.error != null
+                    ? Text(
+                        _result.error!,
+                        key: const Key('squad_invite_error'),
+                        style: TellyTypography.caption(color: TellyColors.neonCoral),
+                      )
+                    : null,
           ),
         ],
-      );
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
+        TextButton(
+          key: const Key('squad_invite_confirm'),
+          onPressed: invitee == null ? null : () => Navigator.of(context).pop(_controller.text),
+          child: const Text('Add'),
+        ),
+      ],
+    );
+  }
 }
 
 class _Hub extends ConsumerWidget {
@@ -422,7 +505,7 @@ class _CanonSwitcher extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: TellyColors.borderGlass),
       ),
-      child: Row(children: [option('movie', '🎬 Movies'), option('tv', '📺 TV Shows')]),
+      child: Row(children: [option('movie', 'Movies'), option('tv', 'TV Shows')]),
     );
   }
 }

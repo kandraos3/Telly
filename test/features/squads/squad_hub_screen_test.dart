@@ -46,6 +46,10 @@ class FakeSquadRepository implements SquadRepository {
   bool failReads = false;
   bool failWrites = false;
 
+  /// Lookup table for [findInvitee], keyed by lower-case handle or email.
+  final invitees = <String, SquadInvitee>{};
+  final lookups = <String>[];
+
   @override
   Future<List<Squad>> mySquads() async {
     if (failReads) throw Exception('offline');
@@ -71,6 +75,12 @@ class FakeSquadRepository implements SquadRepository {
   Future<Squad> create({required String name, String? description}) async {
     final s = Squad(id: 'sq-new', name: name, createdBy: 'u1', members: [member('u1', 'Jordan', role: SquadRole.owner)], createdAt: DateTime(2026));
     return squads[s.id] = s;
+  }
+
+  @override
+  Future<SquadInvitee?> findInvitee(String query) async {
+    lookups.add(query);
+    return invitees[query.trim().toLowerCase().replaceFirst(RegExp('^@'), '')];
   }
 
   @override
@@ -133,6 +143,8 @@ void main() {
   group('FE-306 / FE-608: SCR-17 SquadHubScreen', () {
     testWidgets('renders members, the Borda leaderboard and the biggest debate', (tester) async {
       await pump(tester, const SquadHubScreen(squadId: 'sq-1'));
+      await tester.tap(find.byKey(const Key('squad_canon_tv')));
+      await tester.pumpAndSettle();
       expect(find.text('THE APARTMENT (2)'), findsOneWidget);
       expect(find.text('MEMBERS (2)'), findsOneWidget);
       expect(find.byKey(const Key('squad_consensus_101')), findsOneWidget);
@@ -142,13 +154,25 @@ void main() {
 
     testWidgets('switching canon loads that canon once', (tester) async {
       await pump(tester, const SquadHubScreen(squadId: 'sq-1'));
-      await tester.tap(find.byKey(const Key('squad_canon_movie')));
-      await tester.pumpAndSettle();
-      expect(find.byKey(const Key('squad_consensus_201')), findsOneWidget);
       await tester.tap(find.byKey(const Key('squad_canon_tv')));
-      await tester.tap(find.byKey(const Key('squad_canon_movie')));
       await tester.pumpAndSettle();
-      expect(repo.consensusCalls, ['tv', 'movie']);
+      expect(find.byKey(const Key('squad_consensus_101')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('squad_canon_movie')));
+      await tester.tap(find.byKey(const Key('squad_canon_tv')));
+      await tester.pumpAndSettle();
+      expect(repo.consensusCalls, ['movie', 'tv']);
+    });
+
+    testWidgets('FE-SQUADS-02: opens on Movies, with Movies left of TV Shows', (tester) async {
+      await pump(tester, const SquadHubScreen(squadId: 'sq-1'));
+      expect(find.byKey(const Key('squad_consensus_201')), findsOneWidget);
+      expect(repo.consensusCalls, ['movie']);
+      expect(
+        tester.getCenter(find.byKey(const Key('squad_canon_movie'))).dx,
+        lessThan(tester.getCenter(find.byKey(const Key('squad_canon_tv'))).dx),
+      );
+      expect(find.text('Movies'), findsOneWidget);
+      expect(find.text('TV Shows'), findsOneWidget);
     });
 
     testWidgets('Squad Watchlist and Debates tabs show their own content', (tester) async {
@@ -164,20 +188,82 @@ void main() {
 
       await tester.tap(find.byKey(const Key('squad_tab_debates')));
       await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('squad_canon_tv')));
+      await tester.pumpAndSettle();
       expect(find.byKey(const Key('squad_debate_105')), findsOneWidget);
       expect(find.byKey(const Key('squad_debate_101')), findsNothing);
     });
 
-    testWidgets('the owner invites by handle', (tester) async {
-      profiles.profiles['maya'] = const PublicProfile(id: 'u2', username: 'maya', displayName: 'Maya');
-      await pump(tester, const SquadHubScreen(squadId: 'sq-1'));
+    Future<void> openInvite(WidgetTester tester, String text) async {
       await tester.tap(find.byKey(const Key('squad_invite_button')));
       await tester.pumpAndSettle();
-      await tester.enterText(find.byKey(const Key('squad_invite_field')), '@maya');
+      await tester.enterText(find.byKey(const Key('squad_invite_field')), text);
+      await tester.pumpAndSettle();
+    }
+
+    bool addEnabled(WidgetTester tester) =>
+        tester.widget<TextButton>(find.byKey(const Key('squad_invite_confirm'))).onPressed != null;
+
+    testWidgets('the owner invites by handle once it validates', (tester) async {
+      repo.invitees['maya'] = const SquadInvitee(userId: 'u2', username: 'maya', displayName: 'Maya Lin');
+      await pump(tester, const SquadHubScreen(squadId: 'sq-1'));
+      await openInvite(tester, '@maya');
+      expect(find.byKey(const Key('squad_invite_valid')), findsOneWidget);
+      expect(find.text('Maya Lin · @maya'), findsOneWidget);
+      expect(addEnabled(tester), isTrue);
       await tester.tap(find.byKey(const Key('squad_invite_confirm')));
       await tester.pumpAndSettle();
       expect(repo.added.single, ('sq-1', 'u2'));
       expect(find.text('MEMBERS (3)'), findsOneWidget);
+      expect(find.text('Added @maya'), findsOneWidget);
+    });
+
+    testWidgets('FE-SQUADS-02: the owner invites by email', (tester) async {
+      repo.invitees['maya@example.com'] =
+          const SquadInvitee(userId: 'u2', username: 'maya', displayName: 'Maya Lin', matchedByEmail: true);
+      await pump(tester, const SquadHubScreen(squadId: 'sq-1'));
+      await openInvite(tester, 'Maya@Example.com');
+      expect(find.byKey(const Key('squad_invite_valid')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('squad_invite_confirm')));
+      await tester.pumpAndSettle();
+      expect(repo.added.single, ('sq-1', 'u2'));
+    });
+
+    testWidgets('FE-SQUADS-02: unknown, malformed and existing members are flagged live', (tester) async {
+      repo.invitees['alex'] = const SquadInvitee(userId: 'u3', username: 'alex', displayName: 'Alex');
+      await pump(tester, const SquadHubScreen(squadId: 'sq-1'));
+
+      await openInvite(tester, 'nobody_here');
+      expect(find.byKey(const Key('squad_invite_invalid')), findsOneWidget);
+      expect(find.text('No one found with @nobody_here.'), findsOneWidget);
+      expect(addEnabled(tester), isFalse);
+
+      await tester.enterText(find.byKey(const Key('squad_invite_field')), 'ghost@nowhere.dev');
+      await tester.pumpAndSettle();
+      expect(find.text('No Telly account uses that email.'), findsOneWidget);
+
+      final lookupsBefore = repo.lookups.length;
+      await tester.enterText(find.byKey(const Key('squad_invite_field')), 'maya@');
+      await tester.pumpAndSettle();
+      expect(find.text('Enter a full email address.'), findsOneWidget);
+      expect(repo.lookups.length, lookupsBefore, reason: 'malformed input never hits the server');
+
+      await tester.enterText(find.byKey(const Key('squad_invite_field')), 'alex');
+      await tester.pumpAndSettle();
+      expect(find.text('@alex is already in this squad.'), findsOneWidget);
+      expect(addEnabled(tester), isFalse);
+    });
+
+    testWidgets('FE-SQUADS-02: typing quickly checks only the settled text', (tester) async {
+      await pump(tester, const SquadHubScreen(squadId: 'sq-1'));
+      await tester.tap(find.byKey(const Key('squad_invite_button')));
+      await tester.pumpAndSettle();
+      for (final partial in ['may', 'maya', 'maya_']) {
+        await tester.enterText(find.byKey(const Key('squad_invite_field')), partial);
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      await tester.pumpAndSettle();
+      expect(repo.lookups, ['maya_']);
     });
 
     testWidgets('members cannot invite', (tester) async {
@@ -342,6 +428,36 @@ void main() {
       expect(requests.single.url.path, '/rest/v1/squad_members');
       expect(requests.single.url.queryParameters, containsPair('squad_id', 'eq.sq-1'));
       expect(requests.single.url.queryParameters, containsPair('user_id', 'eq.u3'));
+    });
+
+    test('findInvitee calls lookup_squad_invitee and maps the match (FE-SQUADS-02)', () async {
+      final requests = <http.Request>[];
+      final invitee = await SupabaseSquadRepository(
+        clientReturning([
+          {'id': 'u2', 'username': 'maya', 'display_name': 'Maya Lin', 'avatar_url': null, 'matched_by': 'email'},
+        ], requests),
+      ).findInvitee(' maya@example.com ');
+      expect(requests.single.url.path, '/rest/v1/rpc/lookup_squad_invitee');
+      expect(jsonDecode(requests.single.body), {'p_query': 'maya@example.com'});
+      expect(invitee!.userId, 'u2');
+      expect(invitee.matchedByEmail, isTrue);
+
+      expect(await SupabaseSquadRepository(clientReturning([], [])).findInvitee('nobody'), isNull);
+    });
+  });
+
+  group('FE-SQUADS-02: invite input shapes', () {
+    test('recognises emails and handles', () {
+      expect(looksLikeEmail('maya@example.com'), isTrue);
+      expect(looksLikeEmail(' Maya.Lin@Example.co.uk '), isTrue);
+      expect(looksLikeEmail('maya@'), isFalse);
+      expect(looksLikeEmail('@maya'), isFalse);
+
+      expect(looksLikeHandle('@maya_l'), isTrue);
+      expect(looksLikeHandle('Maya'), isTrue);
+      expect(looksLikeHandle('ma'), isFalse);
+      expect(looksLikeHandle('maya__l'), isFalse);
+      expect(looksLikeHandle('maya lin'), isFalse);
     });
   });
 }
