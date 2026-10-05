@@ -28,6 +28,14 @@ abstract class TellyTheme {
       scaffoldBackgroundColor: TellyColors.backgroundPrimary,
       canvasColor: TellyColors.backgroundPrimary,
       cardColor: TellyColors.backgroundSurface,
+      cardTheme: CardThemeData(
+        color: TellyColors.backgroundSurface,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: TellyColors.borderGlass),
+        ),
+      ),
       colorScheme: colorScheme,
       appBarTheme: const AppBarTheme(
         backgroundColor: TellyColors.backgroundPrimary,
@@ -36,6 +44,11 @@ abstract class TellyTheme {
         centerTitle: false,
         systemOverlayStyle: SystemUiOverlayStyle.light,
         iconTheme: IconThemeData(color: TellyColors.textPrimary),
+        titleTextStyle: TextStyle(
+          color: TellyColors.textPrimary,
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+        ),
       ),
       dividerColor: TellyColors.strokeSubtle,
       dividerTheme: const DividerThemeData(
@@ -81,6 +94,14 @@ abstract class TellyTheme {
       scaffoldBackgroundColor: TellyColors.lightBackgroundPrimary,
       canvasColor: TellyColors.lightBackgroundPrimary,
       cardColor: TellyColors.lightBackgroundSurface,
+      cardTheme: CardThemeData(
+        color: TellyColors.lightBackgroundSurface,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: TellyColors.lightStrokeSubtle),
+        ),
+      ),
       colorScheme: colorScheme,
       appBarTheme: const AppBarTheme(
         backgroundColor: TellyColors.lightBackgroundPrimary,
@@ -89,6 +110,11 @@ abstract class TellyTheme {
         centerTitle: false,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         iconTheme: IconThemeData(color: TellyColors.lightTextPrimary),
+        titleTextStyle: TextStyle(
+          color: TellyColors.lightTextPrimary,
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+        ),
       ),
       dividerColor: TellyColors.lightStrokeSubtle,
       dividerTheme: const DividerThemeData(

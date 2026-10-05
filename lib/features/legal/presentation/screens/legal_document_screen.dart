@@ -32,12 +32,9 @@ class _LegalDocumentScreenState extends State<LegalDocumentScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: TellyColors.backgroundPrimary,
       appBar: AppBar(
-        backgroundColor: TellyColors.backgroundPrimary,
-        foregroundColor: TellyColors.textPrimary,
         elevation: 0,
-        title: Text(widget.document.title, style: TellyTypography.titleMedium()),
+        title: Text(widget.document.title, style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context))),
       ),
       body: FutureBuilder<List<LegalBlock>>(
         future: _blocks,
@@ -46,13 +43,13 @@ class _LegalDocumentScreenState extends State<LegalDocumentScreen> {
             return Center(
               child: Text(
                 'This document could not be loaded.',
-                style: TellyTypography.bodyMedium(color: TellyColors.textSecondary),
+                style: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context)),
               ),
             );
           }
           final blocks = snapshot.data;
           if (blocks == null) {
-            return const Center(child: CircularProgressIndicator(color: TellyColors.phosphorLime));
+            return Center(child: CircularProgressIndicator(color: TellyColors.primaryAccentOf(context)));
           }
           return ListView.builder(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
@@ -78,26 +75,26 @@ class _LegalBlockView extends StatelessWidget {
           padding: EdgeInsets.only(top: level == 1 ? 8 : 16, bottom: 8),
           child: Semantics(
             header: true,
-            child: _richText(text, level == 1 ? TellyTypography.titleLarge() : TellyTypography.titleMedium()),
+            child: _richText(text, level == 1 ? TellyTypography.titleLarge(color: TellyColors.textPrimaryOf(context)) : TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context))),
           ),
         ),
       LegalParagraph(:final text) => Padding(
           padding: const EdgeInsets.only(bottom: 12),
-          child: _richText(text, TellyTypography.bodyMedium(color: TellyColors.textSecondary)),
+          child: _richText(text, TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context))),
         ),
       LegalBullet(:final depth, :final text) => Padding(
           padding: EdgeInsets.only(left: 4.0 + depth * 18, bottom: 8),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(depth == 0 ? '•  ' : '◦  ', style: TellyTypography.bodyMedium(color: TellyColors.phosphorLime)),
-              Expanded(child: _richText(text, TellyTypography.bodyMedium(color: TellyColors.textSecondary))),
+              Text(depth == 0 ? '•  ' : '◦  ', style: TellyTypography.bodyMedium(color: TellyColors.primaryAccentOf(context))),
+              Expanded(child: _richText(text, TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context)))),
             ],
           ),
         ),
-      LegalDivider() => const Padding(
-          padding: EdgeInsets.symmetric(vertical: 12),
-          child: Divider(color: TellyColors.strokeSubtle, height: 1),
+      LegalDivider() => Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: Divider(color: TellyColors.strokeOf(context), height: 1),
         ),
     };
   }

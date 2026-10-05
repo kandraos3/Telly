@@ -62,15 +62,15 @@ class TellyFloatingNavBar extends StatelessWidget {
                   child: Container(
                     height: height,
                     decoration: BoxDecoration(
-                      color: TellyColors.backgroundSurface.withValues(alpha: 0.75),
+                      color: TellyColors.surfaceOf(context).withValues(alpha: 0.75),
                       borderRadius: BorderRadius.circular(radius),
-                      border: Border.all(color: TellyColors.strokeSubtle),
+                      border: Border.all(color: TellyColors.strokeOf(context)),
                     ),
                     child: Row(
                       children: [
-                        for (var i = 0; i < leftItems.length; i++) _tab(leftItems[i], i),
+                        for (var i = 0; i < leftItems.length; i++) _tab(context, leftItems[i], i),
                         const Expanded(child: SizedBox()),
-                        for (var i = 0; i < rightItems.length; i++) _tab(rightItems[i], i + leftItems.length),
+                        for (var i = 0; i < rightItems.length; i++) _tab(context, rightItems[i], i + leftItems.length),
                       ],
                     ),
                   ),
@@ -87,8 +87,10 @@ class TellyFloatingNavBar extends StatelessWidget {
     );
   }
 
-  Widget _tab(TellyNavItem item, int index) {
+  Widget _tab(BuildContext context, TellyNavItem item, int index) {
     final active = index == currentIndex;
+    final activeColor = TellyColors.textPrimaryOf(context);
+    final inactiveColor = TellyColors.textTertiaryOf(context);
     return Expanded(
       child: Semantics(
         button: true,
@@ -102,11 +104,11 @@ class TellyFloatingNavBar extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(item.icon, size: 22, color: active ? TellyColors.textPrimary : TellyColors.textTertiary),
+                Icon(item.icon, size: 22, color: active ? activeColor : inactiveColor),
                 const SizedBox(height: 2),
                 Text(
                   item.label,
-                  style: TellyTypography.caption(color: active ? TellyColors.textPrimary : TellyColors.textTertiary),
+                  style: TellyTypography.caption(color: active ? activeColor : inactiveColor),
                 ),
                 const SizedBox(height: 3),
                 AnimatedOpacity(
@@ -116,7 +118,10 @@ class TellyFloatingNavBar extends StatelessWidget {
                     key: active ? const Key('nav_active_dot') : null,
                     width: 4,
                     height: 4,
-                    decoration: const BoxDecoration(color: TellyColors.phosphorLime, shape: BoxShape.circle),
+                    decoration: BoxDecoration(
+                      color: TellyColors.primaryAccentOf(context),
+                      shape: BoxShape.circle,
+                    ),
                   ),
                 ),
               ],

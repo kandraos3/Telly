@@ -74,4 +74,66 @@ abstract class TellyColors {
   // Dropped / DNF (< 5.50)
   static const Color tierDroppedStart = Color(0xFFF87171);
   static const Color tierDroppedEnd = Color(0xFFDC2626);
+
+  // --- Context-Aware Dynamic Resolvers (Midnight Cathode <-> Day Cathode) ---
+  static Color canvasOf(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.light ? lightBackgroundPrimary : backgroundPrimary;
+
+  static Color surfaceOf(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.light ? lightBackgroundSurface : backgroundSurface;
+
+  static Color cardOf(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.light ? lightBackgroundCard : backgroundCard;
+
+  static Color strokeOf(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.light ? lightStrokeSubtle : strokeSubtle;
+
+  static Color strokeStrongOf(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.light ? lightStrokeStrong : strokeStrong;
+
+  static Color borderGlassOf(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.light ? lightBorderGlass : borderGlass;
+
+  static Color textPrimaryOf(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.light ? lightTextPrimary : textPrimary;
+
+  static Color textSecondaryOf(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.light ? lightTextSecondary : textSecondary;
+
+  static Color textTertiaryOf(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.light ? lightTextTertiary : textTertiary;
+
+  static Color textDisabledOf(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.light ? lightTextDisabled : textDisabled;
+
+  static Color primaryAccentOf(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.light ? lightPhosphorLime : phosphorLime;
+
+  static Color neonCoralOf(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.light ? lightNeonCoral : neonCoral;
+
+  static Color warmAmberOf(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.light ? lightWarmAmber : warmAmber;
+
+  static Color electricVioletOf(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.light ? lightElectricViolet : electricViolet;
+
+  static Color electricCyanOf(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.light ? lightElectricCyan : electricCyan;
 }
+
+/// Convenience extension on [BuildContext] for ergonomic access to dynamic theme tokens.
+extension TellyColorsExtension on BuildContext {
+  bool get isLight => Theme.of(this).brightness == Brightness.light;
+  Color get canvasColor => TellyColors.canvasOf(this);
+  Color get surfaceColor => TellyColors.surfaceOf(this);
+  Color get cardColor => TellyColors.cardOf(this);
+  Color get strokeColor => TellyColors.strokeOf(this);
+  Color get strokeStrongColor => TellyColors.strokeStrongOf(this);
+  Color get borderGlassColor => TellyColors.borderGlassOf(this);
+  Color get textPrimaryColor => TellyColors.textPrimaryOf(this);
+  Color get textSecondaryColor => TellyColors.textSecondaryOf(this);
+  Color get textTertiaryColor => TellyColors.textTertiaryOf(this);
+  Color get primaryAccentColor => TellyColors.primaryAccentOf(this);
+}
+

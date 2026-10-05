@@ -74,10 +74,16 @@ class TellyNeonBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final color = _badgeColor();
-    final textColor = variant == TellyBadgeVariant.tasteMatch
-        ? const Color(0xFFC4B5FD)
-        : color;
+    final Color textColor;
+    if (variant == TellyBadgeVariant.tasteMatch) {
+      textColor = isDark ? const Color(0xFFC4B5FD) : const Color(0xFF5B3CE0);
+    } else if (variant == TellyBadgeVariant.godTier) {
+      textColor = isDark ? Colors.white : const Color(0xFF78350F);
+    } else {
+      textColor = color;
+    }
 
     return Container(
       padding: padding,
@@ -109,6 +115,7 @@ class TellyNeonBadge extends StatelessWidget {
           Text(
             label.toUpperCase(),
             style: TellyTypography.caption(color: textColor).copyWith(
+              fontSize: 12,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.5,
             ),

@@ -87,12 +87,11 @@ class _LoggingStudioScreenState extends ConsumerState<LoggingStudioScreen> {
     final title = draft.title;
 
     return Scaffold(
-      backgroundColor: TellyColors.backgroundPrimary,
       body: SafeArea(
         child: Column(
           children: [
             _Header(onCancel: _close),
-            const Divider(height: 1, color: TellyColors.strokeSubtle),
+            Divider(height: 1, color: TellyColors.strokeOf(context)),
             Expanded(
               child: title == null
                   ? _SearchPane(controller: _searchController, draft: draft)
@@ -130,7 +129,7 @@ class _Header extends StatelessWidget {
             child: TextButton(
               key: const Key('logging_cancel'),
               onPressed: onCancel,
-              child: Text('✕ Cancel', style: TellyTypography.labelMedium(color: TellyColors.textSecondary)),
+              child: Text('✕ Cancel', style: TellyTypography.labelMedium(color: TellyColors.textSecondaryOf(context))),
             ),
           ),
           Text('LOG A SHOW', style: TellyTypography.labelLarge()),
@@ -158,16 +157,16 @@ class _SearchPane extends ConsumerWidget {
             controller: controller,
             autofocus: true,
             onChanged: session.updateQuery,
-            style: TellyTypography.bodyLarge(color: TellyColors.textPrimary),
+            style: TellyTypography.bodyLarge(color: TellyColors.textPrimaryOf(context)),
             decoration: InputDecoration(
               hintText: 'Search movies & shows',
-              hintStyle: TellyTypography.bodyLarge(color: TellyColors.textTertiary),
-              prefixIcon: const Icon(Icons.search, color: TellyColors.textTertiary),
+              hintStyle: TellyTypography.bodyLarge(color: TellyColors.textTertiaryOf(context)),
+              prefixIcon: Icon(Icons.search, color: TellyColors.textTertiaryOf(context)),
               filled: true,
-              fillColor: TellyColors.backgroundSurface,
+              fillColor: TellyColors.surfaceOf(context),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: TellyColors.strokeSubtle),
+                borderSide: BorderSide(color: TellyColors.strokeOf(context)),
               ),
             ),
           ),
@@ -290,7 +289,7 @@ class _SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.only(bottom: 8),
-        child: Text(text, style: TellyTypography.labelLarge(color: TellyColors.textSecondary)),
+        child: Text(text, style: TellyTypography.labelLarge(color: TellyColors.textSecondaryOf(context))),
       );
 }
 

@@ -66,7 +66,6 @@ class DualCanonProfileScreen extends ConsumerWidget {
         };
 
     return Scaffold(
-      backgroundColor: TellyColors.backgroundPrimary,
       body: SafeArea(
         child: GestureDetector(
           behavior: HitTestBehavior.translucent,
@@ -116,9 +115,9 @@ class DualCanonProfileScreen extends ConsumerWidget {
                     constraints: const BoxConstraints(minHeight: 56),
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      color: TellyColors.backgroundSurface,
+                      color: TellyColors.surfaceOf(context),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: TellyColors.borderGlass),
+                      border: Border.all(color: TellyColors.borderGlassOf(context)),
                     ),
                     child: Row(
                       children: [
@@ -185,13 +184,14 @@ class DualCanonProfileScreen extends ConsumerWidget {
                       constraints: const BoxConstraints(minHeight: 48),
                       padding: const EdgeInsets.all(3),
                       decoration: BoxDecoration(
-                        color: TellyColors.backgroundCard,
+                        color: TellyColors.cardOf(context),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: TellyColors.strokeSubtle),
+                        border: Border.all(color: TellyColors.strokeOf(context)),
                       ),
                       child: Row(
                         children: [
                           _buildViewModeButton(
+                            context: context,
                             key: const Key('view_mode_ranked_button'),
                             icon: Icons.format_list_numbered_rounded,
                             label: 'Ranked',
@@ -202,6 +202,7 @@ class DualCanonProfileScreen extends ConsumerWidget {
                             },
                           ),
                           _buildViewModeButton(
+                            context: context,
                             key: const Key('view_mode_tier_button'),
                             icon: Icons.view_agenda_rounded,
                             label: 'Tiers',
@@ -212,6 +213,7 @@ class DualCanonProfileScreen extends ConsumerWidget {
                             },
                           ),
                           _buildViewModeButton(
+                            context: context,
                             key: const Key('view_mode_grid_button'),
                             icon: Icons.grid_view_rounded,
                             label: '3x3',
@@ -228,12 +230,12 @@ class DualCanonProfileScreen extends ConsumerWidget {
                     // View Options Overflow Button (relocated Rollup & preferences)
                     IconButton(
                       key: const Key('canon_options_button'),
-                      icon: const Icon(Icons.more_vert, color: TellyColors.textSecondary),
+                      icon: Icon(Icons.more_vert, color: TellyColors.textSecondaryOf(context)),
                       tooltip: 'View Options',
                       onPressed: () {
                         showModalBottomSheet(
                           context: context,
-                          backgroundColor: TellyColors.backgroundCard,
+                          backgroundColor: TellyColors.cardOf(context),
                           shape: const RoundedRectangleBorder(
                             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                           ),
@@ -249,7 +251,7 @@ class DualCanonProfileScreen extends ConsumerWidget {
                                     children: [
                                       Text(
                                         'VIEW OPTIONS',
-                                        style: TellyTypography.labelSmall(color: TellyColors.textTertiary)
+                                        style: TellyTypography.labelSmall(color: TellyColors.textTertiaryOf(context))
                                             .copyWith(fontWeight: FontWeight.bold, letterSpacing: 1.0),
                                       ),
                                       const SizedBox(height: 12),
@@ -257,12 +259,12 @@ class DualCanonProfileScreen extends ConsumerWidget {
                                         SwitchListTile(
                                           key: const Key('franchise_rollup_toggle'),
                                           contentPadding: EdgeInsets.zero,
-                                          title: const Text('Anime Franchise Rollup', style: TextStyle(color: TellyColors.textPrimary)),
-                                          subtitle: const Text(
+                                          title: Text('Anime Franchise Rollup', style: TextStyle(color: TellyColors.textPrimaryOf(context))),
+                                          subtitle: Text(
                                             'Combine multi-season anime into a single master entry',
-                                            style: TextStyle(color: TellyColors.textTertiary, fontSize: 12),
+                                            style: TextStyle(color: TellyColors.textTertiaryOf(context), fontSize: 12),
                                           ),
-                                          activeThumbColor: TellyColors.phosphorLime,
+                                          activeThumbColor: TellyColors.primaryAccentOf(context),
                                           value: currentRollup,
                                           onChanged: (val) {
                                             ref.read(hapticsServiceProvider).duelSelectCandidate();
@@ -270,9 +272,9 @@ class DualCanonProfileScreen extends ConsumerWidget {
                                           },
                                         )
                                       else
-                                        const Padding(
-                                          padding: EdgeInsets.symmetric(vertical: 8),
-                                          child: Text('No additional options for Movies.', style: TextStyle(color: TellyColors.textTertiary)),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(vertical: 8),
+                                          child: Text('No additional options for Movies.', style: TextStyle(color: TellyColors.textTertiaryOf(context))),
                                         ),
                                     ],
                                   ),
@@ -472,6 +474,7 @@ class DualCanonProfileScreen extends ConsumerWidget {
   }
 
   Widget _buildViewModeButton({
+    required BuildContext context,
     required Key key,
     required IconData icon,
     required String label,
@@ -486,22 +489,22 @@ class DualCanonProfileScreen extends ConsumerWidget {
         alignment: Alignment.center,
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: isSelected ? TellyColors.backgroundSurface : Colors.transparent,
+          color: isSelected ? TellyColors.surfaceOf(context) : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
-          border: isSelected ? Border.all(color: TellyColors.borderGlass) : null,
+          border: isSelected ? Border.all(color: TellyColors.borderGlassOf(context)) : null,
         ),
         child: Row(
           children: [
             Icon(
               icon,
               size: 15,
-              color: isSelected ? TellyColors.phosphorLime : TellyColors.textTertiary,
+              color: isSelected ? TellyColors.primaryAccentOf(context) : TellyColors.textSecondaryOf(context),
             ),
             const SizedBox(width: 4),
             Text(
               label,
               style: TellyTypography.caption(
-                color: TellyColors.textPrimary,
+                color: TellyColors.textPrimaryOf(context),
               ).copyWith(fontWeight: isSelected ? FontWeight.bold : FontWeight.w500),
             ),
           ],

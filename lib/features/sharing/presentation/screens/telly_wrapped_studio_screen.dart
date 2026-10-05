@@ -49,18 +49,16 @@ class _TellyWrappedStudioScreenState extends State<TellyWrappedStudioScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: TellyColors.backgroundCanvasOled,
       appBar: AppBar(
-        backgroundColor: TellyColors.backgroundCanvasOled,
         elevation: 0,
         leading: IconButton(
           tooltip: 'Close',
-          icon: const Icon(Icons.close, color: TellyColors.textPrimary),
+          icon: Icon(Icons.close, color: TellyColors.textPrimaryOf(context)),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
           'STORY STUDIO',
-          style: TellyTypography.titleMedium(color: TellyColors.textPrimary).copyWith(letterSpacing: 1.2),
+          style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context)).copyWith(letterSpacing: 1.2),
         ),
         actions: [
           IconButton(

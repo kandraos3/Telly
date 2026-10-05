@@ -123,9 +123,7 @@ class _ActivityFeedScreenState extends ConsumerState<ActivityFeedScreen> {
     final feedAsync = ref.watch(feedControllerProvider(currentFilter));
 
     return Scaffold(
-      backgroundColor: TellyColors.backgroundCanvasOled,
       appBar: AppBar(
-        backgroundColor: TellyColors.backgroundCanvasOled,
         elevation: 0,
         centerTitle: false,
         title: Row(
@@ -180,7 +178,7 @@ class _ActivityFeedScreenState extends ConsumerState<ActivityFeedScreen> {
           ),
           IconButton(
             tooltip: 'Search',
-            icon: const Icon(Icons.search_rounded, color: TellyColors.textPrimary),
+            icon: Icon(Icons.search_rounded, color: TellyColors.textPrimaryOf(context)),
             onPressed: () {
               HapticsService.selectionClick();
             },
@@ -197,8 +195,8 @@ class _ActivityFeedScreenState extends ConsumerState<ActivityFeedScreen> {
             // Activity Feed List with Pull-to-Refresh
             Expanded(
               child: RefreshIndicator(
-                color: TellyColors.phosphorLime,
-                backgroundColor: TellyColors.backgroundCard,
+                color: TellyColors.primaryAccentOf(context),
+                backgroundColor: TellyColors.cardOf(context),
                 onRefresh: () => _feed.refresh(),
                 child: feedAsync.when(
                   data: (feed) {
@@ -289,9 +287,9 @@ class _ActivityFeedScreenState extends ConsumerState<ActivityFeedScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: TellyColors.backgroundSurface,
+        color: TellyColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: TellyColors.borderGlass),
+        border: Border.all(color: TellyColors.borderGlassOf(context)),
       ),
       child: Row(
         children: FeedFilter.values.map((filter) {
@@ -308,17 +306,17 @@ class _ActivityFeedScreenState extends ConsumerState<ActivityFeedScreen> {
                 constraints: const BoxConstraints(minHeight: 48),
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 decoration: BoxDecoration(
-                  color: isSelected ? TellyColors.backgroundCard : Colors.transparent,
+                  color: isSelected ? TellyColors.cardOf(context) : Colors.transparent,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: isSelected ? TellyColors.borderGlass : Colors.transparent,
+                    color: isSelected ? TellyColors.borderGlassOf(context) : Colors.transparent,
                   ),
                 ),
                 alignment: Alignment.center,
                 child: Text(
                   filter.displayName,
                   style: TellyTypography.labelSmall(
-                    color: isSelected ? TellyColors.phosphorLime : Colors.white,
+                    color: isSelected ? TellyColors.primaryAccentOf(context) : TellyColors.textPrimaryOf(context),
                   ).copyWith(
                     fontWeight: FontWeight.w700,
                   ),

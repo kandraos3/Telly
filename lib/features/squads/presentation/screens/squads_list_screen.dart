@@ -28,10 +28,8 @@ class SquadsListScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(squadsListProvider);
     return Scaffold(
-      backgroundColor: TellyColors.backgroundCanvasOled,
       appBar: AppBar(
-        backgroundColor: TellyColors.backgroundCanvasOled,
-        title: Text('MY SQUADS', style: TellyTypography.labelLarge()),
+        title: Text('MY SQUADS', style: TellyTypography.labelLarge(color: TellyColors.textPrimaryOf(context))),
         centerTitle: true,
       ),
       floatingActionButton: FloatingActionButton.extended(

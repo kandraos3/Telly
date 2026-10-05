@@ -115,17 +115,15 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
 
     if (currentList == null) {
       return Scaffold(
-        backgroundColor: TellyColors.backgroundCanvasOled,
         appBar: AppBar(
-          backgroundColor: TellyColors.backgroundCanvasOled,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: TellyColors.textPrimary),
+            icon: Icon(Icons.arrow_back, color: TellyColors.textPrimaryOf(context)),
             onPressed: () => context.pop(),
           ),
         ),
-        body: const Center(
-          child: Text('List not found', style: TextStyle(color: TellyColors.textTertiary)),
+        body: Center(
+          child: Text('List not found', style: TextStyle(color: TellyColors.textTertiaryOf(context))),
         ),
       );
     }
@@ -134,19 +132,17 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
     final isOwner = list.isOwner('@me');
 
     return Scaffold(
-      backgroundColor: TellyColors.backgroundCanvasOled,
       appBar: AppBar(
-        backgroundColor: TellyColors.backgroundCanvasOled,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: TellyColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: TellyColors.textPrimaryOf(context)),
           onPressed: () => context.pop(),
         ),
         title: Text(
           list.title.toUpperCase(),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: TellyTypography.titleMedium(color: TellyColors.textPrimary).copyWith(letterSpacing: 1.2),
+          style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context)).copyWith(letterSpacing: 1.2),
         ),
         actions: [
           IconButton(
@@ -163,16 +159,16 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
                 final confirm = await showDialog<bool>(
                   context: context,
                   builder: (ctx) => AlertDialog(
-                    backgroundColor: TellyColors.backgroundSurface,
-                    title: const Text('Delete List?', style: TextStyle(color: TellyColors.textPrimary)),
+                    backgroundColor: TellyColors.surfaceOf(context),
+                    title: Text('Delete List?', style: TextStyle(color: TellyColors.textPrimaryOf(context))),
                     content: Text(
                       'Are you sure you want to delete "${list.title}"?',
-                      style: const TextStyle(color: TellyColors.textSecondary),
+                      style: TextStyle(color: TellyColors.textSecondaryOf(context)),
                     ),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(ctx, false),
-                        child: const Text('Cancel', style: TextStyle(color: TellyColors.textSecondary)),
+                        child: Text('Cancel', style: TextStyle(color: TellyColors.textSecondaryOf(context))),
                       ),
                       ElevatedButton(
                         onPressed: () => Navigator.pop(ctx, true),
@@ -197,9 +193,9 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
             margin: const EdgeInsets.fromLTRB(16, 8, 16, 12),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: TellyColors.backgroundSurface,
+              color: TellyColors.surfaceOf(context),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: TellyColors.borderGlass),
+              border: Border.all(color: TellyColors.borderGlassOf(context)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -213,14 +209,14 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
                         children: [
                           Text(
                             list.title,
-                            style: TellyTypography.headlineSmall(color: TellyColors.textPrimary)
+                            style: TellyTypography.headlineSmall(color: TellyColors.textPrimaryOf(context))
                                 .copyWith(fontWeight: FontWeight.w800),
                           ),
                           if (list.description != null && list.description!.isNotEmpty) ...[
                             const SizedBox(height: 6),
                             Text(
                               list.description!,
-                              style: TellyTypography.bodyMedium(color: TellyColors.textSecondary),
+                              style: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context)),
                             ),
                           ],
                         ],
@@ -238,18 +234,18 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
                   children: [
                     Text(
                       'Curated by ${list.ownerHandle}',
-                      style: TellyTypography.caption(color: TellyColors.textTertiary),
+                      style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)),
                     ),
                     const Spacer(),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: TellyColors.backgroundCard,
+                        color: TellyColors.cardOf(context),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
                         '🎬 ${list.movieCount} Movies • 📺 ${list.seriesCount} Series',
-                        style: TellyTypography.caption(color: TellyColors.textSecondary)
+                        style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context))
                             .copyWith(fontWeight: FontWeight.w700),
                       ),
                     ),
@@ -405,9 +401,9 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: TellyColors.backgroundSurface,
+        color: TellyColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: TellyColors.borderGlass),
+        border: Border.all(color: TellyColors.borderGlassOf(context)),
       ),
       child: Row(
         children: [
@@ -416,7 +412,7 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
             width: 24,
             child: Text(
               '${index + 1}',
-              style: TellyTypography.caption(color: TellyColors.textTertiary)
+              style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context))
                   .copyWith(fontWeight: FontWeight.w800),
             ),
           ),
@@ -428,16 +424,16 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
               width: 38,
               height: 52,
               decoration: BoxDecoration(
-                color: TellyColors.backgroundCard,
+                color: TellyColors.cardOf(context),
                 borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: TellyColors.borderGlass),
+                border: Border.all(color: TellyColors.borderGlassOf(context)),
               ),
               child: PosterImage(
                 posterPath: item.posterPath,
                 fallback: Center(
                   child: Icon(
                     item.mediaType == 'movie' ? Icons.movie_outlined : Icons.tv_outlined,
-                    color: TellyColors.textTertiary,
+                    color: TellyColors.textTertiaryOf(context),
                     size: 18,
                   ),
                 ),
@@ -458,7 +454,7 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
                     item.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TellyTypography.bodyMedium(color: TellyColors.textPrimary)
+                    style: TellyTypography.bodyMedium(color: TellyColors.textPrimaryOf(context))
                         .copyWith(fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 2),

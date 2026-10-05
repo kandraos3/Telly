@@ -125,7 +125,6 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
 
       content = detailAsync.when(
         loading: () => const Scaffold(
-          backgroundColor: TellyColors.backgroundCanvasOled,
           body: Center(
             child: CircularProgressIndicator(color: TellyColors.phosphorLime),
           ),
@@ -172,7 +171,6 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
 
   Widget _buildScaffold(TitleDetail title) {
     return Scaffold(
-      backgroundColor: TellyColors.backgroundCanvasOled,
       body: CustomScrollView(
         slivers: [
           // 1. 16:9 Backdrop with Gradient Fade and Top Actions
@@ -395,7 +393,8 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                   ),
                   const SizedBox(width: 8),
                   TellyNeonBadge(
-                    label: '${tier.emoji} ${tier.label.toUpperCase()}',
+                    label: tier.label.toUpperCase(),
+                    icon: ExcludeSemantics(child: Text(tier.emoji, style: const TextStyle(fontSize: 11))),
                     variant: tier == CanonTier.god
                         ? TellyBadgeVariant.godTier
                         : TellyBadgeVariant.tasteMatch,

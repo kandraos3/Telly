@@ -71,9 +71,9 @@ class _FeedActivityCardState extends State<FeedActivityCard> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: TellyColors.backgroundSurface,
+        color: TellyColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: TellyColors.borderGlass),
+        border: Border.all(color: TellyColors.borderGlassOf(context)),
       ),
       child: Material(
         color: Colors.transparent,
@@ -90,7 +90,7 @@ class _FeedActivityCardState extends State<FeedActivityCard> {
                   children: [
                     CircleAvatar(
                       radius: 18,
-                      backgroundColor: TellyColors.backgroundCard,
+                      backgroundColor: TellyColors.cardOf(context),
                       backgroundImage: (activity.userAvatarUrl != null && activity.userAvatarUrl!.isNotEmpty)
                           ? NetworkImage(activity.userAvatarUrl!)
                           : null,
@@ -99,7 +99,7 @@ class _FeedActivityCardState extends State<FeedActivityCard> {
                               activity.userDisplayName.isNotEmpty
                                   ? activity.userDisplayName[0].toUpperCase()
                                   : '?',
-                              style: TellyTypography.labelLarge(color: TellyColors.phosphorLime),
+                              style: TellyTypography.labelLarge(color: TellyColors.primaryAccentOf(context)),
                             )
                           : null,
                     ),
@@ -114,7 +114,7 @@ class _FeedActivityCardState extends State<FeedActivityCard> {
                                 child: Text(
                                   activity.userDisplayName,
                                   style: TellyTypography.labelLarge(
-                                    color: TellyColors.textPrimary,
+                                    color: TellyColors.textPrimaryOf(context),
                                   ).copyWith(fontWeight: FontWeight.bold),
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -123,7 +123,7 @@ class _FeedActivityCardState extends State<FeedActivityCard> {
                               Text(
                                 '@${activity.username}',
                                 style: TellyTypography.caption(
-                                  color: TellyColors.textTertiary,
+                                  color: TellyColors.textTertiaryOf(context),
                                 ),
                               ),
                             ],
@@ -131,7 +131,7 @@ class _FeedActivityCardState extends State<FeedActivityCard> {
                           Text(
                             activity.relativeTime,
                             style: TellyTypography.caption(
-                              color: TellyColors.textTertiary,
+                              color: TellyColors.textTertiaryOf(context),
                             ).copyWith(fontSize: 11),
                           ),
                         ],
@@ -166,9 +166,9 @@ class _FeedActivityCardState extends State<FeedActivityCard> {
                         width: 60,
                         height: 90,
                         decoration: BoxDecoration(
-                          color: TellyColors.backgroundCard,
+                          color: TellyColors.cardOf(context),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: TellyColors.borderGlass),
+                          border: Border.all(color: TellyColors.borderGlassOf(context)),
                         ),
                         clipBehavior: Clip.antiAlias,
                         child: PosterImage(
@@ -179,7 +179,7 @@ class _FeedActivityCardState extends State<FeedActivityCard> {
                               activity.mediaType == 'movie'
                                   ? Icons.movie_rounded
                                   : Icons.tv_rounded,
-                              color: TellyColors.textTertiary,
+                              color: TellyColors.textTertiaryOf(context),
                               size: 28,
                             ),
                           ),
@@ -195,7 +195,7 @@ class _FeedActivityCardState extends State<FeedActivityCard> {
                             Text(
                               activity.titleName,
                               style: TellyTypography.headlineSmall(
-                                color: TellyColors.textPrimary,
+                                color: TellyColors.textPrimaryOf(context),
                               ).copyWith(fontWeight: FontWeight.bold, fontSize: 16),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -205,7 +205,7 @@ class _FeedActivityCardState extends State<FeedActivityCard> {
                               Text(
                                 '${activity.releaseYear} • ${activity.mediaType == 'movie' ? 'Film' : 'Series'}',
                                 style: TellyTypography.caption(
-                                  color: TellyColors.textTertiary,
+                                  color: TellyColors.textTertiaryOf(context),
                                 ),
                               ),
                             ],

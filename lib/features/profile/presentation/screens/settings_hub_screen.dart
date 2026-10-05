@@ -53,18 +53,16 @@ class SettingsHubScreen extends ConsumerWidget {
     final cacheSize = ref.watch(imageCacheSizeProvider);
 
     return Scaffold(
-      backgroundColor: TellyColors.backgroundCanvasOled,
       appBar: AppBar(
-        backgroundColor: TellyColors.backgroundCanvasOled,
         elevation: 0,
         leading: IconButton(
           tooltip: 'Back',
-          icon: const Icon(Icons.arrow_back, color: TellyColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: TellyColors.textPrimaryOf(context)),
           onPressed: () => context.canPop() ? context.pop() : context.go(Routes.canon),
         ),
         title: Text(
           'SETTINGS & PREFERENCES',
-          style: TellyTypography.titleMedium(color: TellyColors.textPrimary).copyWith(letterSpacing: 1.2),
+          style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context)).copyWith(letterSpacing: 1.2),
         ),
       ),
       body: ListView(
@@ -95,9 +93,9 @@ class SettingsHubScreen extends ConsumerWidget {
               trailing: const Icon(Icons.chevron_right, color: TellyColors.textTertiary, size: 20),
               onTap: () => context.push(Routes.editProfile),
             ),
-            const Divider(color: TellyColors.borderGlass),
+            const Divider(),
             _VisibilityTile(current: me?.visibilityMode ?? 'PUBLIC'),
-            const Divider(color: TellyColors.borderGlass),
+            const Divider(),
             _SwitchTile(
               key: const Key('settings_biometric_unlock'),
               title: 'Biometric Quick Unlock',
@@ -136,14 +134,14 @@ class SettingsHubScreen extends ConsumerWidget {
               trailing: DropdownButton<String>(
                 key: const Key('settings_region'),
                 value: prefs.region,
-                dropdownColor: TellyColors.backgroundCard,
+                dropdownColor: TellyColors.cardOf(context),
                 underline: const SizedBox.shrink(),
-                style: const TextStyle(color: TellyColors.phosphorLime, fontWeight: FontWeight.bold),
+                style: TextStyle(color: TellyColors.primaryAccentOf(context), fontWeight: FontWeight.bold),
                 onChanged: (v) => v == null ? null : _guard(context, () => prefsController.edit((p) => p.copyWith(region: v))),
                 items: [for (final r in AppPreferences.regions) DropdownMenuItem(value: r, child: Text(r))],
               ),
             ),
-            const Divider(color: TellyColors.borderGlass),
+            const Divider(),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: Wrap(
@@ -165,14 +163,14 @@ class SettingsHubScreen extends ConsumerWidget {
                                           : ({...subs.platformIds}..remove(provider.id)),
                                     ),
                               ),
-                      backgroundColor: TellyColors.backgroundCard,
-                      selectedColor: TellyColors.phosphorLime.withValues(alpha: 0.2),
+                      backgroundColor: TellyColors.cardOf(context),
+                      selectedColor: TellyColors.primaryAccentOf(context).withValues(alpha: 0.2),
                       labelStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
                     ),
                 ],
               ),
             ),
-            const Divider(color: TellyColors.borderGlass),
+            const Divider(),
             _SwitchTile(
               key: const Key('settings_include_free'),
               title: 'Include free services',
@@ -202,7 +200,7 @@ class SettingsHubScreen extends ConsumerWidget {
               value: NotificationKind.values.every(prefs.notificationOn),
               onChanged: (v) => _guard(context, () => prefsController.setAllNotifications(v)),
             ),
-            const Divider(color: TellyColors.borderGlass),
+            const Divider(),
             for (final kind in NotificationKind.values)
               _SwitchTile(
                 key: Key('settings_notify_${kind.key}'),
@@ -210,7 +208,7 @@ class SettingsHubScreen extends ConsumerWidget {
                 value: prefs.notificationOn(kind),
                 onChanged: (v) => _guard(context, () => prefsController.setNotification(kind, v)),
               ),
-            const Divider(color: TellyColors.borderGlass),
+            const Divider(),
             _SwitchTile(
               key: const Key('settings_quiet_hours'),
               title: 'Quiet Hours (10 PM – 9 AM)',
@@ -313,12 +311,12 @@ class SettingsHubScreen extends ConsumerWidget {
               trailing: const Icon(Icons.ios_share, color: TellyColors.phosphorLime, size: 20),
               onTap: () => _guard(context, () => ref.read(canonExportServiceProvider).exportCsv()),
             ),
-            const Divider(color: TellyColors.borderGlass),
+            const Divider(),
             _Tile(
               key: const Key('settings_export_letterboxd'),
               title: 'Export Movies for Letterboxd',
               subtitle: 'Letterboxd import format (films only)',
-              trailing: const Icon(Icons.ios_share, color: TellyColors.phosphorLime, size: 20),
+              trailing: Icon(Icons.ios_share, color: TellyColors.primaryAccentOf(context), size: 20),
               onTap: () => _guard(context, () => ref.read(canonExportServiceProvider).exportLetterboxd()),
             ),
           ]),
@@ -331,25 +329,25 @@ class SettingsHubScreen extends ConsumerWidget {
               key: const Key('settings_terms'),
               title: 'Terms of Service',
               subtitle: 'Read in app',
-              trailing: const Icon(Icons.chevron_right, color: TellyColors.textTertiary, size: 20),
+              trailing: Icon(Icons.chevron_right, color: TellyColors.textTertiaryOf(context), size: 20),
               onTap: () => LegalDocumentScreen.open(context, LegalDocument.terms),
             ),
-            const Divider(color: TellyColors.borderGlass),
+            const Divider(),
             _Tile(
               key: const Key('settings_privacy'),
               title: 'Privacy Policy',
               subtitle: 'Read in app',
-              trailing: const Icon(Icons.chevron_right, color: TellyColors.textTertiary, size: 20),
+              trailing: Icon(Icons.chevron_right, color: TellyColors.textTertiaryOf(context), size: 20),
               onTap: () => LegalDocumentScreen.open(context, LegalDocument.privacy),
             ),
-            const Divider(color: TellyColors.borderGlass),
+            const Divider(),
             _Tile(
               key: const Key('settings_sign_out'),
               title: me?.username == null ? 'Log Out' : 'Log Out @${me!.username}',
-              trailing: const Icon(Icons.logout, color: TellyColors.textSecondary, size: 20),
+              trailing: Icon(Icons.logout, color: TellyColors.textSecondaryOf(context), size: 20),
               onTap: () => ref.read(authControllerProvider.notifier).signOut(),
             ),
-            const Divider(color: TellyColors.borderGlass),
+            const Divider(),
             _Tile(
               key: const Key('settings_delete_account'),
               title: 'Delete Account…',
@@ -367,7 +365,7 @@ class SettingsHubScreen extends ConsumerWidget {
   Future<void> _confirmAccountDeletion(BuildContext context, WidgetRef ref) async {
     final confirmed = await showModalBottomSheet<bool>(
       context: context,
-      backgroundColor: TellyColors.backgroundCard,
+      backgroundColor: TellyColors.cardOf(context),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -387,7 +385,7 @@ class SettingsHubScreen extends ConsumerWidget {
               Text(
                 'Your profile, rankings, duel history, and social connections will become invisible immediately. '
                 'You will have a 30-day grace period to log back in and cancel deletion before permanent destruction.',
-                style: TellyTypography.bodyMedium(color: TellyColors.textSecondary),
+                style: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context)),
               ),
               const SizedBox(height: 24),
               Row(
@@ -397,10 +395,10 @@ class SettingsHubScreen extends ConsumerWidget {
                       key: const Key('delete_account_cancel_button'),
                       onPressed: () => Navigator.of(ctx).pop(false),
                       style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: TellyColors.borderGlass),
+                        side: BorderSide(color: TellyColors.strokeOf(context)),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
-                      child: const Text('Cancel', style: TextStyle(color: TellyColors.textPrimary)),
+                      child: Text('Cancel', style: TextStyle(color: TellyColors.textPrimaryOf(context))),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -460,9 +458,9 @@ class _VisibilityTile extends ConsumerWidget {
       trailing: DropdownButton<String>(
         key: const Key('settings_visibility'),
         value: current,
-        dropdownColor: TellyColors.backgroundCard,
+        dropdownColor: TellyColors.cardOf(context),
         underline: const SizedBox.shrink(),
-        style: const TextStyle(color: TellyColors.phosphorLime, fontWeight: FontWeight.bold),
+        style: TextStyle(color: TellyColors.primaryAccentOf(context), fontWeight: FontWeight.bold),
         items: [for (final e in _labels.entries) DropdownMenuItem(value: e.key, child: Text(e.value))],
         onChanged: (v) async {
           if (v == null || v == current) return;
@@ -488,7 +486,7 @@ class _SectionHeader extends StatelessWidget {
         padding: const EdgeInsets.only(left: 4, bottom: 8),
         child: Text(
           title,
-          style: TellyTypography.labelSmall(color: TellyColors.textTertiary)
+          style: TellyTypography.labelSmall(color: TellyColors.textTertiaryOf(context))
               .copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
         ),
       );
@@ -501,10 +499,10 @@ class _Card extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Material(
         // A Material (not a coloured Container) so list tiles can paint their ink.
-        color: TellyColors.backgroundSurface,
+        color: TellyColors.surfaceOf(context),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: TellyColors.borderGlass),
+          side: BorderSide(color: TellyColors.borderGlassOf(context)),
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -538,27 +536,27 @@ class _ImportWatchHistoryCard extends ConsumerWidget {
         key: const Key('settings_import_letterboxd'),
         title: 'Import from Letterboxd',
         subtitle: 'Pick watched.csv or ratings.csv from your export',
-        trailing: const Icon(Icons.upload_file_rounded, color: TellyColors.phosphorLime, size: 20),
+        trailing: Icon(Icons.upload_file_rounded, color: TellyColors.primaryAccentOf(context), size: 20),
         onTap: running ? null : () => _letterboxd(ref),
       ),
-      const Divider(color: TellyColors.borderGlass),
+      const Divider(),
       _Tile(
         key: const Key('settings_import_anilist'),
         title: 'Import from AniList',
         subtitle: 'Your completed anime, by AniList username',
-        trailing: const Icon(Icons.person_search_rounded, color: TellyColors.phosphorLime, size: 20),
+        trailing: Icon(Icons.person_search_rounded, color: TellyColors.primaryAccentOf(context), size: 20),
         onTap: running ? null : () => _aniList(context, ref),
       ),
       ...switch (state) {
         ImportIdle() => const <Widget>[],
         ImportRunning(:final source) => [
             const SizedBox(height: 10),
-            const LinearProgressIndicator(color: TellyColors.phosphorLime, backgroundColor: TellyColors.backgroundCard),
+            LinearProgressIndicator(color: TellyColors.primaryAccentOf(context), backgroundColor: TellyColors.cardOf(context)),
             const SizedBox(height: 8),
             Text(
               'Importing from ${source.label}… matching each title takes a moment.',
               key: const Key('settings_import_running'),
-              style: TellyTypography.caption(color: TellyColors.textSecondary),
+              style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)),
             ),
           ],
         ImportDone(:final source, :final result) => [
@@ -592,31 +590,31 @@ class _ImportSummary extends StatelessWidget {
       key: const Key('settings_import_summary'),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: TellyColors.phosphorLime.withValues(alpha: 0.08),
+        color: TellyColors.primaryAccentOf(context).withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: TellyColors.phosphorLime.withValues(alpha: 0.3)),
+        border: Border.all(color: TellyColors.primaryAccentOf(context).withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.check_circle_rounded, color: TellyColors.phosphorLime, size: 18),
+              Icon(Icons.check_circle_rounded, color: TellyColors.primaryAccentOf(context), size: 18),
               const SizedBox(width: 8),
               Expanded(
-                child: Text(lines.join(' · '), style: TellyTypography.bodyMedium(color: TellyColors.textPrimary)),
+                child: Text(lines.join(' · '), style: TellyTypography.bodyMedium(color: TellyColors.textPrimaryOf(context))),
               ),
               IconButton(
                 tooltip: 'Dismiss',
                 onPressed: onDismiss,
-                icon: const Icon(Icons.close, size: 18, color: TellyColors.textTertiary),
+                icon: Icon(Icons.close, size: 18, color: TellyColors.textTertiaryOf(context)),
               ),
             ],
           ),
           if (result.added > 0)
             Text(
               'New titles sit at the bottom of your canon. Duel them to place them properly.',
-              style: TellyTypography.caption(color: TellyColors.textSecondary),
+              style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)),
             ),
           if (result.unmatched.isNotEmpty)
             Theme(
@@ -627,17 +625,17 @@ class _ImportSummary extends StatelessWidget {
                 child: ExpansionTile(
                   key: const Key('settings_import_unmatched'),
                   tilePadding: EdgeInsets.zero,
-                  title: Text('See unmatched titles', style: TellyTypography.labelMedium(color: TellyColors.textSecondary)),
+                  title: Text('See unmatched titles', style: TellyTypography.labelMedium(color: TellyColors.textSecondaryOf(context))),
                   children: [
                     for (final t in result.unmatched.take(50))
                       Align(
                         alignment: Alignment.centerLeft,
-                        child: Text('• $t', style: TellyTypography.caption(color: TellyColors.textTertiary)),
+                        child: Text('• $t', style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context))),
                       ),
                     if (result.unmatched.length > 50)
                       Align(
                         alignment: Alignment.centerLeft,
-                        child: Text('…and ${result.unmatched.length - 50} more', style: TellyTypography.caption()),
+                        child: Text('…and ${result.unmatched.length - 50} more', style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context))),
                       ),
                   ],
                 ),
@@ -667,8 +665,8 @@ class _Tile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: TellyTypography.bodyLarge(color: TellyColors.textPrimary)),
-                    if (subtitle != null) Text(subtitle!, style: TellyTypography.caption()),
+                    Text(title, style: TellyTypography.bodyLarge(color: TellyColors.textPrimaryOf(context))),
+                    if (subtitle != null) Text(subtitle!, style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context))),
                   ],
                 ),
               ),
@@ -689,10 +687,10 @@ class _SwitchTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) => SwitchListTile(
         contentPadding: EdgeInsets.zero,
-        title: Text(title, style: TellyTypography.bodyLarge(color: TellyColors.textPrimary)),
-        subtitle: subtitle == null ? null : Text(subtitle!, style: TellyTypography.caption()),
+        title: Text(title, style: TellyTypography.bodyLarge(color: TellyColors.textPrimaryOf(context))),
+        subtitle: subtitle == null ? null : Text(subtitle!, style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context))),
         value: value,
-        activeThumbColor: TellyColors.phosphorLime,
+        activeThumbColor: TellyColors.primaryAccentOf(context),
         onChanged: onChanged,
       );
 }

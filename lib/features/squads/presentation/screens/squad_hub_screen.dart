@@ -27,18 +27,16 @@ class SquadHubScreen extends ConsumerWidget {
     final hub = async.valueOrNull;
 
     return Scaffold(
-      backgroundColor: TellyColors.backgroundCanvasOled,
       appBar: AppBar(
-        backgroundColor: TellyColors.backgroundCanvasOled,
         elevation: 0,
         leading: IconButton(
           tooltip: 'Back',
-          icon: const Icon(Icons.arrow_back_rounded, color: TellyColors.textPrimary),
+          icon: Icon(Icons.arrow_back_rounded, color: TellyColors.textPrimaryOf(context)),
           onPressed: () => context.canPop() ? context.pop() : context.go(Routes.squads),
         ),
         title: Text(
           hub == null ? 'SQUAD' : '${hub.squad.name.toUpperCase()} (${hub.squad.memberCount})',
-          style: TellyTypography.labelLarge(color: TellyColors.textPrimary)
+          style: TellyTypography.labelLarge(color: TellyColors.textPrimaryOf(context))
               .copyWith(letterSpacing: 1.2, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,

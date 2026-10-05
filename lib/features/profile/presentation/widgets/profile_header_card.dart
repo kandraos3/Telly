@@ -47,7 +47,7 @@ class ProfileHeaderCard extends StatelessWidget {
                   child: Text(
                     'Profile',
                     key: const Key('profile_title_text'),
-                    style: TellyTypography.titleLarge(color: TellyColors.textPrimary).copyWith(
+                    style: TellyTypography.titleLarge(color: TellyColors.textPrimaryOf(context)).copyWith(
                       fontSize: 24,
                       fontWeight: FontWeight.w800,
                       letterSpacing: -0.5,
@@ -58,19 +58,19 @@ class ProfileHeaderCard extends StatelessWidget {
               IconButton(
                 key: const Key('profile_squads_button'),
                 tooltip: 'My Squads',
-                icon: const Icon(Icons.groups_2_outlined, color: TellyColors.textSecondary),
+                icon: Icon(Icons.groups_2_outlined, color: TellyColors.textSecondaryOf(context)),
                 onPressed: onSquadsTap,
               ),
               IconButton(
                 key: const Key('profile_share_button'),
                 tooltip: 'Share profile',
-                icon: const Icon(Icons.ios_share_rounded, color: TellyColors.textSecondary),
+                icon: Icon(Icons.ios_share_rounded, color: TellyColors.textSecondaryOf(context)),
                 onPressed: onShareTap,
               ),
               IconButton(
                 key: const Key('profile_settings_button'),
                 tooltip: 'Settings',
-                icon: const Icon(Icons.settings_outlined, color: TellyColors.textSecondary),
+                icon: Icon(Icons.settings_outlined, color: TellyColors.textSecondaryOf(context)),
                 onPressed: onSettingsTap,
               ),
             ],
@@ -100,9 +100,9 @@ class ProfileHeaderCard extends StatelessWidget {
                           height: 64,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: TellyColors.backgroundCard,
+                            color: TellyColors.cardOf(context),
                             border: Border.all(
-                              color: TellyColors.phosphorLime.withValues(alpha: 0.5),
+                              color: TellyColors.primaryAccentOf(context).withValues(alpha: 0.5),
                               width: 2.0,
                             ),
                           ),
@@ -124,10 +124,10 @@ class ProfileHeaderCard extends StatelessWidget {
                             height: 24,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: TellyColors.phosphorLime,
-                              border: Border.all(color: TellyColors.backgroundPrimary, width: 2),
+                              color: TellyColors.primaryAccentOf(context),
+                              border: Border.all(color: TellyColors.canvasOf(context), width: 2),
                             ),
-                            child: const Icon(Icons.edit_rounded, size: 12, color: TellyColors.backgroundPrimary),
+                            child: Icon(Icons.edit_rounded, size: 12, color: Theme.of(context).brightness == Brightness.light ? Colors.white : TellyColors.backgroundPrimary),
                           ),
                         ),
                       ],
@@ -146,7 +146,7 @@ class ProfileHeaderCard extends StatelessWidget {
                     Text(
                       displayName,
                       key: const Key('profile_display_name_text'),
-                      style: TellyTypography.titleLarge(color: TellyColors.textPrimary).copyWith(
+                      style: TellyTypography.titleLarge(color: TellyColors.textPrimaryOf(context)).copyWith(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
                       ),
@@ -156,7 +156,7 @@ class ProfileHeaderCard extends StatelessWidget {
                       Text(
                         handle,
                         key: const Key('profile_handle_text'),
-                        style: TellyTypography.bodyMedium(color: TellyColors.phosphorLime).copyWith(
+                        style: TellyTypography.bodyMedium(color: TellyColors.primaryAccentOf(context)).copyWith(
                           fontWeight: FontWeight.w600,
                           letterSpacing: 0.2,
                         ),
@@ -167,7 +167,7 @@ class ProfileHeaderCard extends StatelessWidget {
                       Text(
                         bio!,
                         key: const Key('profile_bio_text'),
-                        style: TellyTypography.bodyMedium(color: TellyColors.textSecondary),
+                        style: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context)),
                       ),
                     ],
                   ],
@@ -183,15 +183,15 @@ class ProfileHeaderCard extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
-              color: TellyColors.backgroundCard,
+              color: TellyColors.cardOf(context),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: TellyColors.borderGlass),
+              border: Border.all(color: TellyColors.borderGlassOf(context)),
             ),
             child: Text(
               '$movieCount Movies  •  $seriesCount Series',
               key: const Key('profile_stats_summary_text'),
               textAlign: TextAlign.center,
-              style: TellyTypography.caption(color: TellyColors.textSecondary).copyWith(
+              style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)).copyWith(
                 fontWeight: FontWeight.w600,
                 letterSpacing: 0.2,
               ),

@@ -49,13 +49,11 @@ class EditProfileStudioScreen extends ConsumerWidget {
     final canSave = draft != null && !draft.saving;
 
     return Scaffold(
-      backgroundColor: TellyColors.backgroundCanvasOled,
       appBar: AppBar(
-        backgroundColor: TellyColors.backgroundCanvasOled,
         elevation: 0,
         leading: IconButton(
           tooltip: 'Cancel',
-          icon: const Icon(Icons.close, color: TellyColors.textPrimary),
+          icon: Icon(Icons.close, color: TellyColors.textPrimaryOf(context)),
           onPressed: () {
             final rootNav = Navigator.of(context, rootNavigator: true);
             if (rootNav.canPop()) {
@@ -71,7 +69,7 @@ class EditProfileStudioScreen extends ConsumerWidget {
         ),
         title: Text(
           'EDIT PROFILE',
-          style: TellyTypography.titleMedium(color: TellyColors.textPrimary).copyWith(letterSpacing: 1.2),
+          style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context)).copyWith(letterSpacing: 1.2),
         ),
         actions: [
           TextButton(
@@ -81,7 +79,7 @@ class EditProfileStudioScreen extends ConsumerWidget {
                 ? const SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2))
                 : Text(
                     'Save ✓',
-                    style: TellyTypography.labelLarge(color: canSave ? TellyColors.phosphorLime : TellyColors.textTertiary)
+                    style: TellyTypography.labelLarge(color: canSave ? TellyColors.primaryAccentOf(context) : TellyColors.textTertiaryOf(context))
                         .copyWith(fontWeight: FontWeight.bold),
                   ),
           ),

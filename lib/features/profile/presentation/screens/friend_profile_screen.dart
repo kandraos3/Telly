@@ -37,16 +37,14 @@ class FriendProfileScreen extends ConsumerWidget {
         (currentUserId != null && data != null && data.profile.id == currentUserId);
 
     return Scaffold(
-      backgroundColor: TellyColors.backgroundCanvasOled,
       appBar: AppBar(
-        backgroundColor: TellyColors.backgroundCanvasOled,
         elevation: 0,
         leading: IconButton(
           tooltip: 'Back',
-          icon: const Icon(Icons.arrow_back, color: TellyColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: TellyColors.textPrimaryOf(context)),
           onPressed: () => context.canPop() ? context.pop() : context.go(Routes.feed),
         ),
-        title: Text('@$handle', style: TellyTypography.titleMedium(color: TellyColors.textPrimary)),
+        title: Text('@$handle', style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context))),
         actions: [
           if (data != null)
             _FollowButton(handle: handle, status: data.followStatus, isSelf: isSelf),

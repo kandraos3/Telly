@@ -22,13 +22,11 @@ class TvGraveyardScreen extends ConsumerWidget {
     final async = ref.watch(graveyardControllerProvider);
     final droppedShows = async.valueOrNull ?? const <DroppedShow>[];
     return Scaffold(
-      backgroundColor: TellyColors.backgroundCanvasOled,
       appBar: AppBar(
-        backgroundColor: TellyColors.backgroundCanvasOled,
         elevation: 0,
         leading: IconButton(
           tooltip: 'Back',
-          icon: const Icon(Icons.arrow_back_rounded, color: TellyColors.textPrimary),
+          icon: Icon(Icons.arrow_back_rounded, color: TellyColors.textPrimaryOf(context)),
           onPressed: () => context.canPop() ? context.pop() : context.go(Routes.canon),
         ),
         title: Row(
@@ -38,7 +36,7 @@ class TvGraveyardScreen extends ConsumerWidget {
             const SizedBox(width: 8),
             Text(
               'THE TV GRAVEYARD',
-              style: TellyTypography.labelLarge(color: TellyColors.textPrimary).copyWith(
+              style: TellyTypography.labelLarge(color: TellyColors.textPrimaryOf(context)).copyWith(
                 letterSpacing: 1.2,
                 fontWeight: FontWeight.bold,
               ),

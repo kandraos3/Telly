@@ -334,13 +334,14 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
         borderRadius: BorderRadius.circular(20),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
+          constraints: const BoxConstraints(minHeight: 48),
           padding: const EdgeInsets.symmetric(vertical: 8),
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: isSelected ? TellyColors.phosphorLime : TellyColors.backgroundSurface,
+            color: isSelected ? TellyColors.phosphorLime : TellyColors.surfaceOf(context),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: isSelected ? TellyColors.phosphorLime : TellyColors.borderGlass,
+              color: isSelected ? TellyColors.phosphorLime : TellyColors.borderGlassOf(context),
             ),
           ),
           child: Row(
@@ -349,7 +350,7 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
               Icon(
                 icon,
                 size: 14,
-                color: isSelected ? TellyColors.backgroundCanvasOled : TellyColors.textSecondary,
+                color: isSelected ? const Color(0xFF08090C) : TellyColors.textSecondaryOf(context),
               ),
               const SizedBox(width: 4),
               Text(
@@ -357,7 +358,7 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
-                  color: isSelected ? TellyColors.backgroundCanvasOled : TellyColors.textSecondary,
+                  color: isSelected ? const Color(0xFF08090C) : TellyColors.textSecondaryOf(context),
                 ),
               ),
             ],
@@ -391,13 +392,11 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
     final seriesItems = sortedItems.where((item) => item.mediaType == 'tv').toList();
 
     return Scaffold(
-      backgroundColor: TellyColors.backgroundCanvasOled,
       appBar: AppBar(
-        backgroundColor: TellyColors.backgroundCanvasOled,
         elevation: 0,
         title: Text(
           'UNIVERSAL QUEUE',
-          style: TellyTypography.titleMedium(color: TellyColors.textPrimary).copyWith(letterSpacing: 1.2),
+          style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context)).copyWith(letterSpacing: 1.2),
         ),
         bottom: _selectedMode == QueueHubMode.watchlist
             ? PreferredSize(
@@ -405,18 +404,18 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
                 child: Container(
                   margin: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
-                    color: TellyColors.backgroundSurface,
+                    color: TellyColors.surfaceOf(context),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: TellyColors.borderGlass),
+                    border: Border.all(color: TellyColors.borderGlassOf(context)),
                   ),
                   child: TabBar(
                     controller: _tabController,
                     indicator: BoxDecoration(
-                      color: TellyColors.phosphorLime,
+                      color: TellyColors.primaryAccentOf(context),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    labelColor: TellyColors.backgroundCanvasOled,
-                    unselectedLabelColor: TellyColors.textSecondary,
+                    labelColor: Theme.of(context).brightness == Brightness.light ? Colors.white : TellyColors.backgroundCanvasOled,
+                    unselectedLabelColor: TellyColors.textSecondaryOf(context),
                     labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
                     indicatorSize: TabBarIndicatorSize.tab,
                     dividerColor: Colors.transparent,
@@ -465,11 +464,11 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                         decoration: BoxDecoration(
                           color: onlyOnMySubscriptions
-                              ? TellyColors.phosphorLime.withValues(alpha: 0.15)
-                              : TellyColors.backgroundSurface,
+                              ? TellyColors.primaryAccentOf(context).withValues(alpha: 0.15)
+                              : TellyColors.surfaceOf(context),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: onlyOnMySubscriptions ? TellyColors.phosphorLime : TellyColors.borderGlass,
+                            color: onlyOnMySubscriptions ? TellyColors.primaryAccentOf(context) : TellyColors.borderGlassOf(context),
                           ),
                         ),
                         child: Row(
@@ -477,13 +476,13 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
                             Icon(
                               onlyOnMySubscriptions ? Icons.check_circle : Icons.radio_button_unchecked,
                               size: 14,
-                              color: onlyOnMySubscriptions ? TellyColors.phosphorLime : TellyColors.textTertiary,
+                              color: onlyOnMySubscriptions ? TellyColors.primaryAccentOf(context) : TellyColors.textTertiaryOf(context),
                             ),
                             const SizedBox(width: 6),
                             Text(
                               'On My Services',
                               style: TellyTypography.caption(
-                                color: onlyOnMySubscriptions ? TellyColors.phosphorLime : TellyColors.textSecondary,
+                                color: onlyOnMySubscriptions ? TellyColors.primaryAccentOf(context) : TellyColors.textSecondaryOf(context),
                               ).copyWith(fontWeight: FontWeight.w700),
                             ),
                           ],
@@ -495,10 +494,10 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
                   // Sort Dropdown
                   DropdownButton<String>(
                     value: sortBy,
-                    dropdownColor: TellyColors.backgroundCard,
+                    dropdownColor: TellyColors.cardOf(context),
                     underline: const SizedBox.shrink(),
-                    icon: const Icon(Icons.arrow_drop_down, color: TellyColors.textTertiary, size: 18),
-                    style: TellyTypography.caption(color: TellyColors.textSecondary),
+                    icon: Icon(Icons.arrow_drop_down, color: TellyColors.textTertiaryOf(context), size: 18),
+                    style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)),
                     onChanged: (val) {
                       if (val != null) {
                         ref.read(queueSortByProvider.notifier).set(val);
@@ -661,9 +660,9 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: TellyColors.backgroundSurface,
+        color: TellyColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: TellyColors.borderGlass),
+        border: Border.all(color: TellyColors.borderGlassOf(context)),
       ),
       child: Material(
         color: Colors.transparent,
@@ -693,7 +692,7 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
                         children: [
                           Text(
                             list.title,
-                            style: TellyTypography.titleMedium(color: TellyColors.textPrimary)
+                            style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context))
                                 .copyWith(fontWeight: FontWeight.w800),
                           ),
                           if (list.description != null && list.description!.isNotEmpty) ...[
@@ -702,7 +701,7 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
                               list.description!,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
-                              style: TellyTypography.caption(color: TellyColors.textSecondary),
+                              style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)),
                             ),
                           ],
                         ],
@@ -720,13 +719,13 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
                   children: [
                     Text(
                       'Curated by ${list.ownerHandle}',
-                      style: TellyTypography.caption(color: TellyColors.textTertiary),
+                      style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)),
                     ),
                     const Spacer(),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: TellyColors.backgroundCard,
+                        color: TellyColors.cardOf(context),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
@@ -818,7 +817,7 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Removed "${item.title}" from queue'),
-            backgroundColor: TellyColors.backgroundCard,
+            backgroundColor: TellyColors.cardOf(context),
           ),
         );
       },
@@ -826,10 +825,10 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: TellyColors.backgroundSurface,
+          color: TellyColors.surfaceOf(context),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: item.isLeavingSoon ? TellyColors.neonCoral.withValues(alpha: 0.4) : TellyColors.borderGlass,
+            color: item.isLeavingSoon ? TellyColors.neonCoral.withValues(alpha: 0.4) : TellyColors.borderGlassOf(context),
           ),
         ),
         child: Column(
@@ -848,16 +847,16 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
                       width: 52,
                       height: 72,
                       decoration: BoxDecoration(
-                        color: TellyColors.backgroundCard,
+                        color: TellyColors.cardOf(context),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: TellyColors.borderGlass),
+                        border: Border.all(color: TellyColors.borderGlassOf(context)),
                       ),
                       child: PosterImage(
                         posterPath: item.posterPath,
                         fallback: Center(
                           child: Icon(
                             item.mediaType == 'movie' ? Icons.movie_outlined : Icons.tv_outlined,
-                            color: TellyColors.textTertiary,
+                            color: TellyColors.textTertiaryOf(context),
                             size: 28,
                           ),
                         ),
@@ -879,7 +878,7 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TellyTypography.titleMedium(
-                                  color: TellyColors.textPrimary,
+                                  color: TellyColors.textPrimaryOf(context),
                                 ).copyWith(fontWeight: FontWeight.w800),
                               ),
                             ),

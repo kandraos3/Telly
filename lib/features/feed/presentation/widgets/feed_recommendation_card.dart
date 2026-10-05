@@ -41,7 +41,7 @@ class FeedRecommendationCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: TellyColors.backgroundSurface,
+        color: TellyColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: TellyColors.electricViolet.withValues(alpha: 0.45)),
       ),

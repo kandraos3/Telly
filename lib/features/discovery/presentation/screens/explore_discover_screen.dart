@@ -110,7 +110,7 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: TellyColors.backgroundCanvasOled,
+      backgroundColor: TellyColors.cardOf(context),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -232,7 +232,7 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: TellyColors.backgroundCanvasOled,
+      backgroundColor: TellyColors.cardOf(context),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -337,13 +337,11 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
     final curatedCanons = ref.watch(discoveryRepositoryProvider).getCuratedCanons();
 
     return Scaffold(
-      backgroundColor: TellyColors.backgroundCanvasOled,
       appBar: AppBar(
-        backgroundColor: TellyColors.backgroundCanvasOled,
         elevation: 0,
         title: Text(
           '🧭 EXPLORE',
-          style: TellyTypography.titleMedium(color: TellyColors.textPrimary)
+          style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context))
               .copyWith(letterSpacing: 1.2, fontWeight: FontWeight.w900),
         ),
         actions: [
@@ -421,9 +419,9 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
   Widget _buildSearchBar() {
     return Container(
       decoration: BoxDecoration(
-        color: TellyColors.backgroundSurface,
+        color: TellyColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: TellyColors.borderGlass),
+        border: Border.all(color: TellyColors.borderGlassOf(context)),
       ),
       child: TextField(
         controller: _searchController,
@@ -431,18 +429,18 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
         onChanged: _onSearchChanged,
         onSubmitted: (q) => ref.read(recentSearchesProvider.notifier).add(q),
         textInputAction: TextInputAction.search,
-        style: const TextStyle(color: TellyColors.textPrimary, fontSize: 14),
+        style: TextStyle(color: TellyColors.textPrimaryOf(context), fontSize: 14),
         decoration: InputDecoration(
           hintText: 'Search shows, actors, showrunners, friends...',
           hintStyle: TextStyle(
-            color: TellyColors.textTertiary.withValues(alpha: 0.8),
+            color: TellyColors.textTertiaryOf(context).withValues(alpha: 0.8),
             fontSize: 13,
           ),
-          prefixIcon: const Icon(Icons.search, color: TellyColors.textTertiary, size: 20),
+          prefixIcon: Icon(Icons.search, color: TellyColors.textTertiaryOf(context), size: 20),
           suffixIcon: _searchQuery.isNotEmpty
               ? IconButton(
                   key: const Key('explore_search_field_clear_btn'),
-                  icon: const Icon(Icons.close, color: TellyColors.textTertiary, size: 18),
+                  icon: Icon(Icons.close, color: TellyColors.textTertiaryOf(context), size: 18),
                   onPressed: _clearSearch,
                 )
               : null,

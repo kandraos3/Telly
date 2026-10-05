@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../features/queue/data/watchlist_repository.dart';
 import '../../features/ranking/data/canon_hydration.dart';
 import '../sync/sync_engine.dart';
-import '../theme/telly_colors.dart';
 import '../widgets/telly_floating_nav_bar.dart';
 import 'routes.dart';
 
@@ -46,7 +45,6 @@ class _AppShellState extends ConsumerState<AppShell> {
     ref.listen(syncEngineProvider, (_, __) {});
     final shell = widget.navigationShell;
     return Scaffold(
-      backgroundColor: TellyColors.backgroundPrimary,
       extendBody: true,
       body: shell,
       bottomNavigationBar: TellyFloatingNavBar(
