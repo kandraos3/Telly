@@ -1,5 +1,5 @@
 // Generates everything the site takes from the app into build/site_gen/:
-// tokens.css + fonts (WEB-01). Not part of `flutter test`; run by
+// tokens.css + fonts (WEB-01) and app screenshots (WEB-02). Not part of `flutter test`; run by
 // tool/site/build.sh and .github/workflows/site.yml:
 //   flutter test tool/site/generate_site_test.dart
 import 'dart:io';
@@ -7,6 +7,9 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'src/scene_harness.dart';
+import 'src/scenes.dart';
+import '../../test/helpers/real_fonts.dart';
 import 'src/tokens.dart';
 import 'src/typography_tokens.dart';
 
@@ -14,7 +17,10 @@ const genDir = 'build/site_gen';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
+  setUpAll(() async {
+    GoogleFonts.config.allowRuntimeFetching = false;
+    await loadRealFonts();
+  });
 
   test('tokens.css and fonts from lib/core/theme and assets/fonts', () {
     final fonts = <FontFace>[];
@@ -34,4 +40,9 @@ void main() {
     );
     File('$genDir/tokens.css').writeAsStringSync(css);
   });
+
+  // WEB-02: one PNG per scene in build/site_gen/screenshots/.
+  for (final scene in siteScenes) {
+    testWidgets('screenshot: ${scene.id}', (tester) => shootScene(tester, scene, '$genDir/screenshots'));
+  }
 }

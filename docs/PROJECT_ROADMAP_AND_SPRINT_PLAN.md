@@ -24,11 +24,11 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 6 — Integration, Wiring & Audit Remediation** (COMPLETED: 32 / 32 tickets complete)
-- **Current Active Ticket**: `WEB-02` (Marketing Website track: `WEB-01` ✅ → `WEB-02` → `WEB-03` → `WEB-04`; 1 / 4 complete) — Sprint 6: 32 / 32 tickets complete
+- **Current Active Ticket**: `WEB-03` (Marketing Website track: `WEB-01` ✅ → `WEB-02` ✅ → `WEB-03` → `WEB-04`; 2 / 4 complete) — Sprint 6: 32 / 32 tickets complete
 - **Overall Roadmap Progress**: All 32/32 Sprint 6 architecture, integration, algorithm, and QA remediation tickets fully implemented and verified.
 - **Human-Only Tasks**: Tasks marked `👤 [TO BE DONE BY HUMAN]` (cloud deployment, secrets provisioning, store submission, physical-device profile runs). Client application codebase is 100% complete and self-contained.
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (682 / 682 pass; 100% golden, a11y, integration, and algorithmic parity suites pass; coverage 86.81% overall / 97.04% ranking)
-- **Last Updated**: 2026-10-05 (`WEB-01` site design tokens generated from the app theme)
+- **Last Updated**: 2026-10-05 (`WEB-02` automated app screenshots for the site)
 
 | Sprint | Status | Total Tickets | Audit Verdict |
 | :---: | :---: | :---: | :--- |
@@ -2283,12 +2283,12 @@ A promotional site at `https://kandraos3.github.io/Telly/` that hosts the Privac
 - **Spec Reference**: [**`design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) `SCR-05`, `SCR-07`, `SCR-08`, `SCR-10`, `SCR-12`–`SCR-19`; [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) (golden rendering)
 - **Scope & Objectives**: Render real screens headlessly at iPhone 15 size (393 × 852 pt, 2×) with fixture data, so a redesigned screen shows up on the site on its own.
 - **Granular Tasks**:
-  - [ ] Screenshot font loader: bundled fonts under google_fonts' family names, Material Icons from the SDK, and an emoji font in the fallback family (`flutter test` disables system font fallback).
-  - [ ] `posterArtProvider` hook in `PosterImage` (null in the app) so screenshots show generated poster art instead of the icon fallback, with no studio artwork on the site.
-  - [ ] Scene catalogue (one entry per screen: fixtures, tab, file name) rendered by `tool/site/generate_site_test.dart` into `build/site_gen/screenshots/`.
+  - [x] Screenshot font loader (`test/helpers/real_fonts.dart`, shared with `FE-QUEUE-01`): bundled fonts under google_fonts' family names, Material Icons from the SDK, and Twemoji (COLR) re-weighted into the fallback family (`flutter test` disables system font fallback; bitmap Noto emoji don't render there).
+  - [x] `posterArtProvider` hook in `PosterImage` (null in the app) so screenshots show generated poster art instead of the icon fallback, with no studio artwork on the site.
+  - [x] Scene catalogue (`tool/site/src/scenes.dart`: 13 screens with fixtures, shell tab, taps / scrolls) rendered by `tool/site/generate_site_test.dart` into `build/site_gen/screenshots/` at 786 × 1704.
 - **Testing & Verification**:
-  - [ ] Unit test for the font re-weighting; widget test that `PosterImage` uses `posterArtProvider` only when network posters are off.
-  - [ ] The generator fails if a scene throws or a screenshot named in `site/content.yaml` has no scene.
+  - [x] Unit test for the font re-weighting; widget tests that `PosterImage` uses `posterArtProvider` only when network posters are off; scene catalogue tests (unique URL-safe ids, valid tabs, poster path round trip).
+  - [x] The generator fails if a scene throws or overflows (it caught `FE-QUEUE-01`); the site build (`WEB-03`) fails if `site/content.yaml` names a screenshot that wasn't generated.
 - **Dependencies**: `WEB-01`.
 
 #### `WEB-03`: Static Site Build — Landing Page, Legal Pages, Store Placeholders & Attribution

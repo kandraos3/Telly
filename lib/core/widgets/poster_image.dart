@@ -34,6 +34,10 @@ final posterNetworkImagesProvider = Provider<bool>((ref) {
   return true;
 });
 
+/// Offline poster art for a poster URL, used while network posters are off. Null in the app;
+/// the website's screenshot generator supplies generated art instead of studio posters (WEB-02).
+final posterArtProvider = Provider<ImageProvider Function(String url)?>((ref) => null);
+
 /// A cached poster with a shimmer placeholder and a readable [fallback] (FE-606).
 class PosterImage extends StatelessWidget {
   final String? posterPath;
@@ -48,14 +52,19 @@ class PosterImage extends StatelessWidget {
     if (url == null) return fallback;
 
     bool enabled = !(!kIsWeb && Platform.environment.containsKey('FLUTTER_TEST'));
+    ImageProvider Function(String url)? art;
     try {
       final container = ProviderScope.containerOf(context, listen: false);
       enabled = container.read(posterNetworkImagesProvider);
+      art = container.read(posterArtProvider);
     } catch (_) {
       // Gracefully handles standalone widget tests without an ancestor ProviderScope
     }
 
-    if (!enabled) return fallback;
+    if (!enabled) {
+      if (art == null) return fallback;
+      return Image(image: art(url), fit: fit, errorBuilder: (_, __, ___) => fallback);
+    }
 
     return CachedNetworkImage(
       imageUrl: url,
