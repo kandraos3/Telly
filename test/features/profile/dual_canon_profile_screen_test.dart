@@ -6,7 +6,10 @@ import 'package:telly_app/core/database/database_provider.dart';
 import 'package:telly_app/features/auth/data/auth_repository.dart';
 import 'package:telly_app/features/auth/domain/user_profile.dart';
 import 'package:telly_app/core/services/haptics_service.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:telly_app/core/router/routes.dart';
 import 'package:telly_app/features/profile/data/profile_repository.dart';
+import 'package:telly_app/features/profile/data/profile_share_service.dart';
 import 'package:telly_app/features/profile/presentation/controllers/profile_controller.dart';
 import 'package:telly_app/features/profile/presentation/screens/dual_canon_profile_screen.dart';
 import 'package:telly_app/features/profile/presentation/widgets/poster_grid_view.dart';
@@ -18,6 +21,7 @@ import 'package:telly_app/features/ranking/domain/franchise_rollup_service.dart'
 
 import '../../fakes/fake_auth_repository.dart';
 import '../../fakes/fake_profile_repository.dart';
+import '../../helpers/router_harness.dart';
 
 /// Fixed canon for screen tests: these fixtures carry franchise metadata Drift does not store.
 class SeededProfileCanon extends ProfileCanonNotifier {
@@ -118,9 +122,10 @@ void main() {
     CanonViewMode initialViewMode = CanonViewMode.rankedList,
     bool initialRollup = false,
     FakeProfileRepository? profiles,
+    ProfileShareService? share,
+    bool routed = false,
   }) {
-    return ProviderScope(
-      overrides: [
+    final overrides = [
         hapticsEnabledProvider.overrideWith((ref) => false),
         selectedCanonProvider.overrideWith(() => Selection(initialCanon)),
         canonViewModeProvider.overrideWith(() => Selection(initialViewMode)),
@@ -139,12 +144,58 @@ void main() {
         )),
         profileCanonProvider.overrideWith(() => SeededProfileCanon(movies ?? sampleMovies, series ?? sampleSeries)),
         if (profiles != null) profileRepositoryProvider.overrideWithValue(profiles),
-      ],
+        if (share != null) profileShareServiceProvider.overrideWithValue(share),
+      ];
+    if (routed) return routerHarness(const DualCanonProfileScreen(), overrides: overrides);
+    return ProviderScope(
+      overrides: overrides,
       child: const MaterialApp(
         home: DualCanonProfileScreen(),
       ),
     );
   }
+
+  group('FE-PROFILE-02: SCR-14 top bar, avatar and share', () {
+    testWidgets('top bar reads "Profile" with squads, share and settings actions', (tester) async {
+      await tester.pumpWidget(buildTestableProfileScreen());
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('profile_title_text')), findsOneWidget);
+      expect(find.text('Profile'), findsOneWidget);
+      for (final key in ['profile_squads_button', 'profile_share_button', 'profile_settings_button']) {
+        expect(find.byKey(Key(key)), findsOneWidget);
+      }
+      expect(find.textContaining('📺'), findsNothing, reason: 'old TV emoji removed');
+    });
+
+    testWidgets('tapping the avatar opens Edit Profile', (tester) async {
+      await tester.pumpWidget(buildTestableProfileScreen(routed: true));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('profile_avatar_button')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('route:${Routes.editProfile}'), findsOneWidget);
+    });
+
+    testWidgets('tapping Share opens the share sheet with the handle and top titles', (tester) async {
+      final sent = <ShareParams>[];
+      await tester.pumpWidget(buildTestableProfileScreen(
+        share: ProfileShareService(share: (p) async => sent.add(p), shareUrl: 'https://example.test/telly'),
+      ));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('profile_share_button')));
+      await tester.pump();
+
+      expect(sent, hasLength(1));
+      final text = sent.single.text!;
+      expect(text, contains('Jordan Miller (@jordan)'));
+      expect(text, contains('1. Interstellar'));
+      expect(text, contains('Top TV shows'));
+      expect(text, contains('https://example.test/telly'));
+    });
+  });
 
   group('FE-608: SCR-14 pinned Top 3 showcase', () {
     testWidgets('pinned titles of the shown canon lead the showcase, then top ranks fill in', (tester) async {
@@ -181,8 +232,8 @@ void main() {
       await tester.pumpWidget(buildTestableProfileScreen());
       await tester.pumpAndSettle();
 
-      expect(find.text('🎬 Movies (3)'), findsOneWidget);
-      expect(find.text('📺 TV Shows (5)'), findsOneWidget);
+      expect(find.text('Movies (3)'), findsOneWidget);
+      expect(find.text('TV Shows (5)'), findsOneWidget);
       expect(find.text('Includes anime'), findsOneWidget);
 
       expect(find.text('Interstellar'), findsWidgets);

@@ -15,6 +15,9 @@ class ProfileHeaderCard extends StatelessWidget {
   final VoidCallback? onShareTap;
   final VoidCallback? onSquadsTap;
 
+  /// Opens Edit Profile (FE-PROFILE-02).
+  final VoidCallback? onAvatarTap;
+
   const ProfileHeaderCard({
     super.key,
     required this.displayName,
@@ -26,6 +29,7 @@ class ProfileHeaderCard extends StatelessWidget {
     this.onSettingsTap,
     this.onShareTap,
     this.onSquadsTap,
+    this.onAvatarTap,
   });
 
   @override
@@ -34,38 +38,40 @@ class ProfileHeaderCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         children: [
-          // 1. TOP BAR: SETTINGS, HANDLE, SHARE
+          // 1. TOP BAR: "Profile" title, then Squads, Share and Settings (FE-PROFILE-02).
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              IconButton(
-                key: const Key('profile_settings_button'),
-                icon: const Icon(Icons.settings_outlined, color: TellyColors.textSecondary),
-                onPressed: onSettingsTap,
-              ),
-              Text(
-                handle,
-                key: const Key('profile_handle_text'),
-                style: TellyTypography.titleMedium(color: TellyColors.textPrimary).copyWith(
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.5,
+              Expanded(
+                child: Semantics(
+                  header: true,
+                  child: Text(
+                    'Profile',
+                    key: const Key('profile_title_text'),
+                    style: TellyTypography.titleLarge(color: TellyColors.textPrimary).copyWith(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
                 ),
               ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    key: const Key('profile_squads_button'),
-                    tooltip: 'My Squads',
-                    icon: const Icon(Icons.groups_2_outlined, color: TellyColors.textSecondary),
-                    onPressed: onSquadsTap,
-                  ),
-                  IconButton(
-                    key: const Key('profile_share_button'),
-                    icon: const Icon(Icons.ios_share_rounded, color: TellyColors.textSecondary),
-                    onPressed: onShareTap,
-                  ),
-                ],
+              IconButton(
+                key: const Key('profile_squads_button'),
+                tooltip: 'My Squads',
+                icon: const Icon(Icons.groups_2_outlined, color: TellyColors.textSecondary),
+                onPressed: onSquadsTap,
+              ),
+              IconButton(
+                key: const Key('profile_share_button'),
+                tooltip: 'Share profile',
+                icon: const Icon(Icons.ios_share_rounded, color: TellyColors.textSecondary),
+                onPressed: onShareTap,
+              ),
+              IconButton(
+                key: const Key('profile_settings_button'),
+                tooltip: 'Settings',
+                icon: const Icon(Icons.settings_outlined, color: TellyColors.textSecondary),
+                onPressed: onSettingsTap,
               ),
             ],
           ),
@@ -76,26 +82,57 @@ class ProfileHeaderCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Avatar
-              Container(
-                width: 64,
-                height: 64,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: TellyColors.backgroundCard,
-                  border: Border.all(
-                    color: TellyColors.phosphorLime.withValues(alpha: 0.5),
-                    width: 2.0,
+              // Avatar: tapping opens Edit Profile.
+              Semantics(
+                button: true,
+                label: 'Edit profile',
+                child: GestureDetector(
+                  key: const Key('profile_avatar_button'),
+                  behavior: HitTestBehavior.opaque,
+                  onTap: onAvatarTap,
+                  child: SizedBox(
+                    width: 68,
+                    height: 68,
+                    child: Stack(
+                      children: [
+                        Container(
+                          width: 64,
+                          height: 64,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: TellyColors.backgroundCard,
+                            border: Border.all(
+                              color: TellyColors.phosphorLime.withValues(alpha: 0.5),
+                              width: 2.0,
+                            ),
+                          ),
+                          child: ClipOval(
+                            child: avatarUrl != null && avatarUrl!.isNotEmpty
+                                ? Image.network(
+                                    avatarUrl!,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => _avatarFallback(),
+                                  )
+                                : _avatarFallback(),
+                          ),
+                        ),
+                        Positioned(
+                          right: 0,
+                          bottom: 0,
+                          child: Container(
+                            width: 24,
+                            height: 24,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: TellyColors.phosphorLime,
+                              border: Border.all(color: TellyColors.backgroundPrimary, width: 2),
+                            ),
+                            child: const Icon(Icons.edit_rounded, size: 12, color: TellyColors.backgroundPrimary),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                child: ClipOval(
-                  child: avatarUrl != null && avatarUrl!.isNotEmpty
-                      ? Image.network(
-                          avatarUrl!,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => _avatarFallback(),
-                        )
-                      : _avatarFallback(),
                 ),
               ),
 
@@ -114,6 +151,17 @@ class ProfileHeaderCard extends StatelessWidget {
                         fontWeight: FontWeight.w700,
                       ),
                     ),
+                    if (handle.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        handle,
+                        key: const Key('profile_handle_text'),
+                        style: TellyTypography.bodyMedium(color: TellyColors.phosphorLime).copyWith(
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                    ],
                     if (bio != null && bio!.isNotEmpty) ...[
                       const SizedBox(height: 4),
                       Text(

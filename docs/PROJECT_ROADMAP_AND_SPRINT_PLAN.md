@@ -2027,6 +2027,15 @@ Tickets ingested through the `issue-manager` skill. Each entry mirrors its GitHu
 - **Testing & Verification**:
   - [x] Settings widget tests open both documents in the viewer and assert no `telly.app` text; share caption test asserts the store link.
 
+#### `FE-PROFILE-02`: Profile Avatar â†’ Edit Profile, Working Share & Redesigned Top Bar (#16)
+- **Spec Reference**: [**`features/06_PROFILE_THE_CANON_AND_STATS.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/06_PROFILE_THE_CANON_AND_STATS.md) Â§1; `SCR-14`
+- **Granular Tasks**:
+  - [x] Top bar is a "Profile" title with Squads / Share / Settings actions; the handle moves under the display name; emoji removed from the canon tabs.
+  - [x] Avatar (with an edit badge) opens `EditProfileStudioScreen`.
+  - [x] `ProfileShareService` shares handle + top 3 of each canon + `AppConfig.shareUrl` through `share_plus`.
+- **Testing & Verification**:
+  - [x] Widget tests: top bar actions, avatar â†’ `/canon/edit`, Share sends the caption.
+
 ---
 
 ## 🏆 Sprint Deliverables Summary Matrix

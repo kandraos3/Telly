@@ -10,6 +10,7 @@ import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../logging/domain/title_search_result.dart';
 import '../../../ranking/domain/canon_type.dart';
 import '../../../ranking/domain/franchise_rollup_service.dart';
+import '../../data/profile_share_service.dart';
 import '../controllers/edit_profile_controller.dart';
 import '../controllers/profile_controller.dart';
 import '../widgets/poster_grid_view.dart';
@@ -30,6 +31,7 @@ class DualCanonProfileScreen extends ConsumerWidget {
   final VoidCallback? onSettingsTap;
   final VoidCallback? onSquadsTap;
   final VoidCallback? onShareTap;
+  final VoidCallback? onAvatarTap;
   final ValueChanged<CanonEntry>? onTapEntry;
 
   const DualCanonProfileScreen({
@@ -37,6 +39,7 @@ class DualCanonProfileScreen extends ConsumerWidget {
     this.onSettingsTap,
     this.onSquadsTap,
     this.onShareTap,
+    this.onAvatarTap,
     this.onTapEntry,
   });
 
@@ -93,7 +96,14 @@ class DualCanonProfileScreen extends ConsumerWidget {
                   seriesCount: seriesCount,
                   onSettingsTap: onSettingsTap,
                   onSquadsTap: onSquadsTap,
-                  onShareTap: onShareTap,
+                  onShareTap: onShareTap ??
+                      () => ref.read(profileShareServiceProvider).shareProfile(
+                            handle: me?.username ?? '',
+                            displayName: me?.displayName ?? '',
+                            topMovies: [for (final e in canonState.movies) e.title],
+                            topSeries: [for (final e in canonState.series) e.title],
+                          ),
+                  onAvatarTap: onAvatarTap ?? () => context.push(Routes.editProfile),
                 ),
 
                 const SizedBox(height: 16),
@@ -115,7 +125,7 @@ class DualCanonProfileScreen extends ConsumerWidget {
                         Expanded(
                           child: _buildCanonTab(
                             key: const Key('movie_canon_tab'),
-                            label: '🎬 Movies ($moviesCount)',
+                            label: 'Movies ($moviesCount)',
                             isSelected: selectedCanon == CanonType.movie,
                             onTap: () {
                               ref.read(hapticsServiceProvider).duelSelectCandidate();
@@ -130,7 +140,7 @@ class DualCanonProfileScreen extends ConsumerWidget {
                         Expanded(
                           child: _buildCanonTab(
                             key: const Key('series_canon_tab'),
-                            label: '📺 TV Shows ($seriesCount)',
+                            label: 'TV Shows ($seriesCount)',
                             subtitle: 'Includes anime',
                             isSelected: selectedCanon == CanonType.series,
                             onTap: () {
