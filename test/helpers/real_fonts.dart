@@ -58,9 +58,12 @@ Future<void> loadRealFonts() async {
   }
 
   final flutterRoot = Platform.environment['FLUTTER_ROOT'] ?? _flutterRootFromPath();
-  await _register('MaterialIcons', [
-    File('$flutterRoot/bin/cache/artifacts/material_fonts/materialicons-regular.otf').readAsBytesSync(),
-  ]);
+  // The file is `materialicons-regular.otf` on some hosts, `MaterialIcons-Regular.otf` on others.
+  final icons = Directory('$flutterRoot/bin/cache/artifacts/material_fonts')
+      .listSync()
+      .whereType<File>()
+      .firstWhere((f) => f.uri.pathSegments.last.toLowerCase() == 'materialicons-regular.otf');
+  await _register('MaterialIcons', [icons.readAsBytesSync()]);
 }
 
 Future<void> _register(String family, List<Uint8List> fonts) async {
