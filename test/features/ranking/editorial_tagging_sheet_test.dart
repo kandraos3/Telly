@@ -339,7 +339,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(publishedData!.viewingVenue, equals(ViewingVenue.imax));
-      expect(publishedData!.director, equals('Denis Villeneuve'));
+      expect(publishedData!.director, isNull);
     });
 
     testWidgets('omits Theatrical Venue selector for TV shows', (tester) async {
@@ -436,7 +436,8 @@ void main() {
       expect(publishedData!.rewatchCount, equals(3));
     });
 
-    testWidgets('auto-tags director from crew metadata when present', (tester) async {
+    testWidgets('director and standout performance are optional and empty by default (FE-LOG-01)', (tester) async {
+      EditorialTaggingData? publishedData;
       await tester.pumpWidget(
         buildTestableWidget(
           child: EditorialTaggingSheet(
@@ -444,15 +445,54 @@ void main() {
             mediaType: 'movie',
             targetRank: 1,
             director: 'Christopher Nolan',
-            onPublish: (_) {},
+            castMembers: const ['Cillian Murphy as Oppenheimer', 'Emily Blunt as Kitty'],
+            onPublish: (data) => publishedData = data,
           ),
         ),
       );
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('director_tag_text')), findsOneWidget);
-      expect(find.text('Christopher Nolan'), findsOneWidget);
-      expect(find.text('Auto-tagged'), findsOneWidget);
+      // No auto-tagged forced label
+      expect(find.text('Auto-tagged'), findsNothing);
+
+      // Director chip is present but unselected by default
+      final dirChipFinder = find.byKey(const Key('director_toggle_chip'));
+      expect(dirChipFinder, findsOneWidget);
+      expect(tester.widget<FilterChip>(dirChipFinder).selected, isFalse);
+
+      // Standout performance dropdown defaults to null / hint
+      final dropdownFinder = find.byKey(const Key('mvp_character_dropdown'));
+      expect(dropdownFinder, findsOneWidget);
+      expect(tester.widget<DropdownButton<String?>>(dropdownFinder).value, isNull);
+
+      // Publish without selecting: director and standout are null
+      final publishBtn = find.byKey(const Key('publish_editorial_button'));
+      await tester.ensureVisible(publishBtn);
+      await tester.tap(publishBtn);
+      await tester.pumpAndSettle();
+
+      expect(publishedData!.director, isNull);
+      expect(publishedData!.mvpCharacter, isNull);
+
+      // Now toggle director chip and select standout performance
+      await tester.ensureVisible(dirChipFinder);
+      await tester.tap(dirChipFinder);
+      await tester.pumpAndSettle();
+      expect(tester.widget<FilterChip>(dirChipFinder).selected, isTrue);
+
+      await tester.ensureVisible(dropdownFinder);
+      await tester.tap(dropdownFinder);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Cillian Murphy as Oppenheimer').last);
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(publishBtn);
+      await tester.tap(publishBtn);
+      await tester.pumpAndSettle();
+
+      expect(publishedData!.director, equals('Christopher Nolan'));
+      expect(publishedData!.mvpCharacter, equals('Cillian Murphy as Oppenheimer'));
     });
 
     testWidgets('tapping Skip calls onSkip callback', (tester) async {

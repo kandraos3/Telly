@@ -98,6 +98,7 @@ class _EditorialTaggingSheetState extends ConsumerState<EditorialTaggingSheet> {
   late BingeVelocity? _selectedVelocity;
   late AnimeAudioMode? _selectedAudioMode;
   late List<String> _selectedVibes;
+  late String? _selectedDirector;
   late String? _selectedMvpCharacter;
   late final TextEditingController _reviewController;
 
@@ -113,8 +114,8 @@ class _EditorialTaggingSheetState extends ConsumerState<EditorialTaggingSheet> {
     _selectedVelocity = init?.bingeVelocity ?? (!_isMovie ? BingeVelocity.weeklyAiring : null);
     _selectedAudioMode = init?.audioMode ?? (widget.isAnime ? AnimeAudioMode.sub : null);
     _selectedVibes = List<String>.from(init?.vibeTags ?? []);
-    _selectedMvpCharacter = init?.mvpCharacter ??
-        (widget.castMembers.isNotEmpty ? widget.castMembers.first : null);
+    _selectedDirector = init?.director;
+    _selectedMvpCharacter = init?.mvpCharacter;
     _reviewController = TextEditingController(text: init?.review ?? '');
   }
 
@@ -148,7 +149,7 @@ class _EditorialTaggingSheetState extends ConsumerState<EditorialTaggingSheet> {
       bingeVelocity: !_isMovie ? _selectedVelocity : null,
       audioMode: widget.isAnime ? _selectedAudioMode : null,
       vibeTags: List.unmodifiable(_selectedVibes),
-      director: widget.director,
+      director: _selectedDirector,
       mvpCharacter: _selectedMvpCharacter,
       review: _reviewController.text.trim(),
     );
@@ -393,36 +394,30 @@ class _EditorialTaggingSheetState extends ConsumerState<EditorialTaggingSheet> {
                 if (widget.director != null && widget.director!.isNotEmpty) ...[
                   Padding(
                     padding: const EdgeInsets.only(bottom: 10),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.movie_creation_outlined,
-                            size: 16, color: TellyColors.phosphorLime),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Director: ',
-                          style: TellyTypography.bodyMedium(color: TellyColors.textSecondary),
-                        ),
-                        Text(
-                          widget.director!,
-                          key: const Key('director_tag_text'),
-                          style: TellyTypography.bodyMedium(color: TellyColors.textPrimary).copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: TellyColors.backgroundCard,
-                            borderRadius: BorderRadius.circular(4),
-                            border: Border.all(color: TellyColors.borderGlass),
-                          ),
-                          child: Text(
-                            'Auto-tagged',
-                            style: TellyTypography.caption(color: TellyColors.textTertiary),
-                          ),
-                        ),
-                      ],
+                    child: FilterChip(
+                      key: const Key('director_toggle_chip'),
+                      avatar: Icon(
+                        Icons.movie_creation_outlined,
+                        size: 16,
+                        color: _selectedDirector != null ? TellyColors.phosphorLime : TellyColors.textTertiary,
+                      ),
+                      label: Text(
+                        _selectedDirector != null ? 'Director: ${widget.director}' : '+ Tag Director (${widget.director})',
+                      ),
+                      selected: _selectedDirector != null,
+                      onSelected: (selected) {
+                        ref.read(hapticsServiceProvider).duelSelectCandidate();
+                        setState(() {
+                          _selectedDirector = selected ? widget.director : null;
+                        });
+                      },
+                      backgroundColor: TellyColors.backgroundCard,
+                      selectedColor: TellyColors.phosphorLime.withValues(alpha: 0.15),
+                      labelStyle: TextStyle(
+                        color: _selectedDirector != null ? TellyColors.phosphorLime : TellyColors.textSecondary,
+                        fontWeight: _selectedDirector != null ? FontWeight.bold : FontWeight.normal,
+                        fontSize: 12,
+                      ),
                     ),
                   ),
                 ],
@@ -436,26 +431,35 @@ class _EditorialTaggingSheetState extends ConsumerState<EditorialTaggingSheet> {
                     border: Border.all(color: TellyColors.strokeSubtle),
                   ),
                   child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
+                    child: DropdownButton<String?>(
                       key: const Key('mvp_character_dropdown'),
                       value: _selectedMvpCharacter,
                       isExpanded: true,
                       dropdownColor: TellyColors.backgroundSurface,
                       icon: const Icon(Icons.arrow_drop_down, color: TellyColors.phosphorLime),
                       hint: Text(
-                        'Select MVP Standout Performance',
+                        'Select MVP Standout Performance (Optional)',
                         style: TellyTypography.bodyMedium(color: TellyColors.textTertiary),
                       ),
-                      items: widget.castMembers.map((cast) {
-                        return DropdownMenuItem<String>(
-                          value: cast,
+                      items: [
+                        DropdownMenuItem<String?>(
+                          value: null,
                           child: Text(
-                            cast,
-                            style: TellyTypography.bodyMedium(color: TellyColors.textPrimary),
-                            overflow: TextOverflow.ellipsis,
+                            'None (Optional)',
+                            style: TellyTypography.bodyMedium(color: TellyColors.textTertiary),
                           ),
-                        );
-                      }).toList(),
+                        ),
+                        ...widget.castMembers.map((cast) {
+                          return DropdownMenuItem<String?>(
+                            value: cast,
+                            child: Text(
+                              cast,
+                              style: TellyTypography.bodyMedium(color: TellyColors.textPrimary),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          );
+                        }),
+                      ],
                       onChanged: (val) {
                         ref.read(hapticsServiceProvider).duelSelectCandidate();
                         setState(() => _selectedMvpCharacter = val);
