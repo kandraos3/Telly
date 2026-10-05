@@ -24,11 +24,11 @@
 ## 📊 Active Sprint Execution Dashboard
 
 - **Current Active Sprint**: **Sprint 6 — Integration, Wiring & Audit Remediation** (COMPLETED: 32 / 32 tickets complete)
-- **Current Active Ticket**: `WEB-04` (Marketing Website track: `WEB-01` ✅ → `WEB-02` ✅ → `WEB-03` ✅ → `WEB-04`; 3 / 4 complete) — Sprint 6: 32 / 32 tickets complete
+- **Current Active Ticket**: `WEB-04` (Marketing Website track: `WEB-01` ✅ → `WEB-02` ✅ → `WEB-03` ✅ → `WEB-04` ✅ code complete; awaiting push + Pages enablement) — Sprint 6: 32 / 32 tickets complete
 - **Overall Roadmap Progress**: All 32/32 Sprint 6 architecture, integration, algorithm, and QA remediation tickets fully implemented and verified.
 - **Human-Only Tasks**: Tasks marked `👤 [TO BE DONE BY HUMAN]` (cloud deployment, secrets provisioning, store submission, physical-device profile runs). Client application codebase is 100% complete and self-contained.
 - **Active Quality Gate**: Static Analysis (`dart analyze --fatal-infos` — 0 issues), Automated Tests (682 / 682 pass; 100% golden, a11y, integration, and algorithmic parity suites pass; coverage 86.81% overall / 97.04% ranking)
-- **Last Updated**: 2026-10-05 (`WEB-03` static site build: landing, legal, support, attribution)
+- **Last Updated**: 2026-10-05 (`WEB-04` GitHub Pages auto-deploy workflow)
 
 | Sprint | Status | Total Tickets | Audit Verdict |
 | :---: | :---: | :---: | :--- |
@@ -2309,12 +2309,13 @@ A promotional site at `https://kandraos3.github.io/Telly/` that hosts the Privac
 - **Spec Reference**: [**`technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) (CI gates); `.github/workflows/ci.yml` (`DEV-602`)
 - **Scope & Objectives**: `.github/workflows/site.yml` rebuilds and redeploys the site when a push to `main` touches anything the site is made from, and skips the deploy when the output didn't change.
 - **Granular Tasks**:
-  - [ ] Triggers: pushes to `main` touching `lib/**`, `assets/**`, `docs/legal/**`, `site/**`, `tool/site/**`, `test/fakes/**`, `pubspec.*` or the workflow; plus manual `workflow_dispatch` (with a force option).
-  - [ ] Steps: site unit tests → fetch emoji font → generate tokens and screenshots → build → content hash compared with the live `build-hash.txt` → `actions/deploy-pages` only when it differs.
-  - [ ] `tool/site/build.sh` runs the same pipeline locally.
+  - [x] Triggers: pushes to `main` touching `lib/**`, `assets/**`, `docs/legal/**`, `site/**`, `tool/site/**`, `test/fakes/**`, `pubspec.*` or the workflow; plus manual `workflow_dispatch` (with a force option).
+  - [x] Steps: site unit tests → fetch emoji font → generate tokens and screenshots → build → content hash compared with the live `build-hash.txt` → `actions/deploy-pages` only when it differs.
+  - [x] `tool/site/build.sh` runs the same pipeline locally.
   - [ ] 👤 **[TO BE DONE BY HUMAN]** Approve enabling GitHub Pages (Settings → Pages → Source: GitHub Actions).
 - **Testing & Verification**:
-  - [ ] Local `tool/site/build.sh` run produces the full site; workflow YAML validated by a successful run on `main`.
+  - [x] Local `tool/site/build.sh` run produces the full site (desktop and 390 px previews checked); workflow YAML parses.
+  - [ ] First successful workflow run on `main` (after push and enabling Pages).
 - **Dependencies**: `WEB-03`.
 
 ---

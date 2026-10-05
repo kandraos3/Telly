@@ -1,0 +1,108 @@
+name: Telly Website Deploy (WEB-04)
+
+# Rebuilds the website from the app (theme tokens, screenshots, legal docs) and
+# redeploys it to GitHub Pages when anything it is made from changes. The build
+# hashes its output and skips the deploy when the live site is already identical.
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'lib/**'
+      - 'assets/**'
+      - 'docs/legal/**'
+      - 'site/**'
+      - 'tool/site/**'
+      - 'test/site/**'
+      - 'test/fakes/**'
+      - 'test/helpers/**'
+      - 'pubspec.yaml'
+      - 'pubspec.lock'
+      - '.github/workflows/site.yml'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Deploy even if the built site matches the live one'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deploy at a time; a newer push waits instead of cancelling a deploy mid-way.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Generate & Build Site
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      changed: ${{ steps.compare.outputs.changed }}
+      url: ${{ steps.compare.outputs.url }}
+
+    steps:
+      - name: Checkout Codebase
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Site Unit Tests
+        run: flutter test test/site test/helpers/real_fonts_test.dart
+
+      - name: Cache Emoji Font
+        uses: actions/cache@v4
+        with:
+          path: build/site_cache
+          key: site-emoji-twemoji-colr-0.7.0
+
+      - name: Generate Tokens & Screenshots, Build Site
+        run: bash tool/site/build.sh
+
+      - name: Compare With Live Site
+        id: compare
+        env:
+          FORCE: ${{ inputs.force }}
+        run: |
+          url=$(grep -m1 -E '^  url:' site/content.yaml | awk '{print $2}')
+          new=$(cat build/site/build-hash.txt)
+          live=$(curl -fsSL "${url}build-hash.txt" 2>/dev/null || echo none)
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          if [ "$new" != "$live" ] || [ "$FORCE" = "true" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "Site changed ($live -> $new): deploying." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Site unchanged ($new): deploy skipped." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload Pages Artifact
+        if: steps.compare.outputs.changed == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/site
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    if: needs.build.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
