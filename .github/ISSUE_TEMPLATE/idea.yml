@@ -1,0 +1,17 @@
+name: Idea
+description: A feature, improvement or half-formed thought; it lands in the Inbox for triage
+labels: [idea]
+projects: [kandraos3/1]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: The idea
+      description: As rough as you like. Agents shape it later.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why it matters
+      placeholder: "What's clunky today, or what this would unlock"

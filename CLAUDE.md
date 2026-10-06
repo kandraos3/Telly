@@ -4,16 +4,19 @@
 
 ---
 
-## 🏛️ Prime Directive: Spec-Driven, Ticket-Anchored Development
+## 🏛️ Prime Directive: Spec-Driven, Issue-Anchored Development
 
 Antigravity operates as a senior pair programmer and autonomous software engineer on this project. To ensure zero architectural drift, zero regression, and continuous verifiable progress, **all work must strictly adhere to the following six rules**:
 
-### Rule 1: Strict Ticket Anchoring
-- **Never write unassigned or untracked code.** Every single code change, refactor, or test must be anchored to an explicit **Ticket ID** defined in [`docs/PROJECT_ROADMAP_AND_SPRINT_PLAN.md`](file:///c:/Users/karla/Desktop/SeriesBeli/docs/PROJECT_ROADMAP_AND_SPRINT_PLAN.md) (e.g., `BE-101`, `FE-102`, `ALGO-201`, `QA-204`).
-- If a user asks for a feature or modification not present in the roadmap, first locate the relevant sprint, formalize a ticket with spec references and acceptance criteria, add it to the roadmap, and then implement it.
+### Rule 1: Strict Issue Anchoring
+- **Never write untracked code.** Every code change, refactor or test is anchored to a **GitHub issue** on `kandraos3/Telly`. The issue number (`#52`) is the ticket ID. The full system is in [`docs/process/WORKFLOW.md`](file:///c:/Users/karla/Desktop/SeriesBeli/docs/process/WORKFLOW.md).
+- Status lives on the [**Telly** project board](https://github.com/users/kandraos3/projects/1) (Inbox → Shaping → Ready → In progress → Done), never in labels. Use `python tool/tracker/tracker.py` for board and issue operations.
+- Use the skills: **`intake`** when the owner shares ideas, bugs or brain dumps; **`shape`** to turn an idea or epic into spec plus Ready sub-issues; **`ship`** to implement a Ready issue.
+- If the owner asks for something with no issue, file one first (`intake`; for a small, obvious fix, file it straight to *In progress*), then build it.
+- Sprint-era IDs (`FE-601`, `FE-AUTH-01`, …) are history, kept in [`docs/history/`](file:///c:/Users/karla/Desktop/SeriesBeli/docs/history/). Don't add to those files.
 
 ### Rule 2: Mandatory Spec-Grounding Before Code
-- Every ticket contains a `- **Spec Reference**:` pointing to one or more design, architecture, or feature documents in [`docs/`](file:///c:/Users/karla/Desktop/SeriesBeli/docs/).
+- Every Ready issue cites one or more spec sections in [`docs/`](file:///c:/Users/karla/Desktop/SeriesBeli/docs/). If it doesn't, it isn't Ready: shape it first.
 - **The agent MUST view and read the cited spec document/section before authoring code or creating files.**
 - Never guess color hex codes, layout dimensions, database column types, or mathematical formulas. Pull them directly from the cited spec document.
 
@@ -32,20 +35,21 @@ Antigravity operates as a senior pair programmer and autonomous software enginee
   ```
 - **Zero compiler warnings, zero lint errors, and zero failing tests.**
 
-### Rule 5: Progress Accounting in the Roadmap
-- As each granular task in a ticket is completed, edit [`docs/PROJECT_ROADMAP_AND_SPRINT_PLAN.md`](file:///c:/Users/karla/Desktop/SeriesBeli/docs/PROJECT_ROADMAP_AND_SPRINT_PLAN.md):
-  - Change `[ ]` to `[x]` for all finished tasks and test requirements.
-  - Update the **Active Sprint Execution Dashboard** at the top of the file (update Completed count, Burn-Down %, and Current Active Ticket).
+### Rule 5: Progress Accounting on the Board, Truth in the Spec
+- Move the issue on the board as it progresses (`tracker.py track <N> --status ...`), and tick its acceptance criteria in the issue body or a closing comment.
+- **A behaviour change updates its spec in the same commit.** Spec and code must never disagree. Record non-obvious product or architecture choices in [`docs/decisions/`](file:///c:/Users/karla/Desktop/SeriesBeli/docs/decisions/).
+- Deferred or discovered work becomes a new issue, never a silent TODO.
 
 ### Rule 6: Atomic Git Commits
-- Commit every completed ticket as an isolated, atomic unit of work:
+- Commit each completed issue as an isolated, atomic unit of work, referencing it:
   ```bash
-  git commit -m "feat(<scope>): [<TICKET-ID>] <concise description of deliverable>"
+  git commit -m "<type>(<scope>): <concise description> (#N)" -m "Fixes #N"
   ```
+- `Fixes #N` only when the commit completes the issue; otherwise `Refs #N`. Reference the parent epic with `Refs #<epic>`.
 - Examples:
-  - `feat(theme): [FE-102] implement Midnight Cathode color tokens and typography hierarchy`
-  - `feat(ranking): [ALGO-201] implement binary insertion sort tournament with logarithmic bounds`
-  - `test(ranking): [QA-201] add property-based unit tests for tournament invariants`
+  - `feat(explore): add "Because you ranked X" carousel rows (#52)`
+  - `fix(theme): raise lime contrast on light-mode canon rows (#47)`
+- Don't push unless the owner asks.
 
 ---
 
@@ -84,18 +88,17 @@ All remote Supabase work (checking what's live, applying migrations, deploying e
 
 ---
 
-## 🔄 Standard 6-Step Ticket Execution Workflow
+## 🔄 Standard Workflow
 
 ```mermaid
 flowchart LR
-    A["1. Identify Next Ticket<br>(from Roadmap)"] --> B["2. Read Spec Doc<br>(docs/...)"]
-    B --> C["3. Implement Code<br>(Flutter / SQL)"]
-    C --> D["4. Write & Run Tests<br>(Pyramid Rules)"]
-    D -->|Fail| C
-    D -->|Pass| E["5. Check off [x]<br>(Update Roadmap)"]
-    E --> F["6. Atomic Commit<br>(feat: [TICKET-ID])"]
+    A["Owner input<br>(voice note, bug, idea)"] -->|intake| B["Inbox issue<br>+ docs/inbox/"]
+    B -->|shape| C["Spec + decisions<br>+ Ready sub-issues"]
+    C -->|ship| D["Code + tests<br>(Pyramid Rules)"]
+    D -->|Gate fails| D
+    D -->|Gate passes| E["Spec still true<br>Commit: (#N) Fixes #N"]
 ```
 
 ---
-*Constitution Version: 1.0.0*  
+*Constitution Version: 2.0.0 (2026-10-06: issues replace the sprint roadmap; see decision 0001)*  
 *Enforced on: All Antigravity Agent Sessions*

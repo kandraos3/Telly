@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: How work is tracked
+    url: https://github.com/kandraos3/Telly/blob/main/docs/process/WORKFLOW.md
+    about: Issues are the tickets; status lives on the Telly project board.

@@ -1,3 +1,5 @@
+> **Frozen 2026-10-06.** Historical record of Sprints 1–6; do not edit. Work is now tracked as GitHub issues on the [Telly board](https://github.com/users/kandraos3/projects/1) — see [`docs/process/WORKFLOW.md`](../process/WORKFLOW.md) and decision [0001](../decisions/0001-issues-are-the-ticket-system.md). Open items were carried over as issues.
+
 # Telly: Engineering Roadmap & Granular 10-Week Sprint Plan
 
 > **Comprehensive engineering execution blueprint breaking down all features, designs, database procedures, APIs, and tests into granular, standalone developer tickets with direct specification links.**

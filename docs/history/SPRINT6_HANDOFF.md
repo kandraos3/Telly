@@ -1,3 +1,5 @@
+> **Frozen 2026-10-06.** Historical record of Sprints 1–6; do not edit. Work is now tracked as GitHub issues on the [Telly board](https://github.com/users/kandraos3/projects/1) — see [`docs/process/WORKFLOW.md`](../process/WORKFLOW.md) and decision [0001](../decisions/0001-issues-are-the-ticket-system.md). Open items were carried over as issues.
+
 # Sprint 6 Handoff — State, Lessons & How to Continue
 
 _Written 2026-10-03 for the next agent. Read `AGENTS.md` first (ticket anchoring, spec-first, 70/20/10 tests, gate before commit, roadmap accounting, atomic commits). This file is the "what happened and what's next"; the roadmap (`docs/PROJECT_ROADMAP_AND_SPRINT_PLAN.md`) is the source of truth for tickets._

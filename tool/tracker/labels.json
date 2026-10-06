@@ -1,0 +1,48 @@
+{
+  "_comment": "Source of truth for GitHub labels on kandraos3/Telly. Sync with: python tool/tracker/tracker.py labels. Status lives on the project board, never in labels.",
+  "labels": [
+    {"name": "bug", "color": "FF4B6E", "description": "Something is broken or behaves differently from its spec"},
+    {"name": "enhancement", "color": "D2FF52", "description": "Improvement to something that already exists"},
+    {"name": "feature", "color": "7C5CFF", "description": "New capability"},
+    {"name": "design", "color": "FFA733", "description": "Needs design work: layout, IA, visual tokens, mockups"},
+    {"name": "idea", "color": "C5DEF5", "description": "Raw idea, not committed to; may be shaped, parked or dropped"},
+    {"name": "epic", "color": "5319E7", "description": "Parent issue grouping sub-issues under one spec"},
+    {"name": "chore", "color": "BFD4F2", "description": "Process, tooling, CI, dependency or ops work"},
+    {"name": "human-only", "color": "FEF2C0", "description": "Needs the owner: consoles, secrets, stores, physical devices"},
+    {"name": "documentation", "color": "0075CA", "description": "Docs or spec change only"},
+    {"name": "accessibility", "color": "F143AB", "description": "Barrier affecting people with disabilities"},
+    {"name": "question", "color": "D876E3", "description": "Needs an answer or decision from the owner"},
+    {"name": "duplicate", "color": "CFD3D7", "description": "Already tracked in another issue"},
+    {"name": "wontfix", "color": "FFFFFF", "description": "Decided not to do"},
+
+    {"name": "area:nav", "color": "B60205", "description": "Bottom bar, More hub, routing and information architecture"},
+    {"name": "area:home", "color": "FBCA04", "description": "Home tab, currently-watching tracking"},
+    {"name": "area:auth", "color": "6E7681", "description": "Sign-in, onboarding, legal acceptance (SCR-01)"},
+    {"name": "area:logging", "color": "D2FF52", "description": "Logging studio and reveal (SCR-09, SCR-12)"},
+    {"name": "area:ranking", "color": "FFA733", "description": "Duels, binary insertion, TrueSkill, percentile scores"},
+    {"name": "area:profile", "color": "7C5CFF", "description": "Own and other users' profiles, canon lists, stats (SCR-14, SCR-15)"},
+    {"name": "area:title-detail", "color": "2EA043", "description": "Movie and show detail screen (SCR-08)"},
+    {"name": "area:explore", "color": "0075CA", "description": "Explore, search, recommendation rows (SCR-07)"},
+    {"name": "area:social", "color": "1F6FEB", "description": "Friends, follows, profile privacy"},
+    {"name": "area:squads", "color": "A371F7", "description": "Squads list, hub, squad chat (SCR-17)"},
+    {"name": "area:co-watch", "color": "E85AAD", "description": "Two-to-Watch and quick swipe duel (SCR-16)"},
+    {"name": "area:queue", "color": "F9D0C4", "description": "Smart queue, custom and shared lists (SCR-13)"},
+    {"name": "area:feed", "color": "1D76DB", "description": "Activity feed, upsets, reactions (SCR-05)"},
+    {"name": "area:gamification", "color": "F9A825", "description": "Points, achievements, streaks, challenges, referrals"},
+    {"name": "area:monetization", "color": "0E8A16", "description": "Telly Pro subscription and paywalls"},
+    {"name": "area:settings", "color": "8A99AD", "description": "Settings hub, account, import/export (SCR-20)"},
+    {"name": "area:theme", "color": "E36209", "description": "Dark/light themes and color tokens"},
+    {"name": "area:backend", "color": "3E4B9E", "description": "Supabase schema, RPCs, edge functions, caching, push"},
+    {"name": "area:release", "color": "006B75", "description": "CI, store submission, signing, monitoring, website"},
+    {"name": "area:process", "color": "EDEDED", "description": "Tracking system, agent skills, repo conventions"},
+
+    {"name": "p0-blocker", "color": "B60205", "description": "Crash, broken build, auth loop, data corruption"},
+    {"name": "p1-high", "color": "D93F0B", "description": "Core flow broken, wrong ranking math, major visual regression"},
+    {"name": "p2-medium", "color": "FBCA04", "description": "Secondary feature, UX clarity, layout polish"},
+    {"name": "p3-low", "color": "0E8A16", "description": "Cosmetic or nice-to-have"}
+  ],
+  "remove": [
+    "status:triage", "status:ready", "status:in-progress", "status:review", "status:done",
+    "good first issue", "help wanted", "invalid"
+  ]
+}

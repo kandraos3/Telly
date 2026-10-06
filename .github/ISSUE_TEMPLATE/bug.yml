@@ -1,0 +1,32 @@
+name: Bug
+description: Something is broken or doesn't match the spec
+labels: [bug]
+projects: [kandraos3/1]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you saw, and what you expected instead.
+    validations:
+      required: true
+  - type: input
+    id: where
+    attributes:
+      label: Where
+      placeholder: "e.g. Canon tab, light mode, after logging a show"
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: "1. ...\n2. ..."
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Screenshots or recording
+      description: Drag files here.
+  - type: dropdown
+    id: device
+    attributes:
+      label: Device
+      options: [iOS, Android, Both, Not sure]

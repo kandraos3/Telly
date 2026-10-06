@@ -107,7 +107,9 @@ The project is fully equipped with turnkey, executable code assets, schemas, and
 
 | Asset | Path | Description & Purpose |
 | :--- | :--- | :--- |
-| **Sprint Plan** | [**`PROJECT_ROADMAP_AND_SPRINT_PLAN.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/PROJECT_ROADMAP_AND_SPRINT_PLAN.md) | 10-week, 5-sprint engineering roadmap with ticket breakdowns and acceptance criteria. |
+| **Roadmap** | [**`ROADMAP.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/ROADMAP.md) | Now / Next / Later themes linking to epic issues on the [Telly board](https://github.com/users/kandraos3/projects/1). |
+| **Work Tracking** | [**`process/WORKFLOW.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/process/WORKFLOW.md) | Issues as tickets, board statuses, spec rules, `intake` / `shape` / `ship` skills. Decisions in [`decisions/`](file:///c:/Users/karla/Desktop/SeriesBeli/docs/decisions/), raw input in [`inbox/`](file:///c:/Users/karla/Desktop/SeriesBeli/docs/inbox/). |
+| **Sprint History** | [**`history/SPRINTS_1-6_ROADMAP.md`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/history/SPRINTS_1-6_ROADMAP.md) | Frozen Sprints 1–6 roadmap and Sprint 6 handoff. |
 | **Env Template** | [**`.env.example`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/.env.example) | Complete template for Supabase, TMDB, JustWatch, Twilio, Sentry, and OneSignal keys. |
 | **DB Migrations** | [**`supabase/migrations/`**](file:///c:/Users/karla/Desktop/SeriesBeli/supabase/migrations/) | Executable schema, RLS policies, indexes and stored procedures (single source of truth; contract in TA-02). |
 | **Seed Data** | [**`supabase/seed.sql`**](file:///c:/Users/karla/Desktop/SeriesBeli/supabase/seed.sql) | 50 real shows with accurate TMDB IDs, genres, and streaming services for immediate testing. |
