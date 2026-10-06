@@ -1,0 +1,68 @@
+{
+  "_comment": "Standard stages scaffolded as sub-issues under every issue labelled idea or epic. Single source for tracker.py, the tracker GitHub Action and the shape/ship skills. Edit here, never in copies.",
+  "applies_to": ["idea", "epic"],
+  "stages": [
+    {
+      "key": "evaluate",
+      "name": "Evaluate",
+      "skill": "shape",
+      "goal": "Decide whether this is worth doing, and when.",
+      "checklist": [
+        "Problem and who it is for, in two or three sentences",
+        "How it works today (code and spec references), if it touches existing features",
+        "Rough size (S / M / L / XL), risks and dependencies",
+        "Recommendation: go, park or drop, with reasons, posted as a comment",
+        "Owner decision (needs-owner) when it is a product call rather than an obvious yes"
+      ]
+    },
+    {
+      "key": "alternatives",
+      "name": "Explore alternatives",
+      "skill": "shape",
+      "goal": "Find two or three genuinely different ways to do it and pick one.",
+      "checklist": [
+        "Two or three options with trade-offs (UX, effort, risk, what it rules out later)",
+        "Mockups or sketches for anything visual, in dark and light themes",
+        "A recommendation, and the owner's pick (needs-owner)",
+        "Decision record in docs/decisions/ for the chosen option"
+      ],
+      "skippable": "Close with a one-line reason when there is only one sensible approach."
+    },
+    {
+      "key": "specify",
+      "name": "Specify",
+      "skill": "shape",
+      "goal": "Write the detailed design so implementation needs no guessing.",
+      "checklist": [
+        "Spec section in docs/ written or updated, with the tracking line (epic #N, Status: approved)",
+        "Screens, states (empty, loading, error, offline), data, formulas and tokens covered",
+        "Task sub-issues created under the Implement stage, each with acceptance criteria and tests",
+        "Task dependencies noted as 'Blocked by #N'"
+      ]
+    },
+    {
+      "key": "implement",
+      "name": "Implement",
+      "skill": "ship",
+      "goal": "Build it. The actual work lives in task sub-issues of this stage.",
+      "checklist": [
+        "Every task sub-issue closed via the ship skill (code, tests, gate, spec kept true)",
+        "Backend changes deployed through the supabase-deploy skill",
+        "Deferred or discovered work filed as new issues"
+      ]
+    },
+    {
+      "key": "verify",
+      "name": "Verify & release",
+      "skill": "ship",
+      "goal": "Prove it works end to end and close the loop.",
+      "checklist": [
+        "Acceptance criteria of the epic checked against the running app",
+        "E2E, golden and accessibility coverage at the right pyramid level",
+        "Dark and light themes checked; device run filed as a human-only issue if needed",
+        "Spec tracking line set to Status: shipped; docs/ROADMAP.md updated",
+        "Short summary for the owner posted on the epic"
+      ]
+    }
+  ]
+}

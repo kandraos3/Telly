@@ -1,17 +1,45 @@
 # Telly: Autonomous Engineering Rules of Engagement (AGENTS.md)
 
-> **Mandatory operating instructions, coding protocols, and quality gates for AI agents (Antigravity) and developers implementing the Telly mobile application.**
+> **Mandatory operating instructions, coding protocols, and quality gates for every AI agent (Claude Code, Antigravity, Gemini, …) and developer working on the Telly mobile application.**
+>
+> This file is the single source. `CLAUDE.md` and `GEMINI.md` are generated copies, and `.claude/skills/` mirrors `.agents/skills/`. Edit only `AGENTS.md` / `.agents/skills/`, then run `python tool/agents/sync.py`. CI fails on drift.
+
+---
+
+## 🧭 Operating Model: the Owner Is the PM, Agents Do the Work
+
+The owner acts as product manager. **Agents do all implementation and all tracking**: filing, triaging, moving cards, advancing stages, closing issues, keeping specs and the roadmap current. The owner only:
+- shares ideas, bugs and voice notes;
+- answers issues labelled **`needs-owner`** (post the question as a comment with options and a recommendation, then add the label);
+- does issues labelled **`human-only`** (consoles, secrets, stores, physical devices; write exact steps).
+
+Never ask the owner to move a card, add a label, close an issue or write a ticket.
+
+### Skill routing (mandatory)
+
+Before acting, match the request to a skill and load it. If several match, use them in this order.
+
+| Situation | Skill |
+|---|---|
+| Owner shares an idea, complaint, bug, voice note or screenshot, however casual; or asks to triage the Inbox | **`intake`** |
+| Owner asks "what's the status / what's next / what needs me?" | Run `python tool/tracker/tracker.py sync` then `report`, and summarise (no skill needed) |
+| Working an Evaluate, Explore alternatives or Specify stage; designing, spec'ing or breaking down a feature; an issue lacks acceptance criteria | **`shape`** |
+| Implementing a task, bug or chore; "work on #N"; "pick up the next thing"; a Verify & release stage | **`ship`** |
+| Any Supabase migration, edge function, secret, pgTAP or "what's live" | **`supabase-deploy`** |
+| Running the app on a phone or emulator | **`mobile-deploy`** |
+
+All issue and board operations go through `python tool/tracker/tracker.py` (see [`docs/process/WORKFLOW.md`](file:///c:/Users/karla/Desktop/SeriesBeli/docs/process/WORKFLOW.md) §7). Don't hand-edit project fields with raw `gh project` calls.
 
 ---
 
 ## 🏛️ Prime Directive: Spec-Driven, Issue-Anchored Development
 
-Antigravity operates as a senior pair programmer and autonomous software engineer on this project. To ensure zero architectural drift, zero regression, and continuous verifiable progress, **all work must strictly adhere to the following six rules**:
+Every agent operates as a senior pair programmer and autonomous software engineer on this project. To ensure zero architectural drift, zero regression, and continuous verifiable progress, **all work must strictly adhere to the following six rules**:
 
 ### Rule 1: Strict Issue Anchoring
 - **Never write untracked code.** Every code change, refactor or test is anchored to a **GitHub issue** on `kandraos3/Telly`. The issue number (`#52`) is the ticket ID. The full system is in [`docs/process/WORKFLOW.md`](file:///c:/Users/karla/Desktop/SeriesBeli/docs/process/WORKFLOW.md).
-- Status lives on the [**Telly** project board](https://github.com/users/kandraos3/projects/1) (Inbox → Shaping → Ready → In progress → Done), never in labels. Use `python tool/tracker/tracker.py` for board and issue operations.
-- Use the skills: **`intake`** when the owner shares ideas, bugs or brain dumps; **`shape`** to turn an idea or epic into spec plus Ready sub-issues; **`ship`** to implement a Ready issue.
+- Status lives on the [**Telly** project board](https://github.com/users/kandraos3/projects/1) (Inbox → Backlog → Shaping → Ready → In progress → Done), never in labels.
+- **Ideas and epics follow five standard stages** (Evaluate → Explore alternatives → Specify → Implement → Verify & release), created automatically as sub-issues from `tool/tracker/stages.json`. The concrete work is task sub-issues under the Implement stage. Finish stages only with `tracker.py advance`.
 - If the owner asks for something with no issue, file one first (`intake`; for a small, obvious fix, file it straight to *In progress*), then build it.
 - Sprint-era IDs (`FE-601`, `FE-AUTH-01`, …) are history, kept in [`docs/history/`](file:///c:/Users/karla/Desktop/SeriesBeli/docs/history/). Don't add to those files.
 
@@ -36,7 +64,7 @@ Antigravity operates as a senior pair programmer and autonomous software enginee
 - **Zero compiler warnings, zero lint errors, and zero failing tests.**
 
 ### Rule 5: Progress Accounting on the Board, Truth in the Spec
-- Move the issue on the board as it progresses (`tracker.py track <N> --status ...`), and tick its acceptance criteria in the issue body or a closing comment.
+- Move the issue on the board as it progresses (`tracker.py track`, `advance`, `close`), tick its acceptance criteria in the issue body or a closing comment, and run `tracker.py sync` after pushing.
 - **A behaviour change updates its spec in the same commit.** Spec and code must never disagree. Record non-obvious product or architecture choices in [`docs/decisions/`](file:///c:/Users/karla/Desktop/SeriesBeli/docs/decisions/).
 - Deferred or discovered work becomes a new issue, never a silent TODO.
 
@@ -93,10 +121,11 @@ All remote Supabase work (checking what's live, applying migrations, deploying e
 ```mermaid
 flowchart LR
     A["Owner input<br>(voice note, bug, idea)"] -->|intake| B["Inbox issue<br>+ docs/inbox/"]
-    B -->|shape| C["Spec + decisions<br>+ Ready sub-issues"]
-    C -->|ship| D["Code + tests<br>(Pyramid Rules)"]
-    D -->|Gate fails| D
-    D -->|Gate passes| E["Spec still true<br>Commit: (#N) Fixes #N"]
+    B -->|"bug / small change"| T["Ready issue"]
+    B -->|"idea / epic: 5 stages"| E["1 Evaluate → 2 Alternatives<br>→ 3 Specify (shape)"]
+    E -->|"tasks under stage 4"| T
+    T -->|ship| D["Code + tests + gate<br>Commit (#N) Fixes #N"]
+    D --> V["5 Verify & release (ship)<br>epic closes via advance"]
 ```
 
 ---

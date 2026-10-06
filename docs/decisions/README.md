@@ -30,3 +30,4 @@ What changes, what we give up, what follow-up work this creates.
 | # | Decision | Status |
 |---|---|---|
 | [0001](0001-issues-are-the-ticket-system.md) | GitHub issues are the ticket system; the sprint roadmap is frozen | Accepted |
+| [0002](0002-standard-stages-for-ideas.md) | Every idea follows five standard stages; agents own all tracking | Accepted |

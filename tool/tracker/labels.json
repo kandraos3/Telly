@@ -5,13 +5,14 @@
     {"name": "enhancement", "color": "D2FF52", "description": "Improvement to something that already exists"},
     {"name": "feature", "color": "7C5CFF", "description": "New capability"},
     {"name": "design", "color": "FFA733", "description": "Needs design work: layout, IA, visual tokens, mockups"},
-    {"name": "idea", "color": "C5DEF5", "description": "Raw idea, not committed to; may be shaped, parked or dropped"},
-    {"name": "epic", "color": "5319E7", "description": "Parent issue grouping sub-issues under one spec"},
+    {"name": "idea", "color": "C5DEF5", "description": "Not yet evaluated; gets standard stage sub-issues and becomes an epic on a go"},
+    {"name": "epic", "color": "5319E7", "description": "Evaluated initiative with standard stage sub-issues; tasks live under its Implement stage"},
     {"name": "chore", "color": "BFD4F2", "description": "Process, tooling, CI, dependency or ops work"},
     {"name": "human-only", "color": "FEF2C0", "description": "Needs the owner: consoles, secrets, stores, physical devices"},
     {"name": "documentation", "color": "0075CA", "description": "Docs or spec change only"},
     {"name": "accessibility", "color": "F143AB", "description": "Barrier affecting people with disabilities"},
-    {"name": "question", "color": "D876E3", "description": "Needs an answer or decision from the owner"},
+    {"name": "needs-owner", "color": "D876E3", "description": "Waiting on a decision or answer from the owner; the agent's question is in the latest comment"},
+    {"name": "stage", "color": "EDEDED", "description": "Standard stage of an idea/epic (tool/tracker/stages.json); finish with `advance`"},
     {"name": "duplicate", "color": "CFD3D7", "description": "Already tracked in another issue"},
     {"name": "wontfix", "color": "FFFFFF", "description": "Decided not to do"},
 
@@ -43,6 +44,6 @@
   ],
   "remove": [
     "status:triage", "status:ready", "status:in-progress", "status:review", "status:done",
-    "good first issue", "help wanted", "invalid"
+    "good first issue", "help wanted", "invalid", "question"
   ]
 }

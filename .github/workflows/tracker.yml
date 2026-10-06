@@ -1,0 +1,34 @@
+name: Tracker - scaffold idea/epic stages
+
+# Ideas filed on GitHub (web, phone, issue form) get the standard stage
+# sub-issues from tool/tracker/stages.json. Issues created by agents through
+# tracker.py carry a "telly-scaffold: local" marker and are scaffolded locally.
+# Board statuses for the new stages are set by the next `tracker.py sync`
+# (GITHUB_TOKEN cannot edit a user-owned project).
+
+on:
+  issues:
+    types: [opened, labeled]
+
+permissions:
+  issues: write
+  contents: read
+
+concurrency:
+  group: tracker-scaffold-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  scaffold:
+    if: >-
+      github.event.issue.state == 'open' &&
+      (contains(github.event.issue.labels.*.name, 'idea') || contains(github.event.issue.labels.*.name, 'epic')) &&
+      !contains(github.event.issue.body, 'telly-scaffold: local')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create missing stage sub-issues
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 tool/tracker/tracker.py scaffold ${{ github.event.issue.number }} --no-board

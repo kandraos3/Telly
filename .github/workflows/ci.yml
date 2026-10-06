@@ -11,6 +11,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  agent-instructions:
+    name: Agent instructions in sync (AGENTS.md, skills, tracker stages)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: AGENTS.md copies and skill mirrors match their sources
+        run: python3 tool/agents/sync.py --check
+      - name: Tracker config parses
+        run: python3 -c "import json; [json.load(open(f)) for f in ('tool/tracker/stages.json', 'tool/tracker/labels.json')]"
+
   static-analysis-and-unit-tests:
     name: Flutter Lint, Test Pyramid & Coverage Gate
     runs-on: ubuntu-latest
