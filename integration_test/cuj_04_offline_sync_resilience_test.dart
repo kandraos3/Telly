@@ -84,9 +84,11 @@ void main() {
     // 4. Restore Network Connectivity
     connectivityService.setOnline(true);
 
-    // Wait for SyncEngine to detect connectivity and flush WAL
-    for (var i = 0; i < 200 && transport.applied.length < 3; i++) {
-      await Future<void>.delayed(const Duration(milliseconds: 10));
+    // Wait for SyncEngine to detect connectivity and flush the WAL. A shared CI emulator can take
+    // seconds, so wait on the condition with a generous deadline and stop as soon as it holds (#123).
+    final deadline = DateTime.now().add(const Duration(seconds: 20));
+    while (transport.applied.length < 3 && DateTime.now().isBefore(deadline)) {
+      await Future<void>.delayed(const Duration(milliseconds: 50));
     }
 
     // 5. Assert strict FIFO flush and zero data loss
