@@ -519,7 +519,7 @@ flowchart LR
 | Edge functions (Deno) | `supabase/functions/` |
 | Agent instructions in sync | `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/`, `.claude/`, `tool/agents/`, `tool/tracker/*.json` |
 
-Editing `ci.yml` itself, or a manual **Run workflow**, runs every job. A newer push to the same branch cancels the older run. When a new job or folder is added, extend its filter in the `changes` job.
+A push that only touches other files (for example `docs/`) runs just the change check. Editing `ci.yml` itself, or a manual **Run workflow**, runs every job. A newer push to the same branch cancels the older run. When a new job or folder is added, extend its filter in the `changes` job.
 
 ---
 *Document Version: 1.0.0*  
