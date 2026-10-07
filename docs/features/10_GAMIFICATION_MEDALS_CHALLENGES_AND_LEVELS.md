@@ -61,7 +61,7 @@ Shown as the lime "▲ N weeks" chip (Achievements summary, Your level, friends'
 | Column | Type | Notes |
 |---|---|---|
 | `id` | TEXT PK | Stable slug, e.g. `movies_100`, `collection_263`, `challenge_spooktober_2026` |
-| `kind` | enum `milestone · taste · streak · collection · challenge` | Section on `SCR-23` |
+| `kind` | enum `milestone · taste · streak · collection · challenge · special` | Section on `SCR-23` (`special` is Founding Viewer) |
 | `tier` | enum `bronze · silver · gold · special` | Medal colour (§9.1) |
 | `name`, `description` | TEXT | Description says how to earn it ("Rank 100 films") |
 | `glyph` | VARCHAR(4) | 1–4 characters drawn on the medal (`100`, `LR`, `↯`) |
@@ -84,7 +84,9 @@ Shown as the lime "▲ N weeks" chip (Achievements summary, Your level, friends'
 | Genre Explorer | taste | silver | Qualifying rankings across 8 different genres |
 | Graveyard Keeper | taste | bronze | 5 shows in the TV Graveyard |
 | Regular / Devotee / Year-Rounder | streak | bronze / silver / gold | Best weekly streak of 4 / 12 / 52 weeks |
-| Founding Viewer | special | special | Account created before the public launch date + 90 days (a constant in the migration) |
+| Founding Viewer | special | special | Account created before the public launch date + 90 days. The date comes from `_public_launch_date()`, which returns NULL until the owner sets it; until then the medal stays locked. |
+
+Seeded ids: `movies_10`, `tv_10`, `movies_50`, `tv_50`, `movies_100`, `tv_100`, `upset_artist`, `taste_twin`, `decade_hopper`, `genre_explorer`, `graveyard_keeper`, `streak_4`, `streak_12`, `streak_52`, `founding_viewer`. Taste Twin's progress is the best taste match (either canon) with someone you follow, against a target of 92. Graveyard Keeper counts `user_dropped_shows` rows for series.
 
 **Collection medals** (slice 2): one per TMDB collection the user has started (§7). The tier is gold, and it's earned when every *released* film in the collection is in their qualifying rankings.
 
@@ -94,19 +96,25 @@ Shown as the lime "▲ N weeks" chip (Achievements summary, Your level, friends'
 
 `(user_id, achievement_id) PK, unlocked_at, seen_at NULL, pinned_slot SMALLINT NULL CHECK 1..3`, with a unique `(user_id, pinned_slot)`.
 
-- **Evaluation:** `evaluate_achievements(user_id)` runs at the end of the ranking RPC, the duel RPC, the drop RPC and the follow RPC (cheap: indexed counts), and nightly for taste and streak medals. Inserts are idempotent (`ON CONFLICT DO NOTHING`). Each new unlock:
+- **Evaluation:** `evaluate_achievements(user_id, broadcast default true)` runs:
+  - at the end of `record_pairwise_duels` (once per batch);
+  - from statement-level triggers after inserts into `user_rankings` (and updates that change a status to `COMPLETED`), `user_dropped_shows`, `social_follows` (accepted) and `taste_matches` (92% or more). Drops and follows are direct table writes, so triggers cover every path;
+  - nightly for everyone (`evaluate_all_achievements`, pg_cron `evaluate-achievements`) for taste and streak medals.
+
+  Only the service role can call it directly. Inserts are idempotent (`ON CONFLICT DO NOTHING`). Each new unlock:
   1. adds XP (§6, slice 3; until then, nothing);
-  2. writes a `MEDAL_UNLOCKED` activity if `users.share_achievements` (§10).
+  2. writes a `MEDAL_UNLOCKED` activity if `users.share_achievements` (§10). The backfill of existing users at deploy passes `broadcast = false`, so it posts nothing.
 - **Medals are never revoked**, even if the rankings behind them are deleted.
-- **Offline:** rankings sync through the offline duel queue first, so unlocks appear after sync. The app shows the unlock moment (`SCR-24`) for rows where `seen_at IS NULL`, then marks them seen.
+- **Offline:** rankings sync through the offline duel queue first, so unlocks appear after sync. The app shows the unlock moment (`SCR-24`) for rows where `seen_at IS NULL`, then marks them seen with `mark_achievements_seen(ids default NULL)` (NULL marks them all).
+- **Reading:** `my_achievements()` returns the active catalogue (plus retired medals you hold) with `progress` (capped at the target), `unlocked_at`, `seen_at`, `pinned_slot`, `rarity_percent` (NULL while New), `rarity_is_new`, and `friends_count` / `friends` (up to 5 visible people you follow who hold it). Others' unlocks and pins are readable from `user_achievements` wherever their profile is visible.
 
 ### 4.3 Rarity
 
-`achievement_rarity (achievement_id PK, holders INT, active_users INT, percent NUMERIC(5,2), computed_at)`. A nightly job counts holders among users active in the last 90 days. Shown as "Unlocked by 4.2% of Telly viewers", or "New: not enough viewers yet" under 200 active users.
+`achievement_rarity (achievement_id PK, holders INT, active_users INT, percent NUMERIC(5,2), computed_at)`. A nightly job (`refresh_achievement_rarity`, pg_cron `refresh-achievement-rarity`) counts holders among users active in the last 90 days, meaning signed in (`auth.users.last_sign_in_at`) and not deleted. Shown as "Unlocked by 4.2% of Telly viewers", or "New: not enough viewers yet" under 200 active users.
 
 ### 4.4 Pinning
 
-Up to three medals pinned to slots 1–3 (`pin_achievement(achievement_id, slot)` and `unpin_achievement(slot)`). Pinned medals appear:
+Up to three medals pinned to slots 1–3 (`pin_achievement(achievement_id, slot)` and `unpin_achievement(slot)`). Only unlocked medals can be pinned (`22023` otherwise). Pinning into a taken slot replaces that medal, and pinning a pinned medal moves it. Pinned medals appear:
 - on `SCR-23`;
 - under your name on the More profile card (`SCR-22`) and the friend profile (`SCR-15`);
 - on the medals share card.
@@ -350,7 +358,8 @@ All screens use the shared app bars (screen specs §0.2) and the frosted bottom 
 
 ## 10. Feed and privacy
 
-- **Activity types:** `activity_logs.activity_type` gains `MEDAL_UNLOCKED` and `CHALLENGE_COMPLETED`, with metadata for the medal (id, name, tier, glyph) or the challenge (id, slug, name, count, best title).
+- **Activity types:** `activity_logs.activity_type` gains `MEDAL_UNLOCKED` (slice 1) and `CHALLENGE_COMPLETED` (slice 2), with metadata for the medal (`achievement_id`, `name`, `tier`, `glyph`, `kind`) or the challenge (id, slug, name, count, best title).
+- **Older apps:** they would render an unknown activity type as a broken ranking card, so `get_activity_feed` leaves medal rows out unless the caller passes `p_include_medals => true`. Apps that have the medal card (#139) pass it.
 - **Feed cards** (Social, `SCR-05`; mockup C3):
   - **Medal card:** the person, the medal, its rarity, and reactions.
   - **Challenge card:** the person, the medal, "Best of the 8: The Thing (#1, 9.40)", reactions, and **Join** while the challenge is live.
