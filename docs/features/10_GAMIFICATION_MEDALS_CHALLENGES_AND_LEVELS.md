@@ -27,7 +27,7 @@ It ships in three slices (§12).
 
 Every count in this spec is over **qualifying rankings**: rows in `user_rankings` with status `COMPLETED`, where at least one of these holds:
 - the user has a `pairwise_duels` row in the same canon in which the title is winner or loser (it was placed through duels); or
-- it was the first title in that canon, so no duel was possible. This means no other `user_rankings` row in the same `media_type` has an earlier `created_at`.
+- it was the first title in that canon, so no duel was possible. This means no other `user_rankings` row in the same `media_type` has an earlier `created_at` (ties, such as rows from one import transaction, are broken by `id`, so exactly one row is first).
 
 Consequences:
 - **Imports never count.** Letterboxd and AniList imports create rankings without duels. At most one imported title per canon can slip through as "first in canon"; that's accepted.
@@ -44,9 +44,11 @@ Exposed as the SQL view `public.qualifying_rankings (user_id, title_id, media_ty
 - **A week counts** when the user has at least one qualifying ranking whose `created_at` falls in it.
 - **Weekly streak:** the number of consecutive counted weeks, ending with the most recent *finished* week, plus the current week if it already counts.
   - **The current week never breaks a streak** while it's still running.
-  - **Freezes:** walking back through the weeks, a missed week is covered by a **freeze** if none has been used in the calendar month of that week's Monday (at most one per month). A covered week doesn't add to the count, but it doesn't break the streak either.
+  - **Freezes:** walking back through the weeks, a missed week is covered by a **freeze** if none has been used in the calendar month of that week's Monday (at most one per month). A covered week doesn't add to the count, but it doesn't break the streak either. A freeze is only spent when it bridges to an earlier counted week; if the gap can't be bridged, the weeks stay missed.
   - **A missed week with no freeze available ends the streak.**
-- **Computed, not stored:** `weekly_streak(user_id) → (current_weeks, best_weeks, weeks jsonb)`, where `weeks` holds the last 7 weeks as `counted | frozen | missed | current`. Being a pure SQL function over `qualifying_rankings`, it's deterministic and testable with pgTAP.
+  - **Best streak:** the longest run over the whole history, under the same rules.
+- **Computed, not stored:** `weekly_streak(user_id, now default NOW()) → (current_weeks, best_weeks, weeks jsonb)`. `weeks` holds the last 7 weeks, oldest first, as `{week: "2026-W42", starts_on: "2026-10-12", status}` with status `counted | frozen | missed | current`; the running week is `current` until it counts, then `counted`. Being a SQL function over `qualifying_rankings` with `now` as a parameter, it's deterministic and testable with pgTAP. It runs as the caller, so it respects profile visibility (a hidden user reads as zero).
+- **Setting the time zone:** `set_timezone(name)` validates the IANA name (`22023` if unknown). Clients can't write the column directly.
 
 Shown as the lime "▲ N weeks" chip (Achievements summary, Your level, friends' rows) and as the 7-week strip on `SCR-27` (❄ marks a frozen week).
 

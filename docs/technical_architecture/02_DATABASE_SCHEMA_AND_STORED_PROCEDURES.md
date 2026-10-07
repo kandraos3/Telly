@@ -42,7 +42,7 @@ Abbreviations: **PK** primary key, **FK** foreign key, **U** unique. All `update
 
 | Table | Key columns & constraints | Purpose |
 | :--- | :--- | :--- |
-| `users` | **PK** `id` → `auth.users(id)` ON DELETE CASCADE; `username` VARCHAR(20) **U**, nullable until claimed, `CHECK (username ~ '^[a-z0-9_]{3,20}$')`; `display_name`, `avatar_url`, `bio` VARCHAR(160), `visibility_mode` (default `PUBLIC`), `pinned_showcase` JSONB `[{title_id, media_type}]` (max 3), `preferences` JSONB, `onboarding_completed` BOOL, `is_deleted` BOOL, `deletion_requested_at`, `created_at`, `updated_at` | Public profile. A skeleton row is created by the `on_auth_user_created` trigger. |
+| `users` | **PK** `id` → `auth.users(id)` ON DELETE CASCADE; `username` VARCHAR(20) **U**, nullable until claimed, `CHECK (username ~ '^[a-z0-9_]{3,20}$')`; `display_name`, `avatar_url`, `bio` VARCHAR(160), `visibility_mode` (default `PUBLIC`), `pinned_showcase` JSONB `[{title_id, media_type}]` (max 3), `preferences` JSONB, `onboarding_completed` BOOL, `is_deleted` BOOL, `deletion_requested_at`, `timezone` TEXT (IANA, default `UTC`; written only by `set_timezone`), `created_at`, `updated_at` | Public profile. A skeleton row is created by the `on_auth_user_created` trigger. |
 | `titles` | **PK** `(id, media_type)`; `title`, `original_title`, `release_date`, `last_air_date`, `status`, `poster_path`, `backdrop_path`, `overview`, `genres` TEXT[], `original_network`, `number_of_seasons`, `number_of_episodes`, `runtime_minutes`, `director`, `is_anime`, `anilist_id`, `mal_id`, `anime_studio`, `source_material`, `popularity` NUMERIC, `global_community_score` NUMERIC(4,2), `streaming_services` JSONB, `created_at`, `updated_at` | TMDB metadata cache (written only by `service_role` / edge functions). |
 | `tv_seasons` | **PK** `id`; **FK** `(title_id, media_type)` → `titles` with `CHECK (media_type = 'tv')`; **U** `(title_id, season_number)` | Season breakdown for `SCR-08`. |
 | `streaming_platforms` | **PK** `id` (`netflix`, `max`, `hulu`, `apple_tv_plus`, `disney_plus`, `prime_video`, `crunchyroll`, `paramount_plus`, `criterion`) | Provider catalog. |
@@ -63,11 +63,13 @@ Abbreviations: **PK** primary key, **FK** foreign key, **U** unique. All `update
 | `feed_reactions` | **PK** `id`; **FK** `activity_id`; **U** `(activity_id, user_id, reaction_type)` | Reactions. |
 | `comments` | **PK** `id`; **FK** `activity_id`; `user_id`; `body` VARCHAR(500); `contains_spoilers`; `is_hidden` | Spoiler-safe threads (`SCR-06`). |
 | `curated_canons` | **PK** `slug`; `title`, `subtitle`, `emoji`, `media_type`, `items` JSONB `[{title_id, media_type}]`, `sort_order` | Editorial collections (`SCR-07`); read-only for clients. |
+| `qualifying_rankings` (view) | `(user_id, title_id, media_type, created_at)`; `security_invoker` | Gamification's anti-gaming rule (features/10 §2): `COMPLETED` rankings that were duelled in their canon, or were first in it. |
 | `reports` | **PK** `id`; `reporter_id`; `target_type`, `target_id` TEXT, `reason`, `notes`, `status` (`OPEN`/`ACTIONED`/`DISMISSED`), `created_at` | Apple 1.2 moderation queue. |
 
 ### 2.3 Indexes
 - `user_rankings (user_id, media_type, rank_position)` — canon reads.
 - `user_rankings (title_id, media_type)` — friends-who-ranked, taste match joins.
+- `user_rankings (user_id, media_type, created_at, id)` — first-in-canon check for `qualifying_rankings`.
 - `pairwise_duels (winner_title_id, loser_title_id, media_type)`, `pairwise_duels (user_id, media_type)`.
 - `titles USING GIN (title gin_trgm_ops)`, `titles USING GIN (genres)`.
 - `social_follows (following_id, status)`, `activity_logs (user_id, created_at DESC)`, `activity_logs (created_at DESC)`.
@@ -126,6 +128,8 @@ All of the following are `SECURITY DEFINER`, `SET search_path = public`. They ta
 | `get_friends_binging(p_limit, p_days)` | Titles accepted followees ranked or queued recently; SECURITY INVOKER (RLS applies). |
 | `get_title_social_summary(p_title_id, p_media_type) → JSONB` | `SCR-08`: my rank/score/σ, visible followees who ranked it, community average, survival rate (completed / watching / dropped, most common drop point). |
 | `stale_watchlist_titles(p_older_than_hours, p_limit)` / `refresh_leaving_soon_flags(p_today)` | `service_role` only; used by the `streaming-catalog-sync` edge function and a daily `pg_cron` job. |
+| `set_timezone(p_timezone TEXT) → TEXT` | #135. Stores the caller's IANA time zone in `users.timezone`; unknown names raise `22023`. |
+| `weekly_streak(p_user UUID, p_now TIMESTAMPTZ DEFAULT NOW()) → (current_weeks, best_weeks, weeks JSONB)` | #135, features/10 §3. Monday-to-Sunday weeks in the user's time zone over `qualifying_rankings`; at most one freeze per calendar month; `weeks` is the last 7 as `[{week, starts_on, status}]`, oldest first. SECURITY INVOKER, so a hidden user reads as zero. |
 | `lookup_profile_card(p_handle TEXT) → (id, username, display_name, avatar_url, bio, visibility_mode, pinned_showcase, can_view)` | FE-608, `SCR-15`. Finds a non-deleted, non-`GHOST`, non-blocked user by handle even when `users` RLS hides them (`FRIENDS_ONLY` non-follower), so a follow request can be sent. `bio` and `pinned_showcase` are returned only when `can_view_user` holds (`'[]'` otherwise). Authenticated only. |
 | `get_squad_members(p_squad_id) → (user_id, username, display_name, avatar_url, role, joined_at)` | FE-608, `SCR-17`. Members only (`42501` otherwise); shows squad-mates whose profiles RLS would hide. |
 | `squad_shared_watchlist(p_squad_id) → (title_id, media_type, title, poster_path, queued_by, member_count)` | FE-608, `SCR-17`. Members only. Titles queued by at least `LEAST(2, member_count)` members, most-queued first. |
