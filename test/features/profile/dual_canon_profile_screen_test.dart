@@ -17,6 +17,7 @@ import 'package:telly_app/features/profile/data/profile_share_service.dart';
 import 'package:telly_app/features/profile/domain/canon_stats.dart';
 import 'package:telly_app/features/profile/presentation/controllers/profile_controller.dart';
 import 'package:telly_app/features/profile/presentation/screens/dual_canon_profile_screen.dart';
+import 'package:telly_app/features/profile/presentation/widgets/canon_podium.dart';
 import 'package:telly_app/features/profile/presentation/widgets/poster_grid_view.dart';
 import 'package:telly_app/features/profile/presentation/widgets/ranked_canon_list.dart';
 import 'package:telly_app/features/profile/presentation/widgets/tier_view_list.dart';
@@ -270,9 +271,9 @@ void main() {
       expect(find.byType(TopShowcaseRow), findsNothing);
       expect(find.byKey(const Key('canon_options_button')), findsNothing);
       expect(find.byKey(const Key('view_mode_ranked_button')), findsNothing, reason: 'views moved into the View sheet');
-      // The list starts 12 dp under the switcher.
+      // The podium starts 12 dp under the switcher.
       final switcherBottom = tester.getBottomLeft(find.byType(TellyCanonSwitcher)).dy;
-      expect(tester.getTopLeft(find.byType(RankedCanonList)).dy - switcherBottom, closeTo(12, 0.5));
+      expect(tester.getTopLeft(find.byType(CanonPodium)).dy - switcherBottom, closeTo(12, 0.5));
     });
 
     testWidgets('tapping Share opens the share sheet with the handle and top titles', (tester) async {
@@ -385,14 +386,101 @@ void main() {
     });
   });
 
+  group('#132: SCR-14 Ranked podium', () {
+    CanonEntry movie(int rank) => CanonEntry(
+          id: 100 + rank,
+          title: 'Film $rank',
+          mediaType: 'movie',
+          rankPosition: rank,
+          calculatedScore: 10.0 - rank * 0.2,
+        );
+    List<CanonEntry> movies(int n) => [for (var r = 1; r <= n; r++) movie(r)];
+
+    testWidgets('0 titles: the empty state and no podium', (tester) async {
+      await tester.pumpWidget(buildTestableProfileScreen(movies: const []));
+      await tester.pumpAndSettle();
+      expect(find.byType(CanonPodium), findsNothing);
+      expect(find.textContaining('No ranked titles'), findsOneWidget);
+    });
+
+    for (final n in [1, 2, 3]) {
+      testWidgets('$n title(s): only those cards, in their columns, and no rows', (tester) async {
+        await tester.pumpWidget(buildTestableProfileScreen(movies: movies(n)));
+        await tester.pumpAndSettle();
+        for (var r = 1; r <= 3; r++) {
+          expect(find.byKey(ValueKey('podium_card_${100 + r}')), r <= n ? findsOneWidget : findsNothing);
+        }
+        expect(find.byType(RankedCanonList), findsNothing);
+      });
+    }
+
+    testWidgets('#1 is the widest and tallest card, the cards share a bottom edge', (tester) async {
+      await tester.pumpWidget(buildTestableProfileScreen(movies: movies(3)));
+      await tester.pumpAndSettle();
+      Rect card(int r) => tester.getRect(find.byKey(ValueKey('podium_card_${100 + r}')));
+      expect(card(1).width, greaterThan(card(2).width));
+      expect(card(2).width, closeTo(card(3).width, 0.5));
+      expect(card(1).height, greaterThan(card(2).height));
+      expect(card(1).bottom, closeTo(card(2).bottom, 0.5));
+      expect(card(1).left, lessThan(card(2).left));
+      expect(card(2).left, lessThan(card(3).left));
+    });
+
+    testWidgets('10+ titles: rows start at #4 with no repeat of #1-#3', (tester) async {
+      await tester.pumpWidget(buildTestableProfileScreen(movies: movies(12)));
+      await tester.pumpAndSettle();
+      final list = tester.widget<RankedCanonList>(find.byType(RankedCanonList));
+      expect(list.entries.first.rankPosition, 4);
+      expect(list.entries, hasLength(9));
+      expect(find.byKey(const ValueKey('ranked_row_101')), findsNothing);
+      expect(find.byKey(const ValueKey('ranked_row_104')), findsOneWidget);
+    });
+
+    testWidgets('tapping a podium card opens the title', (tester) async {
+      await tester.pumpWidget(buildTestableProfileScreen(routed: true));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('podium_card_1')));
+      await tester.pumpAndSettle();
+      expect(find.text('route:${Routes.title('movie', 1)}'), findsOneWidget);
+    });
+
+    testWidgets('Tiers and 3x3 have no podium', (tester) async {
+      for (final mode in [CanonViewMode.tierView, CanonViewMode.grid3x3]) {
+        await tester.pumpWidget(buildTestableProfileScreen(movies: movies(5), initialViewMode: mode));
+        await tester.pumpAndSettle();
+        expect(find.byType(CanonPodium), findsNothing, reason: '$mode');
+      }
+    });
+
+    testWidgets('each canon has its own podium: no film on the TV podium', (tester) async {
+      await tester.pumpWidget(buildTestableProfileScreen());
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('series_canon_tab')));
+      await tester.pumpAndSettle();
+
+      final podium = find.byType(CanonPodium);
+      expect(tester.widget<CanonPodium>(podium).entries.every((e) => e.mediaType == 'tv'), isTrue);
+      expect(find.descendant(of: podium, matching: find.text('Interstellar')), findsNothing);
+    });
+
+    testWidgets('cards are labelled for screen readers with rank, title and score', (tester) async {
+      final semantics = tester.ensureSemantics();
+      await tester.pumpWidget(buildTestableProfileScreen());
+      await tester.pumpAndSettle();
+      expect(find.bySemanticsLabel('#1, Interstellar, 10.00'), findsOneWidget);
+      semantics.dispose();
+    });
+  });
+
   group('FE-207: Three Canon View Modes Tests', () {
-    testWidgets('mode 1 renders RankedCanonList by default', (tester) async {
+    testWidgets('mode 1 renders the podium by default (three titles: no rows below it)', (tester) async {
       await tester.pumpWidget(buildTestableProfileScreen(
         initialViewMode: CanonViewMode.rankedList,
       ));
       await tester.pumpAndSettle();
 
-      expect(find.byType(RankedCanonList), findsOneWidget);
+      expect(find.byType(CanonPodium), findsOneWidget);
+      expect(find.byType(RankedCanonList), findsNothing);
       expect(find.byType(TierViewList), findsNothing);
       expect(find.byType(PosterGridView), findsNothing);
 
@@ -516,7 +604,7 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      final rowFinder = find.byKey(const ValueKey('ranked_row_2'));
+      final rowFinder = find.byKey(const ValueKey('podium_card_2'));
       expect(rowFinder, findsOneWidget);
       await tester.ensureVisible(rowFinder);
       await tester.pumpAndSettle();
@@ -541,7 +629,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Parasite ranked row should be removed from view
-      expect(find.byKey(const ValueKey('ranked_row_2')), findsNothing);
+      expect(find.byKey(const ValueKey('podium_card_2')), findsNothing);
     });
   });
 
@@ -563,7 +651,7 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      final rowFinder = find.byKey(const ValueKey('ranked_row_1'));
+      final rowFinder = find.byKey(const ValueKey('podium_card_1'));
       await tester.ensureVisible(rowFinder);
       await tester.pumpAndSettle();
       await tester.longPress(rowFinder);

@@ -27,6 +27,7 @@ import 'package:telly_app/features/feed/data/social_repository.dart';
 import 'package:telly_app/features/home/presentation/screens/home_screen.dart';
 import 'package:telly_app/features/more/presentation/screens/more_hub_screen.dart';
 import 'package:telly_app/features/profile/presentation/controllers/profile_controller.dart';
+import 'package:telly_app/features/profile/presentation/screens/dual_canon_profile_screen.dart';
 
 import '../fakes/fake_auth_repository.dart';
 import '../fakes/fake_social_repository.dart';
@@ -569,6 +570,17 @@ void main() {
         ));
         await tester.pumpAndSettle();
         await expectLater(find.byType(MoreHubScreen), matchesGoldenFile('goldens/more_${name}_iphone15.png'));
+      });
+
+      testWidgets('Golden: SCR-14 Canon podium ($name) on iPhone 15 Pro size (#47)', (tester) async {
+        await tester.binding.setSurfaceSize(const Size(393, 852));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        await tester.pumpWidget(ProviderScope(
+          overrides: shellOverrides(),
+          child: MaterialApp(theme: theme, home: const DualCanonProfileScreen()),
+        ));
+        await tester.pumpAndSettle();
+        await expectLater(find.byType(DualCanonProfileScreen), matchesGoldenFile('goldens/canon_podium_${name}_iphone15.png'));
       });
     }
 

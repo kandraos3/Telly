@@ -17,7 +17,6 @@ import '../../../feed/domain/social_models.dart';
 import '../../../feed/presentation/controllers/feed_controllers.dart';
 import '../../../profile/presentation/controllers/profile_controller.dart';
 import '../../../profile/presentation/widgets/poster_grid_view.dart';
-import '../../../ranking/domain/canon_tier.dart';
 import '../../../ranking/domain/canon_type.dart';
 import '../../../ranking/presentation/widgets/canon_tier_style.dart';
 
@@ -282,7 +281,7 @@ class _FriendRow extends StatelessWidget {
                     ),
                     if (showScore) ...[
                       const SizedBox(width: 10),
-                      _ScoreChip(score: score),
+                      CanonTierScoreChip(key: const Key('home_score_chip'), score: score),
                     ],
                   ],
                 ),
@@ -290,30 +289,6 @@ class _FriendRow extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-/// Score in tabular figures on a tint of its tier colour (style guide §2.2), readable in both themes.
-class _ScoreChip extends StatelessWidget {
-  final double score;
-  const _ScoreChip({required this.score});
-
-  @override
-  Widget build(BuildContext context) {
-    final tier = CanonTier.fromScore(score);
-    return Container(
-      key: const Key('home_score_chip'),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: tier.accent.withValues(alpha: 0.18),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: tier.accent),
-      ),
-      child: Text(
-        score.toStringAsFixed(2),
-        style: TellyTypography.scoreChip(color: TellyColors.textPrimaryOf(context)),
       ),
     );
   }

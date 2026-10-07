@@ -640,7 +640,7 @@ The Canon tab opens on your rankings. Your profile card lives in the More hub (`
 - **Content** (12 dp under the switcher) depends on the view:
   - **Ranked** (default):
     - **Podium** (key `canon_podium`): ranks #1–#3 as three poster cards in one row, with 16 dp gutters and 10 dp gaps. Columns are 1.25fr / 1fr / 1fr, bottom-aligned.
-    - **Card:** Surface, radius 14, glass border. The poster is 170 dp tall for #1 and 132 dp for #2 and #3. A rank tag sits top-left (Phosphor Lime fill `#D2FF52`, `#08090C` text, `labelMedium` w800, radius 6, in both themes). Below the poster, with 8 dp padding, come the title (`labelLarge` w800, one line) and the tier score chip used by the rows.
+    - **Card:** Surface, radius 14, glass border. The poster is 170 dp tall for #1 and 132 dp for #2 and #3. A rank tag sits top-left (Phosphor Lime fill `#D2FF52`, `#08090C` text, `labelMedium` w800, radius 6, in both themes). Below the poster, with 8 dp padding, come the title (`labelLarge` w800, one line) and the tier score chip (`CanonTierScoreChip`: an 18% tint of the tier accent, a tier-accent border and `textPrimary` digits, the same chip as Home's friend rows).
     - **Tap and long-press** do what they do on a row: tap opens the title, long-press opens the row actions (re-duel or remove).
     - **Short canons:** with fewer than 3 titles, only the cards that exist are drawn, in the same columns.
     - **Rows:** from #4 on, the existing ranked rows (component library §3.1).

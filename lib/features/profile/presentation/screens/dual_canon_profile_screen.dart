@@ -17,6 +17,7 @@ import '../../../ranking/domain/franchise_rollup_service.dart';
 import '../../data/profile_share_service.dart';
 import '../controllers/edit_profile_controller.dart';
 import '../controllers/profile_controller.dart';
+import '../widgets/canon_podium.dart';
 import '../widgets/canon_stats_panel.dart';
 import '../widgets/poster_grid_view.dart';
 import '../widgets/ranked_canon_list.dart';
@@ -141,10 +142,25 @@ class DualCanonProfileScreen extends ConsumerWidget {
                 const SizedBox(height: 12),
 
                 switch (viewMode) {
-                  CanonViewMode.rankedList => RankedCanonList(
-                      entries: entries,
-                      onTapEntry: handleTap,
-                      onLongPressEntry: (entry) => _showEntryActions(context, entry, ref, selectedCanon),
+                  // Ranked: #1–#3 on the podium, rows from #4 (#47). An empty canon keeps the list's empty state.
+                  CanonViewMode.rankedList when entries.isEmpty => const RankedCanonList(entries: []),
+                  CanonViewMode.rankedList => Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CanonPodium(
+                          entries: entries,
+                          onTapEntry: handleTap,
+                          onLongPressEntry: (entry) => _showEntryActions(context, entry, ref, selectedCanon),
+                        ),
+                        if (entries.length > 3) ...[
+                          const SizedBox(height: 8),
+                          RankedCanonList(
+                            entries: entries.skip(3).toList(),
+                            onTapEntry: handleTap,
+                            onLongPressEntry: (entry) => _showEntryActions(context, entry, ref, selectedCanon),
+                          ),
+                        ],
+                      ],
                     ),
                   CanonViewMode.tierView => TierViewList(
                       entries: entries,

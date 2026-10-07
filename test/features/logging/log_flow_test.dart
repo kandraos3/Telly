@@ -130,7 +130,7 @@ void main() {
       await seedCanon(db, 'movie', ['Inception', 'Heat'], baseId: 27205);
       await pumpFlow(tester, initial: Routes.canon);
 
-      await tester.longPress(find.byKey(const ValueKey('ranked_row_27206')));
+      await tester.longPress(find.byKey(const ValueKey('podium_card_27206')));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('reset_duels_action')));
       await tester.pumpAndSettle();

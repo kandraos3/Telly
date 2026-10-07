@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/telly_colors.dart';
+import '../../../../core/theme/telly_typography.dart';
 import '../../../../core/widgets/telly_neon_badge.dart';
 import '../../domain/canon_tier.dart';
 
@@ -50,6 +51,32 @@ class CanonTierBadge extends StatelessWidget {
       label: tier.badgeLabel,
       color: tier.accent,
       variant: tier == CanonTier.god ? TellyBadgeVariant.godTier : TellyBadgeVariant.neutral,
+    );
+  }
+}
+
+/// A score in tabular figures on an 18% tint of its tier accent, with a tier-accent
+/// border (style guide §2.2). The digits stay `textPrimary`, so they read in both themes.
+/// Used by Home's friend rows and the Canon podium (#47).
+class CanonTierScoreChip extends StatelessWidget {
+  final double score;
+
+  const CanonTierScoreChip({super.key, required this.score});
+
+  @override
+  Widget build(BuildContext context) {
+    final tier = CanonTier.fromScore(score);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: tier.accent.withValues(alpha: 0.18),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: tier.accent),
+      ),
+      child: Text(
+        score.toStringAsFixed(2),
+        style: TellyTypography.scoreChip(color: TellyColors.textPrimaryOf(context)),
+      ),
     );
   }
 }

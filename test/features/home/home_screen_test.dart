@@ -180,7 +180,8 @@ void main() {
 
     testWidgets('score chips use the tier colour and tabular figures', (tester) async {
       await pumpHome(tester);
-      final chip = tester.widget<Container>(find.byKey(const Key('home_score_chip')).first);
+      final chip = tester.widget<Container>(
+          find.descendant(of: find.byKey(const Key('home_score_chip')).first, matching: find.byType(Container)).first);
       final tier = CanonTier.fromScore(9.72);
       expect((chip.decoration! as BoxDecoration).border!.top.color, tier.accent);
       expect(find.text('9.72'), findsNWidgets(3));
