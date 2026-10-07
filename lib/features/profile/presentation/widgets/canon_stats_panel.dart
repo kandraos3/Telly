@@ -111,7 +111,7 @@ class _StatTile extends StatelessWidget {
               Text(detail!,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TellyTypography.caption(color: TellyColors.phosphorLime)),
+                  style: TellyTypography.caption(color: TellyColors.primaryAccentOf(context))),
           ],
         ),
       ),

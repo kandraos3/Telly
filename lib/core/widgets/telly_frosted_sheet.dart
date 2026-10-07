@@ -51,9 +51,13 @@ class TellyFrostedSheet extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                 ],
-                Padding(
-                  padding: padding,
-                  child: child,
+                // A transparent Material keeps ListTile ink visible above the frosted fill.
+                Material(
+                  type: MaterialType.transparency,
+                  child: Padding(
+                    padding: padding,
+                    child: child,
+                  ),
                 ),
               ],
             ),
@@ -69,6 +73,7 @@ class TellyFrostedSheet extends StatelessWidget {
     required WidgetBuilder builder,
     bool isDismissible = true,
     bool enableDrag = true,
+    EdgeInsetsGeometry padding = const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
   }) {
     return showModalBottomSheet<T>(
       context: context,
@@ -78,6 +83,7 @@ class TellyFrostedSheet extends StatelessWidget {
       isDismissible: isDismissible,
       enableDrag: enableDrag,
       builder: (ctx) => TellyFrostedSheet(
+        padding: padding,
         child: builder(ctx),
       ),
     );

@@ -573,8 +573,10 @@ final siteScenes = <Scene>[
     overrides: baseOverrides,
     interact: (tester) async {
       await tapText(tester, 'TV Shows 12');
+      // Views live in the header's View sheet (#47).
+      await tester.tap(find.byKey(const Key('canon_view_button')));
+      await tester.pumpAndSettle();
       await tapText(tester, 'Tiers');
-      await scrollBy(tester, 560);
     },
   ),
   Scene(id: 'feed', tab: 3, build: () => const ActivityFeedScreen(), overrides: baseOverrides),

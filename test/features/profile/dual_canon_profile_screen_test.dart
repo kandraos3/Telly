@@ -8,6 +8,10 @@ import 'package:telly_app/features/auth/domain/user_profile.dart';
 import 'package:telly_app/core/services/haptics_service.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:telly_app/core/router/routes.dart';
+import 'package:telly_app/features/profile/presentation/widgets/canon_stats_panel.dart';
+import 'package:telly_app/core/theme/telly_theme.dart';
+import 'package:telly_app/core/theme/telly_colors.dart';
+import 'package:telly_app/core/widgets/telly_canon_switcher.dart';
 import 'package:telly_app/features/profile/data/profile_repository.dart';
 import 'package:telly_app/features/profile/data/profile_share_service.dart';
 import 'package:telly_app/features/profile/domain/canon_stats.dart';
@@ -32,6 +36,12 @@ class SeededProfileCanon extends ProfileCanonNotifier {
 
   @override
   ProfileCanonState build() => ProfileCanonState(movies: movies, series: series);
+}
+
+/// Opens a header sheet (#47): Stats (`canon_stats_button`) or View (`canon_view_button`).
+Future<void> openSheet(WidgetTester tester, String buttonKey) async {
+  await tester.tap(find.byKey(Key(buttonKey)));
+  await tester.pumpAndSettle();
 }
 
 void main() {
@@ -182,7 +192,10 @@ void main() {
     testWidgets('shows hours, top genre and top director for the movie canon', (tester) async {
       await tester.pumpWidget(buildTestableProfileScreen(profiles: statsRepo()));
       await tester.pumpAndSettle();
+      expect(find.byKey(const Key('canon_stats_panel')), findsNothing, reason: 'stats live in the sheet (#47)');
+      await openSheet(tester, 'canon_stats_button');
 
+      expect(find.text('MOVIE STATS'), findsOneWidget);
       expect(tile(tester, 'canon_stat_titles'), contains('3'));
       expect(tile(tester, 'canon_stat_hours'), contains('8h'));
       expect(tile(tester, 'canon_stat_genre'), allOf(contains('Science Fiction'), contains('67% of your canon')));
@@ -195,15 +208,37 @@ void main() {
 
       await tester.tap(find.byKey(const Key('series_canon_tab')));
       await tester.pumpAndSettle();
+      await openSheet(tester, 'canon_stats_button');
 
+      expect(find.text('TV STATS'), findsOneWidget);
       expect(tile(tester, 'canon_stat_hours'), allOf(contains('≈250h'), contains('from episode counts')));
       expect(tile(tester, 'canon_stat_genre'), contains('Drama'));
       expect(tile(tester, 'canon_stat_creator'), allOf(contains('Top Network'.toUpperCase()), contains('HBO'), contains('3 shows')));
     });
 
+    testWidgets('detail lines use the theme accent, so they read on light (#47, #54)', (tester) async {
+      await tester.pumpWidget(MaterialApp(
+        theme: TellyTheme.light,
+        home: const Scaffold(
+          body: CanonStatsPanel(
+            stats: CanonStats(
+              mediaType: 'movie',
+              totalTitles: 3,
+              totalMinutes: 470,
+              topGenre: StatLeader(name: 'Science Fiction', count: 2, percent: 67),
+            ),
+            isMovie: true,
+            localTitleCount: 3,
+          ),
+        ),
+      ));
+      expect(tester.widget<Text>(find.text('67% of your canon')).style!.color, TellyColors.lightPhosphorLime);
+    });
+
     testWidgets('offline falls back to the local title count and dashes', (tester) async {
       await tester.pumpWidget(buildTestableProfileScreen(profiles: statsRepo()..failReads = true));
       await tester.pumpAndSettle();
+      await openSheet(tester, 'canon_stats_button');
 
       expect(tile(tester, 'canon_stat_titles'), contains('3'));
       expect(tile(tester, 'canon_stat_hours'), contains('—'));
@@ -211,27 +246,33 @@ void main() {
   });
 
   group('FE-PROFILE-02: SCR-14 top bar, avatar and share', () {
-    testWidgets('header reads "Canon" with only the share action (FE-HEADER-01, #44)', (tester) async {
+    testWidgets('header reads "Canon" with Stats, View and Share, in that order (FE-HEADER-01, #47)', (tester) async {
       await tester.pumpWidget(buildTestableProfileScreen());
       await tester.pumpAndSettle();
 
       expect(tester.widget<Text>(find.byKey(const Key('screen_header_title'))).data, 'Canon');
       expect(find.text('Profile'), findsNothing);
-      expect(find.byKey(const Key('profile_share_button')), findsOneWidget);
+      double x(String key) => tester.getCenter(find.byKey(Key(key))).dx;
+      expect(x('canon_stats_button'), lessThan(x('canon_view_button')));
+      expect(x('canon_view_button'), lessThan(x('profile_share_button')));
       // Settings moved to the More hub and Squads to Social.
       expect(find.byKey(const Key('profile_squads_button')), findsNothing);
       expect(find.byKey(const Key('profile_settings_button')), findsNothing);
       expect(find.textContaining('📺'), findsNothing, reason: 'old TV emoji removed');
     });
 
-    testWidgets('tapping the avatar opens Edit Profile', (tester) async {
-      await tester.pumpWidget(buildTestableProfileScreen(routed: true));
+    testWidgets('the page leads with the switcher: no profile card or in-page controls (#47)', (tester) async {
+      await tester.pumpWidget(buildTestableProfileScreen());
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byKey(const Key('profile_avatar_button')));
-      await tester.pumpAndSettle();
-
-      expect(find.text('route:${Routes.editProfile}'), findsOneWidget);
+      expect(find.byKey(const Key('profile_avatar_button')), findsNothing, reason: 'the profile card lives in More');
+      expect(find.text('Jordan Miller'), findsNothing);
+      expect(find.byType(TopShowcaseRow), findsNothing);
+      expect(find.byKey(const Key('canon_options_button')), findsNothing);
+      expect(find.byKey(const Key('view_mode_ranked_button')), findsNothing, reason: 'views moved into the View sheet');
+      // The list starts 12 dp under the switcher.
+      final switcherBottom = tester.getBottomLeft(find.byType(TellyCanonSwitcher)).dy;
+      expect(tester.getTopLeft(find.byType(RankedCanonList)).dy - switcherBottom, closeTo(12, 0.5));
     });
 
     testWidgets('tapping Share opens the share sheet with the handle and top titles', (tester) async {
@@ -265,25 +306,25 @@ void main() {
         );
       await tester.pumpWidget(buildTestableProfileScreen(profiles: profiles));
       await tester.pumpAndSettle();
+      await openSheet(tester, 'canon_stats_button');
 
       final row = tester.widget<TopShowcaseRow>(find.byType(TopShowcaseRow));
       expect(row.topEntries.map((e) => e.title), ['Dune: Part Two', 'Interstellar', 'Parasite']);
     });
-  });
-  group('FE-206: SCR-14 Dual-Canon Profile Header & Segmented Pill Switcher Tests', () {
-    testWidgets('renders profile avatar, handle, bio, and cultural stats', (tester) async {
-      await tester.pumpWidget(buildTestableProfileScreen());
+
+    testWidgets('tapping a showcase title closes the sheet and opens the title', (tester) async {
+      await tester.pumpWidget(buildTestableProfileScreen(routed: true));
+      await tester.pumpAndSettle();
+      await openSheet(tester, 'canon_stats_button');
+
+      await tester.tap(find.descendant(of: find.byType(TopShowcaseRow), matching: find.text('Parasite')).first);
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('profile_handle_text')), findsOneWidget);
-      expect(find.text('@jordan'), findsOneWidget);
-      expect(find.byKey(const Key('profile_display_name_text')), findsOneWidget);
-      expect(find.text('Jordan Miller'), findsOneWidget);
-      expect(find.byKey(const Key('profile_bio_text')), findsOneWidget);
-      expect(find.byKey(const Key('profile_stats_summary_text')), findsOneWidget);
-      expect(find.text('3 Movies  •  5 Series'), findsOneWidget, reason: 'real counts, no invented hours');
+      expect(find.byKey(const Key('canon_stats_sheet')), findsNothing);
+      expect(find.text('route:${Routes.title('movie', 2)}'), findsOneWidget);
     });
-
+  });
+  group('FE-206: SCR-14 Dual-Canon Profile Header & Segmented Pill Switcher Tests', () {
     testWidgets('defaults to Movie Canon and displays movie titles', (tester) async {
       await tester.pumpWidget(buildTestableProfileScreen());
       await tester.pumpAndSettle();
@@ -368,11 +409,14 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      final tierBtn = find.byKey(const Key('view_mode_tier_button'));
-      await tester.ensureVisible(tierBtn);
+      await openSheet(tester, 'canon_view_button');
+      await tester.tap(find.byKey(const Key('view_mode_tier_button')));
       await tester.pumpAndSettle();
-      await tester.tap(tierBtn);
-      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('canon_view_sheet')), findsNothing, reason: 'choosing a view closes the sheet');
+      expect(find.byTooltip('View: Tiers'), findsOneWidget);
+      expect(find.descendant(of: find.byKey(const Key('canon_view_button')), matching: find.byIcon(Icons.view_agenda_rounded)),
+          findsOneWidget);
 
       expect(find.byType(TierViewList), findsOneWidget);
       expect(find.byType(RankedCanonList), findsNothing);
@@ -385,14 +429,25 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      final gridBtn = find.byKey(const Key('view_mode_grid_button'));
-      await tester.ensureVisible(gridBtn);
-      await tester.pumpAndSettle();
-      await tester.tap(gridBtn);
+      await openSheet(tester, 'canon_view_button');
+      await tester.tap(find.byKey(const Key('view_mode_grid_button')));
       await tester.pumpAndSettle();
 
       expect(find.byType(PosterGridView), findsOneWidget);
       expect(find.byType(RankedCanonList), findsNothing);
+      expect(find.byTooltip('View: 3x3'), findsOneWidget);
+    });
+
+    testWidgets('the View sheet marks the current view and hides the rollup on Movies', (tester) async {
+      await tester.pumpWidget(buildTestableProfileScreen(initialViewMode: CanonViewMode.rankedList));
+      await tester.pumpAndSettle();
+      await openSheet(tester, 'canon_view_button');
+
+      expect(find.text('VIEW'), findsOneWidget);
+      expect(tester.widget<ListTile>(find.byKey(const Key('view_mode_ranked_button'))).selected, isTrue);
+      expect(tester.widget<ListTile>(find.byKey(const Key('view_mode_tier_button'))).selected, isFalse);
+      expect(find.byKey(const Key('franchise_rollup_toggle')), findsNothing);
+      expect(find.text('SERIES ONLY'), findsNothing);
     });
   });
 
@@ -408,19 +463,14 @@ void main() {
       expect(find.text('Attack on Titan Season 1'), findsOneWidget);
       expect(find.text('Attack on Titan Season 2'), findsOneWidget);
 
-      // Tap View Options button to open sheet
-      final optionsBtn = find.byKey(const Key('canon_options_button'));
-      expect(optionsBtn, findsOneWidget);
-      await tester.ensureVisible(optionsBtn);
-      await tester.pumpAndSettle();
-      await tester.tap(optionsBtn);
-      await tester.pumpAndSettle();
-
-      // Tap Franchise Rollup toggle inside options sheet
+      // The rollup lives in the View sheet's Series-only section (#47).
+      await openSheet(tester, 'canon_view_button');
+      expect(find.text('SERIES ONLY'), findsOneWidget);
       final rollupToggle = find.byKey(const Key('franchise_rollup_toggle'));
       expect(rollupToggle, findsOneWidget);
       await tester.tap(rollupToggle);
       await tester.pumpAndSettle();
+      expect(find.byKey(const Key('canon_view_sheet')), findsOneWidget, reason: 'toggling keeps the sheet open');
 
       // Dismiss bottom sheet
       await tester.tapAt(const Offset(10, 10));
