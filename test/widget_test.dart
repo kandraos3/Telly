@@ -130,6 +130,16 @@ void main() {
       }
     });
 
+    testWidgets('the Log button does not raise where tab content is cut off (#44)', (tester) async {
+      await launch(tester, FakeAuthRepository(signedInUserId: 'u1', profile: onboarded));
+      // Home shows the button, More does not: both must see the same bottom inset (the nav bar only).
+      final withButton = MediaQuery.paddingOf(tester.element(find.byType(HomeScreen))).bottom;
+      await tester.tap(find.byKey(const Key('nav_tab_more')));
+      await tester.pumpAndSettle();
+      final withoutButton = MediaQuery.paddingOf(tester.element(find.byType(MoreHubScreen))).bottom;
+      expect(withButton, withoutButton);
+    });
+
     testWidgets('floating Log button opens the logging flow (SCR-09)', (tester) async {
       final c = await launch(tester, FakeAuthRepository(signedInUserId: 'u1', profile: onboarded));
       await tester.tap(find.byKey(const Key('log_fab')));

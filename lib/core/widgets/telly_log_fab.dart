@@ -20,7 +20,8 @@ class TellyLogFab extends StatelessWidget {
   static const double gapAboveNavBar = 16;
   static const double haloBlur = 20;
 
-  /// Extra bottom padding tab content needs to clear the button (its height plus the gap below it).
+  /// Extra space at the end of a tab's scrolling content, so its last item can scroll clear of the button
+  /// (its height plus the gap below it). Content still scrolls behind the button (component spec §2.3).
   static const double clearance = height + gapAboveNavBar;
   static const double haloAlpha = 0.35;
 

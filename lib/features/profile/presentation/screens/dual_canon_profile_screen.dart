@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:telly_app/core/widgets/telly_log_fab.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -283,7 +284,8 @@ class DualCanonProfileScreen extends ConsumerWidget {
                   ),
               },
 
-              const SizedBox(height: 32),
+              // End space lets the last row scroll above the floating Log button (#44).
+              const SizedBox(height: 32 + TellyLogFab.clearance),
             ],
           ),
         ),

@@ -57,20 +57,7 @@ class _AppShellState extends ConsumerState<AppShell> {
       children: [
         Scaffold(
           extendBody: true,
-          // Tab screens clear the bottom safe-area padding; while the Log button shows, that padding
-          // also covers it, so no content ends up underneath (component spec §2.3).
-          body: Builder(
-            builder: (context) {
-              final media = MediaQuery.of(context);
-              if (!showLog) return shell;
-              return MediaQuery(
-                data: media.copyWith(
-                  padding: media.padding.copyWith(bottom: media.padding.bottom + TellyLogFab.clearance),
-                ),
-                child: shell,
-              );
-            },
-          ),
+          body: shell,
           bottomNavigationBar: TellyFloatingNavBar(
             currentIndex: shell.currentIndex,
             onTabSelected: (index) => shell.goBranch(

@@ -8,6 +8,7 @@ import '../../../../core/theme/telly_typography.dart';
 import '../../../../core/widgets/telly_avatar.dart';
 import '../../../../core/widgets/telly_canon_switcher.dart';
 import '../../../../core/widgets/telly_empty_state.dart';
+import '../../../../core/widgets/telly_log_fab.dart';
 import '../../../../core/widgets/telly_screen_header.dart';
 import '../../../../core/widgets/telly_section_header.dart';
 import '../../../feed/data/social_repository.dart';
@@ -43,10 +44,10 @@ class HomeScreen extends ConsumerWidget {
             ),
           ],
         ),
-        // The header's safe area already clears the nav bar and the floating Log button (shell, §2.3).
+        // The header's safe area clears the nav bar; the end space lets the last row scroll above the Log button.
         body: const SingleChildScrollView(
           physics: BouncingScrollPhysics(),
-          padding: EdgeInsets.only(top: 8, bottom: 24),
+          padding: EdgeInsets.only(top: 8, bottom: 24 + TellyLogFab.clearance),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [

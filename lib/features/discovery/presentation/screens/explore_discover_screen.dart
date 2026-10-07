@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:telly_app/core/widgets/telly_log_fab.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -358,7 +359,8 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
       body: TellyFloatingHeaderScrollView(
         header: const TellyScreenHeader(title: 'Explore'),
         body: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          // End space lets the last section scroll above the floating Log button (#44).
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 8 + TellyLogFab.clearance),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

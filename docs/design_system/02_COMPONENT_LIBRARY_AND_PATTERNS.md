@@ -51,7 +51,7 @@ Rather than a traditional opaque bottom bar anchored to the screen bottom, Telly
 The single entry point to the Log flow (`SCR-09`) from the tabs. It replaces the old centre hexagon.
 - **Shape:** extended pill, 52px tall, horizontal padding 20px, radius `999px`. A `+` glyph (20px, stroke 2.4) followed by the label `Log` (Body Large, w700).
 - **Colour:** fill Phosphor Lime `#D2FF52` with Void `#08090C` glyph and label in **both** themes (dark text on lime passes AAA). Halo: `0 0 20px rgba(210, 255, 82, 0.35)` in dark mode, none in light mode.
-- **Position:** bottom-right, 20px from the right edge and 16px above the nav bar's top edge. Content scrolls under it. While it shows, the shell adds its height plus the 16px gap to the tab's bottom safe-area padding, so the last row is never hidden.
+- **Position:** bottom-right, 20px from the right edge and 16px above the nav bar's top edge. Content scrolls behind it; the visible area still ends at the nav bar, not above the button. Each tab's scrolling content ends with extra space equal to the button's height plus the 16px gap, so the last row can scroll clear of it.
 - **Visibility:** shown on Home, Explore, Canon and Social. Hidden on More and on every pushed screen (title pages keep their own rank action). It never collapses on scroll.
 - **Behaviour:** tap opens `/log` (`SCR-09`) with a medium haptic. Semantics label: "Log a title".
 
