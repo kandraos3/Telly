@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:telly_app/core/router/routes.dart';
 import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/theme/telly_theme.dart';
 import 'package:telly_app/features/queue/data/streaming_availability_service.dart';
@@ -8,6 +9,7 @@ import 'package:telly_app/features/queue/domain/streaming_models.dart';
 import 'package:telly_app/features/queue/presentation/screens/smart_queue_screen.dart';
 
 import '../../helpers/real_fonts.dart';
+import '../../helpers/router_harness.dart';
 
 void main() {
   final testWatchlist = [
@@ -84,6 +86,31 @@ void main() {
     );
   }
 
+  group('#133: SCR-13 one control row and Lists', () {
+    testWidgets('one control row: the switcher and Filter share a row; no hub pills or services chip', (tester) async {
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Watchlist'), findsNothing);
+      expect(find.text('My Lists'), findsNothing);
+      expect(find.text('On My Services'), findsNothing);
+      expect(find.byKey(const Key('queue_sort_button')), findsNothing);
+      final switcher = tester.getRect(find.byKey(const Key('queue_movies_tab')));
+      final filter = tester.getRect(find.byKey(const Key('queue_filter_button')));
+      expect(filter.center.dy, closeTo(switcher.center.dy, 1));
+      expect(filter.left, greaterThan(switcher.right));
+    });
+
+    testWidgets('the Lists action opens the Lists screen', (tester) async {
+      await tester.pumpWidget(routerHarness(SmartQueueScreen(testItems: testWatchlist)));
+      await tester.pumpAndSettle();
+      expect(find.byTooltip('Lists'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('queue_lists_button')));
+      await tester.pumpAndSettle();
+      expect(find.text('route:${Routes.queueLists}'), findsOneWidget);
+    });
+  });
+
   group('FE-408: SmartQueueScreen Widget Tests (SCR-13)', () {
     testWidgets('renders segregated Movie and Series tabs with item counts',
         (tester) async {
@@ -147,16 +174,24 @@ void main() {
       expect(find.text('Slow Horses'), findsOneWidget);
       expect(find.text('Fargo'), findsOneWidget);
 
-      // Toggle "On My Services" filter ON
-      await tester.tap(find.text('On My Services'));
+      // Turn "Only on my services" on in the Filter sheet (#133); the sheet stays open.
+      expect(find.byKey(const Key('filter_button_badge')), findsNothing);
+      await tester.tap(find.byKey(const Key('queue_filter_button')));
       await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('queue_services_toggle')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('queue_filter_sheet')), findsOneWidget);
+      await tester.tapAt(const Offset(10, 10));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('filter_button_badge')), findsOneWidget);
+      expect(find.bySemanticsLabel('Filter, 1 active'), findsOneWidget);
 
       // Fargo (on Hulu) should be filtered out; Slow Horses (on Apple TV+) remains
       expect(find.text('Slow Horses'), findsOneWidget);
       expect(find.text('Fargo'), findsNothing);
     });
 
-    testWidgets('the header sort action re-sorts the watchlist (FE-HEADER-01)', (tester) async {
+    testWidgets('sorting from the Filter sheet re-sorts the watchlist and does not count as a filter (#133)', (tester) async {
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
       await tester.tap(find.text('TV Shows 2'));
@@ -167,14 +202,15 @@ void main() {
       expect(y('Slow Horses'), lessThan(y('Fargo')));
       expect(find.byType(DropdownButton<String>), findsNothing, reason: 'sorting moved to the header');
 
-      await tester.tap(find.byKey(const Key('queue_sort_button')));
+      await tester.tap(find.byKey(const Key('queue_filter_button')));
       await tester.pumpAndSettle();
       expect(find.text('SORT BY'), findsOneWidget);
       await tester.tap(find.byKey(const Key('queue_sort_option_leaving_soon')));
       await tester.pumpAndSettle();
 
-      expect(find.text('SORT BY'), findsNothing);
+      expect(find.text('SORT BY'), findsNothing, reason: 'choosing a sort closes the sheet');
       expect(y('Fargo'), lessThan(y('Slow Horses')));
+      expect(find.byKey(const Key('filter_button_badge')), findsNothing);
     });
 
     testWidgets('FE-UI-01: swiping the list moves the shared canon switcher with it', (tester) async {

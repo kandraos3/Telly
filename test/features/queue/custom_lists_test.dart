@@ -6,7 +6,7 @@ import 'package:telly_app/core/theme/telly_theme.dart';
 import 'package:telly_app/features/queue/data/custom_list_repository.dart';
 import 'package:telly_app/features/queue/domain/custom_list_models.dart';
 import 'package:telly_app/features/queue/presentation/screens/custom_list_detail_screen.dart';
-import 'package:telly_app/features/queue/presentation/screens/smart_queue_screen.dart';
+import 'package:telly_app/features/queue/presentation/screens/queue_lists_screen.dart';
 
 void main() {
   group('FE-LISTS-01: CustomListRepository Unit Tests', () {
@@ -80,16 +80,16 @@ void main() {
     });
   });
 
-  group('FE-LISTS-01: SmartQueueScreen & Custom Lists Hub Widget Tests', () {
-    Widget createHubWidget({
-      QueueHubMode initialMode = QueueHubMode.myLists,
+  group('FE-LISTS-01 / #133: Lists screen (SCR-13)', () {
+    Widget createListsWidget({
+      QueueListsMode initialMode = QueueListsMode.mine,
       List<CustomList>? customLists,
       List<CustomList>? sharedLists,
     }) {
       return ProviderScope(
         child: MaterialApp(
           theme: TellyTheme.dark,
-          home: SmartQueueScreen(
+          home: QueueListsScreen(
             initialMode: initialMode,
             testCustomLists: customLists,
             testSharedLists: sharedLists,
@@ -98,27 +98,34 @@ void main() {
       );
     }
 
-    testWidgets('renders hub tabs and switches to My Lists view', (tester) async {
-      await tester.pumpWidget(createHubWidget(initialMode: QueueHubMode.watchlist));
+    testWidgets('opens on My lists and switches to Friends\' lists', (tester) async {
+      await tester.pumpWidget(createListsWidget());
       await tester.pumpAndSettle();
 
-      expect(find.text('Watchlist'), findsOneWidget);
-      expect(find.text('My Lists'), findsOneWidget);
-      expect(find.text('Friends\' Lists'), findsOneWidget);
-
-      // Tap "My Lists" pill
-      await tester.tap(find.text('My Lists'));
-      await tester.pumpAndSettle();
-
+      expect(find.text('Lists'), findsOneWidget);
       expect(find.text('MY CURATED LISTS (2)'), findsOneWidget);
       expect(find.text('Criterion Must-Sees'), findsOneWidget);
       expect(find.text('Spooky Season Marathon'), findsOneWidget);
       expect(find.text('PUBLIC'), findsWidgets);
       expect(find.text('PRIVATE'), findsWidgets);
+
+      await tester.tap(find.byKey(const Key('lists_friends_tab')));
+      await tester.pumpAndSettle();
+      expect(find.text('SHARED BY FRIENDS (2)'), findsOneWidget);
     });
 
-    testWidgets('FE-UI-01: an empty My Lists offers New list, which opens the create dialog', (tester) async {
-      await tester.pumpWidget(createHubWidget(customLists: const []));
+    testWidgets('New list sits in the app bar on both tabs (§0.2)', (tester) async {
+      await tester.pumpWidget(createListsWidget());
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('create_new_list_button')), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('lists_friends_tab')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('create_new_list_button')), findsOneWidget);
+    });
+
+    testWidgets('FE-UI-01: an empty My lists offers New list, which opens the create dialog', (tester) async {
+      await tester.pumpWidget(createListsWidget(customLists: const []));
       await tester.pumpAndSettle();
       expect(find.text('No custom lists yet'), findsOneWidget);
       expect(find.text('MY CURATED LISTS (0)'), findsOneWidget);
@@ -128,66 +135,34 @@ void main() {
       expect(find.text('Create Custom List'), findsOneWidget);
     });
 
-    testWidgets('header actions follow the hub mode (FE-HEADER-01)', (tester) async {
-      await tester.pumpWidget(createHubWidget(initialMode: QueueHubMode.watchlist));
-      await tester.pumpAndSettle();
-      expect(find.text('Queue'), findsOneWidget);
-      expect(find.byKey(const Key('queue_sort_button')), findsOneWidget);
-      expect(find.byKey(const Key('create_new_list_button')), findsNothing);
-
-      await tester.tap(find.text('My Lists'));
-      await tester.pumpAndSettle();
-      expect(find.byKey(const Key('queue_sort_button')), findsNothing);
-      expect(find.byKey(const Key('create_new_list_button')), findsOneWidget);
-
-      await tester.tap(find.text('Friends\' Lists'));
-      await tester.pumpAndSettle();
-      expect(find.byKey(const Key('queue_sort_button')), findsNothing);
-      expect(find.byKey(const Key('create_new_list_button')), findsNothing);
-    });
-
     testWidgets('creates new named custom list with private toggle', (tester) async {
-      await tester.pumpWidget(createHubWidget(initialMode: QueueHubMode.myLists));
+      await tester.pumpWidget(createListsWidget());
       await tester.pumpAndSettle();
 
-      // Tap "New List" button
       await tester.tap(find.byKey(const Key('create_new_list_button')));
       await tester.pumpAndSettle();
-
       expect(find.text('Create Custom List'), findsOneWidget);
 
-      // Fill in title
-      await tester.enterText(
-        find.byKey(const Key('create_list_title_field')),
-        'Cyberpunk Essentials',
-      );
-      // Fill in description
-      await tester.enterText(
-        find.byKey(const Key('create_list_desc_field')),
-        'Dystopian neon visions',
-      );
-      // Toggle private switch
+      await tester.enterText(find.byKey(const Key('create_list_title_field')), 'Cyberpunk Essentials');
+      await tester.enterText(find.byKey(const Key('create_list_desc_field')), 'Dystopian neon visions');
       await tester.tap(find.byKey(const Key('create_list_private_switch')));
       await tester.pumpAndSettle();
 
-      // Submit creation
       await tester.tap(find.byKey(const Key('create_list_submit_button')));
       await tester.pumpAndSettle();
 
-      // Verify list appears in list
       expect(find.text('Cyberpunk Essentials'), findsOneWidget);
       expect(find.text('Dystopian neon visions'), findsOneWidget);
     });
 
-    testWidgets('switches to Friends Lists and saves friend list', (tester) async {
-      await tester.pumpWidget(createHubWidget(initialMode: QueueHubMode.sharedLists));
+    testWidgets('saves a friend\'s list from Friends\' lists', (tester) async {
+      await tester.pumpWidget(createListsWidget(initialMode: QueueListsMode.friends));
       await tester.pumpAndSettle();
 
       expect(find.text('SHARED BY FRIENDS (2)'), findsOneWidget);
       expect(find.text('A24 Masterclass'), findsOneWidget);
       expect(find.text('Prestige TV Golden Age'), findsOneWidget);
 
-      // Tap save list on the first friend list
       final saveButtons = find.byTooltip('Save to My Lists');
       expect(saveButtons, findsWidgets);
       await tester.tap(saveButtons.first);

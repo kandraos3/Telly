@@ -18,6 +18,7 @@ import 'package:telly_app/features/more/presentation/screens/more_hub_screen.dar
 import 'package:telly_app/features/profile/presentation/screens/dual_canon_profile_screen.dart';
 import 'package:telly_app/features/profile/presentation/screens/settings_hub_screen.dart';
 import 'package:telly_app/features/profile/presentation/screens/tv_graveyard_screen.dart';
+import 'package:telly_app/features/queue/presentation/screens/queue_lists_screen.dart';
 import 'package:telly_app/features/queue/presentation/screens/smart_queue_screen.dart';
 import 'package:telly_app/features/sharing/presentation/screens/telly_wrapped_studio_screen.dart';
 import 'package:telly_app/features/squads/presentation/screens/squads_list_screen.dart';
@@ -167,6 +168,21 @@ void main() {
         expect(find.byType(screen), findsOneWidget, reason: key);
         expect(find.byKey(const Key('nav_bar_surface')), findsNothing, reason: key);
       }
+    });
+
+    testWidgets('Queue opens the Lists screen at /more/queue/lists (#133)', (tester) async {
+      final c = await launch(tester, FakeAuthRepository(signedInUserId: 'u1', profile: onboarded));
+      c.read(appRouterProvider).go(Routes.queue);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('queue_lists_button')));
+      await tester.pumpAndSettle();
+      expect(find.byType(QueueListsScreen), findsOneWidget);
+      expect(find.byKey(const Key('nav_bar_surface')), findsNothing);
+
+      // The old /queue/lists path still lands there.
+      c.read(appRouterProvider).go('/queue/lists');
+      await tester.pumpAndSettle();
+      expect(find.byType(QueueListsScreen), findsOneWidget);
     });
 
     testWidgets('My Squads opens from the Social header', (tester) async {

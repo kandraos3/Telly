@@ -42,6 +42,7 @@ abstract final class Routes {
   // Pushed from the More hub
   static const queue = '$more/queue'; // SCR-13
   static String customList(String id) => '$queue/list/$id';
+  static const queueLists = '$queue/lists'; // SCR-13 Lists screen (#47)
   static const graveyard = '$more/graveyard'; // SCR-18
   static const wrapped = '$more/wrapped'; // SCR-19
   static const settings = '$more/settings'; // SCR-20

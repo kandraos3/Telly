@@ -10,6 +10,7 @@ void main() {
       expect(moved('/feed/activity/a1'), Routes.activity('a1'));
       expect(moved('/queue'), Routes.queue);
       expect(moved('/queue/list/l7'), Routes.customList('l7'));
+      expect(moved('/queue/lists'), Routes.queueLists);
       expect(moved('/canon/settings'), Routes.settings);
       expect(moved('/canon/edit'), Routes.editProfile);
       expect(moved('/canon/graveyard'), Routes.graveyard);
@@ -27,6 +28,7 @@ void main() {
         Routes.social,
         Routes.more,
         Routes.queue,
+        Routes.queueLists,
         Routes.settings,
         Routes.title('tv', 1396),
         '/feeds',

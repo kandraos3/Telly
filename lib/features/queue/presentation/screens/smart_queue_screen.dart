@@ -9,16 +9,13 @@ import 'package:telly_app/core/widgets/poster_image.dart';
 import 'package:telly_app/core/widgets/telly_neon_badge.dart';
 import 'package:telly_app/core/widgets/telly_canon_switcher.dart';
 import 'package:telly_app/core/widgets/telly_empty_state.dart';
+import 'package:telly_app/core/widgets/telly_filter_button.dart';
+import 'package:telly_app/core/widgets/telly_frosted_sheet.dart';
 import 'package:telly_app/core/widgets/telly_screen_header.dart';
-import 'package:telly_app/core/widgets/telly_section_header.dart';
-import 'package:telly_app/core/widgets/telly_segmented_control.dart';
 import 'package:telly_app/features/queue/data/streaming_availability_repository.dart';
 import 'package:telly_app/features/queue/data/streaming_availability_service.dart';
 import 'package:telly_app/features/queue/data/watchlist_repository.dart';
 import 'package:telly_app/features/queue/domain/streaming_models.dart';
-import 'package:telly_app/features/queue/domain/custom_list_models.dart';
-import 'package:telly_app/features/queue/data/custom_list_repository.dart';
-import 'package:telly_app/features/queue/presentation/screens/custom_list_detail_screen.dart';
 
 /// Provider for user's universal watchlist items (FE-609).
 /// Backed by Drift [WatchlistCache] + Supabase `user_watchlist` and [StreamingAvailabilityRepository].
@@ -122,23 +119,14 @@ class QueueSortByNotifier extends Notifier<String> {
 final queueSortByProvider =
     NotifierProvider<QueueSortByNotifier, String>(QueueSortByNotifier.new);
 
-enum QueueHubMode { watchlist, myLists, sharedLists }
-
-/// SCR-13: Smart Queue Screen with Dual Watchlists, Custom Lists & Shared Friends' Lists.
-/// Conforms to `FE-408`, `FE-609`, `FE-LISTS-01` and `docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md` §13.
+/// SCR-13: Smart Queue, the watchlist split into Movies and TV Shows (FE-408, FE-609).
+/// One control row (the compact switcher and the Filter chip); Sort and On My Services
+/// live in the Filter sheet, and custom lists on the Lists screen (epic #47, decision 0004).
+/// Conforms to `docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md` §13.
 class SmartQueueScreen extends ConsumerStatefulWidget {
   final List<WatchlistItem>? testItems;
-  final QueueHubMode initialMode;
-  final List<CustomList>? testCustomLists;
-  final List<CustomList>? testSharedLists;
 
-  const SmartQueueScreen({
-    super.key,
-    this.testItems,
-    this.initialMode = QueueHubMode.watchlist,
-    this.testCustomLists,
-    this.testSharedLists,
-  });
+  const SmartQueueScreen({super.key, this.testItems});
 
   @override
   ConsumerState<SmartQueueScreen> createState() => _SmartQueueScreenState();
@@ -146,12 +134,10 @@ class SmartQueueScreen extends ConsumerStatefulWidget {
 
 class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with SingleTickerProviderStateMixin {
   late final TabController _tabController;
-  late QueueHubMode _selectedMode;
 
   @override
   void initState() {
     super.initState();
-    _selectedMode = widget.initialMode;
     _tabController = TabController(length: 2, vsync: this);
   }
 
@@ -159,173 +145,6 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
   void dispose() {
     _tabController.dispose();
     super.dispose();
-  }
-
-  void _showCreateListDialog(BuildContext context) {
-    final titleController = TextEditingController();
-    final descController = TextEditingController();
-    bool isPrivate = false;
-
-    showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (context, setModalState) => AlertDialog(
-          backgroundColor: TellyColors.surfaceOf(context),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-            side: BorderSide(color: TellyColors.borderGlassOf(context)),
-          ),
-          title: Text(
-            'Create Custom List',
-            style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context))
-                .copyWith(fontWeight: FontWeight.w800),
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'LIST NAME',
-                  style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context))
-                      .copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
-                ),
-                const SizedBox(height: 6),
-                TextField(
-                  key: const Key('create_list_title_field'),
-                  controller: titleController,
-                  style: TextStyle(color: TellyColors.textPrimaryOf(context)),
-                  decoration: InputDecoration(
-                    hintText: 'e.g. Criterion Must-Sees',
-                    hintStyle: TextStyle(color: TellyColors.textTertiaryOf(context)),
-                    filled: true,
-                    fillColor: TellyColors.cardOf(context),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: TellyColors.borderGlassOf(context)),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 14),
-                Text(
-                  'DESCRIPTION (OPTIONAL)',
-                  style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context))
-                      .copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
-                ),
-                const SizedBox(height: 6),
-                TextField(
-                  key: const Key('create_list_desc_field'),
-                  controller: descController,
-                  style: TextStyle(color: TellyColors.textPrimaryOf(context)),
-                  maxLines: 2,
-                  decoration: InputDecoration(
-                    hintText: 'What makes this list special...',
-                    hintStyle: TextStyle(color: TellyColors.textTertiaryOf(context)),
-                    filled: true,
-                    fillColor: TellyColors.cardOf(context),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: TellyColors.borderGlassOf(context)),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: TellyColors.cardOf(context),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: TellyColors.borderGlassOf(context)),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        isPrivate ? Icons.lock_outline : Icons.public,
-                        color: isPrivate ? TellyColors.neonCoral : TellyColors.phosphorLime,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              isPrivate ? 'Private List' : 'Public List',
-                              style: TextStyle(
-                                color: TellyColors.textPrimaryOf(context),
-                                fontWeight: FontWeight.w700,
-                                fontSize: 13,
-                              ),
-                            ),
-                            Text(
-                              isPrivate
-                                  ? 'Only you can view and edit'
-                                  : 'Visible on your profile & shareable',
-                              style: TextStyle(
-                                color: TellyColors.textTertiaryOf(context),
-                                fontSize: 11,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Switch(
-                        key: const Key('create_list_private_switch'),
-                        value: isPrivate,
-                        activeThumbColor: TellyColors.neonCoral,
-                        onChanged: (val) {
-                          setModalState(() {
-                            isPrivate = val;
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: Text('Cancel', style: TextStyle(color: TellyColors.textSecondaryOf(context))),
-            ),
-            ElevatedButton(
-              key: const Key('create_list_submit_button'),
-              onPressed: () async {
-                final title = titleController.text.trim();
-                if (title.isNotEmpty) {
-                  final messenger = ScaffoldMessenger.of(context);
-                  final cardBg = TellyColors.cardOf(context);
-                  final desc = descController.text.trim();
-                  await ref.read(userCustomListsProvider.notifier).createList(
-                        title: title,
-                        description: desc.isNotEmpty ? desc : null,
-                        isPrivate: isPrivate,
-                      );
-                  if (ctx.mounted) Navigator.pop(ctx);
-                  messenger.showSnackBar(
-                    SnackBar(
-                      content: Text('Created list "$title"'),
-                      backgroundColor: cardBg,
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: TellyColors.phosphorLime,
-                foregroundColor: Colors.black,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              ),
-              child: const Text('Create List', style: TextStyle(fontWeight: FontWeight.w800)),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   @override
@@ -352,137 +171,79 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
     final seriesItems = sortedItems.where((item) => item.mediaType == 'tv').toList();
 
     return Scaffold(
-      // Pushed from the More hub (#44): subpage app bar with the Sort / New list actions (§0.2).
+      // Pushed from the More hub (#44): subpage app bar with the Lists action (§0.2, #47).
       appBar: TellySubpageAppBar(
         title: 'Queue',
         onNav: () => context.canPop() ? context.pop() : context.go(Routes.more),
         actions: [
-            if (_selectedMode == QueueHubMode.watchlist)
-              TellyHeaderAction(
-                key: const Key('queue_sort_button'),
-                icon: Icons.swap_vert_rounded,
-                tooltip: 'Sort',
-                onPressed: () => _showSortSheet(context),
-              ),
-            if (_selectedMode == QueueHubMode.myLists)
-              TellyHeaderAction(
-                key: const Key('create_new_list_button'),
-                icon: Icons.add_rounded,
-                tooltip: 'New list',
-                onPressed: () => _showCreateListDialog(context),
-              ),
+          TellyHeaderAction(
+            key: const Key('queue_lists_button'),
+            icon: Icons.collections_bookmark_outlined,
+            tooltip: 'Lists',
+            onPressed: () => context.push(Routes.queueLists),
+          ),
         ],
       ),
       body: Column(
-          children: [
-            // Hub mode switcher: the shared segmented control (FE-UI-01).
-            TellySegmentedControl<QueueHubMode>(
-              margin: const EdgeInsets.fromLTRB(16, 8, 16, 6),
-              segments: const [
-                TellySegment(value: QueueHubMode.watchlist, label: 'Watchlist'),
-                TellySegment(value: QueueHubMode.myLists, label: 'My Lists'),
-                TellySegment(value: QueueHubMode.sharedLists, label: 'Friends\' Lists'),
-              ],
-              selected: _selectedMode,
-              onChanged: (mode) => setState(() => _selectedMode = mode),
-            ),
-
-            if (_selectedMode == QueueHubMode.watchlist) ...[
-              // Movies / TV Shows, styled like the Canon selector (FE-HEADER-01).
-              _buildCanonTabs(movieCount: movieItems.length, seriesCount: seriesItems.length),
-
-              // Filter Bar (sorting lives in the header)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  // Master Subscription Filter Toggle
-                  child: InkWell(
-                    onTap: () {
-                      ref.read(queueFilterSubscribedProvider.notifier).toggle();
-                    },
-                    borderRadius: BorderRadius.circular(20),
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(minHeight: 48),
-                      child: Container(
-                        alignment: Alignment.center,
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: onlyOnMySubscriptions
-                              ? TellyColors.primaryAccentOf(context).withValues(alpha: 0.15)
-                              : TellyColors.surfaceOf(context),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: onlyOnMySubscriptions ? TellyColors.primaryAccentOf(context) : TellyColors.borderGlassOf(context),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              onlyOnMySubscriptions ? Icons.check_circle : Icons.radio_button_unchecked,
-                              size: 14,
-                              color: onlyOnMySubscriptions ? TellyColors.primaryAccentOf(context) : TellyColors.textTertiaryOf(context),
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              'On My Services',
-                              style: TellyTypography.caption(
-                                color: onlyOnMySubscriptions ? TellyColors.primaryAccentOf(context) : TellyColors.textSecondaryOf(context),
-                              ).copyWith(fontWeight: FontWeight.w700),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
+        children: [
+          // The one control row: Movies / TV Shows and Filter (SCR-13).
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            child: Row(
+              children: [
+                Expanded(child: _buildCanonTabs(movieCount: movieItems.length, seriesCount: seriesItems.length)),
+                const SizedBox(width: 8),
+                TellyFilterButton(
+                  key: const Key('queue_filter_button'),
+                  // Sort order never counts as a filter.
+                  activeCount: onlyOnMySubscriptions ? 1 : 0,
+                  onPressed: () => _showFilterSheet(context),
                 ),
-              ),
+              ],
+            ),
+          ),
 
-              // Tab Content
-              Expanded(
-                child: watchlistAsync.isLoading && widget.testItems == null && allItems.isEmpty
-                    ? const Center(
-                        child: CircularProgressIndicator(color: TellyColors.phosphorLime),
-                      )
-                    : TabBarView(
-                        controller: _tabController,
-                        children: [
-                          _buildQueueList(movieItems, userSubscriptions, onlyOnMySubscriptions),
-                          _buildQueueList(seriesItems, userSubscriptions, onlyOnMySubscriptions),
-                        ],
-                      ),
-              ),
-            ] else if (_selectedMode == QueueHubMode.myLists) ...[
-              Expanded(
-                child: _buildMyListsView(context),
-              ),
-            ] else ...[
-              Expanded(
-                child: _buildSharedListsView(context),
-              ),
-            ],
-          ],
-        ),
+          // Tab Content
+          Expanded(
+            child: watchlistAsync.isLoading && widget.testItems == null && allItems.isEmpty
+                ? const Center(
+                    child: CircularProgressIndicator(color: TellyColors.phosphorLime),
+                  )
+                : TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _buildQueueList(movieItems, userSubscriptions, onlyOnMySubscriptions),
+                      _buildQueueList(seriesItems, userSubscriptions, onlyOnMySubscriptions),
+                    ],
+                  ),
+          ),
+        ],
+      ),
     );
   }
 
-  /// Watchlist sort options, opened from the header's sort action (FE-HEADER-01).
-  void _showSortSheet(BuildContext context) {
-    showModalBottomSheet<void>(
+  /// SCR-13 Filter sheet: SORT BY (closes the sheet) and SHOW (keeps it open).
+  void _showFilterSheet(BuildContext context) {
+    TellyFrostedSheet.show<void>(
       context: context,
-      backgroundColor: TellyColors.cardOf(context),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder: (sheetCtx) => Consumer(
         builder: (ctx, ref, _) {
           final sortBy = ref.watch(queueSortByProvider);
-          Widget option(String value, String label, IconData icon) {
+          Widget label(String text) => Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Text(
+                  text,
+                  style: TellyTypography.labelSmall(color: TellyColors.textTertiaryOf(ctx))
+                      .copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
+                ),
+              );
+          Widget option(String value, String text, IconData icon) {
             final isSelected = sortBy == value;
             return ListTile(
               key: Key('queue_sort_option_$value'),
+              contentPadding: EdgeInsets.zero,
               leading: Icon(icon, color: TellyColors.textSecondaryOf(ctx)),
-              title: Text(label, style: TellyTypography.bodyLarge(color: TellyColors.textPrimaryOf(ctx))),
+              title: Text(text, style: TellyTypography.bodyLarge(color: TellyColors.textPrimaryOf(ctx))),
               trailing: isSelected ? Icon(Icons.check_rounded, color: TellyColors.primaryAccentOf(ctx)) : null,
               selected: isSelected,
               onTap: () {
@@ -492,27 +253,29 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
             );
           }
 
-          return SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      'SORT BY',
-                      style: TellyTypography.labelSmall(color: TellyColors.textTertiaryOf(ctx))
-                          .copyWith(fontWeight: FontWeight.bold, letterSpacing: 1.0),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  option('friends_score', 'Friends\' Score', Icons.people_alt_outlined),
-                  option('leaving_soon', 'Leaving Soon', Icons.timer_outlined),
-                ],
+          return Column(
+            key: const Key('queue_filter_sheet'),
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              label('SORT BY'),
+              option('friends_score', 'Friends\' score', Icons.people_alt_outlined),
+              option('leaving_soon', 'Leaving soon', Icons.timer_outlined),
+              const SizedBox(height: 12),
+              label('SHOW'),
+              SwitchListTile(
+                key: const Key('queue_services_toggle'),
+                contentPadding: EdgeInsets.zero,
+                title: Text('Only on my services', style: TellyTypography.bodyLarge(color: TellyColors.textPrimaryOf(ctx))),
+                subtitle: Text(
+                  'Hide titles you can\'t stream',
+                  style: TellyTypography.caption(color: TellyColors.textTertiaryOf(ctx)),
+                ),
+                activeThumbColor: TellyColors.primaryAccentOf(ctx),
+                value: ref.watch(queueFilterSubscribedProvider),
+                onChanged: (val) => ref.read(queueFilterSubscribedProvider.notifier).set(val),
               ),
-            ),
+            ],
           );
         },
       ),
@@ -525,190 +288,13 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
     return AnimatedBuilder(
       animation: _tabController,
       builder: (context, _) => TellyCanonSwitcher(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        margin: EdgeInsets.zero,
         selected: _tabController.index == 0 ? 'movie' : 'tv',
         movieCount: movieCount,
         seriesCount: seriesCount,
         movieKey: const Key('queue_movies_tab'),
         seriesKey: const Key('queue_series_tab'),
         onSelect: (mediaType) => _tabController.animateTo(mediaType == 'movie' ? 0 : 1),
-      ),
-    );
-  }
-
-  Widget _buildMyListsView(BuildContext context) {
-    final userListsAsync = ref.watch(userCustomListsProvider);
-    final lists = widget.testCustomLists ?? userListsAsync.valueOrNull ?? const [];
-
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(0, 8, 0, 10),
-          // New lists are created from the header's + action (FE-HEADER-01).
-          child: TellySectionHeader(label: 'MY CURATED LISTS (${lists.length})'),
-        ),
-        Expanded(
-          child: lists.isEmpty
-              ? Center(
-                  child: SingleChildScrollView(
-                    child: TellyEmptyState(
-                      icon: Icons.playlist_add,
-                      title: 'No custom lists yet',
-                      message: 'Create your first list for marathons or recommendations.',
-                      actionLabel: 'New list',
-                      actionIcon: Icons.add_rounded,
-                      onAction: () => _showCreateListDialog(context),
-                    ),
-                  ),
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  itemCount: lists.length,
-                  itemBuilder: (context, index) {
-                    final list = lists[index];
-                    return _buildCustomListCard(context, list, isUserOwned: true);
-                  },
-                ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSharedListsView(BuildContext context) {
-    final sharedListsAsync = ref.watch(sharedCustomListsProvider);
-    final lists = widget.testSharedLists ?? sharedListsAsync.valueOrNull ?? const [];
-
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(0, 8, 0, 10),
-          child: TellySectionHeader(label: 'SHARED BY FRIENDS (${lists.length})'),
-        ),
-        Expanded(
-          child: lists.isEmpty
-              ? const Center(
-                  child: SingleChildScrollView(
-                    child: TellyEmptyState(
-                      icon: Icons.group_outlined,
-                      title: 'No shared lists found',
-                      message: 'Friends\' public lists will show up here.',
-                    ),
-                  ),
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  itemCount: lists.length,
-                  itemBuilder: (context, index) {
-                    final list = lists[index];
-                    return _buildCustomListCard(context, list, isUserOwned: false);
-                  },
-                ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCustomListCard(BuildContext context, CustomList list, {required bool isUserOwned}) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: TellyColors.surfaceOf(context),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: TellyColors.borderGlassOf(context)),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => CustomListDetailScreen(
-                  listId: list.id,
-                  initialList: list,
-                ),
-              ),
-            );
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            list.title,
-                            style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context))
-                                .copyWith(fontWeight: FontWeight.w800),
-                          ),
-                          if (list.description != null && list.description!.isNotEmpty) ...[
-                            const SizedBox(height: 4),
-                            Text(
-                              list.description!,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    TellyNeonBadge(
-                      label: list.isPrivate ? 'PRIVATE' : 'PUBLIC',
-                      variant: list.isPrivate ? TellyBadgeVariant.upset : TellyBadgeVariant.winner,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Text(
-                      'Curated by ${list.ownerHandle}',
-                      style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)),
-                    ),
-                    const Spacer(),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: TellyColors.cardOf(context),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        '🎬 ${list.movieCount} Movies • 📺 ${list.seriesCount} Series',
-                        style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context))
-                            .copyWith(fontWeight: FontWeight.w700),
-                      ),
-                    ),
-                    if (!isUserOwned) ...[
-                      const SizedBox(width: 8),
-                      IconButton(
-                        icon: const Icon(Icons.bookmark_add_outlined, color: TellyColors.phosphorLime, size: 20),
-                        tooltip: 'Save to My Lists',
-                        onPressed: () {
-                          ref.read(userCustomListsProvider.notifier).saveSharedList(list);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Saved "${list.title}" to your lists!'),
-                              backgroundColor: TellyColors.cardOf(context),
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }
