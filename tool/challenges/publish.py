@@ -23,6 +23,7 @@ import datetime as dt
 import json
 import pathlib
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -294,7 +295,11 @@ def main(argv: list[str] | None = None) -> int:
         f.write(sql)
         path = f.name
     print(f'Publishing to the linked project ({path}) ...')
-    result = subprocess.run(['supabase', 'db', 'query', '--linked', '--file', path], cwd=ROOT,
+    cli = shutil.which('supabase')  # on Windows the CLI is a .cmd/.exe shim
+    if cli is None:
+        print('The Supabase CLI is not on PATH.', file=sys.stderr)
+        return 1
+    result = subprocess.run([cli, 'db', 'query', '--linked', '--file', path], cwd=ROOT,
                             stdin=subprocess.DEVNULL, capture_output=True, text=True)
     print(result.stdout)
     if result.returncode != 0:
