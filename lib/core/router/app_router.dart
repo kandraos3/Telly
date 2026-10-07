@@ -24,6 +24,8 @@ import '../../features/profile/presentation/screens/tv_graveyard_screen.dart';
 import '../../features/achievements/presentation/screens/achievements_screen.dart';
 import '../../features/challenges/presentation/screens/challenge_screen.dart';
 import '../../features/challenges/presentation/screens/challenges_screen.dart';
+import '../../features/levels/presentation/screens/friends_this_week_screen.dart';
+import '../../features/levels/presentation/screens/your_level_screen.dart';
 import '../../features/queue/presentation/screens/custom_list_detail_screen.dart';
 import '../../features/queue/presentation/screens/queue_lists_screen.dart';
 import '../../features/queue/presentation/screens/smart_queue_screen.dart';
@@ -173,6 +175,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                       path: ':slug',
                       parentNavigatorKey: rootNavigatorKey,
                       builder: (_, state) => ChallengeScreen(slug: state.pathParameters['slug']!),
+                    ),
+                  ],
+                ),
+                GoRoute(
+                  path: 'level',
+                  parentNavigatorKey: rootNavigatorKey,
+                  builder: (_, __) => const YourLevelScreen(),
+                  routes: [
+                    GoRoute(
+                      path: 'week',
+                      parentNavigatorKey: rootNavigatorKey,
+                      builder: (_, __) => const FriendsThisWeekScreen(),
                     ),
                   ],
                 ),

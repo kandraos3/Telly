@@ -45,6 +45,11 @@ import '../fakes/fake_auth_repository.dart';
 import '../fakes/fake_social_repository.dart';
 import '../features/achievements/achievements_fixtures.dart';
 import '../features/challenges/challenges_fixtures.dart';
+import '../features/levels/levels_fixtures.dart';
+import 'package:telly_app/features/levels/data/levels_repository.dart';
+import 'package:telly_app/features/levels/presentation/controllers/levels_controller.dart';
+import 'package:telly_app/features/levels/presentation/screens/friends_this_week_screen.dart';
+import 'package:telly_app/features/levels/presentation/screens/your_level_screen.dart';
 import '../features/feed/challenge_activity_card_test.dart' show challengeActivity;
 import 'package:telly_app/features/challenges/data/challenges_repository.dart';
 import 'package:telly_app/features/challenges/domain/challenge.dart';
@@ -687,6 +692,26 @@ void main() {
         await tester.pumpAndSettle();
         await expectLater(find.byType(ChallengeActivityCard), matchesGoldenFile('goldens/challenge_feed_card_$name.png'));
       });
+
+      for (final (screenName, screen) in [('level', const YourLevelScreen()), ('level_week', const FriendsThisWeekScreen())]) {
+        testWidgets('Golden: SCR-27 $screenName ($name) on iPhone 15 Pro size (#146)', (tester) async {
+          await tester.binding.setSurfaceSize(const Size(393, 852));
+          addTearDown(() => tester.binding.setSurfaceSize(null));
+          final db = AppDatabase.inMemory();
+          addTearDown(db.close);
+          await tester.pumpWidget(ProviderScope(
+            overrides: [
+              hapticsEnabledProvider.overrideWith((ref) => false),
+              databaseProvider.overrideWithValue(db),
+              levelsRepositoryProvider.overrideWithValue(FakeLevelsRepository()),
+              weeklyTableSquadsProvider.overrideWith((ref) async => const []),
+            ],
+            child: MaterialApp(theme: theme, home: screen),
+          ));
+          await tester.pumpAndSettle();
+          await expectLater(find.byWidget(screen), matchesGoldenFile('goldens/${screenName}_${name}_iphone15.png'));
+        });
+      }
 
       testWidgets('Golden: SCR-24 UnlockMomentScreen ($name) on iPhone 15 Pro size (#138)', (tester) async {
         await tester.binding.setSurfaceSize(const Size(393, 852));

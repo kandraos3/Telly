@@ -139,6 +139,26 @@ class TelemetryService {
     _track('challenge_completed', {'achievement_id': achievementId});
   }
 
+  /// A weekly quest was completed (features/10 §11, #146).
+  void trackQuestCompleted({required String questKey, required int xp}) {
+    _track('quest_completed', {'quest_key': questKey, 'xp': xp});
+  }
+
+  /// The user's level went up (features/10 §11, #146).
+  void trackLevelUp({required int from, required int to}) {
+    _track('level_up', {'from': from, 'to': to});
+  }
+
+  /// The weekly streak grew (features/10 §11, #146).
+  void trackStreakExtended({required int weeks}) {
+    _track('streak_extended', {'weeks': weeks});
+  }
+
+  /// A cosmetic reward was equipped (features/10 §11, #147).
+  void trackRewardEquipped({required String rewardId}) {
+    _track('reward_equipped', {'reward_id': rewardId});
+  }
+
   void _track(String name, Map<String, dynamic> properties) {
     final event = TelemetryEvent(
       name: name,

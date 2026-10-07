@@ -46,6 +46,9 @@ abstract final class Routes {
   static const achievements = '$more/achievements'; // SCR-23 (#50)
   static const challenges = '$more/challenges'; // SCR-25 (#50)
   static String challenge(String slug) => '$challenges/$slug'; // SCR-26
+  static const level = '$more/level'; // SCR-27 (#50)
+  static const levelRewards = '$level/rewards'; // SCR-27 Rewards
+  static const levelWeek = '$level/week'; // SCR-27 Friends this week
   static const graveyard = '$more/graveyard'; // SCR-18
   static const wrapped = '$more/wrapped'; // SCR-19
   static const settings = '$more/settings'; // SCR-20

@@ -196,7 +196,10 @@ class _SummaryCard extends StatelessWidget {
               children: [
                 Text('Weekly streak', style: muted),
                 const SizedBox(height: 6),
-                _LimeChip(key: const Key('achievements_streak_chip'), label: streak.chipLabel),
+                GestureDetector(
+                  onTap: () => context.push(Routes.level),
+                  child: _LimeChip(key: const Key('achievements_streak_chip'), label: streak.chipLabel),
+                ),
               ],
             ),
           ),
@@ -206,7 +209,7 @@ class _SummaryCard extends StatelessWidget {
   }
 }
 
-/// The lime "▲ N weeks" chip (features/10 §3). Opens `SCR-27` once Your level ships (#146).
+/// The lime "▲ N weeks" chip (features/10 §3). Opens `SCR-27` (#146).
 class _LimeChip extends StatelessWidget {
   final String label;
   const _LimeChip({super.key, required this.label});

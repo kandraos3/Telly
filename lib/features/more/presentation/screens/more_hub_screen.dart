@@ -15,14 +15,15 @@ import '../../../auth/presentation/controllers/auth_controller.dart';
 
 /// `SCR-22` More hub (epic #44, decision 0003): everything that is not a daily destination.
 ///
-/// Profile card, a full-width Queue tile, feature tiles (Achievements, Challenges, Wrapped,
-/// Graveyard) and a grouped list (Settings). Future entries (Your level #50, Invite #51, Telly
-/// Pro #52, Help #118) are added only once they ship. Spec: `docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md` `SCR-22`.
+/// Profile card, a full-width Queue tile, feature tiles (Achievements, Challenges, Your level,
+/// Wrapped, Graveyard) and a grouped list (Settings). Future entries (Invite #51, Telly Pro
+/// #52, Help #118) are added only once they ship. Spec: `docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md` `SCR-22`.
 class MoreHubScreen extends ConsumerWidget {
   final VoidCallback? onProfileTap;
   final VoidCallback? onQueueTap;
   final VoidCallback? onAchievementsTap;
   final VoidCallback? onChallengesTap;
+  final VoidCallback? onLevelTap;
   final VoidCallback? onWrappedTap;
   final VoidCallback? onGraveyardTap;
   final VoidCallback? onSettingsTap;
@@ -33,6 +34,7 @@ class MoreHubScreen extends ConsumerWidget {
     this.onQueueTap,
     this.onAchievementsTap,
     this.onChallengesTap,
+    this.onLevelTap,
     this.onWrappedTap,
     this.onGraveyardTap,
     this.onSettingsTap,
@@ -84,6 +86,14 @@ class MoreHubScreen extends ConsumerWidget {
                   label: 'Challenges',
                   subtitle: 'Race friends to the finish',
                   onTap: onChallengesTap ?? () => context.push(Routes.challenges),
+                ),
+                _FeatureTile(
+                  key: const Key('more_tile_level'),
+                  icon: Icons.bolt_rounded,
+                  tone: TellyColors.primaryAccentOf(context),
+                  label: 'Your level',
+                  subtitle: 'XP, quests and rewards',
+                  onTap: onLevelTap ?? () => context.push(Routes.level),
                 ),
                 _FeatureTile(
                   key: const Key('more_tile_wrapped'),

@@ -347,6 +347,9 @@ All screens use the shared app bars (screen specs §0.2) and the frosted bottom 
 - **Level card:** a ring (primary-accent progress), the level number, its name, "2,340 / 3,000 XP to Level 13" and a bar.
 - **Weekly streak card:** the chip and the 7-week strip (§3), with the freeze line.
 - **This week's quests:** three rows with checks, progress and XP chips. They reset on Monday.
+- **Streak strip** (#146): counted weeks filled in the primary accent with a check, a used freeze as ❄ on cyan, missed weeks outlined, and the running week labelled "Now"; the others are labelled by ISO week ("W41").
+- **Analytics** are detected in the app by comparing a load with what it last saw (kept in `gamification_cache`), and never on the first load: `level_up`, `quest_completed`, `streak_extended`.
+- **Offline:** the last snapshot from `gamification_cache`, read-only, with the offline banner.
 - **Links:** **Rewards** (`/more/level/rewards`, mockup B2) and **Friends this week** (`/more/level/week`, mockup B3).
   - **Rewards:** the track by level (unlocked rows outlined in lime, locked rows with XP to go), an Equip action on unlocked rows, and the XP rules table.
   - **Friends this week:** a segmented Friends / each squad. Rank, avatar, name, level, streak and weekly XP, with your row tinted. A footer says it resets Monday.
