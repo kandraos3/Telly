@@ -74,6 +74,23 @@ void main() {
       expect(logs.map((p) => p['broadcast']), [false, true]);
     });
 
+    test('#150: each duel names the title being placed, never an opponent', () async {
+      await seedCanon(db, 'tv', ['A', 'B'], baseId: 1);
+      await repo.commitPlacement(
+        candidate: const CanonCandidate(titleId: 9, mediaType: 'tv', title: 'New'),
+        targetRank: 2,
+        duels: const [
+          LoggedDuel(winnerTitleId: 1, loserTitleId: 9),
+          LoggedDuel(winnerTitleId: 9, loserTitleId: 2),
+          // Not involving the candidate: sent without a placed title, so the server's CHECK holds.
+          LoggedDuel(winnerTitleId: 1, loserTitleId: 2),
+        ],
+      );
+      final duels = (payloadOf((await queue()).single)['duels'] as List).cast<Map<String, dynamic>>();
+      expect(duels.map((d) => d['placed_title_id']), [9, 9, null]);
+      expect(duels.last.containsKey('placed_title_id'), isFalse);
+    });
+
     test('FE-SHARE-01: leaderboard() centres a 5-row window and slides at the canon edges', () async {
       await seedCanon(db, 'tv', ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'], baseId: 1);
       Future<List<int>> windowFor(int titleId, int rank) async {

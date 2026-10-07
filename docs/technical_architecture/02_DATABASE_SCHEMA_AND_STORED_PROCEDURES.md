@@ -50,7 +50,7 @@ Abbreviations: **PK** primary key, **FK** foreign key, **U** unique. All `update
 | `user_streaming_subscriptions` | **PK** `(user_id, platform_id)` | Household services (`SCR-02`). |
 | `user_rankings` | **PK** `id`; **FK** `(title_id, media_type)`; `user_id`; `rank_position` INT ≥ 1; `calculated_score` NUMERIC(4,2); `rating_uncertainty` NUMERIC(3,2) (σ); `status`, `finale_impact`, `favorite_character`, `review_short` VARCHAR(280), `tags` TEXT[], `watched_with_user_ids` UUID[], `audio_language`, `is_rewatch`, `rewatch_count`, `venue`; **U** `(user_id, title_id, media_type)`; **U** `(user_id, media_type, rank_position)` DEFERRABLE INITIALLY DEFERRED | The personal Dual-Canon. |
 | `applied_mutations` | **PK** `client_mutation_id`; `user_id`, `kind`, `applied_at` | Idempotency log for offline replay (I-5); server-internal, no client access. |
-| `pairwise_duels` | **PK** `id`; `user_id`; `winner_title_id`, `loser_title_id`, `media_type` (both FKs share it); `is_upset`, `decision_time_ms`, `client_mutation_id` UUID **U**; `CHECK (winner_title_id <> loser_title_id)` | Audit log powering upsets and win-rates. |
+| `pairwise_duels` | **PK** `id`; `user_id`; `winner_title_id`, `loser_title_id`, `media_type` (both FKs share it); `is_upset`, `decision_time_ms`, `client_mutation_id` UUID **U**, `placed_title_id` INT NULL (the title whose placement produced the duel; `CHECK` it is the winner or the loser; NULL for tournament and legacy duels); `CHECK (winner_title_id <> loser_title_id)` | Audit log powering upsets and win-rates. |
 | `user_external_accounts` | **PK** `id`; **U** `(user_id, service_name)` | Letterboxd / AniList / MAL links. |
 | `user_dropped_shows` | **PK** `id`; **FK** `(title_id, media_type)`; `dropped_at_season`, `dropped_at_episode`, `reason`, `willing_to_revisit`, `notify_on_acclaim`, `notes`; **U** `(user_id, title_id, media_type)` | TV Graveyard (`SCR-18`). |
 | `user_watchlist` | **PK** `(user_id, title_id, media_type)`; `priority`, `recommended_by_user_id`, `added_at` | Smart Queue (`SCR-13`). |
@@ -63,7 +63,7 @@ Abbreviations: **PK** primary key, **FK** foreign key, **U** unique. All `update
 | `feed_reactions` | **PK** `id`; **FK** `activity_id`; **U** `(activity_id, user_id, reaction_type)` | Reactions. |
 | `comments` | **PK** `id`; **FK** `activity_id`; `user_id`; `body` VARCHAR(500); `contains_spoilers`; `is_hidden` | Spoiler-safe threads (`SCR-06`). |
 | `curated_canons` | **PK** `slug`; `title`, `subtitle`, `emoji`, `media_type`, `items` JSONB `[{title_id, media_type}]`, `sort_order` | Editorial collections (`SCR-07`); read-only for clients. |
-| `qualifying_rankings` (view) | `(user_id, title_id, media_type, created_at)`; `security_invoker` | Gamification's anti-gaming rule (features/10 §2): `COMPLETED` rankings that were duelled in their canon, or were first in it. |
+| `qualifying_rankings` (view) | `(user_id, title_id, media_type, created_at)`; `security_invoker` | Gamification's anti-gaming rule (features/10 §2): `COMPLETED` rankings that were placed through a duel in their canon (`placed_title_id`, or either side when it is NULL), or were first in it. |
 | `reports` | **PK** `id`; `reporter_id`; `target_type`, `target_id` TEXT, `reason`, `notes`, `status` (`OPEN`/`ACTIONED`/`DISMISSED`), `created_at` | Apple 1.2 moderation queue. |
 
 ### 2.3 Indexes
@@ -112,7 +112,7 @@ All of the following are `SECURITY DEFINER`, `SET search_path = public`. They ta
 | `insert_user_ranking_atomic(p_title_id, p_media_type, p_target_rank, p_status, p_finale_impact, p_review, p_tags, p_character, p_is_rewatch, p_venue, p_audio_language, p_client_mutation_id) → user_rankings` | Inserts at `p_target_rank` (clamped to `1..N+1`) and shifts the rows below it. If the title is already ranked, it **moves** it: closes the old gap, then opens the new one. First title in a canon gets σ = 0.50 (features/02 §7.3), otherwise σ = 1.20. |
 | `move_user_ranking(p_title_id, p_media_type, p_new_rank, p_client_mutation_id)` | Drag-and-drop re-index. |
 | `delete_user_ranking(p_title_id, p_media_type, p_client_mutation_id)` | Removes the row and closes the gap. |
-| `record_pairwise_duels(p_duels JSONB)` | Batch insert of `{client_mutation_id, winner_title_id, loser_title_id, media_type, decision_time_ms}`; sets `is_upset` via `detect_upset_duel`; emits `UPSET_ALERT` activity for upsets. |
+| `record_pairwise_duels(p_duels JSONB)` | Batch insert of `{client_mutation_id, winner_title_id, loser_title_id, media_type, decision_time_ms, placed_title_id?}` (`placed_title_id` optional, #150); sets `is_upset` via `detect_upset_duel`; emits `UPSET_ALERT` activity for upsets. |
 
 ### 3.3 Read & Social RPCs
 | RPC | Behaviour |

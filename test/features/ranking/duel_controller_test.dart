@@ -101,6 +101,7 @@ void main() {
       expect(duels.map((d) => (d['winner_title_id'], d['loser_title_id'])), votes);
       expect(duels.map((d) => d['client_mutation_id']).toSet(), hasLength(votes.length));
       expect(duels.every((d) => d['media_type'] == 'tv'), isTrue);
+      expect(duels.every((d) => d['placed_title_id'] == 999), isTrue, reason: '#150: the new title is the placed one');
     });
 
     test('a movie duel never loads tv opponents', () async {

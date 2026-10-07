@@ -26,7 +26,7 @@ It ships in three slices (§12).
 ## 2. Qualifying rankings (the anti-gaming rule)
 
 Every count in this spec is over **qualifying rankings**: rows in `user_rankings` with status `COMPLETED`, where at least one of these holds:
-- the user has a `pairwise_duels` row in the same canon in which the title is winner or loser (it was placed through duels); or
+- the user has a `pairwise_duels` row in the same canon whose `placed_title_id` is the title (it was placed through duels). Opponents already in the canon get nothing from the duel. When `placed_title_id` is NULL (onboarding tournament duels, where both titles are new, and duels from older apps), both the winner and the loser qualify; or
 - it was the first title in that canon, so no duel was possible. This means no other `user_rankings` row in the same `media_type` has an earlier `created_at` (ties, such as rows from one import transaction, are broken by `id`, so exactly one row is first).
 
 Consequences:

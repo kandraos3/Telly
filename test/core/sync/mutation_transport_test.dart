@@ -50,7 +50,7 @@ void main() {
         'status': 'COMPLETED',
         'is_rewatch': false,
         'duels': [
-          {'client_mutation_id': 'd1', 'winner_title_id': 136315, 'loser_title_id': 1396, 'media_type': 'tv'},
+          {'client_mutation_id': 'd1', 'winner_title_id': 136315, 'loser_title_id': 1396, 'media_type': 'tv', 'placed_title_id': 136315},
         ],
       }));
 
@@ -65,6 +65,7 @@ void main() {
         'p_broadcast': true, // payloads queued before FE-LOG-02 keep broadcasting
       });
       expect((body(requests[1])['p_duels'] as List).single, containsPair('client_mutation_id', 'd1'));
+      expect((body(requests[1])['p_duels'] as List).single, containsPair('placed_title_id', 136315), reason: '#150');
     });
 
     test('FE-LOG-02: a private log forwards p_broadcast = false', () async {

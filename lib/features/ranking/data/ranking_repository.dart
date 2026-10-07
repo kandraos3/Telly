@@ -167,6 +167,8 @@ class RankingRepository {
       );
       final rescored = await _writeCanon(canon, pendingTitleId: candidate.titleId);
 
+      // placed_title_id: only the title being placed qualifies for gamification from these
+      // duels, not the opponents already in the canon (Spec 10 §2).
       final duelPayload = [
         for (final d in duels)
           {
@@ -175,6 +177,8 @@ class RankingRepository {
             'loser_title_id': d.loserTitleId,
             'media_type': mediaType,
             'decision_time_ms': d.decisionTimeMs,
+            if (d.winnerTitleId == candidate.titleId || d.loserTitleId == candidate.titleId)
+              'placed_title_id': candidate.titleId,
           },
       ];
       final mutationId = existing == null
