@@ -5,14 +5,78 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main, develop ]
+  # Manual runs ("Run workflow") always run every job.
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# pull-requests: read lets the change filter list a PR's files through the API.
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
+  # Which areas this push or PR touched (#122). Each job below runs only when its area changed.
+  # Editing this workflow, or a manual run, runs everything.
+  changes:
+    name: Detect changed areas
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      flutter: ${{ steps.filter.outputs.flutter == 'true' || steps.filter.outputs.ci == 'true' || github.event_name == 'workflow_dispatch' }}
+      emulator: ${{ steps.filter.outputs.emulator == 'true' || steps.filter.outputs.ci == 'true' || github.event_name == 'workflow_dispatch' }}
+      database: ${{ steps.filter.outputs.database == 'true' || steps.filter.outputs.ci == 'true' || github.event_name == 'workflow_dispatch' }}
+      functions: ${{ steps.filter.outputs.functions == 'true' || steps.filter.outputs.ci == 'true' || github.event_name == 'workflow_dispatch' }}
+      agents: ${{ steps.filter.outputs.agents == 'true' || steps.filter.outputs.ci == 'true' || github.event_name == 'workflow_dispatch' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            ci:
+              - '.github/workflows/ci.yml'
+            flutter:
+              - 'lib/**'
+              - 'test/**'
+              - 'integration_test/**'
+              - 'tool/**/*.dart'
+              - 'assets/**'
+              - 'pubspec.yaml'
+              - 'pubspec.lock'
+              - 'analysis_options.yaml'
+              - 'dart_test.yaml'
+            emulator:
+              - 'lib/**'
+              - 'integration_test/**'
+              - 'android/**'
+              - 'assets/**'
+              - 'pubspec.yaml'
+              - 'pubspec.lock'
+              - 'test/fakes/**'
+              - 'test/helpers/**'
+            database:
+              - 'supabase/migrations/**'
+              - 'supabase/tests/**'
+              - 'supabase/seed.sql'
+              - 'supabase/config.toml'
+            functions:
+              - 'supabase/functions/**'
+            agents:
+              - 'AGENTS.md'
+              - 'CLAUDE.md'
+              - 'GEMINI.md'
+              - '.agents/**'
+              - '.claude/**'
+              - 'tool/agents/**'
+              - 'tool/tracker/*.json'
+
   agent-instructions:
     name: Agent instructions in sync (AGENTS.md, skills, tracker stages)
+    needs: changes
+    if: needs.changes.outputs.agents == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -24,6 +88,8 @@ jobs:
 
   static-analysis-and-unit-tests:
     name: Flutter Lint, Test Pyramid & Coverage Gate
+    needs: changes
+    if: needs.changes.outputs.flutter == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -91,6 +157,8 @@ jobs:
 
   database-pgtap-verification:
     name: Supabase pgTAP, RLS & Concurrency Gate (QA-601)
+    needs: changes
+    if: needs.changes.outputs.database == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -121,6 +189,8 @@ jobs:
 
   edge-functions:
     name: Edge Function Unit Tests (Deno)
+    needs: changes
+    if: needs.changes.outputs.functions == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     defaults:
@@ -144,6 +214,8 @@ jobs:
 
   android-emulator-integration:
     name: Android Emulator Integration Test (CUJ Acceptance)
+    needs: changes
+    if: needs.changes.outputs.emulator == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
 

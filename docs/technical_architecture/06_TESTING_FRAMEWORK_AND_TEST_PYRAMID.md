@@ -508,6 +508,19 @@ flowchart LR
 4. **pgTAP Database Schema Parity**: All migrations must pass cleanly on a blank Supabase container with zero schema drift.
 5. **No Missed Frame Regressions**: Frame timing budget must meet the $< 16.6\text{ ms}$ ceiling.
 
+### 7.2 Which Jobs Run (#122)
+`.github/workflows/ci.yml` first detects which areas a push or PR touched, and runs only the jobs for those areas. A skipped job counts as passing.
+
+| Job | Runs when these change |
+| :--- | :--- |
+| Flutter lint, tests & coverage | `lib/`, `test/`, `integration_test/`, Dart files under `tool/`, `assets/`, `pubspec.*`, `analysis_options.yaml`, `dart_test.yaml` |
+| Android emulator E2E (CUJ-01 to CUJ-04) | `lib/`, `integration_test/`, `android/`, `assets/`, `pubspec.*`, `test/fakes/`, `test/helpers/` |
+| pgTAP, RLS & concurrency | `supabase/migrations/`, `supabase/tests/`, `supabase/seed.sql`, `supabase/config.toml` |
+| Edge functions (Deno) | `supabase/functions/` |
+| Agent instructions in sync | `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/`, `.claude/`, `tool/agents/`, `tool/tracker/*.json` |
+
+Editing `ci.yml` itself, or a manual **Run workflow**, runs every job. A newer push to the same branch cancels the older run. When a new job or folder is added, extend its filter in the `changes` job.
+
 ---
 *Document Version: 1.0.0*  
 *Author: Antigravity Quality & Systems Engineering Team*
