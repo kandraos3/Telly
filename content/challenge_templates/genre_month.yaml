@@ -1,0 +1,13 @@
+key: genre_month
+name: Genre month
+description: Rank $target $genre films
+art: gold
+medal_glyph: G
+params: [genre]
+rule:
+  media_type: movie
+  filters:
+    - type: genre
+      any: [$genre]
+target: 8
+sort: 1

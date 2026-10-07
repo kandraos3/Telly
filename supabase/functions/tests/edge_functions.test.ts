@@ -5,6 +5,7 @@ import { handleSearch } from "../tmdb-search/handler.ts";
 import { handleDetails } from "../tmdb-details/handler.ts";
 import { handleAvailability } from "../streaming-availability/handler.ts";
 import { handleCatalogSync } from "../streaming-catalog-sync/handler.ts";
+import { handleScheduler, monthStart } from "../challenge-scheduler/handler.ts";
 import { platformFromName } from "../_shared/providers.ts";
 import { fakeFetch, jsonResponse, MemoryStore, RecordedCall } from "./fakes.ts";
 
@@ -319,4 +320,40 @@ Deno.test("provider names map to streaming_platforms ids", () => {
   assertEquals(platformFromName("Apple TV"), null, "the Apple TV store is not an Apple TV+ subscription");
   assertEquals(platformFromName("Paramount Plus Apple TV Channel"), null);
   assertEquals(platformFromName("Maxdome"), null);
+});
+
+// ---------------------------------------------------------------------------- challenge-scheduler (#143)
+Deno.test("challenge-scheduler: service role only", async () => {
+  const res = await handleScheduler(new Request("http://edge.local/", { method: "POST" }), {
+    rpc: () => Promise.resolve(0),
+    serviceRoleKey: "srk",
+  });
+  assertEquals(res.status, 401);
+});
+
+Deno.test("challenge-scheduler: schedules this month and next, then expires featured flags", async () => {
+  const calls: [string, Record<string, unknown> | undefined][] = [];
+  const res = await handleScheduler(
+    new Request("http://edge.local/", { method: "POST", headers: { Authorization: "Bearer srk" } }),
+    {
+      rpc: (fn, args) => {
+        calls.push([fn, args]);
+        return Promise.resolve(fn === "expire_featured_challenges" ? 1 : 2);
+      },
+      serviceRoleKey: "srk",
+      now: () => new Date("2026-12-25T06:00:00Z"),
+    },
+  );
+  assertEquals(res.status, 200);
+  assertEquals(await res.json(), { created: { "2026-12-01": 2, "2027-01-01": 2 }, expired: 1 });
+  assertEquals(calls, [
+    ["schedule_calendar_challenges", { p_month: "2026-12-01" }],
+    ["schedule_calendar_challenges", { p_month: "2027-01-01" }],
+    ["expire_featured_challenges", undefined],
+  ]);
+});
+
+Deno.test("challenge-scheduler: monthStart rolls over the year", () => {
+  assertEquals(monthStart(new Date("2026-12-31T23:59:59Z"), 1), "2027-01-01");
+  assertEquals(monthStart(new Date("2026-03-15T00:00:00Z")), "2026-03-01");
 });

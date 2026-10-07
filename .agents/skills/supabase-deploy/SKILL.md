@@ -89,6 +89,7 @@ Exit codes:
   - exclude soft-deleted users (`JOIN public.users u … AND NOT u.is_deleted`) from community aggregates
 - **Session flags** passed to triggers use `set_config('telly.<name>', …, true)` and are reset before the function returns (see `20261010000900_private_logging.sql`).
 - **One pgTAP test per migration.** Name it `supabase/tests/database/NNN_<name>.test.sql`, continuing the numbering (next is `014`). Wrap it in `BEGIN; … SELECT * FROM finish(); ROLLBACK;` with a `plan(n)` that matches the assertion count, and use the seeded titles from `supabase/seed.sql` (e.g. 155, 238, 680, 1396, 76331, 8592, 66732).
+- **Challenge content** (`content/`, #143) is data, not migrations: publish it with `python tool/challenges/publish.py --dry-run` then `--publish`. It runs through the same `supabase login` (`supabase db query --linked`), so treat `--publish` like a push: confirm first unless the owner asked to deploy in this session.
 - **Dart side.** When an RPC gains a parameter, send it from `lib/core/sync/mutation_transport.dart` (or the repository) and extend the transport/repository unit test.
 
 ## 5. Authoring edge functions

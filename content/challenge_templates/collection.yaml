@@ -1,0 +1,14 @@
+# "$collection" is a TMDB collection id (titles.collection_id).
+key: collection
+name: Finish the saga
+description: Rank every film in a collection
+art: gold
+medal_glyph: S
+params: [collection]
+rule:
+  media_type: movie
+  filters:
+    - type: collection
+      any: [$collection]
+target: 3
+sort: 3

@@ -1,0 +1,84 @@
+# Launch calendar: the challenges the scheduler creates each month (features/10 §8.4).
+# Each entry runs from the 1st to the end of its month (UTC). See content/README.md.
+"2026-11":
+  - slug: noirvember-2026
+    template: decade
+    name: Noirvember
+    params: {decade: 1940}
+    target: 6
+    featured: true
+    medal_glyph: NV
+  - slug: limited-series-november-2026
+    template: limited_series
+    name: Limited November
+    target: 4
+
+"2026-12":
+  - slug: holiday-classics-2026
+    template: genre_month
+    name: Holiday Classics
+    params: {genre: Family}
+    target: 6
+    featured: true
+    medal_glyph: HC
+  - slug: year-end-catch-up-2026
+    template: rank_any
+    name: Year-End Catch-Up
+    target: 10
+    medal_glyph: YE
+
+"2027-01":
+  - slug: new-year-new-canon-2027
+    template: rank_any
+    name: New Year, New Canon
+    target: 12
+    featured: true
+    medal_glyph: NY
+  - slug: hbo-binge-2027-01
+    template: network
+    name: HBO Binge
+    params: {network: HBO}
+    target: 4
+
+"2027-02":
+  - slug: romance-month-2027
+    template: genre_month
+    name: Romance Month
+    params: {genre: Romance}
+    target: 6
+    featured: true
+    art: coral
+    medal_glyph: RM
+  - slug: documentary-february-2027
+    template: genre_month
+    name: Doc February
+    params: {genre: Documentary}
+    target: 4
+
+"2027-03":
+  - slug: animation-march-2027
+    template: genre_month
+    name: Animation March
+    params: {genre: Animation}
+    target: 8
+    featured: true
+    medal_glyph: AN
+  - slug: nineties-dive-2027
+    template: decade
+    name: Nineties Dive
+    params: {decade: 1990}
+    target: 6
+
+"2027-04":
+  - slug: sci-fi-april-2027
+    template: genre_month
+    name: Sci-Fi April
+    params: {genre: Science Fiction}
+    target: 6
+    featured: true
+    medal_glyph: SF
+  - slug: a24-april-2027
+    template: company
+    name: A24 April
+    params: {company: A24}
+    target: 4

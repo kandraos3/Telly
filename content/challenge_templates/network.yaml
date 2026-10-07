@@ -1,0 +1,13 @@
+key: network
+name: Network binge
+description: Rank $target $network series
+art: cyan
+medal_glyph: N
+params: [network]
+rule:
+  media_type: tv
+  filters:
+    - type: network
+      any: [$network]
+target: 5
+sort: 4

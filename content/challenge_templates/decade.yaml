@@ -1,0 +1,14 @@
+# "$decade" is the decade's first year (1940); the description reads "the 1940s".
+key: decade
+name: Decade dive
+description: Rank $target films from the $decades
+art: noir
+medal_glyph: D
+params: [decade]
+rule:
+  media_type: movie
+  filters:
+    - type: decade
+      any: [$decade]
+target: 6
+sort: 2

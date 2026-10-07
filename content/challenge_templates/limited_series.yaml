@@ -1,0 +1,13 @@
+key: limited_series
+name: Limited series run
+description: Rank $target limited series
+art: violet
+medal_glyph: LS
+params: []
+rule:
+  media_type: tv
+  filters:
+    - type: tv_type
+      any: [Miniseries]
+target: 5
+sort: 5

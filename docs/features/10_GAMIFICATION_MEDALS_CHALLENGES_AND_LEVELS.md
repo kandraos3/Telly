@@ -207,7 +207,7 @@ Every reward is cosmetic. Nothing that's needed to use Telly is ever locked (dec
 | `rule` JSONB | §8.2 |
 | `target` INT | e.g. 8 |
 | `squad_id` UUID NULL | Set for squad challenges |
-| `featured` BOOL | At most one featured at a time |
+| `featured` BOOL | At most one featured at a time: featuring a challenge un-features any whose window overlaps it, so each month's featured challenge can be set ahead |
 | `template_key` TEXT NULL | Set when generated from a template |
 | `status` | `draft · live`. "Ended" is derived from `ends_at`. |
 | `created_by` | User, or NULL for official challenges |
@@ -261,7 +261,8 @@ New and updated challenges reach every installed app on its next open. There are
    - `content/challenge_templates/` holds parameterised templates: genre month, decade, collection, network, limited series.
    - `content/challenge_calendar.yaml` maps months to templates and parameters.
    - A monthly scheduled edge function, `challenge-scheduler` (pg_cron), creates the coming month's challenges from the calendar. It also ends the featured flag on expired ones.
-   - **Launch calendar:** six months of challenges are written in slice 2.
+   - How it runs (#143): `publish.py` copies the calendar into `challenge_calendar`; `challenge-scheduler` calls `schedule_calendar_challenges(month)` for this month and next (idempotent; each runs from the 1st to the 1st, UTC) and `expire_featured_challenges()`. pg_cron calls it on the 25th and the 1st. Publishing also schedules this month and next at once, so a new calendar entry doesn't wait for the cron. The file schema is in `content/README.md`.
+   - **Launch calendar:** six months of challenges are written in slice 2: Spooktober (October 2026, a one-off file), then November 2026 to April 2027 in `content/challenge_calendar.yaml`, with a featured challenge and a second one each month.
 3. **The Supabase table editor**, as a manual fallback for urgent fixes (a typo, extending a deadline). Changes made there must be copied back into the repo file the same week.
 4. **Squads**, through §8.3.
 

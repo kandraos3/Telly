@@ -1,0 +1,15 @@
+# Spooktober 2026: the launch challenge (features/10 §8, mockup C1).
+slug: spooktober-2026
+name: Spooktober
+description: Rank 8 horror films by Oct 31
+art: horror
+medal_glyph: "8"
+starts_at: 2026-10-01T00:00:00Z
+ends_at: 2026-11-01T00:00:00Z
+rule:
+  media_type: movie
+  filters:
+    - type: genre
+      any: [Horror]
+target: 8
+featured: true

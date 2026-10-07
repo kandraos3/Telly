@@ -1,0 +1,11 @@
+key: rank_any
+name: Ranking sprint
+description: Rank $target films or series
+art: lime
+medal_glyph: R
+params: []
+rule:
+  media_type: any
+  filters: []
+target: 10
+sort: 7

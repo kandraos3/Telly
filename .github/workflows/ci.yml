@@ -30,6 +30,7 @@ jobs:
       database: ${{ steps.filter.outputs.database == 'true' || steps.filter.outputs.ci == 'true' || github.event_name == 'workflow_dispatch' }}
       functions: ${{ steps.filter.outputs.functions == 'true' || steps.filter.outputs.ci == 'true' || github.event_name == 'workflow_dispatch' }}
       agents: ${{ steps.filter.outputs.agents == 'true' || steps.filter.outputs.ci == 'true' || github.event_name == 'workflow_dispatch' }}
+      challenges: ${{ steps.filter.outputs.challenges == 'true' || steps.filter.outputs.ci == 'true' || github.event_name == 'workflow_dispatch' }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -64,6 +65,9 @@ jobs:
               - 'supabase/config.toml'
             functions:
               - 'supabase/functions/**'
+            challenges:
+              - 'content/**'
+              - 'tool/challenges/**'
             agents:
               - 'AGENTS.md'
               - 'CLAUDE.md'
@@ -85,6 +89,21 @@ jobs:
         run: python3 tool/agents/sync.py --check
       - name: Tracker config parses
         run: python3 -c "import json; [json.load(open(f)) for f in ('tool/tracker/stages.json', 'tool/tracker/labels.json')]"
+
+  challenge-content:
+    name: Challenge content validates (#143)
+    needs: changes
+    if: needs.changes.outputs.challenges == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PyYAML
+        run: python3 -m pip install --quiet pyyaml
+      - name: Publisher tests
+        run: python3 tool/challenges/test_publish.py
+      - name: Dry run
+        run: python3 tool/challenges/publish.py --dry-run
 
   static-analysis-and-unit-tests:
     name: Flutter Lint, Test Pyramid & Coverage Gate

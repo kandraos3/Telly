@@ -1,0 +1,14 @@
+# "$company" is a production company name as TMDB spells it ("A24").
+key: company
+name: Studio spotlight
+description: Rank $target $company films
+art: noir
+medal_glyph: ST
+params: [company]
+rule:
+  media_type: movie
+  filters:
+    - type: company
+      any: [$company]
+target: 5
+sort: 6
