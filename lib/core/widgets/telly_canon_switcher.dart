@@ -71,6 +71,9 @@ class TellyCanonSwitcher extends StatelessWidget {
 }
 
 class _CanonOption extends StatelessWidget {
+  /// Extra width added to the space before the count.
+  static const double _countGap = 4;
+
   /// The track's 4 dp inset sits inside the hit area, so each half is a 48 dp target.
   final EdgeInsets inset;
   final String name;
@@ -114,11 +117,14 @@ class _CanonOption extends StatelessWidget {
               TextSpan(
                 text: name,
                 children: [
-                  if (count != null)
+                  if (count != null) ...[
+                    // A wider space (about 8 dp) between the name and its count (#47 device check).
+                    const TextSpan(text: ' ', style: TextStyle(letterSpacing: _countGap)),
                     TextSpan(
-                      text: ' $count',
+                      text: '$count',
                       style: TextStyle(color: countColor, fontFeatures: const [FontFeature.tabularFigures()]),
                     ),
+                  ],
                 ],
               ),
               maxLines: 1,

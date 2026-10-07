@@ -77,9 +77,9 @@ void main() {
     testWidgets('the selected half keeps a primary label with an accent count; the other is muted', (tester) async {
       await tester.pumpWidget(host(TellyCanonSwitcher(selected: 'tv', movieCount: 3, seriesCount: 5, onSelect: (_) {})));
       expect(textColor(tester, 'TV Shows 5'), TellyColors.textPrimary);
-      expect(spanColor(tester, 'TV Shows 5', ' 5'), TellyColors.phosphorLime);
+      expect(spanColor(tester, 'TV Shows 5', '5'), TellyColors.phosphorLime);
       expect(textColor(tester, 'Movies 3'), TellyColors.textTertiary);
-      expect(spanColor(tester, 'Movies 3', ' 3'), TellyColors.textTertiary);
+      expect(spanColor(tester, 'Movies 3', '3'), TellyColors.textTertiary);
     });
 
     testWidgets('uses the darker accent for the count on light, and 48 dp targets', (tester) async {
@@ -88,7 +88,7 @@ void main() {
         theme: TellyTheme.light,
       ));
       expect(textColor(tester, 'Movies 3'), TellyColors.lightTextPrimary);
-      expect(spanColor(tester, 'Movies 3', ' 3'), const Color(0xFF233B00));
+      expect(spanColor(tester, 'Movies 3', '3'), const Color(0xFF233B00));
       expect(tester.getSize(find.byKey(const Key('t'))).height, greaterThanOrEqualTo(48));
     });
 

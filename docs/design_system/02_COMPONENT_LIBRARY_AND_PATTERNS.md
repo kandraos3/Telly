@@ -209,7 +209,7 @@ Two levels of switcher, each with one look everywhere (`lib/core/widgets/`):
   - **Track:** Surface, radius 14, 4 dp inset, glass border, 48 dp min height.
   - **Selected half:** lifts onto Overlay `#1A1D27` (light `#F0F2F5`) with a glass border and radius 10. Its label is `textPrimary`, and its count is in the segmented control's accent label colour (`#D2FF52`; light `#233B00`, which keeps AA contrast on Overlay).
   - **Unselected half:** label and count in `textTertiary`.
-  - **Labels:** `labelLarge` w800, with the count after the name when the screen knows it ("Movies 142"). There's no subtitle line; the old "Includes anime" note under TV Shows is dropped.
+  - **Labels:** `labelLarge` w800, with the count after the name when the screen knows it ("Movies 142"). The space before the count is widened by 4 dp (about 8 dp in all), so the two read apart. There's no subtitle line; the old "Includes anime" note under TV Shows is dropped.
   - **Targets:** the 4 dp inset sits inside each half's hit area, so each half is a 48 dp target.
   - **Behaviour:** selection-click haptic. It can be expanded to share a row (Queue puts the Filter chip beside it).
 
