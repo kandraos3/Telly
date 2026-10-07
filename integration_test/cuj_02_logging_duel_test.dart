@@ -6,10 +6,13 @@ import 'package:telly_app/app.dart';
 import 'package:telly_app/core/config/app_config.dart';
 import 'package:telly_app/core/database/database.dart';
 import 'package:telly_app/core/database/database_provider.dart';
+import 'package:telly_app/core/sync/connectivity_signal.dart';
 import 'package:telly_app/features/auth/data/auth_repository.dart';
 import 'package:telly_app/features/auth/domain/user_profile.dart';
+import 'package:telly_app/features/discovery/data/discovery_repository.dart';
 import 'package:telly_app/features/feed/data/social_repository.dart';
 import 'package:telly_app/features/logging/presentation/screens/logging_studio_screen.dart';
+import 'package:telly_app/features/ranking/data/canon_hydration.dart';
 import 'package:telly_app/features/ranking/data/ranking_repository.dart';
 import 'package:telly_app/features/ranking/domain/binary_insertion_tournament.dart';
 import 'package:telly_app/features/ranking/domain/sentiment_bracket.dart';
@@ -17,6 +20,11 @@ import 'package:telly_app/features/ranking/domain/sentiment_bracket.dart';
 import '../test/fakes/fake_auth_repository.dart';
 import '../test/fakes/fake_social_repository.dart';
 import '../test/helpers/canon_seed.dart';
+
+class _EmptyRemoteCanon implements RemoteCanonSource {
+  @override
+  Future<List<RemoteRanking>> fetchMyCanon(String userId) async => const [];
+}
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -39,6 +47,10 @@ void main() {
           ),
         )),
         socialRepositoryProvider.overrideWithValue(FakeSocialRepository()),
+        // The same backend fakes as the router widget tests: Explore and Canon must not reach Supabase.
+        discoveryRepositoryProvider.overrideWithValue(FakeDiscoveryRepository()),
+        remoteCanonSourceProvider.overrideWithValue(_EmptyRemoteCanon()),
+        connectivityProvider.overrideWith((ref) => Stream.value(true)),
         appConfigProvider.overrideWithValue(const AppConfig(
           appEnv: 'test',
           supabaseUrl: 'https://test.supabase.co',
