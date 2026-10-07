@@ -1,0 +1,390 @@
+# Feature Spec 10: Gamification: Medals, Challenges and Levels
+
+> Tracking: epic #50 · Status: approved · Decision: [0005](../decisions/0005-gamification-medals-challenges-levels.md) · Mockup: [0050](../design_system/mockups/0050-gamification-directions.html)
+
+## 1. Overview
+
+A light game layer that brings people back between watches and gives friends something to compare, without ever rewarding people for ranking things they didn't watch. It has three parts, all reached from the More hub:
+
+| Part | What it is | Screen |
+|---|---|---|
+| **Medals** (trophy case) | Medals for milestones, finished film collections, taste moments and streaks. Pin three to your profile. | `SCR-23` Achievements |
+| **Challenges** | Time-boxed or open-ended goals ("Spooktober: 8 horror films by Oct 31"), seasonal or squad-made, raced with friends. | `SCR-25` Challenges, `SCR-26` Challenge |
+| **Levels** | XP from rankings, quests, collections, challenges and streaks; levels unlock cosmetic rewards; a weekly table with friends. | `SCR-27` Your level |
+
+Ground rules (decision 0005):
+- **Only qualifying rankings count** (§2).
+- **Rewards are cosmetic.**
+- **The streak is weekly.**
+- **Competition is friends-only, in weekly tables.**
+- **Medals and finished challenges post to the feed** unless you turn it off.
+
+It ships in three slices (§12).
+
+---
+
+## 2. Qualifying rankings (the anti-gaming rule)
+
+Every count in this spec is over **qualifying rankings**: rows in `user_rankings` with status `COMPLETED`, where at least one of these holds:
+- the user has a `pairwise_duels` row in the same canon in which the title is winner or loser (it was placed through duels); or
+- it was the first title in that canon, so no duel was possible. This means no other `user_rankings` row in the same `media_type` has an earlier `created_at`.
+
+Consequences:
+- **Imports never count.** Letterboxd and AniList imports create rankings without duels. At most one imported title per canon can slip through as "first in canon"; that's accepted.
+- **Re-ranking can't farm.** Deleting a title and ranking it again yields the same XP reference (§6), so no new XP.
+- **Canons stay separate.** A duel never pairs a film with a show, so qualification is always within one canon.
+
+Exposed as the SQL view `public.qualifying_rankings (user_id, title_id, media_type, created_at)`, which is RLS-safe through `security_invoker`.
+
+---
+
+## 3. Weeks, streaks and time zones
+
+- **Week:** Monday 00:00 to Sunday 23:59:59 in the user's time zone, `users.timezone` (IANA name, default `UTC`). The app sets it on sign-in and when it changes. Weeks are labelled ISO-style: `2026-W41`.
+- **A week counts** when the user has at least one qualifying ranking whose `created_at` falls in it.
+- **Weekly streak:** the number of consecutive counted weeks, ending with the most recent *finished* week, plus the current week if it already counts.
+  - **The current week never breaks a streak** while it's still running.
+  - **Freezes:** walking back through the weeks, a missed week is covered by a **freeze** if none has been used in the calendar month of that week's Monday (at most one per month). A covered week doesn't add to the count, but it doesn't break the streak either.
+  - **A missed week with no freeze available ends the streak.**
+- **Computed, not stored:** `weekly_streak(user_id) → (current_weeks, best_weeks, weeks jsonb)`, where `weeks` holds the last 7 weeks as `counted | frozen | missed | current`. Being a pure SQL function over `qualifying_rankings`, it's deterministic and testable with pgTAP.
+
+Shown as the lime "▲ N weeks" chip (Achievements summary, Your level, friends' rows) and as the 7-week strip on `SCR-27` (❄ marks a frozen week).
+
+---
+
+## 4. Medals
+
+### 4.1 Catalogue (`achievements` table)
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | TEXT PK | Stable slug, e.g. `movies_100`, `collection_263`, `challenge_spooktober_2026` |
+| `kind` | enum `milestone · taste · streak · collection · challenge` | Section on `SCR-23` |
+| `tier` | enum `bronze · silver · gold · special` | Medal colour (§9.1) |
+| `name`, `description` | TEXT | Description says how to earn it ("Rank 100 films") |
+| `glyph` | VARCHAR(4) | 1–4 characters drawn on the medal (`100`, `LR`, `↯`) |
+| `media_type` | `media_type_enum` NULL | Set for per-canon medals |
+| `threshold` | INT NULL | Target for counted medals |
+| `collection_id` / `challenge_id` | INT / UUID NULL | For collection and challenge medals |
+| `sort` | INT | Order within its section |
+| `active` | BOOL | Retired medals stay for people who hold them but are hidden from those who don't |
+
+**Launch medals** (slice 1, seeded by migration):
+
+| Medal | Kind | Tier | Earned by |
+|---|---|---|---|
+| Ticket Stub (films / series) | milestone | bronze | 10 qualifying rankings in that canon |
+| Half-Centurion (films / series) | milestone | silver | 50 |
+| Centurion (films / series) | milestone | gold | 100 |
+| Upset Artist | taste | special (violet) | 5 duels marked `is_upset` |
+| Taste Twin | taste | special | Following someone with a taste match of 92% or more (`taste_matches`) |
+| Decade Hopper | taste | silver | Qualifying rankings from 5 different release decades |
+| Genre Explorer | taste | silver | Qualifying rankings across 8 different genres |
+| Graveyard Keeper | taste | bronze | 5 shows in the TV Graveyard |
+| Regular / Devotee / Year-Rounder | streak | bronze / silver / gold | Best weekly streak of 4 / 12 / 52 weeks |
+| Founding Viewer | special | special | Account created before the public launch date + 90 days (a constant in the migration) |
+
+**Collection medals** (slice 2): one per TMDB collection the user has started (§7). The tier is gold, and it's earned when every *released* film in the collection is in their qualifying rankings.
+
+**Challenge medals** (slice 2): each challenge brings its own medal (§8). The tier is gold.
+
+### 4.2 Unlocks (`user_achievements`)
+
+`(user_id, achievement_id) PK, unlocked_at, seen_at NULL, pinned_slot SMALLINT NULL CHECK 1..3`, with a unique `(user_id, pinned_slot)`.
+
+- **Evaluation:** `evaluate_achievements(user_id)` runs at the end of the ranking RPC, the duel RPC, the drop RPC and the follow RPC (cheap: indexed counts), and nightly for taste and streak medals. Inserts are idempotent (`ON CONFLICT DO NOTHING`). Each new unlock:
+  1. adds XP (§6, slice 3; until then, nothing);
+  2. writes a `MEDAL_UNLOCKED` activity if `users.share_achievements` (§10).
+- **Medals are never revoked**, even if the rankings behind them are deleted.
+- **Offline:** rankings sync through the offline duel queue first, so unlocks appear after sync. The app shows the unlock moment (`SCR-24`) for rows where `seen_at IS NULL`, then marks them seen.
+
+### 4.3 Rarity
+
+`achievement_rarity (achievement_id PK, holders INT, active_users INT, percent NUMERIC(5,2), computed_at)`. A nightly job counts holders among users active in the last 90 days. Shown as "Unlocked by 4.2% of Telly viewers", or "New: not enough viewers yet" under 200 active users.
+
+### 4.4 Pinning
+
+Up to three medals pinned to slots 1–3 (`pin_achievement(achievement_id, slot)` and `unpin_achievement(slot)`). Pinned medals appear:
+- on `SCR-23`;
+- under your name on the More profile card (`SCR-22`) and the friend profile (`SCR-15`);
+- on the medals share card.
+
+The pinned row is never empty: when nothing is pinned, it shows your three most recent unlocks, labelled "Recent".
+
+---
+
+## 5. Levels and rewards
+
+### 5.1 Levels
+
+Levels come from total XP, which is earned and never spent.
+- Going from level L to L+1 takes **250 × L XP**. The total needed to *reach* level L is **125 × L × (L − 1)**: level 1 at 0 XP, level 2 at 250, level 12 at 16,500, level 13 at 19,500.
+- `SCR-27` shows the progress inside the current level, e.g. "2,340 / 3,000 XP to Level 13".
+
+| Levels | Name |
+|---|---|
+| 1–4 | Extra |
+| 5–9 | Regular |
+| 10–14 | Cinephile |
+| 15–19 | Critic |
+| 20–29 | Auteur |
+| 30+ | Legend |
+
+### 5.2 Rewards (`rewards` table, slice 3)
+
+`id, name, kind (frame · card_style · canon_decoration · app_icon · header_art), level_required, active, sort`.
+
+**Unlocked** means level ≥ `level_required`; it's derived, not stored. **Equipped** choices live in `user_reward_choices (user_id, kind, reward_id)`.
+
+| Level | Reward | Where it shows |
+|---|---|---|
+| 5 | Lime profile frame | Avatar ring on profile and feed (both themes) |
+| 10 | "Noir" card style | Wrapped and share cards |
+| 15 | Gold podium tags | The Canon podium rank tags (`SCR-14`) |
+| 20 | Alternate app icons | Settings → App icon (platform alternate icons) |
+| 30 | Custom canon header art | A still behind your profile header |
+
+Every reward is cosmetic. Nothing that's needed to use Telly is ever locked (decision 0005). A future Telly Pro (#52) must not move these behind a paywall without a new decision.
+
+---
+
+## 6. XP ledger (slice 3)
+
+`xp_ledger (id, user_id, amount INT, source ENUM, ref TEXT, week TEXT, created_at)`, with a **unique `(user_id, source, ref)`**. It's append-only: corrections are new rows with `source = 'correction'`, and no updates or deletes. This keeps every point auditable for a possible later redemption, such as merch (decision 0005).
+
+| Source | XP | `ref` | Limits |
+|---|---|---|---|
+| `ranking` | +10 | `media_type:title_id` | Qualifying rankings only; **at most 10 a week** (100 XP) |
+| `quest` | +40 / +50 / +60 | `week:quest_key` | 3 quests a week |
+| `streak` | +25 | `week` | Once per counted week |
+| `medal` | +25 | `achievement_id` | Milestone, taste and streak medals |
+| `collection` | +100 | `collection_id` | Once per collection |
+| `challenge` | +150 seasonal, +100 squad | `challenge_id` | Once per challenge |
+| `referral` | reserved for #51 | | |
+| `correction` | ± | free text | Written only by the service role |
+
+`my_level() → (level, name, total_xp, level_floor, level_ceiling, week_xp)`.
+
+---
+
+## 7. Collections (slice 2)
+
+- **Data:**
+  - `titles.collection_id INT NULL` comes from TMDB `belongs_to_collection`.
+  - `title_collections (collection_id PK, name, poster_path, part_ids INT[], released_part_ids INT[], fetched_at)` comes from TMDB `/collection/{id}`, refreshed weekly by `tmdb-details`.
+  - Films only: TMDB collections are film collections, so the TV canon has none.
+- **Progress:** the number of `released_part_ids` in the user's qualifying rankings, out of the number released.
+- **When it appears:**
+  - A collection shows on `SCR-23` once the user has ranked one of its films.
+  - It's sorted closest-to-done first, with the top 3 shown and the rest under "See all".
+  - A finished collection becomes a gold medal (`collection_<id>`) worth +100 XP.
+
+---
+
+## 8. Challenges (slice 2)
+
+### 8.1 Data
+
+`challenges`:
+
+| Column | Notes |
+|---|---|
+| `id` UUID, `slug` TEXT UNIQUE | e.g. `spooktober-2026` |
+| `name`, `description` | "Spooktober", "Rank 8 horror films by Oct 31" |
+| `art` | A gradient key (`horror`, `noir`, `gold`…), or a storage path for a hero image |
+| `starts_at`, `ends_at` NULL | Open-ended when `ends_at` is NULL |
+| `rule` JSONB | §8.2 |
+| `target` INT | e.g. 8 |
+| `squad_id` UUID NULL | Set for squad challenges |
+| `featured` BOOL | At most one featured at a time |
+| `template_key` TEXT NULL | Set when generated from a template |
+| `status` | `draft · live`. "Ended" is derived from `ends_at`. |
+| `created_by` | User, or NULL for official challenges |
+
+`challenge_participants (challenge_id, user_id, joined_at, completed_at NULL) PK (challenge_id, user_id)`.
+
+### 8.2 Rules
+
+A rule is a media type plus filters that must all match. Rules are data, so a new challenge never needs an app update. Only a new filter *type* does.
+
+```json
+{ "media_type": "movie", "filters": [ { "type": "genre", "any": ["Horror"] } ] }
+```
+
+| Filter `type` | Matches a title when | Source |
+|---|---|---|
+| `genre` | Any of its genres is in `any` | `titles.genres` |
+| `decade` | Its release year's decade is in `any` (`1970`) | `titles.release_date` |
+| `collection` | `titles.collection_id` is in `any` | §7 |
+| `titles` | `(id, media_type)` is in `any` (an explicit list, such as Best Picture winners) | |
+| `network` | `titles.original_network` is in `any` | |
+| `company` | Any of its production companies is in `any` (`A24`) | New `titles.production_companies TEXT[]` from `tmdb-details` |
+| `tv_type` | TMDB TV type is in `any` (`Miniseries`) | New `titles.tv_type` from `tmdb-details` |
+
+- `media_type` is `movie`, `tv` or `any`.
+- **Progress** is the number of qualifying rankings of matching titles with `created_at` between `starts_at` and `ends_at`. Rankings made before you joined count, as long as they're inside the window.
+- **Completing:** reaching `target` sets `completed_at`, unlocks the challenge medal, adds XP and posts `CHALLENGE_COMPLETED`.
+- **RPCs:**
+  - `challenge_progress(challenge_id) → mine + followed participants`;
+  - `join_challenge(id)` and `leave_challenge(id)`;
+  - `my_challenges()` and `discover_challenges()`;
+  - `challenge_picks(id)` returns matching titles from your Queue first, then titles the people you follow ranked highly, excluding anything already ranked.
+
+### 8.3 Squad challenges
+
+- **Who can create:** a squad's owner or admins, from the templates (§8.4) with their own name and dates.
+- **Who sees it:** squad members only.
+- **Joining:** members join automatically.
+- **Medal:** finishing earns a squad challenge medal; squad challenge XP is +100.
+
+### 8.4 Running challenges after launch (operations)
+
+New and updated challenges reach every installed app on its next open. There are four ways in:
+1. **Challenge files in the repo (main path).**
+   - One YAML file per challenge in `content/challenges/` (name, dates, art, rule, target, medal glyph).
+   - `tool/challenges/publish.py` validates the files and upserts them through the service-role RPC `admin_upsert_challenge`, following the `supabase-deploy` rules. Its `--dry-run` runs in CI on every change.
+   - The owner can just ask the agent ("add an Oscars-season challenge for March").
+2. **Recurring templates.**
+   - `content/challenge_templates/` holds parameterised templates: genre month, decade, collection, network, limited series.
+   - `content/challenge_calendar.yaml` maps months to templates and parameters.
+   - A monthly scheduled edge function, `challenge-scheduler` (pg_cron), creates the coming month's challenges from the calendar. It also ends the featured flag on expired ones.
+   - **Launch calendar:** six months of challenges are written in slice 2.
+3. **The Supabase table editor**, as a manual fallback for urgent fixes (a typo, extending a deadline). Changes made there must be copied back into the repo file the same week.
+4. **Squads**, through §8.3.
+
+---
+
+## 9. Screens
+
+All screens use the shared app bars (screen specs §0.2) and the frosted bottom sheet (component library §6), and work in both themes. Routes sit under the More branch.
+
+### 9.1 Medal visual
+
+- **Shape:** a hexagon (54 × 60 dp; small 40 × 45; large 110 × 124) with the glyph centred (Plus Jakarta Sans w800) in `#08090C`.
+- **Fills** (fixed in both themes):
+
+| Tier | Fill | Glyph |
+|---|---|---|
+| Gold | `#FFE066 → #FFA733` (the God-tier gradient, style guide §2.2) | `#08090C` |
+| Silver | `#E5E7EB → #94A3B8` | `#08090C` |
+| Bronze | `#F5B78A → #B8693A` | `#08090C` |
+| Special | `#A78BFA → #7C5CFF` | white |
+
+- **Locked:** an Overlay fill with a dashed `strokeSubtle` outline and the glyph in `textTertiary`.
+- **Semantics:** "Gold medal, Middle-earth, unlocked" or "Collection, The Dark Knight Trilogy, 2 of 3".
+
+### 9.2 `SCR-22` More hub additions
+
+- **Tiles:** Achievements (trophy, Warm Amber), Challenges (flag, Electric Cyan `#00F0FF`; light `#00838F`; violet stays reserved for Invite friends, #51) and Your level (bolt, primary accent) join the feature grid after Queue, before Wrapped and Graveyard.
+- **Profile card:** shows the pinned medals (small) after the handle.
+
+### 9.3 `SCR-23` Achievements (`/more/achievements`): mockup A1
+
+- **App bar:** ← Achievements, with Share (a card of your pinned medals).
+- **Summary card:** "Unlocked N of M", and the "▲ N weeks" streak chip, which opens `SCR-27`.
+- **Pinned to profile:** three medals with names. Tapping one opens its sheet, which has a Pin/Unpin action.
+- **Sections** in this order:
+  - Collections (slice 2): N in progress, with progress bars and "2/3";
+  - Milestones;
+  - Taste;
+  - Streak.
+
+  Locked medals show with progress ("94/100").
+- **Medal sheet** (mockup A2): the medal, its name and how it's earned, and a progress bar. For collections, it also lists "Still to watch" with one-tap **+ Queue**. Then which friends have it (avatar stack) and the rarity line. Unlocked medals add **Pin to profile** and **Share card**.
+- **Empty (new user):** every medal is locked with its progress, and the pinned row shows a hint: "Rank titles to earn your first medal".
+
+### 9.4 `SCR-24` Unlock moment: mockup A3
+
+- **What it is:** a full-screen modal over everything, shown on the next app foreground (or right after the ranking) for each unseen unlock, one after another.
+- **Layout:**
+  - a confetti backdrop (static if reduced motion is on);
+  - an "Achievement unlocked" chip;
+  - the large medal;
+  - the name in the display font;
+  - one personal line ("The Return of the King came in at #2 in your canon");
+  - rarity and friends;
+  - **Pin to profile** (primary), **Share card**, and **Done**.
+- **Haptics:** a medium impact on show.
+
+### 9.5 `SCR-25` Challenges (`/more/challenges`): mockup C1
+
+- **App bar:** ← Challenges, with **+** for squad owners and admins (creates a squad challenge from a template).
+- **Featured:** a hero card with art, "FEATURED · N DAYS LEFT", the name, the rule line, joined and friend counts, and your progress if you've joined (a **Join** button if not).
+- **Yours:** challenges you've joined that are still live, with progress, and a "Squad" chip for squad challenges.
+- **Join next:** live challenges you haven't joined, each with **Join**.
+- **Ended:** collapsed. Finished challenges show their medal.
+
+### 9.6 `SCR-26` Challenge (`/more/challenges/:slug`): mockup C2
+
+- **App bar:** ← name, with Share.
+- **Progress card:** the rule line, days left (or "Open-ended"), and a large "3 / 8" with a bar.
+- **Friends in this challenge:** followed participants and you, sorted by progress, with bars and counts.
+- **Picks:** matching titles from your Queue (with ▶ provider), then suggestions (+ Queue).
+- **Join / Leave** sits in the app bar's ⋮ menu once joined.
+
+### 9.7 `SCR-27` Your level (`/more/level`): mockup B1–B3
+
+- **App bar:** ← Your level, with **?** (a sheet of the XP rules from §6, in plain words).
+- **Level card:** a ring (primary-accent progress), the level number, its name, "2,340 / 3,000 XP to Level 13" and a bar.
+- **Weekly streak card:** the chip and the 7-week strip (§3), with the freeze line.
+- **This week's quests:** three rows with checks, progress and XP chips. They reset on Monday.
+- **Links:** **Rewards** (`/more/level/rewards`, mockup B2) and **Friends this week** (`/more/level/week`, mockup B3).
+  - **Rewards:** the track by level (unlocked rows outlined in lime, locked rows with XP to go), an Equip action on unlocked rows, and the XP rules table.
+  - **Friends this week:** a segmented Friends / each squad. Rank, avatar, name, level, streak and weekly XP, with your row tinted. A footer says it resets Monday.
+
+### 9.8 Weekly quests (slice 3)
+
+- **Templates:** `quest_templates (key, title, rule JSONB (§8.2 filters, or a special kind such as finish_from_queue), target, xp)`.
+- **Assignment:** three are assigned per user per week on first read (`my_week()`). The pick is deterministic, seeded by `user_id` and the week, so a refresh never reshuffles them.
+- **Mix:** one easy (rank 1–3), one exploration (a genre or decade you rank least), and one Queue quest.
+
+### 9.9 States (all screens)
+
+- **Loading:** skeletons (component library §7.1).
+- **Offline:** the last snapshot from a Drift cache (`gamification_cache`, one JSON per screen), read-only, with the offline banner. Join and Pin wait until you're back online.
+- **Error:** a retry with the shared empty state.
+
+---
+
+## 10. Feed and privacy
+
+- **Activity types:** `activity_logs.activity_type` gains `MEDAL_UNLOCKED` and `CHALLENGE_COMPLETED`, with metadata for the medal (id, name, tier, glyph) or the challenge (id, slug, name, count, best title).
+- **Feed cards** (Social, `SCR-05`; mockup C3):
+  - **Medal card:** the person, the medal, its rarity, and reactions.
+  - **Challenge card:** the person, the medal, "Best of the 8: The Thing (#1, 9.40)", reactions, and **Join** while the challenge is live.
+- **Ordinary rankings** made inside a joined challenge show "Spooktober 2 of 8" under the ranking line.
+- **Privacy:** Settings (`SCR-20`) → Privacy → **Share achievements in the feed** (`users.share_achievements`, default on). Off means no medal or challenge posts; unlocks still happen. Quests, level-ups and streaks never post. Private accounts follow the existing visibility rules.
+
+---
+
+## 11. Analytics
+
+PostHog events: `medal_unlocked`, `medal_pinned`, `challenge_joined`, `challenge_completed`, `quest_completed`, `level_up`, `reward_equipped`, and `streak_extended` (weekly).
+
+These measure the goal (people coming back weekly) and catch unhealthy patterns, such as ranking spikes right before a cap resets.
+
+---
+
+## 12. Delivery slices
+
+1. **Slice 1, medals and streak:**
+   - qualifying rankings, time zone, weekly streak;
+   - medal catalogue, evaluation and rarity;
+   - pinning;
+   - `SCR-23` (without collections), `SCR-24`;
+   - the More tile and profile pins;
+   - the medal feed card and the privacy toggle.
+2. **Slice 2, collections and challenges:**
+   - TMDB collections, companies and TV type;
+   - collection medals;
+   - challenges, rules and squad challenges;
+   - publishing tools and the scheduler, plus the launch calendar;
+   - `SCR-25`, `SCR-26`, and the challenge feed card.
+3. **Slice 3, levels:**
+   - the XP ledger and levels;
+   - quests;
+   - rewards and cosmetics;
+   - the weekly friends table;
+   - `SCR-27`.
+
+Each slice ships on its own. The More tiles appear only once their slice ships (SCR-22 "Future entries").

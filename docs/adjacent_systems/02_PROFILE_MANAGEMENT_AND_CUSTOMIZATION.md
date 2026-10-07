@@ -63,6 +63,8 @@ This document details the **Edit Profile Studio**, the **Showcase Architecture**
 
 ## 3. The Social Badge & Achievement System
 
+> Superseded by [features/10](../features/10_GAMIFICATION_MEDALS_CHALLENGES_AND_LEVELS.md) (epic #50, decision 0005). The sketch below is kept for history; the medal catalogue, pinning and rarity rules live in features/10 §4.
+
 Badges are awarded algorithmically to celebrate dedication to the medium:
 
 ```

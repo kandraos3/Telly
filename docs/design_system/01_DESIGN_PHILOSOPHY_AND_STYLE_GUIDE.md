@@ -83,6 +83,18 @@ To give users instant visual hierarchy when scanning leaderboards:
 💀 Dropped / DNF (< 5.50)       : Blood Ash [ #F87171 → #DC2626 ]
 ```
 
+### 2.3 Medal Tiers (epic #50)
+
+Medals are hexagons whose fills stay the same in both themes (features/10 §9.1):
+
+| Tier | Fill gradient | Glyph |
+|---|---|---|
+| Gold | `#FFE066 → #FFA733` (shared with God tier) | `#08090C` |
+| Silver | `#E5E7EB → #94A3B8` | `#08090C` |
+| Bronze | `#F5B78A → #B8693A` | `#08090C` |
+| Special | `#A78BFA → #7C5CFF` (shared with Prestige) | `#FFFFFF` |
+| Locked | Overlay surface, dashed `stroke-subtle` outline | `text-tertiary` |
+
 ---
 
 ## 3. Typography Hierarchy & Font Pairings

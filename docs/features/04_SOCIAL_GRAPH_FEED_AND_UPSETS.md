@@ -45,7 +45,7 @@ In television, this dynamic is amplified tenfold. Everyone has a strong opinion 
 2. **The Upset Alert:** A user places a controversial show above a cultural consensus titan.
 3. **The DNF (Dropped) Drop:** A user gives up on a show and explains why.
 4. **The Finale Reaction:** Immediate hot-take following a season or series finale broadcast.
-5. **The Milestone Achievement:** e.g., *"Maya just logged their 100th series!"*
+5. **The Milestone Achievement:** e.g., *"Maya just logged their 100th series!"* Now specified as the medal and finished-challenge cards in [features/10](10_GAMIFICATION_MEDALS_CHALLENGES_AND_LEVELS.md) §10 (#50).
 
 ### 2.2 1-Tap Watchlist Ingestion
 Every feed card contains a prominent button: `[ + Want to Watch ]`.

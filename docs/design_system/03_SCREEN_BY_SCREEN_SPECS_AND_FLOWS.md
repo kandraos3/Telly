@@ -28,6 +28,11 @@ This document defines every single screen in the Telly application. For each scr
 20. **`SCR-20`**: Settings, Account & Data Export
 21. **`SCR-21`**: Home
 22. **`SCR-22`**: More Hub
+23. **`SCR-23`**: Achievements (medals): [features/10](../features/10_GAMIFICATION_MEDALS_CHALLENGES_AND_LEVELS.md) §9.3
+24. **`SCR-24`**: Unlock moment: features/10 §9.4
+25. **`SCR-25`**: Challenges: features/10 §9.5
+26. **`SCR-26`**: Challenge detail: features/10 §9.6
+27. **`SCR-27`**: Your level (with Rewards and Friends this week): features/10 §9.7
 
 ---
 
@@ -43,7 +48,7 @@ Five tabs in the floating bar (component library §2.1), plus the floating Log b
 | Explore | `/explore` | `SCR-07` Explore | none |
 | Canon | `/canon` | `SCR-14` Canon | none |
 | Social | `/social` | `SCR-05` Feed | `/social/activity/:id` (`SCR-06`) |
-| More | `/more` | `SCR-22` More hub | `/more/queue` (`SCR-13`), `/more/queue/lists`, `/more/queue/list/:id`, `/more/graveyard` (`SCR-18`), `/more/wrapped` (`SCR-19`), `/more/settings` (`SCR-20`), `/more/edit` |
+| More | `/more` | `SCR-22` More hub | `/more/queue` (`SCR-13`), `/more/queue/lists`, `/more/queue/list/:id`, `/more/graveyard` (`SCR-18`), `/more/wrapped` (`SCR-19`), `/more/settings` (`SCR-20`), `/more/edit`, `/more/achievements` (`SCR-23`), `/more/challenges` (`SCR-25`), `/more/challenges/:slug` (`SCR-26`), `/more/level`, `/more/level/rewards`, `/more/level/week` (`SCR-27`) |
 
 Unchanged, pushed over the shell: the `/log` flow (`SCR-09` to `SCR-12`), `/title/:mediaType/:id` (`SCR-08`), `/u/:handle` (`SCR-15`), `/cowatch` and `/u/:handle/two-to-watch` (`SCR-16`), `/squads` and `/squads/:id` (`SCR-17`, opened from Social).
 
@@ -824,7 +829,7 @@ The Canon tab opens on your rankings. Your profile card lives in the More hub (`
 - **Sections:**
   - `Profile:` Avatar, Username, Bio, Connected Accounts (Apple, Google).
   - `Subscriptions:` Manage active streaming services.
-  - `Privacy & Social:` Private profile toggle, hide dropped shows from public feed, spoiler protection settings.
+  - `Privacy & Social:` Private profile toggle, hide dropped shows from public feed, spoiler protection settings, and **Share achievements in the feed** (default on; features/10 §10, #50).
   - `Notifications:` Upsets from friends, shared finale airings, leaving soon alerts.
   - `Data & Exports:`
     - `Export Canon to CSV / Excel`
@@ -896,6 +901,6 @@ A WHOOP-style hub (`/more`): one place for everything that isn't a daily destina
 - **Queue tile:** first and full width, bookmark icon in the primary accent (`#D2FF52`; light `#4D7800`). Opens `/more/queue`.
 - **Feature tiles:** a 2-column grid, 104dp tall, `surface-raised` with a `stroke-subtle` border and radius 16. Icon (24px) top-left in its semantic accent; label (Body Large w600) and a one-line subtitle (Caption, `textTertiary`) bottom-left. Shipped now: **Wrapped** (lime), **Graveyard** (Neon Coral `#FF4B6E`; light `#D61F4D`).
 - **Grouped list:** 52dp rows in one rounded card with dividers. Shipped now: **Settings and account** (opens `/more/settings`).
-- **Future entries** are added by their epics, and only once they ship (no "Soon" placeholders in the app): Achievements (#50, tile, amber), Invite friends (#51, tile, violet), Telly Pro (#52, list row, amber), and Help & feedback (#118, list row, once a support channel exists).
+- **Future entries** are added by their epics, and only once they ship (no "Soon" placeholders in the app): Achievements (#50 slice 1, tile, amber), Challenges (#50 slice 2, tile, cyan), Your level (#50 slice 3, tile, primary accent), all three placed after Queue (features/10 §9.2), Invite friends (#51, tile, violet), Telly Pro (#52, list row, amber), and Help & feedback (#118, list row, once a support channel exists).
 - The floating Log button is hidden on this tab.
 - **Offline:** everything works offline except refreshing the avatar. No loading state is needed.

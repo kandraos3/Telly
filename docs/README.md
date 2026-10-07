@@ -23,6 +23,7 @@ Each feature of the product is specified in an end-to-end, production-ready engi
 | **07** | [**`Discovery & Streaming Intelligence`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md) | Universal Smart Watchlist, JustWatch streaming availability & app deep-linking, "Leaving Soon" expiration alerts, and Network Battlegrounds (HBO vs Apple TV+ vs Netflix). |
 | **08** | [**`Anime Integration & Hybrid Canon`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/08_ANIME_INTEGRATION_AND_HYBRID_CANON.md) | 1-click AniList / MAL profile import, Franchise Rollup (seasons/cours/movies), TrueSkill ranking confidence ($\sigma$), Studio affinity (MAPPA, Ufotable), and seasonal anime charts. |
 | **09** | [**`Movie Integration & Dual Canon`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md) | First-class movie integration, Dual-Canon segregation architecture (Movie Canon vs Series Canon), 1-click Letterboxd `diary.csv` import, theatrical venue tracking, and "Movie Night" decider. |
+| **10** | [**`Gamification: Medals, Challenges & Levels`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/10_GAMIFICATION_MEDALS_CHALLENGES_AND_LEVELS.md) | Medals (milestones, TMDB collections, taste, weekly streak), time-boxed and squad challenges run as server data, XP levels with cosmetic rewards, weekly friends tables; only duelled rankings count. |
 
 ---
 
