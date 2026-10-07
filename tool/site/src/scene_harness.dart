@@ -1,6 +1,6 @@
 // Renders one app screen to a PNG for the website (WEB-02), the way the app
-// shell would show it: dark theme, iPhone 15 viewport, floating nav bar on
-// tab screens, generated poster art.
+// shell would show it: dark theme, iPhone 15 viewport, floating nav bar and
+// Log button on tab screens, generated poster art.
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -11,7 +11,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:telly_app/core/database/database.dart';
 import 'package:telly_app/core/theme/telly_theme.dart';
+import 'package:telly_app/core/router/app_shell.dart';
 import 'package:telly_app/core/widgets/telly_floating_nav_bar.dart';
+import 'package:telly_app/core/widgets/telly_log_fab.dart';
 
 /// iPhone 15 viewport in logical pixels.
 const phoneSize = Size(393, 852);
@@ -61,13 +63,24 @@ Future<void> shootScene(WidgetTester tester, Scene scene, String outDir) async {
         path: '/',
         builder: (_, __) => scene.tab == null
             ? Scaffold(body: scene.build())
-            : Scaffold(
-                extendBody: true,
-                body: scene.build(),
-                bottomNavigationBar: TellyFloatingNavBar(
-                  currentIndex: scene.tab!,
-                  onTabSelected: (_) {},
-                  onLogTap: () {},
+            : Builder(
+                builder: (context) => Stack(
+                  children: [
+                    Scaffold(
+                      extendBody: true,
+                      body: scene.build(),
+                      bottomNavigationBar: TellyFloatingNavBar(
+                        currentIndex: scene.tab!,
+                        items: AppShell.navItems,
+                        onTabSelected: (_) {},
+                      ),
+                    ),
+                    Positioned(
+                      right: TellyLogFab.rightInset,
+                      bottom: TellyLogFab.bottomOffsetOf(context),
+                      child: TellyLogFab(onTap: () {}),
+                    ),
+                  ],
                 ),
               ),
       ),

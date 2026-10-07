@@ -23,7 +23,7 @@ Rather than a traditional opaque bottom bar anchored to the screen bottom, Telly
   3. `Canon` (bar-chart / film strip icon): `SCR-14`
   4. `Social` (two-people icon): `SCR-05`
   5. `More` (2×2 grid icon): `SCR-22`
-- **Item anatomy:** 22px stroke icon, 11px label (Caption, w600) under it, 4px dot under the label. Each item is at least 48 × 56 dp.
+- **Item anatomy:** 22px stroke icon, 11px label (Caption) under it, 4px dot under the label. Each item is at least 48 × 56 dp.
 - **Active Tab State:** Icon and label shift to `textPrimary` (`#FFFFFF`; light `#0F1117`) with a 4px Phosphor dot beneath (`#D2FF52`; light `#4D7800`). Inactive items use `textTertiary` (`#7D8198`; light `#696E87`).
 - **Re-tap:** tapping the active tab pops it to its root.
 

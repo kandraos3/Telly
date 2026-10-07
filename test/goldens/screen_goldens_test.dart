@@ -103,7 +103,6 @@ void main() {
               child: TellyFloatingNavBar(
                 currentIndex: 0,
                 onTabSelected: (_) {},
-                onLogTap: () {},
               ),
             ),
           ),

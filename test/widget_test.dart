@@ -101,13 +101,14 @@ void main() {
       expect(tester.state(find.byType(ActivityFeedScreen)), same(feedState));
     });
 
-    testWidgets('center action opens the logging flow (SCR-09)', (tester) async {
+    testWidgets('floating Log button opens the logging flow (SCR-09)', (tester) async {
       final c = await launch(tester, FakeAuthRepository(signedInUserId: 'u1', profile: onboarded));
-      await tester.tap(find.byKey(const Key('nav_log_button')));
+      await tester.tap(find.byKey(const Key('log_fab')));
       await tester.pumpAndSettle();
       // Pushed full-screen over the shell (imperative match, so assert on what renders).
       expect(find.byType(LoggingStudioScreen), findsOneWidget);
       expect(find.byKey(const Key('nav_bar_surface')), findsNothing);
+      expect(find.byKey(const Key('log_fab')), findsNothing);
       expect(c.read(appRouterProvider).canPop(), isTrue);
     });
 

@@ -5,25 +5,34 @@ import 'package:telly_app/core/theme/telly_theme.dart';
 import 'package:telly_app/core/widgets/telly_floating_nav_bar.dart';
 
 void main() {
-  Future<List<Object>> pumpBar(WidgetTester tester, {int index = 0}) async {
+  Future<List<Object>> pumpBar(WidgetTester tester, {int index = 0, ThemeData? theme}) async {
     final events = <Object>[];
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(MaterialApp(
-      theme: TellyTheme.dark,
+      theme: theme ?? TellyTheme.dark,
       home: Scaffold(
         bottomNavigationBar: TellyFloatingNavBar(
           currentIndex: index,
           onTabSelected: events.add,
-          onLogTap: () => events.add('log'),
         ),
       ),
     ));
     return events;
   }
 
-  group('FE-602: TellyFloatingNavBar (component spec §2.1)', () {
+  BoxDecoration surfaceOf(WidgetTester tester) => tester
+      .widget<Container>(
+        find.descendant(of: find.byKey(const Key('nav_bar_surface')), matching: find.byType(Container)).first,
+      )
+      .decoration! as BoxDecoration;
+
+  Icon iconOf(WidgetTester tester, String tab) => tester.widget<Icon>(
+        find.descendant(of: find.byKey(Key('nav_tab_$tab')), matching: find.byType(Icon)),
+      );
+
+  group('#113: TellyFloatingNavBar (component spec §2.1)', () {
     testWidgets('pill is 64 tall, inset 16 from each edge, radius 32', (tester) async {
       await pumpBar(tester);
       final rect = tester.getRect(find.byKey(const Key('nav_bar_surface')));
@@ -35,57 +44,81 @@ void main() {
       expect(clip.borderRadius, BorderRadius.circular(32));
     });
 
-    testWidgets('surface is #11131A @ 75% with a #242938 1px stroke and blur 24', (tester) async {
+    testWidgets('dark surface is #11131A @ 75% with a #242938 1px stroke and blur 24', (tester) async {
       await pumpBar(tester);
-      final container = tester.widget<Container>(
-        find.descendant(of: find.byKey(const Key('nav_bar_surface')), matching: find.byType(Container)).first,
-      );
-      final deco = container.decoration! as BoxDecoration;
+      final deco = surfaceOf(tester);
       expect(deco.color, TellyColors.backgroundSurface.withValues(alpha: 0.75));
       expect((deco.border! as Border).top.color, TellyColors.strokeSubtle);
       expect((deco.border! as Border).top.width, 1);
       expect(TellyFloatingNavBar.blurSigma, 24);
     });
 
-    testWidgets('center action is a lime button raised 6px with a 12px halo', (tester) async {
+    testWidgets('light surface is #FFFFFF @ 90% with a #E2E5EC stroke', (tester) async {
+      await pumpBar(tester, theme: TellyTheme.light);
+      final deco = surfaceOf(tester);
+      expect(deco.color, TellyColors.lightBackgroundSurface.withValues(alpha: 0.9));
+      expect((deco.border! as Border).top.color, TellyColors.lightStrokeSubtle);
+    });
+
+    testWidgets('shows five equal destinations and no centre action', (tester) async {
       await pumpBar(tester);
-      final surface = tester.getRect(find.byKey(const Key('nav_bar_surface')));
-      final log = tester.getRect(find.byKey(const Key('nav_log_button')));
-      expect(log.center.dx, closeTo(surface.center.dx, 0.01));
-      expect(surface.center.dy - log.center.dy, closeTo(6, 0.01));
-
-      final halo = tester.widget<Container>(
-        find.descendant(of: find.byKey(const Key('nav_log_button')), matching: find.byType(Container)).first,
-      );
-      final shadow = (halo.decoration! as BoxDecoration).boxShadow!.single;
-      expect(shadow.blurRadius, 12);
-      final fill = tester.widget<ColoredBox>(
-        find.descendant(of: find.byKey(const Key('nav_log_button')), matching: find.byType(ColoredBox)),
-      );
-      expect(fill.color, TellyColors.phosphorLime);
+      final tabs = ['home', 'explore', 'canon', 'social', 'more'];
+      final widths = [for (final t in tabs) tester.getSize(find.byKey(Key('nav_tab_$t'))).width];
+      for (final w in widths) {
+        expect(w, closeTo(widths.first, 0.01));
+      }
+      for (final t in tabs) {
+        final size = tester.getSize(find.byKey(Key('nav_tab_$t')));
+        expect(size.width, greaterThanOrEqualTo(48));
+        expect(size.height, greaterThanOrEqualTo(56));
+      }
+      expect(find.byKey(const Key('nav_log_button')), findsNothing);
     });
 
-    testWidgets('active tab is white with a phosphor dot; others are muted', (tester) async {
-      await pumpBar(tester, index: 2);
-      Icon iconOf(String tab) => tester.widget<Icon>(
-            find.descendant(of: find.byKey(Key('nav_tab_$tab')), matching: find.byType(Icon)),
-          );
-      expect(iconOf('queue').color, TellyColors.textPrimary);
-      expect(iconOf('feed').color, TellyColors.textTertiary);
-      expect(
-        find.descendant(of: find.byKey(const Key('nav_tab_queue')), matching: find.byKey(const Key('nav_active_dot'))),
-        findsOneWidget,
+    testWidgets('active tab uses primary text with a phosphor dot; others are tertiary (dark)', (tester) async {
+      await pumpBar(tester, index: 3);
+      expect(iconOf(tester, 'social').color, TellyColors.textPrimary);
+      expect(iconOf(tester, 'home').color, TellyColors.textTertiary);
+      final dot = find.descendant(
+        of: find.byKey(const Key('nav_tab_social')),
+        matching: find.byKey(const Key('nav_active_dot')),
       );
+      expect(dot, findsOneWidget);
       expect(find.byKey(const Key('nav_active_dot')), findsOneWidget);
+      expect((tester.widget<Container>(dot).decoration! as BoxDecoration).color, TellyColors.phosphorLime);
     });
 
-    testWidgets('tabs report branch indices 0..3 and the center button reports log', (tester) async {
+    testWidgets('active and inactive colours follow the light theme', (tester) async {
+      await pumpBar(tester, index: 4, theme: TellyTheme.light);
+      expect(iconOf(tester, 'more').color, TellyColors.lightTextPrimary);
+      expect(iconOf(tester, 'canon').color, TellyColors.lightTextTertiary);
+      final dot = tester.widget<Container>(find.byKey(const Key('nav_active_dot')));
+      expect((dot.decoration! as BoxDecoration).color, TellyColors.lightPhosphorLime);
+    });
+
+    testWidgets('tabs report branch indices 0..4', (tester) async {
       final events = await pumpBar(tester);
-      for (final tab in ['feed', 'explore', 'queue', 'canon']) {
+      for (final tab in ['home', 'explore', 'canon', 'social', 'more']) {
         await tester.tap(find.byKey(Key('nav_tab_$tab')));
       }
-      await tester.tap(find.byKey(const Key('nav_log_button')));
-      expect(events, [0, 1, 2, 3, 'log']);
+      expect(events, [0, 1, 2, 3, 4]);
+    });
+
+    testWidgets('accepts a custom item list', (tester) async {
+      final events = <Object>[];
+      await tester.pumpWidget(MaterialApp(
+        theme: TellyTheme.dark,
+        home: Scaffold(
+          bottomNavigationBar: TellyFloatingNavBar(
+            currentIndex: 0,
+            onTabSelected: events.add,
+            items: const [TellyNavItem(Icons.home_rounded, 'A'), TellyNavItem(Icons.explore_outlined, 'B')],
+          ),
+        ),
+      ));
+      await tester.tap(find.byKey(const Key('nav_tab_b')));
+      expect(events, [1]);
+      expect(find.byKey(const Key('nav_tab_home')), findsNothing);
     });
   });
 }
