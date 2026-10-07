@@ -52,7 +52,7 @@ void main() {
 
     testWidgets('renders the tabs, an upset card and standard cards from the repository', (tester) async {
       await pump(tester);
-      expect(find.text('Feed'), findsOneWidget);
+      expect(find.text('Social'), findsOneWidget);
       for (final tab in ['Following', 'Squads', 'Global']) {
         expect(find.text(tab), findsOneWidget);
       }

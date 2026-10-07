@@ -42,8 +42,8 @@ class MoreHubScreen extends ConsumerWidget {
         header: const TellyScreenHeader(title: 'More'),
         body: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          // Clears the floating nav bar (the shell extends the body under it).
-          padding: EdgeInsets.fromLTRB(16, 8, 16, MediaQuery.paddingOf(context).bottom + 24),
+          // The header's safe area already clears the floating nav bar.
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -54,7 +54,7 @@ class MoreHubScreen extends ConsumerWidget {
                 onTap: onProfileTap ?? () => context.go(Routes.canon),
               ),
               const SizedBox(height: 16),
-              _QueueTile(onTap: onQueueTap ?? () => context.go(Routes.queue)),
+              _QueueTile(onTap: onQueueTap ?? () => context.push(Routes.queue)),
               const SizedBox(height: 12),
               Row(
                 children: [

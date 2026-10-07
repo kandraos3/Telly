@@ -185,7 +185,7 @@ void main() {
       await tester.ensureVisible(find.byKey(const Key('home_friends_see_all')));
       await tester.tap(find.byKey(const Key('home_friends_see_all')));
       await tester.pumpAndSettle();
-      expect(find.text('route:${Routes.feed}'), findsOneWidget);
+      expect(find.text('route:${Routes.social}'), findsOneWidget);
     });
 
     testWidgets('no friends activity offers "Find friends in Social"', (tester) async {
@@ -193,7 +193,7 @@ void main() {
       expect(find.text('Find friends in Social'), findsOneWidget);
       await tester.tap(find.byKey(const Key('home_friends_empty_action')));
       await tester.pumpAndSettle();
-      expect(find.text('route:${Routes.feed}'), findsOneWidget);
+      expect(find.text('route:${Routes.social}'), findsOneWidget);
     });
 
     testWidgets('shows skeleton rows while the feed loads', (tester) async {

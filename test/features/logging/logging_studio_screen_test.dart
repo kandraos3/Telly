@@ -182,7 +182,7 @@ void main() {
       await tester.ensureVisible(find.text('🪦 Bury in The TV Graveyard'));
       await tester.tap(find.text('🪦 Bury in The TV Graveyard'));
       await tester.pumpAndSettle();
-      expect(find.text('route:/canon/graveyard'), findsOneWidget);
+      expect(find.text('route:/more/graveyard'), findsOneWidget);
       expect(graveyard.shows.single.titleId, 136315, reason: 'persisted to user_dropped_shows');
     });
 

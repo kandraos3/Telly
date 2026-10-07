@@ -40,7 +40,7 @@ class FriendProfileScreen extends ConsumerWidget {
     return Scaffold(
       appBar: TellySubpageAppBar(
         title: '@$handle',
-        onNav: () => context.canPop() ? context.pop() : context.go(Routes.feed),
+        onNav: () => context.canPop() ? context.pop() : context.go(Routes.home),
         actions: [
           if (data != null)
             _FollowButton(handle: handle, status: data.followStatus, isSelf: isSelf),

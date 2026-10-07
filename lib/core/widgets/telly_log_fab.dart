@@ -19,6 +19,9 @@ class TellyLogFab extends StatelessWidget {
   /// Gap between the button's bottom edge and the nav bar's top edge.
   static const double gapAboveNavBar = 16;
   static const double haloBlur = 20;
+
+  /// Extra bottom padding tab content needs to clear the button (its height plus the gap below it).
+  static const double clearance = height + gapAboveNavBar;
   static const double haloAlpha = 0.35;
 
   /// Distance from the screen bottom to the button's bottom edge: the nav bar's bottom inset (safe area,

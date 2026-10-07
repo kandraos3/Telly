@@ -826,7 +826,6 @@ The landing tab (`/home`). Epic #45 designs its real content (currently-watching
 - **From your friends:** the 3 newest items of the Following feed (the same feed state as the Social tab) as compact rows: a 36dp avatar, then "<name> ranked <title> #N" ("dropped", "queued" or "commented on" for other activity types), then a score chip in tabular figures on an 18% tint of its tier accent with a tier-accent border (style guide §2.2; no chip for drops). Tapping a row opens the title. *See all* opens the Social tab.
 - **Empty states:** with no ranked titles in the selected canon, that section becomes a card reading "Log your first title to start your canon" with a Log button. With no friends' activity, the friends section becomes "Find friends in Social", linking to the Social tab.
 - **Loading:** skeleton tiles and rows. **Offline:** the canon comes from Drift. The friends section keeps what it loaded earlier in the session, or hides if nothing has loaded.
-- Bottom padding clears the nav bar and the floating Log button.
 
 ### `SCR-22`: More Hub
 

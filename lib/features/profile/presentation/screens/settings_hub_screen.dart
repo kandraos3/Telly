@@ -56,7 +56,7 @@ class SettingsHubScreen extends ConsumerWidget {
     return Scaffold(
       appBar: TellySubpageAppBar(
         title: 'Settings',
-        onNav: () => context.canPop() ? context.pop() : context.go(Routes.canon),
+        onNav: () => context.canPop() ? context.pop() : context.go(Routes.more),
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),

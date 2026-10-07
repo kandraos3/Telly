@@ -48,7 +48,7 @@ void main() {
     Widget stub(BuildContext _, GoRouterState s) => Scaffold(body: Text('route:${s.uri}'));
     final router = GoRouter(initialLocation: initial, routes: [
       GoRoute(path: Routes.canon, builder: (_, __) => const DualCanonProfileScreen()),
-      GoRoute(path: Routes.feed, builder: stub),
+      GoRoute(path: Routes.home, builder: stub),
       GoRoute(
         path: Routes.log,
         builder: (_, s) => LoggingStudioScreen(initialTitle: s.extra as TitleSearchResult?),

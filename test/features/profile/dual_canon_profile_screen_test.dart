@@ -211,15 +211,16 @@ void main() {
   });
 
   group('FE-PROFILE-02: SCR-14 top bar, avatar and share', () {
-    testWidgets('header reads "Canon" with squads, share and settings actions (FE-HEADER-01)', (tester) async {
+    testWidgets('header reads "Canon" with only the share action (FE-HEADER-01, #44)', (tester) async {
       await tester.pumpWidget(buildTestableProfileScreen());
       await tester.pumpAndSettle();
 
       expect(tester.widget<Text>(find.byKey(const Key('screen_header_title'))).data, 'Canon');
       expect(find.text('Profile'), findsNothing);
-      for (final key in ['profile_squads_button', 'profile_share_button', 'profile_settings_button']) {
-        expect(find.byKey(Key(key)), findsOneWidget);
-      }
+      expect(find.byKey(const Key('profile_share_button')), findsOneWidget);
+      // Settings moved to the More hub and Squads to Social.
+      expect(find.byKey(const Key('profile_squads_button')), findsNothing);
+      expect(find.byKey(const Key('profile_settings_button')), findsNothing);
       expect(find.textContaining('📺'), findsNothing, reason: 'old TV emoji removed');
     });
 

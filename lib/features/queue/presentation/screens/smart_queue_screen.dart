@@ -352,10 +352,11 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
     final seriesItems = sortedItems.where((item) => item.mediaType == 'tv').toList();
 
     return Scaffold(
-      body: TellyFloatingHeaderScrollView(
-        header: TellyScreenHeader(
-          title: 'Queue',
-          actions: [
+      // Pushed from the More hub (#44): subpage app bar with the Sort / New list actions (§0.2).
+      appBar: TellySubpageAppBar(
+        title: 'Queue',
+        onNav: () => context.canPop() ? context.pop() : context.go(Routes.more),
+        actions: [
             if (_selectedMode == QueueHubMode.watchlist)
               TellyHeaderAction(
                 key: const Key('queue_sort_button'),
@@ -370,9 +371,9 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
                 tooltip: 'New list',
                 onPressed: () => _showCreateListDialog(context),
               ),
-          ],
-        ),
-        body: Column(
+        ],
+      ),
+      body: Column(
           children: [
             // Hub mode switcher: the shared segmented control (FE-UI-01).
             TellySegmentedControl<QueueHubMode>(
@@ -462,7 +463,6 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
             ],
           ],
         ),
-      ),
     );
   }
 

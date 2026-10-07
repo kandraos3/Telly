@@ -274,7 +274,9 @@ final queueItems = [
 
 class _StreamingFake implements StreamingAvailabilityRepository {
   @override
-  Future<List<ShowStreamingAvailability>> getAvailability({required int titleId, required String mediaType, String? country}) async => [
+  Future<List<ShowStreamingAvailability>> getAvailability(
+          {required int titleId, required String mediaType, String? country}) async =>
+      [
         const ShowStreamingAvailability(
           platformId: 'apple_tv_plus',
           platformName: 'Apple TV+',
@@ -559,14 +561,14 @@ final siteScenes = <Scene>[
   ),
   Scene(
     id: 'canon',
-    tab: 3,
+    tab: 2,
     build: () => const DualCanonProfileScreen(),
     overrides: baseOverrides,
     interact: (tester) => tapText(tester, 'TV Shows (12)'),
   ),
   Scene(
     id: 'tiers',
-    tab: 3,
+    tab: 2,
     build: () => const DualCanonProfileScreen(),
     overrides: baseOverrides,
     interact: (tester) async {
@@ -575,11 +577,10 @@ final siteScenes = <Scene>[
       await scrollBy(tester, 560);
     },
   ),
-  Scene(id: 'feed', tab: 0, build: () => const ActivityFeedScreen(), overrides: baseOverrides),
+  Scene(id: 'feed', tab: 3, build: () => const ActivityFeedScreen(), overrides: baseOverrides),
   Scene(id: 'explore', tab: 1, build: () => const ExploreDiscoverScreen(), overrides: baseOverrides),
   Scene(
     id: 'queue',
-    tab: 2,
     build: () => SmartQueueScreen(testItems: queueItems),
     overrides: baseOverrides,
     interact: (tester) => tapText(tester, 'TV Shows (${queueItems.length})'),

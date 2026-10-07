@@ -133,7 +133,7 @@ class LogRevealScreen extends ConsumerWidget {
         leaderboard: commit.leaderboard(),
         onShareStory: () => _shareStory(context, ref, commit),
         onViewInCanon: () => context.go(Routes.canon),
-        onClose: () => context.go(Routes.feed),
+        onClose: () => context.go(Routes.home),
       ),
     );
   }

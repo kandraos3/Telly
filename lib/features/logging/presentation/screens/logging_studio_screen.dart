@@ -50,7 +50,7 @@ class _LoggingStudioScreenState extends ConsumerState<LoggingStudioScreen> {
     super.dispose();
   }
 
-  void _close() => context.canPop() ? context.pop() : context.go(Routes.feed);
+  void _close() => context.canPop() ? context.pop() : context.go(Routes.home);
 
   Future<void> _onStatus(WatchStatus status) async {
     final session = ref.read(loggingSessionProvider.notifier);

@@ -11,7 +11,16 @@ import 'package:telly_app/core/router/routes.dart';
 import 'package:telly_app/features/auth/data/auth_repository.dart';
 import 'package:telly_app/features/auth/domain/user_profile.dart';
 import 'package:telly_app/features/auth/presentation/screens/auth_screen.dart';
+import 'package:telly_app/features/discovery/presentation/screens/explore_discover_screen.dart';
 import 'package:telly_app/features/feed/presentation/screens/activity_feed_screen.dart';
+import 'package:telly_app/features/home/presentation/screens/home_screen.dart';
+import 'package:telly_app/features/more/presentation/screens/more_hub_screen.dart';
+import 'package:telly_app/features/profile/presentation/screens/dual_canon_profile_screen.dart';
+import 'package:telly_app/features/profile/presentation/screens/settings_hub_screen.dart';
+import 'package:telly_app/features/profile/presentation/screens/tv_graveyard_screen.dart';
+import 'package:telly_app/features/queue/presentation/screens/smart_queue_screen.dart';
+import 'package:telly_app/features/sharing/presentation/screens/telly_wrapped_studio_screen.dart';
+import 'package:telly_app/features/squads/presentation/screens/squads_list_screen.dart';
 import 'package:telly_app/features/logging/presentation/screens/logging_studio_screen.dart';
 import 'package:telly_app/features/ranking/data/canon_hydration.dart';
 import 'package:telly_app/features/ranking/data/ranking_repository.dart';
@@ -73,32 +82,52 @@ void main() {
       expect(find.byType(StreamingSetupScreen), findsOneWidget);
     });
 
-    testWidgets('authenticated + onboarded launch lands on the Feed inside the shell', (tester) async {
+    testWidgets('authenticated + onboarded launch lands on Home inside the shell (#44)', (tester) async {
       final c = await launch(tester, FakeAuthRepository(signedInUserId: 'u1', profile: onboarded));
-      expect(location(c), Routes.feed);
-      expect(find.byType(ActivityFeedScreen), findsOneWidget);
+      expect(location(c), Routes.home);
+      expect(find.byType(HomeScreen), findsOneWidget);
       expect(find.byKey(const Key('nav_bar_surface')), findsOneWidget);
+      expect(find.byKey(const Key('log_fab')), findsOneWidget);
     });
 
-    testWidgets('each tab switches branch and keeps the other branches alive', (tester) async {
+    testWidgets('the five tabs switch branch and keep the other branches alive', (tester) async {
       final c = await launch(tester, FakeAuthRepository(signedInUserId: 'u1', profile: onboarded));
-      for (final (tab, path) in [
-        ('explore', Routes.explore),
-        ('queue', Routes.queue),
-        ('canon', Routes.canon),
-        ('feed', Routes.feed),
+      for (final (tab, path, screen) in [
+        ('explore', Routes.explore, ExploreDiscoverScreen),
+        ('canon', Routes.canon, DualCanonProfileScreen),
+        ('social', Routes.social, ActivityFeedScreen),
+        ('more', Routes.more, MoreHubScreen),
+        ('home', Routes.home, HomeScreen),
       ]) {
         await tester.tap(find.byKey(Key('nav_tab_$tab')));
         await tester.pumpAndSettle();
         expect(location(c), path, reason: tab);
+        expect(find.byType(screen), findsOneWidget, reason: tab);
       }
-      // indexedStack: visiting another tab leaves the feed's state mounted offstage.
-      await tester.tap(find.byKey(const Key('nav_tab_queue')));
+      // indexedStack: visiting another tab leaves the feed state mounted offstage.
+      await tester.tap(find.byKey(const Key('nav_tab_social')));
       await tester.pumpAndSettle();
-      final feedState = tester.state(find.byType(ActivityFeedScreen, skipOffstage: false));
-      await tester.tap(find.byKey(const Key('nav_tab_feed')));
+      final feedState = tester.state(find.byType(ActivityFeedScreen));
+      await tester.tap(find.byKey(const Key('nav_tab_more')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('nav_tab_social')));
       await tester.pumpAndSettle();
       expect(tester.state(find.byType(ActivityFeedScreen)), same(feedState));
+    });
+
+    testWidgets('the Log button shows on Home, Explore, Canon and Social but not on More', (tester) async {
+      await launch(tester, FakeAuthRepository(signedInUserId: 'u1', profile: onboarded));
+      for (final (tab, shown) in [
+        ('home', true),
+        ('explore', true),
+        ('canon', true),
+        ('social', true),
+        ('more', false),
+      ]) {
+        await tester.tap(find.byKey(Key('nav_tab_$tab')));
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('log_fab')), shown ? findsOneWidget : findsNothing, reason: tab);
+      }
     });
 
     testWidgets('floating Log button opens the logging flow (SCR-09)', (tester) async {
@@ -112,7 +141,50 @@ void main() {
       expect(c.read(appRouterProvider).canPop(), isTrue);
     });
 
-    testWidgets('deep link /title/tv/1396 opens SCR-08; malformed media types fall back to the feed',
+    testWidgets('More reaches Queue, Wrapped, Graveyard and Settings as pushed screens', (tester) async {
+      final c = await launch(tester, FakeAuthRepository(signedInUserId: 'u1', profile: onboarded));
+      // Pushed imperatively, so the reported location stays /more: assert on what renders.
+      for (final (key, screen) in [
+        ('more_tile_queue', SmartQueueScreen),
+        ('more_tile_wrapped', TellyWrappedStudioScreen),
+        ('more_tile_graveyard', TvGraveyardScreen),
+        ('more_row_settings', SettingsHubScreen),
+      ]) {
+        c.read(appRouterProvider).go(Routes.more);
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(Key(key)));
+        await tester.pumpAndSettle();
+        expect(find.byType(screen), findsOneWidget, reason: key);
+        expect(find.byKey(const Key('nav_bar_surface')), findsNothing, reason: key);
+      }
+    });
+
+    testWidgets('My Squads opens from the Social header', (tester) async {
+      await launch(tester, FakeAuthRepository(signedInUserId: 'u1', profile: onboarded));
+      await tester.tap(find.byKey(const Key('nav_tab_social')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('feed_squads_button')));
+      await tester.pumpAndSettle();
+      expect(find.byType(SquadsListScreen), findsOneWidget);
+    });
+
+    testWidgets('old paths redirect to their new homes (screen spec §0.0)', (tester) async {
+      final c = await launch(tester, FakeAuthRepository(signedInUserId: 'u1', profile: onboarded));
+      for (final (old, now) in [
+        ('/feed', Routes.social),
+        ('/queue', Routes.queue),
+        ('/canon/settings', Routes.settings),
+        ('/canon/graveyard', Routes.graveyard),
+        ('/canon/wrapped', Routes.wrapped),
+        ('/canon/edit', Routes.editProfile),
+      ]) {
+        c.read(appRouterProvider).go(old);
+        await tester.pumpAndSettle();
+        expect(location(c), now, reason: old);
+      }
+    });
+
+    testWidgets('deep link /title/tv/1396 opens SCR-08; malformed media types fall back to Home',
         (tester) async {
       final c = await launch(tester, FakeAuthRepository(signedInUserId: 'u1', profile: onboarded));
       c.read(appRouterProvider).go('/title/tv/1396');
@@ -122,7 +194,7 @@ void main() {
 
       c.read(appRouterProvider).go('/title/anime/1');
       await tester.pumpAndSettle();
-      expect(location(c), Routes.feed);
+      expect(location(c), Routes.home);
     });
 
     testWidgets('a deep link while signed out is sent to SCR-01', (tester) async {

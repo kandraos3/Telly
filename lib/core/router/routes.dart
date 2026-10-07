@@ -1,4 +1,5 @@
-/// Route paths for every screen in `docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`.
+/// Route paths for every screen in `docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md`
+/// (route map: §0.0, decision 0003).
 abstract final class Routes {
   static const splash = '/splash';
   static const auth = '/auth'; // SCR-01
@@ -11,11 +12,12 @@ abstract final class Routes {
   static const seedGrid = '/onboarding/seeds'; // SCR-03
   static const tournament = '/onboarding/tournament'; // SCR-04
 
-  // Shell tabs (component spec §2.1)
-  static const feed = '/feed'; // SCR-05
+  // Shell tabs (component spec §2.1), in nav bar order
+  static const home = '/home'; // SCR-21
   static const explore = '/explore'; // SCR-07
-  static const queue = '/queue'; // SCR-13
   static const canon = '/canon'; // SCR-14
+  static const social = '/social'; // SCR-05
+  static const more = '/more'; // SCR-22
 
   /// Explore with its search field focused; the token makes every request a new location.
   static String exploreSearch() => '$explore?search=${DateTime.now().microsecondsSinceEpoch}';
@@ -26,7 +28,7 @@ abstract final class Routes {
   static const reveal = '/log/reveal'; // SCR-12
 
   // Pushed screens
-  static String activity(String id) => '/feed/activity/$id'; // SCR-06
+  static String activity(String id) => '$social/activity/$id'; // SCR-06
   static String title(String mediaType, int id) => '/title/$mediaType/$id'; // SCR-08
   static String profile(String handle) => '/u/$handle'; // SCR-15
   static String twoToWatch(String handle) => '/u/$handle/two-to-watch'; // SCR-16
@@ -36,9 +38,34 @@ abstract final class Routes {
       '${friendHandle != null ? '&friend=$friendHandle' : ''}';
   static const squads = '/squads'; // SCR-17 list
   static String squad(String id) => '/squads/$id'; // SCR-17
-  static const graveyard = '/canon/graveyard'; // SCR-18
-  static const wrapped = '/canon/wrapped'; // SCR-19
-  static const settings = '/canon/settings'; // SCR-20
-  static const editProfile = '/canon/edit';
-  static String customList(String id) => '/queue/list/$id';
+
+  // Pushed from the More hub
+  static const queue = '$more/queue'; // SCR-13
+  static String customList(String id) => '$queue/list/$id';
+  static const graveyard = '$more/graveyard'; // SCR-18
+  static const wrapped = '$more/wrapped'; // SCR-19
+  static const settings = '$more/settings'; // SCR-20
+  static const editProfile = '$more/edit';
+
+  /// Where an old (pre-#44) path now lives, keeping the rest of the path and the query; null when
+  /// [uri] is not an old path. Old links in shares, notifications and emails keep working (§0.0).
+  static String? legacyRedirect(Uri uri) {
+    final path = uri.path;
+    String? moved;
+    if (path == '/feed' || path.startsWith('/feed/')) {
+      moved = social + path.substring('/feed'.length);
+    } else if (path == '/queue' || path.startsWith('/queue/')) {
+      moved = queue + path.substring('/queue'.length);
+    } else {
+      for (final sub in const ['settings', 'edit', 'graveyard', 'wrapped']) {
+        final old = '$canon/$sub';
+        if (path == old || path.startsWith('$old/')) {
+          moved = '$more/$sub${path.substring(old.length)}';
+          break;
+        }
+      }
+    }
+    if (moved == null) return null;
+    return uri.hasQuery ? '$moved?${uri.query}' : moved;
+  }
 }

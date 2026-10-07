@@ -9,7 +9,8 @@ import '../widgets/telly_floating_nav_bar.dart';
 import '../widgets/telly_log_fab.dart';
 import 'routes.dart';
 
-/// Scaffold for the tab branches with the floating nav bar and the floating Log button overlaid (FE-602, #44).
+/// Scaffold for the five tab branches (Home, Explore, Canon, Social, More) with the floating nav bar and,
+/// outside More, the floating Log button overlaid (FE-602, #44).
 ///
 /// The shell stays mounted under every signed-in screen, so it also keeps the canon
 /// hydration (FE-604) and the sync engine (FE-605) alive, and flushes on app resume.
@@ -18,13 +19,11 @@ class AppShell extends ConsumerStatefulWidget {
 
   const AppShell({super.key, required this.navigationShell});
 
-  /// Nav bar items, one per branch. The five-tab shell (Home, Explore, Canon, Social, More) lands in #116.
-  static const navItems = [
-    TellyNavItem(Icons.home_rounded, 'Feed'),
-    TellyNavItem(Icons.explore_outlined, 'Explore'),
-    TellyNavItem(Icons.collections_bookmark_outlined, 'Queue'),
-    TellyNavItem(Icons.movie_filter_outlined, 'Canon'),
-  ];
+  /// Index of the More branch, where the floating Log button is hidden (component spec §2.3).
+  static const moreBranch = 4;
+
+  /// Whether the floating Log button shows on [branch]: Home, Explore, Canon and Social.
+  static bool showsLogButton(int branch) => branch != moreBranch;
 
   @override
   ConsumerState<AppShell> createState() => _AppShellState();
@@ -53,14 +52,27 @@ class _AppShellState extends ConsumerState<AppShell> {
     ref.listen(watchlistHydrationProvider, (_, __) {});
     ref.listen(syncEngineProvider, (_, __) {});
     final shell = widget.navigationShell;
+    final showLog = AppShell.showsLogButton(shell.currentIndex);
     return Stack(
       children: [
         Scaffold(
           extendBody: true,
-          body: shell,
+          // Tab screens clear the bottom safe-area padding; while the Log button shows, that padding
+          // also covers it, so no content ends up underneath (component spec §2.3).
+          body: Builder(
+            builder: (context) {
+              final media = MediaQuery.of(context);
+              if (!showLog) return shell;
+              return MediaQuery(
+                data: media.copyWith(
+                  padding: media.padding.copyWith(bottom: media.padding.bottom + TellyLogFab.clearance),
+                ),
+                child: shell,
+              );
+            },
+          ),
           bottomNavigationBar: TellyFloatingNavBar(
             currentIndex: shell.currentIndex,
-            items: AppShell.navItems,
             onTabSelected: (index) => shell.goBranch(
               index,
               // Re-tapping the active tab pops it to its root.
@@ -68,11 +80,12 @@ class _AppShellState extends ConsumerState<AppShell> {
             ),
           ),
         ),
-        Positioned(
-          right: TellyLogFab.rightInset,
-          bottom: TellyLogFab.bottomOffsetOf(context),
-          child: TellyLogFab(onTap: () => context.push(Routes.log)),
-        ),
+        if (showLog)
+          Positioned(
+            right: TellyLogFab.rightInset,
+            bottom: TellyLogFab.bottomOffsetOf(context),
+            child: TellyLogFab(onTap: () => context.push(Routes.log)),
+          ),
       ],
     );
   }

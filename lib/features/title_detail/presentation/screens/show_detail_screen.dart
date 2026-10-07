@@ -306,7 +306,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
       backgroundColor: canvasColor,
       expandedHeight: 220,
       pinned: true,
-      leading: TellyNavButton(onPressed: () => context.canPop() ? context.pop() : context.go(Routes.feed)),
+      leading: TellyNavButton(onPressed: () => context.canPop() ? context.pop() : context.go(Routes.home)),
       // FE-HEADER-03: the collapsed bar names the title once the in-page title has scrolled under it.
       titleSpacing: 4,
       title: ExcludeSemantics(

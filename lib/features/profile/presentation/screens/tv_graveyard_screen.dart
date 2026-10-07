@@ -24,7 +24,7 @@ class TvGraveyardScreen extends ConsumerWidget {
     return Scaffold(
       appBar: TellySubpageAppBar(
         title: 'TV Graveyard',
-        onNav: () => context.canPop() ? context.pop() : context.go(Routes.canon),
+        onNav: () => context.canPop() ? context.pop() : context.go(Routes.more),
         actions: [
           TellyHeaderAction(
             key: const Key('graveyard_add_button'),

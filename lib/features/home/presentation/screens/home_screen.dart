@@ -8,7 +8,6 @@ import '../../../../core/theme/telly_typography.dart';
 import '../../../../core/widgets/telly_avatar.dart';
 import '../../../../core/widgets/telly_canon_switcher.dart';
 import '../../../../core/widgets/telly_empty_state.dart';
-import '../../../../core/widgets/telly_log_fab.dart';
 import '../../../../core/widgets/telly_screen_header.dart';
 import '../../../../core/widgets/telly_section_header.dart';
 import '../../../feed/data/social_repository.dart';
@@ -44,14 +43,11 @@ class HomeScreen extends ConsumerWidget {
             ),
           ],
         ),
-        body: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          // Clears the nav bar (the shell extends the body under it) and the floating Log button above it.
-          padding: EdgeInsets.only(
-            top: 8,
-            bottom: MediaQuery.paddingOf(context).bottom + TellyLogFab.height + TellyLogFab.gapAboveNavBar + 8,
-          ),
-          child: const Column(
+        // The header's safe area already clears the nav bar and the floating Log button (shell, §2.3).
+        body: const SingleChildScrollView(
+          physics: BouncingScrollPhysics(),
+          padding: EdgeInsets.only(top: 8, bottom: 24),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _CanonSection(),
@@ -175,7 +171,7 @@ class _FriendsSection extends ConsumerWidget {
       children: [
         TellySectionHeader(
           label: 'FROM YOUR FRIENDS',
-          trailing: _seeAll(context, key: const Key('home_friends_see_all'), onTap: () => context.go(Routes.feed)),
+          trailing: _seeAll(context, key: const Key('home_friends_see_all'), onTap: () => context.go(Routes.social)),
         ),
         const SizedBox(height: 8),
         if (items == null)
@@ -188,7 +184,7 @@ class _FriendsSection extends ConsumerWidget {
             message: 'Follow friends to see what they rank.',
             actionLabel: 'Open Social',
             actionKey: const Key('home_friends_empty_action'),
-            onAction: () => context.go(Routes.feed),
+            onAction: () => context.go(Routes.social),
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
           )
         else

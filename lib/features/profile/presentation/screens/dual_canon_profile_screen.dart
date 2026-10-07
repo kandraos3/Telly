@@ -31,16 +31,12 @@ import '../widgets/top_showcase_row.dart';
 /// - `docs/features/08_ANIME_INTEGRATION_AND_HYBRID_CANON.md` §2
 /// - Tickets: FE-206, FE-207, FE-208, FE-209
 class DualCanonProfileScreen extends ConsumerWidget {
-  final VoidCallback? onSettingsTap;
-  final VoidCallback? onSquadsTap;
   final VoidCallback? onShareTap;
   final VoidCallback? onAvatarTap;
   final ValueChanged<CanonEntry>? onTapEntry;
 
   const DualCanonProfileScreen({
     super.key,
-    this.onSettingsTap,
-    this.onSquadsTap,
     this.onShareTap,
     this.onAvatarTap,
     this.onTapEntry,
@@ -89,27 +85,15 @@ class DualCanonProfileScreen extends ConsumerWidget {
           }
         },
         child: TellyFloatingHeaderScrollView(
-          // FE-HEADER-01: the shared tab header; Squads, Share and Settings moved here from the card.
+          // FE-HEADER-01: the shared tab header. Settings moved to More and Squads to Social (#44).
           header: TellyScreenHeader(
             title: 'Canon',
             actions: [
-              TellyHeaderAction(
-                key: const Key('profile_squads_button'),
-                icon: Icons.groups_2_outlined,
-                tooltip: 'My Squads',
-                onPressed: onSquadsTap,
-              ),
               TellyHeaderAction(
                 key: const Key('profile_share_button'),
                 icon: Icons.ios_share_rounded,
                 tooltip: 'Share profile',
                 onPressed: onShare,
-              ),
-              TellyHeaderAction(
-                key: const Key('profile_settings_button'),
-                icon: Icons.settings_outlined,
-                tooltip: 'Settings',
-                onPressed: onSettingsTap,
               ),
             ],
           ),

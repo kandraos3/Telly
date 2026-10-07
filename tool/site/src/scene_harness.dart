@@ -25,7 +25,7 @@ class Scene {
   /// File name (`<id>.png`) and the key `site/content.yaml` refers to.
   final String id;
 
-  /// Floating nav bar tab (0 Feed, 1 Explore, 2 Queue, 3 Canon); null hides the bar.
+  /// Floating nav bar tab (0 Home, 1 Explore, 2 Canon, 3 Social, 4 More); null hides the bar.
   final int? tab;
 
   final Widget Function() build;
@@ -71,15 +71,15 @@ Future<void> shootScene(WidgetTester tester, Scene scene, String outDir) async {
                       body: scene.build(),
                       bottomNavigationBar: TellyFloatingNavBar(
                         currentIndex: scene.tab!,
-                        items: AppShell.navItems,
                         onTabSelected: (_) {},
                       ),
                     ),
-                    Positioned(
-                      right: TellyLogFab.rightInset,
-                      bottom: TellyLogFab.bottomOffsetOf(context),
-                      child: TellyLogFab(onTap: () {}),
-                    ),
+                    if (AppShell.showsLogButton(scene.tab!))
+                      Positioned(
+                        right: TellyLogFab.rightInset,
+                        bottom: TellyLogFab.bottomOffsetOf(context),
+                        child: TellyLogFab(onTap: () {}),
+                      ),
                   ],
                 ),
               ),

@@ -48,7 +48,7 @@ class SquadsListScreen extends ConsumerWidget {
       backgroundColor: TellyColors.canvasOf(context),
       appBar: TellySubpageAppBar(
         title: 'My Squads',
-        onNav: () => context.canPop() ? context.pop() : context.go(Routes.feed),
+        onNav: () => context.canPop() ? context.pop() : context.go(Routes.social),
         actions: [
           TellyHeaderAction(
             key: const Key('create_squad_button'),

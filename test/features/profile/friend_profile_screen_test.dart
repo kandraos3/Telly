@@ -175,7 +175,7 @@ void main() {
 
       await tester.tap(find.byKey(const Key('edit_profile_button')));
       await tester.pumpAndSettle();
-      expect(find.text('route:/canon/edit'), findsOneWidget);
+      expect(find.text('route:/more/edit'), findsOneWidget);
     });
   });
 

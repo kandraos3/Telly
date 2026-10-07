@@ -27,6 +27,8 @@ import '../../features/sharing/presentation/screens/telly_wrapped_studio_screen.
 import '../../features/squads/presentation/screens/squad_hub_screen.dart';
 import '../../features/squads/presentation/screens/squads_list_screen.dart';
 import '../../features/discovery/presentation/screens/explore_discover_screen.dart';
+import '../../features/home/presentation/screens/home_screen.dart';
+import '../../features/more/presentation/screens/more_hub_screen.dart';
 import '../../features/title_detail/presentation/screens/show_detail_screen.dart';
 import 'app_shell.dart';
 import 'auth_redirect.dart';
@@ -59,8 +61,8 @@ class _RouterRefresh implements Listenable {
 
 final rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
-/// The app router (FE-602): auth/onboarding redirects + StatefulShellRoute with four tabs
-/// and a center Log action (component spec §2.1). Every spec'd screen is reachable.
+/// The app router (FE-602, #44): auth/onboarding redirects, redirects from old paths, and a
+/// StatefulShellRoute with five tabs (route map: screen spec §0.0). Every spec'd screen is reachable.
 final appRouterProvider = Provider<GoRouter>((ref) {
   final refresh = _RouterRefresh();
   ref.listen<AuthState>(authControllerProvider, (_, __) => refresh.notify());
@@ -69,7 +71,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     navigatorKey: rootNavigatorKey,
     initialLocation: Routes.splash,
     refreshListenable: refresh,
-    redirect: (context, state) => authRedirect(ref.read(authControllerProvider), state.matchedLocation),
+    // Old (pre-#44) paths move first; the new location then passes through the auth policy.
+    redirect: (context, state) =>
+        Routes.legacyRedirect(state.uri) ?? authRedirect(ref.read(authControllerProvider), state.matchedLocation),
     routes: [
       GoRoute(path: Routes.splash, builder: (_, __) => const SplashScreen()),
       GoRoute(path: Routes.auth, builder: (_, __) => const AuthScreen()),
@@ -81,13 +85,30 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: Routes.seedGrid, builder: (_, __) => const SeedGridScreen()),
       GoRoute(path: Routes.tournament, builder: (_, __) => const OnboardingTournamentScreen()),
 
-      // The four tabs
+      // The five tabs (decision 0003): Home, Explore, Canon, Social, More
       StatefulShellRoute.indexedStack(
         builder: (context, state, shell) => AppShell(navigationShell: shell),
         branches: [
           StatefulShellBranch(routes: [
+            GoRoute(path: Routes.home, builder: (_, __) => const HomeScreen()),
+          ]),
+          StatefulShellBranch(routes: [
             GoRoute(
-              path: Routes.feed,
+              path: Routes.explore,
+              builder: (_, state) => ExploreDiscoverScreen(searchRequest: state.uri.queryParameters['search']),
+            ),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: Routes.canon,
+              builder: (context, __) => DualCanonProfileScreen(
+                onTapEntry: (entry) => context.push(Routes.title(entry.mediaType, entry.id)),
+              ),
+            ),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: Routes.social,
               builder: (_, __) => const ActivityFeedScreen(),
               routes: [
                 GoRoute(
@@ -102,34 +123,23 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ]),
           StatefulShellBranch(routes: [
             GoRoute(
-              path: Routes.explore,
-              builder: (_, state) => ExploreDiscoverScreen(searchRequest: state.uri.queryParameters['search']),
-            ),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(
-              path: Routes.queue,
-              builder: (_, __) => const SmartQueueScreen(),
+              path: Routes.more,
+              builder: (_, __) => const MoreHubScreen(),
               routes: [
                 GoRoute(
-                  path: 'list/:id',
+                  path: 'queue',
                   parentNavigatorKey: rootNavigatorKey,
-                  builder: (_, state) => CustomListDetailScreen(
-                    listId: state.pathParameters['id'] ?? '',
-                  ),
+                  builder: (_, __) => const SmartQueueScreen(),
+                  routes: [
+                    GoRoute(
+                      path: 'list/:id',
+                      parentNavigatorKey: rootNavigatorKey,
+                      builder: (_, state) => CustomListDetailScreen(
+                        listId: state.pathParameters['id'] ?? '',
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(
-              path: Routes.canon,
-              builder: (context, __) => DualCanonProfileScreen(
-                onSettingsTap: () => context.push(Routes.settings),
-                onSquadsTap: () => context.push(Routes.squads),
-                onTapEntry: (entry) => context.push(Routes.title(entry.mediaType, entry.id)),
-              ),
-              routes: [
                 GoRoute(
                   path: 'settings',
                   parentNavigatorKey: rootNavigatorKey,
@@ -175,7 +185,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         redirect: (_, state) {
           final mediaType = state.pathParameters['mediaType'];
           final id = int.tryParse(state.pathParameters['id'] ?? '');
-          return (mediaType == 'movie' || mediaType == 'tv') && id != null ? null : Routes.feed;
+          return (mediaType == 'movie' || mediaType == 'tv') && id != null ? null : Routes.home;
         },
         builder: (_, state) => ShowDetailScreen(
           titleId: int.parse(state.pathParameters['id']!),

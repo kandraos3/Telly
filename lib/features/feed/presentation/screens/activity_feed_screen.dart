@@ -117,9 +117,9 @@ class _ActivityFeedScreenState extends ConsumerState<ActivityFeedScreen> {
     return Scaffold(
       body: TellyFloatingHeaderScrollView(
         header: TellyScreenHeader(
-          title: 'Feed',
+          title: 'Social',
           actions: [
-            // FE-SQUADS-01: Squads one tap from the home tab, not only behind the profile icon.
+            // FE-SQUADS-01: Squads live in Social (#44), one tap from the tab.
             TellyHeaderAction(
               key: const Key('feed_squads_button'),
               icon: Icons.groups_2_outlined,
@@ -169,7 +169,8 @@ class _ActivityFeedScreenState extends ConsumerState<ActivityFeedScreen> {
                             return Padding(
                               key: const Key('feed_page_loader'),
                               padding: const EdgeInsets.all(24),
-                              child: Center(child: CircularProgressIndicator(color: TellyColors.primaryAccentOf(context))),
+                              child:
+                                  Center(child: CircularProgressIndicator(color: TellyColors.primaryAccentOf(context))),
                             );
                           }
                           final entry = entries[index];
