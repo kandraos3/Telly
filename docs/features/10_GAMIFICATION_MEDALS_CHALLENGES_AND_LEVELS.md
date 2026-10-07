@@ -175,6 +175,8 @@ Every reward is cosmetic. Nothing that's needed to use Telly is ever locked (dec
 
 `my_level() → (level, name, total_xp, level_floor, level_ceiling, week_xp)`.
 
+How it's written (#145): `_award_xp(user)` runs at the end of `evaluate_achievements` (every ranking, duel batch, join, drop and follow, and nightly) and inserts with `ON CONFLICT DO NOTHING`, so it's idempotent. Each row is filed under the week the XP was earned (the ranking's, the unlock's, the completion's), in the user's time zone. Rankings are awarded oldest first, ten per week. Medal XP covers milestone, taste and streak medals only (not Founding Viewer). Clients can read their own rows but never write; rows are never updated; the service role writes `correction` rows. Existing users were backfilled when it shipped.
+
 ---
 
 ## 7. Collections (slice 2)
@@ -354,6 +356,8 @@ All screens use the shared app bars (screen specs §0.2) and the frosted bottom 
 - **Templates:** `quest_templates (key, title, rule JSONB (§8.2 filters, or a special kind such as finish_from_queue), target, xp)`.
 - **Assignment:** three are assigned per user per week on first read (`my_week()`). The pick is deterministic, seeded by `user_id` and the week, so a refresh never reshuffles them.
 - **Mix:** one easy (rank 1–3), one exploration (a genre or decade you rank least), and one Queue quest.
+- **Templates** (seeded): easy `rank_one`, `rank_three`, `rank_film` (+40); exploration `explore_genre` ("Rank 2 $genre titles", the least-ranked of a broad genre list) and `explore_decade` ("Rank a film from the $decades", 1950s–2010s) (+50); Queue `queue_one`, `queue_two` (+60), which count rankings of titles you had queued (a `QUEUE_ADDED` activity before the ranking).
+- **Progress** is qualifying rankings inside the quest's week (Monday to Monday in your time zone). A met quest completes the next time XP is awarded, which `my_week()` also triggers.
 
 ### 9.9 States (all screens)
 
