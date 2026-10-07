@@ -295,14 +295,14 @@ All screens use the shared app bars (screen specs §0.2) and the frosted bottom 
 - **Summary card:** "Unlocked N of M" (M counts the listed medals: special medals such as Founding Viewer only once unlocked), and the "▲ N weeks" streak chip, which opens `SCR-27` once Your level ships (#146).
 - **Pinned to profile:** three medals with names, in slot order. Tapping one opens its sheet, which has a Pin/Unpin action. Pinning takes the first free slot; when all three are taken, the sheet asks which pinned medal to replace.
 - **Sections** in this order:
-  - Collections (slice 2): N in progress, with progress bars and "2/3";
+  - Collections (slice 2, #141): "N in progress", amber progress bars and "2/3", closest to done first with finished ones last; the top three, then "See all N";
   - Milestones;
   - Taste;
   - Streak;
   - Special (only when you hold a special medal).
 
   Locked medals show with progress ("94/100"; Taste Twin as "78% / 92%"); unlocked ones a check.
-- **Medal sheet** (mockup A2): the medal, its name and how it's earned, and a progress bar. For collections, it also lists "Still to watch" with one-tap **+ Queue**. Then which friends have it (avatar stack) and the rarity line. Unlocked medals add **Pin to profile** and **Share card**.
+- **Medal sheet** (mockup A2): the medal, its name and how it's earned, and a progress bar. For collections ("Collection · Gold when complete", "2 of 3 ranked"), it also lists "Still to watch" (`collection_still_to_watch`: released films you haven't ranked, in release order) with one-tap **+ Queue**, which turns to "✓ In Queue". Then which friends have it (avatar stack) and the rarity line. Unlocked medals add **Pin to profile** and **Share card**.
 - **Empty (new user):** every medal is locked with its progress, and the pinned row shows a hint: "Rank titles to earn your first medal".
 
 ### 9.4 `SCR-24` Unlock moment: mockup A3

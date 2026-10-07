@@ -2,21 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/services/haptics_service.dart';
+import '../../../../core/widgets/poster_image.dart';
 import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
 import '../../../../core/widgets/telly_avatar.dart';
 import '../../../../core/widgets/telly_frosted_sheet.dart';
 import '../../../../core/widgets/telly_primary_button.dart';
 import '../../../../core/widgets/telly_section_header.dart';
+import '../../../queue/data/watchlist_repository.dart';
 import '../../../sharing/data/story_share_service.dart';
 import '../../../sharing/domain/medal_story.dart';
 import '../../domain/medal.dart';
+import '../../data/achievements_repository.dart';
 import '../controllers/achievements_controller.dart';
 import 'medal_badge.dart';
 
 /// The medal sheet (features/10 §9.3, mockup A2): the medal, how it's earned, progress, which
 /// people you follow have it, its rarity, and Pin/Unpin for unlocked medals. Collections'
-/// "Still to watch" comes in slice 2 (#141). Unlocked medals add Share card (#138).
+/// Collections list "Still to watch" with one-tap + Queue (#141). Unlocked medals add Share
+/// card (#138).
 class MedalSheet extends ConsumerStatefulWidget {
   final String medalId;
 
@@ -69,7 +73,9 @@ class _MedalSheetState extends ConsumerState<MedalSheet> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '$kind · ${medal.tier.label}',
+                      medal.kind == MedalKind.collection && !medal.isUnlocked
+                          ? 'Collection · ${medal.tier.label} when complete'
+                          : '$kind · ${medal.tier.label}',
                       style: TellyTypography.bodyMedium(color: TellyColors.textTertiaryOf(context)),
                     ),
                   ],
@@ -81,6 +87,10 @@ class _MedalSheetState extends ConsumerState<MedalSheet> {
           Text(medal.description, style: TellyTypography.bodyLarge(color: TellyColors.textSecondaryOf(context))),
           const SizedBox(height: 14),
           _Progress(medal: medal),
+          if (medal.collectionId case final collectionId? when !medal.isUnlocked) ...[
+            const SizedBox(height: 18),
+            _StillToWatch(collectionId: collectionId),
+          ],
           const SizedBox(height: 18),
           const TellySectionHeader(label: 'Friends', padding: EdgeInsets.zero),
           const SizedBox(height: 10),
@@ -202,7 +212,9 @@ class _Progress extends StatelessWidget {
             ? 'Locked'
             : medal.id == 'taste_twin'
                 ? 'Best match ${medal.progress}% of ${medal.threshold}%'
-                : '${medal.progress} of ${medal.threshold}';
+                : medal.kind == MedalKind.collection
+                    ? '${medal.progress} of ${medal.threshold} ranked'
+                    : '${medal.progress} of ${medal.threshold}';
     final accent = TellyColors.warmAmberOf(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -269,6 +281,121 @@ class _Friends extends StatelessWidget {
               key: const Key('medal_sheet_friends'), style: style),
         ),
       ],
+    );
+  }
+}
+
+/// The collection's released films you haven't ranked, each with one-tap + Queue (§9.3, #141).
+class _StillToWatch extends ConsumerStatefulWidget {
+  final int collectionId;
+  const _StillToWatch({required this.collectionId});
+
+  @override
+  ConsumerState<_StillToWatch> createState() => _StillToWatchState();
+}
+
+class _StillToWatchState extends ConsumerState<_StillToWatch> {
+  /// Queued from this sheet: the Queue is local-first, so the server list lags behind it.
+  final _queued = <int>{};
+
+  @override
+  Widget build(BuildContext context) {
+    final films = ref.watch(stillToWatchProvider(widget.collectionId)).valueOrNull;
+    if (films == null || films.isEmpty) return const SizedBox.shrink();
+    return Column(
+      key: const Key('medal_sheet_still_to_watch'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const TellySectionHeader(label: 'Still to watch', padding: EdgeInsets.zero),
+        const SizedBox(height: 10),
+        for (final f in films) ...[
+          Row(
+            children: [
+              Container(
+                width: 34,
+                height: 50,
+                clipBehavior: Clip.antiAlias,
+                decoration: BoxDecoration(color: TellyColors.cardOf(context), borderRadius: BorderRadius.circular(6)),
+                child: PosterImage(
+                  posterPath: f.posterPath,
+                  fallback: Icon(Icons.movie_rounded, size: 16, color: TellyColors.textTertiaryOf(context)),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      f.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TellyTypography.bodyLarge(color: TellyColors.textPrimaryOf(context))
+                          .copyWith(fontWeight: FontWeight.w700),
+                    ),
+                    if (f.releaseYear != null)
+                      Text('${f.releaseYear}', style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context))),
+                  ],
+                ),
+              ),
+              _QueueChip(
+                key: Key('medal_sheet_queue_${f.titleId}'),
+                queued: f.inQueue || _queued.contains(f.titleId),
+                onTap: () => _queue(f),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+        ],
+      ],
+    );
+  }
+
+  Future<void> _queue(StillToWatch f) async {
+    HapticsService.lightImpact();
+    setState(() => _queued.add(f.titleId));
+    try {
+      await ref
+          .read(watchlistRepositoryProvider)
+          .add(titleId: f.titleId, mediaType: 'movie', title: f.title, posterPath: f.posterPath);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _queued.remove(f.titleId));
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(const SnackBar(content: Text("Couldn't add it to your Queue.")));
+    }
+  }
+}
+
+/// The lime "+ Queue" chip, or a quiet "✓ In Queue" once added.
+class _QueueChip extends StatelessWidget {
+  final bool queued;
+  final VoidCallback onTap;
+  const _QueueChip({super.key, required this.queued, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = TellyColors.primaryAccentOf(context);
+    return Semantics(
+      button: !queued,
+      label: queued ? 'In your Queue' : 'Add to Queue',
+      excludeSemantics: true,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(999),
+        onTap: queued ? null : onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          decoration: BoxDecoration(
+            color: queued ? Colors.transparent : accent.withValues(alpha: 0.14),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(color: queued ? TellyColors.strokeOf(context) : accent.withValues(alpha: 0.45)),
+          ),
+          child: Text(
+            queued ? '✓ In Queue' : '+ Queue',
+            style: TellyTypography.labelMedium(color: queued ? TellyColors.textSecondaryOf(context) : accent)
+                .copyWith(fontWeight: FontWeight.w800),
+          ),
+        ),
+      ),
     );
   }
 }

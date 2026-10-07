@@ -100,6 +100,11 @@ class Medal {
 
   bool get isUnlocked => unlockedAt != null;
 
+  /// The TMDB collection behind a `collection_<id>` medal (§7), else null.
+  int? get collectionId => kind == MedalKind.collection && id.startsWith('collection_')
+      ? int.tryParse(id.substring('collection_'.length))
+      : null;
+
   /// 0–1 towards the target; 1 once unlocked.
   double get fraction {
     if (isUnlocked) return 1;
@@ -290,6 +295,14 @@ class AchievementsSnapshot {
   List<Medal> section(MedalKind kind) =>
       [for (final m in visible) if (m.kind == kind) m]..sort((a, b) => a.sort.compareTo(b.sort));
 
+  /// Started collections, closest to done first; finished ones after them (§7).
+  List<Medal> get collections => [for (final m in visible) if (m.kind == MedalKind.collection) m]
+    ..sort((a, b) {
+      if (a.isUnlocked != b.isUnlocked) return a.isUnlocked ? 1 : -1;
+      final byFraction = b.fraction.compareTo(a.fraction);
+      return byFraction != 0 ? byFraction : a.name.compareTo(b.name);
+    });
+
   /// Pinned medals by slot.
   List<Medal> get pinned => [for (final m in medals) if (m.pinnedSlot != null) m]
     ..sort((a, b) => a.pinnedSlot!.compareTo(b.pinnedSlot!));
@@ -371,4 +384,29 @@ class MedalRarity {
   bool get isNew => activeUsers < 200;
 
   String get line => Medal.rarityLineOf(percent, isNew: isNew);
+}
+
+/// A released film of a collection the user hasn't ranked yet (medal sheet "Still to watch", #141).
+class StillToWatch {
+  final int titleId;
+  final String title;
+  final int? releaseYear;
+  final String? posterPath;
+  final bool inQueue;
+
+  const StillToWatch({
+    required this.titleId,
+    required this.title,
+    this.releaseYear,
+    this.posterPath,
+    this.inQueue = false,
+  });
+
+  factory StillToWatch.fromJson(Map<String, dynamic> j) => StillToWatch(
+        titleId: (j['title_id'] as num).toInt(),
+        title: (j['title'] as String?) ?? 'Untitled',
+        releaseYear: (j['release_year'] as num?)?.toInt(),
+        posterPath: j['poster_path'] as String?,
+        inQueue: (j['in_queue'] as bool?) ?? false,
+      );
 }

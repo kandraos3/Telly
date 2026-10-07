@@ -609,6 +609,24 @@ void main() {
         await expectLater(find.byType(AchievementsScreen), matchesGoldenFile('goldens/achievements_${name}_iphone15.png'));
       });
 
+      testWidgets('Golden: SCR-23 Achievements with collections ($name) on iPhone 15 Pro size (#141)', (tester) async {
+        await tester.binding.setSurfaceSize(const Size(393, 852));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        final db = AppDatabase.inMemory();
+        addTearDown(db.close);
+        await tester.pumpWidget(ProviderScope(
+          overrides: [
+            hapticsEnabledProvider.overrideWith((ref) => false),
+            databaseProvider.overrideWithValue(db),
+            achievementsRepositoryProvider.overrideWithValue(FakeAchievementsRepository(withCollections())),
+          ],
+          child: MaterialApp(theme: theme, home: const AchievementsScreen()),
+        ));
+        await tester.pumpAndSettle();
+        await expectLater(
+            find.byType(AchievementsScreen), matchesGoldenFile('goldens/achievements_collections_${name}_iphone15.png'));
+      });
+
       testWidgets('Golden: SCR-24 UnlockMomentScreen ($name) on iPhone 15 Pro size (#138)', (tester) async {
         await tester.binding.setSurfaceSize(const Size(393, 852));
         addTearDown(() => tester.binding.setSurfaceSize(null));

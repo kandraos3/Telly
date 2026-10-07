@@ -26,6 +26,9 @@ abstract interface class AchievementsRepository {
 
   /// Every medal's rarity (`achievement_rarity`), keyed by medal id.
   Future<Map<String, MedalRarity>> fetchRarity();
+
+  /// A collection's released films the user hasn't ranked (#141).
+  Future<List<StillToWatch>> fetchStillToWatch(int collectionId);
 }
 
 class SupabaseAchievementsRepository implements AchievementsRepository {
@@ -86,6 +89,12 @@ class SupabaseAchievementsRepository implements AchievementsRepository {
     };
   }
 
+  @override
+  Future<List<StillToWatch>> fetchStillToWatch(int collectionId) async {
+    final rows = await _client.rpc('collection_still_to_watch', params: {'p_collection_id': collectionId}) as List;
+    return [for (final r in rows) StillToWatch.fromJson(Map<String, dynamic>.from(r as Map))];
+  }
+
   /// Builds the showcase from `user_achievements` rows with their embedded `achievements`.
   static MedalShowcase showcaseFromRows(List<Map<String, dynamic>> rows) => MedalShowcase.of([
         for (final r in rows)
@@ -141,5 +150,9 @@ final medalRarityProvider = FutureProvider<Map<String, MedalRarity>>((ref) async
     return const {};
   }
 });
+
+/// "Still to watch" for one collection medal's sheet.
+final stillToWatchProvider = FutureProvider.autoDispose.family<List<StillToWatch>, int>(
+    (ref, collectionId) => ref.watch(achievementsRepositoryProvider).fetchStillToWatch(collectionId));
 
 final achievementsCacheProvider = Provider<AchievementsCache>((ref) => AchievementsCache(ref.watch(databaseProvider)));

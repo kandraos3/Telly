@@ -70,6 +70,30 @@ AchievementsSnapshot sampleSnapshot({bool pinned = true, bool offline = false, b
   );
 }
 
+/// [sampleSnapshot] plus four started collections and one finished.
+AchievementsSnapshot withCollections() {
+  final base = sampleSnapshot();
+  Medal col(int id, String name, int progress, int target, {String? unlockedAt}) => Medal.fromJson(medalRow(
+        'collection_$id',
+        kind: 'collection',
+        tier: 'gold',
+        name: name,
+        description: 'Rank every released film in $name',
+        glyph: name.substring(0, 2).toUpperCase(),
+        threshold: target,
+        progress: progress,
+        unlockedAt: unlockedAt,
+      ));
+  return base.copyWith(medals: [
+    ...base.medals,
+    col(263, 'The Dark Knight', 2, 3),
+    col(87359, 'Mission: Impossible', 5, 8),
+    col(10194, 'Toy Story', 1, 4),
+    col(1241, 'Harry Potter', 7, 8),
+    col(119, 'The Lord of the Rings', 3, 3, unlockedAt: '2026-10-04T12:00:00Z'),
+  ]);
+}
+
 class FakeAchievementsRepository implements AchievementsRepository {
   FakeAchievementsRepository(this.snapshot);
 
@@ -103,4 +127,9 @@ class FakeAchievementsRepository implements AchievementsRepository {
 
   @override
   Future<Map<String, MedalRarity>> fetchRarity() async => rarity;
+
+  Map<int, List<StillToWatch>> stillToWatch = {};
+
+  @override
+  Future<List<StillToWatch>> fetchStillToWatch(int collectionId) async => stillToWatch[collectionId] ?? const [];
 }

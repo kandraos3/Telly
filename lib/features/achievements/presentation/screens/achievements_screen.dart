@@ -18,9 +18,8 @@ import '../widgets/medal_sheet.dart';
 
 /// `SCR-23` Achievements (`/more/achievements`, features/10 §9.3, mockup A1; #137).
 ///
-/// Summary (unlocked count and the weekly streak chip), the pinned row, then Milestones,
-/// Taste and Streak, with locked medals showing their progress. Collections join in slice 2
-/// (#141). Share (app bar) sends a card of the showcase: pinned medals, or the latest unlocks (#138).
+/// Summary (unlocked count and the weekly streak chip), the pinned row, then Collections
+/// (#141), Milestones, Taste and Streak, with locked medals showing their progress. Share (app bar) sends a card of the showcase: pinned medals, or the latest unlocks (#138).
 class AchievementsScreen extends ConsumerWidget {
   const AchievementsScreen({super.key});
 
@@ -92,6 +91,10 @@ class _Body extends StatelessWidget {
         _SummaryCard(snapshot: snapshot),
         const SizedBox(height: 22),
         _PinnedRow(snapshot: snapshot),
+        if (snapshot.collections.isNotEmpty) ...[
+          const SizedBox(height: 22),
+          _CollectionsSection(collections: snapshot.collections),
+        ],
         for (final (label, medals) in sections)
           if (medals.isNotEmpty) ...[
             const SizedBox(height: 22),
@@ -369,6 +372,130 @@ class _MedalRow extends StatelessWidget {
                     style: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context))
                         .copyWith(fontWeight: FontWeight.w700, fontFeatures: const [FontFeature.tabularFigures()]),
                   ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Collections in progress, closest to done first: the top three, then "See all" (§7, §9.3).
+class _CollectionsSection extends StatefulWidget {
+  static const preview = 3;
+  final List<Medal> collections;
+  const _CollectionsSection({required this.collections});
+
+  @override
+  State<_CollectionsSection> createState() => _CollectionsSectionState();
+}
+
+class _CollectionsSectionState extends State<_CollectionsSection> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final all = widget.collections;
+    final inProgress = all.where((m) => !m.isUnlocked).length;
+    final shown = _expanded ? all : all.take(_CollectionsSection.preview).toList();
+    return Column(
+      key: const Key('achievements_section_collections'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        TellySectionHeader(
+          label: 'Collections',
+          trailing: inProgress == 0
+              ? null
+              : Text('$inProgress in progress',
+                  style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context))),
+        ),
+        const SizedBox(height: 10),
+        _Card(
+          padding: EdgeInsets.zero,
+          child: Column(
+            children: [
+              for (var i = 0; i < shown.length; i++) ...[
+                if (i > 0) Divider(height: 1, thickness: 1, color: TellyColors.strokeOf(context)),
+                _CollectionRow(medal: shown[i]),
+              ],
+            ],
+          ),
+        ),
+        if (all.length > _CollectionsSection.preview && !_expanded)
+          Align(
+            alignment: Alignment.centerRight,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: TextButton(
+                key: const Key('achievements_collections_see_all'),
+                onPressed: () => setState(() => _expanded = true),
+                child: Text('See all ${all.length}',
+                    style: TellyTypography.labelMedium(color: TellyColors.primaryAccentOf(context))),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _CollectionRow extends StatelessWidget {
+  final Medal medal;
+  const _CollectionRow({required this.medal});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = medal.isUnlocked ? 'complete' : '${medal.progress} of ${medal.threshold}';
+    return Semantics(
+      button: true,
+      label: 'Collection, ${medal.name}, $state',
+      excludeSemantics: true,
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          key: Key('achievements_row_${medal.id}'),
+          onTap: () {
+            HapticsService.selectionClick();
+            MedalSheet.show(context, medal);
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            child: Row(
+              children: [
+                MedalBadge.of(medal, size: MedalSize.small),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        medal.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TellyTypography.bodyLarge(color: TellyColors.textPrimaryOf(context))
+                            .copyWith(fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(height: 6),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(3),
+                        child: LinearProgressIndicator(
+                          value: medal.fraction,
+                          minHeight: 5,
+                          color: TellyColors.warmAmberOf(context),
+                          backgroundColor: TellyColors.strokeOf(context),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  medal.isUnlocked ? '${medal.threshold}/${medal.threshold}' : medal.progressLabel,
+                  key: Key('achievements_progress_${medal.id}'),
+                  style: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context))
+                      .copyWith(fontWeight: FontWeight.w700, fontFeatures: const [FontFeature.tabularFigures()]),
+                ),
               ],
             ),
           ),
