@@ -121,7 +121,6 @@ class DualCanonProfileScreen extends ConsumerWidget {
                   selected: selectedCanon == CanonType.movie ? 'movie' : 'tv',
                   movieCount: moviesCount,
                   seriesCount: seriesCount,
-                  seriesSubtitle: 'Includes anime',
                   movieKey: const Key('movie_canon_tab'),
                   seriesKey: const Key('series_canon_tab'),
                   onSelect: (mediaType) {

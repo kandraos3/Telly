@@ -288,9 +288,8 @@ void main() {
       await tester.pumpWidget(buildTestableProfileScreen());
       await tester.pumpAndSettle();
 
-      expect(find.text('Movies (3)'), findsOneWidget);
-      expect(find.text('TV Shows (5)'), findsOneWidget);
-      expect(find.text('Includes anime'), findsOneWidget);
+      expect(find.text('Movies 3'), findsOneWidget);
+      expect(find.text('TV Shows 5'), findsOneWidget);
 
       expect(find.text('Interstellar'), findsWidgets);
       expect(find.text('Parasite'), findsWidgets);

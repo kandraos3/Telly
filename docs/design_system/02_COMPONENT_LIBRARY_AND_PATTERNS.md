@@ -196,7 +196,7 @@ The Duel screen is a distraction-free, full-screen battleground.
 - **Dimensions:** Height 30px, border-radius: 999px (full pill).
 - **Unselected:** `#11131A` background, `#7D8198` text.
 - **Selected:** Electric Violet (`#7C5CFF`) or Phosphor Lime (`#D2FF52`) solid or outline.
-- **Filter button chip** (epic #47, decision [0004](../decisions/0004-canon-podium-and-queue-up-next.md)): opens a screen's Filter sheet; first used by the Queue (`SCR-13`).
+- **Filter button chip** (`TellyFilterButton`; epic #47, decision [0004](../decisions/0004-canon-podium-and-queue-up-next.md)): opens a screen's Filter sheet; first used by the Queue (`SCR-13`).
   - **Shape:** 40 dp tall inside a 48 dp target, radius 20, 12 dp side padding. A `filter_list_rounded` icon (16 dp) and "Filter" in `labelMedium` w800.
   - **Idle:** Surface fill, glass border, `textSecondary` label.
   - **Active** (at least one filter on): primary accent at 15% fill, a primary accent border and label, and a count badge after the label. The badge is a 16 dp pill in `#D2FF52` with `#08090C` digits, in both themes. Sort order never counts as a filter.
@@ -207,9 +207,10 @@ Two levels of switcher, each with one look everywhere (`lib/core/widgets/`):
 - **Segmented control** (`TellySegmentedControl`): switches a screen's sections. Feed (Following / Squads / Global), Queue Lists (My lists / Friends' lists), Squad hub (Consensus / Watchlist / Debates). Surface `#11131A` track, radius 12, 4px inset; the selected segment lifts onto Overlay `#1A1D27` with a glass border and a Phosphor Lime label (`#233B00` on the light theme). Labels are Plus Jakarta Sans `labelMedium` w800; 48dp targets; selection-click haptic.
 - **Canon switcher** (`TellyCanonSwitcher`), compact since epic #47 (decision [0004](../decisions/0004-canon-podium-and-queue-up-next.md)). Movies | TV Shows, Movies always on the left. Used on Canon, Queue, Home and the Squad hub, with the same look everywhere.
   - **Track:** Surface, radius 14, 4 dp inset, glass border, 48 dp min height.
-  - **Selected half:** lifts onto Overlay `#1A1D27` (light `#F0F2F5`) with a glass border and radius 10. Its label is `textPrimary`, and its count is in the primary accent (`#D2FF52`; light `#4D7800`).
+  - **Selected half:** lifts onto Overlay `#1A1D27` (light `#F0F2F5`) with a glass border and radius 10. Its label is `textPrimary`, and its count is in the segmented control's accent label colour (`#D2FF52`; light `#233B00`, which keeps AA contrast on Overlay).
   - **Unselected half:** label and count in `textTertiary`.
   - **Labels:** `labelLarge` w800, with the count after the name when the screen knows it ("Movies 142"). There's no subtitle line; the old "Includes anime" note under TV Shows is dropped.
+  - **Targets:** the 4 dp inset sits inside each half's hit area, so each half is a 48 dp target.
   - **Behaviour:** selection-click haptic. It can be expanded to share a row (Queue puts the Filter chip beside it).
 
 ### 5.6 Section Header — `FE-UI-01`

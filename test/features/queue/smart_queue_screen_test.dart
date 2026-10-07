@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/theme/telly_theme.dart';
 import 'package:telly_app/features/queue/data/streaming_availability_service.dart';
 import 'package:telly_app/features/queue/domain/streaming_models.dart';
@@ -90,9 +91,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Queue'), findsOneWidget);
-      // Tabs: Movies (1) and TV Shows (2), no emoji (FE-HEADER-01)
-      expect(find.text('Movies (1)'), findsOneWidget);
-      expect(find.text('TV Shows (2)'), findsOneWidget);
+      // Tabs: Movies 1 and TV Shows 2, no emoji (FE-HEADER-01)
+      expect(find.text('Movies 1'), findsOneWidget);
+      expect(find.text('TV Shows 2'), findsOneWidget);
 
       // Default selected tab is Movies: Parasite should be visible
       expect(find.text('Parasite'), findsOneWidget);
@@ -107,7 +108,7 @@ void main() {
       await tester.runAsync(loadRealFonts);
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
-      await tester.tap(find.text('TV Shows (2)'));
+      await tester.tap(find.text('TV Shows 2'));
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
@@ -122,7 +123,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap Series tab
-      await tester.tap(find.text('TV Shows (2)'));
+      await tester.tap(find.text('TV Shows 2'));
       await tester.pumpAndSettle();
 
       expect(find.text('Slow Horses'), findsOneWidget);
@@ -139,7 +140,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Switch to Series tab
-      await tester.tap(find.text('TV Shows (2)'));
+      await tester.tap(find.text('TV Shows 2'));
       await tester.pumpAndSettle();
 
       // Both Slow Horses and Fargo are initially shown because filter is OFF
@@ -158,7 +159,7 @@ void main() {
     testWidgets('the header sort action re-sorts the watchlist (FE-HEADER-01)', (tester) async {
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
-      await tester.tap(find.text('TV Shows (2)'));
+      await tester.tap(find.text('TV Shows 2'));
       await tester.pumpAndSettle();
 
       double y(String title) => tester.getTopLeft(find.text(title)).dy;
@@ -180,8 +181,8 @@ void main() {
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
       Color? labelColor(String text) => tester.widget<Text>(find.text(text)).style?.color;
-      // The selected half sits on the accent, so its label uses the dark on-accent colour.
-      expect(labelColor('Movies (1)'), const Color(0xFF08090C));
+      // The selected half lifts onto Overlay with a primary label; the other half is muted.
+      expect(labelColor('Movies 1'), TellyColors.textPrimary);
 
       // Swipe on empty space below the cards: the cards themselves swipe to remove.
       final page = tester.getRect(find.byType(TabBarView));
@@ -189,8 +190,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Slow Horses'), findsOneWidget);
-      expect(labelColor('TV Shows (2)'), const Color(0xFF08090C));
-      expect(labelColor('Movies (1)'), isNot(const Color(0xFF08090C)));
+      expect(labelColor('TV Shows 2'), TellyColors.textPrimary);
+      expect(labelColor('Movies 1'), TellyColors.textTertiary);
     });
 
     testWidgets('FE-UI-01: an empty watchlist shows the shared empty state with an Explore action', (tester) async {

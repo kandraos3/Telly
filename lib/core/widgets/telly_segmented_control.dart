@@ -16,12 +16,12 @@ class TellySegment<T> {
   const TellySegment({required this.value, required this.label, this.key});
 }
 
-/// Section switcher shared by Feed (Following / Squads / Global), Queue (Watchlist /
-/// My Lists / Friends' Lists) and the Squad hub (FE-UI-01).
+/// Section switcher shared by Feed (Following / Squads / Global), Queue Lists (My lists /
+/// Friends' lists) and the Squad hub (FE-UI-01).
 ///
 /// A raised Surface track with the selected option lifted onto an Overlay card and its
-/// label in the accent colour. The Movies / TV Shows choice uses [TellyCanonSwitcher]
-/// instead, so the two levels never look alike.
+/// label in the accent colour. The Movies / TV Shows choice uses [TellyCanonSwitcher],
+/// which shares the lifted look but keeps its label neutral and accents only the count.
 class TellySegmentedControl<T> extends StatelessWidget {
   final List<TellySegment<T>> segments;
   final T selected;

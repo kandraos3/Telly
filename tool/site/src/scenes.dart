@@ -564,7 +564,7 @@ final siteScenes = <Scene>[
     tab: 2,
     build: () => const DualCanonProfileScreen(),
     overrides: baseOverrides,
-    interact: (tester) => tapText(tester, 'TV Shows (12)'),
+    interact: (tester) => tapText(tester, 'TV Shows 12'),
   ),
   Scene(
     id: 'tiers',
@@ -572,7 +572,7 @@ final siteScenes = <Scene>[
     build: () => const DualCanonProfileScreen(),
     overrides: baseOverrides,
     interact: (tester) async {
-      await tapText(tester, 'TV Shows (12)');
+      await tapText(tester, 'TV Shows 12');
       await tapText(tester, 'Tiers');
       await scrollBy(tester, 560);
     },
@@ -583,7 +583,7 @@ final siteScenes = <Scene>[
     id: 'queue',
     build: () => SmartQueueScreen(testItems: queueItems),
     overrides: baseOverrides,
-    interact: (tester) => tapText(tester, 'TV Shows (${queueItems.length})'),
+    interact: (tester) => tapText(tester, 'TV Shows ${queueItems.length}'),
   ),
   Scene(
     id: 'taste-match',
