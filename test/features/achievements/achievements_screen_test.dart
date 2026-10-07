@@ -187,6 +187,17 @@ void main() {
       expect(find.byKey(const Key('achievements_share')), findsNothing);
     });
 
+    testWidgets('#144: earned challenge medals get their own section', (tester) async {
+      final base = sampleSnapshot();
+      await pump(tester, snapshot: base.copyWith(medals: [
+        ...base.medals,
+        Medal.fromJson(medalRow('challenge_spooktober_2026', kind: 'challenge', tier: 'gold', name: 'Spooktober',
+            glyph: '8', threshold: 8, progress: 8, unlockedAt: '2026-10-05T12:00:00Z')),
+      ]));
+      expect(find.byKey(const Key('achievements_section_challenges')), findsOneWidget);
+      expect(find.byKey(const Key('achievements_row_challenge_spooktober_2026')), findsOneWidget);
+    });
+
     testWidgets('light theme uses the light tokens', (tester) async {
       await pump(tester, theme: TellyTheme.light);
       final summary = tester.widget<Container>(

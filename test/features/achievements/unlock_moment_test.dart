@@ -93,6 +93,16 @@ void main() {
       expect(find.text('home'), findsOneWidget);
     });
 
+    testWidgets("#144: a challenge medal's moment records challenge_completed", (tester) async {
+      final base = sampleSnapshot();
+      final seen = [for (final m in base.medals) m.copyWith(seenAt: DateTime(2026, 10, 4))];
+      final spooky = Medal.fromJson(medalRow('challenge_spooktober_2026', kind: 'challenge', tier: 'gold',
+          name: 'Spooktober', glyph: '8', threshold: 8, progress: 8, unlockedAt: '2026-10-05T12:00:00Z'));
+      await pumpHost(tester, snapshot: base.copyWith(medals: [...seen, spooky]));
+      expect(find.text('You finished the Spooktober challenge.'), findsOneWidget);
+      expect(TelemetryService().recordedEvents.map((e) => e.name), ['medal_unlocked', 'challenge_completed']);
+    });
+
     testWidgets('nothing unseen: no moment', (tester) async {
       final seen = sampleSnapshot();
       final all = seen.copyWith(medals: [for (final m in seen.medals) m.copyWith(seenAt: DateTime(2026, 10, 4))]);

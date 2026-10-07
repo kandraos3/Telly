@@ -54,7 +54,11 @@ enum ActivityType {
   showDropped,
   queueAdded,
   commentPosted,
-  medalUnlocked;
+  medalUnlocked,
+  challengeCompleted,
+
+  /// A type this app doesn't know yet; the feed skips these rows (#144).
+  unknown;
 
   static ActivityType fromString(String value) {
     switch (value.toUpperCase()) {
@@ -70,8 +74,10 @@ enum ActivityType {
         return ActivityType.commentPosted;
       case 'MEDAL_UNLOCKED':
         return ActivityType.medalUnlocked;
+      case 'CHALLENGE_COMPLETED':
+        return ActivityType.challengeCompleted;
       default:
-        return ActivityType.rankingCreated;
+        return ActivityType.unknown;
     }
   }
 }
@@ -205,6 +211,80 @@ class FeedMedal {
   }
 }
 
+/// The challenge on a `CHALLENGE_COMPLETED` post (features/10 §10, #144): its metadata.
+@immutable
+class FeedChallenge {
+  final String challengeId;
+  final String slug;
+  final String name;
+  final int count;
+  final String medalGlyph;
+  final String? bestTitle;
+  final int? bestRank;
+  final double? bestScore;
+
+  const FeedChallenge({
+    required this.challengeId,
+    required this.slug,
+    required this.name,
+    required this.count,
+    this.medalGlyph = '★',
+    this.bestTitle,
+    this.bestRank,
+    this.bestScore,
+  });
+
+  static FeedChallenge? fromMetadata(Map<String, dynamic> m) {
+    final slug = m['slug'] as String?;
+    final id = m['challenge_id'] as String?;
+    if (slug == null || id == null) return null;
+    return FeedChallenge(
+      challengeId: id,
+      slug: slug,
+      name: (m['name'] as String?) ?? 'Challenge',
+      count: (m['count'] as num?)?.toInt() ?? 0,
+      medalGlyph: (m['medal_glyph'] as String?) ?? '★',
+      bestTitle: m['best_title'] as String?,
+      bestRank: (m['best_rank'] as num?)?.toInt(),
+      bestScore: (m['best_score'] as num?)?.toDouble(),
+    );
+  }
+
+  /// "Best of the 8: The Thing (#1, 9.40)".
+  String? get bestLine {
+    final title = bestTitle;
+    if (title == null) return null;
+    final detail = [if (bestRank != null) '#$bestRank', if (bestScore != null) bestScore!.toStringAsFixed(2)].join(', ');
+    return 'Best of the $count: $title${detail.isEmpty ? '' : ' ($detail)'}';
+  }
+}
+
+/// "Spooktober 2 of 8" under a ranking made inside a challenge the poster joined (#144).
+@immutable
+class ChallengeContext {
+  final String slug;
+  final String name;
+  final int count;
+  final int target;
+
+  const ChallengeContext({required this.slug, required this.name, required this.count, required this.target});
+
+  static ChallengeContext? fromJson(Object? raw) {
+    if (raw is! Map) return null;
+    final m = Map<String, dynamic>.from(raw);
+    final slug = m['slug'] as String?;
+    if (slug == null) return null;
+    return ChallengeContext(
+      slug: slug,
+      name: (m['name'] as String?) ?? 'Challenge',
+      count: (m['count'] as num?)?.toInt() ?? 0,
+      target: (m['target'] as num?)?.toInt() ?? 0,
+    );
+  }
+
+  String get label => '$name $count of $target';
+}
+
 /// An activity feed item representing an action taken by a user in the social graph.
 @immutable
 class ActivityLog {
@@ -244,6 +324,12 @@ class ActivityLog {
   /// Set for [ActivityType.medalUnlocked] posts.
   final FeedMedal? medal;
 
+  /// Set for [ActivityType.challengeCompleted] posts.
+  final FeedChallenge? challenge;
+
+  /// Set on rankings made inside a challenge the poster joined.
+  final ChallengeContext? challengeContext;
+
   // Interaction states
   final bool inUserQueue;
   final Map<FeedReaction, int> reactions;
@@ -281,6 +367,8 @@ class ActivityLog {
     this.dropReason,
     this.willingToRevisit = false,
     this.medal,
+    this.challenge,
+    this.challengeContext,
     this.inUserQueue = false,
     this.reactions = const {},
     this.userReactions = const {},
@@ -326,6 +414,8 @@ class ActivityLog {
       dropReason: dropReason,
       willingToRevisit: willingToRevisit,
       medal: medal,
+      challenge: challenge,
+      challengeContext: challengeContext,
       inUserQueue: inUserQueue ?? this.inUserQueue,
       reactions: reactions ?? this.reactions,
       userReactions: userReactions ?? this.userReactions,

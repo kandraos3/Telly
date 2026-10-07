@@ -69,6 +69,7 @@ void main() {
       expect(find.text('Queue'), findsOneWidget);
       expect(find.text('Your watchlist and custom lists'), findsOneWidget);
       expect(find.text('Achievements'), findsOneWidget);
+      expect(find.text('Challenges'), findsOneWidget);
       expect(find.text('Wrapped'), findsOneWidget);
       expect(find.text('Graveyard'), findsOneWidget);
       expect(find.text('Settings and account'), findsOneWidget);
@@ -76,17 +77,18 @@ void main() {
       double top(Key k) => tester.getTopLeft(find.byKey(k)).dy;
       expect(top(const Key('more_profile_card')), lessThan(top(const Key('more_tile_queue'))));
       expect(top(const Key('more_tile_queue')), lessThan(top(const Key('more_tile_achievements'))));
-      // #137: Achievements leads the feature grid, beside Wrapped (features/10 §9.2).
-      expect(top(const Key('more_tile_achievements')), top(const Key('more_tile_wrapped')));
+      // #137 / #144: Achievements and Challenges lead the feature grid, then Wrapped and Graveyard.
+      expect(top(const Key('more_tile_achievements')), top(const Key('more_tile_challenges')));
       expect(tester.getTopLeft(find.byKey(const Key('more_tile_achievements'))).dx,
-          lessThan(tester.getTopLeft(find.byKey(const Key('more_tile_wrapped'))).dx));
-      expect(top(const Key('more_tile_wrapped')), lessThan(top(const Key('more_tile_graveyard'))));
+          lessThan(tester.getTopLeft(find.byKey(const Key('more_tile_challenges'))).dx));
+      expect(top(const Key('more_tile_challenges')), lessThan(top(const Key('more_tile_wrapped'))));
+      expect(top(const Key('more_tile_wrapped')), top(const Key('more_tile_graveyard')));
       expect(top(const Key('more_tile_wrapped')), lessThan(top(const Key('more_row_settings'))));
     });
 
     testWidgets('ships no placeholders for unbuilt features', (tester) async {
       await pumpHub(tester);
-      for (final text in ['Soon', 'Challenges', 'Your level', 'Invite friends', 'Telly Pro', 'Help and feedback']) {
+      for (final text in ['Soon', 'Your level', 'Invite friends', 'Telly Pro', 'Help and feedback']) {
         expect(find.text(text), findsNothing, reason: text);
       }
     });
@@ -97,16 +99,16 @@ void main() {
       expect(queue.left, 16);
       expect(queue.right, 390 - 16);
       final achievements = tester.getRect(find.byKey(const Key('more_tile_achievements')));
+      final challenges = tester.getRect(find.byKey(const Key('more_tile_challenges')));
       final wrapped = tester.getRect(find.byKey(const Key('more_tile_wrapped')));
       final graveyard = tester.getRect(find.byKey(const Key('more_tile_graveyard')));
-      for (final tile in [achievements, wrapped, graveyard]) {
+      for (final tile in [achievements, challenges, wrapped, graveyard]) {
         expect(tile.height, 104);
         expect(tile.width, closeTo(wrapped.width, 0.01));
       }
-      expect(wrapped.left - achievements.right, 12);
-      // The odd last tile keeps half the width, on the left, 12 below.
-      expect(graveyard.left, achievements.left);
-      expect(graveyard.top - achievements.bottom, 12);
+      expect(challenges.left - achievements.right, 12);
+      expect(graveyard.left - wrapped.right, 12);
+      expect(wrapped.top - achievements.bottom, 12);
       expect(tester.getSize(find.byKey(const Key('more_row_settings'))).height, 52);
     });
 
@@ -144,6 +146,7 @@ void main() {
       expect(iconColorIn(tester, const Key('more_tile_queue')), TellyColors.phosphorLime);
       expect(iconColorIn(tester, const Key('more_tile_wrapped')), TellyColors.phosphorLime);
       expect(iconColorIn(tester, const Key('more_tile_achievements')), TellyColors.warmAmber);
+      expect(iconColorIn(tester, const Key('more_tile_challenges')), TellyColors.electricCyan);
       expect(iconColorIn(tester, const Key('more_tile_graveyard')), TellyColors.neonCoral);
     });
 
@@ -157,6 +160,7 @@ void main() {
       expect(iconColorIn(tester, const Key('more_tile_queue')), TellyColors.lightPhosphorLime);
       expect(iconColorIn(tester, const Key('more_tile_graveyard')), TellyColors.lightNeonCoral);
       expect(iconColorIn(tester, const Key('more_tile_achievements')), TellyColors.lightWarmAmber);
+      expect(iconColorIn(tester, const Key('more_tile_challenges')), TellyColors.lightElectricCyan);
       expect(tester.widget<Text>(find.text('Jordan Miller')).style!.color, TellyColors.lightTextPrimary);
     });
 
@@ -164,6 +168,7 @@ void main() {
       (const Key('more_profile_card'), Routes.canon),
       (const Key('more_tile_queue'), Routes.queue),
       (const Key('more_tile_achievements'), Routes.achievements),
+      (const Key('more_tile_challenges'), Routes.challenges),
       (const Key('more_tile_wrapped'), Routes.wrapped),
       (const Key('more_tile_graveyard'), Routes.graveyard),
       (const Key('more_row_settings'), Routes.settings),
@@ -186,6 +191,7 @@ void main() {
             onProfileTap: () => taps.add('profile'),
             onQueueTap: () => taps.add('queue'),
             onAchievementsTap: () => taps.add('achievements'),
+            onChallengesTap: () => taps.add('challenges'),
             onWrappedTap: () => taps.add('wrapped'),
             onGraveyardTap: () => taps.add('graveyard'),
             onSettingsTap: () => taps.add('settings'),
@@ -197,13 +203,14 @@ void main() {
         'more_profile_card',
         'more_tile_queue',
         'more_tile_achievements',
+        'more_tile_challenges',
         'more_tile_wrapped',
         'more_tile_graveyard',
         'more_row_settings'
       ]) {
         await tester.tap(find.byKey(Key(k)));
       }
-      expect(taps, ['profile', 'queue', 'achievements', 'wrapped', 'graveyard', 'settings']);
+      expect(taps, ['profile', 'queue', 'achievements', 'challenges', 'wrapped', 'graveyard', 'settings']);
     });
 
     testWidgets('falls back to the initial avatar and a plain "View profile" without a photo or handle',
@@ -221,6 +228,7 @@ void main() {
       expect(find.bySemanticsLabel('Jordan Miller, @jordan · View profile'), findsOneWidget);
       expect(find.bySemanticsLabel('Queue, your watchlist and custom lists'), findsOneWidget);
       expect(find.bySemanticsLabel('Achievements, Medals and your streak'), findsOneWidget);
+      expect(find.bySemanticsLabel('Challenges, Race friends to the finish'), findsOneWidget);
       expect(find.bySemanticsLabel('Wrapped, Your year in rankings'), findsOneWidget);
       expect(find.bySemanticsLabel('Graveyard, Dropped and DNF'), findsOneWidget);
       expect(

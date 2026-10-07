@@ -145,6 +145,22 @@ class _FeedActivityCardState extends State<FeedActivityCard> {
 
                 // 2. Action description
                 _buildActionHeadline(activity),
+                // "Spooktober 2 of 8" for a ranking inside a joined challenge (#144).
+                if (activity.challengeContext case final ctx?) ...[
+                  const SizedBox(height: 4),
+                  Row(
+                    key: const Key('feed_card_challenge_context'),
+                    children: [
+                      Icon(Icons.flag_outlined, size: 14, color: TellyColors.electricCyanOf(context)),
+                      const SizedBox(width: 4),
+                      Text(
+                        ctx.label,
+                        style: TellyTypography.caption(color: TellyColors.electricCyanOf(context))
+                            .copyWith(fontWeight: FontWeight.w700),
+                      ),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: 12),
 
                 // 3. Media row: Poster + Details + Score

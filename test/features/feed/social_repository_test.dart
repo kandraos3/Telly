@@ -77,6 +77,7 @@ void main() {
         'p_before_id': null,
         'p_limit': 1,
         'p_include_medals': true, // #139: this app renders medal cards
+        'p_include_challenges': true, // #144: and challenge cards
       });
       expect(page.hasMore, isTrue, reason: 'a full page may have more');
 
@@ -103,6 +104,32 @@ void main() {
       expect(DateTime.parse(params['p_before'] as String), DateTime.parse('2026-10-03T11:00:00.123456Z'),
           reason: 'microseconds survive the round trip');
       expect(page.hasMore, isFalse);
+    });
+
+    test('#144: rows of an unknown type are skipped; the page still reports more by raw rows', () async {
+      respond = (_) => [feedRow(), {...feedRow(), 'id': 'future-1', 'activity_type': 'SOMETHING_NEW'}];
+      final page = await repo().getFeedPage(filter: FeedFilter.following, limit: 2);
+      expect(page.items.map((a) => a.id), isNot(contains('future-1')));
+      expect(page.items, hasLength(1));
+      expect(page.hasMore, isTrue);
+    });
+
+    test('#144: challenge rows carry the challenge; rankings carry their challenge context', () {
+      final done = activityFromFeedRow({
+        ...feedRow(),
+        'activity_type': 'CHALLENGE_COMPLETED',
+        'metadata': {
+          'challenge_id': 'c1', 'slug': 'spooktober-2026', 'name': 'Spooktober', 'count': 8, 'medal_glyph': '8',
+          'best_title': 'The Thing', 'best_rank': 1, 'best_score': 9.4,
+        },
+      });
+      expect(done.activityType, ActivityType.challengeCompleted);
+      expect(done.challenge!.bestLine, 'Best of the 8: The Thing (#1, 9.40)');
+      final ranked = activityFromFeedRow({
+        ...feedRow(),
+        'challenge_context': {'slug': 'spooktober-2026', 'name': 'Spooktober', 'count': 2, 'target': 8},
+      });
+      expect(ranked.challengeContext!.label, 'Spooktober 2 of 8');
     });
 
     test('dropped-show metadata maps to the Graveyard labels', () {

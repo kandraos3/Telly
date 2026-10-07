@@ -53,9 +53,10 @@ class _UnlockMomentHostState extends ConsumerState<UnlockMomentHost> {
       for (final medal in queue) {
         if (!mounted) return;
         _shown.add(medal.id);
-        ref
-            .read(telemetryServiceProvider)
-            .trackMedalUnlocked(achievementId: medal.id, tier: medal.tier.name, kind: medal.kind.name);
+        final telemetry = ref.read(telemetryServiceProvider)
+          ..trackMedalUnlocked(achievementId: medal.id, tier: medal.tier.name, kind: medal.kind.name);
+        // A challenge medal is only ever earned by finishing the challenge (#144).
+        if (medal.kind == MedalKind.challenge) telemetry.trackChallengeCompleted(achievementId: medal.id);
         await Navigator.of(context, rootNavigator: true).push(MaterialPageRoute<void>(
           fullscreenDialog: true,
           builder: (_) => UnlockMomentScreen(medal: medal),

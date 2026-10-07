@@ -155,6 +155,8 @@ class Medal {
       _ => switch (kind) {
           MedalKind.milestone => "You've ranked $n $what.",
           MedalKind.streak => '$n weeks in a row with at least one ranking.',
+          MedalKind.challenge => 'You finished the $name challenge.',
+          MedalKind.collection => 'Every released film in $name, ranked.',
           _ => description,
         },
     };

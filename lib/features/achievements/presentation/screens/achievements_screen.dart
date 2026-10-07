@@ -80,6 +80,8 @@ class _Body extends StatelessWidget {
       ('Milestones', snapshot.section(MedalKind.milestone)),
       ('Taste', snapshot.section(MedalKind.taste)),
       ('Streak', snapshot.section(MedalKind.streak)),
+      // Finished challenges' medals (#144).
+      ('Challenges', [for (final m in snapshot.section(MedalKind.challenge)) if (m.isUnlocked) m]),
       ('Special', snapshot.section(MedalKind.special)),
     ];
     return ListView(

@@ -44,6 +44,8 @@ abstract final class Routes {
   static String customList(String id) => '$queue/list/$id';
   static const queueLists = '$queue/lists'; // SCR-13 Lists screen (#47)
   static const achievements = '$more/achievements'; // SCR-23 (#50)
+  static const challenges = '$more/challenges'; // SCR-25 (#50)
+  static String challenge(String slug) => '$challenges/$slug'; // SCR-26
   static const graveyard = '$more/graveyard'; // SCR-18
   static const wrapped = '$more/wrapped'; // SCR-19
   static const settings = '$more/settings'; // SCR-20

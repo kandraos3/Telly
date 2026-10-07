@@ -323,19 +323,21 @@ All screens use the shared app bars (screen specs §0.2) and the frosted bottom 
 
 ### 9.5 `SCR-25` Challenges (`/more/challenges`): mockup C1
 
-- **App bar:** ← Challenges, with **+** for squad owners and admins (creates a squad challenge from a template).
+- **App bar:** ← Challenges, with **+** for squad owners and admins (#144: a sheet to pick the squad, a template, its params, a name and a length of 7, 14 or 30 days).
 - **Featured:** a hero card with art, "FEATURED · N DAYS LEFT", the name, the rule line, joined and friend counts, and your progress if you've joined (a **Join** button if not).
 - **Yours:** challenges you've joined that are still live, with progress, and a "Squad" chip for squad challenges.
 - **Join next:** live challenges you haven't joined, each with **Join**.
 - **Ended:** collapsed. Finished challenges show their medal.
+- **Art:** each `art` key maps to a fixed dark gradient (the same in both themes, since the hero text is always light): horror, noir, gold, cyan, violet, coral, lime.
+- **Medals:** a challenge's gold medal appears in Yours and Ended (locked until finished); once earned it also shows on `SCR-23` in a "Challenges" section, gets the unlock moment ("You finished the Spooktober challenge.") and can be pinned.
 
 ### 9.6 `SCR-26` Challenge (`/more/challenges/:slug`): mockup C2
 
 - **App bar:** ← name, with Share.
 - **Progress card:** the rule line, days left (or "Open-ended"), and a large "3 / 8" with a bar.
 - **Friends in this challenge:** followed participants and you, sorted by progress, with bars and counts.
-- **Picks:** matching titles from your Queue (with ▶ provider), then suggestions (+ Queue).
-- **Join / Leave** sits in the app bar's ⋮ menu once joined.
+- **Picks:** matching titles from your Queue ("Picks from your Queue"), then titles friends ranked ("Friends rate these", with their average score and **+ Queue**).
+- **Join / Leave:** an unjoined challenge shows **Join challenge** on the progress card; once joined, **Leave** sits in the app bar's ⋮ menu (finished challenges can't be left). **Share** sends a link with the challenge's line.
 
 ### 9.7 `SCR-27` Your level (`/more/level`): mockup B1–B3
 
@@ -367,15 +369,16 @@ All screens use the shared app bars (screen specs §0.2) and the frosted bottom 
 - **Older apps:** they would render an unknown activity type as a broken ranking card, so `get_activity_feed` leaves medal rows out unless the caller passes `p_include_medals => true`. Apps that have the medal card (#139) pass it.
 - **Feed cards** (Social, `SCR-05`; mockup C3):
   - **Medal card:** the person ("Maya unlocked Centurion", time and tier), the medal, its rarity (read from `achievement_rarity`), and reactions. No poster or Queue button. Opening it shows the comment thread with "Unlocked Centurion" and the medal. Home's friend previews leave medal posts out.
-  - **Challenge card:** the person, the medal, "Best of the 8: The Thing (#1, 9.40)", reactions, and **Join** while the challenge is live.
-- **Ordinary rankings** made inside a joined challenge show "Spooktober 2 of 8" under the ranking line.
+  - **Challenge card:** the person ("Maya finished Spooktober", "8 of 8"), the medal, "Best of the 8: The Thing (#1, 9.40)", reactions, and **Join** while the challenge is live and you're not in it (looked up with `get_challenge`).
+- **Ordinary rankings** made inside a joined challenge show "Spooktober 2 of 8" under the ranking line (`get_activity_feed.challenge_context`: the poster's visible challenge the ranking counted for, featured first, with the count as of that ranking).
+- **Unknown types:** the app skips feed rows whose type it doesn't know, rather than drawing them as rankings, so future types never show broken cards.
 - **Privacy:** Settings (`SCR-20`) → Privacy → **Share achievements in the feed** (`users.share_achievements`, default on). Off means no medal or challenge posts; unlocks still happen. Quests, level-ups and streaks never post. Private accounts follow the existing visibility rules.
 
 ---
 
 ## 11. Analytics
 
-PostHog events: `medal_unlocked` (when its unlock moment shows), `medal_pinned` (on a successful pin), `challenge_joined`, `challenge_completed`, `quest_completed`, `level_up`, `reward_equipped`, and `streak_extended` (weekly).
+PostHog events: `medal_unlocked` (when its unlock moment shows), `medal_pinned` (on a successful pin), `challenge_joined` (on join), `challenge_completed` (when a challenge medal's unlock moment shows), `quest_completed`, `level_up`, `reward_equipped`, and `streak_extended` (weekly).
 
 These measure the goal (people coming back weekly) and catch unhealthy patterns, such as ranking spikes right before a cap resets.
 

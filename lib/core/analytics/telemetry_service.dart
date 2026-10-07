@@ -129,6 +129,16 @@ class TelemetryService {
     _track('medal_pinned', {'achievement_id': achievementId, 'slot': slot});
   }
 
+  /// A challenge was joined (features/10 §11, #144).
+  void trackChallengeJoined({required String slug, required bool squad}) {
+    _track('challenge_joined', {'slug': slug, 'squad': squad});
+  }
+
+  /// A challenge was finished: its medal's unlock moment showed (features/10 §11, #144).
+  void trackChallengeCompleted({required String achievementId}) {
+    _track('challenge_completed', {'achievement_id': achievementId});
+  }
+
   void _track(String name, Map<String, dynamic> properties) {
     final event = TelemetryEvent(
       name: name,

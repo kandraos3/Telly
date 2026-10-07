@@ -44,6 +44,14 @@ import 'package:telly_app/features/profile/presentation/screens/dual_canon_profi
 import '../fakes/fake_auth_repository.dart';
 import '../fakes/fake_social_repository.dart';
 import '../features/achievements/achievements_fixtures.dart';
+import '../features/challenges/challenges_fixtures.dart';
+import '../features/feed/challenge_activity_card_test.dart' show challengeActivity;
+import 'package:telly_app/features/challenges/data/challenges_repository.dart';
+import 'package:telly_app/features/challenges/domain/challenge.dart';
+import 'package:telly_app/features/challenges/presentation/controllers/challenges_controller.dart';
+import 'package:telly_app/features/challenges/presentation/screens/challenge_screen.dart';
+import 'package:telly_app/features/challenges/presentation/screens/challenges_screen.dart';
+import 'package:telly_app/features/feed/presentation/widgets/challenge_activity_card.dart';
 
 class TolerantGoldenComparator extends LocalFileComparator {
   TolerantGoldenComparator(super.testFile, {this.tolerance = 0.50});
@@ -625,6 +633,59 @@ void main() {
         await tester.pumpAndSettle();
         await expectLater(
             find.byType(AchievementsScreen), matchesGoldenFile('goldens/achievements_collections_${name}_iphone15.png'));
+      });
+
+      List<Override> challengeOverrides() => [
+            hapticsEnabledProvider.overrideWith((ref) => false),
+            challengeClockProvider.overrideWithValue(() => testNow),
+            challengesRepositoryProvider.overrideWithValue(FakeChallengesRepository()
+              ..racerList = const [
+                ChallengeRacer(userId: 'm', displayName: 'Maya', progress: 6),
+                ChallengeRacer(userId: 'me', displayName: 'Jordan', progress: 3, isMe: true),
+                ChallengeRacer(userId: 'j', displayName: 'Jordan Lee', progress: 2),
+              ]
+              ..pickList = const [
+                ChallengePick(titleId: 1, mediaType: 'movie', title: 'Hereditary', fromQueue: true),
+                ChallengePick(titleId: 2, mediaType: 'movie', title: 'The Thing', releaseYear: 1982, friendsScore: 9.4),
+              ]),
+            manageableSquadsProvider.overrideWith((ref) async => const []),
+          ];
+
+      testWidgets('Golden: SCR-25 ChallengesScreen ($name) on iPhone 15 Pro size (#144)', (tester) async {
+        await tester.binding.setSurfaceSize(const Size(393, 852));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        await tester.pumpWidget(ProviderScope(
+          overrides: challengeOverrides(),
+          child: MaterialApp(theme: theme, home: const ChallengesScreen()),
+        ));
+        await tester.pumpAndSettle();
+        await expectLater(find.byType(ChallengesScreen), matchesGoldenFile('goldens/challenges_${name}_iphone15.png'));
+      });
+
+      testWidgets('Golden: SCR-26 ChallengeScreen ($name) on iPhone 15 Pro size (#144)', (tester) async {
+        await tester.binding.setSurfaceSize(const Size(393, 852));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        await tester.pumpWidget(ProviderScope(
+          overrides: challengeOverrides(),
+          child: MaterialApp(theme: theme, home: const ChallengeScreen(slug: 'spooktober')),
+        ));
+        await tester.pumpAndSettle();
+        await expectLater(find.byType(ChallengeScreen), matchesGoldenFile('goldens/challenge_${name}_iphone15.png'));
+      });
+
+      testWidgets('Golden: SCR-05 ChallengeActivityCard ($name) on iPhone 15 Pro width (#144)', (tester) async {
+        await tester.binding.setSurfaceSize(const Size(393, 330));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        await tester.pumpWidget(ProviderScope(
+          overrides: challengeOverrides(),
+          child: MaterialApp(
+            theme: theme,
+            home: Scaffold(
+                body: ChallengeActivityCard(activity: challengeActivity('miniseries-november', name: 'Miniseries November'))),
+          ),
+        ));
+        await tester.pumpAndSettle();
+        await expectLater(find.byType(ChallengeActivityCard), matchesGoldenFile('goldens/challenge_feed_card_$name.png'));
       });
 
       testWidgets('Golden: SCR-24 UnlockMomentScreen ($name) on iPhone 15 Pro size (#138)', (tester) async {

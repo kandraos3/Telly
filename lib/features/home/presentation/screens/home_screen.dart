@@ -168,7 +168,10 @@ class _FriendsSection extends ConsumerWidget {
     final me = ref.watch(authControllerProvider.select((s) => s.user?.id));
     // Title activity only: medal posts have no title to show here (#139).
     final items = feed.valueOrNull?.items
-        .where((a) => a.userId != me && a.activityType != ActivityType.medalUnlocked)
+        .where((a) =>
+            a.userId != me &&
+            a.activityType != ActivityType.medalUnlocked &&
+            a.activityType != ActivityType.challengeCompleted)
         .toList();
 
     // Offline or failing with nothing loaded yet: the section hides rather than showing an error.
@@ -235,6 +238,8 @@ class _FriendRow extends StatelessWidget {
       ActivityType.queueAdded => 'queued ${a.titleName}',
       ActivityType.commentPosted => 'commented on ${a.titleName}',
       ActivityType.medalUnlocked => 'unlocked ${a.medal?.name ?? 'a medal'}',
+      ActivityType.challengeCompleted => 'finished ${a.challenge?.name ?? 'a challenge'}',
+      ActivityType.unknown => 'did something new',
     };
   }
 

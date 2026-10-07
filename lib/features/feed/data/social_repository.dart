@@ -89,9 +89,16 @@ class SupabaseSocialRepository implements SocialRepository {
       'p_limit': limit,
       // This app renders medal cards, so it asks for MEDAL_UNLOCKED rows (#139).
       'p_include_medals': true,
+      // ...and challenge cards (#144).
+      'p_include_challenges': true,
     }) as List;
-    final items = [for (final r in rows) activityFromFeedRow(r as Map<String, dynamic>)];
-    return FeedPage(items, hasMore: items.length == limit);
+    // Rows of a type this app doesn't know are skipped rather than drawn as rankings (#144).
+    final items = [
+      for (final r in rows)
+        if (activityFromFeedRow(r as Map<String, dynamic>) case final a when a.activityType != ActivityType.unknown) a,
+    ];
+    // Raw rows decide whether more exist; a full page of unknown rows stops paging (no cursor to move).
+    return FeedPage(items, hasMore: rows.length == limit && items.isNotEmpty);
   }
 
   @override
@@ -328,6 +335,8 @@ ActivityLog activityFromFeedRow(Map<String, dynamic> r) {
     droppedEpisode: (metadata['episode'] as num?)?.toInt(),
     dropReason: DropReasonTaxonomy.fromDbValue(metadata['reason'] as String?) ?? metadata['reason'] as String?,
     medal: FeedMedal.fromMetadata(metadata),
+    challenge: FeedChallenge.fromMetadata(metadata),
+    challengeContext: ChallengeContext.fromJson(r['challenge_context']),
     inUserQueue: (r['in_my_queue'] as bool?) ?? false,
     reactions: {
       for (final MapEntry(:key, :value) in counts.entries)

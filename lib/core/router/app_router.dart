@@ -22,6 +22,8 @@ import '../../features/profile/presentation/screens/friend_profile_screen.dart';
 import '../../features/profile/presentation/screens/settings_hub_screen.dart';
 import '../../features/profile/presentation/screens/tv_graveyard_screen.dart';
 import '../../features/achievements/presentation/screens/achievements_screen.dart';
+import '../../features/challenges/presentation/screens/challenge_screen.dart';
+import '../../features/challenges/presentation/screens/challenges_screen.dart';
 import '../../features/queue/presentation/screens/custom_list_detail_screen.dart';
 import '../../features/queue/presentation/screens/queue_lists_screen.dart';
 import '../../features/queue/presentation/screens/smart_queue_screen.dart';
@@ -161,6 +163,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   path: 'achievements',
                   parentNavigatorKey: rootNavigatorKey,
                   builder: (_, __) => const AchievementsScreen(),
+                ),
+                GoRoute(
+                  path: 'challenges',
+                  parentNavigatorKey: rootNavigatorKey,
+                  builder: (_, __) => const ChallengesScreen(),
+                  routes: [
+                    GoRoute(
+                      path: ':slug',
+                      parentNavigatorKey: rootNavigatorKey,
+                      builder: (_, state) => ChallengeScreen(slug: state.pathParameters['slug']!),
+                    ),
+                  ],
                 ),
                 GoRoute(
                   path: 'graveyard',

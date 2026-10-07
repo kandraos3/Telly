@@ -21,6 +21,9 @@ abstract interface class StoryShareService {
 
   /// Renders the 1080×1920 medals story (one medal or a showcase, #138) and opens the share sheet.
   Future<void> shareMedals(MedalStory story);
+
+  /// Invites people into a challenge (`SCR-26` Share, #144): a line and a link.
+  Future<void> shareChallenge({required String name, required String description, required String slug});
 }
 
 /// Real implementation backed by `package:share_plus`.
@@ -63,6 +66,13 @@ class SharePlusStoryShareService implements StoryShareService {
   }
 
   @override
+  Future<void> shareChallenge({required String name, required String description, required String slug}) =>
+      _share(ShareParams(
+        text: "I'm doing the $name challenge on Telly: $description. Join me: $shareUrl/challenges/$slug",
+        subject: name,
+      ));
+
+  @override
   Future<void> shareMedals(MedalStory story) async {
     final png = await _renderMedals(story);
     await _share(ShareParams(
@@ -78,6 +88,7 @@ class FakeStoryShareService implements StoryShareService {
   final List<({String canonLabel, List<String> topTitles})> sharedStories = [];
   final List<RevealStory> sharedReveals = [];
   final List<MedalStory> sharedMedals = [];
+  final List<String> sharedChallenges = [];
 
   @override
   Future<void> shareStarterCanon({
@@ -92,6 +103,10 @@ class FakeStoryShareService implements StoryShareService {
 
   @override
   Future<void> shareMedals(MedalStory story) async => sharedMedals.add(story);
+
+  @override
+  Future<void> shareChallenge({required String name, required String description, required String slug}) async =>
+      sharedChallenges.add(slug);
 }
 
 final storyShareServiceProvider = Provider<StoryShareService>(

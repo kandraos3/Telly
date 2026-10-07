@@ -188,6 +188,8 @@ class _CommentThreadScreenState extends ConsumerState<CommentThreadScreen> {
                   Text(
                     activity.medal != null
                         ? 'Unlocked ${activity.medal!.name}'
+                        : activity.challenge != null
+                        ? 'Finished ${activity.challenge!.name}'
                         : activity.isUpset
                             ? 'Ranked ${activity.titleName} over ${activity.upsetOverTitleName ?? 'Titan'}'
                             : 'Ranked ${activity.titleName} at #${activity.rankPosition ?? 1}',
