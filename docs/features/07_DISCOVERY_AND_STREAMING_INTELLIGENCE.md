@@ -13,36 +13,28 @@ Discovery in modern television is broken because users are scattered across frag
 
 ## 2. The Smart Queue (Watchlist) Architecture
 
+> Tracking: epic #47 · Status: approved · Decision: [0004](../decisions/0004-canon-podium-and-queue-up-next.md)
+
+The Queue leads with one title to watch next, and the rest of the watchlist follows as compact rows. Screen spec `SCR-13` has the exact layout and states, and the approved mockup is [0047](../design_system/mockups/0047-canon-queue-layouts.html).
+
 ```
 ┌────────────────────────────────────────────────────────┐
-│ [≡ All (42)]      [✓ On My Services (28)]      [Filter]│
+│ [←]  Queue                                       [ ☷ ] │  ☷ = custom lists
+│  [   Movies 14   |   TV Shows 24   ]      [ ⚲ Filter ] │  sort + On My Services
 ├────────────────────────────────────────────────────────┤
-│                                                        │
-│  SORT BY: [ Friends' Average Score ▾ ]                 │
-│                                                        │
-│  ┌──────────────────────────────────────────────────┐  │
-│  │ ┌──────────┐  SLOW HORSES                        │  │
-│  │ │ [Poster] │  Apple TV+ • 4 Seasons              │  │
-│  │ │          │  ⭐ 8.94 Friends Avg (6 Friends)    │  │
-│  │ └──────────┘  Saved from: @maya's God Tier       │  │
-│  │                                                  │  │
-│  │  [ ▶ Watch on Apple TV+ ]        [ ✓ Mark Seen ] │  │
-│  └──────────────────────────────────────────────────┘  │
-│                                                        │
-│  ┌──────────────────────────────────────────────────┐  │
-│  │ ┌──────────┐  STATION ELEVEN                     │  │
-│  │ │ [Poster] │  Max • 1 Season (Miniseries)        │  │
-│  │ │          │  ⭐ 8.81 Friends Avg (4 Friends)    │  │
-│  │ └──────────┘  Saved from: @jordan's recommendation│  │
-│  │                                                  │  │
-│  │  [ ▶ Watch on Max ]              [ ✓ Mark Seen ] │  │
-│  └──────────────────────────────────────────────────┘  │
-│                                                        │
+│  UP NEXT  The Bear · Disney+ · ★ 8.60   [↻ Another]    │
+│  [ ▶ Watch on Disney+ ]                     [ ✓ Seen ] │
+│  ━ THEN ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 23   │
+│  Slow Horses     Apple TV+ · ★ 8.94      [▶ Apple TV+] │
+│  Station Eleven  Max · ★ 8.81                  [▶ Max] │
 └────────────────────────────────────────────────────────┘
 ```
 
+- **Up next pick:** a uniformly random title from the titles the current filter shows for the selected canon. It's re-rolled each time the Queue opens, and ↻ picks a different one. A smart pick (friends' scores, taste match, leaving soon, how long a title has waited) is tracked in #124.
+- **Mark seen:** a swipe right on a row, or ✓ Seen on the Up next card. The title leaves the queue, and the Log flow opens to rank it.
+
 ### 2.1 Smart Queue Sorting Modes
-Users can sort their queue by:
+Users sort their queue from the Filter sheet. *Friends' High Score* and *Leaving Soon* are built; the others are planned:
 - **Friends' High Score (Default):** Shows rated highest by their social circle.
 - **Taste Match Priority:** Shows loved by friends with the highest Taste Match %.
 - **Shortest Time Commitment:** Prioritizes limited miniseries (4–8 episodes) for quick weekend completions.

@@ -1,5 +1,7 @@
 # Feature Spec 06: Profile, "The Canon", Stats & "Telly Wrapped"
 
+> Tracking: epic #47 (Canon layout, §2–§3) · Status: approved · Decision: [0004](../decisions/0004-canon-podium-and-queue-up-next.md)
+
 ## 1. Overview & Identity Signaling
 On Beli, a user's profile is their culinary identity card. On **Telly**, a user's profile is their **Cultural Identity Across Screen Entertainment**. 
 
@@ -14,50 +16,36 @@ People define themselves by what they cherish—whether they are a cinema purist
 
 ---
 
-## 2. Profile Architecture & Wireframe
+## 2. Canon Tab Layout & Wireframe
+
+The Canon tab (`SCR-14`) opens on your rankings. Your identity (avatar, name, bio, counts) lives on the profile card in the More hub (`SCR-22`). Your stats and Top 3 showcase are one tap away in the header's Stats sheet. The exact layout, sizes and states are in screen spec `SCR-14`; the approved mockup is [0047](../design_system/mockups/0047-canon-queue-layouts.html).
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│  [⚙️ Settings]             @jordan            [📤 Share]│
+│  Canon                              [ ▥ ] [ ☰ ] [ ⇪ ]  │  Stats · View · Share
+│  [   Movies 142   |   TV Shows 94   ]                   │
 ├────────────────────────────────────────────────────────┤
-│                                                        │
-│   ( 👤 Avatar )   Jordan Miller                        │
-│                   "Cinema purist. Severance truther."  │
-│                                                        │
-│   142 Movies  •  94 Series  •  3,120 Eps  •  412h Film │
-│                                                        │
-│  ━ DUAL-CANON SELECTOR ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│  [  🎬 Movie Canon (142)  ]  [  📺 Series & Anime (94) ]│
-│                                                        │
-│  ━ TOP 3 SHOWCASES ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐              │
-│  │ [Poster] │  │ [Poster] │  │ [Poster] │              │
-│  │    #1    │  │    #2    │  │    #3    │              │
-│  │Interstell│  │Parasite  │  │Spirited A│              │
-│  │  10.00   │  │   9.72   │  │   9.45   │              │
-│  └──────────┘  └──────────┘  └──────────┘              │
-│                                                        │
-│  [  ≡ Ranked List  ]  [  ▥ Tier View  ]  [  📊 Stats  ] │
-│                                                        │
-│  Filter: [ All Directors ▾ ] [ Theaters Only ] [ 🔍 ]  │
-│                                                        │
-│  #1  Interstellar (Paramount • 2014)           10.00   │
-│      "IMAX 70mm re-release was transcendent."          │
-│                                                        │
-│  #2  Parasite (Neon • 2019)                     9.72   │
-│      "Flawless genre shift. Bong Joon-ho's magnum."    │
-│                                                        │
-│  #3  Spirited Away (Ghibli • 2001)              9.45   │
-│      "The pinnacle of hand-drawn worldbuilding."       │
-│                                                        │
+│  ┌──────────┐ ┌────────┐ ┌────────┐                    │
+│  │ #1       │ │ #2     │ │ #3     │   podium (Ranked)   │
+│  │Interstell│ │Parasite│ │Spirited│                    │
+│  │  10.00   │ │  9.72  │ │  9.45  │                    │
+│  └──────────┘ └────────┘ └────────┘                    │
+│  #4  The Godfather (Paramount • 1972)           9.38   │
+│  #5  Dune: Part Two (Warner Bros • 2024)        9.28   │
 └────────────────────────────────────────────────────────┘
 ```
+
+- **▥ Stats sheet:** the per-canon stats (§5) and the Top 3 showcase (pinned picks first).
+- **☰ View sheet:** Ranked / Tiers / 3x3, plus the Series-only franchise rollup toggle (§4).
 
 ---
 
 ## 3. The Multi-View System
 
+The view is chosen in the header's View sheet. It persists while the app runs, and it's the same for both canons.
+
 ### 3.1 View A: The Ranked Canon (Default)
+- **Podium:** ranks #1–#3 lead as three large poster cards. The list continues from #4 as rows. The podium appears in this view only.
 - Segregated leaderboards:
   - When *Movie Canon* is selected: lists all feature films #1 to #N with runtime, director, venue, and score.
   - When *Series & Anime Canon* is selected: lists all series #1 to #M with season counts, network, and score.
@@ -65,7 +53,7 @@ People define themselves by what they cherish—whether they are a cinema purist
 - Supports smooth drag-and-drop re-ordering (with live recalculation of scores).
 
 ### 3.2 View B: The Tier List View
-Transforms the continuous ranking into recognizable culture tiers:
+Takes the whole page under the switcher (no podium). Transforms the continuous ranking into recognizable culture tiers:
 - **👑 God Tier (9.20 – 10.00):** Life-changing, flawless television.
 - **✨ Prestige Tier (8.50 – 9.19):** Masterful writing, high rewatch value.
 - **👍 Great Tier (7.80 – 8.49):** Highly recommended, few minor flaws.
@@ -74,6 +62,7 @@ Transforms the continuous ranking into recognizable culture tiers:
 - **💀 Graveyard / Dropped (< 5.50):** Shows abandoned or deeply regretted.
 
 ### 3.3 View C: The Top 9 Poster Grid (3x3)
+- Takes the whole page under the switcher (no podium).
 - An aesthetic, borderless grid of posters for the user's Top 9 all-time favorites.
 - Designed with 1-tap export to Camera Roll or Instagram Stories.
 

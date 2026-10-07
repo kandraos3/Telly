@@ -19,7 +19,7 @@ This document defines every single screen in the Telly application. For each scr
 11. **`SCR-11`**: Editorial Tags, MVP Character & Review Sheet
 12. **`SCR-12`**: Canon Slot Reveal & Score Confirmation
 13. **`SCR-13`**: Smart Queue (Universal Watchlist)
-14. **`SCR-14`**: Profile: The Personal Canon (Ranked, Tier, Grid Views)
+14. **`SCR-14`**: Canon: The Personal Dual-Canon (Ranked podium, Tiers, 3x3)
 15. **`SCR-15`**: Friend Profile & Taste Match Comparison
 16. **`SCR-16`**: "Two-to-Watch" Co-Watching Decider
 17. **`SCR-17`**: Squads Hub & Consensus Leaderboard
@@ -43,7 +43,7 @@ Five tabs in the floating bar (component library §2.1), plus the floating Log b
 | Explore | `/explore` | `SCR-07` Explore | none |
 | Canon | `/canon` | `SCR-14` Canon | none |
 | Social | `/social` | `SCR-05` Feed | `/social/activity/:id` (`SCR-06`) |
-| More | `/more` | `SCR-22` More hub | `/more/queue` (`SCR-13`), `/more/queue/list/:id`, `/more/graveyard` (`SCR-18`), `/more/wrapped` (`SCR-19`), `/more/settings` (`SCR-20`), `/more/edit` |
+| More | `/more` | `SCR-22` More hub | `/more/queue` (`SCR-13`), `/more/queue/lists`, `/more/queue/list/:id`, `/more/graveyard` (`SCR-18`), `/more/wrapped` (`SCR-19`), `/more/settings` (`SCR-20`), `/more/edit` |
 
 Unchanged, pushed over the shell: the `/log` flow (`SCR-09` to `SCR-12`), `/title/:mediaType/:id` (`SCR-08`), `/u/:handle` (`SCR-15`), `/cowatch` and `/u/:handle/two-to-watch` (`SCR-16`), `/squads` and `/squads/:id` (`SCR-17`, opened from Social).
 
@@ -67,7 +67,7 @@ The five tab screens (`SCR-21`, `SCR-07`, `SCR-14`, `SCR-05`, `SCR-22`) share on
 | :--- | :--- | :--- |
 | `SCR-21` Home | Home | Search (opens Explore with the search field focused) |
 | `SCR-07` Explore | Explore | none (the search bar sits directly below) |
-| `SCR-14` Canon | Canon | Share profile |
+| `SCR-14` Canon | Canon | Stats (sheet), View (sheet; icon shows the current view), Share profile |
 | `SCR-05` Social | Social | My Squads, Search |
 | `SCR-22` More | More | none |
 
@@ -96,7 +96,8 @@ Every screen opened on top of the tabs uses `TellySubpageAppBar`, the same desig
 | Screen | Leading | Title | Actions |
 | :--- | :--- | :--- | :--- |
 | `SCR-06` Comments | ✕ | Comments | none |
-| `SCR-13` Queue | ← | Queue | Watchlist: Sort (sheet: Friends' Score / Leaving Soon). My Lists: New list. Friends' Lists: none |
+| `SCR-13` Queue | ← | Queue | Lists (opens the Lists screen). Sort lives in the Filter sheet under the app bar |
+| `SCR-13` Lists | ← | Lists | New list (+) |
 | `SCR-09` Log a show | ✕ | Log a show | none |
 | `SCR-10` Duel arena | ✕ | "Duel 2 of 4", centred (progress) | none |
 | `SCR-12` Canon reveal | ✕ | none | none |
@@ -542,84 +543,119 @@ The **Social** tab (`/social`). It was the landing tab until epic #44; Home (`SC
 
 ### `SCR-13`: Smart Queue (Universal Watchlist)
 
-Opened from the More hub (`/more/queue`) as a pushed screen with the subpage app bar (§0.2). Its Sort and New list actions move from the tab header into that app bar; the hub pills stay under it.
+> Tracking: epic #47 · Status: approved · Decision: [0004](../decisions/0004-canon-podium-and-queue-up-next.md) · Mockup: [0047](mockups/0047-canon-queue-layouts.html)
+
+Opened from the More hub (`/more/queue`) as a pushed screen with the subpage app bar (§0.2). It shows your watchlist and leads with one title to watch next. Custom lists live on their own **Lists** screen (`/more/queue/lists`), opened from the app bar.
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│  Queue                              [ ⇅ Sort | + New ] │
-│  [ Watchlist ]  [ My Lists ]  [ Friends' Lists ]       │
-│  [  Movies (14)  |  TV Shows (24)  ]  ○ On My Services │
+│ [←]  Queue                                       [ ☷ ] │  ☷ = Lists
+│  [   Movies 14   |   TV Shows 24   ]      [ ⚲ Filter ① ]│  one control row
 ├────────────────────────────────────────────────────────┤
-│                                                        │
-│  Filter: [ Genre ▾ ]  [ Miniseries ▾ ]  [ Friends Avg ▾]│
-│                                                        │
 │  ┌──────────────────────────────────────────────────┐  │
-│  │ ┌──────┐  SLOW HORSES                            │  │
-│  │ │ [IMG]│  Apple TV+ • 4 Seasons                  │  │
-│  │ └──────┘  ⭐ 8.94 Friends Avg • Saved from @maya  │  │
-│  │                                                  │  │
-│  │  [ ▶ Watch on Apple TV+ ]        [ ✓ Mark Seen ] │  │
+│  │ [backdrop art, 168 dp]                [↻ Another]│  │
+│  │ UP NEXT                                          │  │
+│  │ The Bear                                         │  │
+│  │ Disney+ · 3 seasons · ★ 8.60 · saved from @maya  │  │
+│  ├──────────────────────────────────────────────────┤  │
+│  │ [ ▶ Watch on Disney+               ]  [ ✓ Seen ] │  │
 │  └──────────────────────────────────────────────────┘  │
-│                                                        │
-│  ┌──────────────────────────────────────────────────┐  │
-│  │ ┌──────┐  STATION ELEVEN                         │  │
-│  │ │ [IMG]│  Max • 1 Season (10 eps)                │  │
-│  │ └──────┘  ⭐ 8.81 Friends Avg • Saved from @alex  │  │
-│  │                                                  │  │
-│  │  [ ▶ Watch on Max ]              [ ✓ Mark Seen ] │  │
-│  └──────────────────────────────────────────────────┘  │
-│                                                        │
+│  ━ THEN ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 23   │
+│  [img] Slow Horses       Apple TV+ · 4 seasons · ★ 8.94 [▶ Apple TV+]│
+│  [img] Station Eleven    Max · 1 season · ★ 8.81        [▶ Max]      │
+│  …                                                     │
 └────────────────────────────────────────────────────────┘
 ```
 
-- **User Actions:**
-  - `Toggle Tabs:` Switch between *All Shows* and *On My Services* (instantly hides titles not on active user subscriptions).
-  - `Swipe Right on Row:` Mark as seen and launch Logging Studio (`SCR-09`).
-  - `Swipe Left on Row:` Remove from Watchlist or Move to TV Graveyard.
-  - `Long-press Drag:` Custom prioritize queue order.
+- **App bar:** ← Queue, with one action: **Lists** (`collections_bookmark_outlined`, tooltip "Lists", key `queue_lists_button`), which pushes the Lists screen. Sort and New list no longer sit in this app bar.
+- **Control row** (16 dp gutters, 8 dp gap, 12 dp below the app bar):
+  - **Switcher:** the compact canon switcher (component library §5.5), expanded to fill the row. Movies on the left, each half with its count. Movies and TV Shows never mix.
+  - **Filter chip:** the Filter button chip (component library §5.4), key `queue_filter_button`. It opens the Filter sheet.
+- **Filter sheet** (bottom sheet, component library §6):
+  - **SORT BY**: *Friends' score* (default), then *Leaving soon*. These are radio rows with a check in the primary accent (keys `queue_sort_option_friends_score`, `queue_sort_option_leaving_soon`). Choosing one closes the sheet.
+  - **SHOW**: a switch, *Only on my services*, with the subtitle "Hide titles you can't stream" (key `queue_services_toggle`). Toggling it keeps the sheet open.
+  - The chip's badge counts the active filters. Today only *Only on my services* counts; the sort order never does.
+- **Up next card**: the first item, key `queue_up_next_card`.
+  - **Art:** 16 dp gutters, radius 18, glass border. The art is 168 dp tall: the title's backdrop, or its poster cropped to fill when there is no backdrop. A scrim runs from transparent at 20% to `#08090C` at 92%, in both themes, so the text on it is always light.
+  - **Text on the art:** first the eyebrow "UP NEXT" (caption w800, 1.2 letter spacing, `#D2FF52` in both themes because it sits on the scrim). Then the title (`titleLarge` w800, white). Then one meta line in `#C8CAD8`: provider · seasons (or runtime for a movie) · ★ friends' average · "saved from @handle" when known. A coral **LEAVING SOON** tag follows when it applies.
+  - **↻ Another** (key `queue_up_next_shuffle`, 48 dp target): a frosted pill in the art's top-right corner. It picks a different title. It's hidden when the pool holds only one title.
+  - **Bar:** on Surface, with 12 dp padding. It holds **▶ Watch on <provider>**, the primary button (Phosphor Lime fill, the same deep link as before), and **✓ Seen**, a secondary button on Overlay that does the same as a swipe right.
+  - **Tapping the card** anywhere else opens the title page (`SCR-08`).
+- **How Up next is chosen:** for now, a uniformly random pick (a smart pick is tracked in #124).
+  - The **pool** is the titles the screen shows for the selected canon after the filter.
+  - A pick is made when the Queue opens. Each canon keeps its own pick while the screen stays open, so switching Movies ↔ TV Shows and back doesn't re-roll.
+  - **↻** picks at random from the pool minus the current pick, so the same title never comes up twice in a row.
+  - If the current pick leaves the pool (it's marked seen, removed, or filtered out), a new pick is made at once.
+  - The pick isn't repeated in the rows below it.
+- **Rows** (*THEN*): first a `TellySectionHeader` "THEN" with the count of rows. Each row:
+  - **Layout:** 16 dp gutters, a 40 × 58 poster (radius 6), the title (`bodyLarge` w700, one line), and a meta line in `textTertiary`: seasons or runtime · ★ friends' average in Warm Amber. A coral LEAVING SOON tag follows when it applies. Hairline `strokeSubtle` dividers separate the rows.
+  - **Trailing:** one **▶ <provider>** button (Overlay, glass border, `labelMedium` w800, 48 dp target) with the same deep link.
+  - **Tap** opens the title page. Rows are sorted by the Filter sheet's choice.
+- **Swipe** (rows and the Up next card):
+  - **Right:** mark seen. The title leaves the watchlist, and the Log flow opens prefilled with it (`/log`, `SCR-09`). The background is Phosphor Lime with a check.
+  - **Left:** remove from the watchlist. The background is Neon Coral with a trash icon, and a snackbar offers **Undo**.
+- **States:**
+  - **Loading:** a skeleton card in place of Up next, plus 5 skeleton rows (component library §7.1).
+  - **Empty watchlist:** the existing `TellyEmptyState`, which leads to Explore, replaces the card and the rows.
+  - **Empty after the filter:** `TellyEmptyState`, "Nothing here streams on your services", with a **Show all** button that turns the filter off.
+  - **Offline:** the watchlist comes from the local cache and keeps working.
+- **Lists screen** (`/more/queue/lists`):
+  - **App bar:** ← Lists, with **+ New list** (key `create_new_list_button`).
+  - **Body:** a `TellySegmentedControl` *My lists* / *Friends' lists*, above the existing custom-list cards. Tapping a list opens `/more/queue/list/:id`, which is unchanged.
+- **Planned, not built:** long-press drag to reorder the queue.
 
 ---
 
-### `SCR-14`: Profile: The Personal Dual-Canon
+### `SCR-14`: Canon (The Personal Dual-Canon)
+
+> Tracking: epic #47 · Status: approved · Decision: [0004](../decisions/0004-canon-podium-and-queue-up-next.md) · Mockup: [0047](mockups/0047-canon-queue-layouts.html)
+
+The Canon tab opens on your rankings. Your profile card lives in the More hub (`SCR-22`), so it isn't repeated here.
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│  Canon                           [ 👥 ] [ 📤 ] [ ⚙️ ]  │
+│  Canon                              [ ▥ ] [ ☰ ] [ ⇪ ]  │  Stats · View · Share
+│  [   Movies 142   |   TV Shows 94   ]                   │
 ├────────────────────────────────────────────────────────┤
-│  (👤) Jordan Miller • 142 Movies • 94 Series • 88% Match│
-│                                                        │
-│  ━ DUAL-CANON SELECTOR ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│  [  🎬 Movie Canon (142)  ]  [  📺 Series & Anime (94) ]│
-│                                                        │
-│  [ ≡ Ranked List ]   [ ▥ Tier View ]   [ ▦ 3x3 Grid ]  │
-│                                                        │
-│  Filter: [ All Directors ▾ ] [ Theatrical Only ] [ 🔍 ] │
-│                                                        │
-│  👑 GOD TIER (9.20 – 10.00)                            │
-│  #01  Interstellar (Paramount • 2014)           10.00  │
-│  #02  Parasite (Neon • 2019)                     9.72  │
-│  #03  Spirited Away (Ghibli • 2001)              9.45  │
-│  #04  The Godfather (Paramount • 1972)           9.38  │
-│  #05  Dune: Part Two (Warner Bros • 2024)        9.28  │
-│                                                        │
-│  ✨ PRESTIGE TIER (8.50 – 9.19)                        │
-│  #06  Oppenheimer (Universal • 2023)             9.14  │
-│  #07  The Dark Knight (Warner Bros • 2008)       9.05  │
-│  #08  Whiplash (Sony Pictures • 2014)            8.88  │
-│                                                        │
+│  ┌──────────┐ ┌────────┐ ┌────────┐                    │  Ranked view only:
+│  │ [poster] │ │[poster]│ │[poster]│                    │  the podium
+│  │ #1       │ │ #2     │ │ #3     │                    │
+│  │Interstell│ │Parasite│ │Spirited│                    │
+│  │ [10.00]  │ │ [9.72] │ │ [9.45] │                    │
+│  └──────────┘ └────────┘ └────────┘                    │
+│  #04  [img] The Godfather   Paramount · 1972   [9.38]  │
+│  #05  [img] Dune: Part Two  Warner Bros · 2024 [9.28]  │
+│  …                                                     │
 └────────────────────────────────────────────────────────┘
 ```
 
-- **User Inputs:**
-  - Dual-Canon Selector:
-    - `🎬 Movie Canon`: Switches profile to strictly feature films and anime movies.
-    - `📺 Series & Anime`: Switches profile to television series and anime seasons.
-    - `⚡ Blended (Optional)`: Unified mathematical view for power users.
-  - Tab Switcher: Changes view mode instantly:
-    - `Ranked List:` 1–N sequential rows with drag handles.
-    - `Tier View:` Accordion groups (God Tier, Prestige, Great, etc.).
-    - `3x3 Grid:` Borderless poster collage for visual aesthetics.
-  - Filter dropdowns: Slice list by Director, Theatrical Venue, Network/Studio, Decade, or Genre.
+- **Header** (§0): Canon, with three actions in this order:
+  - **Stats** (`insights_rounded`, tooltip "Stats", key `canon_stats_button`) opens the Stats sheet.
+  - **View** (key `canon_view_button`, tooltip "View: Ranked", "View: Tiers" or "View: 3x3") opens the View sheet. Its icon is the current view's icon: `format_list_numbered_rounded` (Ranked), `view_agenda_rounded` (Tiers) or `grid_view_rounded` (3x3).
+  - **Share profile** (key `profile_share_button`), unchanged.
+- **Switcher:** the compact canon switcher (component library §5.5), full width with 16 dp gutters, Movies on the left and a count on each half (keys `movie_canon_tab`, `series_canon_tab`).
+  - It stays in place when the header scrolls away (§0).
+  - A horizontal swipe on the content also switches canon, with the selection haptic, as before.
+  - The Movie and TV canons never mix. Each has its own podium, tiers, grid and stats.
+- **Content** (12 dp under the switcher) depends on the view:
+  - **Ranked** (default):
+    - **Podium** (key `canon_podium`): ranks #1–#3 as three poster cards in one row, with 16 dp gutters and 10 dp gaps. Columns are 1.25fr / 1fr / 1fr, bottom-aligned.
+    - **Card:** Surface, radius 14, glass border. The poster is 170 dp tall for #1 and 132 dp for #2 and #3. A rank tag sits top-left (Phosphor Lime fill `#D2FF52`, `#08090C` text, `labelMedium` w800, radius 6, in both themes). Below the poster, with 8 dp padding, come the title (`labelLarge` w800, one line) and the tier score chip used by the rows.
+    - **Tap and long-press** do what they do on a row: tap opens the title, long-press opens the row actions (re-duel or remove).
+    - **Short canons:** with fewer than 3 titles, only the cards that exist are drawn, in the same columns.
+    - **Rows:** from #4 on, the existing ranked rows (component library §3.1).
+  - **Tiers:** the existing tier groups (God → Dropped, with headers in each tier's accent and score range), starting right under the switcher. There's no podium.
+  - **3x3:** the existing poster grid in rank order, starting right under the switcher. There's no podium.
+  - **Empty canon:** the existing empty state (component library §7.2), shown in every view.
+- **View sheet** (bottom sheet, component library §6):
+  - **VIEW**: radio rows Ranked / Tiers / 3x3 grid, each with its icon and a check on the current one (keys `view_mode_ranked_button`, `view_mode_tier_button`, `view_mode_grid_button`). Choosing one closes the sheet, with the selection haptic.
+  - **SERIES ONLY**: shown only when TV Shows is selected. It holds the *Anime franchise rollup* switch, with the subtitle "Combine multi-season anime into one entry" (key `franchise_rollup_toggle`). Toggling it keeps the sheet open.
+  - The sheet replaces the in-page view switcher and the old ⋮ View options menu.
+- **Stats sheet** (bottom sheet, component library §6; key `canon_stats_sheet`):
+  - **Title:** "MOVIE STATS" or "TV STATS" for the selected canon.
+  - **Tiles:** the existing stats panel's four tiles: titles ranked, hours watched, top genre, and top director (movies) or top network (TV). Detail lines use the primary accent token, so they're readable in light mode.
+  - **Top 3:** a `TellySectionHeader` "TOP 3 SHOWCASE", then the showcase row: your pinned picks for this canon first, then your best-ranked titles that aren't pinned. Pins are edited in Edit profile.
+  - **Offline:** tiles show "—" except titles ranked, which comes from the local canon (as before).
 
 ---
 
