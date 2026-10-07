@@ -33,3 +33,4 @@ What changes, what we give up, what follow-up work this creates.
 | [0002](0002-standard-stages-for-ideas.md) | Every idea follows five standard stages; agents own all tracking | Accepted |
 | [0003](0003-five-tab-shell-with-more-hub.md) | Five-tab shell (Home · Explore · Canon · Social · More), floating Log button, Queue in More | Accepted |
 | [0004](0004-canon-podium-and-queue-up-next.md) | Canon leads with a podium (view and stats in header sheets); Queue leads with a random "Up next" | Accepted |
+| [0005](0005-gamification-medals-challenges-levels.md) | Gamification: medals, challenges and levels together; cosmetic rewards; weekly streak; friends-only competition; duelled titles only | Accepted |

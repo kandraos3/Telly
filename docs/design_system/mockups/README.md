@@ -14,3 +14,4 @@ Approved mockups, kept as the visual reference for the spec they shaped. The spe
 |---|---|---|---|
 | [0047-canon-queue-layouts.html](0047-canon-queue-layouts.html) | #47 | [0004](../../decisions/0004-canon-podium-and-queue-up-next.md) | SCR-14 Canon (Ranked podium, Tiers, 3x3, View and Stats sheets), SCR-13 Queue (Up next, Filter sheet, Lists) |
 | [Design canvas](https://claude.ai/artifact/KrxRKUaSeqeEMSSoP7o5Zo) (online only, private to the owner) | #44 | [0003](../../decisions/0003-five-tab-shell-with-more-hub.md) | Tab shell A/B/C, Home, More hub |
+| [0050-gamification-directions.html](0050-gamification-directions.html) | #50 | [0005](../../decisions/0005-gamification-medals-challenges-levels.md) | Achievements: Medals (trophy case, medal sheet, unlock moment), Level (streak, quests, rewards, friends this week), Challenges (list, detail, feed card) |

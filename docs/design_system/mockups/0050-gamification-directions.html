@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Telly Gamification Directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap">
+<style>
+/* Layout: a review sheet. Brief, three direction rows of phone frames (375 x 760 dp at 80%), then the open decisions. */
+:root {
+  --page: #EEF0F4; --ink: #0F1117; --ink-2: #4A4E63; --ink-3: #696E87; --rule: #D7DBE5; --card: #FFFFFF; --mark: #4D7800;
+  --f-ui: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-display: "Playfair Display", Georgia, "Times New Roman", serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --page: #050608; --ink: #F2F3F7; --ink-2: #C8CAD8; --ink-3: #7D8198; --rule: #242938; --card: #0D0F15; --mark: #D2FF52; color-scheme: dark } }
+:root[data-theme="dark"] { --page: #050608; --ink: #F2F3F7; --ink-2: #C8CAD8; --ink-3: #7D8198; --rule: #242938; --card: #0D0F15; --mark: #D2FF52; color-scheme: dark }
+
+/* Telly app tokens inside phone frames (style guide §2.1; light from telly_colors.dart) */
+.ph { --bg:#08090C; --sf:#11131A; --ov:#1A1D27; --st:#242938; --gl:rgba(255,255,255,.08); --t1:#FFFFFF; --t2:#C8CAD8; --t3:#7D8198;
+      --lime:#D2FF52; --limeFill:#D2FF52; --onLime:#08090C; --amber:#FFA733; --coral:#FF4B6E; --violet:#7C5CFF; --cyan:#38BDF8; --green:#34D399; }
+.light .ph { --bg:#F6F7F9; --sf:#FFFFFF; --ov:#F0F2F5; --st:#E2E5EC; --gl:rgba(0,0,0,.08); --t1:#0F1117; --t2:#4A4E63; --t3:#696E87;
+      --lime:#233B00; --limeFill:#D2FF52; --onLime:#0F1117; --amber:#B36200; --coral:#D61F4D; --violet:#5B3CE0; --cyan:#0369A1; --green:#047857; }
+
+* { box-sizing: border-box }
+body { background: var(--page); color: var(--ink); font: 15px/1.55 var(--f-ui); margin: 0 }
+.wrap { max-width: 1320px; margin: 0 auto; padding-inline: 24px; padding-block: 40px 72px }
+@media (max-width: 600px) { .wrap { padding-inline: 16px } }
+header.top { display: grid; gap: 10px; max-width: 74ch }
+.eyebrow { font: 700 12px/1 var(--f-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3) }
+h1 { font: 700 clamp(30px, 4vw, 44px)/1.1 var(--f-display); margin: 0; letter-spacing: -.02em; text-wrap: balance }
+h2 { font: 700 28px/1.2 var(--f-display); margin: 0; letter-spacing: -.01em; text-wrap: balance }
+h3 { font: 800 17px/1.3 var(--f-ui); margin: 0 }
+p { margin: 0; color: var(--ink-2) }
+.toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 18px }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 10px; padding: 3px; background: var(--card) }
+.seg button { font: 700 13px var(--f-ui); color: var(--ink-2); background: none; border: 0; padding: 8px 14px; border-radius: 7px; cursor: pointer; min-height: 36px }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--page) }
+.seg button:focus-visible { outline: 2px solid var(--mark); outline-offset: 2px }
+section.dir { margin-top: 56px; display: grid; gap: 18px }
+.dir-head { display: grid; gap: 8px; max-width: 86ch }
+.dir-head .tag { display: inline-flex; align-items: center; gap: 10px }
+.letter { font: 800 13px/1 var(--f-ui); padding: 6px 9px; border-radius: 6px; background: var(--ink); color: var(--page) }
+.pros { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 8px 28px; margin: 4px 0 0; padding: 0; list-style: none; font-size: 14px; color: var(--ink-2) }
+.pros li { padding-left: 16px; position: relative }
+.pros li::before { content: ""; position: absolute; left: 2px; top: .62em; width: 6px; height: 6px; border-radius: 50% }
+.pros .plus::before { background: #34D399 } .pros .minus::before { background: #F87171 }
+.row { display: flex; gap: 22px; overflow-x: auto; padding-bottom: 12px }
+.opt { flex: 0 0 auto; width: 300px; display: grid; gap: 10px; align-content: start }
+.cap { font-size: 13.5px; color: var(--ink-2) }
+.cap b { color: var(--ink) }
+.decisions { margin-top: 64px; display: grid; gap: 16px }
+.dgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px }
+.dcard { background: var(--card); border: 1px solid var(--rule); border-radius: 14px; padding: 18px 20px; display: grid; gap: 10px; align-content: start }
+.dcard ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; color: var(--ink-2); font-size: 14px }
+.dcard .rec { font-size: 13.5px; color: var(--ink); border-top: 1px solid var(--rule); padding-top: 10px }
+.dcard .rec b { color: var(--mark) }
+.plan { background: var(--card); border: 1px solid var(--rule); border-radius: 14px; padding: 20px 22px; display: grid; gap: 10px; max-width: 86ch; margin-top: 18px }
+.plan ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; color: var(--ink-2) }
+
+/* ---------- phone frame ---------- */
+.frame { width: 300px; height: 608px; border-radius: 30px; padding: 6px; background: #1b1d24; box-shadow: 0 12px 30px rgba(0,0,0,.25) }
+.ph { zoom: .8; width: 375px; height: 760px; border-radius: 30px; overflow: hidden; position: relative; background: var(--bg); color: var(--t1); font-family: var(--f-ui); font-size: 13px; line-height: 1.35 }
+.ph .sb { height: 44px; display: flex; justify-content: space-between; align-items: center; padding: 0 26px; font-weight: 700; font-size: 14px }
+.ph .hd { height: 56px; display: flex; align-items: center; gap: 10px; padding: 0 16px }
+.ph .hd h4 { font: 800 20px/1 var(--f-ui); margin: 0; letter-spacing: -.02em; flex: 1 }
+.ph .back { font-size: 20px; color: var(--t1) }
+.ph .ic { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; color: var(--t2); font-size: 16px; border: 1px solid var(--gl); background: var(--sf) }
+.ph .body { position: absolute; top: 100px; left: 0; right: 0; bottom: 0; overflow: hidden; display: grid; gap: 14px; align-content: start; padding-top: 4px }
+.ph .pad { padding: 0 16px }
+.ph .sec { display: flex; align-items: center; gap: 8px; padding: 0 16px; font-size: 11px; font-weight: 800; letter-spacing: .12em; color: var(--t3); text-transform: uppercase }
+.ph .sec::before { content: ""; width: 10px; height: 2px; background: var(--t3) }
+.ph .sec::after { content: ""; flex: 1; height: 1px; background: var(--st) }
+.ph .sec span { order: 3; letter-spacing: 0; text-transform: none; font-weight: 800 }
+.ph .card { margin: 0 16px; background: var(--sf); border: 1px solid var(--gl); border-radius: 16px; padding: 14px }
+.ph .muted { color: var(--t3); font-size: 12px }
+.ph .t2 { color: var(--t2) }
+.ph .big { font: 800 26px/1.1 var(--f-ui); letter-spacing: -.02em; font-variant-numeric: tabular-nums }
+.ph .bar { height: 6px; border-radius: 3px; background: var(--ov); overflow: hidden }
+.ph .bar i { display: block; height: 100%; border-radius: 3px; background: var(--lime) }
+.ph .bar.amber i { background: var(--amber) } .ph .bar.violet i { background: var(--violet) } .ph .bar.green i { background: var(--green) }
+.ph .chip { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 20px; background: var(--ov); border: 1px solid var(--gl); font-size: 11.5px; font-weight: 700; color: var(--t2); white-space: nowrap }
+.ph .chip.lime { background: color-mix(in srgb, var(--limeFill) 18%, transparent); color: var(--lime); border-color: color-mix(in srgb, var(--limeFill) 50%, transparent) }
+.ph .btn { border-radius: 12px; padding: 12px; font-weight: 800; font-size: 13.5px; text-align: center; border: 1px solid var(--gl); background: var(--ov); color: var(--t1) }
+.ph .btn.pri { background: var(--limeFill); color: var(--onLime); border-color: transparent }
+.ph .rowi { display: flex; gap: 12px; align-items: center }
+.ph .grow { flex: 1; min-width: 0 }
+.ph .stack { display: grid; gap: 6px }
+.ph .num { font-variant-numeric: tabular-nums; font-weight: 800 }
+.ph .divide > * + * { border-top: 1px solid var(--st) }
+.ph .li { display: flex; gap: 12px; align-items: center; padding: 11px 0 }
+.ph .li:first-child { padding-top: 0 } .ph .li:last-child { padding-bottom: 0 }
+
+/* badges: hexagon medals in tier colours */
+.ph .medal { width: 54px; height: 60px; clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); display: grid; place-items: center; font: 800 18px/1 var(--f-ui); color: #08090C; flex: none }
+.ph .medal.sm { width: 40px; height: 45px; font-size: 14px }
+.ph .medal.lg { width: 110px; height: 124px; font-size: 40px }
+.ph .gold { background: linear-gradient(160deg, #FFE066, #FFA733) }
+.ph .silver { background: linear-gradient(160deg, #E5E7EB, #94A3B8) }
+.ph .bronze { background: linear-gradient(160deg, #F5B78A, #B8693A) }
+.ph .violetm { background: linear-gradient(160deg, #A78BFA, #7C5CFF); color: #fff }
+.ph .locked { background: var(--ov); color: var(--t3); outline: 1px dashed var(--st) }
+.ph .poster { width: 34px; height: 50px; border-radius: 6px; flex: none }
+.ph .av { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 800; color: #fff; flex: none }
+.ph .avs { display: flex } .ph .avs .av { margin-left: -8px; border: 2px solid var(--sf) } .ph .avs .av:first-child { margin-left: 0 }
+.ph .streak { display: flex; gap: 6px }
+.ph .wk { flex: 1; height: 34px; border-radius: 8px; background: var(--ov); display: grid; place-items: center; font-size: 10px; font-weight: 800; color: var(--t3) }
+.ph .wk.on { background: color-mix(in srgb, var(--limeFill) 22%, transparent); color: var(--lime); border: 1px solid color-mix(in srgb, var(--limeFill) 50%, transparent) }
+.ph .wk.frz { background: color-mix(in srgb, var(--cyan) 18%, transparent); color: var(--cyan) }
+.ph .scrim { position: absolute; inset: 0; background: rgba(4,5,8,.62); z-index: 4 }
+.ph .sheet { position: absolute; left: 0; right: 0; bottom: 0; background: var(--ov); border-top: 1px solid var(--st); border-radius: 26px 26px 0 0; padding: 12px 18px 26px; z-index: 5; display: grid; gap: 14px }
+.ph .grab { width: 40px; height: 4px; border-radius: 2px; background: var(--st); margin: 0 auto }
+.ph .center { text-align: center; justify-items: center }
+.ph .hero { margin: 0 16px; border-radius: 18px; overflow: hidden; position: relative; border: 1px solid var(--gl) }
+.ph .hero .art { height: 150px }
+.ph .hero .ov2 { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 15%, rgba(8,9,12,.93)); padding: 14px; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; color: #fff }
+.ph .hero .ov2 em { font-style: normal; font-size: 10.5px; font-weight: 800; letter-spacing: .12em; color: #D2FF52 }
+.ph .hero .ov2 b { font-size: 20px; font-weight: 800 }
+.ph .hero .ov2 small { color: #C8CAD8; font-size: 12px }
+.ph .tabs { position: absolute; left: 12px; right: 12px; bottom: 22px; height: 60px; border-radius: 30px; background: var(--sf); border: 1px solid var(--st); display: grid; grid-template-columns: repeat(5, 1fr); align-items: center; z-index: 3 }
+.ph .tab { text-align: center; font-size: 10.5px; font-weight: 700; color: var(--t3) }
+.ph .tab.on { color: var(--t1) }
+.ph .confetti { position: absolute; inset: 0; pointer-events: none; background:
+  radial-gradient(circle at 18% 22%, #D2FF52 0 3px, transparent 4px), radial-gradient(circle at 82% 18%, #FFA733 0 3px, transparent 4px),
+  radial-gradient(circle at 70% 34%, #7C5CFF 0 2.5px, transparent 3.5px), radial-gradient(circle at 28% 40%, #FF4B6E 0 2.5px, transparent 3.5px),
+  radial-gradient(circle at 50% 12%, #38BDF8 0 2px, transparent 3px), radial-gradient(circle at 90% 46%, #D2FF52 0 2px, transparent 3px),
+  radial-gradient(circle at 10% 52%, #FFA733 0 2px, transparent 3px) }
+.ph .lvl { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; font: 800 22px/1 var(--f-ui); color: var(--onLime);
+  background: conic-gradient(var(--limeFill) 0 78%, var(--ov) 78% 100%); position: relative; flex: none }
+.ph .lvl::after { content: ""; position: absolute; inset: 6px; border-radius: 50%; background: var(--sf) }
+.ph .lvl span { position: relative; z-index: 1; color: var(--t1) }
+.ph .check { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 800; flex: none; border: 1.5px solid var(--st); color: transparent }
+.ph .check.done { background: var(--limeFill); border-color: transparent; color: var(--onLime) }
+.ph .reward { display: flex; gap: 12px; align-items: center; padding: 10px 12px; border-radius: 12px; background: var(--ov) }
+.ph .reward.got { outline: 1px solid color-mix(in srgb, var(--limeFill) 50%, transparent) }
+.ph .lock { font-size: 13px; color: var(--t3) }
+.ph .rank { width: 22px; font-weight: 800; color: var(--t3); font-variant-numeric: tabular-nums }
+.ph .me { background: color-mix(in srgb, var(--limeFill) 12%, transparent); border-radius: 10px; margin: 0 -8px; padding-inline: 8px !important }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow">Telly · #50 · Approved design · 2026-10-07 · decision 0005 (all three directions)</div>
+    <h1>Gamification directions</h1>
+    <p>Three ways to make Telly a little more of a game. They lead with different things: what you've <b>collected</b>, how you've <b>levelled up</b>, or what you're <b>doing with friends right now</b>. They can be combined, so the decisions at the bottom matter more than picking one letter. Frames are a 375 × 760&nbsp;dp phone at 80%. Names, titles and numbers are examples.</p>
+    <div class="toolbar">
+      <span class="eyebrow" id="themeLbl">App theme</span>
+      <div class="seg" role="group" aria-labelledby="themeLbl">
+        <button type="button" id="th-dark" aria-pressed="true">Dark</button>
+        <button type="button" id="th-light" aria-pressed="false">Light</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== A ===================== -->
+  <section class="dir" id="dir-a">
+    <div class="dir-head">
+      <div class="tag"><span class="letter">A</span><h2>Trophy case</h2></div>
+      <p>Achievements lead. You collect medals for milestones, finished film collections (TMDB collections such as The Dark Knight Trilogy), and taste moments like a big upset. Pin three to your profile. A weekly streak sits quietly alongside. It's calm, personal and easy to understand, with friends only one tap away.</p>
+      <ul class="pros">
+        <li class="plus">Fits a ranking app: it celebrates what you've watched instead of pushing volume.</li>
+        <li class="plus">Collections give a clear "what next" (the missing films, one tap to Queue).</li>
+        <li class="minus">Little day-to-day pull on its own. Medals come slowly.</li>
+        <li class="minus">Needs TMDB collection data, which we don't fetch yet.</li>
+      </ul>
+    </div>
+    <div class="row">
+      <article class="opt">
+        <div class="frame"><div class="ph">
+          <div class="sb"><span>9:41</span><span>●●● ▮</span></div>
+          <div class="hd"><span class="back">←</span><h4>Achievements</h4><span class="ic">⇪</span></div>
+          <div class="body">
+            <div class="card rowi">
+              <div class="grow stack"><span class="muted">Unlocked</span><span class="big">23 <span class="muted" style="font-size:15px">of 60</span></span></div>
+              <div class="stack" style="justify-items:end"><span class="muted">Weekly streak</span><span class="chip lime">▲ 6 weeks</span></div>
+            </div>
+            <div class="sec">Pinned to profile</div>
+            <div class="pad rowi" style="justify-content:space-between">
+              <div class="stack center" style="width:100px"><div class="medal gold">LR</div><span class="muted">Middle-earth</span></div>
+              <div class="stack center" style="width:100px"><div class="medal violetm">↯</div><span class="muted">Upset Artist</span></div>
+              <div class="stack center" style="width:100px"><div class="medal silver">50</div><span class="muted">Half-Centurion</span></div>
+            </div>
+            <div class="sec">Collections <span>4 in progress</span></div>
+            <div class="card divide">
+              <div class="li"><div class="medal sm locked">DK</div><div class="grow stack"><b>The Dark Knight Trilogy</b><div class="bar amber"><i style="width:66%"></i></div></div><span class="num t2">2/3</span></div>
+              <div class="li"><div class="medal sm locked">MI</div><div class="grow stack"><b>Mission: Impossible</b><div class="bar amber"><i style="width:62%"></i></div></div><span class="num t2">5/8</span></div>
+              <div class="li"><div class="medal sm locked">SG</div><div class="grow stack"><b>Studio Ghibli</b><div class="bar amber"><i style="width:30%"></i></div></div><span class="num t2">7/23</span></div>
+            </div>
+            <div class="sec">Milestones</div>
+            <div class="card divide">
+              <div class="li"><div class="medal sm locked">100</div><div class="grow stack"><b>Centurion</b><span class="muted">Rank 100 series</span></div><span class="num t2">94/100</span></div>
+            </div>
+          </div>
+        </div></div>
+        <p class="cap"><b>More → Achievements.</b> Pinned medals, collections closest to done first, then milestones. The streak counts weeks you ranked at least one title.</p>
+      </article>
+
+      <article class="opt">
+        <div class="frame"><div class="ph">
+          <div class="sb"><span>9:41</span><span>●●● ▮</span></div>
+          <div class="hd"><span class="back">←</span><h4>Achievements</h4><span class="ic">⇪</span></div>
+          <div class="body" style="opacity:.5">
+            <div class="card" style="height:80px"></div><div class="card" style="height:120px"></div><div class="card" style="height:160px"></div>
+          </div>
+          <div class="scrim"></div>
+          <div class="sheet">
+            <div class="grab"></div>
+            <div class="rowi"><div class="medal locked" style="outline-color:var(--amber)">DK</div>
+              <div class="grow stack"><b style="font-size:17px">The Dark Knight Trilogy</b><span class="muted">Collection · Gold when complete</span></div></div>
+            <div class="stack"><div class="rowi"><span class="grow t2">2 of 3 ranked</span><span class="num">66%</span></div><div class="bar amber"><i style="width:66%"></i></div></div>
+            <div class="stack">
+              <div class="sec" style="padding:0">Still to watch</div>
+              <div class="rowi"><div class="poster" style="background:linear-gradient(160deg,#3b4a63,#0d1420)"></div><div class="grow stack"><b>The Dark Knight Rises</b><span class="muted">2012 · Max</span></div><span class="chip lime">+ Queue</span></div>
+            </div>
+            <div class="stack">
+              <div class="sec" style="padding:0">Friends</div>
+              <div class="rowi"><div class="avs"><span class="av" style="background:#7C5CFF">M</span><span class="av" style="background:#0EA5E9">J</span><span class="av" style="background:#F97316">S</span></div><span class="grow t2">Maya, Jordan and Sam have it</span></div>
+              <span class="muted">Unlocked by 4.2% of Telly viewers</span>
+            </div>
+          </div>
+        </div></div>
+        <p class="cap"><b>Tapping a medal.</b> Progress, the missing titles with one-tap Queue, which friends have it, and how rare it is.</p>
+      </article>
+
+      <article class="opt">
+        <div class="frame"><div class="ph">
+          <div class="sb"><span>9:41</span><span>●●● ▮</span></div>
+          <div class="confetti"></div>
+          <div class="body center" style="top:120px; gap:18px">
+            <span class="chip lime">Achievement unlocked</span>
+            <div class="medal lg gold">LR</div>
+            <div class="stack center"><b style="font: 700 28px/1.15 var(--f-display)">Middle-earth</b><span class="t2" style="max-width:280px">You've ranked all three Lord of the Rings films. The Return of the King came in at #2 in your canon.</span></div>
+            <span class="muted">Unlocked by 9% of viewers · 2 friends</span>
+            <div class="pad stack" style="width:100%; gap:10px">
+              <div class="btn pri">Pin to profile</div>
+              <div class="btn">Share card</div>
+              <span class="muted">Done</span>
+            </div>
+          </div>
+        </div></div>
+        <p class="cap"><b>The unlock moment.</b> Shown after the ranking that completes it. Optional share card, and it posts to your followers' feed (if you allow it).</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ===================== B ===================== -->
+  <section class="dir" id="dir-b">
+    <div class="dir-head">
+      <div class="tag"><span class="letter">B</span><h2>Levels and weekly quests</h2></div>
+      <p>Points lead. Ranking, finishing collections and weekly quests earn XP. XP raises your level, and levels unlock <b>cosmetic</b> rewards such as profile frames, share-card styles and app icons. A weekly friends' table adds light competition. This is the closest to your "points that unlock things" idea.</p>
+      <ul class="pros">
+        <li class="plus">Strongest weekly habit loop: three fresh quests every Monday.</li>
+        <li class="plus">One number to compare with friends, and rewards to aim for.</li>
+        <li class="minus">Points for ranking can push people to log things they didn't watch, which hurts the canon. Needs caps and rules.</li>
+        <li class="minus">Overlaps with Telly Pro (#52) if rewards ever become features.</li>
+      </ul>
+    </div>
+    <div class="row">
+      <article class="opt">
+        <div class="frame"><div class="ph">
+          <div class="sb"><span>9:41</span><span>●●● ▮</span></div>
+          <div class="hd"><span class="back">←</span><h4>Your level</h4><span class="ic">?</span></div>
+          <div class="body">
+            <div class="card rowi">
+              <div class="lvl"><span>12</span></div>
+              <div class="grow stack"><b style="font-size:17px">Cinephile</b><span class="muted num">2,340 / 3,000 XP to Level 13</span><div class="bar"><i style="width:78%"></i></div></div>
+            </div>
+            <div class="card stack">
+              <div class="rowi"><b class="grow">Weekly streak</b><span class="chip lime">▲ 6 weeks</span></div>
+              <div class="streak"><span class="wk on">W1</span><span class="wk on">W2</span><span class="wk frz">❄</span><span class="wk on">W4</span><span class="wk on">W5</span><span class="wk on">W6</span><span class="wk">now</span></div>
+              <span class="muted">One freeze a month keeps a quiet week from breaking it.</span>
+            </div>
+            <div class="sec">This week's quests <span>resets Mon</span></div>
+            <div class="card divide">
+              <div class="li"><span class="check done">✓</span><div class="grow stack"><b>Rank something from the 1970s</b><span class="muted">Done · The Conversation</span></div><span class="chip">+50</span></div>
+              <div class="li"><span class="check"></span><div class="grow stack"><b>Rank 3 titles</b><div class="bar"><i style="width:66%"></i></div></div><span class="chip">+60</span></div>
+              <div class="li"><span class="check"></span><div class="grow stack"><b>Finish a title from your Queue</b><span class="muted">0 of 1</span></div><span class="chip">+40</span></div>
+            </div>
+          </div>
+        </div></div>
+        <p class="cap"><b>More → Your level.</b> Level ring, the streak by week (❄ = a used freeze), and three quests that reset each Monday.</p>
+      </article>
+
+      <article class="opt">
+        <div class="frame"><div class="ph">
+          <div class="sb"><span>9:41</span><span>●●● ▮</span></div>
+          <div class="hd"><span class="back">←</span><h4>Rewards</h4></div>
+          <div class="body">
+            <p class="pad muted" style="font-size:12.5px">Every reward is cosmetic. Nothing you need to use Telly is locked behind points.</p>
+            <div class="pad stack" style="gap:8px">
+              <div class="reward got"><span class="check done">✓</span><div class="grow stack"><b>Lime profile frame</b><span class="muted">Level 5</span></div></div>
+              <div class="reward got"><span class="check done">✓</span><div class="grow stack"><b>"Noir" Wrapped card style</b><span class="muted">Level 10</span></div></div>
+              <div class="reward"><span class="lvl" style="width:34px;height:34px;font-size:12px"><span>15</span></span><div class="grow stack"><b>Gold podium tags on your canon</b><span class="muted">660 XP to go</span></div><span class="lock">🔒</span></div>
+              <div class="reward"><span class="lvl" style="width:34px;height:34px;font-size:12px;background:var(--ov)"><span>20</span></span><div class="grow stack"><b>Alternate app icons</b><span class="muted">Level 20</span></div><span class="lock">🔒</span></div>
+              <div class="reward"><span class="lvl" style="width:34px;height:34px;font-size:12px;background:var(--ov)"><span>30</span></span><div class="grow stack"><b>Custom canon header art</b><span class="muted">Level 30</span></div><span class="lock">🔒</span></div>
+            </div>
+            <div class="sec">How you earn XP</div>
+            <div class="card divide" style="font-size:12.5px">
+              <div class="li"><span class="grow">Rank a title (max 10 a week)</span><span class="num">+10</span></div>
+              <div class="li"><span class="grow">Finish a weekly quest</span><span class="num">+40–60</span></div>
+              <div class="li"><span class="grow">Complete a collection</span><span class="num">+100</span></div>
+            </div>
+          </div>
+        </div></div>
+        <p class="cap"><b>The rewards track.</b> Cosmetic unlocks by level, and plainly stated earning rules, with a weekly cap so logging more doesn't pay.</p>
+      </article>
+
+      <article class="opt">
+        <div class="frame"><div class="ph">
+          <div class="sb"><span>9:41</span><span>●●● ▮</span></div>
+          <div class="hd"><span class="back">←</span><h4>This week</h4></div>
+          <div class="body">
+            <div class="pad rowi"><span class="chip lime">Friends</span><span class="chip">Squad: Couch Potatoes</span></div>
+            <div class="card divide">
+              <div class="li"><span class="rank">1</span><span class="av" style="background:#7C5CFF">M</span><div class="grow stack"><b>Maya</b><span class="muted">Level 18 · ▲ 11 weeks</span></div><span class="num">640</span></div>
+              <div class="li me"><span class="rank">2</span><span class="av" style="background:#4D7800">Y</span><div class="grow stack"><b>You</b><span class="muted">Level 12 · ▲ 6 weeks</span></div><span class="num">580</span></div>
+              <div class="li"><span class="rank">3</span><span class="av" style="background:#0EA5E9">J</span><div class="grow stack"><b>Jordan</b><span class="muted">Level 9 · ▲ 2 weeks</span></div><span class="num">410</span></div>
+              <div class="li"><span class="rank">4</span><span class="av" style="background:#F97316">S</span><div class="grow stack"><b>Sam</b><span class="muted">Level 14</span></div><span class="num">220</span></div>
+            </div>
+            <p class="pad muted">Weekly XP among people you follow. Resets Monday, so nobody is out of reach for good.</p>
+          </div>
+        </div></div>
+        <p class="cap"><b>Friends this week.</b> A weekly table, never all-time, with friends or a squad only. No global leaderboard.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ===================== C ===================== -->
+  <section class="dir" id="dir-c">
+    <div class="dir-head">
+      <div class="tag"><span class="letter">C</span><h2>Challenges and marathons</h2></div>
+      <p>Time-boxed challenges lead: "Spooktober: 8 horror films by Oct 31", "The Batman marathon", or a challenge your squad sets for itself. You join, see who else is in, and race your friends to the finish. Finishing earns a medal. This is your "movie marathon" idea, built around doing things together.</p>
+      <ul class="pros">
+        <li class="plus">Most social: built-in reasons to talk in squads (#49) and the feed.</li>
+        <li class="plus">Seasonal challenges keep it fresh without daily nagging.</li>
+        <li class="minus">Needs someone to write challenges every month (or a set of templates).</li>
+        <li class="minus">Lonely for people without friends on Telly yet (friends land in #48).</li>
+      </ul>
+    </div>
+    <div class="row">
+      <article class="opt">
+        <div class="frame"><div class="ph">
+          <div class="sb"><span>9:41</span><span>●●● ▮</span></div>
+          <div class="hd"><span class="back">←</span><h4>Challenges</h4><span class="ic">+</span></div>
+          <div class="body">
+            <div class="hero"><div class="art" style="background:linear-gradient(160deg,#5b1a2a,#120609 70%)"></div>
+              <div class="ov2"><em>FEATURED · 24 DAYS LEFT</em><b>Spooktober</b><small>Rank 8 horror films by Oct 31 · 2,140 joined · 3 friends</small>
+                <div class="bar" style="margin-top:6px;background:rgba(255,255,255,.15)"><i style="width:37%"></i></div><small>You: 3 of 8</small></div></div>
+            <div class="sec">Yours</div>
+            <div class="card divide">
+              <div class="li"><div class="medal sm locked">B</div><div class="grow stack"><b>The Batman marathon</b><div class="bar violet"><i style="width:50%"></i></div></div><span class="num t2">4/8</span></div>
+              <div class="li"><div class="medal sm locked">A24</div><div class="grow stack"><b>A24 month</b><span class="muted">Squad · Couch Potatoes · 11 of 20</span></div><span class="chip">Squad</span></div>
+            </div>
+            <div class="sec">Join next</div>
+            <div class="card divide">
+              <div class="li"><div class="grow stack"><b>Best Picture decade</b><span class="muted">Every winner 2015–2024 · open-ended</span></div><span class="chip lime">Join</span></div>
+              <div class="li"><div class="grow stack"><b>Miniseries November</b><span class="muted">4 limited series in 30 days</span></div><span class="chip lime">Join</span></div>
+            </div>
+          </div>
+        </div></div>
+        <p class="cap"><b>More → Challenges.</b> One featured seasonal challenge, the ones you've joined, and what's next. + lets a squad start its own.</p>
+      </article>
+
+      <article class="opt">
+        <div class="frame"><div class="ph">
+          <div class="sb"><span>9:41</span><span>●●● ▮</span></div>
+          <div class="hd"><span class="back">←</span><h4>Spooktober</h4><span class="ic">⇪</span></div>
+          <div class="body">
+            <div class="card stack">
+              <div class="rowi"><span class="grow t2">Rank 8 horror films by Oct 31</span><span class="chip">24 days left</span></div>
+              <div class="rowi"><span class="big">3<span class="muted" style="font-size:15px"> / 8</span></span><div class="grow bar" style="height:8px"><i style="width:37%"></i></div></div>
+            </div>
+            <div class="sec">Friends in this challenge</div>
+            <div class="card divide">
+              <div class="li"><span class="av" style="background:#7C5CFF">M</span><b class="grow">Maya</b><div style="width:90px" class="bar"><i style="width:75%"></i></div><span class="num" style="width:30px;text-align:right">6</span></div>
+              <div class="li me"><span class="av" style="background:#4D7800">Y</span><b class="grow">You</b><div style="width:90px" class="bar"><i style="width:37%"></i></div><span class="num" style="width:30px;text-align:right">3</span></div>
+              <div class="li"><span class="av" style="background:#0EA5E9">J</span><b class="grow">Jordan</b><div style="width:90px" class="bar"><i style="width:25%"></i></div><span class="num" style="width:30px;text-align:right">2</span></div>
+            </div>
+            <div class="sec">Picks from your Queue</div>
+            <div class="card divide">
+              <div class="li"><div class="poster" style="background:linear-gradient(160deg,#4a3b2a,#120d06)"></div><div class="grow stack"><b>Hereditary</b><span class="muted">In your Queue · Max</span></div><span class="chip">▶ Max</span></div>
+              <div class="li"><div class="poster" style="background:linear-gradient(160deg,#20323b,#060c10)"></div><div class="grow stack"><b>The Thing</b><span class="muted">Maya ranked it #2</span></div><span class="chip lime">+ Queue</span></div>
+            </div>
+          </div>
+        </div></div>
+        <p class="cap"><b>A challenge.</b> Your progress, friends racing alongside, and picks that would count, starting with your own Queue.</p>
+      </article>
+
+      <article class="opt">
+        <div class="frame"><div class="ph">
+          <div class="sb"><span>9:41</span><span>●●● ▮</span></div>
+          <div class="hd"><h4 style="font-size:26px">Social</h4></div>
+          <div class="body">
+            <div class="pad rowi"><span class="chip lime">Friends</span><span class="chip">Squads</span><span class="chip">Global</span></div>
+            <div class="card stack">
+              <div class="rowi"><span class="av" style="background:#7C5CFF">M</span><div class="grow stack"><b>Maya finished Spooktober</b><span class="muted">2h · 8 of 8 horror films</span></div></div>
+              <div class="rowi" style="justify-content:center; padding:6px 0"><div class="medal gold">8</div></div>
+              <div class="rowi t2" style="font-size:12.5px">Best of the 8: <b style="color:var(--t1)">The Thing</b> (#1, 9.40)</div>
+              <div class="rowi"><span class="chip">🔥 12</span><span class="chip">💬 4</span><span class="grow"></span><span class="chip lime">Join Spooktober</span></div>
+            </div>
+            <div class="card stack">
+              <div class="rowi"><span class="av" style="background:#0EA5E9">J</span><div class="grow stack"><b>Jordan ranked Pearl #3</b><span class="muted">5h · Spooktober 2 of 8</span></div><span class="chip">8.12</span></div>
+            </div>
+          </div>
+          <div class="tabs"><span class="tab">Home</span><span class="tab">Explore</span><span class="tab">Canon</span><span class="tab on">Social</span><span class="tab">More</span></div>
+        </div></div>
+        <p class="cap"><b>In the feed.</b> Finishing posts a card with a one-tap Join, and ordinary rankings show challenge progress.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ===================== decisions ===================== -->
+  <section class="decisions">
+    <div class="dir-head">
+      <div class="eyebrow">Decide later</div>
+      <h2>The calls that shape it</h2>
+      <p>None of these needs an answer today. My recommendation is in each card.</p>
+    </div>
+    <div class="dgrid">
+      <div class="dcard"><h3>1. What leads?</h3>
+        <ol><li>A: Trophy case (collect)</li><li>B: Levels and quests (progress)</li><li>C: Challenges (do it with friends)</li></ol>
+        <p class="rec"><b>Recommend:</b> A as the base, C next, and B's points only as a light layer later. Achievements are the calmest fit for a ranking app. Challenges then add the social pull.</p></div>
+      <div class="dcard"><h3>2. What do points unlock?</h3>
+        <ol><li>Nothing: no points, only medals</li><li>Cosmetics: frames, card styles, icons</li><li>Features: things like advanced stats</li></ol>
+        <p class="rec"><b>Recommend:</b> cosmetics. Feature unlocks compete with Telly Pro (#52) and make free users grind for basics.</p></div>
+      <div class="dcard"><h3>3. Streak rhythm</h3>
+        <ol><li>Weekly, with one freeze a month</li><li>Daily, like Duolingo</li><li>No streak</li></ol>
+        <p class="rec"><b>Recommend:</b> weekly with a freeze. People don't finish a film every day, so a daily streak would feel like a punishment.</p></div>
+      <div class="dcard"><h3>4. Who you compete with</h3>
+        <ol><li>People you follow and your squads</li><li>Everyone (global leaderboards)</li><li>Nobody: personal only</li></ol>
+        <p class="rec"><b>Recommend:</b> friends and squads only, with weekly tables that reset. Global boards reward grinding and invite cheating. A "rare: 4% of viewers" line gives the global flavour without a table.</p></div>
+      <div class="dcard"><h3>5. Protecting the canon</h3>
+        <ol><li>Only count titles that went through duels</li><li>Weekly cap on points for ranking</li><li>No points for ranking at all</li></ol>
+        <p class="rec"><b>Recommend:</b> 1 and 2 together. Rewards should never make it worth ranking something you didn't watch.</p></div>
+      <div class="dcard"><h3>6. How public it is</h3>
+        <ol><li>Unlocks post to the feed by default (can turn off)</li><li>Off by default</li><li>Never in the feed</li></ol>
+        <p class="rec"><b>Recommend:</b> on by default for medals and finished challenges only (not every quest), with a privacy toggle in Settings.</p></div>
+    </div>
+    <div class="plan">
+      <div class="eyebrow">If you go with the recommendation</div>
+      <ol>
+        <li><b>Slice 1:</b> achievements (milestones and taste medals), the weekly streak, pin to profile, the unlock moment.</li>
+        <li><b>Slice 2:</b> collections from TMDB (needs a backend change), then seasonal and squad challenges.</li>
+        <li><b>Slice 3, optional:</b> XP, levels and cosmetic rewards, once you've decided on Telly Pro.</li>
+      </ol>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  function setTheme(light) {
+    document.body.classList.toggle('light', light);
+    document.getElementById('th-light').setAttribute('aria-pressed', String(light));
+    document.getElementById('th-dark').setAttribute('aria-pressed', String(!light));
+    try { localStorage.setItem('telly50-theme', light ? 'light' : 'dark'); } catch (e) {}
+  }
+  document.getElementById('th-dark').addEventListener('click', function () { setTheme(false); });
+  document.getElementById('th-light').addEventListener('click', function () { setTheme(true); });
+  var saved = null; try { saved = localStorage.getItem('telly50-theme'); } catch (e) {}
+  setTheme(saved === 'light');
+})();
+</script>
+</body>
+</html>
