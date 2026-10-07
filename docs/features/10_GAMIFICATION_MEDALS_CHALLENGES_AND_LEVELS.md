@@ -214,6 +214,8 @@ Every reward is cosmetic. Nothing that's needed to use Telly is ever locked (dec
 
 `challenge_participants (challenge_id, user_id, joined_at, completed_at NULL) PK (challenge_id, user_id)`.
 
+Also `medal_glyph` (the challenge medal's glyph). Slugs are lowercase words joined by hyphens, at most 50 characters; the medal is `challenge_<slug with underscores>`. `challenge_templates (key, name, description, art, medal_glyph, rule, params, target, active, sort)` holds the templates squads create from; `"$genre"`-style strings in a template's rule, and `$target` / `$genre` in its description, are filled from the creator's values.
+
 ### 8.2 Rules
 
 A rule is a media type plus filters that must all match. Rules are data, so a new challenge never needs an app update. Only a new filter *type* does.
@@ -234,7 +236,7 @@ A rule is a media type plus filters that must all match. Rules are data, so a ne
 
 - `media_type` is `movie`, `tv` or `any`.
 - **Progress** is the number of qualifying rankings of matching titles with `created_at` between `starts_at` and `ends_at`. Rankings made before you joined count, as long as they're inside the window.
-- **Completing:** reaching `target` sets `completed_at`, unlocks the challenge medal, adds XP and posts `CHALLENGE_COMPLETED`.
+- **Completing:** reaching `target` sets `completed_at`, unlocks the challenge medal, adds XP and posts `CHALLENGE_COMPLETED` (when sharing; metadata: challenge id, slug, name, count, medal glyph, and the best title by score with its rank and score). It's checked inside `evaluate_achievements`, so it runs after every ranking, duel batch, drop and follow, nightly, and on joining. A finished challenge can't be left. Older apps never receive `CHALLENGE_COMPLETED` rows: `get_activity_feed` needs `p_include_challenges => true`.
 - **RPCs:**
   - `challenge_progress(challenge_id) → mine + followed participants`;
   - `join_challenge(id)` and `leave_challenge(id)`;
