@@ -10,26 +10,32 @@ Components prioritize artwork (posters, backdrop stills, network typography) and
 ## 2. Core Navigation Shell Components
 
 ### 2.1 The Floating Frosted Bottom Bar
+
+> Tracking: epic #44 · Status: approved · Decision: [0003](../decisions/0003-five-tab-shell-with-more-hub.md)
+
 Rather than a traditional opaque bottom bar anchored to the screen bottom, Telly features a **floating pill navigation bar** suspended 16px above the home indicator:
-- **Surface Material:** Frosted dark acrylic (`#11131A` with 75% opacity, `backdrop-filter: blur(24px)`).
-- **Border:** 1px stroke (`#242938`).
+- **Surface Material:** Frosted dark acrylic (`#11131A` with 75% opacity, `backdrop-filter: blur(24px)`). Light mode: `#FFFFFF` at 90% with the same blur.
+- **Border:** 1px stroke (`#242938`; light `#E2E5EC`).
 - **Dimensions:** Height: 64px, Margin: 16px horizontal, Border Radius: 32px.
-- **Items:**
-  1. `Feed` (Home icon)
-  2. `Explore` (Compass icon)
-  3. `Log / Duel` (Center Action — glowing Phosphor Lime hexagon with `+` glyph)
-  4. `Queue` (Bookmark deck icon)
-  5. `The Canon` (Profile / Film strip icon)
-- **Active Tab State:** Icon shifts to Pure White (`#FFFFFF`) with a micro neon phosphor dot beneath it.
-- **Center Action (Log):** Elevated 6px above the bar, background: `#D2FF52`, icon: `#08090C` (Black), surrounded by a soft 12px neon halo.
+- **Items:** five equal-width destinations, no centre action:
+  1. `Home` (house icon): `SCR-21`
+  2. `Explore` (compass icon): `SCR-07`
+  3. `Canon` (bar-chart / film strip icon): `SCR-14`
+  4. `Social` (two-people icon): `SCR-05`
+  5. `More` (2×2 grid icon): `SCR-22`
+- **Item anatomy:** 22px stroke icon, 11px label (Caption, w600) under it, 4px dot under the label. Each item is at least 48 × 56 dp.
+- **Active Tab State:** Icon and label shift to `textPrimary` (`#FFFFFF`; light `#0F1117`) with a 4px Phosphor dot beneath (`#D2FF52`; light `#4D7800`). Inactive items use `textTertiary` (`#7D8198`; light `#696E87`).
+- **Re-tap:** tapping the active tab pops it to its root.
 
 ```
 ┌────────────────────────────────────────────────────────┐
 │                      APP CONTENT                       │
-│                                                        │
+│                                          ┌──────────┐  │
+│                                          │  + Log   │  │  <- §2.3 floating Log button
+│                                          └──────────┘  │
 │   ┌────────────────────────────────────────────────┐   │
-│   │   [🏠]      [🧭]      [ ⬢+ ]      [📑]      [👤]   │   │
-│   │   Feed    Explore      Log       Queue     Canon   │   │
+│   │  [⌂]     [◎]      [▥]      [👥]      [▦]      │   │
+│   │  Home   Explore   Canon   Social    More      │   │
 │   └────────────────────────────────────────────────┘   │
 └────────────────────────────────────────────────────────┘
 ```
@@ -39,6 +45,15 @@ Rather than a traditional opaque bottom bar anchored to the screen bottom, Telly
 - **Left Slot:** Dynamic context (e.g., Telly logomark, active page title, or back arrow with spring bounce).
 - **Right Slot:** Search pill (`[ 🔍 Search shows or friends ]`) or Action menu (`[ ⚙️ Settings ]`).
 - **Scroll Behavior:** Collapses smoothly into a frosted header on scroll down (`Elevation 2`), expands on scroll to top.
+
+### 2.3 Floating Log Button — epic #44
+
+The single entry point to the Log flow (`SCR-09`) from the tabs. It replaces the old centre hexagon.
+- **Shape:** extended pill, 52px tall, horizontal padding 20px, radius `999px`. A `+` glyph (20px, stroke 2.4) followed by the label `Log` (Body Large, w700).
+- **Colour:** fill Phosphor Lime `#D2FF52` with Void `#08090C` glyph and label in **both** themes (dark text on lime passes AAA). Halo: `0 0 20px rgba(210, 255, 82, 0.35)` in dark mode, none in light mode.
+- **Position:** bottom-right, 20px from the right edge and 16px above the nav bar's top edge. Content scrolls under it. Lists on the four tabs add bottom padding so the last row is never hidden.
+- **Visibility:** shown on Home, Explore, Canon and Social. Hidden on More and on every pushed screen (title pages keep their own rank action). It never collapses on scroll.
+- **Behaviour:** tap opens `/log` (`SCR-09`) with a medium haptic. Semantics label: "Log a title".
 
 ---
 

@@ -10,7 +10,7 @@ This document defines every single screen in the Telly application. For each scr
 2. **`SCR-02`**: Streaming Subscriptions Household Setup
 3. **`SCR-03`**: Show Recognition Seed Grid
 4. **`SCR-04`**: Onboarding Duel Tournament & Canon Unveiling
-5. **`SCR-05`**: Home / Activity Feed (Following / Squads / Global)
+5. **`SCR-05`**: Social / Activity Feed (Following / Squads / Global)
 6. **`SCR-06`**: Post Detail & Spoiler-Safe Comment Thread
 7. **`SCR-07`**: Explore & Discover Hub
 8. **`SCR-08`**: Show Detail Page (Metadata, Seasons, Friends' Ranks)
@@ -26,12 +26,32 @@ This document defines every single screen in the Telly application. For each scr
 18. **`SCR-18`**: TV Graveyard (Dropped / DNF Tracker)
 19. **`SCR-19`**: Telly Wrapped & Shareable Asset Studio
 20. **`SCR-20`**: Settings, Account & Data Export
+21. **`SCR-21`**: Home
+22. **`SCR-22`**: More Hub
 
 ---
 
-### §0 Shared Tab Header (Feed, Explore, Queue, Canon) — `FE-HEADER-01`
+### §0.0 App Shell & Route Map — epic #44
 
-The four tab screens (`SCR-05`, `SCR-07`, `SCR-13`, `SCR-14`) share one header, `TellyScreenHeader`:
+> Tracking: epic #44 · Status: approved · Decision: [0003](../decisions/0003-five-tab-shell-with-more-hub.md)
+
+Five tabs in the floating bar (component library §2.1), plus the floating Log button (§2.3) on the first four. Signed-in users land on **Home** (`/home`).
+
+| Tab | Root route | Root screen | Pushed from it |
+| :--- | :--- | :--- | :--- |
+| Home | `/home` | `SCR-21` Home | none |
+| Explore | `/explore` | `SCR-07` Explore | none |
+| Canon | `/canon` | `SCR-14` Canon | none |
+| Social | `/social` | `SCR-05` Feed | `/social/activity/:id` (`SCR-06`) |
+| More | `/more` | `SCR-22` More hub | `/more/queue` (`SCR-13`), `/more/queue/list/:id`, `/more/graveyard` (`SCR-18`), `/more/wrapped` (`SCR-19`), `/more/settings` (`SCR-20`), `/more/edit` |
+
+Unchanged, pushed over the shell: the `/log` flow (`SCR-09` to `SCR-12`), `/title/:mediaType/:id` (`SCR-08`), `/u/:handle` (`SCR-15`), `/cowatch` and `/u/:handle/two-to-watch` (`SCR-16`), `/squads` and `/squads/:id` (`SCR-17`, opened from Social).
+
+**Redirects** (old links in shares, notifications and password-reset mails keep working): `/feed` → `/social`, `/feed/activity/:id` → `/social/activity/:id`, `/queue` → `/more/queue`, `/queue/list/:id` → `/more/queue/list/:id`, `/canon/{settings,edit,graveyard,wrapped}` → `/more/{…}`.
+
+### §0 Shared Tab Header (Home, Explore, Canon, Social, More) — `FE-HEADER-01`
+
+The five tab screens (`SCR-21`, `SCR-07`, `SCR-14`, `SCR-05`, `SCR-22`) share one header, `TellyScreenHeader`:
 
 ```
 ┌────────────────────────────────────────────────────────┐
@@ -45,12 +65,13 @@ The four tab screens (`SCR-05`, `SCR-07`, `SCR-13`, `SCR-14`) share one header, 
 
 | Screen | Title | Actions |
 | :--- | :--- | :--- |
-| `SCR-05` Feed | Feed | My Squads, Search (opens Explore with the search field focused) |
+| `SCR-21` Home | Home | Search (opens Explore with the search field focused) |
 | `SCR-07` Explore | Explore | none (the search bar sits directly below) |
-| `SCR-13` Queue | Queue | Watchlist: Sort (sheet: Friends' Score / Leaving Soon). My Lists: New list. Friends' Lists: none |
-| `SCR-14` Canon | Canon | My Squads, Share profile, Settings |
+| `SCR-14` Canon | Canon | Share profile |
+| `SCR-05` Social | Social | My Squads, Search |
+| `SCR-22` More | More | none |
 
-* **Scroll behavior:** the header scrolls away as the content scrolls down, and any upward scroll snaps it back in full, wherever the content is; there is no need to return to the top. Controls under the header (Feed filter tabs, Queue hub pills and Movies / TV Shows tabs) stay in place.
+* **Scroll behavior:** the header scrolls away as the content scrolls down, and any upward scroll snaps it back in full, wherever the content is; there is no need to return to the top. Controls under the header (Social filter tabs and Movies / TV Shows tabs) stay in place.
 
 #### §0.2 Pushed Screens — `FE-HEADER-02`
 
@@ -68,13 +89,14 @@ Every screen opened on top of the tabs uses `TellySubpageAppBar`, the same desig
 * **Title:** sentence case, no emoji, left-aligned: Plus Jakarta Sans 20 / ExtraBold (w800) / −0.3, `textPrimary`, announced as a heading. Names people typed (squads, lists) are shown as typed, never upper-cased. An optional second line (`labelMedium`, `textSecondary`) carries a count or context ("5 members").
 * **Leading:** one back arrow (`arrow_back_rounded`, "Back") for screens you drill into, one close (`close_rounded`, "Close") for tasks you dismiss, in `textPrimary`. Full-screen flows without an app bar (Duel arena, Canon reveal) use the same close button, on the left.
 * **Actions:** the same muted 48 dp icons as the tab header. At most one accented action per screen, its primary one (Save on Edit profile, Follow on a friend's profile). Destructive actions (Delete list, Delete / Leave squad) live in a muted ⋮ menu, never as a bare coloured icon.
-* **Scroll behavior:** fixed. Only the four tab headers hide on scroll, so Back / Close is always one tap away.
+* **Scroll behavior:** fixed. Only the five tab headers hide on scroll, so Back / Close is always one tap away.
 * **Theme default:** `TellyTheme`'s `AppBarTheme` uses the same title style, left alignment and canvas background, so an app bar that sets nothing still matches.
 * **Out of scope:** onboarding (`SCR-01` to `SCR-04`) keeps its own step header, and the show detail page (`SCR-08`) keeps its backdrop header with the shared back button. Once its in-page title scrolls under the collapsed bar, the bar fades in the title name in the subpage title style (`FE-HEADER-03`).
 
 | Screen | Leading | Title | Actions |
 | :--- | :--- | :--- | :--- |
 | `SCR-06` Comments | ✕ | Comments | none |
+| `SCR-13` Queue | ← | Queue | Watchlist: Sort (sheet: Friends' Score / Leaving Soon). My Lists: New list. Friends' Lists: none |
 | `SCR-09` Log a show | ✕ | Log a show | none |
 | `SCR-10` Duel arena | ✕ | "Duel 2 of 4", centred (progress) | none |
 | `SCR-12` Canon reveal | ✕ | none | none |
@@ -223,11 +245,13 @@ Every screen opened on top of the tabs uses `TellySubpageAppBar`, the same desig
 
 ---
 
-### `SCR-05`: Home / Activity Feed (Following / Squads / Global)
+### `SCR-05`: Social / Activity Feed (Following / Squads / Global)
+
+The **Social** tab (`/social`). It was the landing tab until epic #44; Home (`SCR-21`) is now.
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│  Feed                                   [ 👥 ] [ 🔍 ]  │
+│  Social                                 [ 👥 ] [ 🔍 ]  │
 │  [ Following ]  [ Squads ]  [ Global ]                 │
 ├────────────────────────────────────────────────────────┤
 │                                                        │
@@ -518,6 +542,8 @@ Every screen opened on top of the tabs uses `TellySubpageAppBar`, the same desig
 
 ### `SCR-13`: Smart Queue (Universal Watchlist)
 
+Opened from the More hub (`/more/queue`) as a pushed screen with the subpage app bar (§0.2). Its Sort and New list actions move from the tab header into that app bar; the hub pills stay under it.
+
 ```
 ┌────────────────────────────────────────────────────────┐
 │  Queue                              [ ⇅ Sort | + New ] │
@@ -769,3 +795,70 @@ Every screen opened on top of the tabs uses `TellySubpageAppBar`, the same desig
     - `Export to Notion Template`
     - `Export to Letterboxd Format`
     - `Delete Account & Purge Data`
+
+---
+
+### `SCR-21`: Home
+
+> Tracking: epic #44 (shell) · content redesign: epic #45 · Status: approved (interim content)
+
+The landing tab (`/home`). Epic #45 designs its real content (currently-watching tracking). Until then it shows only data the app already has:
+
+```
+┌────────────────────────────────────────────────────────┐
+│  Home                                          [ 🔍 ]  │
+├────────────────────────────────────────────────────────┤
+│  Your canon                  [ Movies | TV ]  See all  │
+│  [ #1 poster ] [ #2 poster ] [ #3 poster ]             │
+│                                                        │
+│  From your friends                            See all  │
+│  (👤) Maya ranked The Bear #3              [ 8.94 ]    │
+│  (👤) Jordan ranked Severance #2           [ 9.40 ]    │
+│  (👤) …                                                │
+│                                          ┌──────────┐  │
+│                                          │  + Log   │  │
+│                                          └──────────┘  │
+└────────────────────────────────────────────────────────┘
+```
+
+- **Your canon:** the top 3 of the selected canon as poster tiles (component library §3.4) with rank and tier-coloured score chip. A Movies / TV toggle switches canons, which are never mixed. *See all* opens the Canon tab.
+- **From your friends:** the 3 newest items of the Following feed as compact rows (avatar, "<name> ranked <title> #N", tier-coloured score chip). Tapping a row opens the title. *See all* opens the Social tab.
+- **Empty states:** with no ranked titles in the selected canon, that section becomes a card reading "Log your first title to start your canon" with a Log button. With no friends' activity, the friends section becomes "Find friends in Social", linking to the Social tab.
+- **Loading:** skeleton tiles and rows. **Offline:** the canon comes from Drift; the friends section shows the last cached items, or hides if there are none.
+
+### `SCR-22`: More Hub
+
+> Tracking: epic #44 · Status: approved · Decision: [0003](../decisions/0003-five-tab-shell-with-more-hub.md)
+
+A WHOOP-style hub (`/more`): one place for everything that isn't a daily destination, with room for future features.
+
+```
+┌────────────────────────────────────────────────────────┐
+│  More                                                  │
+├────────────────────────────────────────────────────────┤
+│  ┌──────────────────────────────────────────────────┐  │
+│  │ (Y)  Your name                                 › │  │  profile card
+│  │      @handle · View profile                      │  │
+│  └──────────────────────────────────────────────────┘  │
+│  ┌──────────────────────────────────────────────────┐  │
+│  │ [🔖] Queue                                     › │  │  full-width tile
+│  │      Your watchlist and custom lists             │  │
+│  └──────────────────────────────────────────────────┘  │
+│  ┌───────────────────────┐ ┌───────────────────────┐   │
+│  │ [🎁]                  │ │ [🪦]                  │   │  2-column tiles
+│  │ Wrapped               │ │ Graveyard             │   │
+│  │ Your year in rankings │ │ Dropped and DNF       │   │
+│  └───────────────────────┘ └───────────────────────┘   │
+│  ┌──────────────────────────────────────────────────┐  │
+│  │ [⚙] Settings and account                       › │  │  grouped list
+│  └──────────────────────────────────────────────────┘  │
+└────────────────────────────────────────────────────────┘
+```
+
+- **Profile card:** avatar 56dp, display name (Title Medium), `@handle · View profile` (Body Medium, `textTertiary`). Opens the Canon tab, which is your public profile.
+- **Queue tile:** first and full width, bookmark icon in the primary accent (`#D2FF52`; light `#4D7800`). Opens `/more/queue`.
+- **Feature tiles:** a 2-column grid, 104dp tall, `surface-raised` with a `stroke-subtle` border and radius 16. Icon (24px) top-left in its semantic accent; label (Body Large w600) and a one-line subtitle (Caption, `textTertiary`) bottom-left. Shipped now: **Wrapped** (lime), **Graveyard** (Neon Coral `#FF4B6E`; light `#D61F4D`).
+- **Grouped list:** 52dp rows in one rounded card with dividers. Shipped now: **Settings and account** (opens `/more/settings`).
+- **Future entries** are added by their epics, and only once they ship (no "Soon" placeholders in the app): Achievements (#50, tile, amber), Invite friends (#51, tile, violet), Telly Pro (#52, list row, amber), and Help & feedback (#118, list row, once a support channel exists).
+- The floating Log button is hidden on this tab.
+- **Offline:** everything works offline except refreshing the avatar. No loading state is needed.

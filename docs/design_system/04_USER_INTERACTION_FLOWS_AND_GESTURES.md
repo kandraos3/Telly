@@ -49,7 +49,7 @@ stateDiagram-v2
 ```
 
 #### Step-by-Step Interaction Detail:
-1. **Trigger:** User taps the glowing center `[⬢+]` button on the bottom nav.
+1. **Trigger:** User taps the floating lime `+ Log` button above the nav bar (component library §2.3; shown on Home, Explore, Canon and Social), or the rank action on a title page (`SCR-08`).
 2. **Instant Search (`SCR-09`):** Predictive search pulls from TMDB as user types (debounced at 150ms).
 3. **Status Selection:** User selects `Finished Whole Series` (or `Up to Date`, `Season X`, `Dropped`).
 4. **Sentiment Coarse Sort:** User taps one of 4 sentiment buckets (`Masterpiece`, `Loved`, `Liked`, `Meh`).
