@@ -39,7 +39,7 @@ SELECT is((SELECT count(*)::INT FROM public.lookup_squad_invitee('nobody_here'))
 SELECT is((SELECT count(*)::INT FROM public.lookup_squad_invitee('ghost@test.dev')), 0, 'ghosts stay invisible');
 SELECT is((SELECT count(*)::INT FROM public.lookup_squad_invitee('blocker_inv')), 0,
     'blocked relationships stay invisible');
-SELECT unlike(pg_get_function_result('public.lookup_squad_invitee(text)'::regprocedure), '%email%',
+SELECT unalike(pg_get_function_result('public.lookup_squad_invitee(text)'::regprocedure), '%email%',
     'no email column is ever exposed');
 
 SELECT * FROM finish();

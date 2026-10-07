@@ -76,7 +76,7 @@ SELECT results_eq(
     $$ VALUES ('Solo'::VARCHAR, 'OWNER'::VARCHAR, 1) $$,
     'an outsider sees only their own squad');
 
-SELECT unlike(pg_get_function_result('public.get_my_squads()'::regprocedure), '%email%',
+SELECT unalike(pg_get_function_result('public.get_my_squads()'::regprocedure), '%email%',
     'no email column is ever exposed');
 
 SELECT * FROM finish();
