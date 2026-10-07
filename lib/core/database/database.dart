@@ -98,6 +98,17 @@ class WatchlistCache extends Table {
   Set<Column> get primaryKey => {titleId, mediaType};
 }
 
+/// Last server snapshot per gamification screen, one JSON document per key (features/10
+/// §9.9): shown read-only while offline.
+class GamificationCache extends Table {
+  TextColumn get key => text()();
+  TextColumn get json => text()();
+  DateTimeColumn get savedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column> get primaryKey => {key};
+}
+
 // --- DAOS ---
 
 @DriftAccessor(tables: [LocalRankings])
@@ -213,14 +224,14 @@ class LocalTitleDao extends DatabaseAccessor<AppDatabase> with _$LocalTitleDaoMi
 // --- MASTER DATABASE ---
 
 @DriftDatabase(
-  tables: [CachedTitles, LocalRankings, PendingMutations, WatchlistCache],
+  tables: [CachedTitles, LocalRankings, PendingMutations, WatchlistCache, GamificationCache],
   daos: [LocalRankingDao, LocalTitleDao, PendingMutationDao],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -228,6 +239,7 @@ class AppDatabase extends _$AppDatabase {
         onUpgrade: (m, from, to) async {
           try {
             if (from < 2) await _migrateV1ToV2(m);
+            if (from < 3) await m.createTable(gamificationCache);
           } catch (e, stack) {
             await SentryService().captureException(
               e,
@@ -271,6 +283,7 @@ class AppDatabase extends _$AppDatabase {
       await delete(watchlistCache).go();
       await delete(pendingMutations).go();
       await delete(cachedTitles).go();
+      await delete(gamificationCache).go();
     });
   }
 

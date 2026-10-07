@@ -29,11 +29,16 @@ import 'package:telly_app/features/auth/domain/user_profile.dart';
 import 'package:telly_app/features/feed/data/social_repository.dart';
 import 'package:telly_app/features/home/presentation/screens/home_screen.dart';
 import 'package:telly_app/features/more/presentation/screens/more_hub_screen.dart';
+import 'package:telly_app/core/database/database.dart';
+import 'package:telly_app/core/database/database_provider.dart';
+import 'package:telly_app/features/achievements/data/achievements_repository.dart';
+import 'package:telly_app/features/achievements/presentation/screens/achievements_screen.dart';
 import 'package:telly_app/features/profile/presentation/controllers/profile_controller.dart';
 import 'package:telly_app/features/profile/presentation/screens/dual_canon_profile_screen.dart';
 
 import '../fakes/fake_auth_repository.dart';
 import '../fakes/fake_social_repository.dart';
+import '../features/achievements/achievements_fixtures.dart';
 
 class TolerantGoldenComparator extends LocalFileComparator {
   TolerantGoldenComparator(super.testFile, {this.tolerance = 0.50});
@@ -573,6 +578,23 @@ void main() {
         ));
         await tester.pumpAndSettle();
         await expectLater(find.byType(MoreHubScreen), matchesGoldenFile('goldens/more_${name}_iphone15.png'));
+      });
+
+      testWidgets('Golden: SCR-23 AchievementsScreen ($name) on iPhone 15 Pro size (#137)', (tester) async {
+        await tester.binding.setSurfaceSize(const Size(393, 852));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        final db = AppDatabase.inMemory();
+        addTearDown(db.close);
+        await tester.pumpWidget(ProviderScope(
+          overrides: [
+            hapticsEnabledProvider.overrideWith((ref) => false),
+            databaseProvider.overrideWithValue(db),
+            achievementsRepositoryProvider.overrideWithValue(FakeAchievementsRepository(sampleSnapshot())),
+          ],
+          child: MaterialApp(theme: theme, home: const AchievementsScreen()),
+        ));
+        await tester.pumpAndSettle();
+        await expectLater(find.byType(AchievementsScreen), matchesGoldenFile('goldens/achievements_${name}_iphone15.png'));
       });
 
       testWidgets('Golden: SCR-14 Canon podium ($name) on iPhone 15 Pro size (#47)', (tester) async {

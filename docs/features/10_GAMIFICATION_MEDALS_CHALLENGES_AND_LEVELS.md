@@ -290,16 +290,17 @@ All screens use the shared app bars (screen specs §0.2) and the frosted bottom 
 
 ### 9.3 `SCR-23` Achievements (`/more/achievements`): mockup A1
 
-- **App bar:** ← Achievements, with Share (a card of your pinned medals).
-- **Summary card:** "Unlocked N of M", and the "▲ N weeks" streak chip, which opens `SCR-27`.
-- **Pinned to profile:** three medals with names. Tapping one opens its sheet, which has a Pin/Unpin action.
+- **App bar:** ← Achievements, with Share (a card of your pinned medals; added with the share card, #138).
+- **Summary card:** "Unlocked N of M" (M counts the listed medals: special medals such as Founding Viewer only once unlocked), and the "▲ N weeks" streak chip, which opens `SCR-27` once Your level ships (#146).
+- **Pinned to profile:** three medals with names, in slot order. Tapping one opens its sheet, which has a Pin/Unpin action. Pinning takes the first free slot; when all three are taken, the sheet asks which pinned medal to replace.
 - **Sections** in this order:
   - Collections (slice 2): N in progress, with progress bars and "2/3";
   - Milestones;
   - Taste;
-  - Streak.
+  - Streak;
+  - Special (only when you hold a special medal).
 
-  Locked medals show with progress ("94/100").
+  Locked medals show with progress ("94/100"; Taste Twin as "78% / 92%"); unlocked ones a check.
 - **Medal sheet** (mockup A2): the medal, its name and how it's earned, and a progress bar. For collections, it also lists "Still to watch" with one-tap **+ Queue**. Then which friends have it (avatar stack) and the rarity line. Unlocked medals add **Pin to profile** and **Share card**.
 - **Empty (new user):** every medal is locked with its progress, and the pinned row shows a hint: "Rank titles to earn your first medal".
 
@@ -351,7 +352,7 @@ All screens use the shared app bars (screen specs §0.2) and the frosted bottom 
 ### 9.9 States (all screens)
 
 - **Loading:** skeletons (component library §7.1).
-- **Offline:** the last snapshot from a Drift cache (`gamification_cache`, one JSON per screen), read-only, with the offline banner. Join and Pin wait until you're back online.
+- **Offline:** the last snapshot from a Drift cache (`gamification_cache`, one JSON per screen; Drift schema v3), read-only, with the offline banner ("⚡ Offline Mode • Showing your last saved medals"). Join and Pin wait until you're back online (a snackbar says so).
 - **Error:** a retry with the shared empty state.
 
 ---

@@ -12,12 +12,13 @@ import '../../../auth/presentation/controllers/auth_controller.dart';
 
 /// `SCR-22` More hub (epic #44, decision 0003): everything that is not a daily destination.
 ///
-/// Profile card, a full-width Queue tile, feature tiles (Wrapped, Graveyard) and a grouped list
-/// (Settings). Future entries (Achievements #50, Invite #51, Telly Pro #52, Help #118) are added
-/// only once they ship. Spec: `docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md` `SCR-22`.
+/// Profile card, a full-width Queue tile, feature tiles (Achievements, Wrapped, Graveyard) and a
+/// grouped list (Settings). Future entries (Challenges and Your level #50, Invite #51, Telly Pro
+/// #52, Help #118) are added only once they ship. Spec: `docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md` `SCR-22`.
 class MoreHubScreen extends ConsumerWidget {
   final VoidCallback? onProfileTap;
   final VoidCallback? onQueueTap;
+  final VoidCallback? onAchievementsTap;
   final VoidCallback? onWrappedTap;
   final VoidCallback? onGraveyardTap;
   final VoidCallback? onSettingsTap;
@@ -26,6 +27,7 @@ class MoreHubScreen extends ConsumerWidget {
     super.key,
     this.onProfileTap,
     this.onQueueTap,
+    this.onAchievementsTap,
     this.onWrappedTap,
     this.onGraveyardTap,
     this.onSettingsTap,
@@ -56,31 +58,33 @@ class MoreHubScreen extends ConsumerWidget {
               const SizedBox(height: 16),
               _QueueTile(onTap: onQueueTap ?? () => context.push(Routes.queue)),
               const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: _FeatureTile(
-                      key: const Key('more_tile_wrapped'),
-                      icon: Icons.card_giftcard_rounded,
-                      tone: TellyColors.primaryAccentOf(context),
-                      label: 'Wrapped',
-                      subtitle: 'Your year in rankings',
-                      onTap: onWrappedTap ?? () => context.push(Routes.wrapped),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _FeatureTile(
-                      key: const Key('more_tile_graveyard'),
-                      icon: Icons.heart_broken_outlined,
-                      tone: TellyColors.neonCoralOf(context),
-                      label: 'Graveyard',
-                      subtitle: 'Dropped and DNF',
-                      onTap: onGraveyardTap ?? () => context.push(Routes.graveyard),
-                    ),
-                  ),
-                ],
-              ),
+              _TileGrid(tiles: [
+                // Gamification tiles come first, after Queue (features/10 §9.2).
+                _FeatureTile(
+                  key: const Key('more_tile_achievements'),
+                  icon: Icons.emoji_events_outlined,
+                  tone: TellyColors.warmAmberOf(context),
+                  label: 'Achievements',
+                  subtitle: 'Medals and your streak',
+                  onTap: onAchievementsTap ?? () => context.push(Routes.achievements),
+                ),
+                _FeatureTile(
+                  key: const Key('more_tile_wrapped'),
+                  icon: Icons.card_giftcard_rounded,
+                  tone: TellyColors.primaryAccentOf(context),
+                  label: 'Wrapped',
+                  subtitle: 'Your year in rankings',
+                  onTap: onWrappedTap ?? () => context.push(Routes.wrapped),
+                ),
+                _FeatureTile(
+                  key: const Key('more_tile_graveyard'),
+                  icon: Icons.heart_broken_outlined,
+                  tone: TellyColors.neonCoralOf(context),
+                  label: 'Graveyard',
+                  subtitle: 'Dropped and DNF',
+                  onTap: onGraveyardTap ?? () => context.push(Routes.graveyard),
+                ),
+              ]),
               const SizedBox(height: 16),
               _GroupedList(
                 rows: [
@@ -226,6 +230,30 @@ class _QueueTile extends StatelessWidget {
           _chevron(context, size: 18),
         ],
       ),
+    );
+  }
+}
+
+/// Feature tiles two to a row, 12dp apart; an odd last tile keeps half the width.
+class _TileGrid extends StatelessWidget {
+  final List<Widget> tiles;
+  const _TileGrid({required this.tiles});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        for (var i = 0; i < tiles.length; i += 2) ...[
+          if (i > 0) const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(child: tiles[i]),
+              const SizedBox(width: 12),
+              Expanded(child: i + 1 < tiles.length ? tiles[i + 1] : const SizedBox.shrink()),
+            ],
+          ),
+        ],
+      ],
     );
   }
 }

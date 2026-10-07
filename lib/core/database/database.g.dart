@@ -1968,6 +1968,238 @@ class WatchlistCacheCompanion extends UpdateCompanion<WatchlistCacheData> {
   }
 }
 
+class $GamificationCacheTable extends GamificationCache
+    with TableInfo<$GamificationCacheTable, GamificationCacheData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $GamificationCacheTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _keyMeta = const VerificationMeta('key');
+  @override
+  late final GeneratedColumn<String> key = GeneratedColumn<String>(
+      'key', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _jsonMeta = const VerificationMeta('json');
+  @override
+  late final GeneratedColumn<String> json = GeneratedColumn<String>(
+      'json', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _savedAtMeta =
+      const VerificationMeta('savedAt');
+  @override
+  late final GeneratedColumn<DateTime> savedAt = GeneratedColumn<DateTime>(
+      'saved_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  @override
+  List<GeneratedColumn> get $columns => [key, json, savedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'gamification_cache';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<GamificationCacheData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('key')) {
+      context.handle(
+          _keyMeta, key.isAcceptableOrUnknown(data['key']!, _keyMeta));
+    } else if (isInserting) {
+      context.missing(_keyMeta);
+    }
+    if (data.containsKey('json')) {
+      context.handle(
+          _jsonMeta, json.isAcceptableOrUnknown(data['json']!, _jsonMeta));
+    } else if (isInserting) {
+      context.missing(_jsonMeta);
+    }
+    if (data.containsKey('saved_at')) {
+      context.handle(_savedAtMeta,
+          savedAt.isAcceptableOrUnknown(data['saved_at']!, _savedAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {key};
+  @override
+  GamificationCacheData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return GamificationCacheData(
+      key: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}key'])!,
+      json: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}json'])!,
+      savedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}saved_at'])!,
+    );
+  }
+
+  @override
+  $GamificationCacheTable createAlias(String alias) {
+    return $GamificationCacheTable(attachedDatabase, alias);
+  }
+}
+
+class GamificationCacheData extends DataClass
+    implements Insertable<GamificationCacheData> {
+  final String key;
+  final String json;
+  final DateTime savedAt;
+  const GamificationCacheData(
+      {required this.key, required this.json, required this.savedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['key'] = Variable<String>(key);
+    map['json'] = Variable<String>(json);
+    map['saved_at'] = Variable<DateTime>(savedAt);
+    return map;
+  }
+
+  GamificationCacheCompanion toCompanion(bool nullToAbsent) {
+    return GamificationCacheCompanion(
+      key: Value(key),
+      json: Value(json),
+      savedAt: Value(savedAt),
+    );
+  }
+
+  factory GamificationCacheData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return GamificationCacheData(
+      key: serializer.fromJson<String>(json['key']),
+      json: serializer.fromJson<String>(json['json']),
+      savedAt: serializer.fromJson<DateTime>(json['savedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'key': serializer.toJson<String>(key),
+      'json': serializer.toJson<String>(json),
+      'savedAt': serializer.toJson<DateTime>(savedAt),
+    };
+  }
+
+  GamificationCacheData copyWith(
+          {String? key, String? json, DateTime? savedAt}) =>
+      GamificationCacheData(
+        key: key ?? this.key,
+        json: json ?? this.json,
+        savedAt: savedAt ?? this.savedAt,
+      );
+  GamificationCacheData copyWithCompanion(GamificationCacheCompanion data) {
+    return GamificationCacheData(
+      key: data.key.present ? data.key.value : this.key,
+      json: data.json.present ? data.json.value : this.json,
+      savedAt: data.savedAt.present ? data.savedAt.value : this.savedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('GamificationCacheData(')
+          ..write('key: $key, ')
+          ..write('json: $json, ')
+          ..write('savedAt: $savedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(key, json, savedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is GamificationCacheData &&
+          other.key == this.key &&
+          other.json == this.json &&
+          other.savedAt == this.savedAt);
+}
+
+class GamificationCacheCompanion
+    extends UpdateCompanion<GamificationCacheData> {
+  final Value<String> key;
+  final Value<String> json;
+  final Value<DateTime> savedAt;
+  final Value<int> rowid;
+  const GamificationCacheCompanion({
+    this.key = const Value.absent(),
+    this.json = const Value.absent(),
+    this.savedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  GamificationCacheCompanion.insert({
+    required String key,
+    required String json,
+    this.savedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : key = Value(key),
+        json = Value(json);
+  static Insertable<GamificationCacheData> custom({
+    Expression<String>? key,
+    Expression<String>? json,
+    Expression<DateTime>? savedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (key != null) 'key': key,
+      if (json != null) 'json': json,
+      if (savedAt != null) 'saved_at': savedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  GamificationCacheCompanion copyWith(
+      {Value<String>? key,
+      Value<String>? json,
+      Value<DateTime>? savedAt,
+      Value<int>? rowid}) {
+    return GamificationCacheCompanion(
+      key: key ?? this.key,
+      json: json ?? this.json,
+      savedAt: savedAt ?? this.savedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (key.present) {
+      map['key'] = Variable<String>(key.value);
+    }
+    if (json.present) {
+      map['json'] = Variable<String>(json.value);
+    }
+    if (savedAt.present) {
+      map['saved_at'] = Variable<DateTime>(savedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('GamificationCacheCompanion(')
+          ..write('key: $key, ')
+          ..write('json: $json, ')
+          ..write('savedAt: $savedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -1976,6 +2208,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $PendingMutationsTable pendingMutations =
       $PendingMutationsTable(this);
   late final $WatchlistCacheTable watchlistCache = $WatchlistCacheTable(this);
+  late final $GamificationCacheTable gamificationCache =
+      $GamificationCacheTable(this);
   late final LocalRankingDao localRankingDao =
       LocalRankingDao(this as AppDatabase);
   late final LocalTitleDao localTitleDao = LocalTitleDao(this as AppDatabase);
@@ -1985,8 +2219,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [cachedTitles, localRankings, pendingMutations, watchlistCache];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+        cachedTitles,
+        localRankings,
+        pendingMutations,
+        watchlistCache,
+        gamificationCache
+      ];
 }
 
 typedef $$CachedTitlesTableCreateCompanionBuilder = CachedTitlesCompanion
@@ -2944,6 +3183,158 @@ typedef $$WatchlistCacheTableProcessedTableManager = ProcessedTableManager<
     ),
     WatchlistCacheData,
     PrefetchHooks Function()>;
+typedef $$GamificationCacheTableCreateCompanionBuilder
+    = GamificationCacheCompanion Function({
+  required String key,
+  required String json,
+  Value<DateTime> savedAt,
+  Value<int> rowid,
+});
+typedef $$GamificationCacheTableUpdateCompanionBuilder
+    = GamificationCacheCompanion Function({
+  Value<String> key,
+  Value<String> json,
+  Value<DateTime> savedAt,
+  Value<int> rowid,
+});
+
+class $$GamificationCacheTableFilterComposer
+    extends Composer<_$AppDatabase, $GamificationCacheTable> {
+  $$GamificationCacheTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get key => $composableBuilder(
+      column: $table.key, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get json => $composableBuilder(
+      column: $table.json, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get savedAt => $composableBuilder(
+      column: $table.savedAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$GamificationCacheTableOrderingComposer
+    extends Composer<_$AppDatabase, $GamificationCacheTable> {
+  $$GamificationCacheTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get key => $composableBuilder(
+      column: $table.key, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get json => $composableBuilder(
+      column: $table.json, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get savedAt => $composableBuilder(
+      column: $table.savedAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$GamificationCacheTableAnnotationComposer
+    extends Composer<_$AppDatabase, $GamificationCacheTable> {
+  $$GamificationCacheTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get key =>
+      $composableBuilder(column: $table.key, builder: (column) => column);
+
+  GeneratedColumn<String> get json =>
+      $composableBuilder(column: $table.json, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get savedAt =>
+      $composableBuilder(column: $table.savedAt, builder: (column) => column);
+}
+
+class $$GamificationCacheTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $GamificationCacheTable,
+    GamificationCacheData,
+    $$GamificationCacheTableFilterComposer,
+    $$GamificationCacheTableOrderingComposer,
+    $$GamificationCacheTableAnnotationComposer,
+    $$GamificationCacheTableCreateCompanionBuilder,
+    $$GamificationCacheTableUpdateCompanionBuilder,
+    (
+      GamificationCacheData,
+      BaseReferences<_$AppDatabase, $GamificationCacheTable,
+          GamificationCacheData>
+    ),
+    GamificationCacheData,
+    PrefetchHooks Function()> {
+  $$GamificationCacheTableTableManager(
+      _$AppDatabase db, $GamificationCacheTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$GamificationCacheTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$GamificationCacheTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$GamificationCacheTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> key = const Value.absent(),
+            Value<String> json = const Value.absent(),
+            Value<DateTime> savedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              GamificationCacheCompanion(
+            key: key,
+            json: json,
+            savedAt: savedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String key,
+            required String json,
+            Value<DateTime> savedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              GamificationCacheCompanion.insert(
+            key: key,
+            json: json,
+            savedAt: savedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable<$GamificationCacheTable, GamificationCacheData>(
+                        table),
+                    BaseReferences<_$AppDatabase, $GamificationCacheTable,
+                        GamificationCacheData>(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$GamificationCacheTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $GamificationCacheTable,
+    GamificationCacheData,
+    $$GamificationCacheTableFilterComposer,
+    $$GamificationCacheTableOrderingComposer,
+    $$GamificationCacheTableAnnotationComposer,
+    $$GamificationCacheTableCreateCompanionBuilder,
+    $$GamificationCacheTableUpdateCompanionBuilder,
+    (
+      GamificationCacheData,
+      BaseReferences<_$AppDatabase, $GamificationCacheTable,
+          GamificationCacheData>
+    ),
+    GamificationCacheData,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -2956,4 +3347,6 @@ class $AppDatabaseManager {
       $$PendingMutationsTableTableManager(_db, _db.pendingMutations);
   $$WatchlistCacheTableTableManager get watchlistCache =>
       $$WatchlistCacheTableTableManager(_db, _db.watchlistCache);
+  $$GamificationCacheTableTableManager get gamificationCache =>
+      $$GamificationCacheTableTableManager(_db, _db.gamificationCache);
 }

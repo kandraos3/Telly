@@ -21,6 +21,7 @@ import '../../features/profile/presentation/screens/edit_profile_studio_screen.d
 import '../../features/profile/presentation/screens/friend_profile_screen.dart';
 import '../../features/profile/presentation/screens/settings_hub_screen.dart';
 import '../../features/profile/presentation/screens/tv_graveyard_screen.dart';
+import '../../features/achievements/presentation/screens/achievements_screen.dart';
 import '../../features/queue/presentation/screens/custom_list_detail_screen.dart';
 import '../../features/queue/presentation/screens/queue_lists_screen.dart';
 import '../../features/queue/presentation/screens/smart_queue_screen.dart';
@@ -155,6 +156,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   path: 'edit',
                   parentNavigatorKey: rootNavigatorKey,
                   builder: (_, __) => const EditProfileStudioScreen(),
+                ),
+                GoRoute(
+                  path: 'achievements',
+                  parentNavigatorKey: rootNavigatorKey,
+                  builder: (_, __) => const AchievementsScreen(),
                 ),
                 GoRoute(
                   path: 'graveyard',
