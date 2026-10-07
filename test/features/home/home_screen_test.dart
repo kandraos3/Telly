@@ -8,6 +8,8 @@ import 'package:telly_app/core/router/routes.dart';
 import 'package:telly_app/core/services/haptics_service.dart';
 import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/theme/telly_theme.dart';
+import 'package:telly_app/features/auth/data/auth_repository.dart';
+import 'package:telly_app/features/auth/domain/user_profile.dart';
 import 'package:telly_app/features/feed/data/social_repository.dart';
 import 'package:telly_app/features/feed/domain/social_models.dart';
 import 'package:telly_app/features/home/presentation/screens/home_screen.dart';
@@ -17,6 +19,7 @@ import 'package:telly_app/features/ranking/domain/canon_type.dart';
 import 'package:telly_app/features/ranking/domain/franchise_rollup_service.dart';
 import 'package:telly_app/features/ranking/presentation/widgets/canon_tier_style.dart';
 
+import '../../fakes/fake_auth_repository.dart';
 import '../../fakes/fake_social_repository.dart';
 
 /// Fixed canon state for screen tests.
@@ -78,6 +81,16 @@ void main() {
     ]);
     container = ProviderContainer(overrides: [
       hapticsEnabledProvider.overrideWith((ref) => false),
+      authRepositoryProvider.overrideWithValue(FakeAuthRepository(
+        signedInUserId: 'u-me',
+        profile: UserProfile(
+          id: 'u-me',
+          username: 'me',
+          displayName: 'Me',
+          onboardingCompleted: true,
+          createdAt: DateTime(2026),
+        ),
+      )),
       profileCanonProvider.overrideWith(
         () => _SeededCanon(canon ?? ProfileCanonState(movies: _movies, series: _series)),
       ),
@@ -186,6 +199,31 @@ void main() {
       await tester.tap(find.byKey(const Key('home_friends_see_all')));
       await tester.pumpAndSettle();
       expect(find.text('route:${Routes.social}'), findsOneWidget);
+    });
+
+    testWidgets('leaves out my own activity (#121)', (tester) async {
+      await pumpHome(
+        tester,
+        social: FakeSocialRepository(feed: [
+          fakeActivity('mine', userId: 'u-me', username: 'me', title: 'Dr. STONE', minutesAgo: 0),
+          fakeActivity('a1', username: 'maya', title: 'The Bear', minutesAgo: 1),
+          fakeActivity('a2', username: 'jordan', title: 'Severance', minutesAgo: 2),
+          fakeActivity('a3', username: 'sam', title: 'Shogun', minutesAgo: 3),
+        ]),
+      );
+      expect(find.byKey(const Key('home_friend_row_mine')), findsNothing);
+      for (final id in ['a1', 'a2', 'a3']) {
+        expect(find.byKey(Key('home_friend_row_$id')), findsOneWidget, reason: id);
+      }
+    });
+
+    testWidgets('only my own activity shows the "Find friends in Social" empty state (#121)', (tester) async {
+      await pumpHome(
+        tester,
+        social: FakeSocialRepository(feed: [fakeActivity('mine', userId: 'u-me', username: 'me')]),
+      );
+      expect(find.byKey(const Key('home_friend_row_mine')), findsNothing);
+      expect(find.text('Find friends in Social'), findsOneWidget);
     });
 
     testWidgets('no friends activity offers "Find friends in Social"', (tester) async {

@@ -11,6 +11,7 @@ import '../../../../core/widgets/telly_empty_state.dart';
 import '../../../../core/widgets/telly_log_fab.dart';
 import '../../../../core/widgets/telly_screen_header.dart';
 import '../../../../core/widgets/telly_section_header.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../feed/data/social_repository.dart';
 import '../../../feed/domain/social_models.dart';
 import '../../../feed/presentation/controllers/feed_controllers.dart';
@@ -156,14 +157,17 @@ class _PosterSkeletonRow extends StatelessWidget {
   }
 }
 
-/// The newest [HomeScreen.previewCount] items of the Following feed, sharing the Social tab's controller.
+/// The newest [HomeScreen.previewCount] items of the Following feed by other people, sharing the Social tab's
+/// controller.
 class _FriendsSection extends ConsumerWidget {
   const _FriendsSection();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final feed = ref.watch(feedControllerProvider(FeedFilter.following));
-    final items = feed.valueOrNull?.items;
+    // The Following feed includes my own posts; this section shows only other people (#121).
+    final me = ref.watch(authControllerProvider.select((s) => s.user?.id));
+    final items = feed.valueOrNull?.items.where((a) => a.userId != me).toList();
 
     // Offline or failing with nothing loaded yet: the section hides rather than showing an error.
     if (items == null && feed.hasError) return const SizedBox.shrink(key: Key('home_friends_hidden'));

@@ -823,8 +823,8 @@ The landing tab (`/home`). Epic #45 designs its real content (currently-watching
 ```
 
 - **Your canon:** a section header (`TellySectionHeader`), the shared canon switcher, and the top 3 of the selected canon as the Canon grid's poster tiles (component library §3.4: rank badge and score chip). The switcher shares the Canon tab's selection, and the two canons are never mixed. *See all* opens the Canon tab. Tapping a poster opens the title.
-- **From your friends:** the 3 newest items of the Following feed (the same feed state as the Social tab) as compact rows: a 36dp avatar, then "<name> ranked <title> #N" ("dropped", "queued" or "commented on" for other activity types), then a score chip in tabular figures on an 18% tint of its tier accent with a tier-accent border (style guide §2.2; no chip for drops). Tapping a row opens the title. *See all* opens the Social tab.
-- **Empty states:** with no ranked titles in the selected canon, that section becomes a card reading "Log your first title to start your canon" with a Log button. With no friends' activity, the friends section becomes "Find friends in Social", linking to the Social tab.
+- **From your friends:** the 3 newest items of the Following feed by other people (the same feed state as the Social tab; your own posts are left out) as compact rows: a 36dp avatar, then "<name> ranked <title> #N" ("dropped", "queued" or "commented on" for other activity types), then a score chip in tabular figures on an 18% tint of its tier accent with a tier-accent border (style guide §2.2; no chip for drops). Tapping a row opens the title. *See all* opens the Social tab.
+- **Empty states:** with no ranked titles in the selected canon, that section becomes a card reading "Log your first title to start your canon" with a Log button. With no activity from other people, the friends section becomes "Find friends in Social", linking to the Social tab.
 - **Loading:** skeleton tiles and rows. **Offline:** the canon comes from Drift. The friends section keeps what it loaded earlier in the session, or hides if nothing has loaded.
 
 ### `SCR-22`: More Hub
