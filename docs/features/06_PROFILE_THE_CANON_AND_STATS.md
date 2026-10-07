@@ -1,6 +1,6 @@
 # Feature Spec 06: Profile, "The Canon", Stats & "Telly Wrapped"
 
-> Tracking: epic #47 (Canon layout, §2–§3) · Status: approved · Decision: [0004](../decisions/0004-canon-podium-and-queue-up-next.md)
+> Tracking: epic #47 (Canon layout, §2–§3) · Status: shipped · Decision: [0004](../decisions/0004-canon-podium-and-queue-up-next.md)
 
 ## 1. Overview & Identity Signaling
 On Beli, a user's profile is their culinary identity card. On **Telly**, a user's profile is their **Cultural Identity Across Screen Entertainment**. 

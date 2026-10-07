@@ -543,7 +543,7 @@ The **Social** tab (`/social`). It was the landing tab until epic #44; Home (`SC
 
 ### `SCR-13`: Smart Queue (Universal Watchlist)
 
-> Tracking: epic #47 · Status: approved · Decision: [0004](../decisions/0004-canon-podium-and-queue-up-next.md) · Mockup: [0047](mockups/0047-canon-queue-layouts.html)
+> Tracking: epic #47 · Status: shipped · Decision: [0004](../decisions/0004-canon-podium-and-queue-up-next.md) · Mockup: [0047](mockups/0047-canon-queue-layouts.html)
 
 Opened from the More hub (`/more/queue`) as a pushed screen with the subpage app bar (§0.2). It shows your watchlist and leads with one title to watch next. Custom lists live on their own **Lists** screen (`/more/queue/lists`), opened from the app bar.
 
@@ -608,7 +608,7 @@ Opened from the More hub (`/more/queue`) as a pushed screen with the subpage app
 
 ### `SCR-14`: Canon (The Personal Dual-Canon)
 
-> Tracking: epic #47 · Status: approved · Decision: [0004](../decisions/0004-canon-podium-and-queue-up-next.md) · Mockup: [0047](mockups/0047-canon-queue-layouts.html)
+> Tracking: epic #47 · Status: shipped · Decision: [0004](../decisions/0004-canon-podium-and-queue-up-next.md) · Mockup: [0047](mockups/0047-canon-queue-layouts.html)
 
 The Canon tab opens on your rankings. Your profile card lives in the More hub (`SCR-22`), so it isn't repeated here.
 

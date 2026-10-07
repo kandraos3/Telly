@@ -13,7 +13,7 @@ Discovery in modern television is broken because users are scattered across frag
 
 ## 2. The Smart Queue (Watchlist) Architecture
 
-> Tracking: epic #47 · Status: approved · Decision: [0004](../decisions/0004-canon-podium-and-queue-up-next.md)
+> Tracking: epic #47 · Status: shipped · Decision: [0004](../decisions/0004-canon-podium-and-queue-up-next.md)
 
 The Queue leads with one title to watch next, and the rest of the watchlist follows as compact rows. Screen spec `SCR-13` has the exact layout and states, and the approved mockup is [0047](../design_system/mockups/0047-canon-queue-layouts.html).
 

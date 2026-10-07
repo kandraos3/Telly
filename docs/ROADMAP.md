@@ -11,7 +11,6 @@ _Updated 2026-10-07. Change this page when the direction changes, not for status
 ## Next
 - **Home tab + currently watching** ([#45](https://github.com/kandraos3/Telly/issues/45))
 - **Explore rows + recommendation engine**, curated canons removed ([#46](https://github.com/kandraos3/Telly/issues/46))
-- **Canon & Queue layout pass** ([#47](https://github.com/kandraos3/Telly/issues/47))
 - **Light-mode lime contrast** ([#54](https://github.com/kandraos3/Telly/issues/54))
 - **Push notifications** ([#42](https://github.com/kandraos3/Telly/issues/42))
 - **Apple & Google sign-in** ([#3](https://github.com/kandraos3/Telly/issues/3))
@@ -22,6 +21,8 @@ _Updated 2026-10-07. Change this page when the direction changes, not for status
 - **Gamification**: achievements, challenges, points, streaks ([#50](https://github.com/kandraos3/Telly/issues/50)), then **referrals** ([#51](https://github.com/kandraos3/Telly/issues/51))
 - **Telly Pro** (idea, [#52](https://github.com/kandraos3/Telly/issues/52))
 - **Watch party** (idea, [#53](https://github.com/kandraos3/Telly/issues/53))
+- **Smart "Up next" pick** for the Queue, replacing the random pick (idea, [#124](https://github.com/kandraos3/Telly/issues/124))
 
 ## Recently shipped
+- **Canon & Queue layout pass**: the Canon tab opens on a #1–#3 podium, with stats and views in header sheets; the Queue leads with a random "Up next" card under one control row, with lists on their own screen ([#47](https://github.com/kandraos3/Telly/issues/47), [decision 0004](decisions/0004-canon-podium-and-queue-up-next.md))
 - **Navigation & app structure**: five tabs (Home · Explore · Canon · Social · More), floating Log button, More hub with the Queue, interim Home ([#44](https://github.com/kandraos3/Telly/issues/44), [decision 0003](decisions/0003-five-tab-shell-with-more-hub.md))
