@@ -42,6 +42,7 @@ graph TD
 | `GET /movie/{id}?append_to_response=credits,keywords` | Full movie metadata, director, runtime, cast, release dates | 30 Days (Redis / Postgres) |
 | `GET /tv/{id}?append_to_response=credits,keywords` | Full show metadata, showrunner, primary cast, network | 30 Days (Redis / Postgres) |
 | `GET /tv/{id}/season/{num}` | Season episode list, episode titles, air dates | 14 Days (Postgres) |
+| `GET /collection/{id}` | A film collection's parts and release dates (`belongs_to_collection` on the movie; features/10 §7, #140) | 7 Days (`title_collections`) |
 | `GET /movie/changes` & `GET /tv/changes` | Daily delta feed of modified movie and TV metadata | Processed daily by cron |
 
 ### 2.3 Image CDN Optimization

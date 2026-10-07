@@ -181,13 +181,14 @@ Every reward is cosmetic. Nothing that's needed to use Telly is ever locked (dec
 
 - **Data:**
   - `titles.collection_id INT NULL` comes from TMDB `belongs_to_collection`.
-  - `title_collections (collection_id PK, name, poster_path, part_ids INT[], released_part_ids INT[], fetched_at)` comes from TMDB `/collection/{id}`, refreshed weekly by `tmdb-details`.
+  - `title_collections (collection_id PK, name, poster_path, part_ids INT[], released_part_ids INT[], fetched_at)` comes from TMDB `/collection/{id}`, refreshed weekly by `tmdb-details` (when a film in it is opened, and by the half-hourly `tmdb-maintenance` job, which also backfills older titles). Parts are stored as `titles` rows so they can be queued.
+  - `titles.production_companies` and `titles.tv_type` come from the same details call (challenge filters, §8.2).
   - Films only: TMDB collections are film collections, so the TV canon has none.
 - **Progress:** the number of `released_part_ids` in the user's qualifying rankings, out of the number released.
 - **When it appears:**
   - A collection shows on `SCR-23` once the user has ranked one of its films.
   - It's sorted closest-to-done first, with the top 3 shown and the rest under "See all".
-  - A finished collection becomes a gold medal (`collection_<id>`) worth +100 XP.
+  - A finished collection becomes a gold medal (`collection_<id>`) worth +100 XP. The medal row is created by a trigger when the collection is cached: name without "Collection", glyph from initials ("LR", "DK"), target = released films. Collections with fewer than two released films have no medal. A sequel's release raises the target, but a medal already earned stays.
 
 ---
 

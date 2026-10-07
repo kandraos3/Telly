@@ -21,6 +21,22 @@ export interface TitleRow {
   director?: string | null;
   is_anime?: boolean;
   popularity?: number | null;
+  // #140 (features/10 §7–§8): collection and challenge filters.
+  collection_id?: number | null;
+  production_companies?: string[];
+  tv_type?: string | null;
+  /** 2 once stored with the #140 fields; the maintenance run backfills lower versions. */
+  metadata_version?: number;
+}
+
+/** TMDB collection cache (`title_collections`, features/10 §7). */
+export interface CollectionRow {
+  collection_id: number;
+  name: string;
+  poster_path: string | null;
+  part_ids: number[];
+  released_part_ids: number[];
+  fetched_at?: string;
 }
 
 export interface SeasonRow {
@@ -52,6 +68,13 @@ export interface CatalogStore {
   replaceAvailability(titleId: number, mediaType: MediaType, country: string, rows: AvailabilityRow[]): Promise<void>;
   staleWatchlistTitles(olderThanHours: number, limit: number): Promise<{ title_id: number; media_type: MediaType }[]>;
   refreshLeavingSoonFlags(): Promise<number>;
+  /** When `title_collections` last refreshed this collection; null if never. */
+  collectionFetchedAt(collectionId: number): Promise<string | null>;
+  upsertCollection(row: CollectionRow): Promise<void>;
+  /** Titles stored before the current metadata version, most popular first. */
+  titlesNeedingDetails(limit: number): Promise<{ id: number; media_type: MediaType }[]>;
+  /** Collections not refreshed for [maxAgeDays]. */
+  staleCollections(maxAgeDays: number, limit: number): Promise<number[]>;
 }
 
 export function serviceClient(): SupabaseClient {
@@ -113,6 +136,31 @@ export function supabaseCatalogStore(client: SupabaseClient = serviceClient()): 
       const { data, error } = await client.rpc("refresh_leaving_soon_flags");
       check(error);
       return Number(data ?? 0);
+    },
+    async collectionFetchedAt(collectionId) {
+      const { data, error } = await client
+        .from("title_collections")
+        .select("fetched_at")
+        .eq("collection_id", collectionId)
+        .maybeSingle();
+      check(error);
+      return (data?.fetched_at as string | undefined) ?? null;
+    },
+    async upsertCollection(row) {
+      const { error } = await client
+        .from("title_collections")
+        .upsert({ ...row, fetched_at: row.fetched_at ?? new Date().toISOString() }, { onConflict: "collection_id" });
+      check(error);
+    },
+    async titlesNeedingDetails(limit) {
+      const { data, error } = await client.rpc("titles_needing_details", { p_limit: limit });
+      check(error);
+      return (data ?? []) as { id: number; media_type: MediaType }[];
+    },
+    async staleCollections(maxAgeDays, limit) {
+      const { data, error } = await client.rpc("stale_title_collections", { p_max_age_days: maxAgeDays, p_limit: limit });
+      check(error);
+      return ((data ?? []) as { collection_id: number }[]).map((r) => r.collection_id);
     },
   };
 }

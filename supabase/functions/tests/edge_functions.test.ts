@@ -133,6 +133,100 @@ Deno.test("tmdb-details: bad params → 400; unknown title → 404", async () =>
   assertEquals((await handleDetails(req("/?id=7&media_type=tv"), { fetch: fakeFetch({}), tmdbToken: "t", store: null })).status, 404);
 });
 
+// ---------------------------------------------------------------------------- tmdb-details: collections (#140)
+const darkKnight = () =>
+  jsonResponse({
+    id: 155,
+    title: "The Dark Knight",
+    release_date: "2008-07-16",
+    genres: [{ name: "Action" }, { name: "Crime" }],
+    production_companies: [{ name: "Warner Bros. Pictures" }, { name: "Syncopy" }],
+    belongs_to_collection: { id: 263, name: "The Dark Knight Collection" },
+    credits: { cast: [], crew: [{ job: "Director", name: "Christopher Nolan" }] },
+  });
+const darkKnightCollection = () =>
+  jsonResponse({
+    id: 263,
+    name: "The Dark Knight Collection",
+    poster_path: "/dk.jpg",
+    parts: [
+      { id: 49026, title: "The Dark Knight Rises", release_date: "2012-07-17", poster_path: "/dkr.jpg" },
+      { id: 272, title: "Batman Begins", release_date: "2005-06-10" },
+      { id: 155, title: "The Dark Knight", release_date: "2008-07-16" },
+      { id: 999001, title: "Unannounced Sequel", release_date: "" },
+    ],
+  });
+
+Deno.test("tmdb-details: films store their collection, companies and metadata version (#140)", async () => {
+  const store = new MemoryStore();
+  const calls: RecordedCall[] = [];
+  const fetch = fakeFetch({ "/collection/263": darkKnightCollection, "/movie/155": darkKnight }, calls);
+  const res = await handleDetails(req("/?id=155&media_type=movie"), {
+    fetch,
+    tmdbToken: "t",
+    store,
+    now: () => new Date("2026-10-07T12:00:00Z"),
+  });
+  assertEquals(res.status, 200);
+  const title = store.titles.find((t) => t.id === 155 && t.metadata_version === 2)!;
+  assertEquals(title.collection_id, 263);
+  assertEquals(title.production_companies, ["Warner Bros. Pictures", "Syncopy"]);
+  assertEquals(title.tv_type, null);
+
+  // A never-fetched collection is cached, its parts stored, and only released parts count.
+  assertEquals(store.collections.length, 1);
+  const collection = store.collections[0];
+  assertEquals(collection.part_ids, [272, 155, 49026, 999001]);
+  assertEquals(collection.released_part_ids, [272, 155, 49026]);
+  assert(store.titles.some((t) => t.id === 49026 && t.collection_id === 263 && t.title === "The Dark Knight Rises"));
+});
+
+Deno.test("tmdb-details: a fresh collection is not refetched; a week-old one is", async () => {
+  const store = new MemoryStore();
+  const calls: RecordedCall[] = [];
+  const fetch = fakeFetch({ "/collection/263": darkKnightCollection, "/movie/155": darkKnight }, calls);
+  const deps = { fetch, tmdbToken: "t", store, now: () => new Date("2026-10-07T12:00:00Z") };
+
+  store.collectionFetched[263] = "2026-10-05T12:00:00Z";
+  await handleDetails(req("/?id=155&media_type=movie"), deps);
+  assertEquals(calls.filter((c) => c.url.includes("/collection/")).length, 0);
+
+  store.collectionFetched[263] = "2026-09-29T12:00:00Z";
+  await handleDetails(req("/?id=155&media_type=movie"), deps);
+  assertEquals(calls.filter((c) => c.url.includes("/collection/")).length, 1);
+});
+
+Deno.test("tmdb-details: series store their TMDB type and no collection", async () => {
+  const store = new MemoryStore();
+  const fetch = fakeFetch({
+    "/tv/87108": () => jsonResponse({ id: 87108, name: "Chernobyl", type: "Miniseries", networks: [{ name: "HBO" }] }),
+  });
+  await handleDetails(req("/?id=87108&media_type=tv"), { fetch, tmdbToken: "t", store });
+  assertEquals(store.titles[0].tv_type, "Miniseries");
+  assertEquals(store.titles[0].collection_id, null);
+});
+
+Deno.test("tmdb-details maintenance: service role only; backfills titles and refreshes stale collections", async () => {
+  const store = new MemoryStore();
+  store.needingDetails = [{ id: 155, media_type: "movie" }];
+  store.staleCollectionIds = [263];
+  store.collectionFetched[263] = "2026-10-07T00:00:00Z"; // fresh, so the details call doesn't refetch it
+  const fetch = fakeFetch({ "/collection/263": darkKnightCollection, "/movie/155": darkKnight });
+  const deps = { fetch, tmdbToken: "t", store, serviceRoleKey: "srk", now: () => new Date("2026-10-07T12:00:00Z") };
+
+  const denied = await handleDetails(req("/", { method: "POST", headers: { Authorization: "Bearer nope" } }), deps);
+  assertEquals(denied.status, 401);
+
+  const res = await handleDetails(
+    req("/", { method: "POST", headers: { Authorization: "Bearer srk" }, body: JSON.stringify({ limit: 10 }) }),
+    deps,
+  );
+  assertEquals(res.status, 200);
+  assertEquals(await res.json(), { titles: 1, collections: 1, failures: [] });
+  assert(store.titles.some((t) => t.id === 155 && t.metadata_version === 2));
+  assertEquals(store.collections.length, 1);
+});
+
 // ---------------------------------------------------------------------------- streaming-availability
 Deno.test("availability: Severance via TMDB providers maps to apple_tv_plus and is cached", async () => {
   const store = new MemoryStore();

@@ -1,5 +1,5 @@
 // Test doubles for edge-function handlers.
-import type { AvailabilityRow, CatalogStore, SeasonRow, TitleRow } from "../_shared/db.ts";
+import type { AvailabilityRow, CatalogStore, CollectionRow, SeasonRow, TitleRow } from "../_shared/db.ts";
 import type { MediaType } from "../_shared/http.ts";
 
 export interface RecordedCall {
@@ -28,6 +28,10 @@ export class MemoryStore implements CatalogStore {
   availability: AvailabilityRow[] = [];
   stale: { title_id: number; media_type: MediaType }[] = [];
   leavingSoonRuns = 0;
+  collections: CollectionRow[] = [];
+  collectionFetched: Record<number, string> = {};
+  needingDetails: { id: number; media_type: MediaType }[] = [];
+  staleCollectionIds: number[] = [];
 
   upsertTitles(rows: TitleRow[]) {
     this.titles.push(...rows);
@@ -54,5 +58,19 @@ export class MemoryStore implements CatalogStore {
   refreshLeavingSoonFlags() {
     this.leavingSoonRuns++;
     return Promise.resolve(this.availability.filter((r) => r.is_leaving_soon).length);
+  }
+  collectionFetchedAt(collectionId: number) {
+    return Promise.resolve(this.collectionFetched[collectionId] ?? null);
+  }
+  upsertCollection(row: CollectionRow) {
+    this.collections.push(row);
+    this.collectionFetched[row.collection_id] = new Date().toISOString();
+    return Promise.resolve();
+  }
+  titlesNeedingDetails(limit: number) {
+    return Promise.resolve(this.needingDetails.slice(0, limit));
+  }
+  staleCollections(_maxAgeDays: number, limit: number) {
+    return Promise.resolve(this.staleCollectionIds.slice(0, limit));
   }
 }

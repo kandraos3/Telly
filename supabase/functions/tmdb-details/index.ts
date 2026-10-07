@@ -7,5 +7,6 @@ Deno.serve((req) =>
     fetch,
     tmdbToken: Deno.env.get("TMDB_ACCESS_TOKEN") ?? Deno.env.get("TMDB_API_KEY"),
     store: supabaseCatalogStore(),
+    serviceRoleKey: Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"),
   })
 );
