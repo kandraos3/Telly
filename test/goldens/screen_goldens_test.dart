@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,6 +15,8 @@ import 'package:telly_app/features/profile/presentation/widgets/poster_grid_view
 import 'package:telly_app/features/profile/presentation/widgets/ranked_canon_list.dart';
 import 'package:telly_app/features/profile/presentation/widgets/tier_view_list.dart';
 import 'package:telly_app/features/queue/data/watchlist_repository.dart';
+import 'package:telly_app/features/queue/domain/streaming_models.dart';
+import 'package:telly_app/features/queue/presentation/screens/smart_queue_screen.dart';
 import 'package:telly_app/features/ranking/domain/franchise_rollup_service.dart';
 import 'package:telly_app/features/ranking/presentation/screens/slot_reveal_modal.dart';
 import 'package:telly_app/features/ranking/presentation/widgets/duel_arena_card.dart';
@@ -581,6 +584,38 @@ void main() {
         ));
         await tester.pumpAndSettle();
         await expectLater(find.byType(DualCanonProfileScreen), matchesGoldenFile('goldens/canon_podium_${name}_iphone15.png'));
+      });
+
+      testWidgets('Golden: SCR-13 Queue Up next ($name) on iPhone 15 Pro size (#47)', (tester) async {
+        await tester.binding.setSurfaceSize(const Size(393, 852));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        WatchlistItem tv(int id, String title, double score, {bool leaving = false}) => WatchlistItem(
+              showId: id,
+              title: title,
+              mediaType: 'tv',
+              seasonCount: 3,
+              friendsAvgScore: score,
+              isLeavingSoon: leaving,
+              savedFromHandle: '@maya',
+              addedAt: DateTime(2026),
+            );
+        await tester.pumpWidget(ProviderScope(
+          // A seeded pick keeps the golden stable.
+          overrides: [queueRandomProvider.overrideWithValue(Random(4))],
+          child: MaterialApp(
+            theme: theme,
+            home: SmartQueueScreen(testItems: [
+              tv(1, 'The Bear', 8.60),
+              tv(2, 'Slow Horses', 8.94),
+              tv(3, 'Station Eleven', 8.81, leaving: true),
+              tv(4, 'Severance', 8.55),
+            ]),
+          ),
+        ));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('queue_series_tab')));
+        await tester.pumpAndSettle();
+        await expectLater(find.byType(SmartQueueScreen), matchesGoldenFile('goldens/queue_up_next_${name}_iphone15.png'));
       });
     }
 

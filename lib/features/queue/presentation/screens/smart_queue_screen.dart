@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -5,17 +7,20 @@ import 'package:telly_app/core/router/routes.dart';
 import 'package:telly_app/core/services/streaming_deep_link_factory.dart';
 import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/theme/telly_typography.dart';
-import 'package:telly_app/core/widgets/poster_image.dart';
-import 'package:telly_app/core/widgets/telly_neon_badge.dart';
 import 'package:telly_app/core/widgets/telly_canon_switcher.dart';
 import 'package:telly_app/core/widgets/telly_empty_state.dart';
 import 'package:telly_app/core/widgets/telly_filter_button.dart';
 import 'package:telly_app/core/widgets/telly_frosted_sheet.dart';
 import 'package:telly_app/core/widgets/telly_screen_header.dart';
+import 'package:telly_app/core/widgets/telly_section_header.dart';
 import 'package:telly_app/features/queue/data/streaming_availability_repository.dart';
 import 'package:telly_app/features/queue/data/streaming_availability_service.dart';
 import 'package:telly_app/features/queue/data/watchlist_repository.dart';
+import 'package:telly_app/features/logging/domain/title_search_result.dart';
 import 'package:telly_app/features/queue/domain/streaming_models.dart';
+import 'package:telly_app/features/queue/domain/up_next_picker.dart';
+import 'package:telly_app/features/queue/presentation/widgets/queue_row.dart';
+import 'package:telly_app/features/queue/presentation/widgets/up_next_card.dart';
 
 /// Provider for user's universal watchlist items (FE-609).
 /// Backed by Drift [WatchlistCache] + Supabase `user_watchlist` and [StreamingAvailabilityRepository].
@@ -119,6 +124,31 @@ class QueueSortByNotifier extends Notifier<String> {
 final queueSortByProvider =
     NotifierProvider<QueueSortByNotifier, String>(QueueSortByNotifier.new);
 
+/// Random source for the Up next pick; tests override it with a seeded [Random].
+final queueRandomProvider = Provider<Random>((ref) => Random());
+
+/// The Queue's Up next pick per canon (SCR-13, #134). Auto-disposed with the screen, so
+/// each visit re-rolls. The state is a version number that [shuffle] bumps; the picks
+/// themselves live in [UpNextPicker], which memoises them while they stay in the pool.
+class QueueUpNextNotifier extends AutoDisposeNotifier<int> {
+  late UpNextPicker _picker;
+
+  @override
+  int build() {
+    _picker = UpNextPicker(ref.watch(queueRandomProvider));
+    return 0;
+  }
+
+  int? pickFor(String mediaType, List<int> pool) => _picker.pickFor(mediaType, pool);
+
+  void shuffle(String mediaType, List<int> pool) {
+    _picker.shuffle(mediaType, pool);
+    state++;
+  }
+}
+
+final queueUpNextProvider = NotifierProvider.autoDispose<QueueUpNextNotifier, int>(QueueUpNextNotifier.new);
+
 /// SCR-13: Smart Queue, the watchlist split into Movies and TV Shows (FE-408, FE-609).
 /// One control row (the compact switcher and the Filter chip); Sort and On My Services
 /// live in the Filter sheet, and custom lists on the Lists screen (epic #47, decision 0004).
@@ -135,6 +165,12 @@ class SmartQueueScreen extends ConsumerStatefulWidget {
 class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with SingleTickerProviderStateMixin {
   late final TabController _tabController;
 
+  /// Titles swiped away this visit, hidden at once: a dismissed [Dismissible] must leave the
+  /// tree before the watchlist's async removal lands. Ephemeral UI state; Undo un-hides.
+  final Set<String> _swiped = {};
+
+  static String _swipeKey(WatchlistItem item) => '${item.mediaType}_${item.showId}';
+
   @override
   void initState() {
     super.initState();
@@ -150,7 +186,10 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
   @override
   Widget build(BuildContext context) {
     final watchlistAsync = ref.watch(userWatchlistProvider);
-    final List<WatchlistItem> allItems = widget.testItems ?? watchlistAsync.valueOrNull ?? const [];
+    final List<WatchlistItem> allItems = [
+      for (final item in widget.testItems ?? watchlistAsync.valueOrNull ?? const <WatchlistItem>[])
+        if (!_swiped.contains(_swipeKey(item))) item,
+    ];
     final userSubscriptions = ref.watch(userSubscriptionsProvider);
     final onlyOnMySubscriptions = ref.watch(queueFilterSubscribedProvider);
     final sortBy = ref.watch(queueSortByProvider);
@@ -206,14 +245,14 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
           // Tab Content
           Expanded(
             child: watchlistAsync.isLoading && widget.testItems == null && allItems.isEmpty
-                ? const Center(
-                    child: CircularProgressIndicator(color: TellyColors.phosphorLime),
-                  )
+                ? const _QueueSkeleton()
                 : TabBarView(
                     controller: _tabController,
                     children: [
-                      _buildQueueList(movieItems, userSubscriptions, onlyOnMySubscriptions),
-                      _buildQueueList(seriesItems, userSubscriptions, onlyOnMySubscriptions),
+                      _buildQueueList('movie', movieItems, allItems.where((i) => i.mediaType == 'movie').length,
+                          userSubscriptions, onlyOnMySubscriptions),
+                      _buildQueueList('tv', seriesItems, allItems.where((i) => i.mediaType == 'tv').length,
+                          userSubscriptions, onlyOnMySubscriptions),
                     ],
                   ),
           ),
@@ -299,17 +338,37 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
     );
   }
 
-  Widget _buildQueueList(List<WatchlistItem> items, Set<String> userSubscriptions, bool onlyOnMySubscriptions) {
+  /// One canon's page: the Up next card, then THEN rows (SCR-13, #134). [unfilteredCount]
+  /// tells "nothing streams on your services" apart from an empty watchlist.
+  Widget _buildQueueList(
+    String mediaType,
+    List<WatchlistItem> items,
+    int unfilteredCount,
+    Set<String> userSubscriptions,
+    bool onlyOnMySubscriptions,
+  ) {
     if (items.isEmpty) {
+      if (onlyOnMySubscriptions && unfilteredCount > 0) {
+        return Center(
+          child: SingleChildScrollView(
+            child: TellyEmptyState(
+              icon: Icons.tv_off_outlined,
+              title: 'Nothing here streams on your services',
+              message: 'Show your whole queue, or add services in Settings.',
+              actionLabel: 'Show all',
+              actionKey: const Key('queue_show_all_button'),
+              onAction: () => ref.read(queueFilterSubscribedProvider.notifier).set(false),
+            ),
+          ),
+        );
+      }
       return Center(
         child: SingleChildScrollView(
           child: TellyEmptyState(
             icon: Icons.bookmark_outline,
             title: 'Your queue is clear!',
-            message: onlyOnMySubscriptions
-                ? 'No titles found on your active subscriptions.'
-                : 'Add shows from friend profiles and the feed.',
-            actionLabel: onlyOnMySubscriptions ? null : 'Explore titles',
+            message: 'Add shows from friend profiles and the feed.',
+            actionLabel: 'Explore titles',
             actionIcon: Icons.explore_outlined,
             onAction: () => context.go(Routes.explore),
           ),
@@ -317,215 +376,145 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        final item = items[index];
-        return _buildQueueCard(item, userSubscriptions);
-      },
+    // The pick's version: ↻ bumps it, so the page rebuilds with the new pick.
+    ref.watch(queueUpNextProvider);
+    final upNext = ref.read(queueUpNextProvider.notifier);
+    final pool = [for (final i in items) i.showId];
+    final pickId = upNext.pickFor(mediaType, pool);
+    final pick = items.firstWhere((i) => i.showId == pickId);
+    final rest = [for (final i in items) if (i.showId != pickId) i];
+
+    return ListView(
+      key: PageStorageKey('queue_page_$mediaType'),
+      padding: const EdgeInsets.only(top: 4, bottom: 24),
+      children: [
+        _swipeable(
+          pick,
+          UpNextCard(
+            key: const Key('queue_up_next_card'),
+            item: pick,
+            providerName: _providerName(pick, userSubscriptions),
+            onTap: () => context.push(Routes.title(pick.mediaType, pick.showId)),
+            onWatch: () => _watch(pick, userSubscriptions),
+            onSeen: () => _markSeen(pick),
+            onShuffle: pool.length < 2 ? null : () => upNext.shuffle(mediaType, pool),
+          ),
+        ),
+        if (rest.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          TellySectionHeader(
+            label: 'THEN',
+            trailing: Text(
+              '${rest.length}',
+              key: const Key('queue_then_count'),
+              style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)).copyWith(fontWeight: FontWeight.w800),
+            ),
+          ),
+          const SizedBox(height: 4),
+          for (final item in rest)
+            _swipeable(
+              item,
+              QueueRow(
+                key: ValueKey('queue_row_${item.showId}'),
+                item: item,
+                providerName: _providerName(item, userSubscriptions),
+                onTap: () => context.push(Routes.title(item.mediaType, item.showId)),
+                onWatch: () => _watch(item, userSubscriptions),
+              ),
+            ),
+        ],
+      ],
     );
   }
 
-  Widget _buildQueueCard(WatchlistItem item, Set<String> userSubscriptions) {
-    final primaryAvail = item.primarySubscribedAvailability(userSubscriptions);
-    final providerName = primaryAvail != null ? primaryAvail.platformName : 'Online';
-    final providerId = primaryAvail != null ? primaryAvail.platformId : 'netflix';
+  static String _providerName(WatchlistItem item, Set<String> userSubscriptions) =>
+      item.primarySubscribedAvailability(userSubscriptions)?.platformName ?? 'Online';
 
-    return Dismissible(
-      key: ValueKey('queue_item_${item.showId}'),
-      direction: DismissDirection.endToStart,
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        decoration: BoxDecoration(
-          color: TellyColors.neonCoral,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: const Icon(Icons.delete_outline, color: Colors.white),
-      ),
-      onDismissed: (_) {
-        ref.read(userWatchlistProvider.notifier).removeItem(item.showId, item.mediaType);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Removed "${item.title}" from queue'),
-            backgroundColor: TellyColors.cardOf(context),
-          ),
+  void _watch(WatchlistItem item, Set<String> userSubscriptions) {
+    StreamingDeepLinkFactory.launchPlayback(
+      providerId: item.primarySubscribedAvailability(userSubscriptions)?.platformId ?? 'netflix',
+      externalShowId: '${item.showId}',
+      showSlug: item.title.toLowerCase().replaceAll(' ', '-'),
+    );
+  }
+
+  /// Swipe right: mark seen (opens the Log flow); swipe left: remove, with Undo (SCR-13).
+  Widget _swipeable(WatchlistItem item, Widget child) {
+    Widget background(Color color, IconData icon, Alignment alignment, Color iconColor) => Container(
+          alignment: alignment,
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          color: color,
+          child: Icon(icon, color: iconColor),
         );
+    return Dismissible(
+      key: ValueKey('queue_swipe_${item.mediaType}_${item.showId}'),
+      background: background(TellyColors.phosphorLime, Icons.check_rounded, Alignment.centerLeft, const Color(0xFF08090C)),
+      secondaryBackground: background(TellyColors.neonCoral, Icons.delete_outline, Alignment.centerRight, Colors.white),
+      onDismissed: (direction) {
+        setState(() => _swiped.add(_swipeKey(item)));
+        direction == DismissDirection.startToEnd ? _markSeen(item) : _remove(item);
       },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: TellyColors.surfaceOf(context),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: item.isLeavingSoon ? TellyColors.neonCoral.withValues(alpha: 0.4) : TellyColors.borderGlassOf(context),
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => context.push(Routes.title(item.mediaType, item.showId)),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Media Type Icon / Poster Box
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Container(
-                      width: 52,
-                      height: 72,
-                      decoration: BoxDecoration(
-                        color: TellyColors.cardOf(context),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: TellyColors.borderGlassOf(context)),
-                      ),
-                      child: PosterImage(
-                        posterPath: item.posterPath,
-                        fallback: Center(
-                          child: Icon(
-                            item.mediaType == 'movie' ? Icons.movie_outlined : Icons.tv_outlined,
-                            color: TellyColors.textTertiaryOf(context),
-                            size: 28,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 14),
+      child: child,
+    );
+  }
 
-                  // Title & Details
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                item.title,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TellyTypography.titleMedium(
-                                  color: TellyColors.textPrimaryOf(context),
-                                ).copyWith(fontWeight: FontWeight.w800),
-                              ),
-                            ),
-                            if (item.isLeavingSoon)
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: TellyColors.neonCoral.withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: Text(
-                                  '⚠️ LEAVING SOON',
-                                  style: TellyTypography.caption(
-                                    color: TellyColors.neonCoral,
-                                  ).copyWith(fontSize: 8, fontWeight: FontWeight.w800),
-                                ),
-                              ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          item.mediaType == 'movie'
-                              ? '${item.runtimeMinutes ?? 120} min'
-                              : '${item.seasonCount ?? 1} Seasons • ${item.episodeCount ?? 10} Episodes',
-                          style: TellyTypography.caption(color: TellyColors.textTertiary),
-                        ),
-                        const SizedBox(height: 6),
-                        Row(
-                          children: [
-                            const Icon(Icons.star, size: 13, color: TellyColors.warmAmber),
-                            const SizedBox(width: 4),
-                            Text(
-                              '${item.friendsAvgScore.toStringAsFixed(2)} Friends Avg',
-                              style: TellyTypography.caption(
-                                color: TellyColors.warmAmber,
-                              ).copyWith(fontWeight: FontWeight.w700),
-                            ),
-                            if (item.savedFromHandle != null) ...[
-                              Text(
-                                ' • From ${item.savedFromHandle}',
-                                style: TellyTypography.caption(color: TellyColors.textSecondary),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
+  /// Leaves the watchlist and opens the Log flow with the title selected (SCR-09).
+  void _markSeen(WatchlistItem item) {
+    ref.read(userWatchlistProvider.notifier).removeItem(item.showId, item.mediaType);
+    context.push(
+      Routes.log,
+      extra: TitleSearchResult(id: item.showId, mediaType: item.mediaType, title: item.title, posterPath: item.posterPath),
+    );
+  }
 
-            // Actions Row: 1-Tap Watch and Mark Seen
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Shrinks (ellipsized) so long provider names fit a 393 pt phone (FE-QUEUE-01).
-                Flexible(
-                  child: TellyNeonBadge(
-                    label: providerName.toUpperCase(),
-                    variant: TellyBadgeVariant.winner,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Row(
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        ref.read(userWatchlistProvider.notifier).removeItem(item.showId, item.mediaType);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Marked "${item.title}" as Seen!'),
-                            backgroundColor: TellyColors.cardOf(context),
-                          ),
-                        );
-                      },
-                      style: TextButton.styleFrom(
-                        foregroundColor: TellyColors.textSecondaryOf(context),
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: const Text('✓ Mark Seen', style: TextStyle(fontSize: 12)),
-                    ),
-                    const SizedBox(width: 8),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        StreamingDeepLinkFactory.launchPlayback(
-                          providerId: providerId,
-                          externalShowId: '${item.showId}',
-                          showSlug: item.title.toLowerCase().replaceAll(' ', '-'),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: TellyColors.phosphorLime,
-                        foregroundColor: TellyColors.backgroundCanvasOled,
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      ),
-                      icon: const Icon(Icons.play_arrow, size: 14),
-                      label: Text(
-                        'Watch on $providerName',
-                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
+  void _remove(WatchlistItem item) {
+    final watchlist = ref.read(userWatchlistProvider.notifier);
+    watchlist.removeItem(item.showId, item.mediaType);
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text('Removed "${item.title}" from queue'),
+        backgroundColor: TellyColors.cardOf(context),
+        action: SnackBarAction(
+          key: const Key('queue_undo_remove'),
+          label: 'Undo',
+          textColor: TellyColors.primaryAccentOf(context),
+          onPressed: () {
+            if (mounted) setState(() => _swiped.remove(_swipeKey(item)));
+            watchlist.addItem(
+              titleId: item.showId,
+              mediaType: item.mediaType,
+              title: item.title,
+              posterPath: item.posterPath,
+              recommendedBy: item.savedFromHandle,
+            );
+          },
         ),
       ),
+    );
+  }
+}
+
+/// Loading placeholder: a card-sized block and five row-sized blocks (component library §7.1).
+class _QueueSkeleton extends StatelessWidget {
+  const _QueueSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    Widget block(double height, {EdgeInsets margin = const EdgeInsets.symmetric(horizontal: 16, vertical: 6)}) =>
+        Container(
+          height: height,
+          margin: margin,
+          decoration: BoxDecoration(color: TellyColors.surfaceOf(context), borderRadius: BorderRadius.circular(14)),
+        );
+    return ListView(
+      key: const Key('queue_skeleton'),
+      physics: const NeverScrollableScrollPhysics(),
+      children: [
+        block(240, margin: const EdgeInsets.fromLTRB(16, 4, 16, 16)),
+        for (var i = 0; i < 5; i++) block(58),
+      ],
     );
   }
 }

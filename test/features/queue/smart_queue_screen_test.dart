@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -10,6 +13,49 @@ import 'package:telly_app/features/queue/presentation/screens/smart_queue_screen
 
 import '../../helpers/real_fonts.dart';
 import '../../helpers/router_harness.dart';
+
+/// Always the first choice: the Up next pick is the first title in sort order, and ↻
+/// takes the first other title. Keeps widget tests deterministic (#134).
+class _FirstRandom implements Random {
+  @override
+  int nextInt(int max) => 0;
+  @override
+  double nextDouble() => 0;
+  @override
+  bool nextBool() => false;
+}
+
+/// An in-memory watchlist whose remove / add land at once, for swipe and Undo tests.
+class _MemoryWatchlist extends WatchlistNotifier {
+  _MemoryWatchlist(this._items);
+  final List<WatchlistItem> _items;
+
+  @override
+  Future<List<WatchlistItem>> build() async => List.of(_items);
+
+  @override
+  Future<void> removeItem(int showId, [String? mediaType]) async {
+    state = AsyncData([for (final i in state.value!) if (i.showId != showId) i]);
+  }
+
+  @override
+  Future<void> addItem({
+    required int titleId,
+    required String mediaType,
+    required String title,
+    String? posterPath,
+    String? recommendedBy,
+  }) async {
+    final original = _items.firstWhere((i) => i.showId == titleId);
+    state = AsyncData([...state.value!, original]);
+  }
+}
+
+/// A watchlist that never finishes loading.
+class _LoadingWatchlist extends WatchlistNotifier {
+  @override
+  Future<List<WatchlistItem>> build() => Completer<List<WatchlistItem>>().future;
+}
 
 void main() {
   final testWatchlist = [
@@ -73,16 +119,29 @@ void main() {
     ),
   ];
 
-  Widget createTestWidget({Set<String>? userSubscriptions}) {
+  List<Override> queueOverrides({Set<String>? userSubscriptions, WatchlistNotifier? watchlist}) => [
+        queueRandomProvider.overrideWithValue(_FirstRandom()),
+        if (userSubscriptions != null) userSubscriptionsProvider.overrideWith((ref) => userSubscriptions),
+        if (watchlist != null) userWatchlistProvider.overrideWith(() => watchlist),
+      ];
+
+  Widget createTestWidget({Set<String>? userSubscriptions, List<WatchlistItem>? items, ThemeData? theme}) {
     return ProviderScope(
-      overrides: [
-        if (userSubscriptions != null)
-          userSubscriptionsProvider.overrideWith((ref) => userSubscriptions),
-      ],
+      overrides: queueOverrides(userSubscriptions: userSubscriptions),
       child: MaterialApp(
-        theme: TellyTheme.dark,
-        home: SmartQueueScreen(testItems: testWatchlist),
+        theme: theme ?? TellyTheme.dark,
+        home: SmartQueueScreen(testItems: items ?? testWatchlist),
       ),
+    );
+  }
+
+  /// The real watchlist provider over [_MemoryWatchlist], so swipes really remove titles.
+  Widget createLiveWidget({List<WatchlistItem>? items, bool routed = false}) {
+    final overrides = queueOverrides(watchlist: _MemoryWatchlist(items ?? testWatchlist));
+    if (routed) return routerHarness(const SmartQueueScreen(), overrides: overrides);
+    return ProviderScope(
+      overrides: overrides,
+      child: MaterialApp(theme: TellyTheme.dark, home: const SmartQueueScreen()),
     );
   }
 
@@ -102,12 +161,155 @@ void main() {
     });
 
     testWidgets('the Lists action opens the Lists screen', (tester) async {
-      await tester.pumpWidget(routerHarness(SmartQueueScreen(testItems: testWatchlist)));
+      await tester.pumpWidget(routerHarness(SmartQueueScreen(testItems: testWatchlist), overrides: queueOverrides()));
       await tester.pumpAndSettle();
       expect(find.byTooltip('Lists'), findsOneWidget);
       await tester.tap(find.byKey(const Key('queue_lists_button')));
       await tester.pumpAndSettle();
       expect(find.text('route:${Routes.queueLists}'), findsOneWidget);
+    });
+  });
+
+  group('#134: SCR-13 Up next, rows and swipes', () {
+    Finder inCard(String text) => find.descendant(of: find.byKey(const Key('queue_up_next_card')), matching: find.text(text));
+    Future<void> openSeries(WidgetTester tester) async {
+      await tester.tap(find.byKey(const Key('queue_series_tab')));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('leads with the Up next card; the pick is not repeated in the THEN rows', (tester) async {
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
+      await openSeries(tester);
+
+      expect(inCard('UP NEXT'), findsOneWidget);
+      expect(inCard('Slow Horses'), findsOneWidget);
+      expect(find.byKey(const ValueKey('queue_row_101')), findsNothing);
+      expect(find.byKey(const ValueKey('queue_row_103')), findsOneWidget);
+      expect(find.text('THEN'), findsOneWidget);
+      expect(tester.widget<Text>(find.byKey(const Key('queue_then_count'))).data, '1');
+      expect(find.text('▶ Hulu'), findsOneWidget, reason: 'one action per row');
+      expect(find.text('✓ Mark Seen'), findsNothing);
+    });
+
+    testWidgets('↻ Another picks a different title, and each canon keeps its own pick', (tester) async {
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
+      await openSeries(tester);
+
+      expect(tester.getSize(find.byKey(const Key('queue_up_next_shuffle'))).height, greaterThanOrEqualTo(48));
+      await tester.tap(find.byKey(const Key('queue_up_next_shuffle')));
+      await tester.pumpAndSettle();
+      expect(inCard('Fargo'), findsOneWidget);
+      expect(find.byKey(const ValueKey('queue_row_101')), findsOneWidget, reason: 'the old pick joins the rows');
+
+      await tester.tap(find.byKey(const Key('queue_movies_tab')));
+      await tester.pumpAndSettle();
+      await openSeries(tester);
+      expect(inCard('Fargo'), findsOneWidget, reason: 'switching canons does not re-roll');
+    });
+
+    testWidgets('a pool of one: no ↻ and no THEN rows; films never show on the TV card', (tester) async {
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
+
+      expect(inCard('Parasite'), findsOneWidget);
+      expect(find.byKey(const Key('queue_up_next_shuffle')), findsNothing);
+      expect(find.text('THEN'), findsNothing);
+
+      await openSeries(tester);
+      expect(inCard('Parasite'), findsNothing);
+    });
+
+    testWidgets('swipe left removes a row, and Undo puts it back', (tester) async {
+      await tester.pumpWidget(createLiveWidget());
+      await tester.pumpAndSettle();
+      await openSeries(tester);
+
+      await tester.drag(find.byKey(const ValueKey('queue_row_103')), const Offset(-600, 0));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('queue_row_103')), findsNothing);
+      expect(find.text('Removed "Fargo" from queue'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('queue_undo_remove')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('queue_row_103')), findsOneWidget);
+    });
+
+    testWidgets('swipe right marks seen: the title leaves the queue and the Log flow opens', (tester) async {
+      await tester.pumpWidget(createLiveWidget(routed: true));
+      await tester.pumpAndSettle();
+      await openSeries(tester);
+
+      await tester.drag(find.byKey(const ValueKey('queue_row_103')), const Offset(600, 0));
+      await tester.pumpAndSettle();
+      expect(find.text('route:${Routes.log}'), findsOneWidget);
+    });
+
+    testWidgets('✓ Seen on the card opens the Log flow, and the next pick takes its place', (tester) async {
+      await tester.pumpWidget(createLiveWidget(routed: true));
+      await tester.pumpAndSettle();
+      await openSeries(tester);
+
+      await tester.tap(find.byKey(const Key('queue_up_next_seen')));
+      await tester.pumpAndSettle();
+      expect(find.text('route:${Routes.log}'), findsOneWidget);
+    });
+
+    testWidgets('when the pick is removed, a new pick replaces it at once', (tester) async {
+      await tester.pumpWidget(createLiveWidget());
+      await tester.pumpAndSettle();
+      await openSeries(tester);
+      expect(inCard('Slow Horses'), findsOneWidget);
+
+      await tester.drag(find.byKey(const Key('queue_up_next_card')), const Offset(-600, 0));
+      await tester.pumpAndSettle();
+      expect(inCard('Fargo'), findsOneWidget);
+      expect(find.text('THEN'), findsNothing);
+    });
+
+    testWidgets('filtered to nothing: "Show all" turns the filter off', (tester) async {
+      await tester.pumpWidget(createTestWidget(userSubscriptions: {'netflix'}));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('queue_filter_button')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('queue_services_toggle')));
+      await tester.pumpAndSettle();
+      await tester.tapAt(const Offset(10, 10));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Nothing here streams on your services'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('queue_show_all_button')));
+      await tester.pumpAndSettle();
+      expect(inCard('Parasite'), findsOneWidget);
+      expect(find.byKey(const Key('filter_button_badge')), findsNothing);
+    });
+
+    testWidgets('loading shows the skeleton', (tester) async {
+      await tester.pumpWidget(ProviderScope(
+        overrides: queueOverrides(watchlist: _LoadingWatchlist()),
+        child: MaterialApp(theme: TellyTheme.dark, home: const SmartQueueScreen()),
+      ));
+      await tester.pump();
+      expect(find.byKey(const Key('queue_skeleton')), findsOneWidget);
+    });
+
+    testWidgets('the card reads in light mode: the eyebrow and title sit on the dark scrim', (tester) async {
+      await tester.pumpWidget(createTestWidget(theme: TellyTheme.light));
+      await tester.pumpAndSettle();
+      expect(tester.widget<Text>(inCard('UP NEXT')).style!.color, TellyColors.phosphorLime);
+      expect(tester.widget<Text>(inCard('Parasite')).style!.color, Colors.white);
+    });
+
+    test('each visit re-rolls: the pick provider is disposed with the screen', () async {
+      final container = ProviderContainer(overrides: [queueRandomProvider.overrideWithValue(_FirstRandom())]);
+      addTearDown(container.dispose);
+      final sub = container.listen(queueUpNextProvider, (_, __) {});
+      final first = container.read(queueUpNextProvider.notifier);
+      sub.close();
+      await Future<void>.delayed(Duration.zero);
+      container.listen(queueUpNextProvider, (_, __) {});
+      expect(identical(container.read(queueUpNextProvider.notifier), first), isFalse);
     });
   });
 
@@ -139,7 +341,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
-      expect(find.text('APPLE TV+'), findsOneWidget);
+      // Slow Horses is the Up next pick; its primary action names the service in full.
       expect(find.text('Watch on Apple TV+'), findsOneWidget);
     });
 
@@ -155,7 +357,7 @@ void main() {
 
       expect(find.text('Slow Horses'), findsOneWidget);
       expect(find.text('Fargo'), findsOneWidget);
-      expect(find.text('⚠️ LEAVING SOON'), findsOneWidget);
+      expect(find.text('LEAVING SOON'), findsOneWidget);
       expect(find.text('Watch on Apple TV+'), findsOneWidget);
     });
 
@@ -191,16 +393,28 @@ void main() {
       expect(find.text('Fargo'), findsNothing);
     });
 
-    testWidgets('sorting from the Filter sheet re-sorts the watchlist and does not count as a filter (#133)', (tester) async {
-      await tester.pumpWidget(createTestWidget());
+    testWidgets('sorting from the Filter sheet re-sorts the rows and does not count as a filter (#133)', (tester) async {
+      WatchlistItem tv(int id, String title, double score, {bool leaving = false}) => WatchlistItem(
+            showId: id,
+            title: title,
+            mediaType: 'tv',
+            friendsAvgScore: score,
+            isLeavingSoon: leaving,
+            addedAt: DateTime(2026),
+          );
+      await tester.pumpWidget(createTestWidget(items: [
+        tv(1, 'Alpha', 9.5),
+        tv(2, 'Bravo', 9.0),
+        tv(3, 'Charlie', 8.5),
+        tv(4, 'Delta', 8.0, leaving: true),
+      ]));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('TV Shows 2'));
+      await tester.tap(find.byKey(const Key('queue_series_tab')));
       await tester.pumpAndSettle();
 
       double y(String title) => tester.getTopLeft(find.text(title)).dy;
-      // Default: friends' score, so Slow Horses (8.94) sits above Fargo (8.75).
-      expect(y('Slow Horses'), lessThan(y('Fargo')));
-      expect(find.byType(DropdownButton<String>), findsNothing, reason: 'sorting moved to the header');
+      // Friends' score: Alpha is the pick; the rows run Bravo, Charlie, Delta.
+      expect(y('Bravo'), lessThan(y('Delta')));
 
       await tester.tap(find.byKey(const Key('queue_filter_button')));
       await tester.pumpAndSettle();
@@ -209,7 +423,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('SORT BY'), findsNothing, reason: 'choosing a sort closes the sheet');
-      expect(y('Fargo'), lessThan(y('Slow Horses')));
+      expect(y('Delta'), lessThan(y('Bravo')), reason: 'leaving soon first');
+      expect(find.descendant(of: find.byKey(const Key('queue_up_next_card')), matching: find.text('Alpha')), findsOneWidget,
+          reason: 'sorting keeps the pick');
       expect(find.byKey(const Key('filter_button_badge')), findsNothing);
     });
 
