@@ -33,7 +33,7 @@ This document defines every single screen in the Telly application. For each scr
 
 ### §0.0 App Shell & Route Map — epic #44
 
-> Tracking: epic #44 · Status: approved · Decision: [0003](../decisions/0003-five-tab-shell-with-more-hub.md)
+> Tracking: epic #44 · Status: shipped · Decision: [0003](../decisions/0003-five-tab-shell-with-more-hub.md)
 
 Five tabs in the floating bar (component library §2.1), plus the floating Log button (§2.3) on the first four. Signed-in users land on **Home** (`/home`).
 
@@ -800,7 +800,7 @@ Opened from the More hub (`/more/queue`) as a pushed screen with the subpage app
 
 ### `SCR-21`: Home
 
-> Tracking: epic #44 (shell) · content redesign: epic #45 · Status: approved (interim content)
+> Tracking: epic #44 (shell) · content redesign: epic #45 · Status: shipped (interim content)
 
 The landing tab (`/home`). Epic #45 designs its real content (currently-watching tracking). Until then it shows only data the app already has:
 
@@ -829,7 +829,7 @@ The landing tab (`/home`). Epic #45 designs its real content (currently-watching
 
 ### `SCR-22`: More Hub
 
-> Tracking: epic #44 · Status: approved · Decision: [0003](../decisions/0003-five-tab-shell-with-more-hub.md)
+> Tracking: epic #44 · Status: shipped · Decision: [0003](../decisions/0003-five-tab-shell-with-more-hub.md)
 
 A WHOOP-style hub (`/more`): one place for everything that isn't a daily destination, with room for future features.
 

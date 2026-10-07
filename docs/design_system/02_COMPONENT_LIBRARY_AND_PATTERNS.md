@@ -11,7 +11,7 @@ Components prioritize artwork (posters, backdrop stills, network typography) and
 
 ### 2.1 The Floating Frosted Bottom Bar
 
-> Tracking: epic #44 · Status: approved · Decision: [0003](../decisions/0003-five-tab-shell-with-more-hub.md)
+> Tracking: epic #44 · Status: shipped · Decision: [0003](../decisions/0003-five-tab-shell-with-more-hub.md)
 
 Rather than a traditional opaque bottom bar anchored to the screen bottom, Telly features a **floating pill navigation bar** suspended 16px above the home indicator:
 - **Surface Material:** Frosted dark acrylic (`#11131A` with 75% opacity, `backdrop-filter: blur(24px)`). Light mode: `#FFFFFF` at 90% with the same blur.
