@@ -1,14 +1,67 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:telly_app/app.dart';
+import 'package:telly_app/core/config/app_config.dart';
 import 'package:telly_app/core/database/database.dart';
+import 'package:telly_app/core/database/database_provider.dart';
+import 'package:telly_app/features/auth/data/auth_repository.dart';
+import 'package:telly_app/features/auth/domain/user_profile.dart';
+import 'package:telly_app/features/feed/data/social_repository.dart';
+import 'package:telly_app/features/logging/presentation/screens/logging_studio_screen.dart';
 import 'package:telly_app/features/ranking/data/ranking_repository.dart';
 import 'package:telly_app/features/ranking/domain/binary_insertion_tournament.dart';
 import 'package:telly_app/features/ranking/domain/sentiment_bracket.dart';
 
+import '../test/fakes/fake_auth_repository.dart';
+import '../test/fakes/fake_social_repository.dart';
 import '../test/helpers/canon_seed.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+  testWidgets('CUJ-02 entry: the floating Log button opens logging in one tap from every tab but More (#44)',
+      (tester) async {
+    final db = AppDatabase.inMemory();
+    addTearDown(db.close);
+    await tester.pumpWidget(ProviderScope(
+      overrides: [
+        databaseProvider.overrideWithValue(db),
+        authRepositoryProvider.overrideWithValue(FakeAuthRepository(
+          signedInUserId: 'usr_cuj02',
+          profile: UserProfile(
+            id: 'usr_cuj02',
+            username: 'logger',
+            displayName: 'Logger',
+            onboardingCompleted: true,
+            createdAt: DateTime(2026),
+          ),
+        )),
+        socialRepositoryProvider.overrideWithValue(FakeSocialRepository()),
+        appConfigProvider.overrideWithValue(const AppConfig(
+          appEnv: 'test',
+          supabaseUrl: 'https://test.supabase.co',
+          supabaseAnonKey: 'test-anon-key',
+        )),
+      ],
+      child: const TellyApp(),
+    ));
+    await tester.pumpAndSettle();
+
+    for (final tab in ['home', 'explore', 'canon', 'social']) {
+      await tester.tap(find.byKey(Key('nav_tab_$tab')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('log_fab'))); // the one tap
+      await tester.pumpAndSettle();
+      expect(find.byType(LoggingStudioScreen), findsOneWidget, reason: tab);
+      await tester.tap(find.byTooltip('Close'));
+      await tester.pumpAndSettle();
+    }
+    await tester.tap(find.byKey(const Key('nav_tab_more')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('log_fab')), findsNothing);
+  });
 
   testWidgets('CUJ-02: Complete Movie Logging & Slot Insertion (E2E Integration)', (tester) async {
     final db = AppDatabase.inMemory();

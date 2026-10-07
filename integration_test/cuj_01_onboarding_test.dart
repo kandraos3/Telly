@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -7,7 +8,9 @@ import 'package:telly_app/core/database/database.dart';
 import 'package:telly_app/core/database/database_provider.dart';
 import 'package:telly_app/features/auth/data/auth_repository.dart';
 import 'package:telly_app/features/auth/domain/user_profile.dart';
+import 'package:telly_app/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:telly_app/features/feed/data/social_repository.dart';
+import 'package:telly_app/features/home/presentation/screens/home_screen.dart';
 import 'package:telly_app/features/onboarding/data/onboarding_repository.dart';
 import 'package:telly_app/features/onboarding/data/top_50_seeds.dart';
 import 'package:telly_app/features/profile/data/profile_repository.dart';
@@ -79,8 +82,17 @@ void main() {
     expect(top8Score, equals(1.00));
 
     // 5. Complete registration and onboarding
-    await auth.markOnboardingCompleted();
+    final container = ProviderScope.containerOf(tester.element(find.byType(TellyApp)));
+    await container.read(authControllerProvider.notifier).finishOnboarding();
+    await tester.pumpAndSettle();
     expect(auth.fetchCurrentProfile(), completion(predicate<UserProfile?>((u) => u?.onboardingCompleted == true)));
+
+    // 6. Lands on Home inside the five-tab shell, with Log one tap away (#44, decision 0003)
+    expect(find.byType(HomeScreen), findsOneWidget);
+    for (final tab in ['home', 'explore', 'canon', 'social', 'more']) {
+      expect(find.byKey(Key('nav_tab_$tab')), findsOneWidget, reason: tab);
+    }
+    expect(find.byKey(const Key('log_fab')), findsOneWidget);
   });
 }
 

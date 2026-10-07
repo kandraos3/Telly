@@ -67,7 +67,8 @@ Widget _seeAll(BuildContext context, {required Key key, required VoidCallback on
       style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
       child: Text(
         'See all',
-        style: TellyTypography.labelMedium(color: TellyColors.primaryAccentOf(context)),
+        style: TellyTypography.labelLarge(color: TellyColors.primaryAccentOf(context))
+            .copyWith(fontWeight: FontWeight.bold),
       ),
     );
 

@@ -19,6 +19,17 @@ import 'package:telly_app/features/ranking/presentation/screens/slot_reveal_moda
 import 'package:telly_app/features/ranking/presentation/widgets/duel_arena_card.dart';
 import 'package:telly_app/features/title_detail/domain/title_detail_models.dart';
 import 'package:telly_app/features/title_detail/presentation/screens/show_detail_screen.dart';
+import 'package:telly_app/core/widgets/poster_image.dart';
+import 'package:telly_app/core/widgets/telly_log_fab.dart';
+import 'package:telly_app/features/auth/data/auth_repository.dart';
+import 'package:telly_app/features/auth/domain/user_profile.dart';
+import 'package:telly_app/features/feed/data/social_repository.dart';
+import 'package:telly_app/features/home/presentation/screens/home_screen.dart';
+import 'package:telly_app/features/more/presentation/screens/more_hub_screen.dart';
+import 'package:telly_app/features/profile/presentation/controllers/profile_controller.dart';
+
+import '../fakes/fake_auth_repository.dart';
+import '../fakes/fake_social_repository.dart';
 
 class TolerantGoldenComparator extends LocalFileComparator {
   TolerantGoldenComparator(super.testFile, {this.tolerance = 0.50});
@@ -42,6 +53,18 @@ class TolerantGoldenComparator extends LocalFileComparator {
     }
     return true;
   }
+}
+
+/// Fixed canon for the Home goldens.
+class _GoldenCanon extends ProfileCanonNotifier {
+  @override
+  ProfileCanonState build() => const ProfileCanonState(
+        movies: [
+          CanonEntry(id: 1, title: 'Past Lives', mediaType: 'movie', rankPosition: 1, calculatedScore: 9.80),
+          CanonEntry(id: 2, title: 'Arrival', mediaType: 'movie', rankPosition: 2, calculatedScore: 9.10),
+          CanonEntry(id: 3, title: 'Heat', mediaType: 'movie', rankPosition: 3, calculatedScore: 8.40),
+        ],
+      );
 }
 
 class _InMemoryWatchlistRepository implements WatchlistRepository {
@@ -499,6 +522,80 @@ void main() {
         find.byType(PosterGridView),
         matchesGoldenFile('goldens/canon_grid_pixel8.png'),
       );
+    });
+
+    // -------------------------------------------------------------------------
+    // 8b. SCR-21 Home and SCR-22 More hub, dark and light (#44)
+    // -------------------------------------------------------------------------
+    for (final (name, theme) in [('dark', TellyTheme.darkTheme), ('light', TellyTheme.lightTheme)]) {
+      List<Override> shellOverrides() => [
+            hapticsEnabledProvider.overrideWith((ref) => false),
+            posterNetworkImagesProvider.overrideWithValue(false),
+            authRepositoryProvider.overrideWithValue(FakeAuthRepository(
+              signedInUserId: 'u1',
+              profile: UserProfile(
+                id: 'u1',
+                username: 'jordan',
+                displayName: 'Jordan Miller',
+                onboardingCompleted: true,
+                createdAt: DateTime(2026),
+              ),
+            )),
+            socialRepositoryProvider.overrideWithValue(FakeSocialRepository(feed: [
+              fakeActivity('a1', username: 'maya', title: 'The Bear', minutesAgo: 1),
+              fakeActivity('a2', username: 'jordan', title: 'Severance', minutesAgo: 2),
+              fakeActivity('a3', username: 'sam', title: 'Shogun', minutesAgo: 3),
+            ])),
+            profileCanonProvider.overrideWith(() => _GoldenCanon()),
+          ];
+
+      testWidgets('Golden: SCR-21 HomeScreen ($name) on iPhone 15 Pro size', (tester) async {
+        await tester.binding.setSurfaceSize(const Size(393, 852));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        await tester.pumpWidget(ProviderScope(
+          overrides: shellOverrides(),
+          child: MaterialApp(theme: theme, home: const HomeScreen()),
+        ));
+        await tester.pumpAndSettle();
+        await expectLater(find.byType(HomeScreen), matchesGoldenFile('goldens/home_${name}_iphone15.png'));
+      });
+
+      testWidgets('Golden: SCR-22 MoreHubScreen ($name) on iPhone 15 Pro size', (tester) async {
+        await tester.binding.setSurfaceSize(const Size(393, 852));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        await tester.pumpWidget(ProviderScope(
+          overrides: shellOverrides(),
+          child: MaterialApp(theme: theme, home: const MoreHubScreen()),
+        ));
+        await tester.pumpAndSettle();
+        await expectLater(find.byType(MoreHubScreen), matchesGoldenFile('goldens/more_${name}_iphone15.png'));
+      });
+    }
+
+    testWidgets('Golden: floating Log button over the nav bar (light)', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(393, 200));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await tester.pumpWidget(MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: TellyTheme.lightTheme,
+        home: Builder(
+          builder: (context) => Stack(
+            children: [
+              Scaffold(
+                body: const SizedBox.expand(),
+                bottomNavigationBar: TellyFloatingNavBar(currentIndex: 0, onTabSelected: (_) {}),
+              ),
+              Positioned(
+                right: TellyLogFab.rightInset,
+                bottom: TellyLogFab.bottomOffsetOf(context),
+                child: TellyLogFab(onTap: () {}),
+              ),
+            ],
+          ),
+        ),
+      ));
+      await tester.pumpAndSettle();
+      await expectLater(find.byType(MaterialApp), matchesGoldenFile('goldens/nav_bar_log_fab_light_iphone15.png'));
     });
 
     // -------------------------------------------------------------------------

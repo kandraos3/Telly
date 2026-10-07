@@ -809,7 +809,7 @@ The landing tab (`/home`). Epic #45 designs its real content (currently-watching
 │  Home                                          [ 🔍 ]  │
 ├────────────────────────────────────────────────────────┤
 │  ── YOUR CANON ───────────────────────────── See all   │
-│  [      Movies      |      Series & Anime      ]       │
+│  [        Movies        |        TV Shows        ]       │
 │  [ #1 poster ] [ #2 poster ] [ #3 poster ]             │
 │                                                        │
 │  ── FROM YOUR FRIENDS ─────────────────────── See all  │

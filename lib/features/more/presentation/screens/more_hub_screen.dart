@@ -347,7 +347,7 @@ class _ListRow extends StatelessWidget {
                       child: Text(
                         label,
                         style: TellyTypography.bodyLarge(color: TellyColors.textPrimaryOf(context))
-                            .copyWith(fontWeight: FontWeight.w500),
+                            .copyWith(fontWeight: FontWeight.w600),
                       ),
                     ),
                     _chevron(context, size: 18),

@@ -2,6 +2,9 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:telly_app/core/widgets/telly_log_fab.dart';
+import 'package:telly_app/features/home/presentation/screens/home_screen.dart';
+import 'package:telly_app/features/more/presentation/screens/more_hub_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -471,6 +474,32 @@ void main() {
 
     testWidgets('14b. SCR-13 SmartQueueScreen meets guidelines in Light Theme', (tester) async {
       await runA11yAudit(tester, const SmartQueueScreen(), theme: TellyTheme.lightTheme);
+    });
+
+    testWidgets('14c. SCR-21 HomeScreen meets guidelines (#44)', (tester) async {
+      await runA11yAudit(tester, const HomeScreen());
+    });
+
+    testWidgets('14d. SCR-21 HomeScreen meets guidelines in Light Theme', (tester) async {
+      await runA11yAudit(tester, const HomeScreen(), theme: TellyTheme.lightTheme);
+    });
+
+    testWidgets('14e. SCR-22 MoreHubScreen meets guidelines (#44)', (tester) async {
+      await runA11yAudit(tester, const MoreHubScreen());
+    });
+
+    testWidgets('14f. SCR-22 MoreHubScreen meets guidelines in Light Theme', (tester) async {
+      await runA11yAudit(tester, const MoreHubScreen(), theme: TellyTheme.lightTheme);
+    });
+
+    testWidgets('14g. Floating Log button meets guidelines in both themes (#44; label covered in telly_log_fab_test)', (tester) async {
+      for (final theme in [TellyTheme.darkTheme, TellyTheme.lightTheme]) {
+        await runA11yAudit(
+          tester,
+          Align(alignment: Alignment.bottomRight, child: TellyLogFab(onTap: () {})),
+          theme: theme,
+        );
+      }
     });
 
     testWidgets('15. SCR-14 DualCanonProfileScreen meets guidelines', (tester) async {
