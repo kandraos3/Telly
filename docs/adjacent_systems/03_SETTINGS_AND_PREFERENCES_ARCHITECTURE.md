@@ -41,6 +41,8 @@ The Settings hub in **Telly** provides centralized control over account security
 └────────────────────────────────────────────────────────┘
 ```
 
+**Share achievements in the feed** (#139, features/10 §10) is a switch on `users.share_achievements` (default on), written directly (the column is client-writable). Off stops medal posts in Social; medals still unlock.
+
 ---
 
 ## 2. Screen Specifications & Sub-Settings
@@ -60,6 +62,7 @@ The Settings hub in **Telly** provides centralized control over account security
 │  🔔 Notifications                                    > │
 │  📳 Haptics & Motion                     (Full Haptics)>│
 │  🔒 Privacy & Ghost Mode                  (Public)   > │
+│  🏅 Share achievements in the feed            [ ON ]   │
 │                                                        │
 │  ━ DATA & EXPORTS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
 │  💾 Storage & Offline Sync                (42 MB)    > │

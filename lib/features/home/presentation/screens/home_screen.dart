@@ -166,7 +166,10 @@ class _FriendsSection extends ConsumerWidget {
     final feed = ref.watch(feedControllerProvider(FeedFilter.following));
     // The Following feed includes my own posts; this section shows only other people (#121).
     final me = ref.watch(authControllerProvider.select((s) => s.user?.id));
-    final items = feed.valueOrNull?.items.where((a) => a.userId != me).toList();
+    // Title activity only: medal posts have no title to show here (#139).
+    final items = feed.valueOrNull?.items
+        .where((a) => a.userId != me && a.activityType != ActivityType.medalUnlocked)
+        .toList();
 
     // Offline or failing with nothing loaded yet: the section hides rather than showing an error.
     if (items == null && feed.hasError) return const SizedBox.shrink(key: Key('home_friends_hidden'));
@@ -231,6 +234,7 @@ class _FriendRow extends StatelessWidget {
       ActivityType.showDropped => 'dropped ${a.titleName}',
       ActivityType.queueAdded => 'queued ${a.titleName}',
       ActivityType.commentPosted => 'commented on ${a.titleName}',
+      ActivityType.medalUnlocked => 'unlocked ${a.medal?.name ?? 'a medal'}',
     };
   }
 

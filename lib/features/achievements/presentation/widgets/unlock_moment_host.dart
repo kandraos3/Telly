@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/analytics/telemetry_service.dart';
 import '../../../../core/sync/sync_engine.dart';
 import '../../domain/medal.dart';
 import '../controllers/achievements_controller.dart';
@@ -52,6 +53,9 @@ class _UnlockMomentHostState extends ConsumerState<UnlockMomentHost> {
       for (final medal in queue) {
         if (!mounted) return;
         _shown.add(medal.id);
+        ref
+            .read(telemetryServiceProvider)
+            .trackMedalUnlocked(achievementId: medal.id, tier: medal.tier.name, kind: medal.kind.name);
         await Navigator.of(context, rootNavigator: true).push(MaterialPageRoute<void>(
           fullscreenDialog: true,
           builder: (_) => UnlockMomentScreen(medal: medal),

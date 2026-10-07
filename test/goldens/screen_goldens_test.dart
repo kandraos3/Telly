@@ -35,6 +35,8 @@ import 'package:telly_app/features/achievements/data/achievements_repository.dar
 import 'package:telly_app/features/achievements/presentation/screens/achievements_screen.dart';
 import 'package:telly_app/features/achievements/presentation/screens/unlock_moment_screen.dart';
 import 'package:telly_app/features/sharing/domain/medal_story.dart';
+import 'package:telly_app/features/achievements/domain/medal.dart';
+import 'package:telly_app/features/feed/presentation/widgets/medal_activity_card.dart';
 import 'package:telly_app/features/sharing/presentation/widgets/medal_story_card.dart';
 import 'package:telly_app/features/profile/presentation/controllers/profile_controller.dart';
 import 'package:telly_app/features/profile/presentation/screens/dual_canon_profile_screen.dart';
@@ -622,6 +624,41 @@ void main() {
         ));
         await tester.pumpAndSettle();
         await expectLater(find.byType(UnlockMomentScreen), matchesGoldenFile('goldens/unlock_moment_${name}_iphone15.png'));
+      });
+
+      testWidgets('Golden: SCR-05 MedalActivityCard ($name) on iPhone 15 Pro width (#139)', (tester) async {
+        await tester.binding.setSurfaceSize(const Size(393, 300));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        final medals = FakeAchievementsRepository(null)
+          ..rarity = {'movies_100': const MedalRarity(percent: 4.2, activeUsers: 950)};
+        await tester.pumpWidget(ProviderScope(
+          overrides: [
+            hapticsEnabledProvider.overrideWith((ref) => false),
+            achievementsRepositoryProvider.overrideWithValue(medals),
+          ],
+          child: MaterialApp(
+            theme: theme,
+            home: Scaffold(
+              body: MedalActivityCard(
+                activity: ActivityLog(
+                  id: 'm1',
+                  userId: 'u-maya',
+                  username: 'maya',
+                  userDisplayName: 'Maya',
+                  activityType: ActivityType.medalUnlocked,
+                  titleId: 0,
+                  titleName: '',
+                  medal: const FeedMedal(id: 'movies_100', name: 'Centurion', tier: MedalTier.gold, glyph: '100'),
+                  reactions: {FeedReaction.fire: 12},
+                  commentCount: 4,
+                  createdAt: DateTime.now().subtract(const Duration(hours: 2)),
+                ),
+              ),
+            ),
+          ),
+        ));
+        await tester.pumpAndSettle();
+        await expectLater(find.byType(MedalActivityCard), matchesGoldenFile('goldens/medal_feed_card_$name.png'));
       });
 
       testWidgets('Golden: SCR-14 Canon podium ($name) on iPhone 15 Pro size (#47)', (tester) async {

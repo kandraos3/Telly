@@ -83,6 +83,17 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  group('#139: Share achievements in the feed', () {
+    testWidgets('defaults on and writes users.share_achievements when turned off', (tester) async {
+      await pump(tester);
+      final toggle = find.byKey(const Key('settings_share_achievements'));
+      expect(tester.widget<SwitchListTile>(find.descendant(of: toggle, matching: find.byType(SwitchListTile))).value, isTrue);
+      await tester.tap(toggle);
+      await tester.pumpAndSettle();
+      expect(profiles.updates.last, {'share_achievements': false});
+    });
+  });
+
   group('FE-505 / FE-608: SCR-20 Settings', () {
     testWidgets('notification toggles persist to users.preferences with spec defaults', (tester) async {
       await pump(tester);

@@ -87,6 +87,8 @@ class SupabaseSocialRepository implements SocialRepository {
       'p_before': after?.createdAt.toUtc().toIso8601String(),
       'p_before_id': after?.id,
       'p_limit': limit,
+      // This app renders medal cards, so it asks for MEDAL_UNLOCKED rows (#139).
+      'p_include_medals': true,
     }) as List;
     final items = [for (final r in rows) activityFromFeedRow(r as Map<String, dynamic>)];
     return FeedPage(items, hasMore: items.length == limit);
@@ -325,6 +327,7 @@ ActivityLog activityFromFeedRow(Map<String, dynamic> r) {
     droppedSeason: (metadata['season'] as num?)?.toInt(),
     droppedEpisode: (metadata['episode'] as num?)?.toInt(),
     dropReason: DropReasonTaxonomy.fromDbValue(metadata['reason'] as String?) ?? metadata['reason'] as String?,
+    medal: FeedMedal.fromMetadata(metadata),
     inUserQueue: (r['in_my_queue'] as bool?) ?? false,
     reactions: {
       for (final MapEntry(:key, :value) in counts.entries)

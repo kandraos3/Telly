@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:telly_app/core/analytics/telemetry_service.dart';
 import 'package:telly_app/core/database/database.dart';
 import 'package:telly_app/core/database/database_provider.dart';
 import 'package:telly_app/core/services/haptics_service.dart';
@@ -24,7 +25,10 @@ class _IdleSync extends SyncEngine {
 
 void main() {
   late AppDatabase db;
-  setUp(() => db = AppDatabase.inMemory());
+  setUp(() {
+    db = AppDatabase.inMemory();
+    TelemetryService().reset();
+  });
   tearDown(() => db.close());
 
   Future<(FakeAchievementsRepository, FakeStoryShareService)> pumpHost(
@@ -80,6 +84,11 @@ void main() {
       expect(find.text('Upset Artist'), findsOneWidget);
       await done(tester);
       expect(repo.seen, ['streak_4', 'movies_10', 'upset_artist']);
+      // #139: one medal_unlocked event per moment.
+      expect(
+        TelemetryService().recordedEvents.where((e) => e.name == 'medal_unlocked').map((e) => e.properties['achievement_id']),
+        ['streak_4', 'movies_10', 'upset_artist'],
+      );
       expect(find.byKey(const Key('unlock_moment')), findsNothing);
       expect(find.text('home'), findsOneWidget);
     });

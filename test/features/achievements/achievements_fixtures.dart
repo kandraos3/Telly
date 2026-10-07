@@ -98,4 +98,9 @@ class FakeAchievementsRepository implements AchievementsRepository {
 
   @override
   Future<MedalShowcase> fetchShowcase(String userId) async => showcases[userId] ?? MedalShowcase.empty;
+
+  Map<String, MedalRarity> rarity = {};
+
+  @override
+  Future<Map<String, MedalRarity>> fetchRarity() async => rarity;
 }

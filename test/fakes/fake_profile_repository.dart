@@ -59,6 +59,7 @@ class FakeProfileRepository implements ProfileRepository {
     String? bio,
     String? avatarUrl,
     String? visibility,
+    bool? shareAchievements,
     List<({int titleId, String mediaType})>? pinnedShowcase,
   }) async {
     _write();
@@ -67,6 +68,7 @@ class FakeProfileRepository implements ProfileRepository {
       if (bio != null) 'bio': bio,
       if (avatarUrl != null) 'avatar_url': avatarUrl,
       if (visibility != null) 'visibility_mode': visibility,
+      if (shareAchievements != null) 'share_achievements': shareAchievements,
       if (pinnedShowcase != null) 'pinned_showcase': pinnedShowcase,
     });
   }

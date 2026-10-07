@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import '../../achievements/domain/medal.dart';
 
 /// Status of a social follow relationship.
 enum FollowStatus {
@@ -52,7 +53,8 @@ enum ActivityType {
   upsetAlert,
   showDropped,
   queueAdded,
-  commentPosted;
+  commentPosted,
+  medalUnlocked;
 
   static ActivityType fromString(String value) {
     switch (value.toUpperCase()) {
@@ -66,6 +68,8 @@ enum ActivityType {
         return ActivityType.queueAdded;
       case 'COMMENT_POSTED':
         return ActivityType.commentPosted;
+      case 'MEDAL_UNLOCKED':
+        return ActivityType.medalUnlocked;
       default:
         return ActivityType.rankingCreated;
     }
@@ -179,6 +183,28 @@ enum ReportReason {
   const ReportReason(this.dbValue, this.label);
 }
 
+/// The medal on a `MEDAL_UNLOCKED` post (features/10 §10): the activity's metadata.
+@immutable
+class FeedMedal {
+  final String id;
+  final String name;
+  final MedalTier tier;
+  final String glyph;
+
+  const FeedMedal({required this.id, required this.name, required this.tier, required this.glyph});
+
+  static FeedMedal? fromMetadata(Map<String, dynamic> m) {
+    final id = m['achievement_id'] as String?;
+    if (id == null) return null;
+    return FeedMedal(
+      id: id,
+      name: (m['name'] as String?) ?? 'Medal',
+      tier: MedalTier.parse(m['tier'] as String?),
+      glyph: (m['glyph'] as String?) ?? '',
+    );
+  }
+}
+
 /// An activity feed item representing an action taken by a user in the social graph.
 @immutable
 class ActivityLog {
@@ -214,6 +240,9 @@ class ActivityLog {
   final int? droppedEpisode;
   final String? dropReason;
   final bool willingToRevisit;
+
+  /// Set for [ActivityType.medalUnlocked] posts.
+  final FeedMedal? medal;
 
   // Interaction states
   final bool inUserQueue;
@@ -251,6 +280,7 @@ class ActivityLog {
     this.droppedEpisode,
     this.dropReason,
     this.willingToRevisit = false,
+    this.medal,
     this.inUserQueue = false,
     this.reactions = const {},
     this.userReactions = const {},
@@ -295,6 +325,7 @@ class ActivityLog {
       droppedEpisode: droppedEpisode,
       dropReason: dropReason,
       willingToRevisit: willingToRevisit,
+      medal: medal,
       inUserQueue: inUserQueue ?? this.inUserQueue,
       reactions: reactions ?? this.reactions,
       userReactions: userReactions ?? this.userReactions,

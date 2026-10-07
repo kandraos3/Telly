@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:telly_app/core/analytics/telemetry_service.dart';
 import 'package:telly_app/core/database/database.dart';
 import 'package:telly_app/core/database/database_provider.dart';
 import 'package:telly_app/features/achievements/data/achievements_repository.dart';
@@ -92,6 +93,8 @@ void main() {
       await ctrl.pin(byId('streak_4'));
       s = container.read(achievementsControllerProvider).requireValue;
       expect(repo.pins.last, ('streak_4', 3));
+      expect(TelemetryService().recordedEvents.last.toJson()['properties'], {'achievement_id': 'streak_4', 'slot': 3},
+          reason: '#139: medal_pinned');
       expect(s.pinned.map((m) => m.id), ['upset_artist', 'movies_10', 'streak_4']);
 
       await ctrl.pin(byId('streak_4'), slot: 1);

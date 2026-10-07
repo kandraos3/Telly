@@ -89,6 +89,23 @@ class SettingsHubScreen extends ConsumerWidget {
             const Divider(),
             _VisibilityTile(current: me?.visibilityMode ?? 'PUBLIC'),
             const Divider(),
+            // Medal posts in Social (features/10 §10, #139); medals unlock either way.
+            _SwitchTile(
+              key: const Key('settings_share_achievements'),
+              title: 'Share achievements in the feed',
+              subtitle: 'Post your new medals to Social',
+              value: me?.shareAchievements ?? true,
+              onChanged: (on) async {
+                final messenger = ScaffoldMessenger.of(context);
+                try {
+                  await ref.read(profileRepositoryProvider).updateProfile(shareAchievements: on);
+                  await ref.read(authControllerProvider.notifier).refreshProfile();
+                } catch (_) {
+                  messenger.showSnackBar(const SnackBar(content: Text("Couldn't change your sharing setting.")));
+                }
+              },
+            ),
+            const Divider(),
             _SwitchTile(
               key: const Key('settings_biometric_unlock'),
               title: 'Biometric Quick Unlock',

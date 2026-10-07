@@ -7,6 +7,9 @@ class UserProfile {
   final String? avatarUrl;
   final String? bio;
   final String visibilityMode;
+
+  /// Medal posts in the feed (features/10 §10); unlocks happen either way.
+  final bool shareAchievements;
   final bool onboardingCompleted;
   final DateTime createdAt;
 
@@ -17,6 +20,7 @@ class UserProfile {
     this.avatarUrl,
     this.bio,
     this.visibilityMode = 'PUBLIC',
+    this.shareAchievements = true,
     this.onboardingCompleted = false,
     required this.createdAt,
   });
@@ -30,6 +34,7 @@ class UserProfile {
         avatarUrl: json['avatar_url'] as String?,
         bio: json['bio'] as String?,
         visibilityMode: (json['visibility_mode'] as String?) ?? 'PUBLIC',
+        shareAchievements: (json['share_achievements'] as bool?) ?? true,
         onboardingCompleted: (json['onboarding_completed'] as bool?) ?? false,
         createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ?? DateTime.now(),
       );
@@ -40,6 +45,7 @@ class UserProfile {
     String? avatarUrl,
     String? bio,
     String? visibilityMode,
+    bool? shareAchievements,
     bool? onboardingCompleted,
   }) {
     return UserProfile(
@@ -49,6 +55,7 @@ class UserProfile {
       avatarUrl: avatarUrl ?? this.avatarUrl,
       bio: bio ?? this.bio,
       visibilityMode: visibilityMode ?? this.visibilityMode,
+      shareAchievements: shareAchievements ?? this.shareAchievements,
       onboardingCompleted: onboardingCompleted ?? this.onboardingCompleted,
       createdAt: createdAt,
     );

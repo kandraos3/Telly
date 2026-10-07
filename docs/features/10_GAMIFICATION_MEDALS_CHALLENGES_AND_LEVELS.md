@@ -40,7 +40,7 @@ Exposed as the SQL view `public.qualifying_rankings (user_id, title_id, media_ty
 
 ## 3. Weeks, streaks and time zones
 
-- **Week:** Monday 00:00 to Sunday 23:59:59 in the user's time zone, `users.timezone` (IANA name, default `UTC`). The app sets it on sign-in and when it changes. Weeks are labelled ISO-style: `2026-W41`.
+- **Week:** Monday 00:00 to Sunday 23:59:59 in the user's time zone, `users.timezone` (IANA name, default `UTC`). The app sets it on sign-in and when it changes: the app shell reads the device zone (`flutter_timezone`) on start and on every resume and calls `set_timezone` when it differs from the last value sent. Weeks are labelled ISO-style: `2026-W41`.
 - **A week counts** when the user has at least one qualifying ranking whose `created_at` falls in it.
 - **Weekly streak:** the number of consecutive counted weeks, ending with the most recent *finished* week, plus the current week if it already counts.
   - **The current week never breaks a streak** while it's still running.
@@ -362,7 +362,7 @@ All screens use the shared app bars (screen specs §0.2) and the frosted bottom 
 - **Activity types:** `activity_logs.activity_type` gains `MEDAL_UNLOCKED` (slice 1) and `CHALLENGE_COMPLETED` (slice 2), with metadata for the medal (`achievement_id`, `name`, `tier`, `glyph`, `kind`) or the challenge (id, slug, name, count, best title).
 - **Older apps:** they would render an unknown activity type as a broken ranking card, so `get_activity_feed` leaves medal rows out unless the caller passes `p_include_medals => true`. Apps that have the medal card (#139) pass it.
 - **Feed cards** (Social, `SCR-05`; mockup C3):
-  - **Medal card:** the person, the medal, its rarity, and reactions.
+  - **Medal card:** the person ("Maya unlocked Centurion", time and tier), the medal, its rarity (read from `achievement_rarity`), and reactions. No poster or Queue button. Opening it shows the comment thread with "Unlocked Centurion" and the medal. Home's friend previews leave medal posts out.
   - **Challenge card:** the person, the medal, "Best of the 8: The Thing (#1, 9.40)", reactions, and **Join** while the challenge is live.
 - **Ordinary rankings** made inside a joined challenge show "Spooktober 2 of 8" under the ranking line.
 - **Privacy:** Settings (`SCR-20`) → Privacy → **Share achievements in the feed** (`users.share_achievements`, default on). Off means no medal or challenge posts; unlocks still happen. Quests, level-ups and streaks never post. Private accounts follow the existing visibility rules.
@@ -371,7 +371,7 @@ All screens use the shared app bars (screen specs §0.2) and the frosted bottom 
 
 ## 11. Analytics
 
-PostHog events: `medal_unlocked`, `medal_pinned`, `challenge_joined`, `challenge_completed`, `quest_completed`, `level_up`, `reward_equipped`, and `streak_extended` (weekly).
+PostHog events: `medal_unlocked` (when its unlock moment shows), `medal_pinned` (on a successful pin), `challenge_joined`, `challenge_completed`, `quest_completed`, `level_up`, `reward_equipped`, and `streak_extended` (weekly).
 
 These measure the goal (people coming back weekly) and catch unhealthy patterns, such as ranking spikes right before a cap resets.
 

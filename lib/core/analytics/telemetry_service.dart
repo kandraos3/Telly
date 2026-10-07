@@ -119,6 +119,16 @@ class TelemetryService {
     });
   }
 
+  /// A medal's unlock moment was shown (features/10 §11, #139).
+  void trackMedalUnlocked({required String achievementId, required String tier, required String kind}) {
+    _track('medal_unlocked', {'achievement_id': achievementId, 'tier': tier, 'kind': kind});
+  }
+
+  /// A medal was pinned to the profile (features/10 §11, #139).
+  void trackMedalPinned({required String achievementId, required int slot}) {
+    _track('medal_pinned', {'achievement_id': achievementId, 'slot': slot});
+  }
+
   void _track(String name, Map<String, dynamic> properties) {
     final event = TelemetryEvent(
       name: name,

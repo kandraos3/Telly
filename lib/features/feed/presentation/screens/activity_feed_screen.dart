@@ -17,6 +17,7 @@ import 'package:telly_app/features/logging/domain/title_search_result.dart';
 import 'package:telly_app/features/feed/presentation/widgets/feed_recommendation_card.dart';
 import 'package:telly_app/features/feed/presentation/widgets/moderation_sheet.dart';
 import 'package:telly_app/features/feed/presentation/widgets/feed_activity_card.dart';
+import 'package:telly_app/features/feed/presentation/widgets/medal_activity_card.dart';
 import 'package:telly_app/features/feed/presentation/widgets/upset_activity_card.dart';
 
 /// SCR-05: Home / Social Activity Feed Screen (FE-301).
@@ -183,7 +184,15 @@ class _ActivityFeedScreenState extends ConsumerState<ActivityFeedScreen> {
                           }
 
                           final Widget card;
-                          if (activity.isUpset) {
+                          if (activity.activityType == ActivityType.medalUnlocked) {
+                            card = MedalActivityCard(
+                              key: Key('medal_card_${activity.id}'),
+                              activity: activity,
+                              onCardTap: () => _openComments(activity),
+                              onCommentTap: () => _openComments(activity),
+                              onReactionToggle: (reaction) => _handleReactionToggle(activity, reaction),
+                            );
+                          } else if (activity.isUpset) {
                             card = UpsetActivityCard(
                               key: Key('upset_card_${activity.id}'),
                               activity: activity,

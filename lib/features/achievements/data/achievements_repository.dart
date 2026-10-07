@@ -23,6 +23,9 @@ abstract interface class AchievementsRepository {
   /// Another user's pinned medals, or their latest unlocks (friend profile, §4.4). RLS returns
   /// nothing for profiles the viewer can't see.
   Future<MedalShowcase> fetchShowcase(String userId);
+
+  /// Every medal's rarity (`achievement_rarity`), keyed by medal id.
+  Future<Map<String, MedalRarity>> fetchRarity();
 }
 
 class SupabaseAchievementsRepository implements AchievementsRepository {
@@ -71,6 +74,18 @@ class SupabaseAchievementsRepository implements AchievementsRepository {
     return showcaseFromRows(rows);
   }
 
+  @override
+  Future<Map<String, MedalRarity>> fetchRarity() async {
+    final rows = await _client.from('achievement_rarity').select('achievement_id, percent, active_users');
+    return {
+      for (final r in rows)
+        r['achievement_id'] as String: MedalRarity(
+          percent: (r['percent'] as num).toDouble(),
+          activeUsers: (r['active_users'] as num).toInt(),
+        ),
+    };
+  }
+
   /// Builds the showcase from `user_achievements` rows with their embedded `achievements`.
   static MedalShowcase showcaseFromRows(List<Map<String, dynamic>> rows) => MedalShowcase.of([
         for (final r in rows)
@@ -115,6 +130,15 @@ final medalShowcaseProvider = FutureProvider.autoDispose.family<MedalShowcase, S
     return await ref.watch(achievementsRepositoryProvider).fetchShowcase(userId);
   } catch (_) {
     return MedalShowcase.empty;
+  }
+});
+
+/// Medal rarity for feed posts; empty (every medal reads "New") when it can't be loaded.
+final medalRarityProvider = FutureProvider<Map<String, MedalRarity>>((ref) async {
+  try {
+    return await ref.watch(achievementsRepositoryProvider).fetchRarity();
+  } catch (_) {
+    return const {};
   }
 });
 

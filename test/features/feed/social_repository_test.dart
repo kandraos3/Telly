@@ -71,7 +71,13 @@ void main() {
       final page = await repo().getFeedPage(filter: FeedFilter.squads, limit: 1);
 
       expect(requests.single.url.path, '/rest/v1/rpc/get_activity_feed');
-      expect(body(requests.single), {'p_filter': 'squads', 'p_before': null, 'p_before_id': null, 'p_limit': 1});
+      expect(body(requests.single), {
+        'p_filter': 'squads',
+        'p_before': null,
+        'p_before_id': null,
+        'p_limit': 1,
+        'p_include_medals': true, // #139: this app renders medal cards
+      });
       expect(page.hasMore, isTrue, reason: 'a full page may have more');
 
       final a = page.items.single;

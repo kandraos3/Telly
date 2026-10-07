@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/analytics/telemetry_service.dart';
+
 import '../../data/achievements_repository.dart';
 import '../../domain/medal.dart';
 
@@ -36,6 +38,7 @@ class AchievementsController extends AsyncNotifier<AchievementsSnapshot> {
     final target = slot ?? current.freePinSlot;
     if (target == null) throw StateError('No free pin slot; choose one to replace');
     await ref.read(achievementsRepositoryProvider).pin(medal.id, target);
+    ref.read(telemetryServiceProvider).trackMedalPinned(achievementId: medal.id, slot: target);
     await _apply(current.copyWith(medals: [
       for (final m in current.medals)
         if (m.id == medal.id)

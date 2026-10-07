@@ -73,6 +73,7 @@ abstract interface class ProfileRepository {
     String? bio,
     String? avatarUrl,
     String? visibility,
+    bool? shareAchievements,
     List<({int titleId, String mediaType})>? pinnedShowcase,
   });
 
@@ -155,6 +156,7 @@ class SupabaseProfileRepository implements ProfileRepository {
     String? bio,
     String? avatarUrl,
     String? visibility,
+    bool? shareAchievements,
     List<({int titleId, String mediaType})>? pinnedShowcase,
   }) async {
     final changes = <String, Object?>{
@@ -162,6 +164,7 @@ class SupabaseProfileRepository implements ProfileRepository {
       if (bio != null) 'bio': bio,
       if (avatarUrl != null) 'avatar_url': avatarUrl,
       if (visibility != null) 'visibility_mode': visibility,
+      if (shareAchievements != null) 'share_achievements': shareAchievements,
       if (pinnedShowcase != null)
         'pinned_showcase': [for (final p in pinnedShowcase) {'title_id': p.titleId, 'media_type': p.mediaType}],
     };

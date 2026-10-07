@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/achievements/presentation/widgets/unlock_moment_host.dart';
+import '../../features/profile/data/timezone_sync.dart';
 import '../../features/queue/data/watchlist_repository.dart';
 import '../../features/ranking/data/canon_hydration.dart';
 import '../sync/sync_engine.dart';
@@ -38,8 +39,13 @@ class _AppShellState extends ConsumerState<AppShell> {
   void initState() {
     super.initState();
     _lifecycle = AppLifecycleListener(
-      onResume: () => ref.read(syncEngineProvider.notifier).flush(force: true),
+      onResume: () {
+        ref.read(syncEngineProvider.notifier).flush(force: true);
+        ref.read(timezoneSyncProvider).sync();
+      },
     );
+    // Weekly streaks count in the user's own time zone (features/10 §3, #139).
+    ref.read(timezoneSyncProvider).sync();
   }
 
   @override

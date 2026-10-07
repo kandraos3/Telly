@@ -53,6 +53,7 @@ dependencies:
   posthog_flutter: ^5.50.13
   sentry_flutter: ^8.9.0
   local_auth: ^2.3.0
+  flutter_timezone: ^5.1.1
 
 dev_dependencies:
   flutter_test:

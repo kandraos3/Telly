@@ -14,6 +14,7 @@ import 'package:telly_app/features/feed/domain/social_models.dart';
 import 'package:telly_app/features/feed/presentation/controllers/feed_controllers.dart';
 import 'package:telly_app/features/feed/presentation/widgets/moderation_sheet.dart';
 import 'package:telly_app/features/feed/presentation/widgets/spoiler_mask.dart';
+import 'package:telly_app/features/achievements/presentation/widgets/medal_badge.dart';
 
 /// SCR-06: Post Detail & Spoiler-Safe Comment Thread (FE-305).
 ///
@@ -166,7 +167,8 @@ class _CommentThreadScreenState extends ConsumerState<CommentThreadScreen> {
                   ? Text(
                       activity.userDisplayName.isNotEmpty ? activity.userDisplayName[0] : '?',
                       style: TellyTypography.caption(
-                        color: activity.isUpset ? TellyColors.neonCoralOf(context) : TellyColors.primaryAccentOf(context),
+                        color:
+                            activity.isUpset ? TellyColors.neonCoralOf(context) : TellyColors.primaryAccentOf(context),
                       ).copyWith(fontWeight: FontWeight.bold),
                     )
                   : null,
@@ -184,9 +186,11 @@ class _CommentThreadScreenState extends ConsumerState<CommentThreadScreen> {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    activity.isUpset
-                        ? 'Ranked ${activity.titleName} over ${activity.upsetOverTitleName ?? 'Titan'}'
-                        : 'Ranked ${activity.titleName} at #${activity.rankPosition ?? 1}',
+                    activity.medal != null
+                        ? 'Unlocked ${activity.medal!.name}'
+                        : activity.isUpset
+                            ? 'Ranked ${activity.titleName} over ${activity.upsetOverTitleName ?? 'Titan'}'
+                            : 'Ranked ${activity.titleName} at #${activity.rankPosition ?? 1}',
                     style: TellyTypography.caption(
                       color: activity.isUpset ? TellyColors.neonCoralOf(context) : TellyColors.primaryAccentOf(context),
                     ).copyWith(fontWeight: FontWeight.w600),
@@ -206,27 +210,30 @@ class _CommentThreadScreenState extends ConsumerState<CommentThreadScreen> {
               ),
             ),
             const SizedBox(width: 10),
-            Container(
-              width: 44,
-              height: 66,
-              decoration: BoxDecoration(
-                color: TellyColors.cardOf(context),
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: TellyColors.borderGlassOf(context)),
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: PosterImage(
-                posterPath: activity.titlePosterUrl ??
-                    TmdbImages.poster(findSeedPoster(activity.titleId, activity.mediaType, activity.titleName)),
-                fallback: Center(
-                  child: Icon(
-                    activity.mediaType == 'movie' ? Icons.movie_rounded : Icons.tv_rounded,
-                    color: TellyColors.textTertiaryOf(context),
-                    size: 20,
+            if (activity.medal case final medal?)
+              MedalBadge(tier: medal.tier, glyph: medal.glyph, unlocked: true, size: MedalSize.small)
+            else
+              Container(
+                width: 44,
+                height: 66,
+                decoration: BoxDecoration(
+                  color: TellyColors.cardOf(context),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: TellyColors.borderGlassOf(context)),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: PosterImage(
+                  posterPath: activity.titlePosterUrl ??
+                      TmdbImages.poster(findSeedPoster(activity.titleId, activity.mediaType, activity.titleName)),
+                  fallback: Center(
+                    child: Icon(
+                      activity.mediaType == 'movie' ? Icons.movie_rounded : Icons.tv_rounded,
+                      color: TellyColors.textTertiaryOf(context),
+                      size: 20,
+                    ),
                   ),
                 ),
               ),
-            ),
           ],
         ),
       ),
@@ -338,7 +345,9 @@ class _CommentThreadScreenState extends ConsumerState<CommentThreadScreen> {
                     alignment: Alignment.center,
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
-                      color: containsSpoilers ? TellyColors.neonCoralOf(context).withValues(alpha: 0.2) : TellyColors.cardOf(context),
+                      color: containsSpoilers
+                          ? TellyColors.neonCoralOf(context).withValues(alpha: 0.2)
+                          : TellyColors.cardOf(context),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color: containsSpoilers ? TellyColors.neonCoralOf(context) : TellyColors.borderGlassOf(context),
@@ -349,13 +358,16 @@ class _CommentThreadScreenState extends ConsumerState<CommentThreadScreen> {
                         Icon(
                           Icons.warning_amber_rounded,
                           size: 14,
-                          color: containsSpoilers ? TellyColors.neonCoralOf(context) : TellyColors.textPrimaryOf(context),
+                          color:
+                              containsSpoilers ? TellyColors.neonCoralOf(context) : TellyColors.textPrimaryOf(context),
                         ),
                         const SizedBox(width: 4),
                         Text(
                           'Contains Spoilers',
                           style: TellyTypography.caption(
-                            color: containsSpoilers ? TellyColors.neonCoralOf(context) : TellyColors.textPrimaryOf(context),
+                            color: containsSpoilers
+                                ? TellyColors.neonCoralOf(context)
+                                : TellyColors.textPrimaryOf(context),
                           ).copyWith(fontWeight: FontWeight.bold, fontSize: 11),
                         ),
                       ],

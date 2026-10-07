@@ -116,10 +116,11 @@ class Medal {
   }
 
   /// "Unlocked by 4.2% of Telly viewers", or the New line under 200 active viewers (§4.3).
-  String get rarityLine {
-    final pct = rarityPercent;
-    if (rarityIsNew || pct == null) return 'New: not enough viewers yet';
-    final shown = pct >= 10 ? pct.toStringAsFixed(0) : pct.toStringAsFixed(1);
+  String get rarityLine => rarityLineOf(rarityPercent, isNew: rarityIsNew);
+
+  static String rarityLineOf(double? percent, {required bool isNew}) {
+    if (isNew || percent == null) return 'New: not enough viewers yet';
+    final shown = percent >= 10 ? percent.toStringAsFixed(0) : percent.toStringAsFixed(1);
     return 'Unlocked by $shown% of Telly viewers';
   }
 
@@ -358,4 +359,16 @@ class MedalShowcase {
 
   /// "Pinned medals: Centurion, Upset Artist" for screen readers.
   String get semanticLabel => '${isRecent ? 'Recent' : 'Pinned'} medals: ${medals.map((m) => m.name).join(', ')}';
+}
+
+/// One row of `achievement_rarity` (§4.3), for medal posts in the feed.
+class MedalRarity {
+  final double percent;
+  final int activeUsers;
+
+  const MedalRarity({required this.percent, required this.activeUsers});
+
+  bool get isNew => activeUsers < 200;
+
+  String get line => Medal.rarityLineOf(percent, isNew: isNew);
 }
