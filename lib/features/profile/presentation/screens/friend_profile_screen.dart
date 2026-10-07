@@ -8,6 +8,8 @@ import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
 import '../../../../core/widgets/telly_primary_button.dart';
 import '../../../../core/widgets/telly_screen_header.dart';
+import '../../../achievements/data/achievements_repository.dart';
+import '../../../achievements/presentation/widgets/medal_showcase_row.dart';
 import '../../../auth/data/auth_repository.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../cowatch/domain/spearman_taste_match_calculator.dart';
@@ -159,6 +161,17 @@ class _Body extends ConsumerWidget {
                       const SizedBox(height: 2),
                       Text(profile.bio!, style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context))),
                     ],
+                    // Pinned medals, or their latest unlocks (features/10 §4.4, #138).
+                    if (profile.canView)
+                      ref.watch(medalShowcaseProvider(profile.id)).maybeWhen(
+                            data: (showcase) => showcase.isEmpty
+                                ? const SizedBox.shrink()
+                                : Padding(
+                                    padding: const EdgeInsets.only(top: 8),
+                                    child: MedalShowcaseRow(key: const Key('friend_profile_medals'), showcase: showcase),
+                                  ),
+                            orElse: () => const SizedBox.shrink(),
+                          ),
                   ],
                 ),
               ),

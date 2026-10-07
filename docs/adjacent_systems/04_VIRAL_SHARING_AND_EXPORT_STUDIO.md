@@ -36,8 +36,16 @@ All share cards are rendered off-screen at **1080 x 1920 px (3x Retina)** with t
 │  TEMPLATE D: THE TIER LIST POSTER                      │
 │  • S/A/B/C horizontal rows of mini-posters             │
 │  • Perfect for end-of-year recap sharing               │
+│                                                        │
+│  TEMPLATE E: THE MEDALS CARD (#138)                    │
+│  • One medal: "ACHIEVEMENT UNLOCKED", large medal,     │
+│    name, personal line and rarity                      │
+│  • Or a showcase: "MY PINNED MEDALS", three medals,    │
+│    "12 of 14 medals unlocked"                          │
 └────────────────────────────────────────────────────────┘
 ```
+
+Template E (`MedalStoryCard`, features/10 §4.4) uses the reveal card's canvas, wordmark and footer with a Warm Amber glow, and is vector-only so it renders offscreen without network images.
 
 ---
 

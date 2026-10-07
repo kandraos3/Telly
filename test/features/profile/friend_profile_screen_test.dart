@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:telly_app/features/achievements/data/achievements_repository.dart';
+import 'package:telly_app/features/achievements/domain/medal.dart';
 import 'package:telly_app/core/database/database.dart';
 import 'package:telly_app/core/database/database_provider.dart';
 import 'package:telly_app/features/auth/data/auth_repository.dart';
@@ -18,6 +20,7 @@ import '../../fakes/fake_profile_repository.dart';
 import '../../fakes/fake_social_repository.dart';
 import '../../helpers/canon_seed.dart';
 import '../../helpers/router_harness.dart';
+import '../achievements/achievements_fixtures.dart';
 
 CanonEntry entry(int id, String title, int rank, double score, {String mediaType = 'tv', String? review}) =>
     CanonEntry(
@@ -59,6 +62,8 @@ void main() {
   });
   tearDown(() => db.close());
 
+  final medals = FakeAchievementsRepository(null);
+
   Future<void> pump(WidgetTester tester, {String handle = 'maya', bool settle = true, AuthRepository? authRepo}) async {
     tester.view.physicalSize = const Size(800, 2400);
     tester.view.devicePixelRatio = 1;
@@ -68,9 +73,30 @@ void main() {
       profileRepositoryProvider.overrideWithValue(profiles),
       socialRepositoryProvider.overrideWithValue(social),
       authRepositoryProvider.overrideWithValue(authRepo ?? auth),
+      achievementsRepositoryProvider.overrideWithValue(medals),
     ]));
     if (settle) await tester.pumpAndSettle();
   }
+
+  group('#138: pinned medals on SCR-15', () {
+    testWidgets("shows the friend's pinned medals under their name", (tester) async {
+      medals.showcases = {
+        'u-maya': MedalShowcase.of([
+          Medal.fromJson(medalRow('movies_100', tier: 'gold', name: 'Centurion', glyph: '100',
+              unlockedAt: '2026-10-02T12:00:00Z', pinnedSlot: 1)),
+        ]),
+      };
+      addTearDown(() => medals.showcases = {});
+      await pump(tester);
+      expect(find.byKey(const Key('friend_profile_medals')), findsOneWidget);
+      expect(find.bySemanticsLabel('Pinned medals: Centurion'), findsOneWidget);
+    });
+
+    testWidgets('nothing to show: no medal row', (tester) async {
+      await pump(tester);
+      expect(find.byKey(const Key('friend_profile_medals')), findsNothing);
+    });
+  });
 
   group('FE-608: SCR-15 FriendProfileScreen', () {
     testWidgets('shows a loader, then the profile with blended and per-canon matches', (tester) async {

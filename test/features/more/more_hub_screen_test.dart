@@ -10,8 +10,13 @@ import 'package:telly_app/core/widgets/telly_avatar.dart';
 import 'package:telly_app/features/auth/data/auth_repository.dart';
 import 'package:telly_app/features/auth/domain/user_profile.dart';
 import 'package:telly_app/features/more/presentation/screens/more_hub_screen.dart';
+import 'package:telly_app/core/database/database.dart';
+import 'package:telly_app/core/database/database_provider.dart';
+import 'package:telly_app/features/achievements/data/achievements_repository.dart';
+import 'package:telly_app/features/achievements/domain/medal.dart';
 
 import '../../fakes/fake_auth_repository.dart';
+import '../achievements/achievements_fixtures.dart';
 
 void main() {
   UserProfile profile({String? username = 'jordan', String displayName = 'Jordan Miller', String? avatarUrl}) =>
@@ -25,7 +30,9 @@ void main() {
       );
 
   /// Hosts the hub at `/`; any other location renders `route:<location>`.
-  Future<void> pumpHub(WidgetTester tester, {ThemeData? theme, UserProfile? user}) async {
+  Future<void> pumpHub(WidgetTester tester, {ThemeData? theme, UserProfile? user, AchievementsSnapshot? medals}) async {
+    final db = AppDatabase.inMemory();
+    addTearDown(db.close);
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -42,6 +49,8 @@ void main() {
         authRepositoryProvider.overrideWithValue(
           FakeAuthRepository(signedInUserId: 'u1', profile: user ?? profile()),
         ),
+        databaseProvider.overrideWithValue(db),
+        achievementsRepositoryProvider.overrideWithValue(FakeAchievementsRepository(medals ?? sampleSnapshot(empty: true))),
       ],
       child: MaterialApp.router(theme: theme ?? TellyTheme.dark, routerConfig: router),
     ));
@@ -99,6 +108,24 @@ void main() {
       expect(graveyard.left, achievements.left);
       expect(graveyard.top - achievements.bottom, 12);
       expect(tester.getSize(find.byKey(const Key('more_row_settings'))).height, 52);
+    });
+
+    testWidgets("#138: pinned medals sit under the handle and join the card's label", (tester) async {
+      await pumpHub(tester, medals: sampleSnapshot());
+      expect(find.byKey(const Key('more_profile_medals')), findsOneWidget);
+      expect(
+        tester.getTopLeft(find.byKey(const Key('more_profile_medals'))).dy,
+        greaterThan(tester.getTopLeft(find.text('@jordan · View profile')).dy),
+      );
+      final handle = tester.ensureSemantics();
+      expect(find.bySemanticsLabel('Jordan Miller, @jordan · View profile, Pinned medals: Upset Artist, Ticket Stub'),
+          findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('#138: no unlocks, no medal row', (tester) async {
+      await pumpHub(tester);
+      expect(find.byKey(const Key('more_profile_medals')), findsNothing);
     });
 
     testWidgets('profile avatar is 56dp', (tester) async {

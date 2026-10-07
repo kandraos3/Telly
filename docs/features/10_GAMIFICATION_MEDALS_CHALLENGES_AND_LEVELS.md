@@ -117,7 +117,7 @@ Seeded ids: `movies_10`, `tv_10`, `movies_50`, `tv_50`, `movies_100`, `tv_100`, 
 Up to three medals pinned to slots 1–3 (`pin_achievement(achievement_id, slot)` and `unpin_achievement(slot)`). Only unlocked medals can be pinned (`22023` otherwise). Pinning into a taken slot replaces that medal, and pinning a pinned medal moves it. Pinned medals appear:
 - on `SCR-23`;
 - under your name on the More profile card (`SCR-22`) and the friend profile (`SCR-15`);
-- on the medals share card.
+- on the medals share card: a 9:16 story (Template E in the viral sharing spec) in two layouts, one medal ("Achievement unlocked", from the unlock moment and the medal sheet) or the showcase ("My pinned medals" / "My latest medals" with "N of M medals unlocked", from `SCR-23`'s Share).
 
 The pinned row is never empty: when nothing is pinned, it shows your three most recent unlocks, labelled "Recent".
 
@@ -306,15 +306,15 @@ All screens use the shared app bars (screen specs §0.2) and the frosted bottom 
 
 ### 9.4 `SCR-24` Unlock moment: mockup A3
 
-- **What it is:** a full-screen modal over everything, shown on the next app foreground (or right after the ranking) for each unseen unlock, one after another.
+- **What it is:** a full-screen modal over everything, shown on the next app foreground (or right after the ranking) for each unseen unlock, one after another, oldest first. The app shell re-reads medals on resume and when the offline queue finishes syncing; each moment is marked seen when it closes. Offline snapshots never show moments.
 - **Layout:**
   - a confetti backdrop (static if reduced motion is on);
   - an "Achievement unlocked" chip;
   - the large medal;
   - the name in the display font;
-  - one personal line ("The Return of the King came in at #2 in your canon");
+  - one personal line ("The Return of the King came in at #2 in your canon"). Slice 1 lines come from the medal: "You've ranked 10 films.", "4 weeks in a row with at least one ranking.", "You've called 5 upsets against the crowd.", and so on;
   - rarity and friends;
-  - **Pin to profile** (primary), **Share card**, and **Done**.
+  - **Pin to profile** (primary; "Pinned to profile" once pinned; when all three slots are taken it opens the medal sheet's replace chooser), **Share card**, and **Done**.
 - **Haptics:** a medium impact on show.
 
 ### 9.5 `SCR-25` Challenges (`/more/challenges`): mockup C1

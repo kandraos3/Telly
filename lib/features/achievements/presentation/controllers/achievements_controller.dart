@@ -57,6 +57,18 @@ class AchievementsController extends AsyncNotifier<AchievementsSnapshot> {
     ]));
   }
 
+  /// Records that [medal]'s unlock moment was shown. Offline snapshots are left alone, so
+  /// the moment shows again once the app can tell the server.
+  Future<void> markSeen(Medal medal) async {
+    final current = state.valueOrNull;
+    if (current == null || current.offline) return;
+    await ref.read(achievementsRepositoryProvider).markSeen([medal.id]);
+    final latest = state.valueOrNull ?? current;
+    await _apply(latest.copyWith(medals: [
+      for (final m in latest.medals) m.id == medal.id ? m.copyWith(seenAt: DateTime.now()) : m,
+    ]));
+  }
+
   AchievementsSnapshot _requireOnline() {
     final current = state.valueOrNull ?? (throw StateError('Achievements not loaded'));
     if (current.offline) throw const AchievementsOfflineException();

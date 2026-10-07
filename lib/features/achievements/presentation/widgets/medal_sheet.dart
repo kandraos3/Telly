@@ -8,13 +8,15 @@ import '../../../../core/widgets/telly_avatar.dart';
 import '../../../../core/widgets/telly_frosted_sheet.dart';
 import '../../../../core/widgets/telly_primary_button.dart';
 import '../../../../core/widgets/telly_section_header.dart';
+import '../../../sharing/data/story_share_service.dart';
+import '../../../sharing/domain/medal_story.dart';
 import '../../domain/medal.dart';
 import '../controllers/achievements_controller.dart';
 import 'medal_badge.dart';
 
 /// The medal sheet (features/10 §9.3, mockup A2): the medal, how it's earned, progress, which
 /// people you follow have it, its rarity, and Pin/Unpin for unlocked medals. Collections'
-/// "Still to watch" comes in slice 2 (#141); the share card comes with #138.
+/// "Still to watch" comes in slice 2 (#141). Unlocked medals add Share card (#138).
 class MedalSheet extends ConsumerStatefulWidget {
   final String medalId;
 
@@ -92,6 +94,11 @@ class _MedalSheetState extends ConsumerState<MedalSheet> {
           if (medal.isUnlocked) ...[
             const SizedBox(height: 20),
             if (_choosingSlot) _slotChooser(snapshot, medal) else _pinButton(snapshot, medal),
+            TextButton(
+              key: const Key('medal_sheet_share'),
+              onPressed: () => ref.read(storyShareServiceProvider).shareMedals(MedalStory.single(medal)),
+              child: Text('Share card', style: TextStyle(color: TellyColors.textSecondaryOf(context))),
+            ),
           ],
           const SizedBox(height: 8),
         ],

@@ -8,6 +8,9 @@ import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
 import '../../../../core/widgets/telly_avatar.dart';
 import '../../../../core/widgets/telly_screen_header.dart';
+import '../../../achievements/domain/medal.dart';
+import '../../../achievements/presentation/controllers/achievements_controller.dart';
+import '../../../achievements/presentation/widgets/medal_showcase_row.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 
 /// `SCR-22` More hub (epic #44, decision 0003): everything that is not a daily destination.
@@ -38,6 +41,9 @@ class MoreHubScreen extends ConsumerWidget {
     final me = ref.watch(authControllerProvider.select((s) => s.user));
     final name = me?.displayName ?? '';
     final handle = me?.username;
+    // Pinned medals (or the latest unlocks) under the handle once loaded (features/10 §9.2).
+    final showcase =
+        ref.watch(achievementsControllerProvider.select((s) => s.valueOrNull?.showcase)) ?? MedalShowcase.empty;
 
     return Scaffold(
       body: TellyFloatingHeaderScrollView(
@@ -53,6 +59,7 @@ class MoreHubScreen extends ConsumerWidget {
                 name: name,
                 handle: handle,
                 avatarUrl: me?.avatarUrl,
+                showcase: showcase,
                 onTap: onProfileTap ?? () => context.go(Routes.canon),
               ),
               const SizedBox(height: 16),
@@ -152,9 +159,16 @@ class _ProfileCard extends StatelessWidget {
   final String name;
   final String? handle;
   final String? avatarUrl;
+  final MedalShowcase showcase;
   final VoidCallback onTap;
 
-  const _ProfileCard({required this.name, required this.handle, required this.avatarUrl, required this.onTap});
+  const _ProfileCard({
+    required this.name,
+    required this.handle,
+    required this.avatarUrl,
+    required this.showcase,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -162,7 +176,7 @@ class _ProfileCard extends StatelessWidget {
     final subtitle = handle == null || handle!.isEmpty ? 'View profile' : '@$handle · View profile';
     return _HubCard(
       key: const Key('more_profile_card'),
-      semanticLabel: '$title, $subtitle',
+      semanticLabel: showcase.isEmpty ? '$title, $subtitle' : '$title, $subtitle, ${showcase.semanticLabel}',
       onTap: onTap,
       child: Row(
         children: [
@@ -185,6 +199,10 @@ class _ProfileCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TellyTypography.bodyMedium(color: TellyColors.textTertiaryOf(context)),
                 ),
+                if (!showcase.isEmpty) ...[
+                  const SizedBox(height: 8),
+                  MedalShowcaseRow(key: const Key('more_profile_medals'), showcase: showcase),
+                ],
               ],
             ),
           ),

@@ -33,6 +33,9 @@ import 'package:telly_app/core/database/database.dart';
 import 'package:telly_app/core/database/database_provider.dart';
 import 'package:telly_app/features/achievements/data/achievements_repository.dart';
 import 'package:telly_app/features/achievements/presentation/screens/achievements_screen.dart';
+import 'package:telly_app/features/achievements/presentation/screens/unlock_moment_screen.dart';
+import 'package:telly_app/features/sharing/domain/medal_story.dart';
+import 'package:telly_app/features/sharing/presentation/widgets/medal_story_card.dart';
 import 'package:telly_app/features/profile/presentation/controllers/profile_controller.dart';
 import 'package:telly_app/features/profile/presentation/screens/dual_canon_profile_screen.dart';
 
@@ -556,6 +559,13 @@ void main() {
               fakeActivity('a3', username: 'sam', title: 'Shogun', minutesAgo: 3),
             ])),
             profileCanonProvider.overrideWith(() => _GoldenCanon()),
+            // #138: the More profile card shows pinned medals.
+            databaseProvider.overrideWith((ref) {
+              final db = AppDatabase.inMemory();
+              ref.onDispose(db.close);
+              return db;
+            }),
+            achievementsRepositoryProvider.overrideWithValue(FakeAchievementsRepository(sampleSnapshot())),
           ];
 
       testWidgets('Golden: SCR-21 HomeScreen ($name) on iPhone 15 Pro size', (tester) async {
@@ -595,6 +605,23 @@ void main() {
         ));
         await tester.pumpAndSettle();
         await expectLater(find.byType(AchievementsScreen), matchesGoldenFile('goldens/achievements_${name}_iphone15.png'));
+      });
+
+      testWidgets('Golden: SCR-24 UnlockMomentScreen ($name) on iPhone 15 Pro size (#138)', (tester) async {
+        await tester.binding.setSurfaceSize(const Size(393, 852));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        await tester.pumpWidget(ProviderScope(
+          overrides: shellOverrides(),
+          child: MaterialApp(
+            theme: theme,
+            // Reduced motion keeps the confetti still, so the golden is stable.
+            builder: (context, child) =>
+                MediaQuery(data: MediaQuery.of(context).copyWith(disableAnimations: true), child: child!),
+            home: UnlockMomentScreen(medal: sampleSnapshot().medals.first),
+          ),
+        ));
+        await tester.pumpAndSettle();
+        await expectLater(find.byType(UnlockMomentScreen), matchesGoldenFile('goldens/unlock_moment_${name}_iphone15.png'));
       });
 
       testWidgets('Golden: SCR-14 Canon podium ($name) on iPhone 15 Pro size (#47)', (tester) async {
@@ -638,6 +665,22 @@ void main() {
         await tester.tap(find.byKey(const Key('queue_series_tab')));
         await tester.pumpAndSettle();
         await expectLater(find.byType(SmartQueueScreen), matchesGoldenFile('goldens/queue_up_next_${name}_iphone15.png'));
+      });
+    }
+
+    for (final (name, story) in [
+      ('single', MedalStory.single(sampleSnapshot().medals.first)),
+      ('showcase', MedalStory.showcase(sampleSnapshot().showcase, unlocked: 3, total: 6)),
+    ]) {
+      testWidgets('Golden: medals share card ($name, #138)', (tester) async {
+        await tester.binding.setSurfaceSize(MedalStoryCard.logicalSize);
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        await tester.pumpWidget(Directionality(
+          textDirection: TextDirection.ltr,
+          child: MedalStoryCard(story: story),
+        ));
+        await tester.pumpAndSettle();
+        await expectLater(find.byType(MedalStoryCard), matchesGoldenFile('goldens/medal_story_$name.png'));
       });
     }
 

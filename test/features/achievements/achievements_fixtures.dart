@@ -89,4 +89,13 @@ class FakeAchievementsRepository implements AchievementsRepository {
 
   @override
   Future<void> unpin(int slot) async => unpins.add(slot);
+
+  final seen = <String>[];
+  Map<String, MedalShowcase> showcases = {};
+
+  @override
+  Future<void> markSeen(List<String> achievementIds) async => seen.addAll(achievementIds);
+
+  @override
+  Future<MedalShowcase> fetchShowcase(String userId) async => showcases[userId] ?? MedalShowcase.empty;
 }

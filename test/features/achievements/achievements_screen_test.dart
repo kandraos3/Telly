@@ -10,6 +10,7 @@ import 'package:telly_app/features/achievements/data/achievements_repository.dar
 import 'package:telly_app/features/achievements/domain/medal.dart';
 import 'package:telly_app/features/achievements/presentation/screens/achievements_screen.dart';
 import 'package:telly_app/features/achievements/presentation/widgets/medal_badge.dart';
+import 'package:telly_app/features/sharing/data/story_share_service.dart';
 
 import 'achievements_fixtures.dart';
 
@@ -23,6 +24,7 @@ void main() {
     AchievementsSnapshot? snapshot,
     Object? error,
     ThemeData? theme,
+    StoryShareService? share,
   }) async {
     tester.view.physicalSize = const Size(393, 1400);
     tester.view.devicePixelRatio = 1;
@@ -33,6 +35,7 @@ void main() {
         hapticsEnabledProvider.overrideWith((ref) => false),
         databaseProvider.overrideWithValue(db),
         achievementsRepositoryProvider.overrideWithValue(repo),
+        storyShareServiceProvider.overrideWithValue(share ?? FakeStoryShareService()),
       ],
       child: MaterialApp(theme: theme ?? TellyTheme.dark, home: const AchievementsScreen()),
     ));
@@ -164,6 +167,24 @@ void main() {
       expect(MedalBadge.gradientOf(MedalTier.gold), (TellyColors.tierGodStart, TellyColors.tierGodEnd));
       expect(MedalBadge.gradientOf(MedalTier.special), (TellyColors.tierPrestigeStart, TellyColors.tierPrestigeEnd));
       handle.dispose();
+    });
+
+    testWidgets('#138: Share sends a card of the pinned medals; the sheet shares one medal', (tester) async {
+      final share = FakeStoryShareService();
+      await pump(tester, share: share);
+      await tester.tap(find.byKey(const Key('achievements_share')));
+      await tester.pumpAndSettle();
+      expect(share.sharedMedals.single.heading, 'My pinned medals');
+      await tester.tap(find.byKey(const Key('achievements_row_streak_4')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('medal_sheet_share')));
+      await tester.pumpAndSettle();
+      expect(share.sharedMedals.last.medals.single.name, 'Regular');
+    });
+
+    testWidgets('#138: no unlocks, no Share', (tester) async {
+      await pump(tester, snapshot: sampleSnapshot(empty: true));
+      expect(find.byKey(const Key('achievements_share')), findsNothing);
     });
 
     testWidgets('light theme uses the light tokens', (tester) async {

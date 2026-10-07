@@ -696,6 +696,7 @@ The Canon tab opens on your rankings. Your profile card lives in the More hub (`
 └────────────────────────────────────────────────────────┘
 ```
 
+- **Pinned medals** (#138, features/10 §4.4): under the name and bio, the friend's pinned medals (small), or their latest unlocks with a "Recent" label. Hidden when they have none or their profile isn't visible.
 - **User Actions:**
   - `Follow / Unfollow Button`: Updates social graph.
   - `Compare Tastes Tab`: Shows interactive head-to-head scatter plot of mutual rankings across Movie and Series Canons.
@@ -897,7 +898,7 @@ A WHOOP-style hub (`/more`): one place for everything that isn't a daily destina
 └────────────────────────────────────────────────────────┘
 ```
 
-- **Profile card:** avatar 56dp, display name (Title Medium), `@handle · View profile` (Body Medium, `textTertiary`). Opens the Canon tab, which is your public profile.
+- **Profile card:** avatar 56dp, display name (Title Medium), `@handle · View profile` (Body Medium, `textTertiary`), then your pinned medals (small, features/10 §4.4) once you have any. Opens the Canon tab, which is your public profile.
 - **Queue tile:** first and full width, bookmark icon in the primary accent (`#D2FF52`; light `#4D7800`). Opens `/more/queue`.
 - **Feature tiles:** a 2-column grid (12dp gaps; an odd last tile keeps half the width, on the left), 104dp tall, `surface-raised` with a `stroke-subtle` border and radius 16. Icon (24px) top-left in its semantic accent; label (Body Large w600) and a one-line subtitle (Caption, `textTertiary`) bottom-left. Shipped now, in order: **Achievements** (trophy, Warm Amber `#FFA733`; light `#B36200`; "Medals and your streak", #137), **Wrapped** (lime), **Graveyard** (Neon Coral `#FF4B6E`; light `#D61F4D`).
 - **Grouped list:** 52dp rows in one rounded card with dividers. Shipped now: **Settings and account** (opens `/more/settings`).

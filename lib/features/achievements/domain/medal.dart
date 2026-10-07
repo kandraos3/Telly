@@ -135,6 +135,25 @@ class Medal {
     return '${tier.label} medal, $name, $state';
   }
 
+  /// The unlock moment's personal line (`SCR-24`, §9.4).
+  String get personalLine {
+    final what = mediaType == 'tv' ? 'series' : 'films';
+    final n = threshold ?? 0;
+    return switch (id) {
+      'upset_artist' => "You've called $n upsets against the crowd.",
+      'taste_twin' => 'You follow someone who shares $n% of your taste.',
+      'decade_hopper' => 'Your rankings now span $n decades.',
+      'genre_explorer' => 'Your rankings now cover $n genres.',
+      'graveyard_keeper' => '$n shows laid to rest in your TV Graveyard.',
+      'founding_viewer' => 'You joined Telly in its first 90 days.',
+      _ => switch (kind) {
+          MedalKind.milestone => "You've ranked $n $what.",
+          MedalKind.streak => '$n weeks in a row with at least one ranking.',
+          _ => description,
+        },
+    };
+  }
+
   Medal copyWith({int? pinnedSlot, bool clearPin = false, DateTime? seenAt}) => Medal(
         id: id,
         kind: kind,
@@ -280,6 +299,13 @@ class AchievementsSnapshot {
       .take(3)
       .toList();
 
+  /// Unlocks not yet celebrated (`SCR-24`), oldest first.
+  List<Medal> get unseen => [for (final m in medals) if (m.isUnlocked && m.seenAt == null) m]
+    ..sort((a, b) => a.unlockedAt!.compareTo(b.unlockedAt!));
+
+  /// What profiles show under the name: pinned medals, else the latest unlocks (§4.4).
+  MedalShowcase get showcase => MedalShowcase.of(medals);
+
   /// The first free pin slot (1–3), or null when all three are taken.
   int? get freePinSlot {
     final taken = {for (final m in medals) m.pinnedSlot};
@@ -308,4 +334,28 @@ class AchievementsSnapshot {
         'streak': streak.toJson(),
         'saved_at': savedAt.toUtc().toIso8601String(),
       };
+}
+
+/// The medals shown under a name (More profile card, friend profile, share card): the pinned
+/// ones in slot order, or the three most recent unlocks marked [isRecent] (§4.4).
+class MedalShowcase {
+  final List<Medal> medals;
+  final bool isRecent;
+
+  const MedalShowcase({this.medals = const [], this.isRecent = false});
+
+  static const empty = MedalShowcase();
+
+  factory MedalShowcase.of(Iterable<Medal> all) {
+    final pinned = [for (final m in all) if (m.isUnlocked && m.pinnedSlot != null) m]
+      ..sort((a, b) => a.pinnedSlot!.compareTo(b.pinnedSlot!));
+    if (pinned.isNotEmpty) return MedalShowcase(medals: pinned);
+    final recent = [for (final m in all) if (m.isUnlocked) m]..sort((a, b) => b.unlockedAt!.compareTo(a.unlockedAt!));
+    return MedalShowcase(medals: recent.take(3).toList(), isRecent: recent.isNotEmpty);
+  }
+
+  bool get isEmpty => medals.isEmpty;
+
+  /// "Pinned medals: Centurion, Upset Artist" for screen readers.
+  String get semanticLabel => '${isRecent ? 'Recent' : 'Pinned'} medals: ${medals.map((m) => m.name).join(', ')}';
 }

@@ -9,6 +9,8 @@ import '../../../../core/theme/telly_typography.dart';
 import '../../../../core/widgets/telly_empty_state.dart';
 import '../../../../core/widgets/telly_screen_header.dart';
 import '../../../../core/widgets/telly_section_header.dart';
+import '../../../sharing/data/story_share_service.dart';
+import '../../../sharing/domain/medal_story.dart';
 import '../../domain/medal.dart';
 import '../controllers/achievements_controller.dart';
 import '../widgets/medal_badge.dart';
@@ -18,7 +20,7 @@ import '../widgets/medal_sheet.dart';
 ///
 /// Summary (unlocked count and the weekly streak chip), the pinned row, then Milestones,
 /// Taste and Streak, with locked medals showing their progress. Collections join in slice 2
-/// (#141); the app bar's Share comes with the medals share card (#138).
+/// (#141). Share (app bar) sends a card of the showcase: pinned medals, or the latest unlocks (#138).
 class AchievementsScreen extends ConsumerWidget {
   const AchievementsScreen({super.key});
 
@@ -30,6 +32,19 @@ class AchievementsScreen extends ConsumerWidget {
       appBar: TellySubpageAppBar(
         title: 'Achievements',
         onNav: () => context.canPop() ? context.pop() : context.go(Routes.more),
+        actions: [
+          if (snapshot != null && !snapshot.showcase.isEmpty)
+            TellyHeaderAction(
+              key: const Key('achievements_share'),
+              icon: Icons.ios_share_rounded,
+              tooltip: 'Share your medals',
+              onPressed: () => ref.read(storyShareServiceProvider).shareMedals(MedalStory.showcase(
+                    snapshot.showcase,
+                    unlocked: snapshot.unlockedCount,
+                    total: snapshot.visible.length,
+                  )),
+            ),
+        ],
       ),
       body: SafeArea(
         child: snapshot != null
