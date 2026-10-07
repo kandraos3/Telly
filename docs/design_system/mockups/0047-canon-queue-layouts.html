@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Canon &amp; Queue Layouts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap">
+<style>
+/* Layout: a review sheet. Short brief, then per screen a row of phone frames (Today + A/B/C) drawn at real dp and zoomed to 80%. */
+:root {
+  /* page chrome (light) */
+  --page: #EEF0F4; --ink: #0F1117; --ink-2: #4A4E63; --ink-3: #696E87; --rule: #D7DBE5; --card: #FFFFFF; --mark: #4D7800;
+  --f-ui: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-display: "Playfair Display", Georgia, "Times New Roman", serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --page: #050608; --ink: #F2F3F7; --ink-2: #C8CAD8; --ink-3: #7D8198; --rule: #242938; --card: #0D0F15; --mark: #D2FF52; color-scheme: dark } }
+:root[data-theme="dark"] { --page: #050608; --ink: #F2F3F7; --ink-2: #C8CAD8; --ink-3: #7D8198; --rule: #242938; --card: #0D0F15; --mark: #D2FF52; color-scheme: dark }
+
+/* Telly app tokens, scoped to phone frames (style guide §2.1; light from telly_colors.dart) */
+.ph { --bg:#08090C; --sf:#11131A; --ov:#1A1D27; --st:#242938; --gl:rgba(255,255,255,.08); --t1:#FFFFFF; --t2:#C8CAD8; --t3:#7D8198;
+      --lime:#D2FF52; --limeFill:#D2FF52; --onLime:#08090C; --amber:#FFA733; --coral:#FF4B6E; --violet:#7C5CFF; --cyan:#00F0FF; }
+.light .ph { --bg:#F6F7F9; --sf:#FFFFFF; --ov:#F0F2F5; --st:#E2E5EC; --gl:rgba(0,0,0,.08); --t1:#0F1117; --t2:#4A4E63; --t3:#696E87;
+      --lime:#4D7800; --limeFill:#D2FF52; --onLime:#0F1117; --amber:#B36200; --coral:#D61F4D; --violet:#5B3CE0; --cyan:#00838F; }
+
+* { box-sizing: border-box }
+body { background: var(--page); color: var(--ink); font: 15px/1.55 var(--f-ui); margin: 0 }
+.wrap { max-width: 1480px; margin: 0 auto; padding-inline: 24px; padding-block: 40px 72px }
+@media (max-width: 600px) { .wrap { padding-inline: 16px } }
+header.top { display: grid; gap: 10px; max-width: 72ch }
+.eyebrow { font: 700 12px/1 var(--f-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3) }
+h1 { font: 700 clamp(30px, 4vw, 44px)/1.1 var(--f-display); margin: 0; letter-spacing: -.02em; text-wrap: balance }
+h2 { font: 700 28px/1.2 var(--f-display); margin: 0; letter-spacing: -.01em }
+p { margin: 0; color: var(--ink-2) }
+.toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 18px }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 10px; padding: 3px; background: var(--card) }
+.seg button { font: 700 13px var(--f-ui); color: var(--ink-2); background: none; border: 0; padding: 8px 14px; border-radius: 7px; cursor: pointer; min-height: 36px }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--page) }
+.seg button:focus-visible, a:focus-visible { outline: 2px solid var(--mark); outline-offset: 2px }
+section.screen { margin-top: 56px; display: grid; gap: 18px }
+.screen-head { display: grid; gap: 6px; max-width: 80ch }
+.row { display: flex; gap: 22px; overflow-x: auto; padding-bottom: 12px; scroll-snap-type: x proximity }
+.opt { flex: 0 0 auto; width: 300px; display: grid; gap: 12px; align-content: start; scroll-snap-align: start }
+.opt-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap }
+.badge { font: 800 12px/1 var(--f-ui); padding: 5px 8px; border-radius: 6px; background: var(--ink); color: var(--page) }
+.badge.today { background: transparent; color: var(--ink-3); border: 1px solid var(--rule) }
+.opt-head b { font-weight: 700; font-size: 15px }
+.metric { font: 600 13px var(--f-ui); color: var(--ink-3); font-variant-numeric: tabular-nums }
+.metric strong { color: var(--ink); font-weight: 800 }
+.notes { display: grid; gap: 6px; font-size: 13.5px; line-height: 1.5; color: var(--ink-2); margin: 0; padding: 0; list-style: none }
+.notes li { padding-left: 16px; position: relative }
+.notes li::before { content: ""; position: absolute; left: 2px; top: .62em; width: 6px; height: 6px; border-radius: 50% }
+.notes .plus::before { background: #34D399 } .notes .minus::before { background: #F87171 }
+.rec { margin-top: 56px; background: var(--card); border: 1px solid var(--rule); border-radius: 14px; padding: 22px 24px; display: grid; gap: 10px; max-width: 86ch }
+.rec h2 { font-size: 22px }
+.rec ul { margin: 0; padding-left: 20px; color: var(--ink-2); display: grid; gap: 6px }
+
+/* ---------- phone frame (375 × 760 dp, zoomed) ---------- */
+.frame { width: 300px; height: 608px; border-radius: 30px; padding: 6px; background: #1b1d24; box-shadow: 0 1px 0 rgba(255,255,255,.06) inset, 0 12px 30px rgba(0,0,0,.25) }
+.ph { zoom: .8; width: 375px; height: 760px; border-radius: 30px; overflow: hidden; position: relative; background: var(--bg); color: var(--t1); font-family: var(--f-ui); font-size: 13px; line-height: 1.35 }
+.ph .sb { height: 44px; display: flex; justify-content: space-between; align-items: center; padding: 0 26px; font-weight: 700; font-size: 14px; color: var(--t1) }
+.ph .hd { height: 56px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px }
+.ph .hd h3 { font: 800 26px/1 var(--f-ui); margin: 0; letter-spacing: -.02em; color: var(--t1) }
+.ph .hd.sub h3 { font-size: 20px }
+.ph .acts { display: flex; gap: 6px }
+.ph .ic { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; color: var(--t2); font-size: 18px; border: 1px solid var(--gl); background: var(--sf) }
+.ph .ic.plain { border: 0; background: none }
+.ph .body { position: absolute; top: 100px; left: 0; right: 0; bottom: 0; overflow: hidden }
+.ph .pad { padding: 0 16px }
+.ph .gap8 { height: 8px } .ph .gap12 { height: 12px } .ph .gap16 { height: 16px }
+
+/* fold marker: where rank #1 / first card starts */
+.ph .first { position: relative }
+.ph .first::after { content: attr(data-y); position: absolute; right: 6px; top: -9px; font: 800 10px/1 var(--f-ui); color: var(--onLime); background: var(--limeFill); padding: 3px 6px; border-radius: 4px; letter-spacing: .02em }
+
+/* tab bar + log fab */
+.ph .tabs { position: absolute; left: 0; right: 0; bottom: 0; height: 80px; background: var(--sf); border-top: 1px solid var(--st); display: grid; grid-template-columns: repeat(5, 1fr); padding: 10px 6px 24px; z-index: 3 }
+.ph .tab { display: grid; justify-items: center; gap: 3px; font-size: 10.5px; font-weight: 700; color: var(--t3) }
+.ph .tab i { font-style: normal; font-size: 18px; line-height: 1 }
+.ph .tab.on { color: var(--lime) }
+.ph .fab { position: absolute; right: 16px; bottom: 96px; background: var(--limeFill); color: var(--onLime); font-weight: 800; font-size: 15px; padding: 14px 20px; border-radius: 28px; z-index: 4; box-shadow: 0 8px 20px rgba(0,0,0,.35) }
+
+/* profile card (today) */
+.ph .prof { display: flex; gap: 14px; padding: 0 16px; align-items: flex-start }
+.ph .av { width: 64px; height: 64px; border-radius: 50%; border: 2px solid color-mix(in srgb, var(--lime) 50%, transparent); background: linear-gradient(135deg,#5b4bd6,#1aa3b8); flex: none }
+.ph .av.sm { width: 36px; height: 36px; border-width: 1.5px }
+.ph .pname { font-weight: 800; font-size: 18px; color: var(--t1) }
+.ph .phandle { color: var(--t3); font-size: 13px }
+.ph .pbio { color: var(--t2); font-size: 13px; margin-top: 4px }
+.ph .pcounts { display: flex; gap: 18px; margin-top: 8px; font-size: 12px; color: var(--t3) }
+.ph .pcounts b { color: var(--t1); font-size: 15px; display: block; font-variant-numeric: tabular-nums }
+
+/* canon switcher */
+.ph .csw { margin: 0 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 14px; background: var(--sf); border: 1px solid var(--gl) }
+.ph .csw div { border-radius: 10px; padding: 9px 10px; text-align: center; font-weight: 800; font-size: 13.5px; color: var(--t3) }
+.ph .csw div small { display: block; font-weight: 600; font-size: 10.5px; color: var(--t3) }
+.ph .csw .on { background: var(--ov); color: var(--t1); border: 1px solid var(--gl) }
+.ph .csw .on span { color: var(--lime) }
+.ph .csw.slim div { padding: 7px 8px; font-size: 13px }
+
+/* stats panel (today) */
+.ph .stats { margin: 0 16px; border-radius: 16px; background: var(--sf); border: 1px solid var(--gl); padding: 4px; display: grid; grid-template-columns: 1fr 1fr }
+.ph .st { padding: 10px 12px }
+.ph .st em { font-style: normal; display: block; font-size: 10px; font-weight: 700; letter-spacing: .08em; color: var(--t3); text-transform: uppercase }
+.ph .st b { display: block; font-size: 18px; font-weight: 700; margin-top: 4px; color: var(--t1); font-variant-numeric: tabular-nums }
+.ph .st small { color: var(--lime); font-size: 11px }
+
+/* stat strip (A) */
+.ph .strip { display: flex; gap: 8px; padding: 0 16px; overflow: hidden }
+.ph .chip { flex: none; display: inline-flex; gap: 6px; align-items: baseline; padding: 7px 11px; border-radius: 20px; background: var(--sf); border: 1px solid var(--gl); font-size: 12px; color: var(--t3); white-space: nowrap }
+.ph .chip b { color: var(--t1); font-weight: 800; font-variant-numeric: tabular-nums }
+.ph .chip.on { background: color-mix(in srgb, var(--lime) 15%, transparent); border-color: var(--lime); color: var(--lime) }
+.ph .chip.on b { color: var(--lime) }
+
+/* showcase (today) */
+.ph .sec { font-size: 11px; font-weight: 800; letter-spacing: .1em; color: var(--t3); text-transform: uppercase; padding: 0 16px }
+.ph .show { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 10px 16px 0 }
+.ph .show .pst { height: 150px; border-radius: 10px }
+.ph .show .cap { font-size: 11.5px; font-weight: 700; margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--t1) }
+
+/* view-mode row */
+.ph .vrow { display: flex; justify-content: space-between; align-items: center; padding: 0 16px }
+.ph .vm { display: flex; padding: 3px; border-radius: 12px; background: var(--ov); border: 1px solid var(--st) }
+.ph .vm span { padding: 9px 10px; border-radius: 8px; font-size: 12px; font-weight: 800; color: var(--t1); display: inline-flex; gap: 4px }
+.ph .vm span.on { background: var(--sf); color: var(--lime); border: 1px solid var(--gl) }
+.ph .vm.icons span { padding: 8px 11px; font-size: 14px }
+
+/* ranked rows */
+.ph .rk { display: flex; align-items: center; gap: 12px; padding: 8px 16px; border-bottom: 1px solid var(--st) }
+.ph .rk .n { width: 34px; font-weight: 800; font-size: 15px; color: var(--t3); font-variant-numeric: tabular-nums }
+.ph .rk .n.top { color: var(--lime) }
+.ph .rk .pst { width: 36px; height: 52px; border-radius: 6px; flex: none }
+.ph .rk .tt { flex: 1; min-width: 0 }
+.ph .rk .tt b { display: block; font-size: 14.5px; font-weight: 700; color: var(--t1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.ph .rk .tt small { color: var(--t3); font-size: 12px }
+.ph .sc { font-weight: 800; font-size: 14px; padding: 5px 8px; border-radius: 8px; font-variant-numeric: tabular-nums; border: 1px solid; flex: none }
+.ph .tierhd { padding: 14px 16px 6px; font: 700 15px var(--f-display); letter-spacing: .01em }
+
+/* podium (B) */
+.ph .pod { display: grid; grid-template-columns: 1.25fr 1fr 1fr; gap: 10px; padding: 0 16px; align-items: end }
+.ph .pod .card { border-radius: 14px; overflow: hidden; position: relative; background: var(--sf); border: 1px solid var(--gl) }
+.ph .pod .pst { height: 170px }
+.ph .pod .card:nth-child(n+2) .pst { height: 132px }
+.ph .pod .meta { padding: 8px 9px 10px; display: grid; gap: 4px }
+.ph .pod .meta b { font-size: 12.5px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--t1) }
+.ph .pod .no { position: absolute; top: 8px; left: 8px; background: var(--limeFill); color: var(--onLime); font-weight: 800; font-size: 12px; padding: 3px 7px; border-radius: 6px }
+
+/* queue */
+.ph .qhub { margin: 0 16px; display: grid; grid-template-columns: repeat(3,1fr); gap: 4px; padding: 4px; border-radius: 14px; background: var(--sf); border: 1px solid var(--gl) }
+.ph .qhub div { text-align: center; padding: 9px 4px; font-size: 12.5px; font-weight: 800; color: var(--t3); border-radius: 10px }
+.ph .qhub .on { background: var(--ov); color: var(--t1); border: 1px solid var(--gl) }
+.ph .qc { margin: 0 16px 12px; border-radius: 16px; background: var(--sf); border: 1px solid var(--gl); padding: 12px; display: grid; gap: 10px }
+.ph .qc .top { display: flex; gap: 12px }
+.ph .qc .pst { width: 56px; height: 82px; border-radius: 8px; flex: none }
+.ph .qc b { font-size: 15px; font-weight: 800; display: block; color: var(--t1) }
+.ph .qc small { color: var(--t3); font-size: 12px; display: block }
+.ph .qc .fa { color: var(--amber); font-weight: 700; font-size: 12px; margin-top: 4px; display: block; font-variant-numeric: tabular-nums }
+.ph .qc .btns { display: flex; gap: 8px }
+.ph .btn { border-radius: 10px; padding: 9px 12px; font-weight: 800; font-size: 12.5px; text-align: center; border: 1px solid var(--gl); color: var(--t1); background: var(--ov) }
+.ph .btn.pri { background: var(--limeFill); color: var(--onLime); border-color: transparent }
+.ph .btn.grow { flex: 1 }
+.ph .prov { font-size: 10px; font-weight: 800; letter-spacing: .06em; padding: 3px 7px; border-radius: 6px; color: var(--cyan); border: 1px solid color-mix(in srgb, var(--cyan) 50%, transparent); align-self: flex-start }
+.ph .qr { display: flex; align-items: center; gap: 12px; padding: 9px 16px; border-bottom: 1px solid var(--st) }
+.ph .qr .pst { width: 40px; height: 58px; border-radius: 6px; flex: none }
+.ph .qr .tt { flex: 1; min-width: 0 }
+.ph .qr .tt b { display: block; font-size: 14.5px; font-weight: 700; color: var(--t1) }
+.ph .qr .tt small { color: var(--t3); font-size: 12px }
+.ph .qr .go { font-size: 12px; font-weight: 800; padding: 8px 11px; border-radius: 10px; background: var(--ov); color: var(--t1); border: 1px solid var(--gl); white-space: nowrap }
+.ph .hero { margin: 0 16px; border-radius: 18px; overflow: hidden; position: relative; border: 1px solid var(--gl) }
+.ph .hero .art { height: 168px }
+.ph .hero .ov { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 20%, rgba(8,9,12,.92)); display: flex; flex-direction: column; justify-content: flex-end; padding: 14px; gap: 6px; color: #fff }
+.ph .hero .ov em { font-style: normal; font-size: 10.5px; font-weight: 800; letter-spacing: .12em; color: #D2FF52 }
+.ph .hero .ov b { font-size: 20px; font-weight: 800 }
+.ph .hero .ov small { font-size: 12px; color: #C8CAD8 }
+.ph .hero .bar { display: flex; gap: 8px; padding: 12px; background: var(--sf) }
+.ph .note { margin: 4px 16px 10px; padding: 9px 11px; border-radius: 10px; border: 1px dashed var(--st); color: var(--t3); font-size: 11.5px }
+.ph .badge-n { display: inline-grid; place-items: center; min-width: 16px; height: 16px; border-radius: 8px; background: var(--limeFill); color: var(--onLime); font-size: 10px; font-weight: 800; margin-left: 4px; padding: 0 4px }
+.ph .sheetpeek { position: absolute; left: 0; right: 0; bottom: 0; background: var(--ov); border-top: 1px solid var(--st); border-radius: 20px 20px 0 0; padding: 10px 16px 26px; z-index: 5 }
+.ph .sheetpeek .grab { width: 36px; height: 4px; border-radius: 2px; background: var(--st); margin: 0 auto 10px }
+
+/* round 2 additions */
+.ph .ic.on { color: var(--lime); border-color: color-mix(in srgb, var(--lime) 45%, transparent) }
+.ph .tierhd { display: flex; justify-content: space-between; align-items: baseline }
+.ph .tierhd small { font: 700 11px var(--f-ui); color: var(--t3); font-variant-numeric: tabular-nums }
+.ph .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; padding: 0 16px }
+.ph .grid .g { aspect-ratio: 2 / 3; border-radius: 4px; position: relative; max-width: 100% }
+.ph .grid .g span { position: absolute; left: 5px; bottom: 5px; font-size: 11px; font-weight: 800; color: #fff; background: rgba(8,9,12,.7); padding: 2px 5px; border-radius: 4px }
+.ph .scrim { position: absolute; inset: 0; background: rgba(4,5,8,.55); z-index: 4 }
+.ph .sheetpeek h4 { margin: 0 0 6px; font-size: 11px; font-weight: 800; letter-spacing: .1em; color: var(--t3); text-transform: uppercase }
+.ph .opt-row { display: flex; align-items: center; gap: 12px; padding: 12px 2px; border-bottom: 1px solid var(--st); font-size: 15px; font-weight: 600; color: var(--t1) }
+.ph .opt-row:last-child { border-bottom: 0 }
+.ph .opt-row .g1 { width: 22px; text-align: center; color: var(--t2) }
+.ph .opt-row .ck { margin-left: auto; color: var(--lime); font-weight: 800 }
+.ph .opt-row small { display: block; font-size: 12px; font-weight: 500; color: var(--t3) }
+.ph .tog { margin-left: auto; width: 42px; height: 24px; border-radius: 12px; background: var(--st); position: relative; flex: none }
+.ph .tog::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff }
+.ph .tog.on { background: var(--limeFill) } .ph .tog.on::after { left: 21px; background: var(--onLime) }
+.ph .sheetstats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px }
+.ph .sheetstats .st { background: var(--sf); border: 1px solid var(--gl); border-radius: 12px }
+.ph .shuffle { position: absolute; top: 10px; right: 10px; font-size: 11px; font-weight: 800; color: #fff; background: rgba(8,9,12,.6); border: 1px solid rgba(255,255,255,.18); padding: 6px 9px; border-radius: 14px; z-index: 1 }
+.ph .lc { margin: 0 16px 10px; border-radius: 16px; background: var(--sf); border: 1px solid var(--gl); padding: 12px; display: flex; gap: 12px; align-items: center }
+.ph .lc .stack { display: flex; flex: none }
+.ph .lc .stack span { width: 30px; height: 44px; border-radius: 5px; margin-left: -12px; border: 2px solid var(--sf) }
+.ph .lc .stack span:first-child { margin-left: 0 }
+.ph .lc b { display: block; font-size: 14.5px; font-weight: 800; color: var(--t1) }
+.ph .lc small { color: var(--t3); font-size: 12px }
+.ph .lc .pill { margin-left: auto; font-size: 10px; font-weight: 800; letter-spacing: .06em; color: var(--t3); border: 1px solid var(--st); padding: 3px 7px; border-radius: 6px }
+.changes { margin-top: 28px; background: var(--card); border: 1px solid var(--rule); border-radius: 14px; padding: 18px 22px; display: grid; gap: 8px; max-width: 86ch }
+.changes ul { margin: 0; padding-left: 20px; color: var(--ink-2); display: grid; gap: 5px }
+
+@media (prefers-reduced-motion: no-preference) { .seg button { transition: background .15s } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow">Telly · #47 · Approved design · 2026-10-06 · decision 0004</div>
+    <h1>Canon &amp; Queue layouts</h1>
+    <p>Your picks redrawn: <b>Canon B (Podium)</b> and <b>Queue B (Up next hero)</b>, with your changes. Each screen is shown in every state, including its sheets. Frames are a 375 × 760&nbsp;dp phone at 80%, so anything cut off at the bottom is below the fold. Titles, scores and avatars are examples.</p>
+    <div class="changes">
+      <div class="eyebrow">What changed since round 1</div>
+      <ul>
+        <li><b>Canon:</b> the view switcher moves to a header button (its icon shows the current view) that opens a sheet. The sheet also takes over the old ⋮ menu (Anime franchise rollup).</li>
+        <li><b>Canon:</b> the podium appears only in Ranked. Tiers and 3x3 use the whole page under the switcher.</li>
+        <li><b>Canon:</b> stats stay as the header button and open as a sheet.</li>
+        <li><b>Queue:</b> Movies / Series uses the same slim switcher as Canon, next to a <b>Filter</b> chip (Sort and On My Services). My Lists and Friends' Lists move to a Lists screen.</li>
+        <li><b>Queue:</b> "Up next" is a random pick from the titles the current filter shows. It's re-rolled each time you open the Queue, and ↻ picks another. A smart pick is tracked in #124.</li>
+      </ul>
+    </div>
+    <div class="toolbar">
+      <span class="eyebrow" id="themeLbl">App theme</span>
+      <div class="seg" role="group" aria-labelledby="themeLbl">
+        <button type="button" id="th-dark" aria-pressed="true">Dark</button>
+        <button type="button" id="th-light" aria-pressed="false">Light</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="screen" id="canon">
+    <div class="screen-head">
+      <div class="eyebrow">SCR-14 · Canon tab</div>
+      <h2>Canon: Podium</h2>
+      <p>Header: <b>▥ Stats</b>, <b>☰ View</b> (its icon follows the current view) and <b>⇪ Share</b>. Under it is the slim Movies / Series switcher, then the content. Your profile card stays in More. Your pinned Top 3 appears on your profile and in the Stats sheet.</p>
+    </div>
+    <div class="row" id="canonRow"></div>
+  </section>
+
+  <section class="screen" id="queue">
+    <div class="screen-head">
+      <div class="eyebrow">SCR-13 · More → Queue</div>
+      <h2>Queue: Up next hero</h2>
+      <p>App bar: <b>☷ Lists</b>. One control row: Movies / Series and <b>Filter</b>. Then the Up next card (▶ Watch, ✓ Seen, ↻ another pick) and compact rows below it. Swipe a row right to mark it seen and rank it, or left to remove it.</p>
+    </div>
+    <div class="row" id="queueRow"></div>
+  </section>
+
+  <aside class="rec">
+    <div class="eyebrow">Next step</div>
+    <h2>Approve or adjust</h2>
+    <ul>
+      <li>Reply "approved" or list changes. Then I'll record the decision, update SCR-13 and SCR-14, and split the work into tasks.</li>
+      <li>The friend profile (SCR-15) would reuse the same Podium / Tiers / 3x3 views, so friends' canons look like yours.</li>
+    </ul>
+  </aside>
+</div>
+
+<script>
+(function () {
+  // ----- example data -----
+  const films = [
+    ["Interstellar", "Paramount · 2014", 10.00, 222],
+    ["Parasite", "Neon · 2019", 9.72, 140],
+    ["Spirited Away", "Ghibli · 2001", 9.45, 170],
+    ["The Godfather", "Paramount · 1972", 9.38, 30],
+    ["Dune: Part Two", "Warner Bros · 2024", 9.28, 35],
+    ["Oppenheimer", "Universal · 2023", 9.14, 15],
+    ["The Dark Knight", "Warner Bros · 2008", 9.05, 210],
+    ["Whiplash", "Sony Pictures · 2014", 8.88, 0],
+    ["Past Lives", "A24 · 2023", 8.71, 190],
+    ["Arrival", "Paramount · 2016", 8.62, 200],
+    ["Everything Everywhere", "A24 · 2022", 8.44, 300],
+    ["La La Land", "Lionsgate · 2016", 8.12, 260]
+  ];
+  const queue = [
+    ["Slow Horses", "Apple TV+ · 4 seasons", 8.94, "APPLE TV+", "@maya", 160],
+    ["Station Eleven", "Max · 1 season (10 eps)", 8.81, "MAX", "@alex", 20],
+    ["Shōgun", "Disney+ · 1 season", 8.77, "DISNEY+", "@sam", 0],
+    ["The Bear", "Disney+ · 3 seasons", 8.60, "DISNEY+", "@maya", 30],
+    ["Severance", "Apple TV+ · 2 seasons", 8.55, "APPLE TV+", "@jo", 200],
+    ["Andor", "Disney+ · 2 seasons", 8.49, "DISNEY+", "@alex", 350],
+    ["Pachinko", "Apple TV+ · 2 seasons", 8.30, "APPLE TV+", "@sam", 330]
+  ];
+
+  // Score tiers (style guide §2.2): dark / light accent per tier
+  function tier(s) {
+    if (s >= 9.2) return ["God", "#FFA733", "#B36200"];
+    if (s >= 8.5) return ["Prestige", "#A78BFA", "#5B3CE0"];
+    if (s >= 7.8) return ["Great", "#34D399", "#047857"];
+    if (s >= 7.0) return ["Good", "#38BDF8", "#0369A1"];
+    if (s >= 5.5) return ["Mid", "#94A3B8", "#475569"];
+    return ["Dropped", "#F87171", "#B91C1C"];
+  }
+  const isLight = () => document.body.classList.contains("light");
+  function chip(s) {
+    const [, d, l] = tier(s); const c = isLight() ? l : d;
+    return `<span class="sc" style="color:${c};border-color:${c};background:color-mix(in srgb, ${c} 18%, transparent)">${s.toFixed(2)}</span>`;
+  }
+  const poster = h => `background:linear-gradient(160deg,hsl(${h} 55% 42%),hsl(${(h + 40) % 360} 60% 16%))`;
+
+  // ----- shared pieces -----
+  const sb = () => `<div class="sb"><span>9:41</span><span>●●● ▮</span></div>`;
+  const hd = (title, acts = "") => `<div class="hd"><h3>${title}</h3><div class="acts">${acts}</div></div>`;
+  const sub = (title, acts = "") => `<div class="hd sub"><div style="display:flex;gap:10px;align-items:center"><span class="ic plain">←</span><h3>${title}</h3></div><div class="acts">${acts}</div></div>`;
+  const ic = (g, extra = "") => `<span class="ic">${g}${extra}</span>`;
+  const tabs = () => `<div class="tabs">${[["⌂", "Home"], ["◎", "Explore"], ["≡", "Canon", 1], ["◇", "Social"], ["⋯", "More"]]
+    .map(([i, l, on]) => `<div class="tab${on ? " on" : ""}"><i>${i}</i>${l}</div>`).join("")}</div><div class="fab">+ Log</div>`;
+  const csw = (slim) => `<div class="csw${slim ? " slim" : ""}"><div class="on">Movies <span>142</span>${slim ? "" : "<small>&nbsp;</small>"}</div><div>Series <span>94</span>${slim ? "" : "<small>Includes anime</small>"}</div></div>`;
+  const rows = (from, n, mark) => films.slice(from, from + n).map(([t, m, s, h], k) => {
+    const i = from + k;
+    return `<div class="rk${k === 0 && mark ? " first" : ""}"${k === 0 && mark ? ` data-y="#1 at ${mark} dp"` : ""}><span class="n${i < 3 ? " top" : ""}">#${String(i + 1).padStart(2, "0")}</span><span class="pst" style="${poster(h)}"></span><span class="tt"><b>${t}</b><small>${m}</small></span>${chip(s)}</div>`;
+  }).join("");
+  const vrow = (labels = true) => labels
+    ? `<div class="vrow"><div class="vm"><span class="on">☰ Ranked</span><span>▤ Tiers</span><span>▦ 3x3</span></div><span class="ic plain">⋮</span></div>`
+    : `<div class="vrow"><div class="vm icons"><span class="on">☰</span><span>▤</span><span>▦</span></div><span class="ic plain">⋮</span></div>`;
+  const frame = inner => `<div class="frame"><div class="ph">${sb()}${inner}</div></div>`;
+
+  // ----- Canon: Podium, round 2 -----
+  const VIEW = { ranked: "☰", tiers: "▤", grid: "▦" };
+  const chead = (view, on) => hd("Canon",
+    `<span class="ic${on === "stats" ? " on" : ""}" title="Stats">▥</span><span class="ic${on === "view" ? " on" : ""}" title="View">${VIEW[view]}</span>` + ic("⇪"));
+  const podium = () => `<div class="pod">${films.slice(0, 3).map(([t, , s, h], i) => `<div class="card"><div class="pst" style="${poster(h)}"></div><span class="no">#${i + 1}</span><div class="meta"><b>${t}</b>${chip(s)}</div></div>`).join("")}</div>`;
+  const rankedBody = () => `${csw(true)}<div class="gap12"></div>${podium()}<div class="gap12"></div>${rows(3, 7)}`;
+  const tiersBody = () => {
+    const groups = [["God", "9.20 – 10.00", 0, 5], ["Prestige", "8.50 – 9.19", 5, 5], ["Great", "7.80 – 8.49", 10, 2]];
+    return `${csw(true)}<div class="gap8"></div>` + groups.map(([n, r, from, k]) => {
+      const c = isLight() ? tier(films[from][2])[2] : tier(films[from][2])[1];
+      return `<div class="tierhd" style="color:${c}"><span>${n} Tier</span><small>${r} · ${k}</small></div>${rows(from, k)}`;
+    }).join("");
+  };
+  const gridBody = () => `${csw(true)}<div class="gap12"></div><div class="grid">${films.map(([, , , h], i) => `<div class="g" style="${poster(h)}"><span>#${i + 1}</span></div>`).join("")}</div>`;
+  const sheet = inner => `<div class="scrim"></div><div class="sheetpeek"><div class="grab"></div>${inner}</div>`;
+
+  const canon = [
+    { tag: "1", name: "Ranked (default)", html: () => frame(chead("ranked") + `<div class="body">${rankedBody()}</div>` + tabs()),
+      notes: [["plus", "Ranks #1–3 are the podium and #4 onwards follow as rows, so ranking starts about 158 dp down."], ["plus", "Only one control row remains: the slim switcher, the same component the Queue uses."]] },
+    { tag: "2", name: "Tiers", html: () => frame(chead("tiers") + `<div class="body">${tiersBody()}</div>` + tabs()),
+      notes: [["plus", "No podium: tier groups start right under the switcher, with headers in each tier's accent and its score range."]] },
+    { tag: "3", name: "3x3", html: () => frame(chead("grid") + `<div class="body">${gridBody()}</div>` + tabs()),
+      notes: [["plus", "Full-page poster grid in rank order, with a small rank tag on each poster."]] },
+    { tag: "4", name: "View sheet (☰)", html: () => frame(chead("ranked", "view") + `<div class="body">${rankedBody()}</div>` + tabs() + sheet(
+      `<h4>View</h4>
+       <div class="opt-row"><span class="g1">☰</span>Ranked<span class="ck">✓</span></div>
+       <div class="opt-row"><span class="g1">▤</span>Tiers</div>
+       <div class="opt-row"><span class="g1">▦</span>3x3 grid</div>
+       <div class="gap8"></div><h4>Series only</h4>
+       <div class="opt-row"><span><span style="display:block">Anime franchise rollup</span><small>Combine multi-season anime into one entry</small></span><span class="tog on"></span></div>`)),
+      notes: [["plus", "Replaces the in-page switcher and the old ⋮ menu. The header icon always shows the current view."], ["minus", "Changing view takes two taps instead of one."]] },
+    { tag: "5", name: "Stats sheet (▥)", html: () => frame(chead("ranked", "stats") + `<div class="body">${rankedBody()}</div>` + tabs() + sheet(
+      `<h4>Movie stats</h4>
+       <div class="sheetstats"><div class="st"><em>Movies ranked</em><b>142</b></div><div class="st"><em>Hours watched</em><b>301h</b></div><div class="st"><em>Top genre</em><b>Sci-Fi</b><small>31% of your canon</small></div><div class="st"><em>Top director</em><b>Nolan</b><small>5 films</small></div></div>
+       <div class="gap12"></div><h4>Pinned Top 3</h4>
+       <div class="show" style="padding:6px 0 0">${[films[1], films[7], films[8]].map(([t, , , h]) => `<div><div class="pst" style="height:96px;${poster(h)}"></div><div class="cap">${t}</div></div>`).join("")}</div>`)),
+      notes: [["plus", "Today's stats panel for the selected canon, plus your pinned Top 3, which is edited from Edit profile."], ["plus", "It's a sheet, so it can grow later (charts, Wrapped) without pushing the list down."]] }
+  ];
+
+  // ----- Queue: Up next hero, round 2 -----
+  const qrow = ([t, m, s, p, , h]) => `<div class="qr"><span class="pst" style="${poster(h)}"></span><span class="tt"><b>${t}</b><small>${m} · <span style="color:var(--amber);font-weight:700">★ ${s.toFixed(2)}</span></small></span><span class="go">▶ ${p.replace("APPLE TV+", "Apple TV+").replace("DISNEY+", "Disney+").replace("MAX", "Max")}</span></div>`;
+  const tvsw = () => `<div class="csw slim" style="margin:0;flex:1"><div>Movies <span>14</span></div><div class="on">Series <span>24</span></div></div>`;
+  const qctrl = (filterOn) => `<div class="pad" style="display:flex;gap:8px;align-items:center">${tvsw()}<span class="chip${filterOn ? " on" : ""}" style="padding:9px 12px">⚲ Filter${filterOn ? '<span class="badge-n">1</span>' : ""}</span></div>`;
+  const pick = queue[3];
+  const qmain = (filterOn) => sub("Queue", ic("☷")) +
+    `<div class="body">${qctrl(filterOn)}<div class="gap12"></div>
+      <div class="hero"><span class="shuffle">↻ Another</span><div class="art" style="${poster(pick[5])}"></div><div class="ov" style="bottom:56px"><em>UP NEXT · RANDOM PICK</em><b>${pick[0]}</b><small>${pick[1]} · ★ ${pick[2].toFixed(2)} friends avg · saved from ${pick[4]}</small></div><div class="bar"><span class="btn pri grow">▶ Watch on Disney+</span><span class="btn">✓ Seen</span></div></div>
+      <div class="gap12"></div><div class="sec">Then · 23 more</div><div class="gap8"></div>
+      ${queue.filter(q => q !== pick).map(qrow).join("")}
+    </div>`;
+
+  const queueOpts = [
+    { tag: "1", name: "Watchlist", html: () => frame(qmain(false)),
+      notes: [["plus", "One control row. Up next is a random title from what the filter shows, re-rolled on each open. ↻ picks another, and it's never the same title twice in a row."], ["plus", "The rest are compact rows with one ▶ Watch action, sorted by the Filter sheet's choice."], ["minus", "If the filter leaves only one title, there's no ↻. With none, the empty state replaces the hero."]] },
+    { tag: "2", name: "Filter sheet", html: () => frame(qmain(true) + sheet(
+      `<h4>Sort by</h4>
+       <div class="opt-row"><span class="g1">⚇</span>Friends' score<span class="ck">✓</span></div>
+       <div class="opt-row"><span class="g1">◷</span>Leaving soon</div>
+       <div class="gap8"></div><h4>Show</h4>
+       <div class="opt-row"><span><span style="display:block">Only on my services</span><small>Hide titles you can't stream</small></span><span class="tog on"></span></div>`)),
+      notes: [["plus", "Sort and On My Services in one place. The badge on Filter counts active filters (the sort order doesn't count)."], ["plus", "Up next follows the filter, so it's always something you can watch."]] },
+    { tag: "3", name: "Lists (☷)", html: () => frame(sub("Lists", ic("+")) +
+      `<div class="body"><div class="qhub" style="grid-template-columns:1fr 1fr"><div class="on">My lists</div><div>Friends' lists</div></div><div class="gap12"></div>
+        ${[["Comfort rewatches", "12 titles", "PRIVATE", [20, 200, 300]], ["Best of A24", "18 titles", "PUBLIC", [190, 300, 140]], ["Slow-burn thrillers", "9 titles", "PUBLIC", [160, 30, 350]], ["Anime starter pack", "7 titles", "PUBLIC", [170, 0, 260]]]
+          .map(([t, n, p, hs]) => `<div class="lc"><span class="stack">${hs.map(h => `<span style="${poster(h)}"></span>`).join("")}</span><span><b>${t}</b><small>${n}</small></span><span class="pill">${p}</span></div>`).join("")}
+      </div>`),
+      notes: [["plus", "My Lists and Friends' Lists move off the watchlist screen. Pushed from ☷, with + New list in the app bar."], ["minus", "Lists are one tap deeper than today."]] }
+  ];
+
+  function opt(o) {
+    return `<article class="opt"><div class="opt-head"><span class="badge">${o.tag}</span><b>${o.name}</b></div>
+      ${o.html()}
+      <ul class="notes">${o.notes.map(([k, t]) => `<li class="${k}">${t}</li>`).join("")}</ul></article>`;
+  }
+  function render() {
+    document.getElementById("canonRow").innerHTML = canon.map(opt).join("");
+    document.getElementById("queueRow").innerHTML = queueOpts.map(opt).join("");
+  }
+  function setTheme(light) {
+    document.body.classList.toggle("light", light);
+    document.getElementById("th-light").setAttribute("aria-pressed", String(light));
+    document.getElementById("th-dark").setAttribute("aria-pressed", String(!light));
+    try { localStorage.setItem("telly47-theme", light ? "light" : "dark"); } catch (e) {}
+    render();
+  }
+  document.getElementById("th-dark").addEventListener("click", () => setTheme(false));
+  document.getElementById("th-light").addEventListener("click", () => setTheme(true));
+  let saved = null; try { saved = localStorage.getItem("telly47-theme"); } catch (e) {}
+  setTheme(saved === "light");
+})();
+</script>
+</body>
+</html>

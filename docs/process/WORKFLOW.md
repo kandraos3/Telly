@@ -70,7 +70,7 @@ When an issue is labelled `idea` or `epic`, five **stage sub-issues** are create
 | # | Stage | Skill | Outcome |
 |---|---|---|---|
 | 1 | **Evaluate** | `shape` | Go / park / drop, with reasons. Owner decides product calls (`needs-owner`). On *go*, `idea` becomes `epic` |
-| 2 | **Explore alternatives** | `shape` | 2–3 options, mockups if visual, owner's pick, decision record. Skippable with a reason |
+| 2 | **Explore alternatives** | `shape` | 2–3 options, mockups if visual, owner's pick, decision record. The approved mockup is saved in `docs/design_system/mockups/`. Skippable with a reason |
 | 3 | **Specify** | `shape` | Spec section in `docs/`, plus **task sub-issues under the Implement stage** |
 | 4 | **Implement** | `ship` | All task sub-issues done. It can't be advanced while any task is open |
 | 5 | **Verify & release** | `ship` | End-to-end checks, both themes, spec marked shipped, roadmap updated, summary for the owner |

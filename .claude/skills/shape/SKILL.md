@@ -42,6 +42,7 @@ Write a comment covering: problem and audience, current behaviour, size (S/M/L/X
 
 - Show 2–3 genuinely different options. For visual or IA work, **show them**. Make HTML mockups as a published artifact, or render real screens via `tool/site/`. Use the style guide tokens, in dark and light.
 - Owner picks (`needs-owner`) unless one option is clearly dominant. Then write `docs/decisions/NNNN-*.md` and add it to the index.
+- Once the owner approves a visual design, save the approved mockup as one self-contained HTML file in [`docs/design_system/mockups/`](../../../docs/design_system/mockups/README.md) (`<epic>-<title>.html`). Link it from the decision record and the spec, and add it to that folder's index.
 - Only one sensible approach → `advance <stage#> --outcome skip --comment "<why>"`.
 
 ## Stage 3: Specify
