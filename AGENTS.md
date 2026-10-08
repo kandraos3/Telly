@@ -56,28 +56,32 @@ Every agent operates as a senior pair programmer and autonomous software enginee
 - **No ticket is complete without its corresponding automated test.**
 
 ### Rule 4: Quality Gate Verification
-- Before presenting a ticket as complete or creating a commit, run:
+- Before every commit, and before opening or updating a pull request, run:
   ```bash
   dart analyze --fatal-infos
   flutter test
   ```
 - **Zero compiler warnings, zero lint errors, and zero failing tests.**
+- CI runs the same gate plus coverage, pgTAP, Deno and the emulator CUJs on every pull request. Its `CI passed` check is required, so a red PR can't merge.
 
 ### Rule 5: Progress Accounting on the Board, Truth in the Spec
-- Move the issue on the board as it progresses (`tracker.py track`, `advance`, `close`), tick its acceptance criteria in the issue body or a closing comment, and run `tracker.py sync` after pushing.
+- Move the issue on the board as it progresses (`tracker.py track`, `advance`, `close`), tick its acceptance criteria in the issue body or a closing comment, and run `tracker.py sync` after a pull request merges.
 - **A behaviour change updates its spec in the same commit.** Spec and code must never disagree. Record non-obvious product or architecture choices in [`docs/decisions/`](file:///c:/Users/karla/Desktop/SeriesBeli/docs/decisions/).
 - Deferred or discovered work becomes a new issue, never a silent TODO.
 
-### Rule 6: Atomic Git Commits
-- Commit each completed issue as an isolated, atomic unit of work, referencing it:
+### Rule 6: One Branch and One Pull Request per Issue
+- **`main` is protected.** Nothing is pushed to it directly. A pull request merges only when the `CI passed` and `PR title` checks pass. Full rules: [`docs/process/WORKFLOW.md`](file:///c:/Users/karla/Desktop/SeriesBeli/docs/process/WORKFLOW.md) §6.
+- Start each issue on a fresh branch from an up-to-date `main`, named `<type>/<N>-<slug>`:
   ```bash
-  git commit -m "<type>(<scope>): <concise description> (#N)" -m "Fixes #N"
+  git switch main && git pull --ff-only && git switch -c fix/152-edge-jwt
   ```
-- `Fixes #N` only when the commit completes the issue; otherwise `Refs #N`. Reference the parent epic with `Refs #<epic>`.
-- Examples:
-  - `feat(explore): add "Because you ranked X" carousel rows (#52)`
-  - `fix(theme): raise lime contrast on light-mode canon rows (#47)`
-- Don't push unless the owner asks.
+- **One issue per branch, one pull request per issue.** An epic's tasks each get their own PR; an epic never gets one PR.
+- Commit on the branch as often as useful (`<type>(<scope>): <description>`). PRs are squash-merged, so the **PR title** becomes the one atomic commit on `main`: `<type>(<scope>): <concise description>`, with no `(#N)` (GitHub appends the PR number). Examples:
+  - `feat(explore): add "Because you ranked X" carousel rows`
+  - `fix(theme): raise lime contrast on light-mode canon rows`
+- Open the PR with `python tool/tracker/tracker.py pr <N> --title "…" [--refs <epic>] --body-file <summary>`. It pushes the branch, writes `Fixes #N` (or `Refs #N` for stages and `--no-close`) into the body and turns on **auto-merge**: the PR squash-merges itself once CI is green. Pushing branches and opening PRs needs no further go-ahead from the owner.
+- Red CI: fix it on the same branch. A job that fails and then passes on a re-run with no change is flaky: file a `bug` for it.
+- Never push to `main`, force-push a shared branch, or ask for the ruleset to be lifted to get a change in.
 
 ---
 
@@ -113,6 +117,7 @@ All remote Supabase work (checking what's live, applying migrations, deploying e
 - Start with its read-only `status` action, and author migrations and edge functions following its §4–§5 conventions.
 - The only manual step for the human is `supabase login`. Never ask for database passwords or tokens.
 - Confirm with the user before writing to `telly-prod` (push / functions / deploy) unless they asked for a deploy in the current session. Deploy the backend before releasing an app build that depends on it.
+- **Deploy only merged code**: from `main`, level with `origin/main`, after the PR merges. The deploy script and the challenge publisher refuse anywhere else.
 
 ---
 
@@ -124,10 +129,11 @@ flowchart LR
     B -->|"bug / small change"| T["Ready issue"]
     B -->|"idea / epic: 5 stages"| E["1 Evaluate → 2 Alternatives<br>→ 3 Specify (shape)"]
     E -->|"tasks under stage 4"| T
-    T -->|ship| D["Code + tests + gate<br>Commit (#N) Fixes #N"]
-    D --> V["5 Verify & release (ship)<br>epic closes via advance"]
+    T -->|ship| D["Branch + code + tests + gate<br>PR: Fixes #N"]
+    D -->|"CI passed → auto squash-merge"| M["main"]
+    M --> V["5 Verify & release (ship)<br>epic closes via advance"]
 ```
 
 ---
-*Constitution Version: 2.0.0 (2026-10-06: issues replace the sprint roadmap; see decision 0001)*  
+*Constitution Version: 2.1.0 (2026-10-07: branches and pull requests into a protected `main`; see decision 0006)*  
 *Enforced on: All Antigravity Agent Sessions*

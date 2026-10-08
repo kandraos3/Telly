@@ -1,6 +1,12 @@
+<!-- Title: <type>(<scope>): <description>, no (#N). It becomes the squash commit on main.
+     Agents open PRs with `python tool/tracker/tracker.py pr <N> …`, which fills this in. -->
 Fixes #
+Refs #
 
 ### What changed
+
+### Backend
+- [ ] Needs `supabase-deploy` from `main` after merge (migrations, functions or challenge content)
 
 ### Checklist
 - [ ] `dart analyze --fatal-infos` and `flutter test` pass

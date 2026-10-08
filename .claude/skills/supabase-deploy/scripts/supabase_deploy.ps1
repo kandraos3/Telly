@@ -14,6 +14,9 @@
       deploy     push, then functions.
       test       Local pgTAP suite (`supabase test db`), needs Docker Desktop.
 
+    push, functions and deploy run only on main, level with origin/main, with no uncommitted
+    supabase/ or content/ changes.
+
     Exit codes: 0 ok, 1 failure, 2 not logged in (run `supabase login`), 3 unsafe state (refused).
 
 .EXAMPLE
@@ -126,6 +129,28 @@ function Assert-Ready {
     }
     Write-Ok "Repo linked to $ProjectRef."
     return $project
+}
+
+# Writes to telly-prod only from an up-to-date main with a clean supabase/ tree (#158):
+# production must only ever run code that passed CI and merged.
+function Assert-OnMain {
+    $branch = (& git rev-parse --abbrev-ref HEAD).Trim()
+    if ($branch -ne "main") {
+        Write-Fail "On branch '$branch'. Merge the PR first, then deploy from main (git switch main; git pull). Refusing."
+        exit 3
+    }
+    & git fetch --quiet origin main
+    $local = (& git rev-parse HEAD).Trim()
+    $remote = (& git rev-parse origin/main).Trim()
+    if ($local -ne $remote) {
+        Write-Fail "Local main ($($local.Substring(0, 7))) differs from origin/main ($($remote.Substring(0, 7))). Run 'git pull --ff-only'. Refusing."
+        exit 3
+    }
+    if ((& git status --porcelain -- supabase content) | Out-String | ForEach-Object { $_.Trim() }) {
+        Write-Fail "Uncommitted changes under supabase/ or content/. Production only gets merged code. Refusing."
+        exit 3
+    }
+    Write-Ok "On main at origin/main ($($local.Substring(0, 7)))."
 }
 
 # ----------------------------------------------------------------------------- migrations
@@ -316,6 +341,7 @@ if ($Action -eq "test") {
     exit 0
 }
 
+if ($Action -in @("push", "functions", "deploy")) { Assert-OnMain }
 Assert-Ready | Out-Null
 
 switch ($Action) {

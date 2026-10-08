@@ -54,8 +54,12 @@ Write a comment covering: problem and audience, current behaviour, size (S/M/L/X
      --body-file <scratch> --status Ready --horizon <epic's> --parent <implement stage#>
    ```
    Usual order: schema/backend → data/state → UI → E2E/golden. Bodies cite the spec section and say `Blocked by #M` where relevant.
-3. Commit the docs: `docs(<area>): spec <feature> (#<epic>)`.
-4. `advance <stage#> --comment "Spec: docs/...; tasks #a–#b"`. This makes Implement Ready and puts the epic In progress.
+3. Commit the docs on a branch (`docs/<stage#>-spec-<slug>`, from an up-to-date `main`) and open the PR. A stage number gets `Refs`, never `Fixes`:
+   ```bash
+   python tool/tracker/tracker.py pr <stage#> --refs <epic> --title "docs(<area>): spec <feature>" --body-file <scratch>
+   ```
+   Explore alternatives' files (mockups, decision record) go through a PR the same way.
+4. Once the PR has merged, so tasks branch from a `main` that has the spec: `advance <stage#> --comment "Spec: docs/...; tasks #a–#b"`. This makes Implement Ready and puts the epic In progress.
 
 ## Plain issues without stages
 

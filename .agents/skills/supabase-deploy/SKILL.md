@@ -59,6 +59,7 @@ Exit codes:
 ## 3. Agent protocol
 
 1. **Always start with `status`.** It is read-only and shows pending migrations, function drift and missing secrets.
+   - **Writes come from `main` only.** `push`, `functions` and `deploy` refuse (exit 3) unless you are on `main`, level with `origin/main`, with nothing uncommitted under `supabase/` or `content/`. Merge the PR first, then `git switch main && git pull --ff-only`. `status` and `plan` work on any branch, so you can check a migration before it merges.
 2. **Get the user's go-ahead before writing to `telly-prod`** (`push`, `functions`, `deploy`), unless they asked for a deploy in the current conversation. Show them the `plan` output first.
 3. **Deploy the backend before releasing an app build** that depends on it. Old apps must keep working against the new database (see §4).
 4. **Exit code 2:** tell the user to run `supabase login` and wait. Never ask for tokens or passwords.
@@ -89,7 +90,7 @@ Exit codes:
   - exclude soft-deleted users (`JOIN public.users u … AND NOT u.is_deleted`) from community aggregates
 - **Session flags** passed to triggers use `set_config('telly.<name>', …, true)` and are reset before the function returns (see `20261010000900_private_logging.sql`).
 - **One pgTAP test per migration.** Name it `supabase/tests/database/NNN_<name>.test.sql`, continuing the numbering (next is `014`). Wrap it in `BEGIN; … SELECT * FROM finish(); ROLLBACK;` with a `plan(n)` that matches the assertion count, and use the seeded titles from `supabase/seed.sql` (e.g. 155, 238, 680, 1396, 76331, 8592, 66732).
-- **Challenge content** (`content/`, #143) is data, not migrations: publish it with `python tool/challenges/publish.py --dry-run` then `--publish`. It runs through the same `supabase login` (`supabase db query --linked`), so treat `--publish` like a push: confirm first unless the owner asked to deploy in this session.
+- **Challenge content** (`content/`, #143) is data, not migrations: publish it with `python tool/challenges/publish.py --dry-run` then `--publish`. It runs through the same `supabase login` (`supabase db query --linked`), so treat `--publish` like a push: confirm first unless the owner asked to deploy in this session. It also refuses off an up-to-date `main` (exit 3).
 - **Dart side.** When an RPC gains a parameter, send it from `lib/core/sync/mutation_transport.dart` (or the repository) and extend the transport/repository unit test.
 
 ## 5. Authoring edge functions
@@ -103,6 +104,7 @@ Exit codes:
 | Symptom | Fix |
 |---|---|
 | Exit 2 / "Not logged in" | The user runs `supabase login`. |
+| Exit 3 "On branch …" / "differs from origin/main" / "Uncommitted changes" | Production only gets merged code. Merge the PR, then deploy from an up-to-date, clean `main`. |
 | Exit 3 "linked to …" | The repo is linked elsewhere. Confirm the intended target with the user, then pass `-ProjectRef`. |
 | Exit 3 "REMOTE-ONLY" | Someone applied a migration not in this branch. Pull it (`git pull`, or `supabase migration fetch --linked` with the user's OK) before pushing. |
 | Exit 3 "older than the newest remote" | Rename the pending file to a newer timestamp (it isn't applied yet, so renaming is safe). |

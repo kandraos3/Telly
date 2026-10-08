@@ -9,7 +9,7 @@ Content lives in the repo:
 Schema: content/README.md.
 
   python tool/challenges/publish.py --dry-run     # validate and print the SQL (CI runs this)
-  python tool/challenges/publish.py --publish     # validate, then apply to telly-prod
+  python tool/challenges/publish.py --publish     # validate, then apply to telly-prod (main only)
 
 Publishing runs the generated SQL through `supabase db query --linked` (the same login the
 supabase-deploy skill uses; no keys are needed or read). It upserts templates, challenges and
@@ -268,6 +268,22 @@ def to_sql(content: dict, today: dt.date | None = None) -> str:
 
 
 # ---------------------------------------------------------------------------------------- main
+def deploy_ref_problem(root: pathlib.Path = ROOT) -> str | None:
+    """Why this checkout may not publish to telly-prod, or None (#158: production gets merged code only)."""
+    def git(*args: str) -> str:
+        return subprocess.run(['git', *args], cwd=root, capture_output=True, text=True).stdout.strip()
+
+    branch = git('rev-parse', '--abbrev-ref', 'HEAD')
+    if branch != 'main':
+        return f'on branch {branch!r}: merge the PR, then publish from main'
+    git('fetch', '--quiet', 'origin', 'main')
+    if git('rev-parse', 'HEAD') != git('rev-parse', 'origin/main'):
+        return 'local main differs from origin/main: run `git pull --ff-only`'
+    if git('status', '--porcelain', '--', 'content'):
+        return 'uncommitted changes under content/'
+    return None
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     mode = parser.add_mutually_exclusive_group(required=True)
@@ -291,6 +307,10 @@ def main(argv: list[str] | None = None) -> int:
         print(sql)
         return 0
 
+    problem = deploy_ref_problem(args.root)
+    if problem:
+        print(f'Refusing to publish: {problem}.', file=sys.stderr)
+        return 3
     with tempfile.NamedTemporaryFile('w', suffix='.sql', delete=False, encoding='utf-8') as f:
         f.write(sql)
         path = f.name

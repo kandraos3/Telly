@@ -1,10 +1,13 @@
 name: Telly Unified CI Quality Gates (DEV-602)
 
+# `main` is protected (#158): every change lands through a pull request, and the
+# `CI passed` job at the bottom is the required check that gates the merge.
+
 on:
   push:
     branches: [ main ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main ]
   # Manual runs ("Run workflow") always run every job.
   workflow_dispatch:
 
@@ -32,8 +35,8 @@ jobs:
       agents: ${{ steps.filter.outputs.agents == 'true' || steps.filter.outputs.ci == 'true' || github.event_name == 'workflow_dispatch' }}
       challenges: ${{ steps.filter.outputs.challenges == 'true' || steps.filter.outputs.ci == 'true' || github.event_name == 'workflow_dispatch' }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: dorny/paths-filter@0e4a8c6effa4802afeda77dc8d303f8176d7dfad # v3.0.4
         id: filter
         with:
           filters: |
@@ -76,7 +79,7 @@ jobs:
               - '.agents/**'
               - '.claude/**'
               - 'tool/agents/**'
-              - 'tool/tracker/*.json'
+              - 'tool/tracker/**'
 
   agent-instructions:
     name: Agent instructions in sync (AGENTS.md, skills, tracker stages)
@@ -85,11 +88,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - name: AGENTS.md copies and skill mirrors match their sources
         run: python3 tool/agents/sync.py --check
       - name: Tracker config parses
         run: python3 -c "import json; [json.load(open(f)) for f in ('tool/tracker/stages.json', 'tool/tracker/labels.json')]"
+      - name: Tracker tests
+        run: python3 tool/tracker/test_tracker.py
 
   challenge-content:
     name: Challenge content validates (#143)
@@ -98,7 +103,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - name: Install PyYAML
         run: python3 -m pip install --quiet pyyaml
       - name: Publisher tests
@@ -115,16 +120,16 @@ jobs:
 
     steps:
       - name: Checkout Codebase
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       - name: Set up Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
         with:
           distribution: 'zulu'
           java-version: '17'
 
       - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
         with:
           channel: 'stable'
           cache: true
@@ -162,7 +167,7 @@ jobs:
 
       - name: "Upload Test Log on Failure"
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: flutter-test-log
           path: test_output.log
@@ -184,10 +189,10 @@ jobs:
 
     steps:
       - name: Checkout Codebase
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       - name: Set up Supabase CLI
-        uses: supabase/setup-cli@v1
+        uses: supabase/setup-cli@1dedf2c611547ede7232d26866dd3c56ab903bbb # v1.7.3
         with:
           version: latest
 
@@ -219,10 +224,10 @@ jobs:
 
     steps:
       - name: Checkout Codebase
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       - name: Set up Deno
-        uses: denoland/setup-deno@v2
+        uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
         with:
           deno-version: v2.x
 
@@ -241,7 +246,7 @@ jobs:
 
     steps:
       - name: Checkout Codebase
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       - name: Enable KVM group perms
         run: |
@@ -250,13 +255,13 @@ jobs:
           sudo udevadm trigger --name-match=kvm
 
       - name: Set up Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
         with:
           distribution: 'zulu'
           java-version: '17'
 
       - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
         with:
           channel: 'stable'
           cache: true
@@ -265,7 +270,7 @@ jobs:
         run: flutter pub get
 
       - name: Run Integration Tests on Android Emulator
-        uses: reactivecircus/android-emulator-runner@v2
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
         with:
           api-level: 31
           target: default
@@ -273,3 +278,27 @@ jobs:
           profile: pixel_6
           script: flutter test integration_test/app_test.dart
 
+  # The one required status check on `main` (#158). Jobs skipped by the change
+  # filter count as passed; a failed or cancelled job fails this one.
+  ci-passed:
+    name: CI passed
+    if: always()
+    needs:
+      - changes
+      - agent-instructions
+      - challenge-content
+      - static-analysis-and-unit-tests
+      - database-pgtap-verification
+      - edge-functions
+      - android-emulator-integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Every job passed or was skipped
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "Job results: $RESULTS"
+          for r in $RESULTS; do
+            case "$r" in success|skipped) ;; *) echo "::error::A required job ended as '$r'."; exit 1 ;; esac
+          done

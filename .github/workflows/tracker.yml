@@ -5,6 +5,9 @@ name: Tracker - scaffold idea/epic stages
 # tracker.py carry a "telly-scaffold: local" marker and are scaffolded locally.
 # Board statuses for the new stages are set by the next `tracker.py sync`
 # (GITHUB_TOKEN cannot edit a user-owned project).
+# Only issues from the owner or collaborators are scaffolded here: the repo is
+# public and the Idea form labels issues `idea`, so anyone could otherwise make
+# the bot create stage issues. Outside ideas are scaffolded at triage (#158).
 
 on:
   issues:
@@ -22,12 +25,13 @@ jobs:
   scaffold:
     if: >-
       github.event.issue.state == 'open' &&
+      contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.issue.author_association) &&
       (contains(github.event.issue.labels.*.name, 'idea') || contains(github.event.issue.labels.*.name, 'epic')) &&
       !contains(github.event.issue.body, 'telly-scaffold: local')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - name: Create missing stage sub-issues
         env:
           GH_TOKEN: ${{ github.token }}

@@ -85,6 +85,9 @@ For each Inbox item:
 
 - Fill in the inbox file's **Filed as** list (`- #N title`) and **Not filed** (with a reason).
 - If direction changed, update `docs/ROADMAP.md`.
-- Commit: `docs(inbox): capture <slug> (#a-#b)` with `Refs` for every issue.
+- Do the inbox file on a branch (`git switch -c docs/<first #>-inbox-<slug>` from an up-to-date `main`), commit `docs(inbox): capture <slug>`, then open its PR without closing anything:
+  ```bash
+  python tool/tracker/tracker.py pr <first #> --no-close --refs <other #s> --title "docs(inbox): capture <slug>" --body-file <scratch>
+  ```
 
 Never write code during intake.
