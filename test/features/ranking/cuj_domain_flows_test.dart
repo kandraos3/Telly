@@ -234,7 +234,10 @@ void main() {
 
       // 3. Reconnect: the queue flushes in order and the canon is marked synced
       online.add(true);
-      for (var i = 0; i < 200 && applied.length < 3; i++) {
+      // A loaded CI runner can take seconds: wait on the condition with a generous deadline and
+      // stop as soon as it holds (#157, as #123 did for the emulator suite).
+      final deadline = DateTime.now().add(const Duration(seconds: 20));
+      while (applied.length < 3 && DateTime.now().isBefore(deadline)) {
         await Future<void>.delayed(const Duration(milliseconds: 5));
       }
       expect(applied, ids);
