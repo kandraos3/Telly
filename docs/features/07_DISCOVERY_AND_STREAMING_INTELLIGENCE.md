@@ -157,7 +157,7 @@ CREATE TABLE user_streaming_subscriptions (
 
 ## 7. Explore Rows & Recommendation Engine
 
-> Tracking: epic #46 · Status: approved · Decision: [0007](../decisions/0007-explore-hero-rows-and-client-ranker.md) · Mockup: [0046](../design_system/mockups/0046-explore-rows.html)
+> Tracking: epic #46 · Status: approved · Decisions: [0007](../decisions/0007-explore-hero-rows-and-client-ranker.md), [0008](../decisions/0008-explore-dismissals-own-table.md) · Mockup: [0046](../design_system/mockups/0046-explore-rows.html)
 
 Explore (`SCR-07`) is a stack of rows that each answer one question: *what fits me best, what's popular, what's like the titles I loved, what are my friends watching, what am I about to lose, what haven't I tried?* The server **gathers candidates** (it is the only side that can call TMDB and join friends and services). The app **ranks them** with a pure Dart `ExploreRanker`, so every rule below is unit-testable and Explore opens from a local cache.
 
@@ -223,7 +223,7 @@ Rows are shown in this order. Each row hides itself when its minimum isn't met; 
 4. **Leaving**: `title_availability` rows with `is_leaving_soon` on one of my `user_streaming_subscriptions` (monetization `flatrate`, `free` or `ads`), up to 20.
 5. **Wide pool** (for Top picks, Top rated and Something different): the 60 titles in the canon with the highest `COALESCE(global_community_score, tmdb_vote_average)` among those with `tmdb_vote_count ≥ 200` or `community_count ≥ 5`.
 
-Blocked users (either direction) and deleted users never count as friends. Candidates I've ranked or muted are dropped server-side. Queued titles are kept with `in_queue: true`, because Leaving soon needs them (§7.2). `profile.rankings` lets the ranker build the genre profile without another call.
+Blocked users (either direction) and deleted users never count as friends. Candidates I've ranked, muted or dismissed (`user_dismissed_recommendations`, §7.5) are dropped server-side. Queued titles are kept with `in_queue: true`, because Leaving soon needs them (§7.2). `profile.rankings` lets the ranker build the genre profile without another call.
 
 ### 7.4 Scoring (`ExploreRanker`)
 `lib/features/discovery/domain/explore_ranker.dart`. All constants live in one `ExploreWeights` class. Every function is pure (its inputs are the payload and `today`) and unit-tested.
@@ -262,7 +262,7 @@ Blocked users (either direction) and deleted users never count as friends. Candi
 - **Actions**:
   - Card tap → `SCR-08`.
   - Hero **+ Queue**: adds to the watchlist through the existing offline queue path, and the button becomes **✓ In queue**.
-  - Hero **Not for me**: inserts into `user_muted_titles`, shows the next hero, and a snackbar *"Hidden from your picks"* with **Undo**, which deletes the mute.
+  - Hero **Not for me**: inserts into `user_dismissed_recommendations` ([decision 0008](../decisions/0008-explore-dismissals-own-table.md)), shows the next hero, and a snackbar *"Hidden from your picks"* with **Undo**, which deletes the row. It is not a Spoiler Shield mute, so the feed is untouched.
   - **See all ›** on a row: opens `/explore/row/:rowId?canon=movie|tv`, a 3-column poster grid of up to 30 titles from the same ranked payload.
 
 ### 7.6 Server caches and refresh

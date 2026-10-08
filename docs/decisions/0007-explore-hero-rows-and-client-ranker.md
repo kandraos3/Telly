@@ -33,5 +33,5 @@ The owner chose **layout B** and **engine E3**.
 - The scoring is plain Dart, unit-tested with fixed examples (the 70% base of the test pyramid), and Explore opens from the cache offline. The Home feed's pick cards can reuse the same ranker.
 - Changing the scoring weights needs an app release. If they need frequent tuning, a later decision can move the weights into remote config.
 - New backend pieces: a related-titles cache table, an edge function that fills it (nightly, and when a user's top-5 changes), and the candidates RPC. `get_recommended_titles` stays for older clients until the Home feed moves to the ranker. Removing it is tracked as a task under #95.
-- "Not for me" on the hero writes to `user_muted_titles`, which the candidates RPC already excludes.
+- "Not for me" on the hero writes to `user_muted_titles`, which the candidates RPC already excludes. *Changed by [0008](0008-explore-dismissals-own-table.md): dismissals get their own table, so the feed isn't affected.*
 - The spec changes are in screen specs SCR-07 and feature spec 07 §5. The implementation tasks are under #95.
