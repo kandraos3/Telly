@@ -8,18 +8,20 @@ import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/theme/telly_typography.dart';
 import 'package:telly_app/core/widgets/poster_image.dart';
 import 'package:telly_app/core/widgets/telly_screen_header.dart';
-import 'package:telly_app/core/widgets/telly_neon_badge.dart';
 import 'package:telly_app/features/auth/data/auth_repository.dart';
 import 'package:telly_app/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:telly_app/features/discovery/data/discovery_repository.dart';
 import 'package:telly_app/features/discovery/domain/discovery_models.dart';
 import 'package:telly_app/features/discovery/presentation/controllers/explore_picks.dart';
+import 'package:telly_app/features/discovery/presentation/controllers/explore_rows_controller.dart';
+import 'package:telly_app/features/discovery/presentation/widgets/explore_rows_view.dart';
+import 'package:telly_app/core/widgets/telly_canon_switcher.dart';
 import 'package:telly_app/features/logging/data/title_repository.dart';
 import 'package:telly_app/features/logging/domain/title_search_result.dart';
 
-/// SCR-07: Explore & Discover Hub (FE-612).
+/// SCR-07: Explore & Discover Hub (FE-612; rows #180).
 /// Conforms to `docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md` §SCR-07
-/// and `docs/features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md` §5.
+/// and `docs/features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md` §5 and §7.
 class ExploreDiscoverScreen extends ConsumerStatefulWidget {
   /// Set by [Routes.exploreSearch] (the Feed header's search button): each new value
   /// focuses the search field (FE-HEADER-01).
@@ -40,6 +42,9 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
   SearchFilterTab _activeTab = SearchFilterTab.all;
   bool _isSearching = false;
   bool _searchFocused = false;
+
+  /// The canon the rows show (`'movie'` or `'tv'`): the slim switcher under the search bar.
+  String _mediaType = 'movie';
 
   List<TitleSearchResult> _titleResults = [];
   List<UserSearchResult> _userResults = [];
@@ -188,9 +193,7 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
                               Text(
                                 '#$index',
                                 style: TellyTypography.titleMedium(
-                                  color: index == 1
-                                      ? TellyColors.warmAmber
-                                      : TellyColors.textTertiaryOf(context),
+                                  color: index == 1 ? TellyColors.warmAmber : TellyColors.textTertiaryOf(context),
                                 ).copyWith(fontWeight: FontWeight.w800),
                               ),
                               const SizedBox(width: 12),
@@ -203,11 +206,9 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
                                 ),
                               ),
                               Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 4),
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: TellyColors.phosphorLime
-                                      .withValues(alpha: 0.15),
+                                  color: TellyColors.phosphorLime.withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Text(
@@ -248,165 +249,69 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
     );
   }
 
-  void _showCuratedCanonDetail(CuratedCanonItem canon) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: TellyColors.cardOf(context),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (ctx) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.75,
-          minChildSize: 0.5,
-          maxChildSize: 0.95,
-          expand: false,
-          builder: (_, scrollController) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              child: ListView(
-                controller: scrollController,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      margin: const EdgeInsets.only(bottom: 20),
-                      decoration: BoxDecoration(
-                        color: TellyColors.textTertiary.withValues(alpha: 0.3),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      Text(canon.emoji, style: const TextStyle(fontSize: 28)),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          canon.title,
-                          style: TellyTypography.titleLarge(
-                            color: TellyColors.textPrimary,
-                          ).copyWith(fontWeight: FontWeight.w900),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    canon.subtitle,
-                    style: TellyTypography.bodyMedium(color: TellyColors.textSecondary),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'FEATURED TITLES',
-                    style: TellyTypography.labelSmall(
-                      color: TellyColors.textTertiary,
-                    ).copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
-                  ),
-                  const SizedBox(height: 12),
-                  ...canon.sampleTitles.map((title) => InkWell(
-                        key: Key('curated_title_${title.replaceAll(' ', '_')}'),
-                        borderRadius: BorderRadius.circular(12),
-                        onTap: () {
-                          Navigator.of(ctx).pop();
-                          _searchController.text = title;
-                          _onSearchChanged(title);
-                          _searchFocusNode.requestFocus();
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.only(bottom: 8),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: TellyColors.surfaceOf(context),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: TellyColors.borderGlassOf(context)),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.star, size: 16, color: TellyColors.warmAmber),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  title,
-                                  style: TellyTypography.labelLarge(
-                                    color: TellyColors.textPrimaryOf(context),
-                                  ).copyWith(fontWeight: FontWeight.w700),
-                                ),
-                              ),
-                              Icon(Icons.arrow_forward_ios_rounded, size: 14, color: TellyColors.textTertiaryOf(context)),
-                            ],
-                          ),
-                        ),
-                      )),
-                  const SizedBox(height: 16),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    final browsing = _searchQuery.isEmpty && !_searchFocused;
     final battlegroundsAsync = ref.watch(networkBattlegroundsProvider('tv'));
-    final friendsBingingAsync = ref.watch(friendsBingingProvider);
-    final curatedCanons = ref.watch(discoveryRepositoryProvider).getCuratedCanons();
+    int? count(String mediaType) => ref.watch(exploreRowsProvider(mediaType)).valueOrNull?.rows.rankingCount;
 
     return Scaffold(
-      body: TellyFloatingHeaderScrollView(
-        header: const TellyScreenHeader(title: 'Explore'),
-        body: SingleChildScrollView(
-          // End space lets the last section scroll above the floating Log button (#44).
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 8 + TellyLogFab.clearance),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 1. Search Bar
-              _buildSearchBar(),
-              const SizedBox(height: 20),
-
-              // If user is searching, render Search Results
-              if (_searchQuery.isNotEmpty)
-                _buildSearchResults()
-              else if (_searchFocused)
-                _buildSearchZeroState()
+      // Around the NestedScrollView, listening to it and to the rows' list inside it: an
+      // indicator inside the NestedScrollView never sees the pull at the top.
+      body: RefreshIndicator(
+        color: TellyColors.primaryAccentOf(context),
+        // The rows' list sits one level inside the NestedScrollView.
+        notificationPredicate: (n) => n.depth <= 1,
+        onRefresh: () => ref.read(exploreRowsProvider(_mediaType).notifier).refresh(),
+        child: TellyFloatingHeaderScrollView(
+          header: const TellyScreenHeader(title: 'Explore'),
+          body: CustomScrollView(
+            slivers: [
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                sliver: SliverToBoxAdapter(child: _buildSearchBar()),
+              ),
+              if (!browsing)
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 8 + TellyLogFab.clearance),
+                  sliver: SliverToBoxAdapter(
+                    child: _searchQuery.isNotEmpty ? _buildSearchResults() : _buildSearchZeroState(),
+                  ),
+                )
               else ...[
-                // 2. Recommended for You (FE-EXPLORE-03)
-                _buildRecommendedSection(),
-
-                // 2. Network Battlegrounds Strip
-                battlegroundsAsync.when(
-                  loading: () => const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: CircularProgressIndicator(color: TellyColors.phosphorLime),
+                SliverPersistentHeader(
+                  pinned: true,
+                  delegate: _SwitcherHeader(
+                    background: TellyColors.canvasOf(context),
+                    child: TellyCanonSwitcher(
+                      selected: _mediaType,
+                      onSelect: (m) => setState(() => _mediaType = m),
+                      movieCount: count('movie'),
+                      seriesCount: count('tv'),
+                      movieKey: const Key('explore_canon_movie'),
+                      seriesKey: const Key('explore_canon_tv'),
                     ),
                   ),
-                  error: (_, __) => const SizedBox.shrink(),
-                  data: (battlegrounds) => _buildNetworkBattlegroundsStrip(battlegrounds),
                 ),
-                const SizedBox(height: 28),
-
-                // 3. Friends Are Currently Binging Carousel
-                friendsBingingAsync.when(
-                  loading: () => const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: CircularProgressIndicator(color: TellyColors.phosphorLime),
+                SliverPadding(
+                  // End space lets the last row scroll above the floating Log button (#44).
+                  padding: const EdgeInsets.only(top: 12, bottom: 8 + TellyLogFab.clearance),
+                  sliver: SliverToBoxAdapter(
+                    child: ExploreRowsView(
+                      mediaType: _mediaType,
+                      // Network battlegrounds stay as the last Series row (decision 0007).
+                      footer: _mediaType == 'tv'
+                          ? Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              child: battlegroundsAsync.maybeWhen(
+                                data: _buildNetworkBattlegroundsStrip,
+                                orElse: () => const SizedBox.shrink(),
+                              ),
+                            )
+                          : null,
                     ),
                   ),
-                  error: (_, __) => const SizedBox.shrink(),
-                  data: (binging) => _buildFriendsBingingSection(binging),
                 ),
-                const SizedBox(height: 28),
-
-                // 4. Curated Canons
-                _buildCuratedCanonsSection(curatedCanons),
-                const SizedBox(height: 40),
               ],
             ],
           ),
@@ -419,7 +324,7 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
     return Container(
       decoration: BoxDecoration(
         color: TellyColors.surfaceOf(context),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: TellyColors.borderGlassOf(context)),
       ),
       child: TextField(
@@ -430,7 +335,7 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
         textInputAction: TextInputAction.search,
         style: TextStyle(color: TellyColors.textPrimaryOf(context), fontSize: 14),
         decoration: InputDecoration(
-          hintText: 'Search shows, actors, showrunners, friends...',
+          hintText: 'Search titles, people, friends',
           hintStyle: TextStyle(
             color: TellyColors.textTertiaryOf(context).withValues(alpha: 0.8),
             fontSize: 13,
@@ -485,8 +390,7 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
             if (_titleResults.isEmpty)
               Padding(
                 padding: const EdgeInsets.only(bottom: 16),
-                child: Text('No titles found',
-                    style: TellyTypography.bodyMedium(color: TellyColors.textTertiary)),
+                child: Text('No titles found', style: TellyTypography.bodyMedium(color: TellyColors.textTertiary)),
               )
             else
               ..._titleResults.map((title) => _buildTitleResultTile(title)),
@@ -502,8 +406,7 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
             ),
             const SizedBox(height: 10),
             if (_userResults.isEmpty)
-              Text('No users found',
-                  style: TellyTypography.bodyMedium(color: TellyColors.textTertiary))
+              Text('No users found', style: TellyTypography.bodyMedium(color: TellyColors.textTertiary))
             else
               ..._userResults.map((user) => _buildUserResultTile(user)),
           ],
@@ -589,8 +492,7 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
   Widget _buildUserResultTile(UserSearchResult user) {
     final currentUserId = ref.watch(authRepositoryProvider).currentUserId;
     final currentUsername = ref.watch(authControllerProvider).user?.username;
-    final isMe = (currentUsername != null &&
-            currentUsername.toLowerCase() == user.username.toLowerCase()) ||
+    final isMe = (currentUsername != null && currentUsername.toLowerCase() == user.username.toLowerCase()) ||
         (currentUserId != null && currentUserId == user.id);
 
     return InkWell(
@@ -670,38 +572,6 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
         ),
         if (trailing != null) trailing,
       ],
-    );
-  }
-
-  /// "Recommended for You" carousel (FE-EXPLORE-03), fed by Explore's ranked picks (#182).
-  Widget _buildRecommendedSection() {
-    final recommended = ref.watch(explorePicksProvider).valueOrNull ?? const [];
-    if (recommended.isEmpty) return const SizedBox.shrink();
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 28),
-      child: Column(
-        key: const Key('explore_recommended_section'),
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _sectionHeader('RECOMMENDED FOR YOU', TellyColors.phosphorLime),
-          const SizedBox(height: 14),
-          SizedBox(
-            height: 248,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: recommended.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 12),
-              itemBuilder: (context, index) => _RecommendedTitleCard(
-                item: recommended[index],
-                onTap: () => context.push(
-                  Routes.title(recommended[index].mediaType, recommended[index].titleId),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -906,271 +776,27 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
       ),
     );
   }
-
-  Widget _buildFriendsBingingSection(List<FriendBingingItem> items) {
-    if (items.isEmpty) return const SizedBox.shrink();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Container(
-              width: 3,
-              height: 14,
-              decoration: BoxDecoration(
-                color: TellyColors.electricVioletOf(context),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'FRIENDS ARE CURRENTLY BINGING',
-              style: TellyTypography.labelSmall(color: TellyColors.textPrimaryOf(context))
-                  .copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
-            ),
-          ],
-        ),
-        const SizedBox(height: 14),
-        SizedBox(
-          height: 170,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: items.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 14),
-            itemBuilder: (context, index) {
-              final item = items[index];
-              return InkWell(
-                onTap: () => context.push(Routes.title(item.mediaType, item.titleId)),
-                borderRadius: BorderRadius.circular(16),
-                child: Container(
-                  width: 220,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: TellyColors.surfaceOf(context),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: TellyColors.borderGlassOf(context)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: SizedBox(
-                              width: 50,
-                              height: 75,
-                              child: PosterImage(
-                                posterPath: item.posterPath,
-                                fallback: Center(
-                                  child: Icon(Icons.movie_outlined, size: 24, color: TellyColors.textTertiaryOf(context)),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  item.title,
-                                  style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context))
-                                      .copyWith(fontWeight: FontWeight.w800),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                if (item.network != null) ...[
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    item.network!,
-                                    style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)),
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const Spacer(),
-                      Row(
-                        children: [
-                          const Icon(Icons.people, size: 14, color: TellyColors.electricViolet),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              '${item.activeFriendCount} watching',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context))
-                                  .copyWith(fontWeight: FontWeight.w600),
-                            ),
-                          ),
-                          if (item.avgFriendScore != null)
-                            TellyNeonBadge(
-                              label: '★ ${item.avgFriendScore!.toStringAsFixed(1)}',
-                              variant: TellyBadgeVariant.winner,
-                            ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCuratedCanonsSection(List<CuratedCanonItem> canons) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Container(
-              width: 3,
-              height: 14,
-              decoration: BoxDecoration(
-                color: TellyColors.warmAmber,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'CURATED CANONS',
-              style: TellyTypography.labelSmall(color: TellyColors.textPrimaryOf(context))
-                  .copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
-            ),
-          ],
-        ),
-        const SizedBox(height: 14),
-        ...canons.map((canon) => InkWell(
-              onTap: () => _showCuratedCanonDetail(canon),
-              borderRadius: BorderRadius.circular(16),
-              child: Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: TellyColors.surfaceOf(context),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: TellyColors.borderGlassOf(context)),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: TellyColors.cardOf(context),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Center(
-                        child: Text(canon.emoji, style: const TextStyle(fontSize: 24)),
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            canon.title,
-                            style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(context))
-                                .copyWith(fontWeight: FontWeight.w800),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            canon.subtitle,
-                            style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Icon(Icons.chevron_right, color: TellyColors.textTertiaryOf(context)),
-                  ],
-                ),
-              ),
-            )),
-      ],
-    );
-  }
 }
 
-/// Poster card in the "Recommended for You" carousel (FE-EXPLORE-03).
-class _RecommendedTitleCard extends StatelessWidget {
-  const _RecommendedTitleCard({required this.item, required this.onTap});
+/// Pins the canon switcher under the status bar while the rows scroll (SCR-07).
+class _SwitcherHeader extends SliverPersistentHeaderDelegate {
+  _SwitcherHeader({required this.background, required this.child});
 
-  final RecommendedTitle item;
-  final VoidCallback onTap;
+  final Color background;
+  final Widget child;
+
+  static const _height = 60.0;
 
   @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      key: Key('recommended_title_${item.titleId}'),
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: SizedBox(
-        width: 124,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    width: 124,
-                    height: 180,
-                    decoration: BoxDecoration(
-                      color: TellyColors.surfaceOf(context),
-                      border: Border.all(color: TellyColors.borderGlassOf(context)),
-                    ),
-                    child: PosterImage(
-                      posterPath: item.posterPath,
-                      fallback: Center(
-                        child: Icon(Icons.movie_outlined, size: 28, color: TellyColors.textTertiaryOf(context)),
-                      ),
-                    ),
-                  ),
-                ),
-                if (item.communityScore != null)
-                  Positioned(
-                    top: 6,
-                    right: 6,
-                    child: TellyNeonBadge(
-                      label: item.communityScore!.toStringAsFixed(1),
-                      variant: TellyBadgeVariant.winner,
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              item.title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TellyTypography.labelLarge(color: TellyColors.textPrimary)
-                  .copyWith(fontWeight: FontWeight.w800),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              item.reasonLabel,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: TellyTypography.caption(
-                color: item.reason == RecommendationReason.becauseYouLoved
-                    ? TellyColors.phosphorLime
-                    : TellyColors.textTertiary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  double get minExtent => _height;
+
+  @override
+  double get maxExtent => _height;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) =>
+      ColoredBox(color: background, child: Align(alignment: Alignment.center, child: child));
+
+  @override
+  bool shouldRebuild(_SwitcherHeader old) => old.child != child || old.background != background;
 }
