@@ -26,6 +26,14 @@ abstract interface class DiscoveryRepository {
   Future<List<RecommendedTitle>> fetchTrendingTitles({String? mediaType, int limit = 10});
 
   List<CuratedCanonItem> getCuratedCanons();
+
+  /// The raw `get_explore_candidates` payload for one canon (features/07 §7.3). Throws when
+  /// the server can't be reached, so Explore can fall back to its cache.
+  Future<Map<String, dynamic>> fetchExploreCandidates(String mediaType);
+
+  /// Asks `title-related` to fetch TMDB recommendations for seeds the payload reported
+  /// missing (features/07 §7.6). Throws on failure.
+  Future<void> refreshRelated(List<int> seedIds, String mediaType);
 }
 
 class SupabaseDiscoveryRepository implements DiscoveryRepository {
@@ -125,6 +133,17 @@ class SupabaseDiscoveryRepository implements DiscoveryRepository {
   }
 
   @override
+  Future<Map<String, dynamic>> fetchExploreCandidates(String mediaType) async {
+    final response = await _client.rpc('get_explore_candidates', params: {'p_media_type': mediaType});
+    return Map<String, dynamic>.from(response as Map);
+  }
+
+  @override
+  Future<void> refreshRelated(List<int> seedIds, String mediaType) async {
+    await _client.functions.invoke('title-related', body: {'seed_ids': seedIds, 'media_type': mediaType});
+  }
+
+  @override
   List<CuratedCanonItem> getCuratedCanons() {
     return const [
       CuratedCanonItem(
@@ -170,7 +189,16 @@ class FakeDiscoveryRepository implements DiscoveryRepository {
   List<RecommendedTitle> recommended;
   List<RecommendedTitle> trending;
 
+  /// `get_explore_candidates` payloads by media type; a missing canon throws, like being offline.
+  Map<String, Map<String, dynamic>> exploreCandidates;
+
+  /// When set, every candidates fetch throws (offline).
+  bool exploreOffline = false;
+  int exploreFetches = 0;
+  final List<(List<int>, String)> relatedRequests = [];
+
   FakeDiscoveryRepository({
+    this.exploreCandidates = const {},
     this.recommended = const [
       RecommendedTitle(
         titleId: 60059,
@@ -311,6 +339,19 @@ class FakeDiscoveryRepository implements DiscoveryRepository {
   @override
   Future<List<RecommendedTitle>> fetchTrendingTitles({String? mediaType, int limit = 10}) async =>
       trending.where((t) => mediaType == null || t.mediaType == mediaType).take(limit).toList();
+
+  @override
+  Future<Map<String, dynamic>> fetchExploreCandidates(String mediaType) async {
+    exploreFetches++;
+    final payload = exploreCandidates[mediaType];
+    if (exploreOffline || payload == null) throw StateError('offline');
+    return payload;
+  }
+
+  @override
+  Future<void> refreshRelated(List<int> seedIds, String mediaType) async {
+    relatedRequests.add((seedIds, mediaType));
+  }
 
   @override
   List<CuratedCanonItem> getCuratedCanons() {

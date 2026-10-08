@@ -18,3 +18,8 @@ final localTitleDaoProvider = Provider<LocalTitleDao>((ref) {
   return ref.watch(databaseProvider).localTitleDao;
 });
 
+
+/// Provider exposing the [ExploreCacheDao] (features/07 §7.5).
+final exploreCacheDaoProvider = Provider<ExploreCacheDao>((ref) {
+  return ref.watch(databaseProvider).exploreCacheDao;
+});
