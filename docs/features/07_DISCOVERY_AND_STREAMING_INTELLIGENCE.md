@@ -157,7 +157,7 @@ CREATE TABLE user_streaming_subscriptions (
 
 ## 7. Explore Rows & Recommendation Engine
 
-> Tracking: epic #46 · Status: approved · Decisions: [0007](../decisions/0007-explore-hero-rows-and-client-ranker.md), [0008](../decisions/0008-explore-dismissals-own-table.md) · Mockup: [0046](../design_system/mockups/0046-explore-rows.html)
+> Tracking: epic #46 · Status: shipped · Decisions: [0007](../decisions/0007-explore-hero-rows-and-client-ranker.md), [0008](../decisions/0008-explore-dismissals-own-table.md) · Mockup: [0046](../design_system/mockups/0046-explore-rows.html)
 
 Explore (`SCR-07`) is a stack of rows that each answer one question: *what fits me best, what's popular, what's like the titles I loved, what are my friends watching, what am I about to lose, what haven't I tried?* The server **gathers candidates** (it is the only side that can call TMDB and join friends and services). The app **ranks them** with a pure Dart `ExploreRanker`, so every rule below is unit-testable and Explore opens from a local cache.
 

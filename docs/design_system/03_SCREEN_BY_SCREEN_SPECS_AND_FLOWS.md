@@ -330,7 +330,7 @@ The **Social** tab (`/social`). It was the landing tab until epic #44; Home (`SC
 
 ### `SCR-07`: Explore & Discover Hub
 
-> Tracking: epic #46 · Status: approved · Decision: [0007](../decisions/0007-explore-hero-rows-and-client-ranker.md) · Mockup: [0046](mockups/0046-explore-rows.html) · Rules and scoring: [features/07 §7](../features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md#7-explore-rows--recommendation-engine)
+> Tracking: epic #46 · Status: shipped · Decision: [0007](../decisions/0007-explore-hero-rows-and-client-ranker.md) · Mockup: [0046](mockups/0046-explore-rows.html) · Rules and scoring: [features/07 §7](../features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md#7-explore-rows--recommendation-engine)
 
 ```
 ┌────────────────────────────────────────────────────────┐
