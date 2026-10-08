@@ -48,7 +48,8 @@ class AppConfig {
   /// Names of required values that are missing or malformed.
   List<String> get missingRequired => [
         if (Uri.tryParse(supabaseUrl)?.hasScheme != true) 'SUPABASE_URL',
-        if (supabaseAnonKey.isEmpty) 'SUPABASE_ANON_KEY',
+        // A secret key bypasses RLS and would ship inside the app (#155): treat it as malformed.
+        if (supabaseAnonKey.isEmpty || supabaseAnonKey.startsWith('sb_secret_')) 'SUPABASE_ANON_KEY',
       ];
 
   bool get isValid => missingRequired.isEmpty;

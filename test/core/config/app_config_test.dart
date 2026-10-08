@@ -23,6 +23,13 @@ void main() {
     expect(config.missingRequired, ['SUPABASE_URL']);
   });
 
+  test('#155: a Supabase secret key is never accepted as the anon key', () {
+    const secret = AppConfig(supabaseUrl: 'https://abc.supabase.co', supabaseAnonKey: 'sb_secret_xyz');
+    expect(secret.missingRequired, ['SUPABASE_ANON_KEY']);
+    const publishable = AppConfig(supabaseUrl: 'https://abc.supabase.co', supabaseAnonKey: 'sb_publishable_xyz');
+    expect(publishable.isValid, isTrue);
+  });
+
   testWidgets('ConfigErrorApp explains what is missing', (tester) async {
     await tester.pumpWidget(const ConfigErrorApp(missing: ['SUPABASE_URL']));
     expect(find.text('Telly is not configured'), findsOneWidget);

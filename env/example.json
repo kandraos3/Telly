@@ -1,7 +1,7 @@
 {
   "APP_ENV": "development",
   "SUPABASE_URL": "http://127.0.0.1:64321",
-  "SUPABASE_ANON_KEY": "<anon key from `supabase status` or the Supabase dashboard>",
+  "SUPABASE_ANON_KEY": "<publishable key (sb_publishable_…) or legacy anon key, never a sb_secret_ key>",
   "SENTRY_DSN": "",
   "POSTHOG_API_KEY": "",
   "POSTHOG_HOST": "https://app.posthog.com",

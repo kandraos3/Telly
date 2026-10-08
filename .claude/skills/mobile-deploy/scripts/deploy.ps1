@@ -217,6 +217,13 @@ if ($Uninstall -and $Mode -ne "build-only") {
 $envPath = Join-Path $projectRoot $EnvFile
 $defineArgs = @()
 if (Test-Path $envPath) {
+    # #155: a Supabase secret key would be compiled into the app and bypass RLS. Only the
+    # key's prefix is checked; the value is never printed.
+    $envJson = Get-Content $envPath -Raw | ConvertFrom-Json
+    if ("$($envJson.SUPABASE_ANON_KEY)".StartsWith("sb_secret_")) {
+        Write-Host "[FAIL] $EnvFile sets SUPABASE_ANON_KEY to a secret key (sb_secret_...). Use the publishable key (sb_publishable_...) from Project Settings -> API Keys." -ForegroundColor Red
+        exit 1
+    }
     Write-Info "Injecting environment variables from: $EnvFile"
     $defineArgs += "--dart-define-from-file=$envPath"
 } else {
