@@ -27,12 +27,21 @@ abstract interface class DiscoveryRepository {
   /// Asks `title-related` to fetch TMDB recommendations for seeds the payload reported
   /// missing (features/07 §7.6). Throws on failure.
   Future<void> refreshRelated(List<int> seedIds, String mediaType);
+
+  /// The Explore hero's "Not for me" (#189): hides the title from my recommendations only
+  /// (not a Spoiler Shield mute, so the feed is untouched).
+  Future<void> dismissRecommendation(int titleId, String mediaType);
+
+  /// Undo for [dismissRecommendation].
+  Future<void> undoDismissRecommendation(int titleId, String mediaType);
 }
 
 class SupabaseDiscoveryRepository implements DiscoveryRepository {
   final SupabaseClient _client;
+  final String? Function() _currentUserId;
 
-  SupabaseDiscoveryRepository(this._client);
+  SupabaseDiscoveryRepository(this._client, {String? Function()? currentUserId})
+      : _currentUserId = currentUserId ?? (() => _client.auth.currentUser?.id);
 
   @override
   Future<List<NetworkBattleground>> fetchNetworkBattlegrounds({
@@ -113,6 +122,25 @@ class SupabaseDiscoveryRepository implements DiscoveryRepository {
     await _client.functions.invoke('title-related', body: {'seed_ids': seedIds, 'media_type': mediaType});
   }
 
+  String get _me {
+    final id = _currentUserId();
+    if (id == null) throw StateError('Not signed in');
+    return id;
+  }
+
+  @override
+  Future<void> dismissRecommendation(int titleId, String mediaType) => _client
+      .from('user_dismissed_recommendations')
+      .upsert({'user_id': _me, 'title_id': titleId, 'media_type': mediaType});
+
+  @override
+  Future<void> undoDismissRecommendation(int titleId, String mediaType) => _client
+      .from('user_dismissed_recommendations')
+      .delete()
+      .eq('user_id', _me)
+      .eq('title_id', titleId)
+      .eq('media_type', mediaType);
+
   @override
   List<CuratedCanonItem> getCuratedCanons() {
     return const [
@@ -164,6 +192,9 @@ class FakeDiscoveryRepository implements DiscoveryRepository {
   bool exploreOffline = false;
   int exploreFetches = 0;
   final List<(List<int>, String)> relatedRequests = [];
+
+  /// Dismissed `(titleId, mediaType)` pairs, in order; Undo removes them.
+  final List<(int, String)> dismissed = [];
 
   FakeDiscoveryRepository({
     this.exploreCandidates = const {},
@@ -277,6 +308,13 @@ class FakeDiscoveryRepository implements DiscoveryRepository {
   Future<void> refreshRelated(List<int> seedIds, String mediaType) async {
     relatedRequests.add((seedIds, mediaType));
   }
+
+  @override
+  Future<void> dismissRecommendation(int titleId, String mediaType) async => dismissed.add((titleId, mediaType));
+
+  @override
+  Future<void> undoDismissRecommendation(int titleId, String mediaType) async =>
+      dismissed.remove((titleId, mediaType));
 
   @override
   List<CuratedCanonItem> getCuratedCanons() {
