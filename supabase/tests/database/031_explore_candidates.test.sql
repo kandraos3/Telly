@@ -134,7 +134,8 @@ SELECT is((SELECT count(*)::INT FROM c WHERE id = 424 AND cand -> 'friends' <> '
 
 -- The cap: leaving (first priority) all survive; the wide pool (last) is cut.
 SELECT is((SELECT count(*)::INT FROM c), 200, 'at most 200 candidates');
-SELECT is((SELECT count(*)::INT FROM c WHERE id BETWEEN 994001 AND 994020), 20, 'leaving titles win the cap');
+-- 21 titles leave Netflix; the source keeps the 20 soonest (Shawshank in 3 days, then 19 of the fixtures).
+SELECT is((SELECT count(*)::INT FROM c WHERE id = 278 OR id BETWEEN 994001 AND 994020), 20, 'leaving titles win the cap');
 SELECT ok((SELECT count(*) FROM c WHERE id BETWEEN 990001 AND 990070) < 60, 'the quality pool gives way first');
 
 -- Caches are read-only for clients; curated canons are gone.

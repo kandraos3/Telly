@@ -223,7 +223,7 @@ BEGIN
                 'friends', COALESCE((
                     SELECT jsonb_agg(jsonb_build_object(
                                'user_id', u.id,
-                               'display_name', COALESCE(u.display_name, u.username),
+                               'display_name', COALESCE(NULLIF(u.display_name, ''), u.username),
                                'avatar_url', u.avatar_url,
                                'score', fur.calculated_score,
                                'match_pct', tm.match_percentage)
