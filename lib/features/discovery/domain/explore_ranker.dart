@@ -112,6 +112,10 @@ class ExploreRow {
   const ExploreRow({required this.kind, required this.items, this.seed, this.usualGenres = const []});
 
   List<ScoredCandidate> get visible => items.take(ExploreWeights.rowItems).toList();
+
+  /// The `:rowId` of its See all route (#181): the kind's name, plus the seed id for a
+  /// Because row (`becauseYouRanked-496243`), since a canon can have several.
+  String get id => seed == null ? kind.name : '${kind.name}-${seed!.titleId}';
 }
 
 class ExploreHero {
@@ -164,6 +168,14 @@ class ExploreRows {
       }
     }
     return best;
+  }
+
+  /// The row whose [ExploreRow.id] is [id], or null when today's rows don't have it.
+  ExploreRow? rowById(String id) {
+    for (final r in rows) {
+      if (r.id == id) return r;
+    }
+    return null;
   }
 
   ExploreRow? row(ExploreRowKind kind) {
