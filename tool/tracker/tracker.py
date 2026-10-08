@@ -13,6 +13,8 @@ Status and Horizon. Every idea/epic gets standard stage sub-issues.
   python tool/tracker/tracker.py advance STAGE --comment C [--outcome go|skip|park|drop]
   python tool/tracker/tracker.py close N [--comment C] [--not-planned]
   python tool/tracker/tracker.py sub PARENT CHILD [CHILD ...]
+  python tool/tracker/tracker.py pr N --title T [--refs M ...] [--body-file F] [--deploy] [--draft] [--no-close]
+  python tool/tracker/tracker.py check-title T                # PR title follows the commit convention
   python tool/tracker/tracker.py sync [--archive-days D]      # repair board drift
   python tool/tracker/tracker.py labels [--dry-run]
 
@@ -49,6 +51,13 @@ def gh(*args, parse=False):
     if out.returncode != 0:
         sys.exit(f"gh {' '.join(args)} failed:\n{out.stderr.strip()}")
     return json.loads(out.stdout) if parse else out.stdout.strip()
+
+
+def git(*args):
+    out = subprocess.run(["git", *args], capture_output=True, text=True, encoding="utf-8")
+    if out.returncode != 0:
+        sys.exit(f"git {' '.join(args)} failed:\n{out.stderr.strip()}")
+    return out.stdout.strip()
 
 
 def issue(n):
@@ -313,6 +322,95 @@ def advance(n, comment, outcome):
         print(f"#{n} done; #{parent} complete and closed")
 
 
+# ── pull requests ────────────────────────────────────────────────────────────
+
+# A squash merge makes the PR title the commit subject on main, and GitHub appends "(#PR)",
+# so the title carries no issue number of its own (WORKFLOW.md §6).
+TITLE_RE = re.compile(r"^(feat|fix|refactor|perf|test|docs|chore|ci|build|revert)(\([a-z0-9][a-z0-9/._-]*\))?!?: \S.*$")
+REVERT_RE = re.compile(r'^Revert ".+"$')
+TITLE_MAX = 100
+
+
+def title_problem(title):
+    """Why a PR title breaks the commit convention, or None when it is fine."""
+    if REVERT_RE.match(title):
+        return None
+    if not TITLE_RE.match(title):
+        return ("use `<type>(<scope>): <description>` with type one of "
+                "feat, fix, refactor, perf, test, docs, chore, ci, build, revert")
+    if re.search(r"\(#\d+\)\s*$", title):
+        return "drop the trailing (#N): the squash merge appends the PR number, and the body links the issue"
+    if len(title) > TITLE_MAX:
+        return f"keep it under {TITLE_MAX} characters"
+    return None
+
+
+def pr_body(n, closes, refs, summary, deploy):
+    lines = [f"{'Fixes' if closes else 'Refs'} #{n}", *[f"Refs #{r}" for r in refs], "",
+             "### What changed", summary.strip() or "_See the commits._", "",
+             "### Backend",
+             f"- [{'x' if deploy else ' '}] Needs `supabase-deploy` from `main` after merge "
+             "(migrations, functions or challenge content)", "",
+             "### Checklist",
+             "- [x] `dart analyze --fatal-infos` and `flutter test` pass locally (or the change can't affect them)",
+             "- [x] Tests at the right pyramid level; spec and decisions updated where needed"]
+    return "\n".join(lines) + "\n"
+
+
+def should_scaffold(status, author):
+    """Outside ideas wait in the Inbox until triage, so strangers can't make the bot create stages."""
+    return author == OWNER or status not in (None, "Inbox")
+
+
+def check_rollup(checks):
+    states = {(c.get("conclusion") or c.get("state") or c.get("status") or "").upper() for c in checks or []}
+    if states & {"FAILURE", "ERROR", "CANCELLED", "TIMED_OUT", "ACTION_REQUIRED", "STARTUP_FAILURE"}:
+        return "CI failing"
+    if not states or states & {"PENDING", "QUEUED", "IN_PROGRESS", "EXPECTED", "WAITING", ""}:
+        return "CI running"
+    return "CI green"
+
+
+def cmd_check_title(args):
+    problem = title_problem(args.title)
+    if problem:
+        sys.exit(f"PR title {args.title!r}: {problem}")
+    print("PR title OK")
+
+
+def cmd_pr(args):
+    problem = title_problem(args.title)
+    if problem:
+        sys.exit(f"PR title: {problem}")
+    branch = git("rev-parse", "--abbrev-ref", "HEAD")
+    if branch in ("main", "HEAD"):
+        sys.exit("Work on a branch named <type>/<N>-<slug>, never on main (WORKFLOW.md §6)")
+    if git("status", "--porcelain"):
+        sys.exit("Commit or drop local changes first")
+    closes = not args.no_close and not stage_of(issue(args.number))  # stages finish with `advance`, never a merge
+    summary = pathlib.Path(args.body_file).read_text(encoding="utf-8") if args.body_file else ""
+    with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False, encoding="utf-8") as f:
+        f.write(pr_body(args.number, closes, args.refs, summary, args.deploy))
+    git("push", "-u", "origin", branch)
+    existing = gh("pr", "list", "-R", REPO, "--head", branch, "--state", "open", "--json", "url", parse=True)
+    if existing:
+        url = existing[0]["url"]
+        gh("pr", "edit", url, "--title", args.title, "--body-file", f.name)
+    else:
+        create = ["pr", "create", "-R", REPO, "--base", "main", "--head", branch, "--title", args.title,
+                  "--body-file", f.name]
+        url = gh(*create, *(["--draft"] if args.draft else [])).splitlines()[-1]
+    if not args.draft:
+        gh("pr", "merge", url, "--auto", "--squash")
+    board().track(args.number, "In progress")
+    print(url + ("  (draft: merge held)" if args.draft else "  (auto-merge on: squashes when CI passes)"))
+
+
+def open_prs():
+    return gh("pr", "list", "-R", REPO, "--state", "open", "--limit", "100", "--json",
+              "number,title,isDraft,mergeStateStatus,autoMergeRequest,statusCheckRollup", parse=True)
+
+
 # ── commands ─────────────────────────────────────────────────────────────────
 
 def cmd_labels(args):
@@ -407,6 +505,15 @@ def cmd_report(args):
     section("In progress", [i for i in open_items if i["status"] == "In progress"])
     section("Ready, horizon Now", [i for i in open_items if i["status"] == "Ready" and i["horizon"] == "Now"])
     print(f"\n## Inbox: {sum(1 for i in open_items if i['status'] in (None, 'Inbox'))} untriaged")
+    prs = open_prs()
+    print(f"\n## Open pull requests ({len(prs)})")
+    for pr in sorted(prs, key=lambda r: r["number"]):
+        notes = ["draft" if pr["isDraft"] else check_rollup(pr["statusCheckRollup"])]
+        if pr["mergeStateStatus"] == "BEHIND":
+            notes.append("behind main: `gh pr update-branch`")
+        if not pr["isDraft"] and not pr["autoMergeRequest"]:
+            notes.append("auto-merge off")
+        print(f"- #{pr['number']} {pr['title']}: {', '.join(notes)}")
     since = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=7)
     section("Closed in the last 7 days", [
         i for i in items if i["state"] == "CLOSED" and "stage" not in i["labels"]
@@ -428,7 +535,7 @@ def cmd_sync(args):
     b = board()
     on_board = {it["number"]: it for it in b.items() if it["repo"] == REPO}
     open_issues = {i["number"]: i for i in gh("issue", "list", "-R", REPO, "--state", "open", "--limit", "1000",
-                                              "--json", "number,body,labels", parse=True)}
+                                              "--json", "number,body,labels,author", parse=True)}
     cutoff = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=args.archive_days)
     touched_parents = set()
 
@@ -442,6 +549,9 @@ def cmd_sync(args):
                 touched_parents.add(st[1])
             continue
         if set(labels) & set(STAGES["applies_to"]) and not stage_issues(n):
+            if not should_scaffold(status, (i.get("author") or {}).get("login")):
+                print(f"#{n}: outside idea, stages wait for triage")
+                continue
             print(f"#{n}: scaffolding missing stages")
             scaffold(n)
             continue
@@ -530,6 +640,20 @@ def main():
     s.add_argument("parent", type=int)
     s.add_argument("children", nargs="+", type=int)
     s.set_defaults(func=lambda a: add_sub_issues(a.parent, a.children))
+
+    s = sub.add_parser("pr", help="push this branch, open its PR and turn on auto-merge")
+    s.add_argument("number", type=int, help="the issue this branch implements")
+    s.add_argument("--title", required=True, help="<type>(<scope>): <description>, no (#N)")
+    s.add_argument("--refs", nargs="*", type=int, default=[], help="related issues, e.g. the parent epic")
+    s.add_argument("--body-file", help="what changed, in a few lines")
+    s.add_argument("--deploy", action="store_true", help="tick 'needs supabase-deploy after merge'")
+    s.add_argument("--draft", action="store_true", help="open as a draft and hold the merge")
+    s.add_argument("--no-close", action="store_true", help="Refs instead of Fixes (e.g. an intake capture)")
+    s.set_defaults(func=cmd_pr)
+
+    s = sub.add_parser("check-title", help="check a PR title against the commit convention (CI)")
+    s.add_argument("title")
+    s.set_defaults(func=cmd_check_title)
 
     s = sub.add_parser("sync", help="repair drift between issues and the board")
     s.add_argument("--archive-days", type=int, default=30, help="archive Done items closed longer ago than this")

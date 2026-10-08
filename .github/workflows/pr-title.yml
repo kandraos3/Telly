@@ -1,0 +1,25 @@
+name: PR title
+
+# A squash merge turns the PR title into the commit subject on `main` (#158), so
+# the title must follow the commit convention in docs/process/WORKFLOW.md §6.
+# Kept apart from CI so editing a title doesn't re-run the whole test pyramid.
+
+on:
+  pull_request:
+    branches: [ main ]
+    types: [ opened, edited, synchronize, reopened ]
+
+permissions:
+  contents: read
+
+jobs:
+  title:
+    name: PR title
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - name: Title follows the commit convention
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: python3 tool/tracker/tracker.py check-title "$TITLE"

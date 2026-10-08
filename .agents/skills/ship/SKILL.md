@@ -3,14 +3,14 @@ name: ship
 description: >-
   Implement a Ready Telly issue end to end — a task under an epic's Implement stage,
   a bug, an enhancement or a chore — and finish the Implement and Verify & release
-  stages of epics. Claims it on the board, reads the spec, builds it, writes tests
-  per the 70/20/10 pyramid, passes the quality gate, keeps the spec true, commits
-  with the issue reference and keeps the board current. Use whenever writing or
+  stages of epics. Claims it on the board, branches, reads the spec, builds it,
+  writes tests per the 70/20/10 pyramid, passes the quality gate, keeps the spec
+  true, opens an auto-merging pull request and keeps the board current. Use whenever writing or
   fixing code, when the owner says "work on #N", "fix this", "pick up the next
   thing", or when a Verify & release stage is Ready.
 ---
 
-# Ship: Ready issue → verified commit
+# Ship: Ready issue → merged pull request
 
 System rules: [`docs/process/WORKFLOW.md`](../../../docs/process/WORKFLOW.md). Engineering rules: [`AGENTS.md`](../../../AGENTS.md).
 
@@ -24,6 +24,10 @@ python tool/tracker/tracker.py board --status Ready --horizon Now     # then Nex
 - No concrete acceptance criteria? Run **`shape`** first. Exception: a bug whose fix is obvious. Write the criteria yourself and proceed.
 - `python tool/tracker/tracker.py track <N> --status "In progress"` and `gh issue view <N> -R kandraos3/Telly --comments`.
 - If the owner asks for code with no issue, file one first (`tracker.py new … --status "In progress"`).
+- Branch from an up-to-date `main` ([WORKFLOW.md](../../../docs/process/WORKFLOW.md) §6). Commit uncommitted work elsewhere first; never carry it across.
+  ```bash
+  git switch main && git pull --ff-only && git switch -c <type>/<N>-<slug>
+  ```
 
 ## 2. Read the spec
 
@@ -47,14 +51,21 @@ Bug fixes get a regression test that fails without the fix.
 dart analyze --fatal-infos
 bash tool/ft.sh            # flutter test (clears Windows' read-only test assets first)
 ```
-Zero issues and zero failures. Never commit red.
+Zero issues and zero failures. Never commit red. CI re-runs all of it, plus pgTAP, Deno and the emulator CUJs.
 
-## 5. Keep the docs true, then commit
+## 5. Keep the docs true, then open the pull request
 
 - Update the spec where behaviour changed. File deferred or discovered work as new issues (under the same Implement stage if it belongs to the epic).
 - Tick the issue's acceptance criteria (`gh issue edit <N> --body-file …`) or comment with what was verified.
-- `git commit -m "<type>(<scope>): <description> (#N)" -m "Fixes #N" -m "Refs #<epic>"`. One issue per commit.
-- Push only when the owner asked. Not pushed → leave the issue **In progress** and say it's committed locally. Pushed → run `tracker.py sync` (moves the closed issue to Done).
+- Commit on the branch: `git commit -m "<type>(<scope>): <description>"`.
+- Write two or three lines on what changed to a scratch file, then:
+  ```bash
+  python tool/tracker/tracker.py pr <N> --title "<type>(<scope>): <description>" --refs <epic> --body-file <scratch> [--deploy]
+  ```
+  The title becomes the commit on `main`, so no `(#N)`. `--deploy` when migrations, functions or challenge content changed. The PR squash-merges itself once CI is green.
+- Watch it: `gh pr checks <PR> --watch`. Red → fix on the branch, re-run the gate, push (auto-merge stays on). Behind `main` → `gh pr update-branch <PR>`.
+- Merged → `tracker.py sync` (moves the closed issue to Done), `git switch main && git pull --ff-only`, and run **`supabase-deploy`** if the PR ticked *Backend*.
+- Session ending before the merge → leave the issue **In progress** and tell the owner the PR number and its CI state.
 
 ## 6. Finishing an epic's stages
 

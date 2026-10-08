@@ -90,16 +90,60 @@ Stages are finished with `tracker.py advance <stage#> --comment "…"`, never cl
 - Spec files touched by an epic carry a tracking line at the top: `> Tracking: epic #NN · Status: draft | approved | shipped`
 - Non-obvious decisions get a record in `docs/decisions/NNNN-short-title.md` (template in that folder's README).
 
-## 6. Commits
+## 6. Branches, pull requests and commits
+
+Every change reaches `main` through a pull request ([decision 0006](../decisions/0006-branches-and-pull-requests.md)). A ruleset on `main` enforces it:
+
+| Rule | Setting |
+|---|---|
+| Pull request required | Yes, with 0 approvals. Agents work through the owner's account, and GitHub never lets an author approve their own PR; CI is the gate |
+| Required checks | **`CI passed`** (`ci.yml`; sums up every job, and a job skipped by the change filter counts as passed) and **`PR title`** (`pr-title.yml`) |
+| Up to date with `main` | Required before merging |
+| History | Squash merges only, linear, no force pushes, no deletion, nobody can bypass |
+
+### The flow
+
+1. **Claim**: `tracker.py track N --status "In progress"`.
+2. **Branch** from an up-to-date `main`: `git switch main && git pull --ff-only && git switch -c <type>/<N>-<slug>` (e.g. `fix/152-edge-jwt`, `feat/52-because-you-ranked`, `docs/160-inbox-voice-note`).
+3. **Commit** on the branch as often as useful. Run the quality gate (`dart analyze --fatal-infos`, `flutter test`) before each commit.
+4. **Open the PR**: `tracker.py pr N --title "<type>(<scope>): <description>" [--refs <epic>] --body-file <summary> [--deploy]`. It pushes the branch, writes the body (from the same shape as the PR template) and turns on auto-merge.
+5. **CI decides.** Green → GitHub squash-merges, `Fixes #N` closes the issue, and the branch is deleted. Then `tracker.py sync` (moves the issue to Done) and `git switch main && git pull --ff-only`.
+   - **Red**: fix it on the branch and push; auto-merge stays on. A job that fails and then passes on a re-run with no change is flaky: file a `bug` for it.
+   - **Behind `main`**: `gh pr update-branch <PR>`. GitHub doesn't update branches by itself, and `tracker.py report` flags PRs that are behind.
+   - **Hold a merge** (the owner wants a look, or it must wait for something): `tracker.py pr … --draft`, or `gh pr merge <PR> --disable-auto`.
+
+### What gets its own PR
+
+- Each task sub-issue, bug, enhancement and chore: **one PR per issue, never one PR per epic**. Two tasks that can't pass CI separately were split wrong; merge them into one task.
+- An `intake` capture (`docs(inbox): …`, with `--no-close`, so the filed issues stay open).
+- A stage that produces files: the Explore alternatives mockups and decision record, the Specify spec. Stage PRs say `Refs #<stage>`; stages are still finished with `advance`, after the PR merges.
+
+### Titles and commit messages
 
 ```
-<type>(<scope>): <concise description> (#N)
+<type>(<scope>): <concise description>       ← PR title = the commit subject on main; GitHub appends (#PR)
 
-Fixes #N          ← only when the commit completes the issue (a task, bug or chore)
+Fixes #N          ← PR body; only when the PR completes the issue (a task, bug or chore)
 Refs #M           ← related issues or the parent epic
 ```
 
-`type`: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `ci`. One issue per commit where possible. The quality gate (`dart analyze --fatal-infos`, `flutter test`) must pass before committing code. Never put `Fixes` on a stage issue. Stages are finished with `advance`.
+`type`: `feat`, `fix`, `refactor`, `perf`, `test`, `docs`, `chore`, `ci`, `build`, `revert`. No `(#N)` in the title: issue and PR numbers share one sequence, and the PR links the issue. `tracker.py check-title` is the rule CI applies. Never put `Fixes` on a stage issue.
+
+### Backend changes
+
+Production only runs merged code. Migrations, edge functions and challenge content are deployed from `main`, level with `origin/main`, **after** the PR merges; the `supabase-deploy` script and `publish.py --publish` refuse anywhere else. A PR that needs a deploy ticks the *Backend* box (`--deploy`), and the agent that shipped it deploys once it merges. Migrations stay backward compatible (`supabase-deploy` §4), so the gap between merge and deploy is safe.
+
+### Dependency updates
+
+Dependabot opens weekly PRs for the pinned workflow actions and Dart packages. Agents review them during `report`, then `gh pr merge <PR> --auto --squash`. They go through the same checks as any change.
+
+### Repository security
+
+- Secret scanning with push protection; Dependabot alerts and security updates.
+- Workflow actions are pinned to full commit SHAs; the default workflow token is read-only.
+- PRs from outside contributors need approval before CI runs.
+- Vulnerabilities are reported privately ([`SECURITY.md`](../../SECURITY.md)).
+- The *Tracker* Action only scaffolds stages for issues from the owner or collaborators. Ideas from anyone else wait in the Inbox, and `sync` scaffolds them once triaged.
 
 ## 7. The skills and the tracker CLI
 
@@ -112,7 +156,7 @@ Refs #M           ← related issues or the parent epic
 | **`mobile-deploy`** | Running the app on a phone or emulator |
 
 ```bash
-python tool/tracker/tracker.py report                 # owner summary: needs-you, in progress, ready, recently done, epic stages
+python tool/tracker/tracker.py report                 # owner summary: needs-you, in progress, ready, open PRs, recently done, epic stages
 python tool/tracker/tracker.py sync                   # repair the board: closed→Done, missing items, stage statuses, archive old Done
 python tool/tracker/tracker.py board [--status Ready] [--horizon Now] [--label bug]
 python tool/tracker/tracker.py new --title "..." --labels bug,area:profile,p2-medium --body-file body.md [--status Ready] [--horizon Next] [--parent N]
@@ -121,9 +165,11 @@ python tool/tracker/tracker.py advance 55 --comment "Go: ..." [--outcome go|skip
 python tool/tracker/tracker.py track 52 --status "In progress"
 python tool/tracker/tracker.py close 54 --comment "Resolved by abc1234"
 python tool/tracker/tracker.py labels                 # labels.json → GitHub
+python tool/tracker/tracker.py pr 52 --title "feat(explore): …" --refs 44 --body-file summary.md [--deploy] [--draft] [--no-close]
+python tool/tracker/tracker.py check-title "fix(theme): …"   # the PR title rule CI applies
 ```
 
-Agents run `sync` before reading the board for planning, and after pushing commits. The board's built-in "Item closed → Done" workflow is off; `sync` and `close` do that job.
+Agents run `sync` before reading the board for planning, and after a pull request merges. The board's built-in "Item closed → Done" workflow is off; `sync` and `close` do that job.
 
 ## 8. Issue body template
 

@@ -1,0 +1,26 @@
+# Keeps pinned workflow actions and Dart packages current (#158). Every update
+# arrives as a PR and merges only through the same `CI passed` check as any change.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: ci
+      include: scope
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: pub
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      pub-minor-and-patch:
+        update-types: [minor, patch]
