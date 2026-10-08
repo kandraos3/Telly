@@ -41,6 +41,18 @@ class LocalTitleDaoManager {
       $$CachedTitlesTableTableManager(_db.attachedDatabase, _db.cachedTitles);
 }
 
+mixin _$ExploreCacheDaoMixin on DatabaseAccessor<AppDatabase> {
+  $ExploreCacheTable get exploreCache => attachedDatabase.exploreCache;
+  ExploreCacheDaoManager get managers => ExploreCacheDaoManager(this);
+}
+
+class ExploreCacheDaoManager {
+  final _$ExploreCacheDaoMixin _db;
+  ExploreCacheDaoManager(this._db);
+  $$ExploreCacheTableTableManager get exploreCache =>
+      $$ExploreCacheTableTableManager(_db.attachedDatabase, _db.exploreCache);
+}
+
 class $CachedTitlesTable extends CachedTitles
     with TableInfo<$CachedTitlesTable, CachedTitle> {
   @override
@@ -2200,6 +2212,237 @@ class GamificationCacheCompanion
   }
 }
 
+class $ExploreCacheTable extends ExploreCache
+    with TableInfo<$ExploreCacheTable, ExploreCacheData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ExploreCacheTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _mediaTypeMeta =
+      const VerificationMeta('mediaType');
+  @override
+  late final GeneratedColumn<String> mediaType = GeneratedColumn<String>(
+      'media_type', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _jsonMeta = const VerificationMeta('json');
+  @override
+  late final GeneratedColumn<String> json = GeneratedColumn<String>(
+      'json', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _savedAtMeta =
+      const VerificationMeta('savedAt');
+  @override
+  late final GeneratedColumn<DateTime> savedAt = GeneratedColumn<DateTime>(
+      'saved_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  @override
+  List<GeneratedColumn> get $columns => [mediaType, json, savedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'explore_cache';
+  @override
+  VerificationContext validateIntegrity(Insertable<ExploreCacheData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('media_type')) {
+      context.handle(_mediaTypeMeta,
+          mediaType.isAcceptableOrUnknown(data['media_type']!, _mediaTypeMeta));
+    } else if (isInserting) {
+      context.missing(_mediaTypeMeta);
+    }
+    if (data.containsKey('json')) {
+      context.handle(
+          _jsonMeta, json.isAcceptableOrUnknown(data['json']!, _jsonMeta));
+    } else if (isInserting) {
+      context.missing(_jsonMeta);
+    }
+    if (data.containsKey('saved_at')) {
+      context.handle(_savedAtMeta,
+          savedAt.isAcceptableOrUnknown(data['saved_at']!, _savedAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {mediaType};
+  @override
+  ExploreCacheData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ExploreCacheData(
+      mediaType: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}media_type'])!,
+      json: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}json'])!,
+      savedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}saved_at'])!,
+    );
+  }
+
+  @override
+  $ExploreCacheTable createAlias(String alias) {
+    return $ExploreCacheTable(attachedDatabase, alias);
+  }
+}
+
+class ExploreCacheData extends DataClass
+    implements Insertable<ExploreCacheData> {
+  final String mediaType;
+  final String json;
+  final DateTime savedAt;
+  const ExploreCacheData(
+      {required this.mediaType, required this.json, required this.savedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['media_type'] = Variable<String>(mediaType);
+    map['json'] = Variable<String>(json);
+    map['saved_at'] = Variable<DateTime>(savedAt);
+    return map;
+  }
+
+  ExploreCacheCompanion toCompanion(bool nullToAbsent) {
+    return ExploreCacheCompanion(
+      mediaType: Value(mediaType),
+      json: Value(json),
+      savedAt: Value(savedAt),
+    );
+  }
+
+  factory ExploreCacheData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ExploreCacheData(
+      mediaType: serializer.fromJson<String>(json['mediaType']),
+      json: serializer.fromJson<String>(json['json']),
+      savedAt: serializer.fromJson<DateTime>(json['savedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'mediaType': serializer.toJson<String>(mediaType),
+      'json': serializer.toJson<String>(json),
+      'savedAt': serializer.toJson<DateTime>(savedAt),
+    };
+  }
+
+  ExploreCacheData copyWith(
+          {String? mediaType, String? json, DateTime? savedAt}) =>
+      ExploreCacheData(
+        mediaType: mediaType ?? this.mediaType,
+        json: json ?? this.json,
+        savedAt: savedAt ?? this.savedAt,
+      );
+  ExploreCacheData copyWithCompanion(ExploreCacheCompanion data) {
+    return ExploreCacheData(
+      mediaType: data.mediaType.present ? data.mediaType.value : this.mediaType,
+      json: data.json.present ? data.json.value : this.json,
+      savedAt: data.savedAt.present ? data.savedAt.value : this.savedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExploreCacheData(')
+          ..write('mediaType: $mediaType, ')
+          ..write('json: $json, ')
+          ..write('savedAt: $savedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(mediaType, json, savedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ExploreCacheData &&
+          other.mediaType == this.mediaType &&
+          other.json == this.json &&
+          other.savedAt == this.savedAt);
+}
+
+class ExploreCacheCompanion extends UpdateCompanion<ExploreCacheData> {
+  final Value<String> mediaType;
+  final Value<String> json;
+  final Value<DateTime> savedAt;
+  final Value<int> rowid;
+  const ExploreCacheCompanion({
+    this.mediaType = const Value.absent(),
+    this.json = const Value.absent(),
+    this.savedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ExploreCacheCompanion.insert({
+    required String mediaType,
+    required String json,
+    this.savedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : mediaType = Value(mediaType),
+        json = Value(json);
+  static Insertable<ExploreCacheData> custom({
+    Expression<String>? mediaType,
+    Expression<String>? json,
+    Expression<DateTime>? savedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (mediaType != null) 'media_type': mediaType,
+      if (json != null) 'json': json,
+      if (savedAt != null) 'saved_at': savedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ExploreCacheCompanion copyWith(
+      {Value<String>? mediaType,
+      Value<String>? json,
+      Value<DateTime>? savedAt,
+      Value<int>? rowid}) {
+    return ExploreCacheCompanion(
+      mediaType: mediaType ?? this.mediaType,
+      json: json ?? this.json,
+      savedAt: savedAt ?? this.savedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (mediaType.present) {
+      map['media_type'] = Variable<String>(mediaType.value);
+    }
+    if (json.present) {
+      map['json'] = Variable<String>(json.value);
+    }
+    if (savedAt.present) {
+      map['saved_at'] = Variable<DateTime>(savedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExploreCacheCompanion(')
+          ..write('mediaType: $mediaType, ')
+          ..write('json: $json, ')
+          ..write('savedAt: $savedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2210,11 +2453,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $WatchlistCacheTable watchlistCache = $WatchlistCacheTable(this);
   late final $GamificationCacheTable gamificationCache =
       $GamificationCacheTable(this);
+  late final $ExploreCacheTable exploreCache = $ExploreCacheTable(this);
   late final LocalRankingDao localRankingDao =
       LocalRankingDao(this as AppDatabase);
   late final LocalTitleDao localTitleDao = LocalTitleDao(this as AppDatabase);
   late final PendingMutationDao pendingMutationDao =
       PendingMutationDao(this as AppDatabase);
+  late final ExploreCacheDao exploreCacheDao =
+      ExploreCacheDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2224,7 +2470,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         localRankings,
         pendingMutations,
         watchlistCache,
-        gamificationCache
+        gamificationCache,
+        exploreCache
       ];
 }
 
@@ -3335,6 +3582,153 @@ typedef $$GamificationCacheTableProcessedTableManager = ProcessedTableManager<
     ),
     GamificationCacheData,
     PrefetchHooks Function()>;
+typedef $$ExploreCacheTableCreateCompanionBuilder = ExploreCacheCompanion
+    Function({
+  required String mediaType,
+  required String json,
+  Value<DateTime> savedAt,
+  Value<int> rowid,
+});
+typedef $$ExploreCacheTableUpdateCompanionBuilder = ExploreCacheCompanion
+    Function({
+  Value<String> mediaType,
+  Value<String> json,
+  Value<DateTime> savedAt,
+  Value<int> rowid,
+});
+
+class $$ExploreCacheTableFilterComposer
+    extends Composer<_$AppDatabase, $ExploreCacheTable> {
+  $$ExploreCacheTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get mediaType => $composableBuilder(
+      column: $table.mediaType, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get json => $composableBuilder(
+      column: $table.json, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get savedAt => $composableBuilder(
+      column: $table.savedAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$ExploreCacheTableOrderingComposer
+    extends Composer<_$AppDatabase, $ExploreCacheTable> {
+  $$ExploreCacheTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get mediaType => $composableBuilder(
+      column: $table.mediaType, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get json => $composableBuilder(
+      column: $table.json, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get savedAt => $composableBuilder(
+      column: $table.savedAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$ExploreCacheTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ExploreCacheTable> {
+  $$ExploreCacheTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get mediaType =>
+      $composableBuilder(column: $table.mediaType, builder: (column) => column);
+
+  GeneratedColumn<String> get json =>
+      $composableBuilder(column: $table.json, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get savedAt =>
+      $composableBuilder(column: $table.savedAt, builder: (column) => column);
+}
+
+class $$ExploreCacheTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $ExploreCacheTable,
+    ExploreCacheData,
+    $$ExploreCacheTableFilterComposer,
+    $$ExploreCacheTableOrderingComposer,
+    $$ExploreCacheTableAnnotationComposer,
+    $$ExploreCacheTableCreateCompanionBuilder,
+    $$ExploreCacheTableUpdateCompanionBuilder,
+    (
+      ExploreCacheData,
+      BaseReferences<_$AppDatabase, $ExploreCacheTable, ExploreCacheData>
+    ),
+    ExploreCacheData,
+    PrefetchHooks Function()> {
+  $$ExploreCacheTableTableManager(_$AppDatabase db, $ExploreCacheTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ExploreCacheTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ExploreCacheTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ExploreCacheTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> mediaType = const Value.absent(),
+            Value<String> json = const Value.absent(),
+            Value<DateTime> savedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ExploreCacheCompanion(
+            mediaType: mediaType,
+            json: json,
+            savedAt: savedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String mediaType,
+            required String json,
+            Value<DateTime> savedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ExploreCacheCompanion.insert(
+            mediaType: mediaType,
+            json: json,
+            savedAt: savedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable<$ExploreCacheTable, ExploreCacheData>(table),
+                    BaseReferences<_$AppDatabase, $ExploreCacheTable,
+                        ExploreCacheData>(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$ExploreCacheTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $ExploreCacheTable,
+    ExploreCacheData,
+    $$ExploreCacheTableFilterComposer,
+    $$ExploreCacheTableOrderingComposer,
+    $$ExploreCacheTableAnnotationComposer,
+    $$ExploreCacheTableCreateCompanionBuilder,
+    $$ExploreCacheTableUpdateCompanionBuilder,
+    (
+      ExploreCacheData,
+      BaseReferences<_$AppDatabase, $ExploreCacheTable, ExploreCacheData>
+    ),
+    ExploreCacheData,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -3349,4 +3743,6 @@ class $AppDatabaseManager {
       $$WatchlistCacheTableTableManager(_db, _db.watchlistCache);
   $$GamificationCacheTableTableManager get gamificationCache =>
       $$GamificationCacheTableTableManager(_db, _db.gamificationCache);
+  $$ExploreCacheTableTableManager get exploreCache =>
+      $$ExploreCacheTableTableManager(_db, _db.exploreCache);
 }

@@ -109,6 +109,17 @@ class GamificationCache extends Table {
   Set<Column> get primaryKey => {key};
 }
 
+/// Last `get_explore_candidates` payload per canon (features/07 §7.5): Explore ranks it on open,
+/// so rows show at once and offline; refetched when older than 6 h.
+class ExploreCache extends Table {
+  TextColumn get mediaType => text()();
+  TextColumn get json => text()();
+  DateTimeColumn get savedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column> get primaryKey => {mediaType};
+}
+
 // --- DAOS ---
 
 @DriftAccessor(tables: [LocalRankings])
@@ -221,17 +232,28 @@ class LocalTitleDao extends DatabaseAccessor<AppDatabase> with _$LocalTitleDaoMi
   }
 }
 
+@DriftAccessor(tables: [ExploreCache])
+class ExploreCacheDao extends DatabaseAccessor<AppDatabase> with _$ExploreCacheDaoMixin {
+  ExploreCacheDao(super.db);
+
+  Future<ExploreCacheData?> read(String mediaType) =>
+      (select(exploreCache)..where((t) => t.mediaType.equals(mediaType))).getSingleOrNull();
+
+  Future<void> write(String mediaType, String json, DateTime savedAt) => into(exploreCache)
+      .insertOnConflictUpdate(ExploreCacheCompanion.insert(mediaType: mediaType, json: json, savedAt: Value(savedAt)));
+}
+
 // --- MASTER DATABASE ---
 
 @DriftDatabase(
-  tables: [CachedTitles, LocalRankings, PendingMutations, WatchlistCache, GamificationCache],
-  daos: [LocalRankingDao, LocalTitleDao, PendingMutationDao],
+  tables: [CachedTitles, LocalRankings, PendingMutations, WatchlistCache, GamificationCache, ExploreCache],
+  daos: [LocalRankingDao, LocalTitleDao, PendingMutationDao, ExploreCacheDao],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -240,6 +262,7 @@ class AppDatabase extends _$AppDatabase {
           try {
             if (from < 2) await _migrateV1ToV2(m);
             if (from < 3) await m.createTable(gamificationCache);
+            if (from < 4) await m.createTable(exploreCache);
           } catch (e, stack) {
             await SentryService().captureException(
               e,
