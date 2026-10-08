@@ -37,7 +37,7 @@ dependencies:
   reorderables: ^0.6.0
   shimmer: ^3.0.0
   cached_network_image: ^3.4.0
-  google_fonts: ^6.2.1
+  google_fonts: ^8.2.1
 
   # --- Utilities, Media & Ingestion ---
   intl: ^0.19.0
