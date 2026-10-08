@@ -1,5 +1,5 @@
 // Test doubles for edge-function handlers.
-import type { AvailabilityRow, CatalogStore, CollectionRow, SeasonRow, TitleRow } from "../_shared/db.ts";
+import type { AvailabilityRow, CatalogStore, CollectionRow, ExploreSeedRef, ExploreStore, SeasonRow, TitleRow } from "../_shared/db.ts";
 import type { MediaType } from "../_shared/http.ts";
 
 export interface RecordedCall {
@@ -72,5 +72,44 @@ export class MemoryStore implements CatalogStore {
   }
   staleCollections(_maxAgeDays: number, limit: number) {
     return Promise.resolve(this.staleCollectionIds.slice(0, limit));
+  }
+}
+
+/** In-memory Explore caches for title-related tests. */
+export class MemoryExploreStore implements ExploreStore {
+  titles: TitleRow[] = [];
+  related = new Map<string, { related_id: number; position: number }[]>();
+  relatedFetched: Record<string, string> = {};
+  trending: Record<string, number[]> = {};
+  trendingFetched: Record<string, string> = {};
+  stale: ExploreSeedRef[] = [];
+
+  upsertTitles(rows: TitleRow[]) {
+    this.titles.push(...rows);
+    return Promise.resolve();
+  }
+  relatedFetchedAt(seedIds: number[], mediaType: MediaType) {
+    const out: Record<number, string> = {};
+    for (const id of seedIds) {
+      const at = this.relatedFetched[`${mediaType}:${id}`];
+      if (at) out[id] = at;
+    }
+    return Promise.resolve(out);
+  }
+  storeRelated(seedId: number, mediaType: MediaType, related: { related_id: number; position: number }[]) {
+    this.related.set(`${mediaType}:${seedId}`, related);
+    this.relatedFetched[`${mediaType}:${seedId}`] = new Date().toISOString();
+    return Promise.resolve(related.length);
+  }
+  trendingFetchedAt(mediaType: MediaType) {
+    return Promise.resolve(this.trendingFetched[mediaType] ?? null);
+  }
+  storeTrending(mediaType: MediaType, titleIds: number[]) {
+    this.trending[mediaType] = titleIds;
+    this.trendingFetched[mediaType] = new Date().toISOString();
+    return Promise.resolve(titleIds.length);
+  }
+  staleSeeds(_maxAgeDays: number, limit: number) {
+    return Promise.resolve(this.stale.slice(0, limit));
   }
 }

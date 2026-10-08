@@ -27,6 +27,29 @@ export interface TitleRow {
   tv_type?: string | null;
   /** 2 once stored with the #140 fields; the maintenance run backfills lower versions. */
   metadata_version?: number;
+  // #177 (features/07 §7.4): a quality signal for titles nobody on Telly has ranked yet.
+  tmdb_vote_average?: number | null;
+  tmdb_vote_count?: number | null;
+}
+
+/** A seed whose TMDB recommendations are due for a refetch (`stale_explore_seeds`). */
+export interface ExploreSeedRef {
+  seed_id: number;
+  media_type: MediaType;
+}
+
+/** The Explore caches (#177, features/07 §7.6): `title_related`, `trending_titles` and the fetch log. */
+export interface ExploreStore {
+  upsertTitles(rows: TitleRow[]): Promise<void>;
+  /** When each of [seedIds] last had its recommendations fetched; absent if never. */
+  relatedFetchedAt(seedIds: number[], mediaType: MediaType): Promise<Record<number, string>>;
+  /** Replaces a seed's related rows and logs the fetch (`store_title_related`). */
+  storeRelated(seedId: number, mediaType: MediaType, related: { related_id: number; position: number }[]): Promise<number>;
+  /** When the canon's trending list was last stored; null if never. */
+  trendingFetchedAt(mediaType: MediaType): Promise<string | null>;
+  /** Replaces the canon's trending list, best first (`store_trending`). */
+  storeTrending(mediaType: MediaType, titleIds: number[]): Promise<number>;
+  staleSeeds(maxAgeDays: number, limit: number): Promise<ExploreSeedRef[]>;
 }
 
 /** TMDB collection cache (`title_collections`, features/10 §7). */
@@ -161,6 +184,59 @@ export function supabaseCatalogStore(client: SupabaseClient = serviceClient()): 
       const { data, error } = await client.rpc("stale_title_collections", { p_max_age_days: maxAgeDays, p_limit: limit });
       check(error);
       return ((data ?? []) as { collection_id: number }[]).map((r) => r.collection_id);
+    },
+  };
+}
+
+export function supabaseExploreStore(client: SupabaseClient = serviceClient()): ExploreStore {
+  const check = (error: { message: string } | null) => {
+    if (error) throw new Error(error.message);
+  };
+  return {
+    async upsertTitles(rows) {
+      if (rows.length === 0) return;
+      const { error } = await client.from("titles").upsert(rows, { onConflict: "id,media_type" });
+      check(error);
+    },
+    async relatedFetchedAt(seedIds, mediaType) {
+      if (seedIds.length === 0) return {};
+      const { data, error } = await client
+        .from("title_related_fetches")
+        .select("seed_id, fetched_at")
+        .eq("seed_media_type", mediaType)
+        .in("seed_id", seedIds);
+      check(error);
+      return Object.fromEntries(((data ?? []) as { seed_id: number; fetched_at: string }[]).map((r) => [r.seed_id, r.fetched_at]));
+    },
+    async storeRelated(seedId, mediaType, related) {
+      const { data, error } = await client.rpc("store_title_related", {
+        p_seed_id: seedId,
+        p_media_type: mediaType,
+        p_related: related,
+      });
+      check(error);
+      return Number(data ?? 0);
+    },
+    async trendingFetchedAt(mediaType) {
+      const { data, error } = await client
+        .from("trending_titles")
+        .select("fetched_at")
+        .eq("media_type", mediaType)
+        .order("fetched_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      check(error);
+      return (data?.fetched_at as string | undefined) ?? null;
+    },
+    async storeTrending(mediaType, titleIds) {
+      const { data, error } = await client.rpc("store_trending", { p_media_type: mediaType, p_title_ids: titleIds });
+      check(error);
+      return Number(data ?? 0);
+    },
+    async staleSeeds(maxAgeDays, limit) {
+      const { data, error } = await client.rpc("stale_explore_seeds", { p_max_age_days: maxAgeDays, p_limit: limit });
+      check(error);
+      return (data ?? []) as ExploreSeedRef[];
     },
   };
 }
