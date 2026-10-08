@@ -13,6 +13,7 @@ import 'package:telly_app/features/auth/data/auth_repository.dart';
 import 'package:telly_app/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:telly_app/features/discovery/data/discovery_repository.dart';
 import 'package:telly_app/features/discovery/domain/discovery_models.dart';
+import 'package:telly_app/features/discovery/presentation/controllers/explore_picks.dart';
 import 'package:telly_app/features/logging/data/title_repository.dart';
 import 'package:telly_app/features/logging/domain/title_search_result.dart';
 
@@ -672,9 +673,9 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
     );
   }
 
-  /// "Recommended for You" carousel (FE-EXPLORE-03), fed by `get_recommended_titles`.
+  /// "Recommended for You" carousel (FE-EXPLORE-03), fed by Explore's ranked picks (#182).
   Widget _buildRecommendedSection() {
-    final recommended = ref.watch(recommendedTitlesProvider).valueOrNull ?? const [];
+    final recommended = ref.watch(explorePicksProvider).valueOrNull ?? const [];
     if (recommended.isEmpty) return const SizedBox.shrink();
 
     return Padding(
@@ -707,7 +708,7 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
   /// Shown while the search field is focused but empty: recent searches + trending.
   Widget _buildSearchZeroState() {
     final recent = ref.watch(recentSearchesProvider);
-    final trending = ref.watch(trendingTitlesProvider).valueOrNull ?? const [];
+    final trending = ref.watch(exploreTrendingProvider).valueOrNull ?? const [];
 
     return Column(
       key: const Key('explore_search_zero_state'),

@@ -10,6 +10,7 @@ import 'package:telly_app/features/discovery/domain/discovery_models.dart';
 import 'package:telly_app/core/theme/telly_theme.dart';
 import 'package:telly_app/core/widgets/poster_image.dart';
 import 'package:telly_app/features/discovery/data/discovery_repository.dart';
+import 'package:telly_app/features/discovery/presentation/controllers/explore_picks.dart';
 import 'package:telly_app/features/discovery/presentation/screens/explore_discover_screen.dart';
 import 'package:telly_app/features/logging/data/title_repository.dart';
 
@@ -19,15 +20,38 @@ import '../../fakes/fake_auth_repository.dart';
 import '../../fakes/fake_title_repository.dart';
 import '../../helpers/router_harness.dart';
 
+// Explore's ranked picks and trending (#182); the ranking itself is tested in explore_ranker_test.
+const _picks = [
+  RecommendedTitle(
+    titleId: 60059,
+    mediaType: 'tv',
+    title: 'Better Call Saul',
+    reason: RecommendationReason.becauseYouLoved,
+    reasonTitle: 'Breaking Bad',
+  ),
+  RecommendedTitle(titleId: 27205, mediaType: 'movie', title: 'Inception', reason: RecommendationReason.trending),
+];
+const _trending = [
+  RecommendedTitle(titleId: 126308, mediaType: 'tv', title: 'Shogun', reason: RecommendationReason.trending),
+  RecommendedTitle(titleId: 693134, mediaType: 'movie', title: 'Dune: Part Two', reason: RecommendationReason.trending),
+];
+
+List<Override> _pickOverrides({List<RecommendedTitle> picks = _picks}) => [
+      explorePicksProvider.overrideWith((ref) async => picks),
+      exploreTrendingProvider.overrideWith((ref) async => _trending),
+    ];
+
 void main() {
   Widget createTestWidget({
     DiscoveryRepository? discoveryRepo,
     TitleRepository? titleRepo,
     AuthRepository? authRepo,
     String? searchRequest,
+    List<RecommendedTitle> picks = _picks,
   }) {
     return ProviderScope(
       overrides: [
+        ..._pickOverrides(picks: picks),
         posterNetworkImagesProvider.overrideWithValue(false),
         authRepositoryProvider.overrideWithValue(
           authRepo ?? FakeAuthRepository(signedInUserId: 'u-user'),
@@ -295,6 +319,7 @@ void main() {
     Widget routed() => routerHarness(
           const ExploreDiscoverScreen(),
           overrides: [
+            ..._pickOverrides(),
             posterNetworkImagesProvider.overrideWithValue(false),
             authRepositoryProvider.overrideWithValue(FakeAuthRepository(signedInUserId: 'u-user')),
             discoveryRepositoryProvider.overrideWithValue(FakeDiscoveryRepository()),
@@ -328,7 +353,7 @@ void main() {
 
     testWidgets('carousel is hidden when there is nothing to recommend', (tester) async {
       tallView(tester);
-      await tester.pumpWidget(createTestWidget(discoveryRepo: FakeDiscoveryRepository(recommended: [])));
+      await tester.pumpWidget(createTestWidget(picks: const []));
       await tester.pumpAndSettle();
 
       expect(find.byKey(const Key('explore_recommended_section')), findsNothing);
@@ -444,36 +469,28 @@ void main() {
     });
   });
 
-  group('FE-EXPLORE-03: SupabaseDiscoveryRepository', () {
-    test('calls the recommendation RPCs with media type and limit', () async {
+  group('#46: SupabaseDiscoveryRepository', () {
+    test('fetches explore candidates and asks title-related for missing seeds', () async {
       final requests = <http.Request>[];
       final repo = SupabaseDiscoveryRepository(SupabaseClient(
         'http://supabase.test',
         'anon-key',
         httpClient: MockClient((req) async {
           requests.add(req);
-          return http.Response(
-            jsonEncode([
-              {'title_id': 60059, 'media_type': 'tv', 'title': 'Better Call Saul', 'reason_kind': 'trending'},
-            ]),
-            200,
-            headers: {'content-type': 'application/json'},
-            request: req,
-          );
+          return http.Response(jsonEncode({'media_type': 'tv', 'candidates': []}), 200,
+              headers: {'content-type': 'application/json'}, request: req);
         }),
         authOptions: const AuthClientOptions(autoRefreshToken: false),
       ));
 
-      final recs = await repo.fetchRecommendedTitles(mediaType: 'tv', limit: 5);
-      final trending = await repo.fetchTrendingTitles();
+      final payload = await repo.fetchExploreCandidates('tv');
+      await repo.refreshRelated([1396, 60059], 'tv');
 
-      expect(recs.single.title, 'Better Call Saul');
-      expect(trending, hasLength(1));
-      expect(requests[0].url.path, '/rest/v1/rpc/get_recommended_titles');
-      expect(jsonDecode(requests[0].body), {'p_media_type': 'tv', 'p_limit': 5});
-      expect(requests[1].url.path, '/rest/v1/rpc/get_trending_titles');
-      expect(jsonDecode(requests[1].body), {'p_media_type': null, 'p_limit': 10});
+      expect(payload['media_type'], 'tv');
+      expect(requests[0].url.path, '/rest/v1/rpc/get_explore_candidates');
+      expect(jsonDecode(requests[0].body), {'p_media_type': 'tv'});
+      expect(requests[1].url.path, '/functions/v1/title-related');
+      expect(jsonDecode(requests[1].body), {'seed_ids': [1396, 60059], 'media_type': 'tv'});
     });
   });
 }
-

@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../discovery/data/discovery_repository.dart';
 import '../../../discovery/domain/discovery_models.dart';
+import '../../../discovery/presentation/controllers/explore_picks.dart';
 import '../../../queue/data/watchlist_repository.dart';
 import '../../domain/social_models.dart';
 
@@ -53,13 +53,13 @@ class FeedRecommendations {
   bool isQueued(RecommendedTitle t) => queued.contains(keyOf(t));
 }
 
-/// Picks for the SCR-05 recommendation cards (`get_recommended_titles`), plus which
+/// Picks for the SCR-05 recommendation cards (Explore's ranked picks, #182), plus which
 /// ones I queued from the feed. A failed load just means no cards.
 class FeedRecommendationsController extends AsyncNotifier<FeedRecommendations> {
   @override
   Future<FeedRecommendations> build() async {
     try {
-      final picks = await ref.watch(discoveryRepositoryProvider).fetchRecommendedTitles(limit: 12);
+      final picks = await ref.watch(explorePicksProvider.future);
       return FeedRecommendations(picks: picks);
     } catch (_) {
       return const FeedRecommendations();
