@@ -277,4 +277,4 @@ Blocked users (either direction) and deleted users never count as friends. Candi
   - A seed TMDB doesn't know (404) is logged as an empty fetch. Any other TMDB error leaves the seed stale, so it is retried next run.
   - New `titles` rows have `metadata_version` 0, so `tmdb-details` maintenance later fills in their director, network and collection (which the diversity caps in §7.2 use).
 - Secrets: `TMDB_ACCESS_TOKEN` (already set for `tmdb-details`).
-- **Retirement**: `get_recommended_titles` and `get_trending_titles` stay for older app builds and the Home feed until the feed moves to the ranker (#182). `curated_canons` and the client's hard-coded canons are removed.
+- **Retirement**: `get_recommended_titles` and `get_trending_titles` stay for older app builds and the Home feed until no supported build calls them (#191); since #182 the app itself no longer does. `curated_canons` and the client's hard-coded canons are removed.

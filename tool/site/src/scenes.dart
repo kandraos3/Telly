@@ -16,6 +16,7 @@ import 'package:telly_app/features/cowatch/domain/two_to_watch_engine.dart';
 import 'package:telly_app/features/cowatch/presentation/screens/two_to_watch_screen.dart';
 import 'package:telly_app/features/discovery/data/discovery_repository.dart';
 import 'package:telly_app/features/discovery/domain/discovery_models.dart';
+import 'package:telly_app/features/discovery/presentation/controllers/explore_picks.dart';
 import 'package:telly_app/features/discovery/presentation/screens/explore_discover_screen.dart';
 import 'package:telly_app/features/feed/data/social_repository.dart';
 import 'package:telly_app/features/feed/domain/social_models.dart';
@@ -398,8 +399,8 @@ FakeGraveyardRepository _graveyard() {
   return repo;
 }
 
-FakeDiscoveryRepository _discovery() => FakeDiscoveryRepository(
-      recommended: [
+/// Explore's ranked picks and trending for the screenshots (#182: they come from the ranker now).
+final _sitePicks = <RecommendedTitle>[
         RecommendedTitle(
           titleId: 7001,
           mediaType: 'tv',
@@ -420,8 +421,9 @@ FakeDiscoveryRepository _discovery() => FakeDiscoveryRepository(
           reason: RecommendationReason.becauseYouLoved,
           reasonTitle: 'Severance',
         ),
-      ],
-      trending: [
+      ];
+
+final _siteTrending = <RecommendedTitle>[
         for (final (i, title) in const ['Pluribus', 'Slow Horses', 'Blue Eye Samurai', 'Hacks'].indexed)
           RecommendedTitle(
             titleId: 7100 + i,
@@ -431,7 +433,9 @@ FakeDiscoveryRepository _discovery() => FakeDiscoveryRepository(
             releaseYear: 2025,
             reason: RecommendationReason.trending,
           ),
-      ],
+      ];
+
+FakeDiscoveryRepository _discovery() => FakeDiscoveryRepository(
       friendsBinging: [
         FriendBingingItem(
           titleId: 7201,
@@ -495,6 +499,8 @@ List<Override> baseOverrides(AppDatabase db) => [
       squadRepositoryProvider.overrideWithValue(_SquadFake()),
       graveyardRepositoryProvider.overrideWithValue(_graveyard()),
       discoveryRepositoryProvider.overrideWithValue(_discovery()),
+      explorePicksProvider.overrideWith((ref) async => _sitePicks),
+      exploreTrendingProvider.overrideWith((ref) async => _siteTrending),
       coWatchRepositoryProvider.overrideWithValue(_coWatch()),
       storyShareServiceProvider.overrideWithValue(FakeStoryShareService()),
       posterNetworkImagesProvider.overrideWithValue(false),
