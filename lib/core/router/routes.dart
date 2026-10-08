@@ -22,6 +22,9 @@ abstract final class Routes {
   /// Explore with its search field focused; the token makes every request a new location.
   static String exploreSearch() => '$explore?search=${DateTime.now().microsecondsSinceEpoch}';
 
+  /// SCR-07 See all (#181): one Explore row of one canon as a grid.
+  static String exploreRow(String rowId, String mediaType) => '$explore/row/$rowId?canon=$mediaType';
+
   // Logging flow (full-screen, outside the shell)
   static const log = '/log'; // SCR-09
   static const duel = '/log/duel'; // SCR-10 (+ SCR-11 sheet)
