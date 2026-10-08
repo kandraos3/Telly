@@ -4,15 +4,7 @@
 // TV type, keeps `title_collections` fresh (weekly), and has a service-role maintenance mode
 // (any POST with the service-role key) that backfills older titles and refreshes stale collections.
 // Spec: docs/technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md §2; SCR-08.
-import {
-  CATALOG_CACHE_CONTROL,
-  corsHeaders,
-  json,
-  MediaType,
-  parseMediaType,
-  TMDB_API_BASE,
-  tmdbHeaders,
-} from "../_shared/http.ts";
+import { CATALOG_CACHE_CONTROL, corsHeaders, json, MediaType, parseMediaType, TMDB_API_BASE, tmdbHeaders, isServiceRoleRequest } from "../_shared/http.ts";
 import type { CatalogStore, CollectionRow, SeasonRow, TitleRow } from "../_shared/db.ts";
 
 /** The metadata version written by this function; older rows are backfilled. */
@@ -244,7 +236,7 @@ export async function refreshCollection(collectionId: number, deps: DetailsDeps)
 
 /** Scheduler entry point: backfill titles stored before [METADATA_VERSION], then refresh stale collections. */
 async function handleMaintenance(req: Request, deps: DetailsDeps): Promise<Response> {
-  if (!deps.serviceRoleKey || req.headers.get("Authorization") !== `Bearer ${deps.serviceRoleKey}`) {
+  if (!isServiceRoleRequest(req, deps.serviceRoleKey)) {
     return json({ error: "Unauthorized" }, 401);
   }
   if (!deps.store) return json({ error: "Server configuration error: no catalog store" }, 500);

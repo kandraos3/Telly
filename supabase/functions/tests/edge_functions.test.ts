@@ -7,6 +7,7 @@ import { handleAvailability } from "../streaming-availability/handler.ts";
 import { handleCatalogSync } from "../streaming-catalog-sync/handler.ts";
 import { handleScheduler, monthStart } from "../challenge-scheduler/handler.ts";
 import { platformFromName } from "../_shared/providers.ts";
+import { isServiceRoleRequest } from "../_shared/http.ts";
 import { fakeFetch, jsonResponse, MemoryStore, RecordedCall } from "./fakes.ts";
 
 const req = (path: string, init?: RequestInit) => new Request(`http://edge.local${path}`, init);
@@ -308,6 +309,24 @@ Deno.test("catalog-sync: refreshes stale watchlist titles then recomputes leavin
   assertEquals(body.refreshed, 1);
   assertEquals(store.availability[0].platform_id, "apple_tv_plus");
   assertEquals(store.leavingSoonRuns, 1);
+});
+
+// ---------------------------------------------------------------------------- service-role auth (#152)
+function fakeJwt(claims: Record<string, unknown>): string {
+  const enc = (o: unknown) => btoa(JSON.stringify(o)).replace(/=+$/, "").replace(/\+/g, "-").replace(/\//g, "_");
+  return `${enc({ alg: "HS256", typ: "JWT" })}.${enc(claims)}.signature`;
+}
+
+Deno.test("scheduled functions accept the env key or a gateway-verified service_role JWT", () => {
+  const withAuth = (h?: string) =>
+    new Request("http://edge.local/", { method: "POST", headers: h ? { Authorization: h } : {} });
+  assertEquals(isServiceRoleRequest(withAuth("Bearer srk"), "srk"), true);
+  assertEquals(isServiceRoleRequest(withAuth(`Bearer ${fakeJwt({ role: "service_role" })}`), "a-different-env-key"), true);
+  assertEquals(isServiceRoleRequest(withAuth(`Bearer ${fakeJwt({ role: "anon" })}`), "srk"), false);
+  assertEquals(isServiceRoleRequest(withAuth(`Bearer ${fakeJwt({ role: "authenticated", sub: "u" })}`), "srk"), false);
+  assertEquals(isServiceRoleRequest(withAuth("Bearer not-a-jwt"), "srk"), false);
+  assertEquals(isServiceRoleRequest(withAuth(), "srk"), false);
+  assertEquals(isServiceRoleRequest(withAuth("Bearer "), undefined), false);
 });
 
 // ---------------------------------------------------------------------------- provider mapping

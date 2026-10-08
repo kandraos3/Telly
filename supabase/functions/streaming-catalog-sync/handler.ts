@@ -2,7 +2,7 @@
 // Refreshes availability for watchlisted titles whose cache is stale, then recomputes
 // `is_leaving_soon` flags. Invoked by a scheduler with the service-role key as Bearer token.
 // Spec: docs/technical_architecture/03_EXTERNAL_APIS_AND_DATA_PIPELINES.md §3, features/07 §4.
-import { json } from "../_shared/http.ts";
+import { json, isServiceRoleRequest } from "../_shared/http.ts";
 import type { CatalogStore } from "../_shared/db.ts";
 import { AvailabilityDeps, CACHE_TTL_HOURS, fetchAvailability } from "../streaming-availability/handler.ts";
 
@@ -14,8 +14,7 @@ export interface SyncDeps extends AvailabilityDeps {
 }
 
 export async function handleCatalogSync(req: Request, deps: SyncDeps): Promise<Response> {
-  const auth = req.headers.get("Authorization");
-  if (!deps.serviceRoleKey || auth !== `Bearer ${deps.serviceRoleKey}`) {
+  if (!isServiceRoleRequest(req, deps.serviceRoleKey)) {
     return json({ error: "Unauthorized" }, 401);
   }
 

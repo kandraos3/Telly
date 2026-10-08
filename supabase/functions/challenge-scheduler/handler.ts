@@ -2,7 +2,7 @@
 // 1st through `_invoke_edge_function`, with the service-role key as Bearer token. It creates
 // this month's and next month's calendar challenges (`schedule_calendar_challenges`, which is
 // idempotent) and clears featured flags on ended challenges (`expire_featured_challenges`).
-import { json } from "../_shared/http.ts";
+import { json, isServiceRoleRequest } from "../_shared/http.ts";
 
 export interface SchedulerDeps {
   /** Calls a service-role RPC and returns its result. */
@@ -18,7 +18,7 @@ export function monthStart(d: Date, offset = 0): string {
 }
 
 export async function handleScheduler(req: Request, deps: SchedulerDeps): Promise<Response> {
-  if (!deps.serviceRoleKey || req.headers.get("Authorization") !== `Bearer ${deps.serviceRoleKey}`) {
+  if (!isServiceRoleRequest(req, deps.serviceRoleKey)) {
     return json({ error: "Unauthorized" }, 401);
   }
   const now = (deps.now ?? (() => new Date()))();

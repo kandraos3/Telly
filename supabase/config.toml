@@ -39,3 +39,14 @@ enable_confirmations = false
 [edge_runtime]
 enabled = true
 port = 64326
+
+# Scheduled functions authorise pg_cron by the JWT's service_role claim, which is only safe while
+# the gateway verifies signatures (_shared/http.ts isServiceRoleRequest, #152). Keep these on.
+[functions.tmdb-details]
+verify_jwt = true
+
+[functions.challenge-scheduler]
+verify_jwt = true
+
+[functions.streaming-catalog-sync]
+verify_jwt = true
