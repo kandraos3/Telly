@@ -135,7 +135,9 @@ Production only runs merged code. Migrations, edge functions and challenge conte
 
 ### Dependency updates
 
-Dependabot opens weekly PRs for the pinned workflow actions and Dart packages. Agents review them during `report`, then `gh pr merge <PR> --auto --squash`. They go through the same checks as any change.
+Dependabot opens weekly PRs for the pinned workflow actions and Dart packages, **minor and patch versions only**. Agents read the release notes during `report`, then `gh pr merge <PR> --auto --squash`. They go through the same checks as any change. Changes to `cache`, `upload-pages-artifact` or `deploy-pages` are only exercised by the site deploy after the merge, so check that run.
+
+A **major** upgrade is never auto-merged: it gets its own issue, done on purpose with the migration notes read, when there's a reason (a security fix, a runtime GitHub is retiring, a feature we need). Security fixes arrive separately, through Dependabot security updates.
 
 ### Repository security
 
