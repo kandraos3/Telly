@@ -58,6 +58,7 @@ jobs:
               - 'pubspec.lock'
               - 'test/fakes/**'
               - 'test/helpers/**'
+              - 'test/features/**/*_fixtures.dart'
             database:
               - 'supabase/migrations/**'
               - 'supabase/tests/**'

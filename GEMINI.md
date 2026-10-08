@@ -54,7 +54,7 @@ Every agent operates as a senior pair programmer and autonomous software enginee
 - Follow [`docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md`](file:///c:/Users/karla/Desktop/SeriesBeli/docs/technical_architecture/06_TESTING_FRAMEWORK_AND_TEST_PYRAMID.md) rigorously:
   - **70% Base (Unit Tests)**: Pure Dart VM tests for algorithms (Binary Search Sort, Dynamic Percentile Score, Spearman Rank Correlation, TrueSkill), Drift SQLite DAOs, and data parsers (Letterboxd CSV, AniList GraphQL).
   - **20% Middle (Integration & Widget Tests)**: Flutter `WidgetTester` component tests for cards, swipe gestures, and modals; Riverpod `ProviderContainer` state tests; Supabase `pgTAP` stored procedure tests.
-  - **10% Peak (E2E Tests)**: `package:integration_test` verifying the 4 Critical User Journeys (`CUJ-01` to `CUJ-04`).
+  - **10% Peak (E2E Tests)**: `package:integration_test` verifying the 5 Critical User Journeys (`CUJ-01` to `CUJ-05`).
 - **No ticket is complete without its corresponding automated test.**
 
 ### Rule 4: Quality Gate Verification

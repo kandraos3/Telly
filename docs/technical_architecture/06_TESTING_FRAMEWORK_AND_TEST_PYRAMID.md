@@ -250,6 +250,14 @@ journey
   4. Re-enable network (`NetworkService.reconnect()`).
   5. Assert background worker flushes queued transactions to Supabase and receives confirmed server timestamps.
 
+#### CUJ-05: Medals, Challenges & Levels (features/10; #149)
+- **Test Objective**: The gamification loop works from a ranking to what the person sees, and only rankings placed through duels count (features/10 §2).
+- **Where**: `integration_test/helpers/gamification_journeys.dart`, run on the emulator by `cuj_05_gamification_test.dart` and on the host by `test/integration/gamification_journeys_test.dart`. Rankings go through the real `RankingRepository`, offline queue and `SyncEngine`; a fake server applies the rules that pgTAP 021–030 verify against Postgres.
+- **Workflow**:
+  1. Rank a tenth film through duels → after sync the unlock moment shows Ticket Stub → Pin to profile → Done → the medal shows on the More profile card.
+  2. Join Spooktober from Challenges → rank two films → after sync its medal's unlock moment shows → pull to refresh Social → the challenge feed card shows.
+  3. Import a film (no duels), then rank one through duels → Your level shows 10 XP: the import earned nothing.
+
 ---
 
 ## 5. Supplementary Testing & Verification Layers
@@ -514,7 +522,7 @@ flowchart LR
 | Job | Runs when these change |
 | :--- | :--- |
 | Flutter lint, tests & coverage | `lib/`, `test/`, `integration_test/`, Dart files under `tool/`, `assets/`, `pubspec.*`, `analysis_options.yaml`, `dart_test.yaml` |
-| Android emulator E2E (CUJ-01 to CUJ-04) | `lib/`, `integration_test/`, `android/`, `assets/`, `pubspec.*`, `test/fakes/`, `test/helpers/` |
+| Android emulator E2E (CUJ-01 to CUJ-05) | `lib/`, `integration_test/`, `android/`, `assets/`, `pubspec.*`, `test/fakes/`, `test/helpers/`, `test/features/**/*_fixtures.dart` |
 | pgTAP, RLS & concurrency | `supabase/migrations/`, `supabase/tests/`, `supabase/seed.sql`, `supabase/config.toml` |
 | Edge functions (Deno) | `supabase/functions/` |
 | Agent instructions in sync | `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/`, `.claude/`, `tool/agents/`, `tool/tracker/*.json` |
