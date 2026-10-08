@@ -9,6 +9,7 @@ import 'package:telly_app/features/levels/data/levels_repository.dart';
 import 'package:telly_app/features/levels/domain/level_models.dart';
 import 'package:telly_app/features/levels/presentation/controllers/levels_controller.dart';
 import 'package:telly_app/features/levels/presentation/controllers/rewards_controller.dart';
+import 'package:telly_app/features/levels/presentation/screens/header_art_screen.dart';
 import 'package:telly_app/features/levels/presentation/screens/rewards_screen.dart';
 import 'package:telly_app/features/levels/presentation/widgets/reward_cosmetics.dart';
 import 'package:telly_app/features/profile/presentation/widgets/canon_podium.dart';
@@ -146,6 +147,56 @@ void main() {
       expect(find.byKey(const Key('podium_gold_tag')), findsNothing);
       await pump(tester, CanonPodium(entries: entries, goldTags: true), const []);
       expect(find.byKey(const Key('podium_gold_tag')), findsNWidgets(3));
+    });
+  });
+
+  group('#148 alternate icons stub and header art', () {
+    const art = HeaderArt(titleId: 155, mediaType: 'movie', title: 'The Dark Knight', backdropPath: '/dk.jpg');
+
+    testWidgets('an unlocked app icon reward reads Coming soon and cannot be equipped (#154)', (tester) async {
+      final repo = FakeLevelsRepository()
+        ..rewardList = const [
+          Reward(id: 'alt_app_icons', name: 'Alternate app icons', kind: RewardKind.appIcon, levelRequired: 20,
+              unlocked: true),
+          Reward(id: 'canon_header_art', name: 'Custom canon header art', kind: RewardKind.headerArt,
+              levelRequired: 30, unlocked: true),
+        ];
+      await pump(tester, const RewardsScreen(), overrides(repo));
+      expect(find.byKey(const Key('reward_soon_alt_app_icons')), findsOneWidget);
+      expect(find.byKey(const Key('reward_equip_alt_app_icons')), findsNothing);
+      expect(find.descendant(of: find.byKey(const Key('reward_choose_canon_header_art')), matching: find.text('Choose')),
+          findsOneWidget);
+    });
+
+    testWidgets('the picker sets a God-tier still, marks it current and can remove it', (tester) async {
+      final repo = FakeLevelsRepository();
+      await pump(tester, const HeaderArtScreen(), overrides(repo));
+      expect(find.byKey(const Key('header_art_remove')), findsNothing);
+
+      await tester.tap(find.byKey(const Key('header_art_movie_155')));
+      repo.arts['me'] = art; // what the server now returns
+      await tester.pumpAndSettle();
+      expect(repo.setArts, [art]);
+      expect(TelemetryService().recordedEvents.single.toJson()['event'], 'reward_equipped');
+
+      await tester.tap(find.byKey(const Key('header_art_remove')));
+      await tester.pumpAndSettle();
+      expect(repo.unequipped, [RewardKind.headerArt]);
+    });
+
+    testWidgets('no God-tier stills: an empty state', (tester) async {
+      await pump(tester, const HeaderArtScreen(), overrides(FakeLevelsRepository()..artChoices = const []));
+      expect(find.byKey(const Key('header_art_empty')), findsOneWidget);
+    });
+
+    testWidgets('the banner shows only for someone with header art', (tester) async {
+      final repo = FakeLevelsRepository()..arts['a'] = art;
+      await pump(
+          tester,
+          const Column(children: [HeaderArtBanner(userId: 'a'), HeaderArtBanner(userId: 'b')]),
+          overrides(repo));
+      expect(find.byKey(const Key('header_art_banner')), findsOneWidget);
+      expect(find.text('The Dark Knight'), findsOneWidget);
     });
   });
 }

@@ -114,7 +114,26 @@ class _RewardRowState extends ConsumerState<_RewardRow> {
                 ],
               ),
             ),
-            if (r.unlocked)
+            if (r.unlocked && r.kind == RewardKind.appIcon)
+              // Alternate app icons aren't built yet (#154): unlockable, not equippable.
+              Padding(
+                key: Key('reward_soon_${r.id}'),
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Text('Coming soon',
+                    style: TellyTypography.labelMedium(color: TellyColors.textTertiaryOf(context))
+                        .copyWith(fontWeight: FontWeight.w800)),
+              )
+            else if (r.unlocked && r.kind == RewardKind.headerArt)
+              TextButton(
+                key: Key('reward_choose_${r.id}'),
+                onPressed: () {
+                  HapticsService.selectionClick();
+                  context.push(Routes.levelHeaderArt);
+                },
+                child: Text(r.equipped ? 'Change' : 'Choose',
+                    style: TellyTypography.labelMedium(color: accent).copyWith(fontWeight: FontWeight.w800)),
+              )
+            else if (r.unlocked)
               TextButton(
                 key: Key('reward_equip_${r.id}'),
                 onPressed: _busy ? null : () => _toggle(r),

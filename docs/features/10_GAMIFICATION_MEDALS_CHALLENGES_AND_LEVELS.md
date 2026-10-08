@@ -151,8 +151,8 @@ Levels come from total XP, which is earned and never spent.
 | 5 | Lime profile frame | A 2px primary-accent ring around the avatar on the More card, friend profiles and every feed card (both themes). Others see it too: the app looks up who wears it in batches as avatars appear (`user_reward_choices` is readable through `can_view_user`). |
 | 10 | "Noir" card style | Wrapped (`SCR-19`) and the rank-reveal and medal share cards render in greyscale |
 | 15 | Gold podium tags | Your Canon podium's #1–#3 tags use the God-tier gradient instead of lime (`SCR-14`, your own profile only) |
-| 20 | Alternate app icons | Settings → App icon (platform alternate icons) |
-| 30 | Custom canon header art | A still behind your profile header |
+| 20 | Alternate app icons | **Not built yet ([#154](https://github.com/kandraos3/Telly/issues/154)).** The reward stays on the track and unlocks at level 20, but its row reads "Coming soon" and can't be equipped. When built: Settings → App icon (platform alternate icons). |
+| 30 | Custom canon header art | A still (TMDB backdrop) from one of your God-tier titles (9.20+), chosen at `/more/level/rewards/header-art`. It shows as a 132 dp banner above your Canon and at the top of your profile for anyone who can see it. Stored on the `header_art` choice row (`title_id`, `media_type`); `set_header_art` checks level and God tier, `header_art(p_user)` reads it through `can_view_user`. |
 
 Every reward is cosmetic. Nothing that's needed to use Telly is ever locked (decision 0005). A future Telly Pro (#52) must not move these behind a paywall without a new decision.
 
@@ -351,7 +351,7 @@ All screens use the shared app bars (screen specs §0.2) and the frosted bottom 
 - **Analytics** are detected in the app by comparing a load with what it last saw (kept in `gamification_cache`), and never on the first load: `level_up`, `quest_completed`, `streak_extended`.
 - **Offline:** the last snapshot from `gamification_cache`, read-only, with the offline banner.
 - **Links:** **Rewards** (`/more/level/rewards`, mockup B2) and **Friends this week** (`/more/level/week`, mockup B3).
-  - **Rewards:** the track by level (unlocked rows outlined in lime, locked rows with XP to go and a lock), an Equip / Equipped toggle on unlocked rows (one per kind; tapping Equipped unequips), and the XP rules table. Equipping sends `reward_equipped`; a failed change shows a snackbar and leaves the row as it was.
+  - **Rewards:** the track by level (unlocked rows outlined in lime, locked rows with XP to go and a lock), an Equip / Equipped toggle on unlocked rows (one per kind; tapping Equipped unequips), and the XP rules table. Header art's row says **Choose** (or **Change**) and opens its picker: your God-tier stills, the current one checked, and Remove. The app icon row says **Coming soon** (#154). Equipping sends `reward_equipped`; a failed change shows a snackbar and leaves the row as it was.
   - **Friends this week:** a segmented Friends / each squad. Rank, avatar, name, level, streak and weekly XP, with your row tinted. A footer says it resets Monday.
 
 ### 9.8 Weekly quests (slice 3)

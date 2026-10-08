@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/telly_colors.dart';
+import '../../../../core/theme/telly_typography.dart';
+import '../../../../core/widgets/poster_image.dart';
 import '../controllers/rewards_controller.dart';
 
 /// The lime profile frame (level 5 reward, features/10 §5.2; #147): a ring around [child]
@@ -68,4 +70,66 @@ class NoirFilter extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       enabled ? ColorFiltered(colorFilter: const ColorFilter.matrix(_matrix), child: child) : child;
+}
+
+/// Custom canon header art (level 30 reward, §5.2; #148): the chosen God-tier still behind the
+/// top of [userId]'s profile. Nothing when they have none.
+class HeaderArtBanner extends ConsumerWidget {
+  final String? userId;
+
+  /// Space around the banner, applied only when there is art to show.
+  final EdgeInsetsGeometry margin;
+  const HeaderArtBanner({super.key, required this.userId, this.margin = EdgeInsets.zero});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final id = userId;
+    final art = id == null ? null : ref.watch(headerArtProvider(id)).valueOrNull;
+    if (art == null) return const SizedBox.shrink();
+    return Padding(
+      padding: margin,
+      child: Semantics(
+        label: 'Header art: ${art.title}',
+        child: ClipRRect(
+          key: const Key('header_art_banner'),
+          borderRadius: BorderRadius.circular(16),
+          child: SizedBox(
+            height: 132,
+            width: double.infinity,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                PosterImage(
+                  posterPath: TmdbImages.backdrop(art.backdropPath),
+                  fallback: ColoredBox(color: TellyColors.cardOf(context)),
+                ),
+                // A scrim keeps the caption readable on any still, in both themes.
+                const DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Color(0x00000000), Color(0xB3000000)],
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: 12,
+                  right: 12,
+                  bottom: 10,
+                  child: Text(
+                    art.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TellyTypography.labelMedium(color: const Color(0xFFFFFFFF))
+                        .copyWith(fontWeight: FontWeight.w800),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

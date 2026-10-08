@@ -81,4 +81,20 @@ class FakeLevelsRepository implements LevelsRepository {
     frameQueries.add(userIds.toSet());
     return framed.intersection(userIds.toSet());
   }
+
+  final arts = <String, HeaderArt>{};
+  List<HeaderArt> artChoices = const [
+    HeaderArt(titleId: 155, mediaType: 'movie', title: 'The Dark Knight', backdropPath: '/dk.jpg', score: 9.8),
+    HeaderArt(titleId: 1396, mediaType: 'tv', title: 'Breaking Bad', backdropPath: '/bb.jpg', score: 9.6),
+  ];
+  final setArts = <HeaderArt>[];
+
+  @override
+  Future<HeaderArt?> headerArt(String userId) async => arts[userId];
+
+  @override
+  Future<List<HeaderArt>> headerArtChoices() async => artChoices;
+
+  @override
+  Future<void> setHeaderArt(HeaderArt art) async => setArts.add(art);
 }

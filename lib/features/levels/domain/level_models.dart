@@ -240,3 +240,34 @@ class Reward {
         xpToGo: (j['xp_to_go'] as num?)?.toInt() ?? 0,
       );
 }
+
+/// Custom canon header art (level 30 reward, §5.2; #148): a still from a God-tier title.
+class HeaderArt {
+  final int titleId;
+  final String mediaType;
+  final String title;
+  final String backdropPath;
+  final double? score;
+
+  const HeaderArt({
+    required this.titleId,
+    required this.mediaType,
+    required this.title,
+    required this.backdropPath,
+    this.score,
+  });
+
+  factory HeaderArt.fromJson(Map<String, dynamic> j) => HeaderArt(
+        titleId: (j['title_id'] as num).toInt(),
+        mediaType: j['media_type'] as String,
+        title: j['title'] as String,
+        backdropPath: j['backdrop_path'] as String,
+        score: (j['calculated_score'] as num?)?.toDouble(),
+      );
+
+  @override
+  bool operator ==(Object other) => other is HeaderArt && other.titleId == titleId && other.mediaType == mediaType;
+
+  @override
+  int get hashCode => Object.hash(titleId, mediaType);
+}

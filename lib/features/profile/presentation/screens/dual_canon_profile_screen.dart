@@ -12,6 +12,7 @@ import '../../../../core/widgets/telly_frosted_sheet.dart';
 import '../../../../core/widgets/telly_screen_header.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../levels/presentation/controllers/rewards_controller.dart';
+import '../../../levels/presentation/widgets/reward_cosmetics.dart';
 import '../../../logging/domain/title_search_result.dart';
 import '../../../ranking/domain/canon_type.dart';
 import '../../../ranking/domain/franchise_rollup_service.dart';
@@ -127,6 +128,8 @@ class DualCanonProfileScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // My header art, the level 30 reward (features/10 §5.2, #148).
+                HeaderArtBanner(userId: me?.id, margin: const EdgeInsets.fromLTRB(16, 0, 16, 12)),
                 // The shared compact switcher (component library §5.5).
                 TellyCanonSwitcher(
                   selected: selectedCanon == CanonType.movie ? 'movie' : 'tv',

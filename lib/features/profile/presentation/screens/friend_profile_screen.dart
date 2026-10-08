@@ -141,6 +141,8 @@ class _Body extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Column(
         children: [
+          // Their header art, the level 30 reward (features/10 §5.2, #148).
+          if (profile.canView) HeaderArtBanner(userId: profile.id, margin: const EdgeInsets.only(bottom: 14)),
           Row(
             children: [
               RewardFrame(

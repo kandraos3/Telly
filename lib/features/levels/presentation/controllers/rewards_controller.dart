@@ -95,3 +95,38 @@ class FrameDirectory extends Notifier<Map<String, bool>> {
 }
 
 final frameDirectoryProvider = NotifierProvider<FrameDirectory, Map<String, bool>>(FrameDirectory.new);
+
+/// [userId]'s header art (#148). Null when they have none, I can't see it, or I'm offline.
+final headerArtProvider = FutureProvider.family<HeaderArt?, String>((ref, userId) async {
+  try {
+    return await ref.watch(levelsRepositoryProvider).headerArt(userId);
+  } catch (_) {
+    return null; // decoration only
+  }
+});
+
+/// The header art picker (`/more/level/rewards/header-art`, §5.2; #148): my God-tier stills.
+class HeaderArtController extends AsyncNotifier<List<HeaderArt>> {
+  @override
+  Future<List<HeaderArt>> build() => ref.watch(levelsRepositoryProvider).headerArtChoices();
+
+  Future<void> choose(HeaderArt art) async {
+    await ref.read(levelsRepositoryProvider).setHeaderArt(art);
+    ref.read(telemetryServiceProvider).trackRewardEquipped(rewardId: 'canon_header_art');
+    _refresh();
+  }
+
+  Future<void> remove() async {
+    await ref.read(levelsRepositoryProvider).unequip(RewardKind.headerArt);
+    _refresh();
+  }
+
+  void _refresh() {
+    final me = ref.read(authRepositoryProvider).currentUserId;
+    if (me != null) ref.invalidate(headerArtProvider(me));
+    ref.invalidate(rewardsControllerProvider);
+  }
+}
+
+final headerArtControllerProvider =
+    AsyncNotifierProvider<HeaderArtController, List<HeaderArt>>(HeaderArtController.new);

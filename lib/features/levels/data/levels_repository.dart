@@ -11,7 +11,7 @@ import '../../achievements/domain/medal.dart';
 import '../domain/level_models.dart';
 
 /// `SCR-27` and the Rewards track ↔ `my_level`, `weekly_streak`, `my_week`, `weekly_xp_table`
-/// and the reward RPCs (features/10 §5–§6, §9.7–§9.8; #145, #146).
+/// and the reward RPCs (features/10 §5–§6, §9.7–§9.8; #145, #146, #148).
 abstract interface class LevelsRepository {
   Future<YourLevel> fetch();
 
@@ -26,6 +26,14 @@ abstract interface class LevelsRepository {
 
   /// Which of [userIds] have the profile frame equipped (#147); RLS hides hidden profiles.
   Future<Set<String>> framedUsers(Iterable<String> userIds);
+
+  /// [userId]'s header art, if they chose one and I can see their profile (#148).
+  Future<HeaderArt?> headerArt(String userId);
+
+  /// My God-tier titles (9.20+) that have a still, best first: the header art choices.
+  Future<List<HeaderArt>> headerArtChoices();
+
+  Future<void> setHeaderArt(HeaderArt art);
 }
 
 class SupabaseLevelsRepository implements LevelsRepository {
@@ -79,6 +87,36 @@ class SupabaseLevelsRepository implements LevelsRepository {
         .inFilter('user_id', ids);
     return {for (final r in rows) r['user_id'] as String};
   }
+
+  @override
+  Future<HeaderArt?> headerArt(String userId) async {
+    final rows = await _client.rpc('header_art', params: {'p_user': userId}) as List;
+    return rows.isEmpty ? null : HeaderArt.fromJson(Map<String, dynamic>.from(rows.first as Map));
+  }
+
+  @override
+  Future<List<HeaderArt>> headerArtChoices() async {
+    final me = _currentUserId() ?? (throw StateError('Not signed in'));
+    final rows = await _client
+        .from('user_rankings')
+        .select('title_id, media_type, calculated_score, titles!inner(title, backdrop_path)')
+        .eq('user_id', me)
+        .gte('calculated_score', 9.20)
+        .not('titles.backdrop_path', 'is', null)
+        .order('calculated_score', ascending: false);
+    return [
+      for (final r in rows)
+        HeaderArt.fromJson({
+          ...r,
+          'title': (r['titles'] as Map)['title'],
+          'backdrop_path': (r['titles'] as Map)['backdrop_path'],
+        }),
+    ];
+  }
+
+  @override
+  Future<void> setHeaderArt(HeaderArt art) =>
+      _client.rpc('set_header_art', params: {'p_title_id': art.titleId, 'p_media_type': art.mediaType});
 }
 
 /// `SCR-27`'s offline snapshot and what the app last saw (to tell level-ups, finished quests
