@@ -35,6 +35,7 @@ import '../../features/sharing/presentation/screens/telly_wrapped_studio_screen.
 import '../../features/squads/presentation/screens/squad_hub_screen.dart';
 import '../../features/squads/presentation/screens/squads_list_screen.dart';
 import '../../features/discovery/presentation/screens/explore_discover_screen.dart';
+import '../../features/discovery/presentation/screens/explore_row_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/more/presentation/screens/more_hub_screen.dart';
 import '../../features/title_detail/presentation/screens/show_detail_screen.dart';
@@ -104,6 +105,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             GoRoute(
               path: Routes.explore,
               builder: (_, state) => ExploreDiscoverScreen(searchRequest: state.uri.queryParameters['search']),
+              routes: [
+                GoRoute(
+                  path: 'row/:rowId',
+                  parentNavigatorKey: rootNavigatorKey,
+                  builder: (_, state) => ExploreRowScreen(
+                    rowId: state.pathParameters['rowId'] ?? '',
+                    mediaType: state.uri.queryParameters['canon'],
+                  ),
+                ),
+              ],
             ),
           ]),
           StatefulShellBranch(routes: [

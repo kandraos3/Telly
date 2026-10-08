@@ -45,7 +45,7 @@ Five tabs in the floating bar (component library §2.1), plus the floating Log b
 | Tab | Root route | Root screen | Pushed from it |
 | :--- | :--- | :--- | :--- |
 | Home | `/home` | `SCR-21` Home | none |
-| Explore | `/explore` | `SCR-07` Explore | none |
+| Explore | `/explore` | `SCR-07` Explore | `/explore/row/:rowId?canon=movie\|tv` (`SCR-07` See all) |
 | Canon | `/canon` | `SCR-14` Canon | none |
 | Social | `/social` | `SCR-05` Feed | `/social/activity/:id` (`SCR-06`) |
 | More | `/more` | `SCR-22` More hub | `/more/queue` (`SCR-13`), `/more/queue/lists`, `/more/queue/list/:id`, `/more/graveyard` (`SCR-18`), `/more/wrapped` (`SCR-19`), `/more/settings` (`SCR-20`), `/more/edit`, `/more/achievements` (`SCR-23`), `/more/challenges` (`SCR-25`), `/more/challenges/:slug` (`SCR-26`), `/more/level`, `/more/level/rewards`, `/more/level/week` (`SCR-27`) |
@@ -369,7 +369,7 @@ The **Social** tab (`/social`). It was the landing tab until epic #44; Home (`SC
 * **User actions**:
   * The search bar opens the instant search (unchanged): TMDB and user results, with recent searches and Trending as the zero state.
   * Tapping a poster opens `SCR-08`. The hero's **+ Queue** and **Not for me** (with Undo) work as described in features/07 §7.5.
-  * **See all ›** opens `/explore/row/:rowId?canon=`, a 3-column grid of up to 30 titles.
+  * **See all ›** opens `/explore/row/:rowId?canon=`, a 3-column grid of up to 30 titles (features/07 §7.5): a subpage app bar with the row's title (a Because row's says *Because you ranked <seed>*) and subtitle, then 104:154 poster cards that fill the column, 10 dp apart across and 16 dp down, 16 dp gutters, each with its title and the row's meta line. An unknown row or canon shows *"This list isn't available"*.
   * Network battlegrounds (Series only): **See full network rankings →** (unchanged).
 
 ---

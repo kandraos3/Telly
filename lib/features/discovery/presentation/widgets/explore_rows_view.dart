@@ -80,11 +80,17 @@ class _ExploreRowSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = row.visible;
+    final text = _RowText(row: row, mediaType: mediaType, today: today);
     return Column(
       key: Key('explore_row_${row.kind.name}${row.seed == null ? '' : '_${row.seed!.titleId}'}'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _RowHeader(title: _title(context), subtitle: _subtitle()),
+        _RowHeader(
+          title: text.title(context),
+          subtitle: text.subtitle,
+          seeAllKey: Key('explore_see_all_${row.id}'),
+          onSeeAll: () => context.push(Routes.exploreRow(row.id, mediaType)),
+        ),
         const SizedBox(height: 10),
         switch (row.kind) {
           ExploreRowKind.trending => _Carousel(
@@ -100,34 +106,28 @@ class _ExploreRowSection extends StatelessWidget {
               height: 196,
               children: [
                 _SeedTile(seed: row.seed!, mediaType: mediaType),
-                for (final s in items) _PosterCard(pick: s, meta: _matchMeta(s))
+                for (final s in items) _PosterCard(pick: s, meta: text.meta(s))
               ],
             ),
-          ExploreRowKind.leavingSoon => _Carousel(
+          _ => _Carousel(
               height: 196,
-              children: [for (final s in items) _PosterCard(pick: s, meta: _service(s), badge: _daysLeft(s))],
-            ),
-          ExploreRowKind.topPicks => _Carousel(
-              height: 196,
-              children: [for (final s in items) _PosterCard(pick: s, meta: _matchMeta(s))],
-            ),
-          ExploreRowKind.topRated => _Carousel(
-              height: 196,
-              children: [for (final s in items) _PosterCard(pick: s, meta: _communityMeta(s))],
-            ),
-          ExploreRowKind.somethingDifferent => _Carousel(
-              height: 196,
-              children: [for (final s in items) _PosterCard(pick: s, meta: _genreMeta(s))],
+              children: [for (final s in items) _PosterCard(pick: s, meta: text.meta(s), badge: text.badge(s))],
             ),
         },
       ],
     );
   }
+}
 
-  InlineSpan _title(BuildContext context) => switch (row.kind) {
-        ExploreRowKind.trending => const TextSpan(text: 'Trending now'),
-        ExploreRowKind.topPicks => const TextSpan(text: 'Top picks for you'),
-        ExploreRowKind.topRated => const TextSpan(text: 'Top rated on Telly'),
+/// A row's title, subtitle and per-card meta line, shared by its carousel and its See all grid.
+class _RowText {
+  const _RowText({required this.row, required this.mediaType, required this.today});
+
+  final ExploreRow row;
+  final String mediaType;
+  final DateTime today;
+
+  InlineSpan title(BuildContext context) => switch (row.kind) {
         ExploreRowKind.becauseYouRanked => TextSpan(children: [
             const TextSpan(text: 'Because you ranked '),
             TextSpan(
@@ -136,43 +136,51 @@ class _ExploreRowSection extends StatelessWidget {
                   .copyWith(fontSize: 16.5, fontStyle: FontStyle.italic, fontWeight: FontWeight.w700, letterSpacing: 0),
             ),
           ]),
-        ExploreRowKind.friends => const TextSpan(text: 'Your friends are watching'),
-        ExploreRowKind.leavingSoon => const TextSpan(text: 'Leaving your services soon'),
-        ExploreRowKind.somethingDifferent => const TextSpan(text: 'Something different'),
+        _ => TextSpan(text: plainTitle),
       };
 
-  String? _subtitle() => switch (row.kind) {
+  String get plainTitle => switch (row.kind) {
+        ExploreRowKind.trending => 'Trending now',
+        ExploreRowKind.topPicks => 'Top picks for you',
+        ExploreRowKind.topRated => 'Top rated on Telly',
+        ExploreRowKind.becauseYouRanked => 'Because you ranked ${row.seed!.title}',
+        ExploreRowKind.friends => 'Your friends are watching',
+        ExploreRowKind.leavingSoon => 'Leaving your services soon',
+        ExploreRowKind.somethingDifferent => 'Something different',
+      };
+
+  String? get subtitle => switch (row.kind) {
         ExploreRowKind.trending => 'Top 10 ${_canonNoun(mediaType)} this week',
         ExploreRowKind.somethingDifferent when row.usualGenres.isNotEmpty =>
           'Outside your usual ${_andList(row.usualGenres.map((g) => g.toLowerCase()).toList())}',
         _ => null,
       };
 
-  _Meta _matchMeta(ScoredCandidate s) =>
-      _Meta(match: s.matchPct, text: s.candidate.releaseYear == null ? null : '${s.candidate.releaseYear}');
-
-  _Meta _communityMeta(ScoredCandidate s) {
+  /// The meta line under a poster card. Trending and Friends use other cards in the carousel,
+  /// so theirs is the grid's line: the rank, or who is watching.
+  _Meta meta(ScoredCandidate s) {
     final c = s.candidate;
-    return _Meta(
-        text:
-            c.communityScore != null ? '${c.communityScore!.toStringAsFixed(2)} community' : c.releaseYear?.toString());
+    return switch (row.kind) {
+      ExploreRowKind.trending => _Meta(text: '#${row.items.indexOf(s) + 1} this week'),
+      ExploreRowKind.friends => _Meta(text: _friendNames(c)),
+      ExploreRowKind.topPicks || ExploreRowKind.becauseYouRanked =>
+        _Meta(match: s.matchPct, text: c.releaseYear == null ? null : '${c.releaseYear}'),
+      ExploreRowKind.topRated => _Meta(
+          text: c.communityScore != null ? '${c.communityScore!.toStringAsFixed(2)} community' : c.releaseYear?.toString()),
+      ExploreRowKind.somethingDifferent => _Meta(
+            text: [
+          if (c.genres.isNotEmpty) c.genres.first,
+          if (c.communityScore != null) '${c.communityScore!.toStringAsFixed(1)} on Telly',
+        ].join(' · ')),
+      ExploreRowKind.leavingSoon =>
+        _Meta(text: c.providers.isEmpty ? null : StreamingPlatform.labelFor(c.providers.first)),
+    };
   }
 
-  _Meta _genreMeta(ScoredCandidate s) {
-    final c = s.candidate;
-    return _Meta(
-        text: [
-      if (c.genres.isNotEmpty) c.genres.first,
-      if (c.communityScore != null) '${c.communityScore!.toStringAsFixed(1)} on Telly',
-    ].join(' · '));
-  }
-
-  _Meta _service(ScoredCandidate s) =>
-      _Meta(text: s.candidate.providers.isEmpty ? null : StreamingPlatform.labelFor(s.candidate.providers.first));
-
-  String? _daysLeft(ScoredCandidate s) {
+  /// Leaving soon's coral countdown: "3 DAYS", "1 DAY" or "LAST DAY".
+  String? badge(ScoredCandidate s) {
     final u = s.candidate.leavingUntil;
-    if (u == null) return null;
+    if (row.kind != ExploreRowKind.leavingSoon || u == null) return null;
     final days =
         DateTime.utc(u.year, u.month, u.day).difference(DateTime.utc(today.year, today.month, today.day)).inDays;
     if (days <= 0) return 'LAST DAY';
@@ -180,21 +188,96 @@ class _ExploreRowSection extends StatelessWidget {
   }
 }
 
-class _RowHeader extends StatelessWidget {
-  const _RowHeader({required this.title, this.subtitle});
+/// "Maya and Jo" / "Maya and 3 others".
+String _friendNames(ExploreCandidate c) {
+  final names = c.friends.map((f) => f.displayName.isEmpty ? 'A friend' : f.displayName).toList();
+  return names.length <= 3 ? _andList(names) : '${names.first} and ${names.length - 1} others';
+}
 
-  final InlineSpan title;
-  final String? subtitle;
+/// SCR-07 See all (#181): every title of [row] (up to 30) as a 3-column poster grid, in the
+/// carousel's order. A Because row has no seed tile here: the seed is in the screen title.
+class ExploreRowGrid extends StatelessWidget {
+  const ExploreRowGrid({super.key, required this.row, required this.mediaType, required this.today});
+
+  final ExploreRow row;
+  final String mediaType;
+  final DateTime today;
+
+  /// The screen title, with a Because row's seed ("Because you ranked Parasite").
+  static String titleOf(ExploreRow row, String mediaType) =>
+      _RowText(row: row, mediaType: mediaType, today: DateTime(2000)).plainTitle;
+
+  static String? subtitleOf(ExploreRow row, String mediaType) =>
+      _RowText(row: row, mediaType: mediaType, today: DateTime(2000)).subtitle;
 
   @override
   Widget build(BuildContext context) {
+    final text = _RowText(row: row, mediaType: mediaType, today: today);
+    return GridView.builder(
+      key: Key('explore_grid_${row.id}'),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 16,
+        // The 104:154 poster plus two text lines, scaled to the column width.
+        childAspectRatio: 104 / 200,
+      ),
+      itemCount: row.items.length,
+      itemBuilder: (_, i) {
+        final s = row.items[i];
+        return _PosterCard(pick: s, meta: text.meta(s), badge: text.badge(s), width: null);
+      },
+    );
+  }
+}
+
+class _RowHeader extends StatelessWidget {
+  const _RowHeader({required this.title, this.subtitle, required this.seeAllKey, required this.onSeeAll});
+
+  final InlineSpan title;
+  final String? subtitle;
+  final Key seeAllKey;
+  final VoidCallback onSeeAll;
+
+  @override
+  Widget build(BuildContext context) {
+    final plain = title.toPlainText();
+    return Padding(
+      padding: const EdgeInsets.only(left: 16, right: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(child: _heading(context, plain)),
+          Semantics(
+            button: true,
+            label: 'See all, $plain',
+            excludeSemantics: true,
+            child: TextButton(
+              key: seeAllKey,
+              onPressed: onSeeAll,
+              style: TextButton.styleFrom(
+                minimumSize: const Size(48, 48),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                foregroundColor: TellyColors.textTertiaryOf(context),
+                textStyle: TellyTypography.caption().copyWith(fontSize: 12, fontWeight: FontWeight.w700),
+              ),
+              child: const Text('See all ›'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _heading(BuildContext context, String plain) {
     // One heading for screen readers: "Trending now, Top 10 movies this week".
     return Semantics(
       header: true,
-      label: [title.toPlainText(), if (subtitle != null) subtitle!].join(', '),
+      label: [plain, if (subtitle != null) subtitle!].join(', '),
       excludeSemantics: true,
       child: Padding(
-        padding: _gutter,
+        padding: const EdgeInsets.only(top: 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -251,13 +334,15 @@ class _Meta {
 
 void _openTitle(BuildContext context, ExploreCandidate c) => context.push(Routes.title(c.mediaType, c.titleId));
 
-/// 104 × 154 poster with a title and one meta line; [badge] is a coral countdown.
+/// 104 × 154 poster with a title and one meta line; [badge] is a coral countdown. A null
+/// [width] fills its grid cell, keeping the poster's 104:154 shape.
 class _PosterCard extends StatelessWidget {
-  const _PosterCard({required this.pick, required this.meta, this.badge});
+  const _PosterCard({required this.pick, required this.meta, this.badge, this.width = 104});
 
   final ScoredCandidate pick;
   final _Meta meta;
   final String? badge;
+  final double? width;
 
   @override
   Widget build(BuildContext context) {
@@ -272,13 +357,19 @@ class _PosterCard extends StatelessWidget {
         onTap: () => _openTitle(context, c),
         borderRadius: BorderRadius.circular(10),
         child: SizedBox(
-          width: 104,
+          width: width,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Stack(
                 children: [
-                  _Poster(path: c.posterPath, width: 104, height: 154),
+                  if (width == null)
+                    AspectRatio(
+                      aspectRatio: 104 / 154,
+                      child: _Poster(path: c.posterPath, width: double.infinity, height: double.infinity),
+                    )
+                  else
+                    _Poster(path: c.posterPath, width: width!, height: width! * 154 / 104),
                   if (badge != null) Positioned(left: 6, top: 6, child: _CountdownBadge(label: badge!)),
                 ],
               ),
@@ -495,8 +586,7 @@ class _FriendCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = pick.candidate;
-    final names = c.friends.map((f) => f.displayName.isEmpty ? 'A friend' : f.displayName).toList();
-    final who = names.length <= 3 ? _andList(names) : '${names.first} and ${names.length - 1} others';
+    final who = _friendNames(c);
     final scores = [
       for (final f in c.friends)
         if (f.score != null) f.score!
@@ -568,6 +658,8 @@ class _FriendCard extends StatelessWidget {
                     if (avg != null) ...[
                       const SizedBox(height: 6),
                       Text("★ ${avg.toStringAsFixed(1)} friends' avg",
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: TellyTypography.caption(color: TellyColors.warmAmberOf(context))
                               .copyWith(fontSize: 12, fontWeight: FontWeight.w800)),
                     ],

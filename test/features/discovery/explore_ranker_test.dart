@@ -424,6 +424,25 @@ void main() {
       final b = _ranker.rank(_p(candidates.reversed.toList(), seeds: [seed]), _today);
       expect(shape(b), shape(a));
     });
+
+    test('row ids are unique, carry a Because row\'s seed, and find their row (#181)', () {
+      final s1 = _seed(1), s2 = _seed(2, score: 9.2);
+      final candidates = [
+        for (var i = 1; i <= 12; i++)
+          _c(i,
+              links: [SeedLink(seedId: (i.isEven ? s1 : s2).titleId, position: i)],
+              trendingRank: i <= 5 ? i : null),
+      ];
+      final rows = _ranker.rank(_p(candidates, seeds: [s1, s2]), _today);
+      final ids = [for (final r in rows.rows) r.id];
+      expect(ids.toSet(), hasLength(ids.length));
+      expect(ids, containsAll(['trending', 'becauseYouRanked-${s1.titleId}', 'becauseYouRanked-${s2.titleId}']));
+      for (final r in rows.rows) {
+        expect(rows.rowById(r.id), same(r));
+      }
+      expect(rows.rowById('becauseYouRanked-1'), isNull);
+      expect(rows.rowById('friends'), isNull, reason: 'no friends row today');
+    });
   });
 
   group('payload parsing', () {

@@ -263,7 +263,10 @@ Blocked users (either direction) and deleted users never count as friends. Candi
   - Card tap → `SCR-08`.
   - Hero **+ Queue**: adds to the watchlist through the existing offline queue path, and the button becomes **✓ In queue**.
   - Hero **Not for me**: inserts into `user_dismissed_recommendations` ([decision 0008](../decisions/0008-explore-dismissals-own-table.md)), shows the next hero, and a snackbar *"Hidden from your picks"* with **Undo**, which deletes the row. It is not a Spoiler Shield mute, so the feed is untouched.
-  - **See all ›** on a row: opens `/explore/row/:rowId?canon=movie|tv`, a 3-column poster grid of up to 30 titles from the same ranked payload.
+  - **See all ›** on a row (#181): opens `/explore/row/:rowId?canon=movie|tv`, a 3-column poster grid of up to 30 titles (`ExploreRow.items`) ranked from the same payload, in the carousel's order.
+    - `rowId` is the row kind's name (`trending`, `topPicks`, `topRated`, `friends`, `leavingSoon`, `somethingDifferent`), or `becauseYouRanked-<seed title id>` for a Because row.
+    - Each card keeps the row's meta line: match % and year, community score, service and countdown, or genre. In the grid, Trending's line is *#N this week* and Friends' is who is watching. A Because grid has no seed tile; the seed is in the title.
+    - A `rowId` today's rows don't have (a seed that has rotated out, a hidden row, a new user), a canon other than `movie` or `tv`, or a canon that can't load shows *"This list isn't available"*.
 
 ### 7.6 Server caches and refresh
 - `title_related (seed_id, seed_media_type, related_id, position SMALLINT, fetched_at)`, **PK** `(seed_id, seed_media_type, related_id)`. The related title has the seed's media type (TMDB recommendations stay within one type). It holds TMDB `/{movie|tv}/{id}/recommendations` page 1.
