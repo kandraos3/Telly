@@ -658,6 +658,8 @@ class _FriendCard extends StatelessWidget {
                     if (avg != null) ...[
                       const SizedBox(height: 6),
                       Text("★ ${avg.toStringAsFixed(1)} friends' avg",
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: TellyTypography.caption(color: TellyColors.warmAmberOf(context))
                               .copyWith(fontSize: 12, fontWeight: FontWeight.w800)),
                     ],
