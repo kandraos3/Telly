@@ -45,6 +45,13 @@ export function isServiceRoleRequest(req: Request, serviceRoleKey: string | unde
   return jwtRole(token) === "service_role";
 }
 
+/** Whether [req] carries a signed-in user's JWT (`role: authenticated`), not the anon key. */
+export function isAuthenticatedUserRequest(req: Request): boolean {
+  const auth = req.headers.get("Authorization") ?? "";
+  if (!auth.startsWith("Bearer ")) return false;
+  return jwtRole(auth.slice("Bearer ".length).trim()) === "authenticated";
+}
+
 /** The `role` claim of a JWT, without checking its signature (the gateway does that). */
 function jwtRole(token: string): string | null {
   const parts = token.split(".");

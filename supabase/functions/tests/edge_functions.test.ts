@@ -7,8 +7,10 @@ import { handleAvailability } from "../streaming-availability/handler.ts";
 import { handleCatalogSync } from "../streaming-catalog-sync/handler.ts";
 import { handleScheduler, monthStart } from "../challenge-scheduler/handler.ts";
 import { platformFromName } from "../_shared/providers.ts";
-import { isServiceRoleRequest } from "../_shared/http.ts";
-import { fakeFetch, jsonResponse, MemoryStore, RecordedCall } from "./fakes.ts";
+import { isAuthenticatedUserRequest, isServiceRoleRequest } from "../_shared/http.ts";
+import { handleTitleRelated, listItemToTitleRow } from "../title-related/handler.ts";
+import { genreNames } from "../_shared/genres.ts";
+import { fakeFetch, jsonResponse, MemoryExploreStore, MemoryStore, RecordedCall } from "./fakes.ts";
 
 const req = (path: string, init?: RequestInit) => new Request(`http://edge.local${path}`, init);
 
@@ -375,4 +377,142 @@ Deno.test("challenge-scheduler: schedules this month and next, then expires feat
 Deno.test("challenge-scheduler: monthStart rolls over the year", () => {
   assertEquals(monthStart(new Date("2026-12-31T23:59:59Z"), 1), "2027-01-01");
   assertEquals(monthStart(new Date("2026-03-15T00:00:00Z")), "2026-03-01");
+});
+
+// ---------------------------------------------------------------------------- title-related (#177)
+const NOW = new Date("2026-10-08T12:00:00Z");
+const userAuth = () => ({ Authorization: `Bearer ${fakeJwt({ role: "authenticated", sub: "u1" })}` });
+const post = (body: unknown, headers: Record<string, string>) =>
+  req("/", { method: "POST", headers: { ...headers, "Content-Type": "application/json" }, body: JSON.stringify(body) });
+const recs = (ids: number[], extra: Record<string, unknown> = {}) =>
+  jsonResponse({
+    results: ids.map((id) => ({ id, title: `Film ${id}`, genre_ids: [18, 53], vote_average: 7.26, vote_count: 410, ...extra })),
+  });
+
+Deno.test("genre ids map to the names titles.genres stores, per media type", () => {
+  assertEquals(genreNames([878, 18, 999999], "movie"), ["Science Fiction", "Drama"]);
+  assertEquals(genreNames([10765, 10759], "tv"), ["Sci-Fi & Fantasy", "Action & Adventure"]);
+  assertEquals(genreNames([10765], "movie"), []);
+});
+
+Deno.test("title-related: a list item becomes a minimal titles row with votes and genres", () => {
+  const row = listItemToTitleRow(
+    {
+      id: 1429, name: "Attack on Titan", first_air_date: "2013-04-07", genre_ids: [16, 10759], origin_country: ["JP"],
+      vote_average: 8.66, vote_count: 7000, popularity: 99.5, poster_path: "/p.jpg",
+    },
+    "tv",
+  )!;
+  assertEquals(row.title, "Attack on Titan");
+  assertEquals(row.release_date, "2013-04-07");
+  assertEquals(row.genres, ["Animation", "Action & Adventure"]);
+  assertEquals(row.tmdb_vote_average, 8.7);
+  assertEquals(row.tmdb_vote_count, 7000);
+  assertEquals(row.is_anime, true);
+  assertEquals(row.backdrop_path, null);
+  assertEquals(listItemToTitleRow({ id: "x" }, "movie"), null);
+});
+
+Deno.test("title-related: a user's stale seeds are fetched, fresh ones skipped", async () => {
+  const store = new MemoryExploreStore();
+  store.relatedFetched["movie:157336"] = "2026-10-01T00:00:00Z"; // 7 days old: fresh
+  store.relatedFetched["movie:496243"] = "2026-09-01T00:00:00Z"; // 37 days old: stale
+  const calls: RecordedCall[] = [];
+  const fetch = fakeFetch({
+    "/movie/496243/recommendations": () => recs([11, 12, 496243, 11]),
+    "/movie/129/recommendations": () => recs([]),
+  }, calls);
+  const res = await handleTitleRelated(post({ seed_ids: [157336, 496243, 129], media_type: "movie" }, userAuth()), {
+    fetch, tmdbToken: "t", store, now: () => NOW,
+  });
+  assertEquals(res.status, 200);
+  assertEquals(await res.json(), { refreshed: [496243, 129], fresh: [157336], failures: [] });
+  assertEquals(calls.length, 2);
+  assert(calls[0].url.includes("page=1"));
+  // The seed itself and duplicates are dropped; positions follow TMDB order.
+  assertEquals(store.related.get("movie:496243"), [{ related_id: 11, position: 1 }, { related_id: 12, position: 2 }]);
+  assertEquals(store.titles.map((t) => t.id), [11, 12]);
+  assertEquals(store.titles[0].genres, ["Drama", "Thriller"]);
+  // No recommendations still logs the fetch, so it isn't retried every time.
+  assertEquals(store.related.get("movie:129"), []);
+});
+
+Deno.test("title-related: a seed unknown to TMDB is logged as an empty fetch", async () => {
+  const store = new MemoryExploreStore();
+  const res = await handleTitleRelated(post({ seed_ids: [42], media_type: "tv" }, userAuth()), {
+    fetch: fakeFetch({}), tmdbToken: "t", store, now: () => NOW,
+  });
+  assertEquals((await res.json()).refreshed, [42]);
+  assertEquals(store.related.get("tv:42"), []);
+});
+
+Deno.test("title-related: bad user requests are rejected", async () => {
+  const deps = { fetch: fakeFetch({}), tmdbToken: "t", store: new MemoryExploreStore(), serviceRoleKey: "srk", now: () => NOW };
+  for (const body of [
+    { seed_ids: [1, 2, 3, 4, 5, 6], media_type: "movie" },
+    { seed_ids: [], media_type: "movie" },
+    { seed_ids: [1], media_type: "book" },
+    { seed_ids: [-1], media_type: "tv" },
+    { seed_ids: ["1"], media_type: "tv" },
+  ]) {
+    assertEquals((await handleTitleRelated(post(body, userAuth()), deps)).status, 400, JSON.stringify(body));
+  }
+  const anon = { Authorization: `Bearer ${fakeJwt({ role: "anon" })}` };
+  assertEquals((await handleTitleRelated(post({ seed_ids: [1], media_type: "tv" }, anon), deps)).status, 401);
+  assertEquals((await handleTitleRelated(req("/"), deps)).status, 405);
+  assertEquals((await handleTitleRelated(post({}, userAuth()), { ...deps, tmdbToken: undefined })).status, 500);
+});
+
+Deno.test("title-related: a rate-limited user request answers 429", async () => {
+  const fetch = fakeFetch({ "/recommendations": () => new Response("slow down", { status: 429 }) });
+  const res = await handleTitleRelated(post({ seed_ids: [7], media_type: "movie" }, userAuth()), {
+    fetch, tmdbToken: "t", store: new MemoryExploreStore(), now: () => NOW,
+  });
+  assertEquals(res.status, 429);
+});
+
+Deno.test("title-related: the scheduler refreshes stale trending, then stale seeds", async () => {
+  const store = new MemoryExploreStore();
+  store.trendingFetched.movie = "2026-10-08T09:00:00Z"; // 3 h old: fresh
+  store.trendingFetched.tv = "2026-10-08T01:00:00Z"; // 11 h old: stale
+  store.stale = [{ seed_id: 1396, media_type: "tv" }, { seed_id: 155, media_type: "movie" }];
+  const calls: RecordedCall[] = [];
+  const fetch = fakeFetch({
+    "/trending/tv/week": () =>
+      jsonResponse({
+        results: [
+          { id: 66732, media_type: "tv", name: "Stranger Things", genre_ids: [10765] },
+          { id: 9, media_type: "person", name: "Someone" },
+        ],
+      }),
+    "/tv/1396/recommendations": () => recs([60059]),
+    "/movie/155/recommendations": () => new Response("down", { status: 503 }),
+  }, calls);
+  const res = await handleTitleRelated(post({}, { Authorization: "Bearer srk" }), {
+    fetch, tmdbToken: "t", store, serviceRoleKey: "srk", now: () => NOW,
+  });
+  assertEquals(await res.json(), { trending: 1, seeds: 1, rate_limited: false, failures: ["movie:155 (503)"] });
+  assert(!calls.some((c) => c.url.includes("/trending/movie")));
+  assertEquals(store.trending.tv, [66732]); // the person is skipped
+  assertEquals(store.titles.find((t) => t.id === 66732)?.genres, ["Sci-Fi & Fantasy"]);
+  assertEquals(store.related.get("tv:1396"), [{ related_id: 60059, position: 1 }]);
+});
+
+Deno.test("title-related: the scheduler stops at TMDB's rate limit", async () => {
+  const store = new MemoryExploreStore();
+  store.stale = [{ seed_id: 1, media_type: "movie" }, { seed_id: 2, media_type: "movie" }];
+  const calls: RecordedCall[] = [];
+  const fetch = fakeFetch({ "/trending/movie": () => new Response("slow", { status: 429 }) }, calls);
+  const res = await handleTitleRelated(post({}, { Authorization: "Bearer srk" }), {
+    fetch, tmdbToken: "t", store, serviceRoleKey: "srk", now: () => NOW,
+  });
+  assertEquals((await res.json()).rate_limited, true);
+  assertEquals(calls.length, 1);
+});
+
+Deno.test("only a signed-in user's JWT counts as a user request", () => {
+  const withAuth = (h?: string) => new Request("http://edge.local/", { method: "POST", headers: h ? { Authorization: h } : {} });
+  assertEquals(isAuthenticatedUserRequest(withAuth(`Bearer ${fakeJwt({ role: "authenticated", sub: "u" })}`)), true);
+  assertEquals(isAuthenticatedUserRequest(withAuth(`Bearer ${fakeJwt({ role: "anon" })}`)), false);
+  assertEquals(isAuthenticatedUserRequest(withAuth()), false);
 });

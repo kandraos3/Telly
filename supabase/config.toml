@@ -50,3 +50,7 @@ verify_jwt = true
 
 [functions.streaming-catalog-sync]
 verify_jwt = true
+
+# #177: also trusts the authenticated role claim for user requests.
+[functions.title-related]
+verify_jwt = true
