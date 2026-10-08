@@ -1,6 +1,6 @@
 # Feature Spec 10: Gamification: Medals, Challenges and Levels
 
-> Tracking: epic #50 · Status: approved · Decision: [0005](../decisions/0005-gamification-medals-challenges-levels.md) · Mockup: [0050](../design_system/mockups/0050-gamification-directions.html)
+> Tracking: epic #50 · Status: shipped (alternate app icons: #154; Founding Viewer launch date: #151) · Decision: [0005](../decisions/0005-gamification-medals-challenges-levels.md) · Mockup: [0050](../design_system/mockups/0050-gamification-directions.html)
 
 ## 1. Overview
 
@@ -314,7 +314,7 @@ All screens use the shared app bars (screen specs §0.2) and the frosted bottom 
 
 - **What it is:** a full-screen modal over everything, shown on the next app foreground (or right after the ranking) for each unseen unlock, one after another, oldest first. The app shell re-reads medals on resume and when the offline queue finishes syncing; each moment is marked seen when it closes. Offline snapshots never show moments.
 - **Layout:**
-  - a confetti backdrop (static if reduced motion is on);
+  - a confetti backdrop (none if reduced motion is on, so nothing sits behind the text);
   - an "Achievement unlocked" chip;
   - the large medal;
   - the name in the display font;

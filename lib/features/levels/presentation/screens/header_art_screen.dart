@@ -32,7 +32,8 @@ class _HeaderArtScreenState extends ConsumerState<HeaderArtScreen> {
       await action();
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.maybeOf(context)?.showSnackBar(const SnackBar(content: Text("Couldn't change that. Try again.")));
+        ScaffoldMessenger.maybeOf(context)
+            ?.showSnackBar(const SnackBar(content: Text("Couldn't change that. Try again.")));
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -66,7 +67,8 @@ class _HeaderArtScreenState extends ConsumerState<HeaderArtScreen> {
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
                   children: [
                     Text('A still from your God tier, shown behind your profile.',
-                        style: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context))),
+                        style: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context))
+                            .copyWith(fontWeight: FontWeight.w600)),
                     const SizedBox(height: 14),
                     for (final art in choices) ...[
                       _ArtTile(
@@ -125,15 +127,15 @@ class _ArtTile extends StatelessWidget {
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-                color: selected ? accent : TellyColors.strokeOf(context), width: selected ? 2 : 1),
+            border: Border.all(color: selected ? accent : TellyColors.strokeOf(context), width: selected ? 2 : 1),
           ),
           child: Stack(
             fit: StackFit.expand,
             children: [
               PosterImage(
                 posterPath: TmdbImages.backdrop(art.backdropPath),
-                fallback: ColoredBox(color: TellyColors.cardOf(context)),
+                fallback:
+                    const ColoredBox(color: TellyColors.backgroundCard), // dark in both themes: the caption is white
               ),
               const DecoratedBox(
                 decoration: BoxDecoration(
@@ -151,7 +153,8 @@ class _ArtTile extends StatelessWidget {
                 child: Text(art.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TellyTypography.bodyLarge(color: const Color(0xFFFFFFFF)).copyWith(fontWeight: FontWeight.w800)),
+                    style: TellyTypography.bodyLarge(color: const Color(0xFFFFFFFF))
+                        .copyWith(fontWeight: FontWeight.w800)),
               ),
               if (selected)
                 Positioned(

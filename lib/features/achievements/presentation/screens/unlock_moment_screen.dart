@@ -41,9 +41,9 @@ class _UnlockMomentScreenState extends ConsumerState<UnlockMomentScreen> with Si
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Reduced motion: the confetti stays as a still backdrop.
+    // Reduced motion: no confetti at all (a still frame would sit behind the text).
     if (MediaQuery.disableAnimationsOf(context)) {
-      _confetti.value = 0.35;
+      _confetti.value = 0;
     } else if (!_confetti.isAnimating && _confetti.value == 0) {
       _confetti.forward();
     }
@@ -72,10 +72,13 @@ class _UnlockMomentScreenState extends ConsumerState<UnlockMomentScreen> with Si
         children: [
           Positioned.fill(
             child: ExcludeSemantics(
-              child: AnimatedBuilder(
-                animation: _confetti,
-                builder: (_, __) => CustomPaint(painter: _ConfettiPainter(progress: _confetti.value, seed: medal.id.hashCode)),
-              ),
+              child: MediaQuery.disableAnimationsOf(context)
+                  ? const SizedBox.shrink()
+                  : AnimatedBuilder(
+                      animation: _confetti,
+                      builder: (_, __) =>
+                          CustomPaint(painter: _ConfettiPainter(progress: _confetti.value, seed: medal.id.hashCode)),
+                    ),
             ),
           ),
           SafeArea(
@@ -99,16 +102,20 @@ class _UnlockMomentScreenState extends ConsumerState<UnlockMomentScreen> with Si
                     medal.personalLine,
                     key: const Key('unlock_moment_line'),
                     textAlign: TextAlign.center,
-                    style: TellyTypography.bodyLarge(color: TellyColors.textSecondaryOf(context)),
+                    // w600: thin regular text antialiases below AA contrast (as in TellyEmptyState).
+                    style: TellyTypography.bodyLarge(color: TellyColors.textSecondaryOf(context))
+                        .copyWith(fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 14),
                   Text(
                     [
                       medal.rarityLine,
-                      if (friends > 0) '$friends ${friends == 1 ? 'person' : 'people'} you follow ${friends == 1 ? 'has' : 'have'} it',
+                      if (friends > 0)
+                        '$friends ${friends == 1 ? 'person' : 'people'} you follow ${friends == 1 ? 'has' : 'have'} it',
                     ].join(' · '),
                     textAlign: TextAlign.center,
-                    style: TellyTypography.bodyMedium(color: TellyColors.textTertiaryOf(context)),
+                    style: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context))
+                        .copyWith(fontWeight: FontWeight.w600),
                   ),
                   const Spacer(flex: 3),
                   TellyPrimaryButton(
@@ -177,7 +184,10 @@ class _Chip extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: accent.withValues(alpha: 0.45)),
       ),
-      child: Text(label, style: TellyTypography.labelMedium(color: accent).copyWith(fontWeight: FontWeight.w800)),
+      // Primary text on the tinted chip: the accent itself falls below AA there in light theme.
+      child: Text(label,
+          style: TellyTypography.labelMedium(color: TellyColors.textPrimaryOf(context))
+              .copyWith(fontWeight: FontWeight.w800)),
     );
   }
 }

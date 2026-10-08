@@ -18,11 +18,13 @@ _Updated 2026-10-07. Change this page when the direction changes, not for status
 ## Later
 - **Friends & public profiles** ([#48](https://github.com/kandraos3/Telly/issues/48))
 - **Squad chat + share-to-squad** ([#49](https://github.com/kandraos3/Telly/issues/49))
-- **Gamification**: achievements, challenges, points, streaks ([#50](https://github.com/kandraos3/Telly/issues/50)), then **referrals** ([#51](https://github.com/kandraos3/Telly/issues/51))
+- **Referrals** ([#51](https://github.com/kandraos3/Telly/issues/51)), building on gamification
+- **Alternate app icons**, the level 20 reward (stubbed as "Coming soon", [#154](https://github.com/kandraos3/Telly/issues/154))
 - **Telly Pro** (idea, [#52](https://github.com/kandraos3/Telly/issues/52))
 - **Watch party** (idea, [#53](https://github.com/kandraos3/Telly/issues/53))
 - **Smart "Up next" pick** for the Queue, replacing the random pick (idea, [#124](https://github.com/kandraos3/Telly/issues/124))
 
 ## Recently shipped
+- **Gamification**: medals and a trophy case, film collections, seasonal and squad challenges, XP, levels, weekly quests and streaks, cosmetic rewards, and a weekly friends table. Only rankings placed through duels count, so imports can't farm it ([#50](https://github.com/kandraos3/Telly/issues/50), [decision 0005](decisions/0005-gamification-medals-challenges-levels.md), [spec 10](features/10_GAMIFICATION_MEDALS_CHALLENGES_AND_LEVELS.md))
 - **Canon & Queue layout pass**: the Canon tab opens on a #1–#3 podium, with stats and views in header sheets; the Queue leads with a random "Up next" card under one control row, with lists on their own screen ([#47](https://github.com/kandraos3/Telly/issues/47), [decision 0004](decisions/0004-canon-podium-and-queue-up-next.md))
 - **Navigation & app structure**: five tabs (Home · Explore · Canon · Social · More), floating Log button, More hub with the Queue, interim Home ([#44](https://github.com/kandraos3/Telly/issues/44), [decision 0003](decisions/0003-five-tab-shell-with-more-hub.md))

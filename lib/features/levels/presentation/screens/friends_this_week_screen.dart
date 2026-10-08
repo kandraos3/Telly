@@ -104,7 +104,9 @@ class _Table extends StatelessWidget {
           squad
               ? 'Weekly XP in this squad. Resets Monday, so nobody is out of reach for good.'
               : 'Weekly XP among people you follow. Resets Monday, so nobody is out of reach for good.',
-          style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)),
+          // The screen's intro: 13 px secondary w600, like Rewards' (11 px antialiases below AA contrast).
+          style: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context))
+              .copyWith(fontWeight: FontWeight.w600),
         ),
       ],
     );
@@ -140,7 +142,7 @@ class _Row extends StatelessWidget {
                 Text(r.name,
                     style: TellyTypography.bodyLarge(color: TellyColors.textPrimaryOf(context))
                         .copyWith(fontWeight: FontWeight.w700)),
-                Text(detail, style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context))),
+                Text(detail, style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context))),
               ],
             ),
           ),

@@ -17,6 +17,23 @@ import 'package:telly_app/core/services/haptics_service.dart';
 import 'package:telly_app/core/theme/telly_theme.dart';
 import 'package:telly_app/core/widgets/poster_image.dart';
 import 'package:telly_app/features/auth/data/auth_repository.dart';
+import 'package:telly_app/features/achievements/data/achievements_repository.dart';
+import 'package:telly_app/features/achievements/presentation/screens/achievements_screen.dart';
+import 'package:telly_app/features/achievements/presentation/screens/unlock_moment_screen.dart';
+import 'package:telly_app/features/challenges/data/challenges_repository.dart';
+import 'package:telly_app/features/challenges/presentation/controllers/challenges_controller.dart';
+import 'package:telly_app/features/challenges/presentation/screens/challenge_screen.dart';
+import 'package:telly_app/features/challenges/presentation/screens/challenges_screen.dart';
+import 'package:telly_app/features/levels/data/levels_repository.dart';
+import 'package:telly_app/features/levels/presentation/controllers/levels_controller.dart';
+import 'package:telly_app/features/levels/presentation/screens/friends_this_week_screen.dart';
+import 'package:telly_app/features/levels/presentation/screens/header_art_screen.dart';
+import 'package:telly_app/features/levels/presentation/screens/rewards_screen.dart';
+import 'package:telly_app/features/levels/presentation/screens/your_level_screen.dart';
+
+import '../features/achievements/achievements_fixtures.dart';
+import '../features/challenges/challenges_fixtures.dart';
+import '../features/levels/levels_fixtures.dart';
 import 'package:telly_app/features/auth/domain/user_profile.dart';
 import 'package:telly_app/features/auth/presentation/screens/auth_screen.dart';
 import 'package:telly_app/features/auth/presentation/screens/handle_reservation_screen.dart';
@@ -605,5 +622,39 @@ void main() {
     testWidgets('23b. EditProfileStudioScreen meets guidelines in Light Theme', (tester) async {
       await runA11yAudit(tester, const EditProfileStudioScreen(), theme: TellyTheme.lightTheme);
     });
+  });
+
+  // Epic #50 (features/10 §9): every gamification screen, in both themes.
+  group('Gamification screens (#50 verify)', () {
+    List<Override> gameOverrides() => [
+          achievementsRepositoryProvider.overrideWithValue(FakeAchievementsRepository(withCollections())),
+          challengesRepositoryProvider.overrideWithValue(FakeChallengesRepository()),
+          challengeClockProvider.overrideWithValue(() => testNow),
+          levelsRepositoryProvider.overrideWithValue(FakeLevelsRepository()),
+          weeklyTableSquadsProvider.overrideWith((ref) async => const []),
+        ];
+
+    // The unlock moment's confetti runs forever unless motion is reduced.
+    Widget stillMotion(Widget child) =>
+        Builder(builder: (context) => MediaQuery(data: MediaQuery.of(context).copyWith(disableAnimations: true), child: child));
+
+    final screens = <(String, Widget)>[
+      ('SCR-23 AchievementsScreen', const AchievementsScreen()),
+      ('SCR-24 UnlockMomentScreen', stillMotion(UnlockMomentScreen(medal: sampleSnapshot().medals.first))),
+      ('SCR-25 ChallengesScreen', const ChallengesScreen()),
+      ('SCR-26 ChallengeScreen', const ChallengeScreen(slug: 'spooktober')),
+      ('SCR-27 YourLevelScreen', const YourLevelScreen()),
+      ('SCR-27 FriendsThisWeekScreen', const FriendsThisWeekScreen()),
+      ('SCR-27 RewardsScreen', const RewardsScreen()),
+      ('SCR-27 HeaderArtScreen', const HeaderArtScreen()),
+    ];
+    for (final (name, screen) in screens) {
+      testWidgets('24. $name meets guidelines', (tester) async {
+        await runA11yAudit(tester, screen, overrides: gameOverrides());
+      });
+      testWidgets('24b. $name meets guidelines in Light Theme', (tester) async {
+        await runA11yAudit(tester, screen, overrides: gameOverrides(), theme: TellyTheme.lightTheme);
+      });
+    }
   });
 }

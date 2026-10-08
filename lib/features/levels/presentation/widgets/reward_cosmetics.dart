@@ -101,7 +101,8 @@ class HeaderArtBanner extends ConsumerWidget {
               children: [
                 PosterImage(
                   posterPath: TmdbImages.backdrop(art.backdropPath),
-                  fallback: ColoredBox(color: TellyColors.cardOf(context)),
+                  fallback:
+                      const ColoredBox(color: TellyColors.backgroundCard), // dark in both themes: the caption is white
                 ),
                 // A scrim keeps the caption readable on any still, in both themes.
                 const DecoratedBox(

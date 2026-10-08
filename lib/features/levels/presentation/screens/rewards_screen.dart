@@ -34,7 +34,9 @@ class RewardsScreen extends ConsumerWidget {
             children: [
               Text(
                 'Every reward is cosmetic. Nothing you need to use Telly is locked behind points.',
-                style: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context)),
+                // w600: thin regular text antialiases below AA contrast (as in TellyEmptyState).
+                style: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context))
+                    .copyWith(fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 14),
               for (final r in rewards) ...[_RewardRow(reward: r), const SizedBox(height: 10)],

@@ -39,11 +39,12 @@ class _TellyPrimaryButtonState extends State<TellyPrimaryButton> {
 
     final bgColor = isEnabled
         ? widget.backgroundColor
-        : TellyColors.strokeSubtle; // #242938
+        : TellyColors.strokeOf(context); // #242938 dark / #E2E5EC light
 
     final textColor = isEnabled
         ? widget.textColor
-        : TellyColors.textTertiary; // #7D8198
+        // Readable in both themes (WCAG AA), e.g. "Pinned to profile" on the unlock moment (#50 verify).
+        : TellyColors.textSecondaryOf(context);
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 150),
