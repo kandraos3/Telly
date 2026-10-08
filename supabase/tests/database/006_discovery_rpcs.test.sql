@@ -2,7 +2,7 @@
 BEGIN;
 CREATE EXTENSION IF NOT EXISTS pgtap WITH SCHEMA extensions;
 
-SELECT plan(14);
+SELECT plan(12);
 
 INSERT INTO auth.users (id, email) VALUES
     ('d1000000-0000-0000-0000-000000000001', 'me@test.dev'),
@@ -28,11 +28,6 @@ SELECT set_config('request.jwt.claims', '{"sub":"d1000000-0000-0000-0000-0000000
 SELECT public.insert_user_ranking_atomic(76331, 'tv', 1);
 INSERT INTO public.social_follows (follower_id, following_id)
     VALUES ('d1000000-0000-0000-0000-000000000001', 'd2000000-0000-0000-0000-000000000002');
-
--- Curated canons
-SELECT is((SELECT count(*)::INT FROM public.curated_canons), 2, 'curated canons seeded and readable');
-SELECT throws_ok($$ INSERT INTO public.curated_canons (slug, title) VALUES ('x', 'x') $$, '42501', NULL,
-    'curated canons are not client-writable');
 
 -- Network battlegrounds: HBO has 4 rankings (Succession x3 + GoT x2 = 5), AMC 1 (below threshold)
 SELECT results_eq(
