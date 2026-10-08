@@ -92,12 +92,16 @@ class _ExploreRowSection extends StatelessWidget {
               children: [for (final (i, s) in items.indexed) _Top10Card(rank: i + 1, pick: s)],
             ),
           ExploreRowKind.friends => _Carousel(
-              height: 104,
+              // 84 dp poster + padding; the text column (title, names, avatars, average) needs 112.
+              height: 112,
               children: [for (final s in items) _FriendCard(pick: s)],
             ),
           ExploreRowKind.becauseYouRanked => _Carousel(
               height: 196,
-              children: [_SeedTile(seed: row.seed!, mediaType: mediaType), for (final s in items) _PosterCard(pick: s, meta: _matchMeta(s))],
+              children: [
+                _SeedTile(seed: row.seed!, mediaType: mediaType),
+                for (final s in items) _PosterCard(pick: s, meta: _matchMeta(s))
+              ],
             ),
           ExploreRowKind.leavingSoon => _Carousel(
               height: 196,
@@ -149,12 +153,15 @@ class _ExploreRowSection extends StatelessWidget {
 
   _Meta _communityMeta(ScoredCandidate s) {
     final c = s.candidate;
-    return _Meta(text: c.communityScore != null ? '${c.communityScore!.toStringAsFixed(2)} community' : c.releaseYear?.toString());
+    return _Meta(
+        text:
+            c.communityScore != null ? '${c.communityScore!.toStringAsFixed(2)} community' : c.releaseYear?.toString());
   }
 
   _Meta _genreMeta(ScoredCandidate s) {
     final c = s.candidate;
-    return _Meta(text: [
+    return _Meta(
+        text: [
       if (c.genres.isNotEmpty) c.genres.first,
       if (c.communityScore != null) '${c.communityScore!.toStringAsFixed(1)} on Telly',
     ].join(' · '));
@@ -166,7 +173,8 @@ class _ExploreRowSection extends StatelessWidget {
   String? _daysLeft(ScoredCandidate s) {
     final u = s.candidate.leavingUntil;
     if (u == null) return null;
-    final days = DateTime.utc(u.year, u.month, u.day).difference(DateTime.utc(today.year, today.month, today.day)).inDays;
+    final days =
+        DateTime.utc(u.year, u.month, u.day).difference(DateTime.utc(today.year, today.month, today.day)).inDays;
     if (days <= 0) return 'LAST DAY';
     return days == 1 ? '1 DAY' : '$days DAYS';
   }
@@ -180,26 +188,32 @@ class _RowHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: _gutter,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Semantics(
-            header: true,
-            child: Text.rich(
-              title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TellyTypography.labelLarge(color: TellyColors.textPrimaryOf(context))
-                  .copyWith(fontSize: 16.5, fontWeight: FontWeight.w800, letterSpacing: -0.16),
+    // One heading for screen readers: "Trending now, Top 10 movies this week".
+    return Semantics(
+      header: true,
+      label: [title.toPlainText(), if (subtitle != null) subtitle!].join(', '),
+      excludeSemantics: true,
+      child: Padding(
+        padding: _gutter,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Semantics(
+              child: Text.rich(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TellyTypography.labelLarge(color: TellyColors.textPrimaryOf(context))
+                    .copyWith(fontSize: 16.5, fontWeight: FontWeight.w800, letterSpacing: -0.16),
+              ),
             ),
-          ),
-          if (subtitle != null) ...[
-            const SizedBox(height: 2),
-            Text(subtitle!, style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)).copyWith(fontSize: 12)),
+            if (subtitle != null) ...[
+              const SizedBox(height: 2),
+              Text(subtitle!,
+                  style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)).copyWith(fontSize: 12)),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -436,8 +450,8 @@ class _SeedTile extends StatelessWidget {
                           .copyWith(fontSize: 13, fontWeight: FontWeight.w700)),
                   const SizedBox(height: 4),
                   Text('#${seed.rank} · $score',
-                      style: TellyTypography.labelMedium(color: TellyColors.warmAmberOf(context))
-                          .copyWith(fontWeight: FontWeight.w800, fontFeatures: const [ui.FontFeature.tabularFigures()])),
+                      style: TellyTypography.labelMedium(color: TellyColors.warmAmberOf(context)).copyWith(
+                          fontWeight: FontWeight.w800, fontFeatures: const [ui.FontFeature.tabularFigures()])),
                 ],
               ),
             ),
@@ -483,7 +497,10 @@ class _FriendCard extends StatelessWidget {
     final c = pick.candidate;
     final names = c.friends.map((f) => f.displayName.isEmpty ? 'A friend' : f.displayName).toList();
     final who = names.length <= 3 ? _andList(names) : '${names.first} and ${names.length - 1} others';
-    final scores = [for (final f in c.friends) if (f.score != null) f.score!];
+    final scores = [
+      for (final f in c.friends)
+        if (f.score != null) f.score!
+    ];
     final avg = scores.isEmpty ? null : scores.reduce((a, b) => a + b) / scores.length;
     final surface = TellyColors.surfaceOf(context);
     return Semantics(
@@ -520,7 +537,8 @@ class _FriendCard extends StatelessWidget {
                     Text(who,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)).copyWith(fontSize: 11)),
+                        style:
+                            TellyTypography.caption(color: TellyColors.textTertiaryOf(context)).copyWith(fontSize: 11)),
                     const SizedBox(height: 8),
                     SizedBox(
                       height: 22,
@@ -532,7 +550,8 @@ class _FriendCard extends StatelessWidget {
                               child: Container(
                                 width: 22,
                                 height: 22,
-                                decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: surface, width: 2)),
+                                decoration:
+                                    BoxDecoration(shape: BoxShape.circle, border: Border.all(color: surface, width: 2)),
                                 child: CircleAvatar(
                                   backgroundColor: TellyColors.cardOf(context),
                                   child: Text(
@@ -659,8 +678,9 @@ class _HeroState extends ConsumerState<_Hero> {
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    stops: const [0.25, 0.78],
-                    colors: [canvas.withValues(alpha: 0), canvas.withValues(alpha: 0.94)],
+                    // Opaque from 45% down, so the text block keeps its contrast over any backdrop.
+                    stops: const [0.05, 0.45],
+                    colors: [canvas.withValues(alpha: 0), canvas],
                   ),
                 ),
               ),
@@ -672,23 +692,33 @@ class _HeroState extends ConsumerState<_Hero> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('TOP PICK FOR YOU · $match% MATCH',
-                        style: TellyTypography.labelSmall(color: TellyColors.electricVioletOf(context))
-                            .copyWith(fontSize: 10.5, fontWeight: FontWeight.w800, letterSpacing: 1.05)),
-                    const SizedBox(height: 6),
+                    // One announcement for the eyebrow, title and reason; the buttons follow.
                     Semantics(
                       header: true,
-                      child: Text(c.title,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TellyTypography.displayXL(color: TellyColors.textPrimaryOf(context))
-                              .copyWith(fontSize: 26, fontWeight: FontWeight.w700, height: 1.05)),
+                      label: 'Top pick for you, $match% match: ${c.title}. ${_reason()}',
+                      excludeSemantics: true,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('TOP PICK FOR YOU · $match% MATCH',
+                              style: TellyTypography.labelSmall(color: TellyColors.electricVioletOf(context))
+                                  .copyWith(fontSize: 10.5, fontWeight: FontWeight.w800, letterSpacing: 1.05)),
+                          const SizedBox(height: 6),
+                          Text(c.title,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: TellyTypography.displayXL(color: TellyColors.textPrimaryOf(context))
+                                  .copyWith(fontSize: 26, fontWeight: FontWeight.w700, height: 1.05)),
+                          const SizedBox(height: 6),
+                          Text(_reason(),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context))
+                                  .copyWith(fontSize: 12.5)),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 6),
-                    Text(_reason(),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context)).copyWith(fontSize: 12.5)),
                     const SizedBox(height: 10),
                     Row(
                       children: [
@@ -781,7 +811,8 @@ class _NewUserPrompt extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text('Your top picks and "Because you ranked" rows appear once Telly knows your taste.',
-                style: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context)).copyWith(fontSize: 12.5)),
+                style:
+                    TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context)).copyWith(fontSize: 12.5)),
             const SizedBox(height: 10),
             Semantics(
               label: '$rankingCount of 3 ranked',
@@ -848,7 +879,9 @@ class _OfflineBanner extends StatelessWidget {
             Expanded(
               child: Text.rich(
                 TextSpan(children: [
-                  TextSpan(text: 'Offline. ', style: TextStyle(color: TellyColors.textPrimaryOf(context), fontWeight: FontWeight.w700)),
+                  TextSpan(
+                      text: 'Offline. ',
+                      style: TextStyle(color: TellyColors.textPrimaryOf(context), fontWeight: FontWeight.w700)),
                   TextSpan(text: 'Showing picks from $_ago.'),
                 ]),
                 style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)).copyWith(fontSize: 12),
@@ -893,7 +926,8 @@ class _Skeleton extends StatefulWidget {
 }
 
 class _SkeletonState extends State<_Skeleton> with SingleTickerProviderStateMixin {
-  late final AnimationController _shimmer = AnimationController(vsync: this, duration: const Duration(milliseconds: 1400));
+  late final AnimationController _shimmer =
+      AnimationController(vsync: this, duration: const Duration(milliseconds: 1400));
 
   @override
   void didChangeDependencies() {
@@ -941,7 +975,10 @@ class _SkeletonState extends State<_Skeleton> with SingleTickerProviderStateMixi
                 scrollDirection: Axis.horizontal,
                 physics: const NeverScrollableScrollPhysics(),
                 padding: _gutter,
-                children: [for (var i = 0; i < 4; i++) Padding(padding: const EdgeInsets.only(right: 10), child: box(104, 154, 10))],
+                children: [
+                  for (var i = 0; i < 4; i++)
+                    Padding(padding: const EdgeInsets.only(right: 10), child: box(104, 154, 10))
+                ],
               ),
             ),
           ],

@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/network/supabase_providers.dart';
 import '../domain/discovery_models.dart';
+import 'explore_sample_payloads.dart';
 
 abstract interface class DiscoveryRepository {
   Future<List<NetworkBattleground>> fetchNetworkBattlegrounds({
@@ -146,7 +147,8 @@ class FakeDiscoveryRepository implements DiscoveryRepository {
   List<FriendBingingItem> friendsBinging;
   List<UserSearchResult> users;
 
-  /// `get_explore_candidates` payloads by media type; a missing canon throws, like being offline.
+  /// `get_explore_candidates` payloads by media type (example payloads for both canons by
+  /// default); a missing canon throws, like being offline.
   Map<String, Map<String, dynamic>> exploreCandidates;
 
   /// When set, every candidates fetch throws (offline).
@@ -158,7 +160,7 @@ class FakeDiscoveryRepository implements DiscoveryRepository {
   final List<(int, String)> dismissed = [];
 
   FakeDiscoveryRepository({
-    this.exploreCandidates = const {},
+    Map<String, Map<String, dynamic>>? exploreCandidates,
     this.battlegrounds = const [
       NetworkBattleground(
         network: 'HBO',
@@ -230,7 +232,8 @@ class FakeDiscoveryRepository implements DiscoveryRepository {
         displayName: 'Jordan Miller',
       ),
     ],
-  });
+  }) : exploreCandidates = exploreCandidates ??
+            {'movie': sampleMoviePayload(DateTime.now()), 'tv': sampleSeriesPayload(DateTime.now())};
 
   @override
   Future<List<NetworkBattleground>> fetchNetworkBattlegrounds({

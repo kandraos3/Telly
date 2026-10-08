@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -10,7 +11,11 @@ import 'package:telly_app/features/discovery/domain/discovery_models.dart';
 import 'package:telly_app/core/theme/telly_theme.dart';
 import 'package:telly_app/core/widgets/poster_image.dart';
 import 'package:telly_app/features/discovery/data/discovery_repository.dart';
+import 'package:telly_app/core/database/database.dart';
+import 'package:telly_app/core/database/database_provider.dart';
 import 'package:telly_app/features/discovery/presentation/controllers/explore_picks.dart';
+import 'package:telly_app/features/discovery/presentation/controllers/explore_rows_controller.dart';
+import 'package:telly_app/features/queue/data/watchlist_repository.dart';
 import 'package:telly_app/features/discovery/presentation/screens/explore_discover_screen.dart';
 import 'package:telly_app/features/logging/data/title_repository.dart';
 
@@ -18,6 +23,7 @@ import 'package:telly_app/features/auth/data/auth_repository.dart';
 import 'package:telly_app/features/auth/domain/user_profile.dart';
 import '../../fakes/fake_auth_repository.dart';
 import '../../fakes/fake_title_repository.dart';
+import '../../fakes/fake_watchlist_repository.dart';
 import '../../helpers/router_harness.dart';
 
 // Explore's ranked picks and trending (#182); the ranking itself is tested in explore_ranker_test.
@@ -42,6 +48,16 @@ List<Override> _pickOverrides({List<RecommendedTitle> picks = _picks}) => [
     ];
 
 void main() {
+  // Explore's rows read a Drift cache and rank against a fixed day (#180).
+  late AppDatabase db;
+  setUp(() => db = AppDatabase(NativeDatabase.memory()));
+  tearDown(() => db.close());
+  List<Override> env() => [
+        databaseProvider.overrideWithValue(db),
+        exploreNowProvider.overrideWithValue(() => DateTime(2026, 10, 8, 12)),
+        watchlistRepositoryProvider.overrideWithValue(FakeWatchlistRepository()),
+      ];
+
   Widget createTestWidget({
     DiscoveryRepository? discoveryRepo,
     TitleRepository? titleRepo,
@@ -51,6 +67,7 @@ void main() {
   }) {
     return ProviderScope(
       overrides: [
+        ...env(),
         ..._pickOverrides(picks: picks),
         posterNetworkImagesProvider.overrideWithValue(false),
         authRepositoryProvider.overrideWithValue(
@@ -73,98 +90,6 @@ void main() {
   }
 
   group('FE-612: ExploreDiscoverScreen Component Tests (SCR-07)', () {
-    testWidgets('renders search bar, network battlegrounds, binging carousel, and curated canons', (tester) async {
-      tester.view.physicalSize = const Size(1080, 2400);
-      tester.view.devicePixelRatio = 2.0;
-      addTearDown(() {
-        tester.view.resetPhysicalSize();
-        tester.view.resetDevicePixelRatio();
-      });
-
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
-
-      // Header & Search Bar
-      expect(find.text('Explore'), findsOneWidget);
-      expect(find.text('Search shows, actors, showrunners, friends...'), findsOneWidget);
-
-      // Network Battlegrounds Section
-      expect(find.text('NETWORK BATTLEGROUNDS'), findsOneWidget);
-      expect(find.text('👑 HBO'), findsOneWidget);
-      expect(find.text('🍏 Apple TV+'), findsOneWidget);
-      expect(find.text('See Full Network Rankings'), findsOneWidget);
-
-      // Friends Are Currently Binging Carousel
-      expect(find.text('FRIENDS ARE CURRENTLY BINGING'), findsOneWidget);
-      expect(find.text('Shogun'), findsOneWidget);
-      expect(find.text('Slow Horses'), findsOneWidget);
-      expect(find.text('8 watching'), findsOneWidget);
-
-      // Curated Canons Section
-      expect(find.text('CURATED CANONS'), findsOneWidget);
-      expect(find.text('The "Stuck the Landing" Canon'), findsOneWidget);
-      expect(find.text('Peak 1-Season Miniseries'), findsOneWidget);
-    });
-
-    testWidgets('tapping See Full Network Rankings opens bottom sheet with leaderboard', (tester) async {
-      tester.view.physicalSize = const Size(1080, 2400);
-      tester.view.devicePixelRatio = 2.0;
-      addTearDown(() {
-        tester.view.resetPhysicalSize();
-        tester.view.resetDevicePixelRatio();
-      });
-
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
-
-      // Tap See Full Network Rankings
-      final button = find.text('See Full Network Rankings');
-      expect(button, findsOneWidget);
-      await tester.tap(button);
-      await tester.pumpAndSettle();
-
-      // Modal Bottom Sheet appears
-      expect(find.text('👑 NETWORK BATTLEGROUNDS'), findsOneWidget);
-      expect(find.text('#1'), findsOneWidget);
-      expect(find.text('#2'), findsOneWidget);
-    });
-
-    testWidgets('tapping curated canon opens detail sheet with sample titles', (tester) async {
-      tester.view.physicalSize = const Size(1080, 2400);
-      tester.view.devicePixelRatio = 2.0;
-      addTearDown(() {
-        tester.view.resetPhysicalSize();
-        tester.view.resetDevicePixelRatio();
-      });
-
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
-
-      // Scroll down to make Curated Canons fully visible if needed
-      await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -300));
-      await tester.pumpAndSettle();
-
-      // Tap The "Stuck the Landing" Canon card
-      await tester.tap(find.text('The "Stuck the Landing" Canon'));
-      await tester.pumpAndSettle();
-
-      // Modal Bottom Sheet displays DraggableScrollableSheet, description and sample titles
-      expect(find.byType(DraggableScrollableSheet), findsOneWidget);
-      expect(find.text('The "Stuck the Landing" Canon'), findsWidgets);
-      expect(find.text('FEATURED TITLES'), findsOneWidget);
-      expect(find.text('Shows with universally revered, transcendent final episodes.'), findsWidgets);
-      expect(find.text('Breaking Bad'), findsOneWidget);
-      expect(find.text('Succession'), findsOneWidget);
-      expect(find.text('Six Feet Under'), findsOneWidget);
-
-      // Tapping a featured title dismisses sheet and populates search
-      await tester.tap(find.byKey(const Key('curated_title_Breaking_Bad')));
-      await tester.pumpAndSettle();
-
-      expect(find.byType(DraggableScrollableSheet), findsNothing);
-      expect(find.text('Breaking Bad'), findsWidgets);
-    });
-
     testWidgets('search query renders titles and people results with working filter chips', (tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 2.0;
@@ -218,33 +143,8 @@ void main() {
       await tester.tap(find.byKey(const Key('explore_search_field_clear_btn')));
       await tester.pumpAndSettle();
 
-      // Returns to default Discover hub view
-      expect(find.text('NETWORK BATTLEGROUNDS'), findsOneWidget);
-      expect(find.text('FRIENDS ARE CURRENTLY BINGING'), findsOneWidget);
-    });
-
-    testWidgets('renders empty states when repository returns empty collections', (tester) async {
-      tester.view.physicalSize = const Size(1080, 2400);
-      tester.view.devicePixelRatio = 2.0;
-      addTearDown(() {
-        tester.view.resetPhysicalSize();
-        tester.view.resetDevicePixelRatio();
-      });
-
-      final emptyRepo = FakeDiscoveryRepository(
-        battlegrounds: [],
-        friendsBinging: [],
-        users: [],
-      );
-
-      await tester.pumpWidget(createTestWidget(discoveryRepo: emptyRepo));
-      await tester.pumpAndSettle();
-
-      // Explore hub loads, empty battlegrounds and friends binging shrink away, curated canons remain
-      expect(find.text('Explore'), findsOneWidget);
-      expect(find.text('NETWORK BATTLEGROUNDS'), findsNothing);
-      expect(find.text('FRIENDS ARE CURRENTLY BINGING'), findsNothing);
-      expect(find.text('CURATED CANONS'), findsOneWidget);
+      // Returns to the rows
+      expect(find.byKey(const Key('explore_rows_movie')), findsOneWidget);
     });
 
     testWidgets('header has no actions; each Feed search request focuses the search field (FE-HEADER-01)', (tester) async {
@@ -294,6 +194,7 @@ void main() {
       await tester.pumpWidget(routerHarness(
         const ExploreDiscoverScreen(),
         overrides: [
+          ...env(),
           posterNetworkImagesProvider.overrideWithValue(false),
           authRepositoryProvider.overrideWithValue(fakeAuth),
           discoveryRepositoryProvider.overrideWithValue(FakeDiscoveryRepository()),
@@ -315,10 +216,11 @@ void main() {
     });
   });
 
-  group('FE-EXPLORE-03: Recommended for You & search zero-state', () {
+  group('FE-EXPLORE-03: search zero-state', () {
     Widget routed() => routerHarness(
           const ExploreDiscoverScreen(),
           overrides: [
+            ...env(),
             ..._pickOverrides(),
             posterNetworkImagesProvider.overrideWithValue(false),
             authRepositoryProvider.overrideWithValue(FakeAuthRepository(signedInUserId: 'u-user')),
@@ -336,30 +238,6 @@ void main() {
       });
     }
 
-    testWidgets('carousel shows picks with their reason and opens the title', (tester) async {
-      tallView(tester);
-      await tester.pumpWidget(routed());
-      await tester.pumpAndSettle();
-
-      expect(find.text('RECOMMENDED FOR YOU'), findsOneWidget);
-      expect(find.text('Better Call Saul'), findsOneWidget);
-      expect(find.text('Because you loved Breaking Bad'), findsOneWidget);
-      expect(find.text('Trending on Telly'), findsOneWidget);
-
-      await tester.tap(find.byKey(const Key('recommended_title_60059')));
-      await tester.pumpAndSettle();
-      expect(find.text('route:/title/tv/60059'), findsOneWidget);
-    });
-
-    testWidgets('carousel is hidden when there is nothing to recommend', (tester) async {
-      tallView(tester);
-      await tester.pumpWidget(createTestWidget(picks: const []));
-      await tester.pumpAndSettle();
-
-      expect(find.byKey(const Key('explore_recommended_section')), findsNothing);
-      expect(find.text('CURATED CANONS'), findsOneWidget);
-    });
-
     testWidgets('focusing the empty search field shows trending titles immediately', (tester) async {
       tallView(tester);
       await tester.pumpWidget(createTestWidget());
@@ -374,8 +252,8 @@ void main() {
       expect(find.text('Shogun'), findsOneWidget);
       expect(find.text('Dune: Part Two'), findsOneWidget);
       expect(find.text('RECENT SEARCHES'), findsNothing);
-      // The browse sections step aside while the zero-state is up.
-      expect(find.text('CURATED CANONS'), findsNothing);
+      // The rows step aside while the zero-state is up.
+      expect(find.byKey(const Key('explore_rows_movie')), findsNothing);
     });
 
     testWidgets('opening a result records it as a recent search', (tester) async {

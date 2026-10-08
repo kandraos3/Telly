@@ -193,9 +193,7 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
                               Text(
                                 '#$index',
                                 style: TellyTypography.titleMedium(
-                                  color: index == 1
-                                      ? TellyColors.warmAmber
-                                      : TellyColors.textTertiaryOf(context),
+                                  color: index == 1 ? TellyColors.warmAmber : TellyColors.textTertiaryOf(context),
                                 ).copyWith(fontWeight: FontWeight.w800),
                               ),
                               const SizedBox(width: 12),
@@ -208,11 +206,9 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
                                 ),
                               ),
                               Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 4),
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: TellyColors.phosphorLime
-                                      .withValues(alpha: 0.15),
+                                  color: TellyColors.phosphorLime.withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Text(
@@ -253,7 +249,6 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     final browsing = _searchQuery.isEmpty && !_searchFocused;
@@ -261,11 +256,16 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
     int? count(String mediaType) => ref.watch(exploreRowsProvider(mediaType)).valueOrNull?.rows.rankingCount;
 
     return Scaffold(
-      body: TellyFloatingHeaderScrollView(
-        header: const TellyScreenHeader(title: 'Explore'),
-        body: RefreshIndicator(
-          onRefresh: () => ref.read(exploreRowsProvider(_mediaType).notifier).refresh(),
-          child: CustomScrollView(
+      // Around the NestedScrollView, listening to it and to the rows' list inside it: an
+      // indicator inside the NestedScrollView never sees the pull at the top.
+      body: RefreshIndicator(
+        color: TellyColors.primaryAccentOf(context),
+        // The rows' list sits one level inside the NestedScrollView.
+        notificationPredicate: (n) => n.depth <= 1,
+        onRefresh: () => ref.read(exploreRowsProvider(_mediaType).notifier).refresh(),
+        child: TellyFloatingHeaderScrollView(
+          header: const TellyScreenHeader(title: 'Explore'),
+          body: CustomScrollView(
             slivers: [
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
@@ -390,8 +390,7 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
             if (_titleResults.isEmpty)
               Padding(
                 padding: const EdgeInsets.only(bottom: 16),
-                child: Text('No titles found',
-                    style: TellyTypography.bodyMedium(color: TellyColors.textTertiary)),
+                child: Text('No titles found', style: TellyTypography.bodyMedium(color: TellyColors.textTertiary)),
               )
             else
               ..._titleResults.map((title) => _buildTitleResultTile(title)),
@@ -407,8 +406,7 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
             ),
             const SizedBox(height: 10),
             if (_userResults.isEmpty)
-              Text('No users found',
-                  style: TellyTypography.bodyMedium(color: TellyColors.textTertiary))
+              Text('No users found', style: TellyTypography.bodyMedium(color: TellyColors.textTertiary))
             else
               ..._userResults.map((user) => _buildUserResultTile(user)),
           ],
@@ -494,8 +492,7 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
   Widget _buildUserResultTile(UserSearchResult user) {
     final currentUserId = ref.watch(authRepositoryProvider).currentUserId;
     final currentUsername = ref.watch(authControllerProvider).user?.username;
-    final isMe = (currentUsername != null &&
-            currentUsername.toLowerCase() == user.username.toLowerCase()) ||
+    final isMe = (currentUsername != null && currentUsername.toLowerCase() == user.username.toLowerCase()) ||
         (currentUserId != null && currentUserId == user.id);
 
     return InkWell(
@@ -779,7 +776,6 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
       ),
     );
   }
-
 }
 
 /// Pins the canon switcher under the status bar while the rows scroll (SCR-07).
