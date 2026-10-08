@@ -7,6 +7,7 @@ import 'package:telly_app/core/theme/telly_typography.dart';
 import 'package:telly_app/core/widgets/poster_image.dart';
 import 'package:telly_app/features/feed/domain/social_models.dart';
 import 'package:telly_app/features/feed/presentation/widgets/feed_card_actions.dart';
+import 'package:telly_app/features/levels/presentation/widgets/reward_cosmetics.dart';
 import 'package:telly_app/features/onboarding/data/top_50_seeds.dart';
 
 /// Standard activity feed card component (FE-302, FE-304).
@@ -88,20 +89,24 @@ class _FeedActivityCardState extends State<FeedActivityCard> {
                 // 1. Author row & Relative time
                 Row(
                   children: [
-                    CircleAvatar(
-                      radius: 18,
-                      backgroundColor: TellyColors.cardOf(context),
-                      backgroundImage: (activity.userAvatarUrl != null && activity.userAvatarUrl!.isNotEmpty)
-                          ? NetworkImage(activity.userAvatarUrl!)
-                          : null,
-                      child: (activity.userAvatarUrl == null || activity.userAvatarUrl!.isEmpty)
-                          ? Text(
-                              activity.userDisplayName.isNotEmpty
-                                  ? activity.userDisplayName[0].toUpperCase()
-                                  : '?',
-                              style: TellyTypography.labelLarge(color: TellyColors.primaryAccentOf(context)),
-                            )
-                          : null,
+                    // #147: the lime frame when the poster has it equipped.
+                    RewardFrame(
+                      userId: activity.userId,
+                      child: CircleAvatar(
+                        radius: 18,
+                        backgroundColor: TellyColors.cardOf(context),
+                        backgroundImage: (activity.userAvatarUrl != null && activity.userAvatarUrl!.isNotEmpty)
+                            ? NetworkImage(activity.userAvatarUrl!)
+                            : null,
+                        child: (activity.userAvatarUrl == null || activity.userAvatarUrl!.isEmpty)
+                            ? Text(
+                                activity.userDisplayName.isNotEmpty
+                                    ? activity.userDisplayName[0].toUpperCase()
+                                    : '?',
+                                style: TellyTypography.labelLarge(color: TellyColors.primaryAccentOf(context)),
+                              )
+                            : null,
+                      ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(

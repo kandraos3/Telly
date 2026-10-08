@@ -49,6 +49,7 @@ import '../features/levels/levels_fixtures.dart';
 import 'package:telly_app/features/levels/data/levels_repository.dart';
 import 'package:telly_app/features/levels/presentation/controllers/levels_controller.dart';
 import 'package:telly_app/features/levels/presentation/screens/friends_this_week_screen.dart';
+import 'package:telly_app/features/levels/presentation/screens/rewards_screen.dart';
 import 'package:telly_app/features/levels/presentation/screens/your_level_screen.dart';
 import '../features/feed/challenge_activity_card_test.dart' show challengeActivity;
 import 'package:telly_app/features/challenges/data/challenges_repository.dart';
@@ -196,13 +197,15 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          theme: TellyTheme.darkTheme,
-          home: Scaffold(
-            backgroundColor: TellyColors.backgroundCanvasOled,
-            body: Padding(
-              padding: const EdgeInsets.all(16),
-              child: UpsetActivityCard(activity: upsetActivity),
+        ProviderScope(
+          child: MaterialApp(
+            theme: TellyTheme.darkTheme,
+            home: Scaffold(
+              backgroundColor: TellyColors.backgroundCanvasOled,
+              body: Padding(
+                padding: const EdgeInsets.all(16),
+                child: UpsetActivityCard(activity: upsetActivity),
+              ),
             ),
           ),
         ),
@@ -693,7 +696,11 @@ void main() {
         await expectLater(find.byType(ChallengeActivityCard), matchesGoldenFile('goldens/challenge_feed_card_$name.png'));
       });
 
-      for (final (screenName, screen) in [('level', const YourLevelScreen()), ('level_week', const FriendsThisWeekScreen())]) {
+      for (final (screenName, screen) in [
+        ('level', const YourLevelScreen()),
+        ('level_week', const FriendsThisWeekScreen()),
+        ('rewards', const RewardsScreen()), // #147
+      ]) {
         testWidgets('Golden: SCR-27 $screenName ($name) on iPhone 15 Pro size (#146)', (tester) async {
           await tester.binding.setSurfaceSize(const Size(393, 852));
           addTearDown(() => tester.binding.setSurfaceSize(null));

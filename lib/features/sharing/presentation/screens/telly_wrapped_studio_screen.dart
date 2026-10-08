@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:telly_app/core/theme/telly_colors.dart';
+import 'package:telly_app/features/levels/presentation/controllers/rewards_controller.dart';
+import 'package:telly_app/features/levels/presentation/widgets/reward_cosmetics.dart';
 import 'package:telly_app/core/theme/telly_typography.dart';
 import 'package:telly_app/core/widgets/telly_neon_badge.dart';
 import 'package:telly_app/core/widgets/telly_primary_button.dart';
@@ -7,7 +10,8 @@ import 'package:telly_app/core/widgets/telly_screen_header.dart';
 
 /// SCR-19: Telly Wrapped Studio & Shareable Story Carousel.
 /// Conforms to `FE-502` and `docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md` §19.
-class TellyWrappedStudioScreen extends StatefulWidget {
+/// #147: cards render in the "Noir" style when that reward is equipped.
+class TellyWrappedStudioScreen extends ConsumerStatefulWidget {
   final String username;
   final String displayName;
 
@@ -18,10 +22,10 @@ class TellyWrappedStudioScreen extends StatefulWidget {
   });
 
   @override
-  State<TellyWrappedStudioScreen> createState() => _TellyWrappedStudioScreenState();
+  ConsumerState<TellyWrappedStudioScreen> createState() => _TellyWrappedStudioScreenState();
 }
 
-class _TellyWrappedStudioScreenState extends State<TellyWrappedStudioScreen> {
+class _TellyWrappedStudioScreenState extends ConsumerState<TellyWrappedStudioScreen> {
   final PageController _pageController = PageController(viewportFraction: 0.85);
   int _currentPage = 0;
 
@@ -140,7 +144,7 @@ class _TellyWrappedStudioScreenState extends State<TellyWrappedStudioScreen> {
           ],
         ),
         clipBehavior: Clip.antiAlias,
-        child: content,
+        child: NoirFilter(enabled: ref.watch(noirCardsProvider), child: content),
       ),
     );
   }

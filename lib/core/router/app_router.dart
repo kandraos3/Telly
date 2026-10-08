@@ -25,6 +25,7 @@ import '../../features/achievements/presentation/screens/achievements_screen.dar
 import '../../features/challenges/presentation/screens/challenge_screen.dart';
 import '../../features/challenges/presentation/screens/challenges_screen.dart';
 import '../../features/levels/presentation/screens/friends_this_week_screen.dart';
+import '../../features/levels/presentation/screens/rewards_screen.dart';
 import '../../features/levels/presentation/screens/your_level_screen.dart';
 import '../../features/queue/presentation/screens/custom_list_detail_screen.dart';
 import '../../features/queue/presentation/screens/queue_lists_screen.dart';
@@ -183,6 +184,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   parentNavigatorKey: rootNavigatorKey,
                   builder: (_, __) => const YourLevelScreen(),
                   routes: [
+                    GoRoute(
+                      path: 'rewards',
+                      parentNavigatorKey: rootNavigatorKey,
+                      builder: (_, __) => const RewardsScreen(),
+                    ),
                     GoRoute(
                       path: 'week',
                       parentNavigatorKey: rootNavigatorKey,

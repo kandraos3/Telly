@@ -327,6 +327,8 @@ class _Links extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: Column(
         children: [
+          row(const Key('level_link_rewards'), Icons.card_giftcard_rounded, 'Rewards', Routes.levelRewards),
+          Divider(height: 1, thickness: 1, color: TellyColors.strokeOf(context)),
           row(const Key('level_link_week'), Icons.leaderboard_outlined, 'Friends this week', Routes.levelWeek),
         ],
       ),

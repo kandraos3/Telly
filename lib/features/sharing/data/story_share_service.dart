@@ -4,6 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../core/config/app_config.dart';
+import '../../levels/domain/level_models.dart';
+import '../../levels/presentation/controllers/rewards_controller.dart';
+import '../../levels/presentation/widgets/reward_cosmetics.dart';
 import '../domain/medal_story.dart';
 import '../domain/reveal_story.dart';
 import '../presentation/widgets/medal_story_card.dart';
@@ -33,14 +36,22 @@ class SharePlusStoryShareService implements StoryShareService {
   final Future<Uint8List> Function(MedalStory story) _renderMedals;
   final String shareUrl;
 
+  /// [noirCards] says, at share time, whether the "Noir" card style is equipped (#147).
   SharePlusStoryShareService({
     Future<void> Function(ShareParams params)? share,
     Future<Uint8List> Function(RevealStory story)? renderReveal,
     Future<Uint8List> Function(MedalStory story)? renderMedals,
+    Future<bool> Function()? noirCards,
     this.shareUrl = kDefaultShareUrl,
   })  : _share = share ?? ((params) => SharePlus.instance.share(params)),
-        _renderReveal = renderReveal ?? ((story) => StoryCardRenderer.renderOffscreen(RevealStoryCard(story: story))),
-        _renderMedals = renderMedals ?? ((story) => StoryCardRenderer.renderOffscreen(MedalStoryCard(story: story)));
+        _renderReveal = renderReveal ??
+            ((story) async => StoryCardRenderer.renderOffscreen(
+                NoirFilter(enabled: await (noirCards ?? _off)(), child: RevealStoryCard(story: story)))),
+        _renderMedals = renderMedals ??
+            ((story) async => StoryCardRenderer.renderOffscreen(
+                NoirFilter(enabled: await (noirCards ?? _off)(), child: MedalStoryCard(story: story))));
+
+  static Future<bool> _off() async => false;
 
   @override
   Future<void> shareStarterCanon({
@@ -109,5 +120,14 @@ class FakeStoryShareService implements StoryShareService {
       sharedChallenges.add(slug);
 }
 
-final storyShareServiceProvider = Provider<StoryShareService>(
-    (ref) => SharePlusStoryShareService(shareUrl: ref.watch(appConfigProvider).shareUrl));
+final storyShareServiceProvider = Provider<StoryShareService>((ref) => SharePlusStoryShareService(
+      shareUrl: ref.watch(appConfigProvider).shareUrl,
+      noirCards: () async {
+        try {
+          final rewards = await ref.read(rewardsControllerProvider.future);
+          return rewards.any((r) => r.kind == RewardKind.cardStyle && r.equipped && r.unlocked);
+        } catch (_) {
+          return false; // offline or unknown: the standard style
+        }
+      },
+    ));

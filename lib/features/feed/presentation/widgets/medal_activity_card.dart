@@ -6,6 +6,7 @@ import '../../../../core/theme/telly_typography.dart';
 import '../../../achievements/data/achievements_repository.dart';
 import '../../../achievements/domain/medal.dart';
 import '../../../achievements/presentation/widgets/medal_badge.dart';
+import '../../../levels/presentation/widgets/reward_cosmetics.dart';
 import '../../domain/social_models.dart';
 import 'feed_card_actions.dart';
 
@@ -52,18 +53,21 @@ class MedalActivityCard extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    CircleAvatar(
-                      radius: 18,
-                      backgroundColor: TellyColors.cardOf(context),
-                      backgroundImage: (activity.userAvatarUrl?.isNotEmpty ?? false)
-                          ? NetworkImage(activity.userAvatarUrl!)
-                          : null,
-                      child: (activity.userAvatarUrl?.isNotEmpty ?? false)
-                          ? null
-                          : Text(
-                              name.replaceFirst('@', '').isNotEmpty ? name.replaceFirst('@', '')[0].toUpperCase() : '?',
-                              style: TellyTypography.labelLarge(color: TellyColors.primaryAccentOf(context)),
-                            ),
+                    RewardFrame(
+                      userId: activity.userId,
+                      child: CircleAvatar(
+                        radius: 18,
+                        backgroundColor: TellyColors.cardOf(context),
+                        backgroundImage: (activity.userAvatarUrl?.isNotEmpty ?? false)
+                            ? NetworkImage(activity.userAvatarUrl!)
+                            : null,
+                        child: (activity.userAvatarUrl?.isNotEmpty ?? false)
+                            ? null
+                            : Text(
+                                name.replaceFirst('@', '').isNotEmpty ? name.replaceFirst('@', '')[0].toUpperCase() : '?',
+                                style: TellyTypography.labelLarge(color: TellyColors.primaryAccentOf(context)),
+                              ),
+                      ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(

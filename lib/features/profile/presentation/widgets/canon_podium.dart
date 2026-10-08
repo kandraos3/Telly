@@ -15,7 +15,16 @@ class CanonPodium extends StatelessWidget {
   final ValueChanged<CanonEntry>? onTapEntry;
   final ValueChanged<CanonEntry>? onLongPressEntry;
 
-  const CanonPodium({super.key, required this.entries, this.onTapEntry, this.onLongPressEntry});
+  /// Gold rank tags: the level 15 reward (features/10 §5.2; #147).
+  final bool goldTags;
+
+  const CanonPodium({
+    super.key,
+    required this.entries,
+    this.onTapEntry,
+    this.onLongPressEntry,
+    this.goldTags = false,
+  });
 
   static const _flex = [5, 4, 4];
   static const _posterHeights = [170.0, 132.0, 132.0];
@@ -40,6 +49,7 @@ class CanonPodium extends StatelessWidget {
                       posterHeight: _posterHeights[i],
                       onTap: onTapEntry,
                       onLongPress: onLongPressEntry,
+                      goldTag: goldTags,
                     )
                   : const SizedBox.shrink(),
             ),
@@ -56,6 +66,7 @@ class _PodiumCard extends StatelessWidget {
   final double posterHeight;
   final ValueChanged<CanonEntry>? onTap;
   final ValueChanged<CanonEntry>? onLongPress;
+  final bool goldTag;
 
   const _PodiumCard({
     required this.entry,
@@ -63,6 +74,7 @@ class _PodiumCard extends StatelessWidget {
     required this.posterHeight,
     this.onTap,
     this.onLongPress,
+    this.goldTag = false,
   });
 
   /// The rank tag sits on a fixed lime fill, so its colours don't change with the theme.
@@ -113,7 +125,15 @@ class _PodiumCard extends StatelessWidget {
                       left: 8,
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                        decoration: BoxDecoration(color: _tagFill, borderRadius: BorderRadius.circular(6)),
+                        key: goldTag ? const Key('podium_gold_tag') : null,
+                        decoration: BoxDecoration(
+                          color: goldTag ? null : _tagFill,
+                          // The God-tier gradient (style guide §2.2) when the reward is equipped.
+                          gradient: goldTag
+                              ? const LinearGradient(colors: [TellyColors.tierGodStart, TellyColors.tierGodEnd])
+                              : null,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
                         child: Text(
                           '#$place',
                           style: TellyTypography.labelMedium(color: _tagText).copyWith(fontWeight: FontWeight.w800),

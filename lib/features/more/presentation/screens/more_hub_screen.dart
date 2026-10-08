@@ -12,6 +12,7 @@ import '../../../achievements/domain/medal.dart';
 import '../../../achievements/presentation/controllers/achievements_controller.dart';
 import '../../../achievements/presentation/widgets/medal_showcase_row.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../../../levels/presentation/widgets/reward_cosmetics.dart';
 
 /// `SCR-22` More hub (epic #44, decision 0003): everything that is not a daily destination.
 ///
@@ -63,6 +64,7 @@ class MoreHubScreen extends ConsumerWidget {
                 name: name,
                 handle: handle,
                 avatarUrl: me?.avatarUrl,
+                userId: me?.id,
                 showcase: showcase,
                 onTap: onProfileTap ?? () => context.go(Routes.canon),
               ),
@@ -179,6 +181,7 @@ class _ProfileCard extends StatelessWidget {
   final String name;
   final String? handle;
   final String? avatarUrl;
+  final String? userId;
   final MedalShowcase showcase;
   final VoidCallback onTap;
 
@@ -186,6 +189,7 @@ class _ProfileCard extends StatelessWidget {
     required this.name,
     required this.handle,
     required this.avatarUrl,
+    this.userId,
     required this.showcase,
     required this.onTap,
   });
@@ -200,7 +204,10 @@ class _ProfileCard extends StatelessWidget {
       onTap: onTap,
       child: Row(
         children: [
-          TellyAvatar(name: name.isEmpty ? (handle ?? '') : name, imageUrl: avatarUrl, radius: 28),
+          RewardFrame(
+            userId: userId,
+            child: TellyAvatar(name: name.isEmpty ? (handle ?? '') : name, imageUrl: avatarUrl, radius: 28),
+          ),
           const SizedBox(width: 14),
           Expanded(
             child: Column(

@@ -148,9 +148,9 @@ Levels come from total XP, which is earned and never spent.
 
 | Level | Reward | Where it shows |
 |---|---|---|
-| 5 | Lime profile frame | Avatar ring on profile and feed (both themes) |
-| 10 | "Noir" card style | Wrapped and share cards |
-| 15 | Gold podium tags | The Canon podium rank tags (`SCR-14`) |
+| 5 | Lime profile frame | A 2px primary-accent ring around the avatar on the More card, friend profiles and every feed card (both themes). Others see it too: the app looks up who wears it in batches as avatars appear (`user_reward_choices` is readable through `can_view_user`). |
+| 10 | "Noir" card style | Wrapped (`SCR-19`) and the rank-reveal and medal share cards render in greyscale |
+| 15 | Gold podium tags | Your Canon podium's #1–#3 tags use the God-tier gradient instead of lime (`SCR-14`, your own profile only) |
 | 20 | Alternate app icons | Settings → App icon (platform alternate icons) |
 | 30 | Custom canon header art | A still behind your profile header |
 
@@ -351,7 +351,7 @@ All screens use the shared app bars (screen specs §0.2) and the frosted bottom 
 - **Analytics** are detected in the app by comparing a load with what it last saw (kept in `gamification_cache`), and never on the first load: `level_up`, `quest_completed`, `streak_extended`.
 - **Offline:** the last snapshot from `gamification_cache`, read-only, with the offline banner.
 - **Links:** **Rewards** (`/more/level/rewards`, mockup B2) and **Friends this week** (`/more/level/week`, mockup B3).
-  - **Rewards:** the track by level (unlocked rows outlined in lime, locked rows with XP to go), an Equip action on unlocked rows, and the XP rules table.
+  - **Rewards:** the track by level (unlocked rows outlined in lime, locked rows with XP to go and a lock), an Equip / Equipped toggle on unlocked rows (one per kind; tapping Equipped unequips), and the XP rules table. Equipping sends `reward_equipped`; a failed change shows a snackbar and leaves the row as it was.
   - **Friends this week:** a segmented Friends / each squad. Rank, avatar, name, level, streak and weekly XP, with your row tinted. A footer says it resets Monday.
 
 ### 9.8 Weekly quests (slice 3)

@@ -10,6 +10,7 @@ import '../../../challenges/data/challenges_repository.dart';
 import '../../../challenges/domain/challenge.dart';
 import '../../../challenges/presentation/controllers/challenges_controller.dart';
 import '../../../challenges/presentation/widgets/challenge_widgets.dart';
+import '../../../levels/presentation/widgets/reward_cosmetics.dart';
 import '../../domain/social_models.dart';
 import 'feed_card_actions.dart';
 
@@ -66,17 +67,20 @@ class ChallengeActivityCard extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    CircleAvatar(
-                      radius: 18,
-                      backgroundColor: TellyColors.cardOf(context),
-                      backgroundImage:
-                          (activity.userAvatarUrl?.isNotEmpty ?? false) ? NetworkImage(activity.userAvatarUrl!) : null,
-                      child: (activity.userAvatarUrl?.isNotEmpty ?? false)
-                          ? null
-                          : Text(
-                              name.replaceFirst('@', '').isNotEmpty ? name.replaceFirst('@', '')[0].toUpperCase() : '?',
-                              style: TellyTypography.labelLarge(color: TellyColors.primaryAccentOf(context)),
-                            ),
+                    RewardFrame(
+                      userId: activity.userId,
+                      child: CircleAvatar(
+                        radius: 18,
+                        backgroundColor: TellyColors.cardOf(context),
+                        backgroundImage:
+                            (activity.userAvatarUrl?.isNotEmpty ?? false) ? NetworkImage(activity.userAvatarUrl!) : null,
+                        child: (activity.userAvatarUrl?.isNotEmpty ?? false)
+                            ? null
+                            : Text(
+                                name.replaceFirst('@', '').isNotEmpty ? name.replaceFirst('@', '')[0].toUpperCase() : '?',
+                                style: TellyTypography.labelLarge(color: TellyColors.primaryAccentOf(context)),
+                              ),
+                      ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(

@@ -72,4 +72,13 @@ class FakeLevelsRepository implements LevelsRepository {
 
   @override
   Future<void> unequip(RewardKind kind) async => unequipped.add(kind);
+
+  Set<String> framed = {};
+  final frameQueries = <Set<String>>[];
+
+  @override
+  Future<Set<String>> framedUsers(Iterable<String> userIds) async {
+    frameQueries.add(userIds.toSet());
+    return framed.intersection(userIds.toSet());
+  }
 }

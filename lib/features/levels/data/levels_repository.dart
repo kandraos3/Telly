@@ -23,6 +23,9 @@ abstract interface class LevelsRepository {
   Future<void> equip(String rewardId);
 
   Future<void> unequip(RewardKind kind);
+
+  /// Which of [userIds] have the profile frame equipped (#147); RLS hides hidden profiles.
+  Future<Set<String>> framedUsers(Iterable<String> userIds);
 }
 
 class SupabaseLevelsRepository implements LevelsRepository {
@@ -64,6 +67,18 @@ class SupabaseLevelsRepository implements LevelsRepository {
 
   @override
   Future<void> unequip(RewardKind kind) => _client.rpc('unequip_reward', params: {'p_kind': kind.dbValue});
+
+  @override
+  Future<Set<String>> framedUsers(Iterable<String> userIds) async {
+    final ids = userIds.toSet().toList();
+    if (ids.isEmpty) return const {};
+    final rows = await _client
+        .from('user_reward_choices')
+        .select('user_id')
+        .eq('kind', RewardKind.frame.dbValue)
+        .inFilter('user_id', ids);
+    return {for (final r in rows) r['user_id'] as String};
+  }
 }
 
 /// `SCR-27`'s offline snapshot and what the app last saw (to tell level-ups, finished quests

@@ -10,6 +10,7 @@ import '../../../../core/widgets/telly_primary_button.dart';
 import '../../../../core/widgets/telly_screen_header.dart';
 import '../../../achievements/data/achievements_repository.dart';
 import '../../../achievements/presentation/widgets/medal_showcase_row.dart';
+import '../../../levels/presentation/widgets/reward_cosmetics.dart';
 import '../../../auth/data/auth_repository.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../cowatch/domain/spearman_taste_match_calculator.dart';
@@ -142,13 +143,16 @@ class _Body extends ConsumerWidget {
         children: [
           Row(
             children: [
-              CircleAvatar(
-                radius: 28,
-                backgroundColor: TellyColors.cardOf(context),
-                foregroundImage: profile.avatarUrl == null ? null : NetworkImage(profile.avatarUrl!),
-                child: Text(
-                  profile.displayName.isNotEmpty ? profile.displayName[0] : '?',
-                  style: TextStyle(fontSize: 22, color: TellyColors.textPrimaryOf(context), fontWeight: FontWeight.bold),
+              RewardFrame(
+                userId: profile.id,
+                child: CircleAvatar(
+                  radius: 28,
+                  backgroundColor: TellyColors.cardOf(context),
+                  foregroundImage: profile.avatarUrl == null ? null : NetworkImage(profile.avatarUrl!),
+                  child: Text(
+                    profile.displayName.isNotEmpty ? profile.displayName[0] : '?',
+                    style: TextStyle(fontSize: 22, color: TellyColors.textPrimaryOf(context), fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
               const SizedBox(width: 14),

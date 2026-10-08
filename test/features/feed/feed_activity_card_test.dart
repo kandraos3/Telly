@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:telly_app/core/theme/telly_theme.dart';
 import 'package:telly_app/features/feed/domain/social_models.dart';
@@ -6,9 +7,12 @@ import 'package:telly_app/features/feed/presentation/widgets/feed_activity_card.
 
 void main() {
   Widget buildTestableWidget(Widget child) {
-    return MaterialApp(
-      theme: TellyTheme.darkTheme,
-      home: Scaffold(body: SingleChildScrollView(child: child)),
+    // The cards read the reward frame directory (#147), so they need a ProviderScope.
+    return ProviderScope(
+      child: MaterialApp(
+        theme: TellyTheme.darkTheme,
+        home: Scaffold(body: SingleChildScrollView(child: child)),
+      ),
     );
   }
 

@@ -11,6 +11,7 @@ import '../../../../core/widgets/telly_canon_switcher.dart';
 import '../../../../core/widgets/telly_frosted_sheet.dart';
 import '../../../../core/widgets/telly_screen_header.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../../../levels/presentation/controllers/rewards_controller.dart';
 import '../../../logging/domain/title_search_result.dart';
 import '../../../ranking/domain/canon_type.dart';
 import '../../../ranking/domain/franchise_rollup_service.dart';
@@ -151,6 +152,8 @@ class DualCanonProfileScreen extends ConsumerWidget {
                           entries: entries,
                           onTapEntry: handleTap,
                           onLongPressEntry: (entry) => _showEntryActions(context, entry, ref, selectedCanon),
+                          // #147: gold rank tags once the level 15 reward is equipped.
+                          goldTags: ref.watch(goldPodiumProvider),
                         ),
                         if (entries.length > 3) ...[
                           const SizedBox(height: 8),
