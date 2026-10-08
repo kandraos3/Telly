@@ -19,9 +19,9 @@
 
 /* Telly app tokens, scoped to phone frames (style guide §2.1; light from telly_colors.dart, as in 0047) */
 .ph { --bg:#08090C; --sf:#11131A; --ov:#1A1D27; --st:#242938; --gl:rgba(255,255,255,.08); --t1:#FFFFFF; --t2:#C8CAD8; --t3:#7D8198;
-      --lime:#D2FF52; --limeFill:#D2FF52; --onLime:#08090C; --amber:#FFA733; --coral:#FF4B6E; --violet:#9F87FF; --cyan:#00F0FF; --scrim:rgba(8,9,12,.92); }
+      --lime:#D2FF52; --limeFill:#D2FF52; --onLime:#08090C; --amber:#FFA733; --coral:#FF4B6E; --violet:#7C5CFF; --cyan:#00F0FF; --scrim:rgba(8,9,12,.92); --onCoral:#08090C; }
 .light .ph { --bg:#F6F7F9; --sf:#FFFFFF; --ov:#F0F2F5; --st:#E2E5EC; --gl:rgba(0,0,0,.08); --t1:#0F1117; --t2:#4A4E63; --t3:#696E87;
-      --lime:#4D7800; --limeFill:#D2FF52; --onLime:#0F1117; --amber:#B36200; --coral:#D61F4D; --violet:#5B3CE0; --cyan:#00838F; --scrim:rgba(246,247,249,.94); }
+      --lime:#4D7800; --limeFill:#D2FF52; --onLime:#0F1117; --amber:#B36200; --coral:#D61F4D; --violet:#5B3CE0; --cyan:#00838F; --scrim:rgba(246,247,249,.94); --onCoral:#FFFFFF; }
 
 * { box-sizing: border-box }
 body { background: var(--page); color: var(--ink); font: 15px/1.55 var(--f-ui); margin: 0 }
@@ -115,7 +115,7 @@ td:first-child { color: var(--ink); font-weight: 700; white-space: nowrap }
 .ph .cd small { font-size: 11px; color: var(--t3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
 .ph .m { color: var(--violet); font-weight: 800; font-variant-numeric: tabular-nums }
 .ph .tag { position: absolute; left: 6px; top: 6px; font: 800 9.5px/1 var(--f-ui); letter-spacing: .06em; padding: 4px 6px; border-radius: 5px; background: var(--scrim); color: var(--t1) }
-.ph .tag.coral { background: var(--coral); color: #fff }
+.ph .tag.coral { background: var(--coral); color: var(--onCoral) }
 .ph .tag.canon { color: var(--t2) }
 .ph .prov { position: absolute; right: 6px; bottom: 6px; font: 800 9px/1 var(--f-ui); letter-spacing: .05em; padding: 3px 5px; border-radius: 5px; background: var(--scrim); color: var(--cyan) }
 

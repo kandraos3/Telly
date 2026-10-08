@@ -330,38 +330,45 @@ The **Social** tab (`/social`). It was the landing tab until epic #44; Home (`SC
 
 ### `SCR-07`: Explore & Discover Hub
 
+> Tracking: epic #46 · Status: approved · Decision: [0007](../decisions/0007-explore-hero-rows-and-client-ranker.md) · Mockup: [0046](mockups/0046-explore-rows.html) · Rules and scoring: [features/07 §7](../features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md#7-explore-rows--recommendation-engine)
+
 ```
 ┌────────────────────────────────────────────────────────┐
-│  Explore                                               │
-├────────────────────────────────────────────────────────┤
-│                                                        │
-│  [ 🔍 Search shows, actors, showrunners, friends...  ] │
-│                                                        │
-│  ━ NETWORK BATTLEGROUNDS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│  👑 HBO (8.82)  vs  🍏 Apple TV+ (8.41)  vs  🔴 Netflix │
-│  [ See Full Network Rankings → ]                       │
-│                                                        │
-│  ━ FRIENDS ARE CURRENTLY BINGING ━━━━━━━━━━━━━━━━━━━━  │
-│  [ Horizontal Carousel of Posters with Friend Avatars] │
-│  • Shogun (Watched by 8 friends • Avg: 9.31)           │
-│  • Slow Horses (Watched by 5 friends • Avg: 8.94)      │
-│                                                        │
-│  ━ CURATED CANONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
+│  Explore                                               │  TellyScreenHeader, no actions
+│  [ ⌕ Search titles, people, friends                 ]  │
+│  [   Movies 142   |   Series 94   ]                    │  slim TellyCanonSwitcher, sticky
 │  ┌──────────────────────────────────────────────────┐  │
-│  │ 🎯 The "Stuck the Landing" Canon                 │  │
-│  │ Shows with universally revered final episodes    │  │
+│  │  [ backdrop, fades to scrim ]                    │  │  Hero, 252 dp
+│  │  TOP PICK FOR YOU · 94% MATCH                    │  │
+│  │  Decision to Leave                               │  │
+│  │  Like Parasite (9.72) and Memories of Murder…    │  │
+│  │  [ + Queue ]  [ Details ]  [ Not for me ]        │  │
 │  └──────────────────────────────────────────────────┘  │
-│  ┌──────────────────────────────────────────────────┐  │
-│  │ ⚡ Peak 1-Season Miniseries                      │  │
-│  │ Chernobyl, Band of Brothers, Queen's Gambit      │  │
-│  └──────────────────────────────────────────────────┘  │
+│  Trending now                             See all ›    │
+│  Top 10 movies this week                               │
+│  1▕▔▔▏ 2▕▔▔▏ 3▕▔▔▏                                     │  numbered Top 10
+│  Top picks for you · Because you ranked Parasite ·     │
+│  Your friends are watching · Leaving your services     │
+│  soon · Something different · (Series) Network         │
+│  battlegrounds                                         │
 └────────────────────────────────────────────────────────┘
 ```
 
-- **User Actions:**
-  - Search bar input triggers instant autocomplete modal querying TMDB and user database.
-  - Tapping a Curated Canon opens a specialized tier leaderboard.
-  - Tapping Network Battlegrounds displays global comparative analytics.
+* **Order**: search bar (44 dp, `color-surface-raised`, 14 dp radius), then 12 dp, then the slim `TellyCanonSwitcher`, which sticks under the status bar once scrolled. Below it come the hero and the rows in the order of features/07 §7.2, 20 dp apart. Curated canons are removed.
+* **Row header**: title in Plus Jakarta Sans 16.5 / w800, `textPrimary`, with *Because you ranked* followed by the seed in Playfair Display italic. An optional subtitle sits under it in 12 / `textTertiary`. **See all ›** is 12 / w700, `textTertiary`, a 48 dp touch target. The header is announced as a heading.
+* **Poster card** (Top picks, Because, Something different, Leaving soon): 104 × 154 dp poster, 10 dp radius, 10 dp gap, 16 dp gutters. Under the poster: the title (12.5 / w700, one line, ellipsis) and one meta line (11 / `textTertiary`), which for match rows is *"94% match"* in w800 `electricVioletOf`. A provider chip in the poster's bottom-right corner shows when it streams on one of my services.
+* **Hero**: 252 dp, 18 dp radius, glass border. Backdrop (`backdrop_path`, else the poster) under a gradient to the canvas colour at 78%. Eyebrow *"TOP PICK FOR YOU · 94% MATCH"* (10.5 / w800, 0.1 em tracking, `electricVioletOf`); title in Playfair Display 26 / w700; reason line 12.5 / `textSecondary` (features/07 §7.4); buttons **+ Queue** (lime primary), **Details**, **Not for me**.
+* **Trending now**: 92 × 136 dp posters, each led by its rank as an outlined 92 dp numeral (2 dp `textTertiary` stroke, no fill), overlapping the poster by 14 dp. The numeral is decorative; the card reads *"Number 1 trending, Anora"*.
+* **Because you ranked *X***: the first tile is the seed itself, a dashed `strokeSubtleOf` card on `color-surface-raised` reading *YOU RANKED / Parasite / #2 · 9.72*, with the score in `warmAmberOf`. Tapping it opens the seed's title page.
+* **Your friends are watching**: 214 dp wide cards (`color-surface-raised`, 14 dp radius), each with a 56 × 84 poster, the title, friend names (*"Maya, Jo and Sam"*, or *"Maya and 4 others"*), up to 3 overlapping 22 dp avatars, and *"★ 8.6 friends' avg"* in `warmAmberOf`.
+* **Leaving your services soon**: poster cards with a countdown badge in the top-left corner: *"3 DAYS"* / *"LAST DAY"*, 9.5 / w800 on `neonCoralOf`, text `TellyColors.backgroundPrimary` (dark) / white (light). White on dark-theme coral is about 3.2 : 1, so it isn't used. The meta line is the service name.
+* **New user**: the prompt card (`color-surface-raised`, 18 dp radius), *"Rank 3 movies to unlock your picks"*, with progress dots (lime when filled) and **+ Log a movie**.
+* **States**: loading skeleton, offline banner, error with **Try again**, and hidden empty rows, exactly as features/07 §7.5.
+* **User actions**:
+  * The search bar opens the instant search (unchanged): TMDB and user results, with recent searches and Trending as the zero state.
+  * Tapping a poster opens `SCR-08`. The hero's **+ Queue** and **Not for me** (with Undo) work as described in features/07 §7.5.
+  * **See all ›** opens `/explore/row/:rowId?canon=`, a 3-column grid of up to 30 titles.
+  * Network battlegrounds (Series only): **See full network rankings →** (unchanged).
 
 ---
 
