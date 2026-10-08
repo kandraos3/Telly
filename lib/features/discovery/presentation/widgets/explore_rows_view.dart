@@ -8,6 +8,7 @@ import '../../../../core/router/routes.dart';
 import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
 import '../../../../core/widgets/poster_image.dart';
+import '../../../../core/widgets/telly_log_fab.dart';
 import '../../../queue/data/watchlist_repository.dart';
 import '../../../queue/domain/streaming_models.dart';
 import '../../domain/explore_candidates.dart';
@@ -750,17 +751,26 @@ class _HeroState extends ConsumerState<_Hero> {
     try {
       await notifier.dismiss(id);
     } catch (_) {
-      messenger.showSnackBar(const SnackBar(content: Text("Couldn't hide that pick. Try again.")));
+      messenger.showSnackBar(_snackBar(const Text("Couldn't hide that pick. Try again.")));
       return;
     }
     messenger
       ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(
+      ..showSnackBar(_snackBar(
+        Text('Hidden from your picks: $title'),
         key: const Key('explore_dismissed_snackbar'),
-        content: Text('Hidden from your picks: $title'),
         action: SnackBarAction(label: 'Undo', onPressed: () => notifier.undoDismiss(id)),
       ));
   }
+
+  /// Floats above the shell's Log button, which would otherwise cover the Undo action.
+  static SnackBar _snackBar(Widget content, {Key? key, SnackBarAction? action}) => SnackBar(
+        key: key,
+        content: content,
+        action: action,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 8 + TellyLogFab.clearance),
+      );
 
   @override
   Widget build(BuildContext context) {

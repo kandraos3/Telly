@@ -58,6 +58,12 @@ import 'package:telly_app/features/challenges/presentation/controllers/challenge
 import 'package:telly_app/features/challenges/presentation/screens/challenge_screen.dart';
 import 'package:telly_app/features/challenges/presentation/screens/challenges_screen.dart';
 import 'package:telly_app/features/feed/presentation/widgets/challenge_activity_card.dart';
+import 'package:telly_app/features/discovery/data/discovery_repository.dart';
+import 'package:telly_app/features/discovery/data/explore_sample_payloads.dart';
+import 'package:telly_app/features/discovery/presentation/controllers/explore_rows_controller.dart';
+import 'package:telly_app/features/discovery/presentation/screens/explore_discover_screen.dart';
+
+final _exploreToday = DateTime(2026, 10, 8, 12);
 
 class TolerantGoldenComparator extends LocalFileComparator {
   TolerantGoldenComparator(super.testFile, {this.tolerance = 0.50});
@@ -771,6 +777,34 @@ void main() {
         await tester.pumpAndSettle();
         await expectLater(find.byType(MedalActivityCard), matchesGoldenFile('goldens/medal_feed_card_$name.png'));
       });
+
+      // #183: SCR-07 Explore on open (Movies) and for a new user, from the sample payloads.
+      for (final (state, payload) in [
+        ('', sampleMoviePayload(_exploreToday)),
+        ('_new_user', {
+          ...sampleMoviePayload(_exploreToday),
+          'profile': {
+            ...sampleMoviePayload(_exploreToday)['profile'] as Map<String, dynamic>,
+            'rankings': (sampleMoviePayload(_exploreToday)['profile']['rankings'] as List).take(2).toList(),
+          },
+        }),
+      ]) {
+        testWidgets('Golden: SCR-07 Explore$state ($name) on iPhone 15 Pro size (#183)', (tester) async {
+          await tester.binding.setSurfaceSize(const Size(393, 852));
+          addTearDown(() => tester.binding.setSurfaceSize(null));
+          await tester.pumpWidget(ProviderScope(
+            overrides: [
+              ...shellOverrides(),
+              discoveryRepositoryProvider.overrideWithValue(FakeDiscoveryRepository(exploreCandidates: {'movie': payload})),
+              exploreNowProvider.overrideWithValue(() => _exploreToday),
+            ],
+            child: MaterialApp(theme: theme, home: const Scaffold(body: ExploreDiscoverScreen())),
+          ));
+          await tester.pumpAndSettle();
+          await expectLater(
+              find.byType(ExploreDiscoverScreen), matchesGoldenFile('goldens/explore${state}_${name}_iphone15.png'));
+        });
+      }
 
       testWidgets('Golden: SCR-14 Canon podium ($name) on iPhone 15 Pro size (#47)', (tester) async {
         await tester.binding.setSurfaceSize(const Size(393, 852));
