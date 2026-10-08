@@ -362,6 +362,12 @@ The **Social** tab (`/social`). It was the landing tab until epic #44; Home (`SC
 * **Because you ranked *X***: the first tile is the seed itself, a dashed `strokeSubtleOf` card on `color-surface-raised` reading *YOU RANKED / Parasite / #2 · 9.72*, with the score in `warmAmberOf`. Tapping it opens the seed's title page.
 * **Your friends are watching**: 214 × 112 dp cards (`color-surface-raised`, 14 dp radius, 10 dp padding), each with a 56 × 84 poster, the title, friend names (*"Maya, Jo and Sam"*, or *"Maya and 4 others"*), up to 3 overlapping 22 dp avatars, and *"★ 8.6 friends' avg"* in `warmAmberOf`.
 * **Leaving your services soon**: poster cards with a countdown badge in the top-left corner: *"3 DAYS"* / *"LAST DAY"*, 9.5 / w800 on `neonCoralOf`, text `TellyColors.backgroundPrimary` (dark) / white (light). White on dark-theme coral is about 3.2 : 1, so it isn't used. The meta line is the service name.
+* **Larger text** (#197): the heights above are at 1.0× system text. Each box that holds text is its fixed part plus its text lines, scaled by the system text size, so it equals the size above at 1.0× and grows instead of clipping:
+  * hero: 149 dp + 103 dp of text (eyebrow, two title lines, two reason lines);
+  * poster rows: 164 dp + 32 dp (title and meta lines);
+  * friend cards: 62 dp + 50 dp (title, names and average lines).
+
+  The seed tile keeps the poster's 104 × 154 size, so its text scales down to fit instead. The friends' average stays on one line.
 * **New user**: the prompt card (`color-surface-raised`, 18 dp radius), *"Rank 3 movies to unlock your picks"*, with progress dots (lime when filled) and **+ Log a movie**.
 * **States**: loading skeleton, offline banner, error with **Try again**, and hidden empty rows, exactly as features/07 §7.5.
 * **Screen readers**: each row header is one heading that includes its subtitle (*"Trending now, Top 10 movies this week"*). The hero's eyebrow, title and reason line are read as one heading (*"Top pick for you, 84% match: Decision to Leave. Like Parasite (9.72)…"*), followed by its three buttons. Every card is one button whose label carries its meta line.

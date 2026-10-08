@@ -58,6 +58,16 @@ class ExploreRowsView extends ConsumerWidget {
 
 const _gutter = EdgeInsets.symmetric(horizontal: 16);
 
+/// A fixed-height box that holds text grows with the system text size (#197): [fixed] dp of
+/// posters, padding and gaps, plus [text] dp of line boxes at 1.0×, scaled. At 1.0× it is
+/// exactly the SCR-07 height.
+double _scaledHeight(BuildContext context, double fixed, double text) =>
+    fixed + MediaQuery.textScalerOf(context).scale(text);
+
+/// Poster rows (196 dp at 1.0×): a 154 dp poster and 5 dp gap, a 12.5 dp title line (16/12) and an
+/// 11 dp meta line (15/11), with 5 dp to spare.
+double _posterRowHeight(BuildContext context) => _scaledHeight(context, 164, 32);
+
 String _canonNoun(String mediaType, {bool plural = true}) =>
     mediaType == 'movie' ? (plural ? 'movies' : 'movie') : 'series';
 
@@ -98,19 +108,20 @@ class _ExploreRowSection extends StatelessWidget {
               children: [for (final (i, s) in items.indexed) _Top10Card(rank: i + 1, pick: s)],
             ),
           ExploreRowKind.friends => _Carousel(
-              // 84 dp poster + padding; the text column (title, names, avatars, average) needs 112.
-              height: 112,
+              // 112 dp at 1.0×: padding, borders, gaps and the 22 dp avatars (62), plus the title,
+              // names and average lines (50).
+              height: _scaledHeight(context, 62, 50),
               children: [for (final s in items) _FriendCard(pick: s)],
             ),
           ExploreRowKind.becauseYouRanked => _Carousel(
-              height: 196,
+              height: _posterRowHeight(context),
               children: [
                 _SeedTile(seed: row.seed!, mediaType: mediaType),
                 for (final s in items) _PosterCard(pick: s, meta: text.meta(s))
               ],
             ),
           _ => _Carousel(
-              height: 196,
+              height: _posterRowHeight(context),
               children: [for (final s in items) _PosterCard(pick: s, meta: text.meta(s), badge: text.badge(s))],
             ),
         },
@@ -163,10 +174,13 @@ class _RowText {
     return switch (row.kind) {
       ExploreRowKind.trending => _Meta(text: '#${row.items.indexOf(s) + 1} this week'),
       ExploreRowKind.friends => _Meta(text: _friendNames(c)),
-      ExploreRowKind.topPicks || ExploreRowKind.becauseYouRanked =>
+      ExploreRowKind.topPicks ||
+      ExploreRowKind.becauseYouRanked =>
         _Meta(match: s.matchPct, text: c.releaseYear == null ? null : '${c.releaseYear}'),
       ExploreRowKind.topRated => _Meta(
-          text: c.communityScore != null ? '${c.communityScore!.toStringAsFixed(2)} community' : c.releaseYear?.toString()),
+          text: c.communityScore != null
+              ? '${c.communityScore!.toStringAsFixed(2)} community'
+              : c.releaseYear?.toString()),
       ExploreRowKind.somethingDifferent => _Meta(
             text: [
           if (c.genres.isNotEmpty) c.genres.first,
@@ -526,24 +540,31 @@ class _SeedTile extends StatelessWidget {
               height: 154,
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(color: TellyColors.surfaceOf(context), borderRadius: BorderRadius.circular(10)),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('YOU RANKED',
-                      style: TellyTypography.labelSmall(color: TellyColors.textTertiaryOf(context))
-                          .copyWith(fontSize: 10.5, fontWeight: FontWeight.w700, letterSpacing: 0.63)),
-                  const SizedBox(height: 4),
-                  Text(seed.title,
-                      textAlign: TextAlign.center,
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                      style: TellyTypography.labelMedium(color: TellyColors.textPrimaryOf(context))
-                          .copyWith(fontSize: 13, fontWeight: FontWeight.w700)),
-                  const SizedBox(height: 4),
-                  Text('#${seed.rank} · $score',
-                      style: TellyTypography.labelMedium(color: TellyColors.warmAmberOf(context)).copyWith(
-                          fontWeight: FontWeight.w800, fontFeatures: const [ui.FontFeature.tabularFigures()])),
-                ],
+              // The tile keeps the poster's size, so at large text sizes its text scales down to fit.
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: SizedBox(
+                  width: 88,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('YOU RANKED',
+                          style: TellyTypography.labelSmall(color: TellyColors.textTertiaryOf(context))
+                              .copyWith(fontSize: 10.5, fontWeight: FontWeight.w700, letterSpacing: 0.63)),
+                      const SizedBox(height: 4),
+                      Text(seed.title,
+                          textAlign: TextAlign.center,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                          style: TellyTypography.labelMedium(color: TellyColors.textPrimaryOf(context))
+                              .copyWith(fontSize: 13, fontWeight: FontWeight.w700)),
+                      const SizedBox(height: 4),
+                      Text('#${seed.rank} · $score',
+                          style: TellyTypography.labelMedium(color: TellyColors.warmAmberOf(context)).copyWith(
+                              fontWeight: FontWeight.w800, fontFeatures: const [ui.FontFeature.tabularFigures()])),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
@@ -753,7 +774,8 @@ class _HeroState extends ConsumerState<_Hero> {
         key: const Key('explore_hero'),
         borderRadius: BorderRadius.circular(18),
         child: Container(
-          height: 252,
+          // 252 dp at 1.0×; its text block (eyebrow, two title lines, two reason lines) is 103 dp.
+          height: _scaledHeight(context, 149, 103),
           decoration: BoxDecoration(
             color: TellyColors.surfaceOf(context),
             border: Border.all(color: TellyColors.borderGlassOf(context)),

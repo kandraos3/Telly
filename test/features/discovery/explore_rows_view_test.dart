@@ -152,7 +152,7 @@ void main() {
         titleRepositoryProvider.overrideWithValue(FakeTitleRepository()),
       ];
 
-  Widget app({ThemeData? theme, bool reducedMotion = false}) {
+  Widget app({ThemeData? theme, bool reducedMotion = false, double textScale = 1}) {
     Widget stub(BuildContext _, GoRouterState state) => Scaffold(body: Text('route:${state.uri}'));
     final router = GoRouter(routes: [
       GoRoute(path: '/', builder: (_, __) => const Scaffold(body: ExploreDiscoverScreen())),
@@ -166,7 +166,10 @@ void main() {
         theme: theme ?? TellyTheme.dark,
         routerConfig: router,
         builder: (context, child) =>
-            MediaQuery(data: MediaQuery.of(context).copyWith(disableAnimations: reducedMotion), child: child!),
+            MediaQuery(
+            data: MediaQuery.of(context)
+                .copyWith(disableAnimations: reducedMotion, textScaler: TextScaler.linear(textScale)),
+            child: child!),
       ),
     );
   }
@@ -366,5 +369,30 @@ void main() {
       expectReadableText(tester, find.byType(ExploreRowsView));
       handle.dispose();
     });
+  }
+
+  // #197: rows, cards and the hero grow with the system text size instead of overflowing. Any
+  // RenderFlex overflow fails the test; the hero's text must also stay inside its card.
+  for (final (name, theme) in [('dark', TellyTheme.dark), ('light', TellyTheme.light)]) {
+    for (final scale in const [1.0, 1.3, 2.0]) {
+      testWidgets('every row fits at ${scale}x text in the $name theme', (tester) async {
+        tall(tester);
+        await tester.pumpWidget(app(theme: theme, textScale: scale));
+        await tester.pumpAndSettle();
+        for (final canon in const ['movie', 'tv']) {
+          await tester.tap(find.byKey(Key('explore_canon_$canon')));
+          await tester.pumpAndSettle();
+          expect(find.byKey(Key('explore_rows_$canon')), findsOneWidget);
+        }
+        await tester.tap(find.byKey(const Key('explore_canon_movie')));
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('explore_row_friends')), findsOneWidget);
+        expect(find.byKey(const Key('explore_row_becauseYouRanked_496243')), findsOneWidget);
+        final hero = tester.getRect(find.byKey(const Key('explore_hero')));
+        final eyebrow = tester.getRect(find.textContaining('TOP PICK FOR YOU'));
+        expect(eyebrow.top, greaterThanOrEqualTo(hero.top + 14), reason: 'the hero text is not clipped');
+        if (scale == 1.0) expect(hero.height, 252, reason: 'SCR-07 size at 1.0x');
+      });
+    }
   }
 }
