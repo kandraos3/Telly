@@ -1,11 +1,16 @@
 # Keeps pinned workflow actions and Dart packages current (#158). Every update
 # arrives as a PR and merges only through the same `CI passed` check as any change.
+# Minor and patch only (#166): a major upgrade is its own issue, done deliberately.
+# Security fixes still arrive through Dependabot security updates.
 version: 2
 updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
     commit-message:
       prefix: ci
       include: scope
@@ -17,6 +22,9 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
     open-pull-requests-limit: 5
     commit-message:
       prefix: chore
