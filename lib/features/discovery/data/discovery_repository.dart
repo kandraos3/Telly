@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/network/supabase_providers.dart';
 import '../domain/discovery_models.dart';
+import 'explore_sample_payloads.dart';
 
 abstract interface class DiscoveryRepository {
   Future<List<NetworkBattleground>> fetchNetworkBattlegrounds({
@@ -18,7 +19,6 @@ abstract interface class DiscoveryRepository {
 
   Future<List<UserSearchResult>> searchUsers(String query);
 
-  List<CuratedCanonItem> getCuratedCanons();
 
   /// The raw `get_explore_candidates` payload for one canon (features/07 §7.3). Throws when
   /// the server can't be reached, so Explore can fall back to its cache.
@@ -140,44 +140,6 @@ class SupabaseDiscoveryRepository implements DiscoveryRepository {
       .eq('user_id', _me)
       .eq('title_id', titleId)
       .eq('media_type', mediaType);
-
-  @override
-  List<CuratedCanonItem> getCuratedCanons() {
-    return const [
-      CuratedCanonItem(
-        id: 'stuck_the_landing',
-        emoji: '🎯',
-        title: 'The "Stuck the Landing" Canon',
-        subtitle: 'Shows with universally revered, transcendent final episodes.',
-        sampleTitles: ['Breaking Bad', 'Succession', 'Six Feet Under'],
-        mediaType: 'tv',
-      ),
-      CuratedCanonItem(
-        id: 'peak_miniseries',
-        emoji: '⚡',
-        title: 'Peak 1-Season Miniseries',
-        subtitle: 'Limited commitments with maximum cinematic execution.',
-        sampleTitles: ['Chernobyl', 'Band of Brothers', "The Queen's Gambit"],
-        mediaType: 'tv',
-      ),
-      CuratedCanonItem(
-        id: 'comfort_rewatch',
-        emoji: '🛋️',
-        title: 'The "Comfort Rewatch" Pantheon',
-        subtitle: 'Shows our community returns to over and over again.',
-        sampleTitles: ['The Office', 'Parks and Rec', 'New Girl'],
-        mediaType: 'tv',
-      ),
-      CuratedCanonItem(
-        id: 'god_tier_cinema',
-        emoji: '👑',
-        title: 'God Tier Hall of Fame',
-        subtitle: 'All-time masterpieces scoring 9.20 or higher.',
-        sampleTitles: ['Parasite', 'Interstellar', 'Spirited Away'],
-        mediaType: 'movie',
-      ),
-    ];
-  }
 }
 
 class FakeDiscoveryRepository implements DiscoveryRepository {
@@ -185,7 +147,8 @@ class FakeDiscoveryRepository implements DiscoveryRepository {
   List<FriendBingingItem> friendsBinging;
   List<UserSearchResult> users;
 
-  /// `get_explore_candidates` payloads by media type; a missing canon throws, like being offline.
+  /// `get_explore_candidates` payloads by media type (example payloads for both canons by
+  /// default); a missing canon throws, like being offline.
   Map<String, Map<String, dynamic>> exploreCandidates;
 
   /// When set, every candidates fetch throws (offline).
@@ -197,7 +160,7 @@ class FakeDiscoveryRepository implements DiscoveryRepository {
   final List<(int, String)> dismissed = [];
 
   FakeDiscoveryRepository({
-    this.exploreCandidates = const {},
+    Map<String, Map<String, dynamic>>? exploreCandidates,
     this.battlegrounds = const [
       NetworkBattleground(
         network: 'HBO',
@@ -269,7 +232,8 @@ class FakeDiscoveryRepository implements DiscoveryRepository {
         displayName: 'Jordan Miller',
       ),
     ],
-  });
+  }) : exploreCandidates = exploreCandidates ??
+            {'movie': sampleMoviePayload(DateTime.now()), 'tv': sampleSeriesPayload(DateTime.now())};
 
   @override
   Future<List<NetworkBattleground>> fetchNetworkBattlegrounds({
@@ -315,28 +279,6 @@ class FakeDiscoveryRepository implements DiscoveryRepository {
   @override
   Future<void> undoDismissRecommendation(int titleId, String mediaType) async =>
       dismissed.remove((titleId, mediaType));
-
-  @override
-  List<CuratedCanonItem> getCuratedCanons() {
-    return const [
-      CuratedCanonItem(
-        id: 'stuck_the_landing',
-        emoji: '🎯',
-        title: 'The "Stuck the Landing" Canon',
-        subtitle: 'Shows with universally revered, transcendent final episodes.',
-        sampleTitles: ['Breaking Bad', 'Succession', 'Six Feet Under'],
-        mediaType: 'tv',
-      ),
-      CuratedCanonItem(
-        id: 'peak_miniseries',
-        emoji: '⚡',
-        title: 'Peak 1-Season Miniseries',
-        subtitle: 'Limited commitments with maximum cinematic execution.',
-        sampleTitles: ['Chernobyl', 'Band of Brothers', "The Queen's Gambit"],
-        mediaType: 'tv',
-      ),
-    ];
-  }
 }
 
 final discoveryRepositoryProvider = Provider<DiscoveryRepository>((ref) {

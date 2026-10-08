@@ -38,6 +38,12 @@ class ExploreRowsController extends FamilyAsyncNotifier<ExploreRowsState, String
 
   bool _relatedRequested = false;
 
+  /// The payload behind the current rows, so a dismissal can re-rank without a fetch.
+  Map<String, dynamic>? _json;
+
+  /// Candidates removed by [dismiss], by title id, for [undoDismiss].
+  final Map<int, Object?> _dismissed = {};
+
   DiscoveryRepository get _repo => ref.read(discoveryRepositoryProvider);
   ExploreCacheDao get _cache => ref.read(exploreCacheDaoProvider);
   DateTime _now() => ref.read(exploreNowProvider)();
@@ -59,6 +65,49 @@ class ExploreRowsController extends FamilyAsyncNotifier<ExploreRowsState, String
     } catch (e, st) {
       state = current != null ? AsyncData(current.copyWith(isOffline: true)) : AsyncError(e, st);
     }
+  }
+
+  /// The hero's "Not for me" (#189): stores the dismissal and re-ranks the current payload
+  /// without the title, so the next pick takes its place at once.
+  Future<void> dismiss(int titleId) async {
+    final json = _json;
+    final current = state.valueOrNull;
+    if (json == null || current == null) return;
+    final candidates = [...(json['candidates'] as List? ?? const [])];
+    final i = candidates.indexWhere((c) => (c as Map)['title_id'] == titleId);
+    if (i < 0) return;
+    _dismissed[titleId] = candidates.removeAt(i);
+    await _apply({...json, 'candidates': candidates}, current.savedAt, current.isOffline);
+    try {
+      await _repo.dismissRecommendation(titleId, arg);
+    } catch (_) {
+      _dismissed.remove(titleId);
+      await _apply(json, current.savedAt, current.isOffline); // put it back
+      rethrow;
+    }
+  }
+
+  /// Undo for [dismiss]: deletes the dismissal and puts the title back.
+  Future<void> undoDismiss(int titleId) async {
+    final json = _json;
+    final current = state.valueOrNull;
+    final removed = _dismissed.remove(titleId);
+    if (json == null || current == null || removed == null) return;
+    await _apply({...json, 'candidates': [...(json['candidates'] as List? ?? const []), removed]},
+        current.savedAt, current.isOffline);
+    await _repo.undoDismissRecommendation(titleId, arg);
+  }
+
+  Future<void> _apply(Map<String, dynamic> json, DateTime savedAt, bool isOffline) async {
+    _json = json;
+    state = AsyncData(ExploreRowsState(
+      rows: _ranker.rank(ExploreCandidates.fromJson(json), _now()),
+      savedAt: savedAt,
+      isOffline: isOffline,
+    ));
+    try {
+      await _cache.write(arg, jsonEncode(json), savedAt);
+    } catch (_) {}
   }
 
   Future<void> _refreshInBackground() async {
@@ -102,10 +151,10 @@ class ExploreRowsController extends FamilyAsyncNotifier<ExploreRowsState, String
     }
   }
 
-  ExploreRowsState _rank(Map<String, dynamic> json, DateTime savedAt) => ExploreRowsState(
-        rows: _ranker.rank(ExploreCandidates.fromJson(json), _now()),
-        savedAt: savedAt,
-      );
+  ExploreRowsState _rank(Map<String, dynamic> json, DateTime savedAt) {
+    _json = json;
+    return ExploreRowsState(rows: _ranker.rank(ExploreCandidates.fromJson(json), _now()), savedAt: savedAt);
+  }
 }
 
 /// Explore's rows per canon (`'movie'` or `'tv'`).

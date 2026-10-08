@@ -124,24 +124,6 @@ class FriendAvatarInfo {
   }
 }
 
-class CuratedCanonItem {
-  final String id;
-  final String emoji;
-  final String title;
-  final String subtitle;
-  final List<String> sampleTitles;
-  final String mediaType;
-
-  const CuratedCanonItem({
-    required this.id,
-    required this.emoji,
-    required this.title,
-    required this.subtitle,
-    this.sampleTitles = const [],
-    this.mediaType = 'tv',
-  });
-}
-
 class UserSearchResult {
   final String id;
   final String username;
