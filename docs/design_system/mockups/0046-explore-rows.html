@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Explore Rows</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap">
+<style>
+/* Layout: approved-design sheet (like 0047). Brief, then every state of layout B as phone frames (375 × 760 dp at 80%), then the scoring sketch. */
+:root {
+  --page: #EEF0F4; --ink: #0F1117; --ink-2: #4A4E63; --ink-3: #696E87; --rule: #D7DBE5; --card: #FFFFFF; --mark: #4D7800; --rec: #5B3CE0;
+  --f-ui: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-display: "Playfair Display", Georgia, "Times New Roman", serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --page: #050608; --ink: #F2F3F7; --ink-2: #C8CAD8; --ink-3: #7D8198; --rule: #242938; --card: #0D0F15; --mark: #D2FF52; --rec: #A08BFF; color-scheme: dark } }
+:root[data-theme="dark"] { --page: #050608; --ink: #F2F3F7; --ink-2: #C8CAD8; --ink-3: #7D8198; --rule: #242938; --card: #0D0F15; --mark: #D2FF52; --rec: #A08BFF; color-scheme: dark }
+
+/* Telly app tokens, scoped to phone frames (style guide §2.1; light from telly_colors.dart, as in 0047) */
+.ph { --bg:#08090C; --sf:#11131A; --ov:#1A1D27; --st:#242938; --gl:rgba(255,255,255,.08); --t1:#FFFFFF; --t2:#C8CAD8; --t3:#7D8198;
+      --lime:#D2FF52; --limeFill:#D2FF52; --onLime:#08090C; --amber:#FFA733; --coral:#FF4B6E; --violet:#9F87FF; --cyan:#00F0FF; --scrim:rgba(8,9,12,.92); }
+.light .ph { --bg:#F6F7F9; --sf:#FFFFFF; --ov:#F0F2F5; --st:#E2E5EC; --gl:rgba(0,0,0,.08); --t1:#0F1117; --t2:#4A4E63; --t3:#696E87;
+      --lime:#4D7800; --limeFill:#D2FF52; --onLime:#0F1117; --amber:#B36200; --coral:#D61F4D; --violet:#5B3CE0; --cyan:#00838F; --scrim:rgba(246,247,249,.94); }
+
+* { box-sizing: border-box }
+body { background: var(--page); color: var(--ink); font: 15px/1.55 var(--f-ui); margin: 0 }
+.wrap { max-width: 1480px; margin: 0 auto; padding-inline: 24px; padding-block: 40px 72px }
+@media (max-width: 600px) { .wrap { padding-inline: 16px } }
+header.top { display: grid; gap: 10px; max-width: 76ch }
+.eyebrow { font: 700 12px/1 var(--f-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3) }
+h1 { font: 700 clamp(30px, 4vw, 44px)/1.1 var(--f-display); margin: 0; letter-spacing: -.02em; text-wrap: balance }
+h2 { font: 700 28px/1.2 var(--f-display); margin: 0; letter-spacing: -.01em; text-wrap: balance }
+h3.k { font: 700 20px/1.25 var(--f-display); margin: 0 }
+p { margin: 0; color: var(--ink-2) }
+b { color: var(--ink) }
+.ph b { color: var(--t1) }
+.toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 18px }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 10px; padding: 3px; background: var(--card) }
+.seg button { font: 700 13px var(--f-ui); color: var(--ink-2); background: none; border: 0; padding: 8px 14px; border-radius: 7px; cursor: pointer; min-height: 36px }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--page) }
+.seg button:focus-visible { outline: 2px solid var(--mark); outline-offset: 2px }
+section.screen { margin-top: 56px; display: grid; gap: 18px }
+.screen-head { display: grid; gap: 6px; max-width: 82ch }
+.row { display: flex; gap: 22px; overflow-x: auto; padding-bottom: 12px; scroll-snap-type: x proximity }
+.opt { flex: 0 0 auto; width: 300px; display: grid; gap: 12px; align-content: start; scroll-snap-align: start }
+.opt-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap }
+.badge { font: 800 12px/1 var(--f-ui); padding: 5px 8px; border-radius: 6px; background: var(--ink); color: var(--page) }
+.badge.today { background: transparent; color: var(--ink-3); border: 1px solid var(--rule) }
+.badge.pick { background: var(--rec); color: var(--page) }
+.opt-head b { font-weight: 700; font-size: 15px }
+.notes { display: grid; gap: 6px; font-size: 13.5px; line-height: 1.5; color: var(--ink-2); margin: 0; padding: 0; list-style: none }
+.notes li { padding-left: 16px; position: relative }
+.notes li::before { content: ""; position: absolute; left: 2px; top: .62em; width: 6px; height: 6px; border-radius: 50% }
+.notes .plus::before { background: #34D399 } .notes .minus::before { background: #F87171 }
+
+/* engine cards */
+.eng { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 18px }
+.ec { background: var(--card); border: 1px solid var(--rule); border-radius: 14px; padding: 20px; display: grid; gap: 12px; align-content: start; min-width: 0 }
+.ec.picked { border-color: var(--rec); box-shadow: 0 0 0 1px var(--rec) inset }
+.flow { display: grid; gap: 6px; font-size: 13px }
+.flow div { display: grid; grid-template-columns: 78px 1fr; gap: 8px; align-items: baseline }
+.flow em { font-style: normal; font: 700 11px/1.3 var(--f-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3) }
+.flow span { color: var(--ink-2) }
+.size { font: 700 13px var(--f-ui); color: var(--ink-3) } .size b { font-weight: 800 }
+code { font: 600 12.5px/1.4 ui-monospace, "Cascadia Mono", Consolas, monospace; background: color-mix(in srgb, var(--ink) 7%, transparent); padding: 1px 5px; border-radius: 5px; overflow-wrap: anywhere }
+.formula { background: var(--card); border: 1px solid var(--rule); border-radius: 14px; padding: 20px 22px; display: grid; gap: 10px; max-width: 92ch }
+.formula pre { margin: 0; overflow-x: auto; font: 600 13px/1.6 ui-monospace, "Cascadia Mono", Consolas, monospace; color: var(--ink) }
+
+/* row rules table */
+.tbl { overflow-x: auto; border: 1px solid var(--rule); border-radius: 14px; background: var(--card) }
+table { border-collapse: collapse; width: 100%; min-width: 760px; font-size: 13.5px }
+th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--rule); vertical-align: top; color: var(--ink-2) }
+th { font: 700 11px/1.2 var(--f-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3) }
+tr:last-child td { border-bottom: 0 }
+td:first-child { color: var(--ink); font-weight: 700; white-space: nowrap }
+
+.rec { margin-top: 56px; background: var(--card); border: 1px solid var(--rule); border-radius: 14px; padding: 22px 24px; display: grid; gap: 10px; max-width: 88ch }
+.rec h2 { font-size: 22px }
+.rec ol, .rec ul { margin: 0; padding-left: 20px; color: var(--ink-2); display: grid; gap: 6px }
+
+/* ---------- phone frame (375 × 760 dp, zoomed) ---------- */
+.frame { width: 300px; height: 608px; border-radius: 30px; padding: 6px; background: #1b1d24; box-shadow: 0 1px 0 rgba(255,255,255,.06) inset, 0 12px 30px rgba(0,0,0,.25) }
+.ph { zoom: .8; width: 375px; height: 760px; border-radius: 30px; overflow: hidden; position: relative; background: var(--bg); color: var(--t1); font-family: var(--f-ui); font-size: 13px; line-height: 1.35 }
+.ph .sb { height: 44px; display: flex; justify-content: space-between; align-items: center; padding: 0 26px; font-weight: 700; font-size: 14px }
+.ph .hd { height: 56px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px }
+.ph .hd h3 { font: 800 26px/1 var(--f-ui); margin: 0; letter-spacing: -.02em; color: var(--t1) }
+.ph .ic { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; color: var(--t2); font-size: 18px; border: 1px solid var(--gl); background: var(--sf) }
+.ph .body { position: absolute; top: 100px; left: 0; right: 0; bottom: 0; overflow: hidden }
+.ph .body.scrolled { top: 44px }
+.ph .search { margin: 0 16px; height: 44px; border-radius: 14px; background: var(--sf); border: 1px solid var(--gl); display: flex; align-items: center; gap: 10px; padding: 0 14px; color: var(--t3); font-size: 14px }
+.ph .gap8 { height: 8px } .ph .gap12 { height: 12px } .ph .gap16 { height: 16px } .ph .gap20 { height: 20px }
+.ph .tabs { position: absolute; left: 0; right: 0; bottom: 0; height: 80px; background: var(--sf); border-top: 1px solid var(--st); display: grid; grid-template-columns: repeat(5, 1fr); padding: 10px 6px 24px; z-index: 3 }
+.ph .tab { display: grid; justify-items: center; gap: 3px; font-size: 10.5px; font-weight: 700; color: var(--t3) }
+.ph .tab i { font-style: normal; font-size: 18px; line-height: 1 }
+.ph .tab.on { color: var(--lime) }
+.ph .fab { position: absolute; right: 16px; bottom: 96px; background: var(--limeFill); color: var(--onLime); font-weight: 800; font-size: 15px; padding: 14px 20px; border-radius: 28px; z-index: 4; box-shadow: 0 8px 20px rgba(0,0,0,.35) }
+.ph .csw { margin: 0 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 14px; background: var(--sf); border: 1px solid var(--gl) }
+.ph .csw div { border-radius: 10px; padding: 7px 8px; text-align: center; font-weight: 800; font-size: 13px; color: var(--t3) }
+.ph .csw .on { background: var(--ov); color: var(--t1); border: 1px solid var(--gl) }
+.ph .csw .on span { color: var(--lime) }
+.ph .stick { position: sticky; top: 0; background: var(--bg); padding: 8px 0; z-index: 2 }
+
+/* rows */
+.ph .rh { display: flex; justify-content: space-between; align-items: baseline; padding: 0 16px; gap: 10px }
+.ph .rh b { font-size: 16.5px; font-weight: 800; color: var(--t1); letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.ph .rh b i { font-style: italic; font-family: var(--f-display); font-weight: 700 }
+.ph .rh a { color: var(--t3); font-size: 12px; font-weight: 700; flex: none }
+.ph .rs { padding: 2px 16px 0; color: var(--t3); font-size: 12px }
+.ph .car { display: flex; gap: 10px; padding: 10px 16px 0; overflow: hidden }
+.ph .cd { flex: none; width: 104px; display: grid; gap: 5px; align-content: start }
+.ph .pst { border-radius: 10px; position: relative; overflow: hidden }
+.ph .cd .pst { height: 154px }
+.ph .cd b { font-size: 12.5px; font-weight: 700; color: var(--t1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.ph .cd small { font-size: 11px; color: var(--t3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.ph .m { color: var(--violet); font-weight: 800; font-variant-numeric: tabular-nums }
+.ph .tag { position: absolute; left: 6px; top: 6px; font: 800 9.5px/1 var(--f-ui); letter-spacing: .06em; padding: 4px 6px; border-radius: 5px; background: var(--scrim); color: var(--t1) }
+.ph .tag.coral { background: var(--coral); color: #fff }
+.ph .tag.canon { color: var(--t2) }
+.ph .prov { position: absolute; right: 6px; bottom: 6px; font: 800 9px/1 var(--f-ui); letter-spacing: .05em; padding: 3px 5px; border-radius: 5px; background: var(--scrim); color: var(--cyan) }
+
+/* B: hero */
+.ph .hero { margin: 0 16px; border-radius: 18px; overflow: hidden; position: relative; height: 252px; border: 1px solid var(--gl) }
+.ph .hero .bd { position: absolute; inset: 0 }
+.ph .hero .fade { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 25%, var(--scrim) 78%) }
+.ph .hero .in { position: absolute; left: 14px; right: 14px; bottom: 14px; display: grid; gap: 6px }
+.ph .hero .ey { font: 800 10.5px/1 var(--f-ui); letter-spacing: .1em; text-transform: uppercase; color: var(--violet) }
+.ph .hero h4 { margin: 0; font: 700 26px/1.05 var(--f-display); color: var(--t1) }
+.ph .hero p { margin: 0; font-size: 12.5px; color: var(--t2) }
+.ph .btns { display: flex; gap: 8px; margin-top: 4px }
+.ph .btn { border-radius: 10px; padding: 9px 12px; font-weight: 800; font-size: 12.5px; text-align: center; border: 1px solid var(--gl); color: var(--t1); background: var(--ov) }
+.ph .btn.pri { background: var(--limeFill); color: var(--onLime); border-color: transparent }
+.ph .top10 { flex: none; display: flex; align-items: flex-end; width: 136px }
+.ph .top10 span { font: 800 92px/0.8 var(--f-ui); color: transparent; -webkit-text-stroke: 2px var(--t3); letter-spacing: -.06em; margin-right: -14px; position: relative; z-index: 1 }
+.ph .top10 .pst { width: 92px; height: 136px; flex: none }
+.ph .seed { flex: none; width: 104px; height: 154px; border-radius: 10px; border: 1.5px dashed var(--st); display: grid; place-content: center; text-align: center; gap: 4px; padding: 8px; background: var(--sf) }
+.ph .seed small { color: var(--t3); font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase }
+.ph .seed b { font-size: 13px; color: var(--t1) }
+.ph .seed em { font-style: normal; font-weight: 800; color: var(--amber); font-variant-numeric: tabular-nums }
+.ph .fw { flex: none; width: 214px; border-radius: 14px; background: var(--sf); border: 1px solid var(--gl); display: flex; gap: 10px; padding: 10px }
+.ph .fw .pst { width: 56px; height: 84px; flex: none; border-radius: 8px }
+.ph .fw b { font-size: 13.5px; color: var(--t1); display: block }
+.ph .fw small { font-size: 11px; color: var(--t3); display: block; margin-top: 2px }
+.ph .avs { display: flex; margin-top: 8px }
+.ph .avs i { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--sf); margin-right: -7px }
+.ph .fw .sc { color: var(--amber); font-weight: 800; font-size: 12px; margin-top: 6px; display: block; font-variant-numeric: tabular-nums }
+
+/* today */
+.ph .bg3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; padding: 10px 16px 0 }
+.ph .bg3 div { background: var(--sf); border: 1px solid var(--gl); border-radius: 12px; padding: 10px; font-size: 12px; color: var(--t3) }
+.ph .bg3 b { display: block; color: var(--t1); font-size: 13px } .ph .bg3 em { font-style: normal; color: var(--amber); font-weight: 800 }
+.ph .cc { margin: 10px 16px 0; background: var(--sf); border: 1px solid var(--gl); border-radius: 14px; padding: 12px 14px }
+.ph .cc b { display: block; color: var(--t1); font-size: 14px } .ph .cc small { color: var(--t3); font-size: 12px }
+.ph .bug { outline: 2px dashed var(--coral); outline-offset: 2px; border-radius: 4px }
+
+@media (prefers-reduced-motion: no-preference) { .seg button { transition: background .15s } }
+</style>
+<style>
+.ph .sk { background: linear-gradient(90deg, var(--sf), var(--ov), var(--sf)); background-size: 200% 100%; border-radius: 10px }
+@media (prefers-reduced-motion: no-preference) { .ph .sk { animation: sh 1.4s linear infinite } @keyframes sh { to { background-position: -200% 0 } } }
+.ph .skt { height: 14px; width: 150px; margin: 0 16px }
+.ph .banner { margin: 0 16px; padding: 9px 12px; border-radius: 12px; background: var(--sf); border: 1px solid var(--gl); font-size: 12px; color: var(--t2); display: flex; gap: 8px; align-items: center }
+.ph .banner b { color: var(--t1) }
+.ph .prompt { margin: 0 16px; border-radius: 18px; padding: 18px; background: var(--sf); border: 1px solid var(--gl); display: grid; gap: 8px }
+.ph .prompt .ey { font: 800 10.5px/1 var(--f-ui); letter-spacing: .1em; text-transform: uppercase; color: var(--violet) }
+.ph .prompt h4 { margin: 0; font: 700 22px/1.1 var(--f-display); color: var(--t1) }
+.ph .prompt p { margin: 0; font-size: 12.5px; color: var(--t2) }
+.ph .dots { display: flex; gap: 6px; margin-top: 2px } .ph .dots i { width: 28px; height: 6px; border-radius: 3px; background: var(--st) } .ph .dots i.on { background: var(--limeFill) }
+.ph .csw.series div:first-child { background: none; border: 0; color: var(--t3) } .ph .csw.series div:first-child span { color: var(--t3) }
+.ph .csw.series div:last-child { background: var(--ov); color: var(--t1); border: 1px solid var(--gl) } .ph .csw.series div:last-child span { color: var(--lime) }
+.states { display: flex; gap: 22px; overflow-x: auto; padding-bottom: 12px }
+.state { flex: none; width: 300px; display: grid; gap: 10px; align-content: start }
+.state p { font-size: 13.5px }
+.changes { background: var(--card); border: 1px solid var(--rule); border-radius: 14px; padding: 16px 20px; display: grid; gap: 8px; margin-top: 8px }
+.changes ul { margin: 0; padding-left: 20px; color: var(--ink-2); display: grid; gap: 5px; font-size: 14px }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow">Telly · #46 · Approved design · 2026-10-07 · decision 0007</div>
+    <h1>Explore rows</h1>
+    <p>Your pick: <b>layout B</b> (a hero pick, then rows shaped to their job) with <b>engine E3</b> (the server gathers candidates and the app ranks them). The screen is drawn in every state the spec covers. Frames show a 375 × 760&nbsp;dp phone at 80%. Titles, scores and friends are examples.</p>
+    <div class="changes">
+      <div class="eyebrow">Settled with this pick</div>
+      <ul>
+        <li>The curated canons are removed. "Recommended for you" becomes the hero plus the Top picks row.</li>
+        <li>Network battlegrounds stay as the last row, in the Series canon only (the recommended default; you didn't object).</li>
+        <li>The hero's <b>Not for me</b> hides that title from your recommendations (it reuses muted titles), and the next pick takes its place.</li>
+      </ul>
+    </div>
+    <div class="toolbar">
+      <span class="eyebrow" id="themeLbl">App theme</span>
+      <div class="seg" role="group" aria-labelledby="themeLbl">
+        <button type="button" id="th-dark" aria-pressed="true">Dark</button>
+        <button type="button" id="th-light" aria-pressed="false">Light</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="screen">
+    <div class="screen-head">
+      <div class="eyebrow">SCR-07 · Explore tab</div>
+      <h2>States</h2>
+      <p>From the top: search, the slim Movies / Series switcher (it sticks under the status bar when you scroll), the hero, then the rows. Each row has <b>See all ›</b>, which opens the row as a poster grid of up to 30 titles.</p>
+    </div>
+    <div class="states" id="states"></div>
+  </section>
+
+  <section class="screen">
+    <div class="screen-head">
+      <div class="eyebrow">Engine E3 · draft weights, fixed in the spec</div>
+      <h2>How a pick is scored</h2>
+    </div>
+    <div class="formula">
+<pre>fit = 0.40 · taste      cosine of the title's genres vs your canon's genre profile,
+                        each genre weighted by your scores (not a raw count)
+    + 0.20 · seeds      how many of your top-ranked titles TMDB links it to, and how high
+    + 0.15 · friends    friends who ranked it, weighted by their taste match with you
+    + 0.15 · quality    Telly community score, else TMDB rating (shrunk toward the mean)
+    + 0.10 · services   1 if it streams on a service you have, else 0
+
+Shown as "92% match". Rows take titles in order, skipping any title already shown,
+with at most 2 per franchise or director per row.
+Something different flips taste: high quality and good friends' scores, low genre overlap.
+Movies and series are scored separately (dual canon).</pre>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  const H = { "Decision to Leave": 205, "Anora": 330, "The Brutalist": 40, "Sinners": 280, "Memories of Murder": 90, "The Handmaiden": 310, "Burning": 15,
+    "Conclave": 0, "Challengers": 170, "The Social Network": 210, "Heat": 230, "Zodiac": 50, "Sicario": 25, "Paddington 2": 15, "Spider-Verse": 300, "RRR": 10, "Hundreds of Beavers": 0,
+    "Pachinko": 80, "Shōgun": 0, "Severance": 200, "The Bear": 30, "Andor": 350, "Slow Horses": 160, "Dark": 250, "Bluey": 195, "Planet Earth II": 120, "Taskmaster": 45, "Drive My Car": 350, "Prisoners": 215, "Aftersun": 30, "Contact": 230 };
+  const poster = (t) => { const h = H[t] ?? 200; return `background: linear-gradient(160deg, hsl(${h} 45% 42%), hsl(${(h + 40) % 360} 55% 16%))`; };
+  const tabs = () => `<div class="tabs">${[["⌂", "Home"], ["◎", "Explore", 1], ["≡", "Canon"], ["◇", "Social"], ["⋯", "More"]]
+    .map(([i, l, on]) => `<div class="tab${on ? " on" : ""}"><i>${i}</i>${l}</div>`).join("")}</div><div class="fab">+ Log</div>`;
+  const shell = (body, scrolled = false) => `<div class="frame"><div class="ph"><div class="sb"><span>9:41</span><span>●●● ▮</span></div>${scrolled ? "" : `<div class="hd"><h3>Explore</h3><div class="ic">⚙</div></div>`}<div class="body${scrolled ? " scrolled" : ""}">${body}</div>${tabs()}</div></div>`;
+  const search = `<div class="search">⌕ <span>Search titles, people, friends</span></div>`;
+  const csw = (series) => `<div class="csw${series ? " series" : ""}"><div class="on">Movies <span>142</span></div><div>Series <span>94</span></div></div>`;
+  const rh = (title, sub) => `<div class="rh"><b>${title}</b><a>See all ›</a></div>${sub ? `<div class="rs">${sub}</div>` : ""}`;
+  const card = (t, meta, o = {}) => `<div class="cd"><div class="pst" style="${poster(t)}">${o.tag ? `<span class="tag${o.cls ? " " + o.cls : ""}">${o.tag}</span>` : ""}${o.prov ? `<span class="prov">${o.prov}</span>` : ""}</div><b>${t}</b><small>${meta}</small></div>`;
+  const car = (xs) => `<div class="car">${xs.join("")}</div>`;
+  const m = (n) => `<span class="m">${n}% match</span>`;
+  const sp = `<div class="gap20"></div>`;
+  const hero = (t, line, ey = "Top pick for you · 94% match") => `<div class="hero"><div class="bd" style="${poster(t)}"></div><div class="fade"></div><div class="in"><span class="ey">${ey}</span><h4>${t}</h4><p>${line}</p><div class="btns"><span class="btn pri">+ Queue</span><span class="btn">Details</span><span class="btn">Not for me</span></div></div></div>`;
+  const top10 = (xs) => `<div class="car">${xs.map(([n, t]) => `<div class="top10"><span>${n}</span><div class="pst" style="${poster(t)}"></div></div>`).join("")}</div>`;
+  const seed = (t, r, s) => `<div class="seed"><small>You ranked</small><b>${t}</b><em>#${r} · ${s}</em></div>`;
+  const fw = (t, line, sc, n) => `<div class="fw"><div class="pst" style="${poster(t)}"></div><div><b>${t}</b><small>${line}</small><div class="avs">${Array.from({ length: n }, (_, i) => `<i style="background: hsl(${i * 70 + 240} 55% 55%)"></i>`).join("")}</div><span class="sc">★ ${sc} friends' avg</span></div></div>`;
+  const leaving = (xs) => car(xs.map(([t, s, d]) => card(t, s, { tag: `${d} DAY${d > 1 ? "S" : ""}`, cls: "coral" })));
+  const skRow = `<div class="sk skt"></div><div class="car">${'<div class="cd"><div class="sk" style="height:154px"></div></div>'.repeat(4)}</div>`;
+
+  const S = [
+    ["On open · Movies", "Hero, then the numbered Trending row.",
+      shell(`${search}<div class="gap12"></div>${csw()}<div class="gap12"></div>${hero("Decision to Leave", "Like <b>Parasite</b> (9.72) and <b>Memories of Murder</b>. Park Chan-wook, 2022 · on MUBI")}${sp}${rh("Trending now", "Top 10 movies this week")}${top10([[1, "Anora"], [2, "The Brutalist"], [3, "Sinners"]])}`)],
+    ["Scrolled · Movies", "Top picks, Because you ranked X (seed title first), friends, leaving soon.",
+      shell(`<div class="stick">${csw()}</div><div class="gap8"></div>${rh("Top picks for you")}${car([card("Drive My Car", m(91), { prov: "MAX" }), card("Prisoners", m(88)), card("Aftersun", m(86)), card("Contact", m(84))])}${sp}${rh("Because you ranked <i>Parasite</i>")}${car([seed("Parasite", 2, "9.72"), card("Memories of Murder", m(93)), card("The Handmaiden", m(90), { prov: "PRIME" }), card("Burning", m(88))])}${sp}${rh("Your friends are watching")}<div class="car">${fw("Conclave", "Maya, Jo and Sam", "8.6", 3)}${fw("Challengers", "Alex and Jo", "8.1", 2)}</div>`, true)],
+    ["Further down · Movies", "Leaving your services soon (coral countdown) and Something different.",
+      shell(`<div class="stick">${csw()}</div><div class="gap8"></div>${rh("Leaving your services soon")}${leaving([["The Social Network", "Netflix", 3], ["Heat", "Max", 5], ["Zodiac", "Netflix", 6], ["Sicario", "Max", 7]])}${sp}${rh("Something different", "Outside your usual sci-fi and drama")}${car([card("Paddington 2", "Family · 8.9 on Telly"), card("Spider-Verse", "Animation · 9.0"), card("RRR", "Action · 8.4"), card("Hundreds of Beavers", "Comedy · 8.2")])}`, true)],
+    ["Series canon · bottom", "The same rows from the series canon only. Network battlegrounds are the last row here.",
+      shell(`<div class="stick">${csw(true)}</div><div class="gap8"></div>${rh("Because you ranked <i>Severance</i>")}${car([seed("Severance", 1, "9.80"), card("Pachinko", m(88)), card("Andor", m(84)), card("Dark", m(82))])}${sp}${rh("Something different", "Outside your usual drama and thriller")}${car([card("Bluey", "Kids · 9.2 on Telly"), card("Planet Earth II", "Docs · 9.4"), card("Taskmaster", "Comedy · 8.7"), card("The Bear", "Comedy · 8.9")])}${sp}${rh("Network battlegrounds")}<div class="bg3"><div><b>HBO</b><em>8.82</em></div><div><b>Apple TV+</b><em>8.41</em></div><div><b>Netflix</b><em>7.64</em></div></div>`, true)],
+    ["New user · fewer than 3 rankings", "No hero or personal rows yet. A prompt to rank, then Trending and Top rated on Telly.",
+      shell(`${search}<div class="gap12"></div>${csw()}<div class="gap12"></div><div class="prompt"><span class="ey">Picks for you</span><h4>Rank 3 movies to unlock your picks</h4><p>Your top picks and "Because you ranked" rows appear once Telly knows your taste.</p><div class="dots"><i class="on"></i><i></i><i></i></div><div class="btns"><span class="btn pri">+ Log a movie</span></div></div>${sp}${rh("Trending now", "Top 10 movies this week")}${top10([[1, "Anora"], [2, "The Brutalist"], [3, "Sinners"]])}${sp}${rh("Top rated on Telly")}${car([card("Memories of Murder", "9.41 community"), card("Drive My Car", "9.12"), card("Prisoners", "8.95"), card("Contact", "8.80")])}`)],
+    ["Loading · first open", "Skeleton hero and rows. Later opens show the cached rows straight away and refresh in place.",
+      shell(`${search}<div class="gap12"></div>${csw()}<div class="gap12"></div><div class="sk" style="height:252px;margin:0 16px;border-radius:18px"></div>${sp}${skRow}${sp}${skRow}`)],
+    ["Offline", "The last rows from Drift, with when they were fetched. Rows that need the network (Trending) keep their last copy.",
+      shell(`${search}<div class="gap12"></div><div class="banner">⚠ <span><b>Offline.</b> Showing picks from 2 h ago.</span></div><div class="gap12"></div>${csw()}<div class="gap12"></div>${hero("Decision to Leave", "Like <b>Parasite</b> (9.72) and <b>Memories of Murder</b>. Park Chan-wook, 2022 · on MUBI")}${sp}${rh("Top picks for you")}${car([card("Drive My Car", m(91)), card("Prisoners", m(88)), card("Aftersun", m(86)), card("Contact", m(84))])}`)]
+  ];
+  document.getElementById("states").innerHTML = S.map(([h, p, f]) => `<div class="state"><div class="opt-head"><b>${h}</b></div>${f}<p>${p}</p></div>`).join("");
+
+  const setTheme = (t) => {
+    document.body.classList.toggle("light", t === "light");
+    document.getElementById("th-dark").setAttribute("aria-pressed", t === "dark");
+    document.getElementById("th-light").setAttribute("aria-pressed", t === "light");
+    try { localStorage.setItem("telly-mock-theme", t); } catch (_) {}
+  };
+  document.getElementById("th-dark").onclick = () => setTheme("dark");
+  document.getElementById("th-light").onclick = () => setTheme("light");
+  let saved = "dark"; try { saved = localStorage.getItem("telly-mock-theme") || "dark"; } catch (_) {}
+  setTheme(saved);
+})();
+</script>
+</body>
+</html>

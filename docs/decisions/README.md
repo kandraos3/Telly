@@ -35,3 +35,4 @@ What changes, what we give up, what follow-up work this creates.
 | [0004](0004-canon-podium-and-queue-up-next.md) | Canon leads with a podium (view and stats in header sheets); Queue leads with a random "Up next" | Accepted |
 | [0005](0005-gamification-medals-challenges-levels.md) | Gamification: medals, challenges and levels together; cosmetic rewards; weekly streak; friends-only competition; duelled titles only | Accepted |
 | [0006](0006-branches-and-pull-requests.md) | Every change reaches a protected `main` through an auto-merging pull request; production runs merged code only | Accepted |
+| [0007](0007-explore-hero-rows-and-client-ranker.md) | Explore leads with a hero pick and shaped rows; curated canons removed; the server gathers candidates and a Dart `ExploreRanker` ranks them | Accepted |
