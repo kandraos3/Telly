@@ -258,6 +258,15 @@ journey
   2. Join Spooktober from Challenges → rank two films → after sync its medal's unlock moment shows → pull to refresh Social → the challenge feed card shows.
   3. Import a film (no duels), then rank one through duels → Your level shows 10 XP: the import earned nothing.
 
+#### Explore rows (features/07 §7; #183)
+Not one of the five CUJs, but it runs alongside them on the emulator.
+- **Test Objective**: Explore's hero and rows work in the whole app: navigation through See all to a title and back, and Not for me with Undo.
+- **Where**: `integration_test/helpers/explore_journeys.dart`, run on the emulator by `explore_rows_test.dart` (part of `app_test.dart`) and on the host by `test/integration/explore_journeys_test.dart`. The router, Drift `ExploreCache`, controller and ranker are real; `FakeDiscoveryRepository` serves the sample payloads and records dismissals.
+- **Workflow**:
+  1. Open Explore → Series → a Because row's **See all ›** → the grid, titled with its seed → a title opens `SCR-08` → back to the grid → back to Explore, still on Series.
+  2. The hero's **Not for me** → the next pick takes the hero and the snackbar names the hidden title → **Undo** → the first hero is back and the dismissal is deleted.
+- **Goldens**: `explore_{dark,light}_iphone15.png` (on open, Movies) and `explore_new_user_{dark,light}_iphone15.png` in `test/goldens/screen_goldens_test.dart`.
+
 ---
 
 ## 5. Supplementary Testing & Verification Layers
