@@ -262,7 +262,7 @@ Blocked users (either direction) and deleted users never count as friends. Candi
 - **Actions**:
   - Card tap → `SCR-08`.
   - Hero **+ Queue**: adds to the watchlist through the existing offline queue path, and the button becomes **✓ In queue**.
-  - Hero **Not for me**: inserts into `user_dismissed_recommendations` ([decision 0008](../decisions/0008-explore-dismissals-own-table.md)), shows the next hero, and a snackbar *"Hidden from your picks"* with **Undo**, which deletes the row. It is not a Spoiler Shield mute, so the feed is untouched.
+  - Hero **Not for me**: inserts into `user_dismissed_recommendations` ([decision 0008](../decisions/0008-explore-dismissals-own-table.md)), shows the next hero, and a snackbar *"Hidden from your picks: <title>"* with **Undo**, which deletes the row. The snackbar floats 8 dp above the floating Log button (`TellyLogFab.clearance`), which would otherwise cover **Undo**. It is not a Spoiler Shield mute, so the feed is untouched.
   - **See all ›** on a row (#181): opens `/explore/row/:rowId?canon=movie|tv`, a 3-column poster grid of up to 30 titles (`ExploreRow.items`) ranked from the same payload, in the carousel's order.
     - `rowId` is the row kind's name (`trending`, `topPicks`, `topRated`, `friends`, `leavingSoon`, `somethingDifferent`), or `becauseYouRanked-<seed title id>` for a Because row.
     - Each card keeps the row's meta line: match % and year, community score, service and countdown, or genre. In the grid, Trending's line is *#N this week* and Friends' is who is watching. A Because grid has no seed tile; the seed is in the title.
