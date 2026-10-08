@@ -138,10 +138,33 @@ class ExploreRows {
   /// Friends, Leaving soon, Something different. Rows below their minimum are left out.
   final List<ExploreRow> rows;
 
-  const ExploreRows({required this.mediaType, required this.rankingCount, this.hero, this.rows = const []});
+  /// My top seeds (score ≥ 7.80), best first, to explain a pick ("Because you loved X").
+  final List<ExploreSeed> seeds;
+
+  const ExploreRows({
+    required this.mediaType,
+    required this.rankingCount,
+    this.hero,
+    this.rows = const [],
+    this.seeds = const [],
+  });
 
   /// Fewer than 3 rankings: the hero and personal rows give way to the "Rank 3" prompt.
   bool get isNewUser => rankingCount < ExploreWeights.minRankingsForPicks;
+
+  /// The seed [pick] is most like (its strongest seed link), or null.
+  ExploreSeed? strongestSeed(ScoredCandidate pick) {
+    ExploreSeed? best;
+    var bestW = 0.0;
+    for (final link in pick.candidate.seedLinks) {
+      for (final seed in seeds) {
+        if (seed.titleId != link.seedId) continue;
+        final w = ExploreRanker.linkContribution(seed, link);
+        if (w > bestW) (best, bestW) = (seed, w);
+      }
+    }
+    return best;
+  }
 
   ExploreRow? row(ExploreRowKind kind) {
     for (final r in rows) {
@@ -402,6 +425,7 @@ class ExploreRanker {
       mediaType: mediaType,
       rankingCount: rankingCount,
       hero: hero,
+      seeds: seeds,
       rows: [
         if (shows(trending, ExploreWeights.minRowItems)) trending,
         if (shows(picks, ExploreWeights.minRowItems)) picks,

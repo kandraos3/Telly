@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:telly_app/core/services/haptics_service.dart';
 import 'package:telly_app/core/widgets/poster_image.dart';
-import 'package:telly_app/features/discovery/data/discovery_repository.dart';
 import 'package:telly_app/features/discovery/domain/discovery_models.dart';
+import 'package:telly_app/features/discovery/presentation/controllers/explore_picks.dart';
 import 'package:telly_app/features/feed/data/social_repository.dart';
 import 'package:telly_app/features/feed/presentation/controllers/feed_recommendations.dart';
 import 'package:telly_app/features/feed/presentation/screens/activity_feed_screen.dart';
@@ -66,7 +66,7 @@ void main() {
         socialRepositoryProvider.overrideWithValue(
           FakeSocialRepository(feed: [for (var i = 0; i < 8; i++) fakeActivity('a$i', minutesAgo: i)]),
         ),
-        discoveryRepositoryProvider.overrideWithValue(FakeDiscoveryRepository(recommended: picks)),
+        explorePicksProvider.overrideWith((ref) async => picks),
         watchlistRepositoryProvider.overrideWithValue(watchlist),
         posterNetworkImagesProvider.overrideWithValue(false),
         hapticsEnabledProvider.overrideWith((ref) => false),
