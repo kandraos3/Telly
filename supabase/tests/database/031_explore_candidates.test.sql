@@ -55,6 +55,11 @@ INSERT INTO public.title_related (seed_id, seed_media_type, related_id, position
     (157336, 'movie', 693134, 3),  -- muted
     (157336, 'movie', 872585, 4);  -- Oppenheimer
 
+-- The fetch log (#177) is what missing_related reads: 992002 was fetched 15 days ago.
+INSERT INTO public.title_related_fetches (seed_id, seed_media_type, fetched_at, result_count)
+SELECT seed, 'movie', CASE WHEN seed = 992002 THEN NOW() - INTERVAL '15 days' ELSE NOW() END, 20
+FROM unnest(ARRAY[157336, 496243, 992001, 992002, 129]) seed;
+
 INSERT INTO public.trending_titles (media_type, position, title_id)
 SELECT 'movie', p, 993000 + p FROM generate_series(2, 20) p;
 INSERT INTO public.trending_titles (media_type, position, title_id) VALUES
