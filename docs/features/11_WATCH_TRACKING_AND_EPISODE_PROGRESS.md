@@ -41,7 +41,7 @@ Each tracked title falls into exactly one group, checked in this order:
 
 ### 2.4 Dual canon
 - Tracking rows carry `media_type` like every other per-title row.
-- Every list, count and stat that shows tracking filters by one media type, except the hub's *All* chip and Home's summary. Those show both, labelled per row ("Movie" in the meta line).
+- Every list, count and stat that shows tracking filters by one media type, except the hub's *All* chip and Home's hero and chips (SCR-21). Those show both, labelled per row ("Movie" in the meta line).
 - Nothing in tracking compares a movie with a series.
 
 ### 2.5 Movies
@@ -124,7 +124,7 @@ Each write also appends **episode events**, which stats count (§8):
 - **Finished title:** starting again offers **Watch again**, which resets the place to NULL and sets `is_rewatch = true`. Events count as normal.
 
 ### 4.2 Mark the next episode watched
-- The button reads **✓ Watched E6**. Home rows, hub rows and Canon row actions use the short form **✓ E6**.
+- The button reads **✓ Watched E6**. Hub rows and Canon row actions use the short form **✓ E6**; Home's hero uses the full label (SCR-21 §21.2).
 - If the next episode is in another season than your place, it reads **✓ Watched S3 · E1** (short form **✓ S3E1**).
 - Tapping it:
   - moves the place forward (§3.5) with the light impact haptic;
@@ -141,7 +141,7 @@ Each write also appends **episode events**, which stats count (§8):
   - **Rewatched it**.
 - **Mark as not watched** on episode X sets the place to the episode before X, or NULL if X is S1 E1. If that moves the place back more than one episode, it confirms first: "S2 · E3 to S2 · E6 will count as not watched." with **Move back** and **Cancel**.
 - **Rewatched it** records `REWATCHED` (§3.6) and shows "Rewatch logged".
-- **Long-press** on a ✓ E6 button (Home, hub) offers *Un-log S2 · E5* for the last watched episode only.
+- **Long-press** on a ✓ E6 button (hub) or Home's ✓ Watched E6 offers *Un-log S2 · E5* for the last watched episode only.
 - If un-logging takes a `CAUGHT_UP` or `FINISHED` title back to `WATCHING`, its state follows §3.3. A finish sheet that was already shown doesn't reopen.
 
 ### 4.4 Jump
@@ -177,7 +177,7 @@ The **finish sheet** opens when a write takes a series to `CAUGHT_UP` or `FINISH
 - `new_episodes_since` is cleared by the next forward write on that title.
 - **UI:**
   - The hub's *New episodes* group comes first.
-  - Home's summary puts these titles first.
+  - Home's hero breaks ties in their favour, and a *New episodes* move offers the others (SCR-21).
   - The title page shows the *New season* state (SCR-08 §T.6): "Season 3 is out" when `next(place).episode = 1`, otherwise "E4 is out".
   - Rows carry an amber pill with the same text.
 - **Ranked series:** if the title is ranked with status `WATCHING` (Up to date), its rank is kept. The next finish sheet offers **Re-duel** (§4.5).
@@ -343,7 +343,7 @@ All of these are `SECURITY DEFINER`, `SET search_path = public`. They take `p_cl
 - `WATCH_STARTED`: "Maya started watching Severance". Posted at most once per title per 30 days per user.
 - `WATCH_FINISHED`: "Maya finished Shōgun". Posted at most once per title per 30 days.
 - Both use the existing feed card layout with no score chip, and respect the account's visibility mode like every activity. Older apps never receive them: `get_activity_feed` needs `p_include_tracking => true`, like medals and challenges.
-- **Home's friend strip (SCR-21):** "started watching" and "finished" join the existing verbs.
+- **Home's Friends line (SCR-21 §21.4):** "started watching" and "finished" join the existing verbs.
 
 ## 8. Stats
 - **Canon Stats sheet (SCR-14):**
@@ -420,7 +420,7 @@ All of these are `SECURITY DEFINER`, `SET search_path = public`. They take `p_cl
   - the episode sheet (un-log, rewatch, jump confirm);
   - the finish sheet (unranked and ranked);
   - the hub groups and empty and offline states;
-  - the Home summary, More tile and Canon strip and row tag;
+  - the Home hero and chips (SCR-21), More tile and Canon strip and row tag;
   - both themes.
 - **Provider:** optimistic update then replay; undo nets zero; offline queue order.
 - **pgTAP:**

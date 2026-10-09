@@ -205,7 +205,7 @@ The Duel screen is a distraction-free, full-screen battleground.
 ### 5.5 Section Switchers — `FE-UI-01`
 Two levels of switcher, each with one look everywhere (`lib/core/widgets/`):
 - **Segmented control** (`TellySegmentedControl`): switches a screen's sections. Feed (Following / Squads / Global), Queue Lists (My lists / Friends' lists), Squad hub (Consensus / Watchlist / Debates). Surface `#11131A` track, radius 12, 4px inset; the selected segment lifts onto Overlay `#1A1D27` with a glass border and a Phosphor Lime label (`#233B00` on the light theme). Labels are Plus Jakarta Sans `labelMedium` w800; 48dp targets; selection-click haptic.
-- **Canon switcher** (`TellyCanonSwitcher`), compact since epic #47 (decision [0004](../decisions/0004-canon-podium-and-queue-up-next.md)). Movies | TV Shows, Movies always on the left. Used on Canon, Queue, Home and the Squad hub, with the same look everywhere.
+- **Canon switcher** (`TellyCanonSwitcher`), compact since epic #47 (decision [0004](../decisions/0004-canon-podium-and-queue-up-next.md)). Movies | TV Shows, Movies always on the left. Used on Canon, Queue and the Squad hub, with the same look everywhere.
   - **Track:** Surface, radius 14, 4 dp inset, glass border, 48 dp min height.
   - **Selected half:** lifts onto Overlay `#1A1D27` (light `#F0F2F5`) with a glass border and radius 10. Its label is `textPrimary`, and its count is in the segmented control's accent label colour (`#D2FF52`; light `#233B00`, which keeps AA contrast on Overlay).
   - **Unselected half:** label and count in `textTertiary`.

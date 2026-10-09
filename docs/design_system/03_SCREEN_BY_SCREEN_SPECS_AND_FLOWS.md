@@ -72,7 +72,7 @@ The five tab screens (`SCR-21`, `SCR-07`, `SCR-14`, `SCR-05`, `SCR-22`) share on
 
 | Screen | Title | Actions |
 | :--- | :--- | :--- |
-| `SCR-21` Home | Home | Search (opens Explore with the search field focused) |
+| `SCR-21` Home | Home | Streak chip (opens Your level; hidden at 0 weeks), Search (opens Explore with the search field focused) |
 | `SCR-07` Explore | Explore | none (the search bar sits directly below) |
 | `SCR-14` Canon | Canon | Stats (sheet), View (sheet; icon shows the current view), Share profile |
 | `SCR-05` Social | Social | My Squads (`/squads`), Search (`/social/search`, `SCR-28`) |
@@ -936,38 +936,160 @@ The Canon tab opens on your rankings. Your profile card lives in the More hub (`
 
 ### `SCR-21`: Home
 
-> Tracking: epic #44 (shell) · content redesign: epic #45 · Status: shipped (interim content)
+> Tracking: epic #45 · Status: approved · Decision [0011](../decisions/0011-home-tonight-hero-and-moves.md) · Mockup [0045-home-tonight-moves.html](mockups/0045-home-tonight-moves.html)
 
-The landing tab (`/home`). Epic #45 designs its real content (currently-watching tracking). Until then it shows only data the app already has:
+The landing tab (`/home`). Its first job is to answer "what do I watch now?", and its second is to offer a few things worth doing. It has three parts, always in this order: the **Tonight** hero, **Your moves** and the **Friends line**. Nothing else is on Home. Your canon lives in the Canon tab and the full feed in Social.
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│  Home                                          [ 🔍 ]  │
+│  Home                             [ ▲ 6 weeks ]  [ 🔍 ] │
 ├────────────────────────────────────────────────────────┤
-│  ── YOUR CANON ───────────────────────────── See all   │
-│  [        Movies        |        TV Shows        ]       │
-│  [ #1 poster ] [ #2 poster ] [ #3 poster ]             │
+│ ┌────────────────────────────────────────────────────┐ │
+│ │ (backdrop art under a dark scrim)                  │ │
+│ │ UP NEXT · SEVERANCE                                │ │
+│ │ S2 · E6 "Attila"                                   │ │
+│ │ 52 min · Apple TV+ · 4 left this season            │ │
+│ │ [ ✓ Watched E6            ] [ Details ]            │ │
+│ │ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━───────────────        │ │
+│ └────────────────────────────────────────────────────┘ │
+│  (▮ Slow Horses · E2) (▮ Shōgun · S2 new) (All 5 ›)    │
 │                                                        │
-│  ── FROM YOUR FRIENDS ─────────────────────── See all  │
-│  (👤) Maya ranked The Bear #3              [ 8.94 ]    │
-│  (👤) Jordan ranked Severance #2           [ 9.40 ]    │
-│  (👤) …                                                │
+│  ── YOUR MOVES ──────────────────────────────────────  │
+│  [★] RANK IT · You finished The Bear    [Log and duel] │
+│  [◆] CHALLENGE · Heist Month: 4 of 8           [Open]  │
+│  [≈] COMPARE · Maya ranked Andor #2             [See]  │
+│  [▶] UP NEXT IN YOUR QUEUE · Dune: Part Two   [Watch]  │
+│                                                        │
+│  ── FRIENDS ──────────────────────────────── Social ›  │
+│  (M)(J)(S)  Maya, Jordan and 4 others                  │
+│             ranked 9 titles today                      │
 │                                          ┌──────────┐  │
 │                                          │  + Log   │  │
 │                                          └──────────┘  │
 └────────────────────────────────────────────────────────┘
 ```
 
-- **Currently watching** (epic #168; features/11 §2.3; key `home_currently_watching`). It's first on the page, above *Your canon*, until #45 places it.
-  - **Header:** a `TellySectionHeader` "CURRENTLY WATCHING" with **See all N ›**. Both the header and See all open `/more/watching`.
-  - **Card:** a Surface card with at most **3 rows**. They're chosen from *New episodes*, then *In progress*, newest `last_progress_at` first, with both canons mixed and each row labelled.
-  - **Row:** a 40 × 58 poster, the title, a meta line ("S2 · E6 'Attila'", an amber "Season 3 is out", or "Movie · started yesterday"), a 6 dp progress bar, and a trailing **✓ E6** (or **✓ Finished** for a movie). Tap opens the title.
-  - **Count line** under the card when more exist: "+ 1 caught up · 2 finished and waiting to be ranked" (caption, `textTertiary`).
-  - **Hidden** when nothing is tracked. Offline it reads from Drift.
-- **Your canon:** a section header (`TellySectionHeader`), the shared canon switcher, and the top 3 of the selected canon as the Canon grid's poster tiles (component library §3.4: rank badge and score chip). The switcher shares the Canon tab's selection, and the two canons are never mixed. *See all* opens the Canon tab. Tapping a poster opens the title.
-- **From your friends:** the 3 newest items of the Following feed by other people (the same feed state as the Social tab; your own posts are left out) as compact rows: a 36dp avatar, then "<name> ranked <title> #N" ("dropped", "queued" or "commented on" for other activity types), then a score chip in tabular figures on an 18% tint of its tier accent with a tier-accent border (style guide §2.2; no chip for drops). Tapping a row opens the title. *See all* opens the Social tab.
-- **Empty states:** with no ranked titles in the selected canon, that section becomes a card reading "Log your first title to start your canon" with a Log button. With no activity from other people, the friends section becomes "Find friends in Social", linking to the Social tab.
-- **Loading:** skeleton tiles and rows. **Offline:** the canon comes from Drift. The friends section keeps what it loaded earlier in the session, or hides if nothing has loaded.
+#### 21.1 Header
+- The shared tab header (§0) titled **Home**, with Search as before.
+- **Streak chip** (key `home_streak_chip`): the lime "▲ 6 weeks" chip from features/10 §3 (`WeeklyStreak.chipLabel`), placed before Search. Tapping it opens Your level (`SCR-27`, `/more/level`). It's hidden while `currentWeeks` is 0, and when level data has never loaded.
+
+#### 21.2 Tonight hero (key `home_hero`)
+One card with 16 dp side margins, radius 18 and a minimum height of 236 dp. The art (the backdrop, or the poster when there's none) sits under a dark scrim that runs from transparent at 20% to `#08090C` at 92% at the bottom. The text colours are therefore fixed in both themes:
+- eyebrow: Phosphor Lime `#D2FF52`, 9.5 sp, uppercase;
+- title: white, display face, 23 sp;
+- meta: `#C8CAD8`, 11 sp.
+
+The primary button is lime `#D2FF52` with `#08090C` text. The secondary button is glass: white at 12% with a white-at-20% border. Tapping the card outside its buttons opens the title.
+
+The hero shows the first mode that applies (`HomeHeroPicker`, §21.5):
+
+| Mode | When | Eyebrow · title · meta | Buttons |
+|---|---|---|---|
+| **Watching** | a tracked title is in *New episodes* or *In progress* (features/11 §2.3) | "UP NEXT · SEVERANCE" · `S2 · E6 "Attila"` ("Episode 6" without a cached name) · runtime, first streaming provider, "N left this season" | **✓ Watched E6** · **Details** |
+| **Queue** | none of the above, and the Queue isn't empty | "UP NEXT FROM YOUR QUEUE" · title · "Movie · 2h 46m · on Max" or "Series · 3 seasons · on Max" | **▶ Start watching** · **↻ Another** (hidden with one title) |
+| **New user** | no ranking in either canon, nothing tracked, and an empty Queue | "WELCOME TO TELLY" · "Start your canon" · "Log one movie or show you love. Telly ranks everything after it head to head." | **+ Log a title** |
+| **Explore** | everything else (you have rankings, nothing is tracked, the Queue is empty) | "NOTHING ON TONIGHT" · "Find your next watch" · "Explore has picks from your canon" | **Open Explore** |
+
+- **Watching mode:**
+  - **Which title:** the newest `last_progress_at` across both groups, with ties going to *New episodes*. Both canons are eligible.
+  - **New episodes:** the eyebrow reads "SEASON 3 IS OUT" or "E4 IS OUT" (features/11 §4.8) in amber `#FFA733`.
+  - **Movie:** the eyebrow reads "WATCHING · MOVIE", the meta reads "Started yesterday", and the primary button is **✓ Finished**.
+  - **Progress line:** 3 dp along the bottom, lime on white at 18%. It shows the share of released episodes before your place (features/11 §3.4). Movies have none.
+  - **✓ Watched E6** runs the same action as the title page (features/11 §4.2): the Undo toast, the finish sheet after the last episode (§4.5), and a long press that offers *Un-log S2 · E5* (§4.3). **✓ Finished** runs the movie finish (§2.5).
+  - The hero then picks again, so it can move on to the next episode or another title.
+  - **Details** opens the title.
+- **Queue mode:**
+  - **The pool** is the whole Queue: movies and series together, ignoring the Queue's filters.
+  - **The pick** is random and kept for the app session. ↻ re-rolls it. It uses `UpNextPicker` under its own key, `home`, so it's separate from the Queue screen's picks.
+  - **▶ Start watching** starts tracking (features/11 §4.1): the *Where are you?* sheet for a series, straight to watching for a movie. The title leaves the Queue as it does from the title page (§4.10).
+- **Chips under the hero** (key `home_hero_chips`), in Watching mode only:
+  - The other titles in *New episodes* and *In progress*, at most 3, newest progress first.
+  - Each chip is a pill with a 14 × 20 poster and "Slow Horses · E2", an amber "Shōgun · S2 new", or "Dune · Movie".
+  - Tapping a chip **opens that title**. It doesn't change the hero.
+  - The last chip is **All N ›**, where N counts every tracked title in any group. It opens the Watching hub (`SCR-29`).
+  - The row is hidden when there's nothing else to show. It scrolls sideways if it overflows.
+
+#### 21.3 Your moves (key `home_moves`)
+A `TellySectionHeader` reading "YOUR MOVES", then **at most 4** move cards. The section is hidden when there are none.
+- **Card:** Surface, 1 dp stroke, radius 14, 10 dp padding.
+- **Contents:** a 34 dp icon tile (radius 10, the move's accent at 16% with the glyph in that accent), then a kicker (9 sp, uppercase, accent), a title (12.5 sp, bold) and a meta line, then one small trailing button.
+- Tapping anywhere on the card does what its button does.
+
+| Move | Shows when | Kicker · title · meta | Button | Accent |
+|---|---|---|---|---|
+| `rankFinished` | a tracked title in *Finished, not ranked* that was finished in the last 14 days | RANK IT · "You finished The Bear" · "Series · yesterday" | **Log and duel** (lime): opens Log with the watch status prefilled, as the finish sheet does (features/11 §4.5) | lime |
+| `newEpisodes` | a *New episodes* title other than the hero's | NEW EPISODES · "Shōgun: Season 2 is out" · "You're caught up on S1" | **Resume**: opens the title | amber |
+| `streakAtRisk` | `currentWeeks ≥ 1`, the running week is still `current` (not counted), and it's Thursday or later | KEEP YOUR STREAK · "Rank 1 title by Sunday" · "Your 6-week streak needs one ranking this week" | **+ Log** (lime) | amber Thursday and Friday; coral `#FF4B6E` Saturday and Sunday |
+| `challenge` | a joined, unfinished challenge that ends within 3 days or is at least 75% done | CHALLENGE · "Heist Month: 4 of 8" · "9 days left" ("Ends tomorrow", "Ends today") | **Open**: opens the challenge | amber |
+| `friendCompare` | in the last 3 days, a friend ranked (`rankingCreated` or `upsetAlert` in the Following feed) a title you've ranked in the same canon | COMPARE · "Maya ranked Andor #2" · "You have it at #5 · 9.40 vs 9.08" | **See**: opens the title | violet |
+| `queuePick` | the hero isn't in Queue mode and the Queue isn't empty | UP NEXT IN YOUR QUEUE · title · "Movie · on Max" | **Watch**: opens the title | lime |
+| `startTracking` | you've never tracked anything | TRACK · "Watching a show right now?" · "Track it and log episodes from here" | **Find it**: opens Explore with search focused | lime |
+| `findFriends` | you follow nobody | FRIENDS · "Find friends in Social" · "See what they rank" | **Search**: opens Search Users (`SCR-28`) | violet |
+
+**Ranking** (`HomeMovesRanker`, §21.5). Each candidate has a fixed priority. The list sorts by priority, then by recency (newest first), then by title id, so the order is stable.
+
+| Priority | Move |
+|---|---|
+| 100 | `streakAtRisk` on Saturday or Sunday |
+| 90 | `rankFinished` |
+| 85 | `challenge` ending within 3 days |
+| 80 | `newEpisodes` |
+| 75 | `challenge` at 75% or more |
+| 70 | `streakAtRisk` on Thursday or Friday |
+| 60 | `friendCompare` |
+| 50 | `startTracking` |
+| 45 | `findFriends` |
+| 40 | `queuePick` |
+
+- At most **2** moves of one kind and **4** in total. One move per title, so the highest priority wins.
+- Days use the device's local time, and a week runs Monday to Sunday (features/10 §3).
+- `friendCompare` stays within one canon. Your ranking must have the friend's `mediaType`, so a movie never compares with a series. Your rank and score come from the canon state (`profileCanonProvider`). One move per title, from the most recent friend.
+- `queuePick` uses the same `home` pick as the hero's Queue mode.
+
+#### 21.4 Friends line (key `home_friends_line`)
+A `TellySectionHeader` reading "FRIENDS" with **Social ›**, then one Surface card:
+- up to 3 overlapping 26 dp avatars, for the most recent distinct friends;
+- a title: "Maya, Jordan and 4 others", "Maya and Jordan", or "Maya";
+- a meta line: "ranked 9 titles today", counting today's `rankingCreated` and `upsetAlert` items from friends in the loaded Following feed. With none today, it shows the newest item's sentence instead ("Maya started watching Severance · 2h"), using the verbs Home uses today (features/04, features/11 §7.2).
+
+Your own posts, medal posts and challenge posts are left out. Tapping the card opens Social. The line is hidden when you follow nobody (the `findFriends` move covers that) or when the feed has nothing from friends.
+
+#### 21.5 Data and logic
+- **Sources.** All of them already exist and are only read:
+  - `trackingProvider` (backed by Drift);
+  - the Queue (`userWatchlistProvider`, both media types);
+  - `profileCanonProvider`, for whether you have rankings and for your rank and score in comparisons;
+  - `yourLevelControllerProvider`, for the streak;
+  - `challengesControllerProvider`;
+  - `feedControllerProvider(FeedFilter.following)`, plus whether you follow anyone.
+
+  There's no backend change.
+- **Pure Dart**, in `lib/features/home/domain/`, with plain inputs and `now` passed in so the weekday rules can be tested:
+  - `HomeHeroPicker.pick(...) → HomeHero`: the mode, plus the tracked item or the Queue pick;
+  - `HomeMovesRanker.rank(...) → List<HomeMove>`: the tables in §21.3;
+  - `FriendsLine.from(feed, me, now)`.
+- **`homeStateProvider`** derives one `HomeState` from the sources, so widgets hold no logic. A source that's loading or has failed counts as empty.
+- **Removed:**
+  - `HomeCurrentlyWatching`;
+  - Home's `_CanonSection` and `_FriendsSection`;
+  - `TrackingHub.homeRows` and `homeCountLine`, if nothing else uses them.
+
+#### 21.6 States
+- **Loading:** before tracking and the Queue are first known, Home shows a hero skeleton (236 dp, the `card` colour, radius 18) and two 56 dp move skeletons. Each part swaps in as its data arrives.
+- **Stable order:** moves never re-sort while they're on screen. The list refreshes when Home becomes visible again or after you act on a move. The hero re-picks after its own button.
+- **Offline:**
+  - Tracking, the Queue and the canon come from Drift, so the hero and most moves still work.
+  - The streak chip uses the cached level snapshot.
+  - Challenge and friend moves and the Friends line use what loaded earlier in the session, or are left out.
+  - ✓ Watched goes through the offline queue (features/11).
+- **Errors:** Home never shows an error. A failed source just drops its parts.
+- **Empty:** there's no empty page. The hero always has a mode, and a new user gets the New user hero with `startTracking` and `findFriends` moves.
+- **Both themes:** the hero is fixed dark art in both themes. Move cards, chips and the Friends line use the theme tokens (Surface, stroke, text). Accents use each theme's values: in light, lime text and glyphs are `#4D7800`, while `#D2FF52` fills keep their `onLime` text.
+- **Dual canon:** the hero, chips and moves may show movies and series side by side, each labelled, but every comparison and ranking stays within one canon.
+- **Accessibility:**
+  - The hero is one semantics group ("Up next, Severance, season 2 episode 6, Attila"), with its buttons as separate actions.
+  - A move card reads as kicker, title, meta and button.
+  - Every tap target is at least 48 dp.
 
 ### `SCR-22`: More Hub
 
