@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,7 +13,13 @@ import 'package:telly_app/features/auth/data/auth_repository.dart';
 import 'package:telly_app/features/auth/domain/user_profile.dart';
 import 'package:telly_app/features/feed/data/social_repository.dart';
 import 'package:telly_app/features/feed/domain/social_models.dart';
+import 'package:telly_app/features/challenges/domain/challenge.dart';
+import 'package:telly_app/features/challenges/presentation/controllers/challenges_controller.dart';
+import 'package:telly_app/features/home/presentation/providers/home_providers.dart';
 import 'package:telly_app/features/home/presentation/screens/home_screen.dart';
+import 'package:telly_app/features/levels/presentation/controllers/levels_controller.dart';
+import 'package:telly_app/features/queue/domain/streaming_models.dart';
+import 'package:telly_app/features/queue/presentation/screens/smart_queue_screen.dart';
 import 'package:telly_app/features/profile/presentation/controllers/profile_controller.dart';
 import 'package:telly_app/features/ranking/domain/canon_tier.dart';
 import 'package:telly_app/features/ranking/domain/canon_type.dart';
@@ -26,6 +33,8 @@ import 'package:telly_app/features/tracking/presentation/providers/tracking_prov
 import '../../fakes/fake_auth_repository.dart';
 import '../../fakes/fake_social_repository.dart';
 import '../../fakes/fake_tracking_repository.dart';
+import '../levels/levels_fixtures.dart';
+import 'home_fixtures.dart' show SeededChallenges, SeededLevel, SeededQueue, queued;
 
 /// Fixed canon state for screen tests.
 class _SeededCanon extends ProfileCanonNotifier {
@@ -100,6 +109,7 @@ void main() {
     SocialRepository? social,
     ThemeData? theme,
     List<TrackingItem> tracking = const [],
+    List<WatchlistItem> queue = const [],
   }) async {
     tester.view.physicalSize = const Size(390, 1400);
     tester.view.devicePixelRatio = 1;
@@ -115,6 +125,10 @@ void main() {
       hapticsEnabledProvider.overrideWith((ref) => false),
       trackingRepositoryProvider.overrideWithValue(FakeTrackingRepository(tracking)),
       trackingNowProvider.overrideWithValue(() => _now),
+      homeRandomProvider.overrideWithValue(Random(4)),
+      userWatchlistProvider.overrideWith(() => SeededQueue(queue)),
+      yourLevelControllerProvider.overrideWith(() => SeededLevel(sampleLevel(streak: 0))),
+      challengesControllerProvider.overrideWith(() => SeededChallenges(const ChallengesOverview())),
       authRepositoryProvider.overrideWithValue(FakeAuthRepository(
         signedInUserId: 'u-me',
         profile: UserProfile(
@@ -201,37 +215,43 @@ void main() {
     });
   });
 
-  group('#232: SCR-21 Home — currently watching', () {
-    testWidgets('is hidden when nothing is tracked', (tester) async {
-      await pumpHome(tester);
-      expect(find.byKey(const Key('home_currently_watching')), findsNothing);
-      expect(find.text('YOUR CANON'), findsOneWidget, reason: 'the canon section is where it always was');
-    });
-
-    testWidgets('leads the page, above Your canon', (tester) async {
+  group('#242: SCR-21 Home — Tonight hero', () {
+    testWidgets('leads the page with the next episode and the one-tap button', (tester) async {
       await pumpHome(tester, tracking: [_tracked('Shogun')]);
-      expect(find.text('CURRENTLY WATCHING'), findsOneWidget);
-      expect(tester.getTopLeft(find.byKey(const Key('home_currently_watching'))).dy,
-          lessThan(tester.getTopLeft(find.text('YOUR CANON')).dy));
+      expect(tester.widget<Text>(find.byKey(const Key('home_hero_eyebrow'))).data, 'UP NEXT · SHOGUN');
+      expect(tester.widget<Text>(find.byKey(const Key('home_hero_title'))).data, 'S2 · E6 "Attila"');
+      expect(find.descendant(of: find.byKey(const Key('home_hero_primary')), matching: find.text('✓ Watched E6')), findsOneWidget);
+      expect(find.byKey(const Key('home_hero_details')), findsOneWidget);
+      expect(find.byKey(const Key('home_hero_progress')), findsOneWidget, reason: 'a series carries a progress line');
+      expect(tester.getTopLeft(find.byKey(const Key('home_hero'))).dy, lessThan(tester.getTopLeft(find.text('YOUR CANON')).dy));
+      expect(tester.getSize(find.byKey(const Key('home_hero'))).height, greaterThanOrEqualTo(236));
     });
 
-    testWidgets('shows at most three rows: New episodes first, then In progress, newest first', (tester) async {
-      final fresh = _tracked('Fresh', idle: 6, newSince: _now);
-      await pumpHome(tester, tracking: [
-        _tracked('Older', idle: 5),
-        _tracked('Newest', idle: 1),
-        fresh,
-        _tracked('Middle', idle: 3),
-        _tracked('Paused', idle: 40),
-      ]);
-      final titles = tester.widgetList<Text>(find.descendant(of: find.byKey(const Key('home_currently_watching')), matching: find.byType(Text)));
-      final order = [for (final t in titles) t.data].where((t) => ['Fresh', 'Newest', 'Middle', 'Older', 'Paused'].contains(t)).toList();
-      expect(order, ['Fresh', 'Newest', 'Middle'], reason: 'Older and Paused are left out');
-      expect(find.text('Season 3 is out'), findsNothing, reason: 'the new-season badge only shows for a real new season');
-      expect(find.text('E6 is out'), findsOneWidget);
+    testWidgets('✓ Watched logs the episode with an Undo toast', (tester) async {
+      await pumpHome(tester, tracking: [_tracked('Shogun')]);
+      await tester.tap(find.byKey(const Key('home_hero_primary')));
+      await tester.pump();
+      await tester.pump();
+      expect(find.text('S2 · E6 watched'), findsOneWidget);
+      expect(find.text('Undo'), findsOneWidget);
     });
 
-    testWidgets('rows read like the hub, with a bar and ✓ E6, and a movie says so', (tester) async {
+    testWidgets('Details opens the title', (tester) async {
+      final show = _tracked('Shogun');
+      await pumpHome(tester, tracking: [show]);
+      await tester.tap(find.byKey(const Key('home_hero_details')));
+      await tester.pumpAndSettle();
+      expect(find.text('route:${Routes.title('tv', show.titleId)}'), findsOneWidget);
+    });
+
+    testWidgets('a returned show says what is out, in amber, and names the show', (tester) async {
+      await pumpHome(tester, tracking: [_tracked('Shogun', newSince: _now)]);
+      final eyebrow = tester.widget<Text>(find.byKey(const Key('home_hero_eyebrow')));
+      expect(eyebrow.data, 'SHOGUN · E6 IS OUT');
+      expect(eyebrow.style!.color, const Color(0xFFFFA733));
+    });
+
+    testWidgets('a movie says so, finishes with one tap and has no progress line', (tester) async {
       final film = TrackingItem(
         titleId: 5000,
         mediaType: 'movie',
@@ -240,52 +260,102 @@ void main() {
         startedAt: _now.subtract(const Duration(days: 1)),
         lastProgressAt: _now.subtract(const Duration(days: 1)),
       );
-      final show = _tracked('Shogun');
-      await pumpHome(tester, tracking: [show, film]);
-      expect(find.text("S2 · E6 'Attila'"), findsOneWidget);
-      expect(find.text('✓ E6'), findsOneWidget);
-      expect(find.byKey(const Key('hub_progress_bar')), findsOneWidget);
-      expect(find.text('Movie · started yesterday'), findsOneWidget);
-      expect(find.text('✓ Finished'), findsOneWidget);
+      await pumpHome(tester, tracking: [film]);
+      expect(tester.widget<Text>(find.byKey(const Key('home_hero_eyebrow'))).data, 'WATCHING · MOVIE');
+      expect(tester.widget<Text>(find.byKey(const Key('home_hero_meta'))).data, 'Started yesterday');
+      expect(find.descendant(of: find.byKey(const Key('home_hero_primary')), matching: find.text('✓ Finished')), findsOneWidget);
+      expect(find.byKey(const Key('home_hero_progress')), findsNothing);
     });
 
-    testWidgets('the count line mentions caught up and finished-waiting titles; See all counts the hub', (tester) async {
-      await pumpHome(tester, tracking: [
-        _tracked('Shogun'),
-        _tracked('Andor', state: TrackingState.caughtUp, ranked: true),
-        _tracked('The Bear', state: TrackingState.caughtUp),
-        _tracked('Fargo', state: TrackingState.finished),
+    testWidgets('chips list the other titles, then All N; a chip opens its title', (tester) async {
+      final a = _tracked('Alpha', idle: 0);
+      final b = _tracked('Beta', idle: 2);
+      final c = _tracked('Gamma', idle: 3, newSince: _now);
+      await pumpHome(tester, tracking: [a, b, c]);
+      expect(find.byKey(const Key('home_hero_chips')), findsOneWidget);
+      expect(find.text('Beta · E6'), findsOneWidget);
+      expect(find.text('Gamma · E6 new'), findsOneWidget);
+      expect(find.text('All 3 ›'), findsOneWidget);
+      await tester.tap(find.text('Beta · E6'));
+      await tester.pumpAndSettle();
+      expect(find.text('route:${Routes.title('tv', b.titleId)}'), findsOneWidget);
+    });
+
+    testWidgets('All N opens the Watching hub', (tester) async {
+      await pumpHome(tester, tracking: [_tracked('Alpha', idle: 0), _tracked('Beta', idle: 2)]);
+      await tester.tap(find.byKey(const Key('home_chip_all')));
+      await tester.pumpAndSettle();
+      expect(find.text('route:${Routes.watching}'), findsOneWidget);
+    });
+
+    testWidgets('no chip row when it is the only title', (tester) async {
+      await pumpHome(tester, tracking: [_tracked('Alpha')]);
+      expect(find.byKey(const Key('home_hero_chips')), findsNothing);
+    });
+
+    testWidgets('with nothing tracked it falls back to the Queue pick; ↻ needs two titles', (tester) async {
+      await pumpHome(tester, queue: [queued('Dune: Part Two', id: 3, provider: 'Max')]);
+      expect(tester.widget<Text>(find.byKey(const Key('home_hero_eyebrow'))).data, 'UP NEXT FROM YOUR QUEUE');
+      expect(tester.widget<Text>(find.byKey(const Key('home_hero_title'))).data, 'Dune: Part Two');
+      expect(tester.widget<Text>(find.byKey(const Key('home_hero_meta'))).data, 'Movie · on Max');
+      expect(find.byKey(const Key('home_hero_another')), findsNothing);
+      expect(find.byKey(const Key('home_hero_chips')), findsNothing);
+    });
+
+    testWidgets('↻ Another picks a different Queue title', (tester) async {
+      await pumpHome(tester, queue: [for (var i = 1; i <= 3; i++) queued('Film $i', id: i)]);
+      final first = tester.widget<Text>(find.byKey(const Key('home_hero_title'))).data;
+      await tester.tap(find.byKey(const Key('home_hero_another')));
+      await tester.pump();
+      await tester.pump();
+      expect(tester.widget<Text>(find.byKey(const Key('home_hero_title'))).data, isNot(first));
+    });
+
+    testWidgets('a new user is asked to log a first title', (tester) async {
+      await pumpHome(tester, canon: const ProfileCanonState());
+      expect(tester.widget<Text>(find.byKey(const Key('home_hero_title'))).data, 'Start your canon');
+      await tester.tap(find.byKey(const Key('home_hero_primary')));
+      await tester.pumpAndSettle();
+      expect(find.text('route:${Routes.log}'), findsOneWidget);
+    });
+
+    testWidgets('with rankings but nothing to watch it points to Explore', (tester) async {
+      await pumpHome(tester);
+      expect(tester.widget<Text>(find.byKey(const Key('home_hero_title'))).data, 'Find your next watch');
+      await tester.tap(find.byKey(const Key('home_hero_primary')));
+      await tester.pumpAndSettle();
+      expect(find.text('route:${Routes.explore}'), findsOneWidget);
+    });
+
+    testWidgets('shows a skeleton until tracking and the Queue answer', (tester) async {
+      tester.view.physicalSize = const Size(390, 1400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      container = ProviderContainer(overrides: [
+        trackingRepositoryProvider.overrideWithValue(FakeTrackingRepository()),
+        authRepositoryProvider.overrideWithValue(FakeAuthRepository(signedInUserId: 'u-me')),
+        userWatchlistProvider.overrideWith(() => SeededQueue(const [])),
+        yourLevelControllerProvider.overrideWith(() => SeededLevel(sampleLevel(streak: 0))),
+        challengesControllerProvider.overrideWith(() => SeededChallenges(const ChallengesOverview())),
+        profileCanonProvider.overrideWith(() => _SeededCanon(const ProfileCanonState())),
+        socialRepositoryProvider.overrideWithValue(FakeSocialRepository()),
       ]);
-      expect(find.text('+ 1 caught up · 2 finished and waiting to be ranked'), findsOneWidget);
-      expect(find.text('See all 4 ›'), findsOneWidget);
-    });
-
-    testWidgets('no count line when there is nothing else', (tester) async {
-      await pumpHome(tester, tracking: [_tracked('Shogun')]);
-      expect(find.byKey(const Key('home_watching_count')), findsNothing);
-    });
-
-    testWidgets('the header and See all open the Watching hub; a row opens its title', (tester) async {
-      final show = _tracked('Shogun');
-      await pumpHome(tester, tracking: [show]);
-      await tester.tap(find.byKey(const Key('home_watching_see_all')));
+      addTearDown(container.dispose);
+      await tester.pumpWidget(UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(theme: TellyTheme.dark, home: const HomeScreen()),
+      ));
+      expect(find.byKey(const Key('home_hero_loading')), findsOneWidget);
       await tester.pumpAndSettle();
-      expect(find.text('route:${Routes.watching}'), findsOneWidget);
+      expect(find.byKey(const Key('home_hero_loading')), findsNothing);
+      expect(find.byKey(const Key('home_hero')), findsOneWidget);
     });
 
-    testWidgets('tapping the header text also opens the hub', (tester) async {
-      await pumpHome(tester, tracking: [_tracked('Shogun')]);
-      await tester.tap(find.text('CURRENTLY WATCHING'));
-      await tester.pumpAndSettle();
-      expect(find.text('route:${Routes.watching}'), findsOneWidget);
-    });
-
-    testWidgets('a row opens its title', (tester) async {
-      final show = _tracked('Shogun');
-      await pumpHome(tester, tracking: [show]);
-      await tester.tap(find.text('Shogun'));
-      await tester.pumpAndSettle();
-      expect(find.text('route:${Routes.title('tv', show.titleId)}'), findsOneWidget);
+    testWidgets('renders with light tokens', (tester) async {
+      await pumpHome(tester, tracking: [_tracked('Shogun')], theme: TellyTheme.light);
+      expect(find.byKey(const Key('home_hero')), findsOneWidget);
+      expect(tester.widget<Text>(find.byKey(const Key('home_hero_title'))).style!.color, const Color(0xFFFFFFFF),
+          reason: 'the hero text sits on a dark scrim in both themes');
     });
   });
 

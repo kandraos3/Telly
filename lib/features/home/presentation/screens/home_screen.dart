@@ -19,7 +19,7 @@ import '../../../profile/presentation/controllers/profile_controller.dart';
 import '../../../profile/presentation/widgets/poster_grid_view.dart';
 import '../../../ranking/domain/canon_type.dart';
 import '../../../ranking/presentation/widgets/canon_tier_style.dart';
-import '../../../tracking/presentation/widgets/home_currently_watching.dart';
+import '../widgets/home_hero_card.dart';
 
 /// `SCR-21` Home (epic #44): the landing tab. Interim content built only from data the app already has —
 /// the top of the selected canon and the newest Following activity — until epic #45 designs the real Home.
@@ -52,8 +52,9 @@ class HomeScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Currently watching (epic #168) leads the page; it takes no space when empty.
-              HomeCurrentlyWatching(),
+              // The Tonight hero (epic #45) leads the page.
+              HomeHeroSection(),
+              SizedBox(height: 16),
               _CanonSection(),
               SizedBox(height: 24),
               _FriendsSection(),

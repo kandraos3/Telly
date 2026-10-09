@@ -9,6 +9,7 @@ import '../../../logging/domain/log_request.dart';
 import '../../../logging/domain/title_search_result.dart';
 import '../../../profile/domain/dropped_show.dart';
 import '../../../queue/data/watchlist_repository.dart';
+import '../../../queue/domain/streaming_models.dart';
 import '../../../title_detail/data/title_detail_repository.dart';
 import '../../../title_detail/domain/title_detail_models.dart';
 import '../../../profile/presentation/controllers/graveyard_controller.dart';
@@ -104,6 +105,27 @@ abstract final class TrackingActions {
       },
     );
     return started;
+  }
+
+  /// Start watching a Queue title (features/11 §4.1): the title page's flow, fed from the cached detail. A
+  /// series we can't describe offline opens its page instead. The Queue (Home's hero, SCR-13) calls this.
+  static Future<TrackingItem?> startFromQueue(
+    BuildContext context,
+    WidgetRef ref,
+    WatchlistItem item, {
+    ValueChanged<bool>? onQueueChanged,
+  }) async {
+    TitleDetail? detail;
+    try {
+      detail = await ref.read(titleDetailRepositoryProvider).fetchTitleDetail(id: item.showId, mediaType: item.mediaType);
+    } catch (_) {}
+    if (!context.mounted) return null;
+    if (detail == null && item.mediaType == 'tv') {
+      context.push(Routes.title(item.mediaType, item.showId));
+      return null;
+    }
+    final title = detail ?? TitleDetail(id: item.showId, mediaType: item.mediaType, title: item.title, posterPath: item.posterPath);
+    return startWatching(context, ref, title, wasQueued: true, onQueueChanged: onQueueChanged);
   }
 
   /// ✓ E6: moves the place to the next episode, with Undo; opens the finish sheet when that

@@ -985,19 +985,19 @@ The hero shows the first mode that applies (`HomeHeroPicker`, §21.5):
 
 | Mode | When | Eyebrow · title · meta | Buttons |
 |---|---|---|---|
-| **Watching** | a tracked title is in *New episodes* or *In progress* (features/11 §2.3) | "UP NEXT · SEVERANCE" · `S2 · E6 "Attila"` ("Episode 6" without a cached name) · runtime, first streaming provider, "N left this season" | **✓ Watched E6** · **Details** |
-| **Queue** | none of the above, and the Queue isn't empty | "UP NEXT FROM YOUR QUEUE" · title · "Movie · 2h 46m · on Max" or "Series · 3 seasons · on Max" | **▶ Start watching** · **↻ Another** (hidden with one title) |
+| **Watching** | a tracked title is in *New episodes* or *In progress* (features/11 §2.3) | "UP NEXT · SEVERANCE" · `S2 · E6 "Attila"` (`S2 · E6` without a cached name) · runtime ("52 min") and "N left this season", when known | **✓ Watched E6** · **Details** |
+| **Queue** | none of the above, and the Queue isn't empty | "UP NEXT FROM YOUR QUEUE" · title · "Movie · 2 h 46 · on Max" or "Series · 3 seasons · on Max" (the provider only when known) | **▶ Start watching** · **↻ Another** (hidden with one title) |
 | **New user** | no ranking in either canon, nothing tracked, and an empty Queue | "WELCOME TO TELLY" · "Start your canon" · "Log one movie or show you love. Telly ranks everything after it head to head." | **+ Log a title** |
 | **Explore** | everything else (you have rankings, nothing is tracked, the Queue is empty) | "NOTHING ON TONIGHT" · "Find your next watch" · "Explore has picks from your canon" | **Open Explore** |
 
 - **Watching mode:**
   - **Which title:** the newest `last_progress_at` across both groups, with ties going to *New episodes*. Both canons are eligible.
-  - **New episodes:** the eyebrow reads "SEASON 3 IS OUT" or "E4 IS OUT" (features/11 §4.8) in amber `#FFA733`.
+  - **New episodes:** the eyebrow reads "SEVERANCE · SEASON 3 IS OUT" or "SEVERANCE · E4 IS OUT" (features/11 §4.8) in amber `#FFA733`. It names the show because the title line is the episode.
   - **Movie:** the eyebrow reads "WATCHING · MOVIE", the meta reads "Started yesterday", and the primary button is **✓ Finished**.
   - **Progress line:** 3 dp along the bottom, lime on white at 18%. It shows the share of released episodes before your place (features/11 §3.4). Movies have none.
   - **✓ Watched E6** runs the same action as the title page (features/11 §4.2): the Undo toast, the finish sheet after the last episode (§4.5), and a long press that offers *Un-log S2 · E5* (§4.3). **✓ Finished** runs the movie finish (§2.5).
   - The hero then picks again, so it can move on to the next episode or another title.
-  - **Details** opens the title.
+  - **Details** opens the title. So does a tap anywhere else on the card: the text lets taps through to the art.
 - **Queue mode:**
   - **The pool** is the whole Queue: movies and series together, ignoring the Queue's filters.
   - **The pick** is random and kept for the app session. ↻ re-rolls it. It uses `UpNextPicker` under its own key, `home`, so it's separate from the Queue screen's picks.

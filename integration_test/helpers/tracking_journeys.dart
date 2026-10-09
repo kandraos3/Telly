@@ -324,19 +324,22 @@ void trackingJourneys() {
         isFalse);
     expect(_eyebrow('● WATCHING · S1 · E8 NEXT'), findsOneWidget);
 
-    // ...and Home's Currently watching says "S1 · E8".
+    // ...and Home's Tonight hero says "S1 · E8" with the one-tap button.
     c.read(appRouterProvider).go(Routes.home);
-    await _waitFor(tester, find.byKey(const Key('home_currently_watching')));
+    await _waitFor(tester, find.byKey(const Key('home_hero')));
     expect(
       find.descendant(
-          of: find.byKey(const Key('home_currently_watching')),
+          of: find.byKey(const Key('home_hero')),
           matching: find.text('S1 · E8')),
       findsOneWidget,
     );
-    expect(find.text('✓ E8'), findsOneWidget);
+    expect(
+      find.descendant(of: find.byKey(const Key('home_hero_primary')), matching: find.text('✓ Watched E8')),
+      findsOneWidget,
+    );
 
     // 2. ✓ Watched E8 ends the show, so the finish sheet opens. Later, then Undo: back at E7.
-    await _tap(tester, find.byKey(const Key('home_watching_row_tv_$_showId')));
+    await _tap(tester, find.byKey(const Key('home_hero_art')));
     await _tap(tester, find.byKey(const Key('watched_episode_button')));
     await _waitFor(tester, find.byKey(const Key('finish_sheet')));
     await _tap(tester, find.byKey(const Key('finish_later_button')));

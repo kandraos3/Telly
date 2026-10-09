@@ -1,6 +1,11 @@
 import 'package:telly_app/features/challenges/domain/challenge.dart';
+import 'package:telly_app/features/challenges/presentation/controllers/challenges_controller.dart';
 import 'package:telly_app/features/feed/domain/social_models.dart';
+import 'package:telly_app/features/levels/domain/level_models.dart';
+import 'package:telly_app/features/levels/presentation/controllers/levels_controller.dart';
+import 'package:telly_app/features/profile/presentation/controllers/profile_controller.dart';
 import 'package:telly_app/features/queue/domain/streaming_models.dart';
+import 'package:telly_app/features/queue/presentation/screens/smart_queue_screen.dart';
 import 'package:telly_app/features/tracking/domain/tracking_item.dart';
 import 'package:telly_app/features/tracking/domain/tracking_models.dart';
 
@@ -95,3 +100,41 @@ Challenge challenge({
       myProgress: progress,
       completedAt: completedAt,
     );
+
+/// Fixed canon state for Home tests.
+class SeededCanon extends ProfileCanonNotifier {
+  SeededCanon(this.seed);
+  final ProfileCanonState seed;
+
+  @override
+  ProfileCanonState build() => seed;
+}
+
+/// A fixed Queue for Home tests.
+class SeededQueue extends WatchlistNotifier {
+  SeededQueue(this.items);
+  final List<WatchlistItem> items;
+
+  @override
+  Future<List<WatchlistItem>> build() async => items;
+}
+
+/// A fixed level (or a failing one) for Home tests.
+class SeededLevel extends YourLevelController {
+  SeededLevel(this.level, {this.fail = false});
+  final YourLevel level;
+  final bool fail;
+
+  @override
+  Future<YourLevel> build() async => fail ? throw Exception('offline') : level;
+}
+
+/// Fixed challenges (or failing ones) for Home tests.
+class SeededChallenges extends ChallengesController {
+  SeededChallenges(this.overview, {this.fail = false});
+  final ChallengesOverview overview;
+  final bool fail;
+
+  @override
+  Future<ChallengesOverview> build() async => fail ? throw Exception('offline') : overview;
+}

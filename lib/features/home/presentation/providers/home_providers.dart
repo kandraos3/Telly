@@ -50,6 +50,7 @@ class HomeState {
     this.moves = const [],
     this.friends,
     this.streakWeeks = 0,
+    this.queueSize = 0,
     this.heroLoading = false,
     this.movesLoading = false,
   });
@@ -60,6 +61,9 @@ class HomeState {
 
   /// The streak chip's N; 0 hides the chip.
   final int streakWeeks;
+
+  /// Titles in the Queue; ↻ Another needs at least two.
+  final int queueSize;
 
   /// Tracking or the Queue has not answered yet: the hero shows its skeleton.
   final bool heroLoading;
@@ -142,6 +146,7 @@ class HomeController extends Notifier<HomeState> {
       moves: _frozen ?? const [],
       friends: FriendsLine.from(feed: activity, me: me, now: now),
       streakWeeks: level.valueOrNull?.streak.currentWeeks ?? 0,
+      queueSize: queue.length,
       heroLoading: heroLoading,
       movesLoading: movesLoading,
     );

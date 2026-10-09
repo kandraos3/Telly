@@ -29,40 +29,6 @@ import '../../fakes/fake_tracking_repository.dart';
 import '../levels/levels_fixtures.dart';
 import 'home_fixtures.dart';
 
-class _Canon extends ProfileCanonNotifier {
-  _Canon(this.seed);
-  final ProfileCanonState seed;
-
-  @override
-  ProfileCanonState build() => seed;
-}
-
-class _Queue extends WatchlistNotifier {
-  _Queue(this.items);
-  final List<WatchlistItem> items;
-
-  @override
-  Future<List<WatchlistItem>> build() async => items;
-}
-
-class _Level extends YourLevelController {
-  _Level(this.level, {this.fail = false});
-  final YourLevel level;
-  final bool fail;
-
-  @override
-  Future<YourLevel> build() async => fail ? throw Exception('offline') : level;
-}
-
-class _Challenges extends ChallengesController {
-  _Challenges(this.overview, {this.fail = false});
-  final ChallengesOverview overview;
-  final bool fail;
-
-  @override
-  Future<ChallengesOverview> build() async => fail ? throw Exception('offline') : overview;
-}
-
 /// A feed that answers only when [release] is called.
 class _SlowSocial extends FakeSocialRepository {
   _SlowSocial(List<ActivityLog> feed) : super(feed: feed);
@@ -102,10 +68,10 @@ void main() {
           createdAt: DateTime(2026),
         ),
       )),
-      profileCanonProvider.overrideWith(() => _Canon(canon)),
-      userWatchlistProvider.overrideWith(() => _Queue(queue)),
-      yourLevelControllerProvider.overrideWith(() => _Level(level ?? sampleLevel(), fail: levelFails)),
-      challengesControllerProvider.overrideWith(() => _Challenges(overview, fail: challengesFail)),
+      profileCanonProvider.overrideWith(() => SeededCanon(canon)),
+      userWatchlistProvider.overrideWith(() => SeededQueue(queue)),
+      yourLevelControllerProvider.overrideWith(() => SeededLevel(level ?? sampleLevel(), fail: levelFails)),
+      challengesControllerProvider.overrideWith(() => SeededChallenges(overview, fail: challengesFail)),
       socialRepositoryProvider.overrideWithValue(social ?? FakeSocialRepository()),
     ]);
     addTearDown(c.dispose);
