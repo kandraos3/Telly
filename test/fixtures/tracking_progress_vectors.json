@@ -1,0 +1,618 @@
+{
+  "description": "Canonical watch tracking progress vectors (#168). features/11 §3; shared by Dart TrackingProgress tests and pgTAP _tracking_state (#225).",
+  "today": "2026-10-09",
+  "shows": {
+    "ended_two_seasons": {
+      "description": "Ended series, 2 seasons (9 + 10), every episode aired, episodes cached.",
+      "status": "Ended",
+      "seasons": [
+        {
+          "number": 1,
+          "episode_count": 9,
+          "air_date": "2022-02-18"
+        },
+        {
+          "number": 2,
+          "episode_count": 10,
+          "air_date": "2025-01-17"
+        }
+      ],
+      "episodes": [
+        {
+          "season": 1,
+          "from": 1,
+          "to": 9,
+          "first_air_date": "2022-02-18",
+          "interval_days": 7
+        },
+        {
+          "season": 2,
+          "from": 1,
+          "to": 10,
+          "first_air_date": "2025-01-17",
+          "interval_days": 7
+        }
+      ]
+    },
+    "running_weekly": {
+      "description": "Returning series mid-season: S2 E1-E4 aired, E5-E10 not yet.",
+      "status": "Returning Series",
+      "seasons": [
+        {
+          "number": 1,
+          "episode_count": 8,
+          "air_date": "2024-02-27"
+        },
+        {
+          "number": 2,
+          "episode_count": 10,
+          "air_date": "2026-09-18"
+        }
+      ],
+      "episodes": [
+        {
+          "season": 1,
+          "from": 1,
+          "to": 8,
+          "first_air_date": "2024-02-27",
+          "interval_days": 7
+        },
+        {
+          "season": 2,
+          "from": 1,
+          "to": 10,
+          "first_air_date": "2026-09-18",
+          "interval_days": 7
+        }
+      ]
+    },
+    "no_episode_cache_running": {
+      "description": "Returning series with no tv_episodes rows: season fallback applies, and the latest season of a running show counts as unaired.",
+      "status": "Returning Series",
+      "seasons": [
+        {
+          "number": 1,
+          "episode_count": 6,
+          "air_date": "2025-06-01"
+        },
+        {
+          "number": 2,
+          "episode_count": 6,
+          "air_date": "2026-09-01"
+        }
+      ],
+      "episodes": []
+    },
+    "no_episode_cache_ended": {
+      "description": "Ended series with no tv_episodes rows: every started season counts as aired.",
+      "status": "Ended",
+      "seasons": [
+        {
+          "number": 1,
+          "episode_count": 6,
+          "air_date": "2021-03-05"
+        },
+        {
+          "number": 2,
+          "episode_count": 7,
+          "air_date": "2022-03-04"
+        }
+      ],
+      "episodes": []
+    },
+    "unknown_air_dates": {
+      "description": "Announced season with no air date anywhere: nothing in it has aired.",
+      "status": "Returning Series",
+      "seasons": [
+        {
+          "number": 1,
+          "episode_count": 8,
+          "air_date": "2023-01-15"
+        },
+        {
+          "number": 2,
+          "episode_count": 8,
+          "air_date": null
+        }
+      ],
+      "episodes": [
+        {
+          "season": 1,
+          "from": 1,
+          "to": 8,
+          "first_air_date": "2023-01-15",
+          "interval_days": 7
+        },
+        {
+          "season": 2,
+          "from": 1,
+          "to": 8,
+          "first_air_date": null,
+          "interval_days": 7
+        }
+      ]
+    },
+    "single_season_ended": {
+      "description": "Limited series, one season of 10, all aired.",
+      "status": "Ended",
+      "seasons": [
+        {
+          "number": 1,
+          "episode_count": 10,
+          "air_date": "2024-02-27"
+        }
+      ],
+      "episodes": [
+        {
+          "season": 1,
+          "from": 1,
+          "to": 10,
+          "first_air_date": "2024-02-27",
+          "interval_days": 7
+        }
+      ]
+    }
+  },
+  "vectors": [
+    {
+      "name": "not started, ended show",
+      "show": "ended_two_seasons",
+      "place": null,
+      "next": {
+        "season": 1,
+        "episode": 1
+      },
+      "state": "WATCHING",
+      "watched": 0,
+      "aired_total": 19,
+      "progress": 0.0
+    },
+    {
+      "name": "mid season",
+      "show": "ended_two_seasons",
+      "place": {
+        "season": 2,
+        "episode": 5
+      },
+      "next": {
+        "season": 2,
+        "episode": 6
+      },
+      "state": "WATCHING",
+      "watched": 14,
+      "aired_total": 19,
+      "progress": 0.7368421052631579
+    },
+    {
+      "name": "season boundary: last episode of S1",
+      "show": "ended_two_seasons",
+      "place": {
+        "season": 1,
+        "episode": 9
+      },
+      "next": {
+        "season": 2,
+        "episode": 1
+      },
+      "state": "WATCHING",
+      "watched": 9,
+      "aired_total": 19,
+      "progress": 0.47368421052631576
+    },
+    {
+      "name": "last episode of an ended show",
+      "show": "ended_two_seasons",
+      "place": {
+        "season": 2,
+        "episode": 10
+      },
+      "next": null,
+      "state": "FINISHED",
+      "watched": 19,
+      "aired_total": 19,
+      "progress": 1.0
+    },
+    {
+      "name": "caught up on a running show",
+      "show": "running_weekly",
+      "place": {
+        "season": 2,
+        "episode": 4
+      },
+      "next": null,
+      "state": "CAUGHT_UP",
+      "watched": 12,
+      "aired_total": 12,
+      "progress": 1.0
+    },
+    {
+      "name": "behind on a running show",
+      "show": "running_weekly",
+      "place": {
+        "season": 2,
+        "episode": 1
+      },
+      "next": {
+        "season": 2,
+        "episode": 2
+      },
+      "state": "WATCHING",
+      "watched": 9,
+      "aired_total": 12,
+      "progress": 0.75
+    },
+    {
+      "name": "episode cache missing: latest season of a running show is unaired",
+      "show": "no_episode_cache_running",
+      "place": {
+        "season": 1,
+        "episode": 6
+      },
+      "next": null,
+      "state": "CAUGHT_UP",
+      "watched": 6,
+      "aired_total": 6,
+      "progress": 1.0
+    },
+    {
+      "name": "episode cache missing on an ended show: season fallback airs everything",
+      "show": "no_episode_cache_ended",
+      "place": {
+        "season": 1,
+        "episode": 6
+      },
+      "next": {
+        "season": 2,
+        "episode": 1
+      },
+      "state": "WATCHING",
+      "watched": 6,
+      "aired_total": 13,
+      "progress": 0.46153846153846156
+    },
+    {
+      "name": "unknown air dates never air",
+      "show": "unknown_air_dates",
+      "place": {
+        "season": 1,
+        "episode": 8
+      },
+      "next": null,
+      "state": "CAUGHT_UP",
+      "watched": 8,
+      "aired_total": 8,
+      "progress": 1.0
+    },
+    {
+      "name": "place past the season count is clamped",
+      "show": "single_season_ended",
+      "place": {
+        "season": 1,
+        "episode": 14
+      },
+      "clamped_place": {
+        "season": 1,
+        "episode": 10
+      },
+      "next": null,
+      "state": "FINISHED",
+      "watched": 10,
+      "aired_total": 10,
+      "progress": 1.0
+    },
+    {
+      "name": "place in a season that no longer exists is clamped to the last season",
+      "show": "single_season_ended",
+      "place": {
+        "season": 3,
+        "episode": 2
+      },
+      "clamped_place": {
+        "season": 1,
+        "episode": 10
+      },
+      "next": null,
+      "state": "FINISHED",
+      "watched": 10,
+      "aired_total": 10,
+      "progress": 1.0
+    },
+    {
+      "name": "not started on a limited series",
+      "show": "single_season_ended",
+      "place": null,
+      "next": {
+        "season": 1,
+        "episode": 1
+      },
+      "state": "WATCHING",
+      "watched": 0,
+      "aired_total": 10,
+      "progress": 0.0
+    }
+  ],
+  "movie_vectors": [
+    {
+      "name": "movie in progress",
+      "finished_at": null,
+      "state": "WATCHING"
+    },
+    {
+      "name": "movie finished",
+      "finished_at": "2026-10-06",
+      "state": "FINISHED"
+    }
+  ],
+  "event_vectors": [
+    {
+      "name": "forward one episode",
+      "show": "ended_two_seasons",
+      "from": {
+        "season": 2,
+        "episode": 5
+      },
+      "to": {
+        "season": 2,
+        "episode": 6
+      },
+      "events": [
+        {
+          "kind": "WATCHED",
+          "season": 2,
+          "episode": 6
+        }
+      ]
+    },
+    {
+      "name": "forward across a season boundary",
+      "show": "ended_two_seasons",
+      "from": {
+        "season": 1,
+        "episode": 9
+      },
+      "to": {
+        "season": 2,
+        "episode": 1
+      },
+      "events": [
+        {
+          "kind": "WATCHED",
+          "season": 2,
+          "episode": 1
+        }
+      ]
+    },
+    {
+      "name": "jump forward three",
+      "show": "ended_two_seasons",
+      "from": {
+        "season": 2,
+        "episode": 5
+      },
+      "to": {
+        "season": 2,
+        "episode": 8
+      },
+      "events": [
+        {
+          "kind": "WATCHED",
+          "season": 2,
+          "episode": 6
+        },
+        {
+          "kind": "WATCHED",
+          "season": 2,
+          "episode": 7
+        },
+        {
+          "kind": "WATCHED",
+          "season": 2,
+          "episode": 8
+        }
+      ]
+    },
+    {
+      "name": "start from nothing to S1 E2",
+      "show": "ended_two_seasons",
+      "from": null,
+      "to": {
+        "season": 1,
+        "episode": 2
+      },
+      "events": [
+        {
+          "kind": "WATCHED",
+          "season": 1,
+          "episode": 1
+        },
+        {
+          "kind": "WATCHED",
+          "season": 1,
+          "episode": 2
+        }
+      ]
+    },
+    {
+      "name": "un-log one episode",
+      "show": "ended_two_seasons",
+      "from": {
+        "season": 2,
+        "episode": 6
+      },
+      "to": {
+        "season": 2,
+        "episode": 5
+      },
+      "events": [
+        {
+          "kind": "UNWATCHED",
+          "season": 2,
+          "episode": 6
+        }
+      ]
+    },
+    {
+      "name": "un-log back across a season boundary",
+      "show": "ended_two_seasons",
+      "from": {
+        "season": 2,
+        "episode": 1
+      },
+      "to": {
+        "season": 1,
+        "episode": 8
+      },
+      "events": [
+        {
+          "kind": "UNWATCHED",
+          "season": 1,
+          "episode": 9
+        },
+        {
+          "kind": "UNWATCHED",
+          "season": 2,
+          "episode": 1
+        }
+      ]
+    },
+    {
+      "name": "un-log everything",
+      "show": "single_season_ended",
+      "from": {
+        "season": 1,
+        "episode": 2
+      },
+      "to": null,
+      "events": [
+        {
+          "kind": "UNWATCHED",
+          "season": 1,
+          "episode": 1
+        },
+        {
+          "kind": "UNWATCHED",
+          "season": 1,
+          "episode": 2
+        }
+      ]
+    },
+    {
+      "name": "no move, no events",
+      "show": "ended_two_seasons",
+      "from": {
+        "season": 2,
+        "episode": 6
+      },
+      "to": {
+        "season": 2,
+        "episode": 6
+      },
+      "events": []
+    }
+  ],
+  "group_vectors": [
+    {
+      "name": "new episodes beats in progress",
+      "media_type": "tv",
+      "state": "WATCHING",
+      "days_since_progress": 1,
+      "new_episodes": true,
+      "is_ranked": true,
+      "group": "newEpisodes"
+    },
+    {
+      "name": "series in progress",
+      "media_type": "tv",
+      "state": "WATCHING",
+      "days_since_progress": 29,
+      "is_ranked": false,
+      "group": "inProgress"
+    },
+    {
+      "name": "series pauses at 30 days",
+      "media_type": "tv",
+      "state": "WATCHING",
+      "days_since_progress": 30,
+      "is_ranked": false,
+      "group": "paused"
+    },
+    {
+      "name": "movie in progress at 6 days",
+      "media_type": "movie",
+      "state": "WATCHING",
+      "days_since_progress": 6,
+      "is_ranked": false,
+      "group": "inProgress"
+    },
+    {
+      "name": "movie pauses at 7 days",
+      "media_type": "movie",
+      "state": "WATCHING",
+      "days_since_progress": 7,
+      "is_ranked": false,
+      "group": "paused"
+    },
+    {
+      "name": "caught up but not ranked",
+      "media_type": "tv",
+      "state": "CAUGHT_UP",
+      "days_since_progress": 2,
+      "is_ranked": false,
+      "group": "finishedNotRanked"
+    },
+    {
+      "name": "caught up and ranked",
+      "media_type": "tv",
+      "state": "CAUGHT_UP",
+      "days_since_progress": 2,
+      "is_ranked": true,
+      "group": "caughtUp"
+    },
+    {
+      "name": "finished and ranked inside the grace window",
+      "media_type": "tv",
+      "state": "FINISHED",
+      "days_since_progress": 13,
+      "days_since_finished": 13,
+      "is_ranked": true,
+      "group": "caughtUp"
+    },
+    {
+      "name": "finished and ranked past the grace window leaves the hub",
+      "media_type": "tv",
+      "state": "FINISHED",
+      "days_since_progress": 14,
+      "days_since_finished": 14,
+      "is_ranked": true,
+      "group": null
+    },
+    {
+      "name": "finished movie waiting to be ranked",
+      "media_type": "movie",
+      "state": "FINISHED",
+      "days_since_progress": 1,
+      "days_since_finished": 1,
+      "is_ranked": false,
+      "group": "finishedNotRanked"
+    },
+    {
+      "name": "finished ranked movie leaves the hub at once",
+      "media_type": "movie",
+      "state": "FINISHED",
+      "days_since_progress": 0,
+      "days_since_finished": 0,
+      "is_ranked": true,
+      "group": null
+    },
+    {
+      "name": "a stale new-episodes flag never strands a movie",
+      "media_type": "movie",
+      "state": "WATCHING",
+      "days_since_progress": 1,
+      "new_episodes": true,
+      "is_ranked": false,
+      "group": "inProgress"
+    }
+  ],
+  "episode_ranges": "Each episodes entry covers from..to in one season: episode `from` airs on first_air_date and each later one interval_days after. A null first_air_date means no air date is known. A season with no entry uses the season fallback (features/11 section 3.2)."
+}
