@@ -19,6 +19,16 @@ void main() {
       }
     });
 
+    test('#261: the scenes the chapters need exist', () {
+      expect(siteScenes.map((s) => s.id), containsAll(['home', 'watching', 'achievements', 'level']));
+    });
+
+    test('backdrop paths draw the same art without the title', () {
+      final url = 'https://image.tmdb.org/t/p/w780${backdropPathFor('Severance')}';
+      expect(posterArtFor(url), const GeneratedPosterImage('Severance', showTitle: false));
+      expect(posterArtFor(url), isNot(const GeneratedPosterImage('Severance')));
+    });
+
     test('poster art paths round-trip the title through the poster URL', () {
       final url = 'https://image.tmdb.org/t/p/w342${posterPathFor('Dune: Part Two')}';
       expect(posterArtFor(url), const GeneratedPosterImage('Dune: Part Two'));

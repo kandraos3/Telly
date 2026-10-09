@@ -63,7 +63,7 @@ Each chapter is a section with `id`, `eyebrow` ("01 · Track"), `title`, `body`,
 
 | Chapter | Accent | Screens | Covers |
 |---|---|---|---|
-| Track | `electricCyan` | `home`, `watching` | Home's Tonight hero and Your moves; episode progress and seasons |
+| Track | `electricCyan` | `home`, `watching` | Home's Tonight hero and Your moves; episode progress in the Watching hub |
 | Rank | `phosphorLime` | `reveal`, `canon` | Duels, the score reveal, the podium; the score tiers |
 | Discover | `electricViolet` | `explore`, `queue` | Explore rows; Queue Up next and streaming; Two-to-Watch |
 | Friends | `neonCoral` | `feed`, `taste-match` | Upsets and reactions; Taste Match; user search and private profiles; squads |
@@ -78,11 +78,11 @@ Scenes added for this design (`tool/site/src/scenes.dart`). Each renders the rea
 | Scene | Screen | State shown |
 |---|---|---|
 | `home` | SCR-21 Home, tab 0 | Tonight hero on a tracked show's next episode, two or more moves, the friends line, a streak chip |
-| `watching` | SCR-08 title page | A show partway through a season: episode progress and the *Watched E{n}* button |
+| `watching` | SCR-29 Watching hub | Shows grouped by state (new episodes, in progress, finished not ranked, caught up), each with its progress bar and next-episode button, and this week's totals |
 | `achievements` | Achievements, Medals tab | A mix of gold, silver, bronze, special and locked medals, and a collection in progress |
 | `level` | Your level | Level, XP bar, streak, weekly quests in mixed states, friends this week |
 
-Existing scenes keep rendering the current widgets, so `canon` (podium), `explore`, `queue`, `feed` and `taste-match` update automatically. Scenes the page no longer uses can stay in `scenes.dart`; the builder only copies screenshots the page references.
+Existing scenes keep rendering the current widgets, so `canon` (podium), `explore`, `queue`, `feed` and `taste-match` update automatically. Backdrops in scenes use `backdropPathFor(title)`, which draws the same generated art without the title, so text laid over it stays readable. Scenes the page no longer uses can stay in `scenes.dart`; the builder only copies screenshots the page references.
 
 ## 5. Build checks
 
