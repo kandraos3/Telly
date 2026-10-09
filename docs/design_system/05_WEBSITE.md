@@ -1,6 +1,6 @@
 # Telly UI/UX Design System: 05 — Public Website
 
-> Tracking: epic #254 · Status: approved
+> Tracking: epic #254 · Status: shipped
 > Decision: [0013](../decisions/0013-website-five-chapters-with-playable-duel.md) · Mockup: [0254-website-chapters.html](mockups/0254-website-chapters.html)
 
 The public website at `https://kandraos3.github.io/Telly/` is a static site. It sells the app as it is today, hosts the privacy policy, terms and support pages, and links to the stores. Everything about it is built from the app on each push (`.github/workflows/site.yml`):
