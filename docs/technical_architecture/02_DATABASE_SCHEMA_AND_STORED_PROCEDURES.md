@@ -200,7 +200,7 @@ All write RPCs are `SECURITY DEFINER`, `SET search_path = public`. They take `p_
 | `revive_dropped_show(p_title_id, p_client_mutation_id)` | Deletes the caller's `user_dropped_shows` row and starts tracking at its drop point. |
 | `get_my_tracking()` | Own rows with title fields, season counts, the next episode's cached row, canon membership (rank, score) and the latest aired episode. |
 | `get_title_watchers(p_title_id, p_media_type) → (user_id, username, display_name, avatar_url, total)` | Up to 20 accepted-follow users visible through `can_view_user`, not `GHOST`, tracking the title in `WATCHING`. Never returns a place or state. |
-| `get_tracking_stats(p_media_type, p_year)` | `episodes` (`WATCHED + REWATCHED − UNWATCHED`, ≥ 0) or `movies_finished` for the year in `users.timezone`; `p_year` NULL → this ISO week with `minutes` from cached runtimes. |
+| `get_tracking_stats(p_media_type, p_year)` | `episodes` (`WATCHED + REWATCHED − UNWATCHED`, ≥ 0) or `movies_finished` for the year in `users.timezone`; `p_year` NULL → this ISO week with `minutes` from cached runtimes (`tv_episodes` for TV, `titles.runtime_minutes` for movies). |
 | `refresh_tracking_new_episodes() → INT` | Service role / pg_cron only. `CAUGHT_UP`/`FINISHED` series whose next episode now exists and has aired → `WATCHING`, `new_episodes_since = now()`. |
 
 ### 3.4 Triggers

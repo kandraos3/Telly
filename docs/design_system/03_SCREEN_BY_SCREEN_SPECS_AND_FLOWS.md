@@ -453,6 +453,13 @@ The title page shows where you are in a title you track. Untracked titles look a
   - Row 3: **▶ <provider>** (secondary, the same deep link as *Streaming now*) and **✓ Watched E6** (primary, lime fill), equal widths, 48 dp tall. The key `watched_episode_button` is shared with every ✓ E6 button.
   - No still cached: a `surfaceOverlay` box with the episode number.
   - Up to date or finished: the card reads "You're caught up". It shows the next season's air date when known ("Season 3 · Mar 2027"), or "No new season announced". It offers **Rank <title> →** when the title isn't ranked.
+- **§T.4b Movie Watching card** (key `movie_watching_card`; features/11 §2.5, §5.2b). While a movie is `WATCHING`, it replaces *Streaming now*. Layout:
+  - The same container as §T.4.
+  - Row 1: "WATCHING" label, then "Started yesterday" on the right (caption, `textTertiary`).
+  - Row 2: a 34 × 50 poster (radius 6), the title (`labelLarge` w700) and "2 h 46 · on Max".
+  - Row 3: **▶ <provider>** (secondary) and **✓ Finished** (primary, lime fill, key `movie_finished_button`), equal widths, 48 dp.
+  - Finished: "You finished it · Oct 6" with **Rank <title> →** when unranked, or the rank and score chip when ranked. *Streaming now* returns below it.
+  - Movies never show §T.5, the spoiler guard or the drop-off line. *Watching now* (§T.7) does apply.
 - **§T.5 Seasons section.** The header is renamed *Seasons* (it read "SEASONS ACCORDION"). While tracked:
   - **Season rows** add a 26 dp progress ring to the left: a lime fill, or a lime disc with ✓ when the season is watched. The trailing text is "watched", "5 of 10", "Not started" or "Airing · next Fri, Oct 17".
   - **Episode rows**, when a season is expanded, are 44 dp tall. Each has a 14 dp tick column (✓ in the primary accent up to your place, ● on the next episode), the number "E6" (`textTertiary`, tabular), and the name.
@@ -721,7 +728,7 @@ The Canon tab opens on your rankings. Your profile card lives in the More hub (`
   - **Scope:** it counts only the selected canon's tracked titles in *New episodes*, *In progress* or *Paused*, and the second line counts *Finished, not ranked*.
   - **Tap** opens `/more/watching?filter=tv` (or `movie`).
   - **Hidden** when the canon has no tracked titles. Offline it reads from Drift.
-- **Row progress tag** (Ranked view rows, Tiers rows and the podium's meta line): a ranked title you're tracking in `WATCHING` gets a lime outline pill "▶ S2 · E6" (`labelSmall` w800), or an amber "▶ New" when it has new episodes, after its meta. It isn't shown in 3x3.
+- **Row progress tag** (Ranked view rows, Tiers rows and the podium's meta line): a ranked title you're tracking in `WATCHING` gets a lime outline pill "▶ S2 · E6" (`labelSmall` w800), or an amber "▶ New" when it has new episodes, after its meta. A movie shows "▶ Rewatching" (or "▶ Watching" if `is_rewatch` is false). It isn't shown in 3x3.
 - **Content** (12 dp under the switcher, or the strip) depends on the view:
   - **Ranked** (default):
     - **Podium** (key `canon_podium`): ranks #1–#3 as three poster cards in one row, with 16 dp gutters and 10 dp gaps. Columns are 1.25fr / 1fr / 1fr, bottom-aligned.
@@ -1083,13 +1090,13 @@ Everything you're tracking. Pushed at `/more/watching` with the subpage app bar 
   - *All N*, *Series N* and *Movies N* filter by media type and never mix within their counts.
   - *Finished* lists `FINISHED` titles by `finished_at`, newest first (the history).
   - A `?filter=` query selects one chip on open.
-- **This week strip:** a Surface card with two figures in `headlineSmall` w800 tabular: *episodes* this ISO week, and *time*. Time only shows when known (features/11 §8). The strip is hidden on the Movies chip.
+- **This week strip:** a Surface card with two figures in `headlineSmall` w800 tabular: *episodes* this ISO week (All and Series chips) or *movies* finished this week (Movies chip), and *time*. Time only shows when known (features/11 §8).
 - **Groups** in features/11 §2.3 order. Each has a `TellySectionHeader` with a count, and empty groups are omitted.
 - **Row:** 16 dp gutters, a 36 × 52 poster (radius 6), the title (`bodyLarge` w700, one line), and a meta line:
   - "S2 · E6 'Attila' · 5 left";
   - "Up to date · Oct 4";
   - "Ranked #6 · no new season announced";
-  - "Movie · started yesterday";
+  - "Started yesterday · 2 h 46" for a movie in progress or paused, "Finished Oct 6" for a finished movie (*All* chip rows add "Movie ·" first);
   - in *New episodes*, an amber pill instead ("Season 3 is out", "E4 is out").
   - **Progress bar:** 6 dp, under the meta line, for series in *New episodes*, *In progress* and *Paused*.
   - **Trailing:**
