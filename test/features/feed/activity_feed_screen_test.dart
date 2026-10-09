@@ -43,11 +43,11 @@ void main() {
       expect(find.text('route:/squads'), findsOneWidget);
     });
 
-    testWidgets('the header search button opens Explore with a search request (FE-HEADER-01)', (tester) async {
+    testWidgets('the header search button opens Find Friends (SCR-28, epic #48)', (tester) async {
       await pump(tester);
       await tester.tap(find.byKey(const Key('feed_search_button')));
       await tester.pumpAndSettle();
-      expect(find.textContaining(RegExp(r'^route:/explore\?search=\d+$')), findsOneWidget);
+      expect(find.text('route:/social/search'), findsOneWidget);
     });
 
     testWidgets('renders the tabs, an upset card and standard cards from the repository', (tester) async {

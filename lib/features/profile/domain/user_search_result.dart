@@ -24,6 +24,10 @@ class UserSearchResult {
     this.mutualCount,
   });
 
+  String get handle => username;
+  int? get tasteMatchPercent => tasteMatch;
+  int get mutualFriendsCount => mutualCount ?? 0;
+
   factory UserSearchResult.fromJson(Map<String, dynamic> j) => UserSearchResult(
         id: j['id'] as String,
         username: (j['username'] as String?) ?? '',

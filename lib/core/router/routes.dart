@@ -31,6 +31,7 @@ abstract final class Routes {
   static const reveal = '/log/reveal'; // SCR-12
 
   // Pushed screens
+  static const userSearch = '$social/search'; // SCR-28 (#48)
   static String activity(String id) => '$social/activity/$id'; // SCR-06
   static String title(String mediaType, int id) => '/title/$mediaType/$id'; // SCR-08
   static String profile(String handle) => '/u/$handle'; // SCR-15
