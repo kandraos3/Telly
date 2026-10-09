@@ -998,6 +998,7 @@ The hero shows the first mode that applies (`HomeHeroPicker`, §21.5):
   - **✓ Watched E6** runs the same action as the title page (features/11 §4.2): the Undo toast, the finish sheet after the last episode (§4.5), and a long press that offers *Un-log S2 · E5* (§4.3). **✓ Finished** runs the movie finish (§2.5).
   - The hero then picks again, so it can move on to the next episode or another title.
   - **Details** opens the title. So does a tap anywhere else on the card: the text lets taps through to the art.
+  - The Undo toast from **✓ Watched** (and from ↻-less actions on this card) floats above the Log button, so Undo isn't covered.
 - **Queue mode:**
   - **The pool** is the whole Queue: movies and series together, ignoring the Queue's filters.
   - **The pick** is random and kept for the app session. ↻ re-rolls it. It uses `UpNextPicker` under its own key, `home`, so it's separate from the Queue screen's picks.
@@ -1068,7 +1069,7 @@ Your own posts, medal posts and challenge posts are left out. Tapping the card o
   - `HomeHeroPicker.pick(...) → HomeHero`: the mode, plus the tracked item or the Queue pick;
   - `HomeMovesRanker.rank(...) → List<HomeMove>`: the tables in §21.3;
   - `FriendsLine.from(feed, me, now)`.
-- **`homeStateProvider`** (`lib/features/home/presentation/providers/home_providers.dart`) derives one `HomeState` from the sources, so widgets hold no logic. A source that's loading or has failed counts as empty. The hero follows the data at once. The moves are frozen once shown and re-derive on `refresh()` and whenever a source answers for the first time, so late data (level, challenges, feed) still fills in without re-sorting what's on screen.
+- **`homeStateProvider`** (`lib/features/home/presentation/providers/home_providers.dart`) derives one `HomeState` from the sources, so widgets hold no logic. A source that's loading or has failed counts as empty. The hero follows the data at once. The moves are frozen once shown and re-derive on `refresh()` (which first reads the level and challenges again, so a streak you just kept drops its move) and whenever a source answers for the first time, so late data (level, challenges, feed) still fills in without re-sorting what's on screen.
 - **The Queue pick** is `homeQueuePickProvider`: an `UpNextPicker` under the key `home`, over the whole Queue (movie and series ids are folded into one key, `HomeQueueKey`), kept for the app session.
 - **Removed:**
   - `HomeCurrentlyWatching`;

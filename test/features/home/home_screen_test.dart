@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:telly_app/core/router/routes.dart';
 import 'package:telly_app/core/services/haptics_service.dart';
 import 'package:telly_app/core/theme/telly_theme.dart';
+import 'package:telly_app/core/widgets/telly_log_fab.dart';
 import 'package:telly_app/features/auth/data/auth_repository.dart';
 import 'package:telly_app/features/auth/domain/user_profile.dart';
 import 'package:telly_app/features/feed/data/social_repository.dart';
@@ -178,6 +179,15 @@ void main() {
       await tester.pump();
       expect(find.text('S2 · E6 watched'), findsOneWidget);
       expect(find.text('Undo'), findsOneWidget);
+    });
+
+    testWidgets('the Undo toast floats above the Log button so Undo stays tappable', (tester) async {
+      await pumpHome(tester, tracking: [_tracked('Shogun')]);
+      await tester.tap(find.byKey(const Key('home_hero_primary')));
+      await tester.pump();
+      await tester.pump();
+      final toast = tester.widget<SnackBar>(find.byKey(const Key('tracking_undo_tray')));
+      expect((toast.margin! as EdgeInsets).bottom, 8 + TellyLogFab.clearance);
     });
 
     testWidgets('Details opens the title', (tester) async {

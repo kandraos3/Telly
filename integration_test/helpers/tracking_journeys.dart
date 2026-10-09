@@ -338,19 +338,23 @@ void trackingJourneys() {
       findsOneWidget,
     );
 
-    // 2. ✓ Watched E8 ends the show, so the finish sheet opens. Later, then Undo: back at E7.
-    await _tap(tester, find.byKey(const Key('home_hero_art')));
-    await _tap(tester, find.byKey(const Key('watched_episode_button')));
+    // 2. ✓ Watched E8 from the hero ends the show, so the finish sheet opens. Later, then Undo: back at E7.
+    await _tap(tester, find.byKey(const Key('home_hero_primary')));
     await _waitFor(tester, find.byKey(const Key('finish_sheet')));
     await _tap(tester, find.byKey(const Key('finish_later_button')));
     await _tap(tester, find.text('Undo'));
     await _synced(tester, c);
     expect(server.rows[_showId]!.place, const EpisodeRef(1, 7),
         reason: 'Undo sent the previous absolute place');
-    expect(_eyebrow('● WATCHING · S1 · E8 NEXT'), findsOneWidget);
+    expect(
+      find.descendant(of: find.byKey(const Key('home_hero_primary')), matching: find.text('✓ Watched E8')),
+      findsOneWidget,
+      reason: 'the hero is back on E8',
+    );
 
-    // 3. ✓ Watched E8 again: the finish sheet opens with Finished whole series selected → Log and duel.
-    await _tap(tester, find.byKey(const Key('watched_episode_button')));
+    // 3. ✓ Watched E8 again: the finish sheet opens with Finished whole series selected. Later leaves the show
+    // finished and unranked, so Home offers a Rank it move; its Log and duel opens SCR-09 with the status.
+    await _tap(tester, find.byKey(const Key('home_hero_primary')));
     await _waitFor(tester, find.byKey(const Key('finish_sheet')));
     expect(
       find.descendant(
@@ -365,7 +369,11 @@ void trackingJourneys() {
       findsOneWidget,
       reason: 'Finished whole series is preselected',
     );
-    await _tap(tester, find.byKey(const Key('finish_log_button')));
+    await _tap(tester, find.byKey(const Key('finish_later_button')));
+    final rankMove = find.byKey(const Key('home_move_rankFinished_$_showId'));
+    await _waitFor(tester, rankMove);
+    expect(find.descendant(of: rankMove, matching: find.text('You finished The Miniseries')), findsOneWidget);
+    await _tap(tester, find.descendant(of: rankMove, matching: find.text('Log and duel')));
     await _waitFor(tester, find.byKey(const Key('logging_selected_title')));
     final draft = c.read(loggingSessionProvider);
     expect(draft.title!.id, _showId);

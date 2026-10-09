@@ -69,6 +69,7 @@ abstract final class TrackingActions {
     required bool wasQueued,
     bool ranked = false,
     ValueChanged<bool>? onQueueChanged,
+    bool aboveLogButton = false,
   }) async {
     var request = requestFromDetail(title);
     if (title.isTv && request.seasons.isNotEmpty) {
@@ -96,6 +97,7 @@ abstract final class TrackingActions {
     TrackingUndoTray.show(
       context,
       message: 'Watching ${title.title}',
+      aboveLogButton: aboveLogButton,
       onUndo: () async {
         await controller.stop(started);
         if (wasQueued) {
@@ -114,6 +116,7 @@ abstract final class TrackingActions {
     WidgetRef ref,
     WatchlistItem item, {
     ValueChanged<bool>? onQueueChanged,
+    bool aboveLogButton = false,
   }) async {
     TitleDetail? detail;
     try {
@@ -125,12 +128,12 @@ abstract final class TrackingActions {
       return null;
     }
     final title = detail ?? TitleDetail(id: item.showId, mediaType: item.mediaType, title: item.title, posterPath: item.posterPath);
-    return startWatching(context, ref, title, wasQueued: true, onQueueChanged: onQueueChanged);
+    return startWatching(context, ref, title, wasQueued: true, onQueueChanged: onQueueChanged, aboveLogButton: aboveLogButton);
   }
 
   /// ✓ E6: moves the place to the next episode, with Undo; opens the finish sheet when that
   /// leaves nothing to watch (§4.2, §4.5).
-  static Future<void> markNext(BuildContext context, WidgetRef ref, TrackingItem item) async {
+  static Future<void> markNext(BuildContext context, WidgetRef ref, TrackingItem item, {bool aboveLogButton = false}) async {
     final next = item.nextEpisode?.ref;
     if (next == null || item.isMovie) return;
     await _haptic(ref);
@@ -140,6 +143,7 @@ abstract final class TrackingActions {
     TrackingUndoTray.show(
       context,
       message: '${next.label} watched',
+      aboveLogButton: aboveLogButton,
       onUndo: () => controller.undo(before),
     );
     final updated = await ref.read(trackingRepositoryProvider).getOne(item.titleId, item.mediaType);
@@ -156,7 +160,7 @@ abstract final class TrackingActions {
   }
 
   /// Long-press on ✓: *Un-log S2 · E5* for the last watched episode (§4.3).
-  static Future<void> offerUnlogLast(BuildContext context, WidgetRef ref, TrackingItem item) async {
+  static Future<void> offerUnlogLast(BuildContext context, WidgetRef ref, TrackingItem item, {bool aboveLogButton = false}) async {
     final place = item.place;
     if (place == null) return;
     final choice = await TellyFrostedSheet.show<bool>(
@@ -169,11 +173,11 @@ abstract final class TrackingActions {
       ),
     );
     if (choice != true || !context.mounted) return;
-    await unlog(context, ref, item, place);
+    await unlog(context, ref, item, place, aboveLogButton: aboveLogButton);
   }
 
   /// Marks [episode] and everything after it as not watched; Undo restores the place.
-  static Future<void> unlog(BuildContext context, WidgetRef ref, TrackingItem item, EpisodeRef episode) async {
+  static Future<void> unlog(BuildContext context, WidgetRef ref, TrackingItem item, EpisodeRef episode, {bool aboveLogButton = false}) async {
     final before = item.place;
     await _haptic(ref);
     final controller = ref.read(trackingProvider.notifier);
@@ -182,6 +186,7 @@ abstract final class TrackingActions {
     TrackingUndoTray.show(
       context,
       message: '${episode.label} marked not watched',
+      aboveLogButton: aboveLogButton,
       onUndo: () async {
         final current = await ref.read(trackingRepositoryProvider).getOne(item.titleId, item.mediaType);
         if (current != null) await controller.setPlace(current, before);

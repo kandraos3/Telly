@@ -12,6 +12,7 @@ import 'package:telly_app/features/feed/domain/social_models.dart';
 import 'package:telly_app/features/home/domain/home_hero.dart';
 import 'package:telly_app/features/home/domain/home_moves.dart';
 import 'package:telly_app/features/home/presentation/providers/home_providers.dart';
+import 'package:telly_app/features/achievements/domain/medal.dart';
 import 'package:telly_app/features/levels/domain/level_models.dart';
 import 'package:telly_app/features/levels/presentation/controllers/levels_controller.dart';
 import 'package:telly_app/features/profile/presentation/controllers/profile_controller.dart';
@@ -49,6 +50,7 @@ void main() {
     ProfileCanonState canon = const ProfileCanonState(),
     YourLevel? level,
     bool levelFails = false,
+    List<YourLevel>? levelHolder,
     ChallengesOverview overview = const ChallengesOverview(),
     bool challengesFail = false,
     SocialRepository? social,
@@ -70,7 +72,9 @@ void main() {
       )),
       profileCanonProvider.overrideWith(() => SeededCanon(canon)),
       userWatchlistProvider.overrideWith(() => SeededQueue(queue)),
-      yourLevelControllerProvider.overrideWith(() => SeededLevel(level ?? sampleLevel(), fail: levelFails)),
+      yourLevelControllerProvider.overrideWith(
+        () => levelHolder != null ? SwitchableLevel(levelHolder) : SeededLevel(level ?? sampleLevel(), fail: levelFails),
+      ),
       challengesControllerProvider.overrideWith(() => SeededChallenges(overview, fail: challengesFail)),
       socialRepositoryProvider.overrideWithValue(social ?? FakeSocialRepository()),
     ]);
@@ -175,8 +179,30 @@ void main() {
     ];
     expect((await settled(c)).moves.map((m) => m.titleId), [10], reason: 'frozen while on screen');
 
-    c.read(homeStateProvider.notifier).refresh();
+    await c.read(homeStateProvider.notifier).refresh();
     expect((await settled(c)).moves.map((m) => m.titleId), [11, 10], reason: 'newest finish leads after a refresh');
+  });
+
+  test('refresh reads the level again, so a streak you just kept drops its move', () async {
+    final holder = [sampleLevel(streak: 6)];
+    final c = build(tracking: [tracked('Lead', id: 1, idle: 0)], levelHolder: holder);
+    var state = await settled(c);
+    expect(state.moves.map((m) => m.kind), contains(HomeMoveKind.streakAtRisk));
+    expect(state.streakWeeks, 6);
+
+    // Ranking a title counts this week: the running week turns counted and the streak grows.
+    holder[0] = YourLevel(
+      level: sampleLevel().level,
+      streak: const WeeklyStreak(
+        currentWeeks: 7,
+        weeks: [StreakWeek(label: '2026-W42', status: StreakWeekStatus.counted)],
+      ),
+      quests: const [],
+    );
+    await c.read(homeStateProvider.notifier).refresh();
+    state = await settled(c);
+    expect(state.moves.map((m) => m.kind), isNot(contains(HomeMoveKind.streakAtRisk)));
+    expect(state.streakWeeks, 7);
   });
 
   test('↻ Another re-rolls only Home\'s pick, never the Queue screen\'s', () async {

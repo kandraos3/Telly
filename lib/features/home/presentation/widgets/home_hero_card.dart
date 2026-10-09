@@ -195,13 +195,13 @@ class HomeHeroCard extends ConsumerWidget {
                     if (item.isMovie) {
                       await TrackingActions.finishMovie(context, ref, item);
                     } else {
-                      await TrackingActions.markNext(context, ref, item);
+                      await TrackingActions.markNext(context, ref, item, aboveLogButton: true);
                     }
                     if (context.mounted) ref.read(homeStateProvider.notifier).refresh();
                   },
                   onLongPress: item.isMovie || item.place == null
                       ? null
-                      : () => TrackingActions.offerUnlogLast(context, ref, item),
+                      : () => TrackingActions.offerUnlogLast(context, ref, item, aboveLogButton: true),
                 ),
               ),
             if (canLog) const SizedBox(width: 8),
@@ -227,7 +227,7 @@ class HomeHeroCard extends ConsumerWidget {
                 label: '▶ Start watching',
                 primary: true,
                 onPressed: () async {
-                  await TrackingActions.startFromQueue(context, ref, pick);
+                  await TrackingActions.startFromQueue(context, ref, pick, aboveLogButton: true);
                   if (context.mounted) notifier.refresh();
                 },
               ),

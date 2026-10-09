@@ -160,10 +160,25 @@ class HomeController extends Notifier<HomeState> {
     return [...overview.yours, if (featured != null && featured.joined) featured];
   }
 
-  /// Re-derives the moves now: Home became visible again, or a move was acted on.
-  void refresh() {
+  /// Re-derives the moves now: Home became visible again, or a move was acted on. The level and challenges are read
+  /// again first, so a streak that was just kept (or a challenge just finished) drops its move.
+  Future<void> refresh() async {
+    ref.invalidate(yourLevelControllerProvider);
+    ref.invalidate(challengesControllerProvider);
+    try {
+      await Future.wait([
+        ref.read(yourLevelControllerProvider.future),
+        ref.read(challengesControllerProvider.future),
+      ]);
+    } catch (_) {
+      // Offline: the cached level is what there is.
+    }
     _refreshRequested = true;
-    ref.invalidateSelf();
+    try {
+      ref.invalidateSelf();
+    } on StateError {
+      // Home was closed while the level loaded.
+    }
   }
 
   /// ↻ Another on the hero's Queue pick.

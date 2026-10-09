@@ -138,3 +138,12 @@ class SeededChallenges extends ChallengesController {
   @override
   Future<ChallengesOverview> build() async => fail ? throw Exception('offline') : overview;
 }
+
+/// A level that can change between reads: whatever [holder] holds when the provider builds.
+class SwitchableLevel extends YourLevelController {
+  SwitchableLevel(this.holder);
+  final List<YourLevel> holder;
+
+  @override
+  Future<YourLevel> build() async => holder.single;
+}
