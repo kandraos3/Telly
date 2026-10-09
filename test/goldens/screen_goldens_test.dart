@@ -384,6 +384,58 @@ void main() {
         await unmountTree(tester);
       });
 
+      testWidgets('Golden: SCR-08 seasons expanded with the spoiler guard, $mode', (tester) async {
+        await tester.binding.setSurfaceSize(const Size(393, 2000));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        final db = AppDatabase.inMemory();
+        addTearDown(db.close);
+        await trackingRepositoryFor(db).start(TrackingStartRequest(
+          titleId: 1396,
+          mediaType: 'tv',
+          title: 'Severance',
+          titleStatus: 'Returning Series',
+          seasons: [
+            SeasonInfo(number: 1, episodeCount: 9, airDate: DateTime(2022, 2, 18)),
+            SeasonInfo(number: 2, episodeCount: 10, airDate: DateTime(2025, 1, 17)),
+            SeasonInfo(number: 3, episodeCount: 10, airDate: DateTime(2027, 3, 1)),
+          ],
+          place: const EpisodeRef(2, 2),
+        ));
+        const title = TitleDetail(
+          id: 1396,
+          mediaType: 'tv',
+          title: 'Severance',
+          status: 'Returning Series',
+          network: 'Apple TV+',
+          communityScore: 9.34,
+          seasons: [
+            TitleSeasonDetail(seasonNumber: 1, name: 'Season 1', episodeCount: 9, airDate: '2022-02-18'),
+            TitleSeasonDetail(seasonNumber: 2, name: 'Season 2', episodeCount: 10, airDate: '2025-01-17'),
+            TitleSeasonDetail(seasonNumber: 3, name: 'Season 3', episodeCount: 10, airDate: '2027-03-01'),
+          ],
+        );
+        await tester.pumpWidget(ProviderScope(
+          overrides: [
+            ...trackingOverrides(db),
+            titleDetailRepositoryProvider.overrideWithValue(FakeTitleDetailRepository([title])),
+            watchlistRepositoryProvider.overrideWithValue(_InMemoryWatchlistRepository()),
+          ],
+          child: MaterialApp(
+            theme: dark ? TellyTheme.darkTheme : TellyTheme.lightTheme,
+            home: const ShowDetailScreen(titleId: 1396, mediaType: 'tv', initialTitle: title),
+          ),
+        ));
+        await settle(tester);
+        await tester.tap(find.text('Season 2'));
+        await settle(tester);
+
+        await expectLater(
+          find.byType(ShowDetailScreen),
+          matchesGoldenFile('goldens/title_seasons_${mode}_iphone15.png'),
+        );
+        await unmountTree(tester);
+      });
+
       testWidgets('Golden: SCR-08 movie Watching card, $mode', (tester) async {
         await tester.binding.setSurfaceSize(const Size(393, 852));
         addTearDown(() => tester.binding.setSurfaceSize(null));

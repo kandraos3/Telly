@@ -406,7 +406,7 @@ The **Social** tab (`/social`). It was the landing tab until epic #44; Home (`SC
 │  ━ FRIENDS WHO RANKED THIS (14) ━━━━━━━━━━━━━━━━━━━━━  │
 │  • Jordan (#2 • 9.72) • Maya (#3 • 9.50) • Chris (#14) │
 │                                                        │
-│  ━ SEASONS ACCORDION ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
+│  ━ SEASONS           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
 │  [▼] Season 1 (2022) • 9 Episodes • Avg: 9.45          │
 │  [▶] Season 2 (2025) • 10 Episodes • Avg: 9.60         │
 │                                                        │

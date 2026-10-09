@@ -56,6 +56,7 @@ class _ActionRow extends StatelessWidget {
     required this.primaryKey,
     required this.primaryLabel,
     required this.onPrimary,
+    this.onPrimaryLongPress,
   });
 
   final String? providerName;
@@ -63,6 +64,7 @@ class _ActionRow extends StatelessWidget {
   final Key primaryKey;
   final String primaryLabel;
   final VoidCallback onPrimary;
+  final VoidCallback? onPrimaryLongPress;
 
   @override
   Widget build(BuildContext context) {
@@ -97,6 +99,7 @@ class _ActionRow extends StatelessWidget {
             child: ElevatedButton(
               key: primaryKey,
               onPressed: onPrimary,
+              onLongPress: onPrimaryLongPress,
               style: ElevatedButton.styleFrom(
                 backgroundColor: TellyColors.phosphorLime,
                 foregroundColor: _onLime,
@@ -181,6 +184,7 @@ class NextEpisodeCard extends StatelessWidget {
     required this.now,
     required this.onWatched,
     required this.onRank,
+    this.onUnlogLast,
     this.providerName,
     this.onPlay,
   });
@@ -191,6 +195,9 @@ class NextEpisodeCard extends StatelessWidget {
   final VoidCallback? onPlay;
   final VoidCallback onWatched;
   final VoidCallback onRank;
+
+  /// Long-press on ✓ Watched offers *Un-log <last episode>* (features/11 §4.3).
+  final VoidCallback? onUnlogLast;
 
   @override
   Widget build(BuildContext context) {
@@ -265,6 +272,7 @@ class NextEpisodeCard extends StatelessWidget {
             primaryKey: const Key('watched_episode_button'),
             primaryLabel: TrackingLabels.watched(next.ref, place),
             onPrimary: onWatched,
+            onPrimaryLongPress: place == null ? null : onUnlogLast,
           ),
         ],
       ),

@@ -199,7 +199,7 @@ void main() {
       expect(find.text('Maya'), findsOneWidget);
 
       // Seasons Accordion
-      expect(find.text('SEASONS ACCORDION'), findsOneWidget);
+      expect(find.text('SEASONS'), findsOneWidget);
       expect(find.text('Season 1'), findsOneWidget);
       expect(find.text('Season 2'), findsOneWidget);
       expect(find.text('9 Episodes'), findsOneWidget);
@@ -311,7 +311,7 @@ void main() {
       expect(find.text('+ Log & Add to Canon'), findsOneWidget);
 
       // Dual-Canon Invariant: Movies must NEVER have seasons accordion
-      expect(find.text('SEASONS ACCORDION'), findsNothing);
+      expect(find.text('SEASONS'), findsNothing);
       expect(find.text('COMMUNITY SURVIVAL RATE'), findsNothing);
     });
 

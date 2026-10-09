@@ -23,7 +23,12 @@ import 'package:telly_app/features/tracking/domain/tracking_item.dart';
 import 'package:telly_app/features/tracking/domain/tracking_models.dart';
 import 'package:telly_app/features/tracking/domain/tracking_progress.dart';
 import 'package:telly_app/features/tracking/presentation/providers/tracking_providers.dart';
+import 'package:telly_app/features/tracking/domain/season_progress.dart';
+import 'package:telly_app/features/tracking/presentation/widgets/episode_sheet.dart';
 import 'package:telly_app/features/tracking/presentation/widgets/finish_sheet.dart';
+import 'package:telly_app/features/tracking/presentation/widgets/season_widgets.dart';
+import 'package:telly_app/features/tracking/presentation/widgets/tracking_labels.dart';
+import 'package:telly_app/features/tracking/presentation/widgets/watching_now.dart';
 import 'package:telly_app/features/tracking/presentation/widgets/tracking_header.dart';
 import 'package:telly_app/features/tracking/presentation/widgets/tracking_undo_tray.dart';
 import 'package:telly_app/features/tracking/presentation/widgets/watch_slot.dart';
@@ -71,6 +76,9 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
   final _nextCardKey = GlobalKey();
   final _seasonsKey = GlobalKey();
   bool _expectFinish = false;
+
+  /// Episodes whose hidden name the user tapped to reveal; one at a time, not remembered (§5.5).
+  final Set<EpisodeRef> _revealed = {};
 
   /// The caller's rank for this title, which the finish sheet shows (the page knows it, the
   /// tracking cache only learns it on sync).
@@ -270,6 +278,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
 
                     // Quick Action Hub (Queue, Rank/Duel, Co-Watch, Share)
                     _buildQuickActionHub(title, tracked),
+                    _buildWatchingNow(title),
                     const SizedBox(height: 24),
 
                     // Overview / Synopsis
@@ -288,7 +297,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                     const SizedBox(height: 24),
 
                     // YOUR STATUS section (Ranked vs Unranked)
-                    _buildYourStatusSection(title),
+                    _buildYourStatusSection(title, tracked),
                     const SizedBox(height: 28),
 
                     // FRIENDS WHO RANKED THIS section
@@ -300,7 +309,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
 
                     // SEASONS ACCORDION (TV Series only; omitted for Movies)
                     if (title.isTv && title.seasons.isNotEmpty) ...[
-                      KeyedSubtree(key: _seasonsKey, child: _buildSeasonsAccordion(title.seasons)),
+                      KeyedSubtree(key: _seasonsKey, child: _buildSeasonsAccordion(title, tracked)),
                       const SizedBox(height: 28),
                     ],
 
@@ -308,7 +317,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                     // Hidden until someone has finished, watched or dropped it (FE-DETAIL-02).
                     if (title.isTv && title.socialSummary?.survival?.completedPct != null) ...[
                       _buildSurvivalRateSection(
-                          title.socialSummary!.survival!, title.socialSummary!.survival!.completedPct!),
+                          title.socialSummary!.survival!, title.socialSummary!.survival!.completedPct!, tracked),
                       const SizedBox(height: 32),
                     ],
 
@@ -757,6 +766,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
         providerName: first?.name,
         onPlay: first == null ? null : () => _play(title, first.id),
         onWatched: () => _onWatched(item),
+        onUnlogLast: () => _onUnlogLast(item),
         onRank: () => _onRank(item),
       );
     }
@@ -1053,7 +1063,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
     return platformId.replaceAll('_', ' ').toUpperCase();
   }
 
-  Widget _buildYourStatusSection(TitleDetail title) {
+  Widget _buildYourStatusSection(TitleDetail title, TrackingItem? tracked) {
     final myRanking = title.socialSummary?.myRanking;
     final isRanked = myRanking != null;
 
@@ -1106,6 +1116,14 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                 ),
               ],
             ),
+            if (tracked != null && tracked.newEpisodesSince != null) ...[
+              const SizedBox(height: 10),
+              Text(
+                "When you catch up we'll offer a re-duel",
+                key: const Key('reduel_note'),
+                style: TellyTypography.caption(color: TellyColors.warmAmberOf(context)).copyWith(fontWeight: FontWeight.w600),
+              ),
+            ],
             const SizedBox(height: 14),
             OutlinedButton.icon(
               onPressed: () => _onReDuel(title),
@@ -1464,7 +1482,139 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
     );
   }
 
-  Widget _buildSeasonsAccordion(List<TitleSeasonDetail> seasons) {
+  // --- Watch tracking: Watching now, drop-off line, Seasons as progress (#230) ---
+
+  Widget _buildWatchingNow(TitleDetail title) {
+    final watchers = ref.watch(titleWatchersProvider((title.id, title.mediaType))).valueOrNull;
+    if (watchers == null || watchers.watchers.isEmpty) return const SizedBox.shrink();
+    return WatchingNowRow(watchers: watchers, onOpenProfile: (handle) => context.push(Routes.profile(handle)));
+  }
+
+  /// "You're past S1 · E4, where 18% of viewers drop it." once the place is after the top drop
+  /// point (features/11 §5.4).
+  String? _dropOffLine(CommunitySurvivalSummary survival, TrackingItem? tracked) {
+    final point = survival.commonDropPoint;
+    final place = tracked?.place;
+    if (tracked == null || tracked.isMovie || place == null || point?.season == null || point?.count == null) return null;
+    final total = survival.completed + survival.watching + survival.dropped;
+    if (total <= 0) return null;
+    final drop = EpisodeRef(point!.season!, point.episode ?? 1);
+    if (!(place > drop)) return null;
+    final pct = (point.count! * 100 / total).round();
+    return "You're past ${drop.label}, where $pct% of viewers drop it.";
+  }
+
+  TrackingItem? get _liveTracked => _withRank(ref.read(titleTrackingProvider((widget.titleId, widget.mediaType))));
+
+  Future<void> _onUnlogLast(TrackingItem item) async {
+    final place = item.place;
+    if (place == null) return;
+    final choice = await TellyFrostedSheet.show<bool>(
+      context: context,
+      builder: (ctx) => ListTile(
+        key: const Key('unlog_last_action'),
+        leading: const Icon(Icons.undo_rounded),
+        title: Text('Un-log ${place.label}'),
+        onTap: () => Navigator.of(ctx).pop(true),
+      ),
+    );
+    if (choice == true && mounted) await _unlog(item, place);
+  }
+
+  /// Marks [episode] and everything after it as not watched; Undo restores the place.
+  Future<void> _unlog(TrackingItem item, EpisodeRef episode) async {
+    final before = item.place;
+    await _haptic();
+    await _tracking.unlog(item, episode);
+    if (!mounted) return;
+    TrackingUndoTray.show(
+      context,
+      message: '${episode.label} marked not watched',
+      onUndo: () {
+        final current = _liveTracked;
+        if (current != null) _tracking.setPlace(current, before);
+      },
+    );
+  }
+
+  Future<void> _jumpTo(TrackingItem item, EpisodeRef episode) async {
+    final before = item.place;
+    await _haptic();
+    _expectFinish = true;
+    await _tracking.setPlace(item, episode);
+    if (!mounted) return;
+    TrackingUndoTray.show(
+      context,
+      message: '${episode.label} watched',
+      onUndo: () {
+        _expectFinish = false;
+        final current = _liveTracked;
+        if (current != null) _tracking.setPlace(current, before);
+      },
+    );
+  }
+
+  /// features/11 §4.3, §4.4: the episode sheet for a row of the Seasons list.
+  Future<void> _onEpisodeTap(TrackingItem item, EpisodeRef episode, List<EpisodeInfo> cached) async {
+    final today = DateTime.now();
+    final schedule = item.schedule(episodes: {
+      for (final s in item.seasons)
+        s.number: s.number == episode.season ? cached : const <EpisodeInfo>[],
+    });
+    final info = cached.where((e) => e.episode == episode.episode).firstOrNull ??
+        EpisodeInfo(season: episode.season, episode: episode.episode);
+    final place = item.place;
+    final watched = place != null && !(episode > place);
+    final aired = TrackingProgress.aired(schedule, episode, today);
+    final jump = TrackingProgress.watchedCount(schedule, episode) - TrackingProgress.watchedCount(schedule, place);
+    final action = await EpisodeSheet.show(
+      context,
+      episode: info,
+      watched: watched,
+      aired: aired,
+      now: today,
+      jumpCount: jump,
+    );
+    if (action == null || !mounted) return;
+    final current = _liveTracked ?? item;
+    switch (action) {
+      case EpisodeAction.unlog:
+        final moved = TrackingProgress.watchedCount(schedule, place) - TrackingProgress.watchedCount(schedule, episode) + 1;
+        if (moved > 1) {
+          final ok = await showDialog<bool>(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              key: const Key('move_back_dialog'),
+              content: Text('${episode.label} to ${place!.label} will count as not watched.'),
+              actions: [
+                TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
+                TextButton(
+                  key: const Key('move_back_confirm'),
+                  onPressed: () => Navigator.of(ctx).pop(true),
+                  child: const Text('Move back'),
+                ),
+              ],
+            ),
+          );
+          if (ok != true || !mounted) return;
+        }
+        await _unlog(current, episode);
+      case EpisodeAction.rewatched:
+        await _tracking.logRewatch(current, episode);
+        if (mounted) {
+          ScaffoldMessenger.of(context)
+            ..clearSnackBars()
+            ..showSnackBar(const SnackBar(content: Text('Rewatch logged'), duration: Duration(seconds: 2)));
+        }
+      case EpisodeAction.jump:
+        await _jumpTo(current, episode);
+    }
+  }
+
+  Widget _buildSeasonsAccordion(TitleDetail title, TrackingItem? tracked) {
+    final seasons = title.seasons;
+    final now = DateTime.now();
+    final next = tracked?.state == TrackingState.watching ? tracked?.nextEpisode?.ref : null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1480,7 +1630,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
             ),
             const SizedBox(width: 8),
             Text(
-              'SEASONS ACCORDION',
+              'SEASONS',
               style: TellyTypography.labelSmall(
                 color: TellyColors.textPrimaryOf(context),
               ).copyWith(fontWeight: FontWeight.w800, letterSpacing: 1.0),
@@ -1490,6 +1640,21 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
         const SizedBox(height: 12),
         ...seasons.map((season) {
           final isExpanded = _expandedSeasons.contains(season.seasonNumber);
+          final cached = tracked == null || !isExpanded
+              ? const <EpisodeInfo>[]
+              : ref.watch(seasonEpisodesProvider((title.id, season.seasonNumber))).valueOrNull ?? const <EpisodeInfo>[];
+          final progress = tracked == null || tracked.isMovie
+              ? null
+              : SeasonProgress.of(
+                  tracked,
+                  SeasonInfo(
+                    number: season.seasonNumber,
+                    episodeCount: season.episodeCount,
+                    airDate: season.airDate == null ? null : DateTime.tryParse(season.airDate!),
+                  ),
+                  now,
+                  episodes: cached,
+                );
           return Container(
             margin: const EdgeInsets.only(bottom: 8),
             decoration: BoxDecoration(
@@ -1501,7 +1666,9 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
               children: [
                 Semantics(
                   button: true,
-                  label: '${season.name}, ${season.episodeCount} Episodes',
+                  label: progress == null
+                      ? '${season.name}, ${season.episodeCount} Episodes'
+                      : '${season.name}, ${TrackingLabels.season(progress, now)}',
                   child: InkWell(
                     onTap: () {
                       setState(() {
@@ -1517,6 +1684,10 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                       padding: const EdgeInsets.all(14),
                       child: Row(
                         children: [
+                          if (progress != null) ...[
+                            SeasonRing(key: Key('season_ring_${season.seasonNumber}'), fraction: progress.fraction, done: progress.isWatched),
+                            const SizedBox(width: 8),
+                          ],
                           Icon(
                             isExpanded ? Icons.arrow_drop_down : Icons.arrow_right,
                             color: TellyColors.primaryAccentOf(context),
@@ -1531,7 +1702,8 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                             ),
                           ),
                           Text(
-                            '${season.episodeCount} Episodes',
+                            progress == null ? '${season.episodeCount} Episodes' : TrackingLabels.season(progress, now),
+                            key: Key('season_state_${season.seasonNumber}'),
                             style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)),
                           ),
                         ],
@@ -1549,6 +1721,16 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                       ).copyWith(height: 1.4),
                     ),
                   ),
+                if (isExpanded && tracked != null && !tracked.isMovie)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 6, right: 6, bottom: 8),
+                    child: Column(
+                      children: [
+                        for (var e = 1; e <= season.episodeCount; e++)
+                          _buildEpisodeRow(tracked, EpisodeRef(season.seasonNumber, e), next, cached),
+                      ],
+                    ),
+                  ),
               ],
             ),
           );
@@ -1557,8 +1739,37 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
     );
   }
 
-  Widget _buildSurvivalRateSection(CommunitySurvivalSummary survival, int completedPct) {
+  Widget _buildEpisodeRow(TrackingItem tracked, EpisodeRef ref, EpisodeRef? next, List<EpisodeInfo> cached) {
+    final place = tracked.place;
+    final mark = place != null && !(ref > place)
+        ? EpisodeMark.watched
+        : ref == next
+            ? EpisodeMark.here
+            : EpisodeMark.later;
+    final hidden = mark == EpisodeMark.later && next != null && ref > next && !_revealed.contains(ref);
+    final firstHidden = next == null ? null : TrackingProgress.candidateAfter(tracked.schedule(), next);
+    final info = cached.where((e) => e.episode == ref.episode).firstOrNull;
+    final name = info?.name == null || info!.name!.isEmpty ? 'Episode ${ref.episode}' : info.name!;
+    return EpisodeRow(
+      key: Key('episode_row_${ref.season}_${ref.episode}'),
+      number: ref.episode,
+      name: name,
+      mark: mark,
+      hidden: hidden,
+      showHiddenCaption: hidden && ref == firstHidden,
+      onTap: () {
+        if (hidden) {
+          setState(() => _revealed.add(ref));
+        } else {
+          _onEpisodeTap(tracked, ref, cached);
+        }
+      },
+    );
+  }
+
+  Widget _buildSurvivalRateSection(CommunitySurvivalSummary survival, int completedPct, TrackingItem? tracked) {
     final dropPoint = survival.commonDropPoint;
+    final pastDrop = _dropOffLine(survival, tracked);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -1610,6 +1821,14 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                 ),
             ],
           ),
+          if (pastDrop != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              pastDrop,
+              key: const Key('drop_off_line'),
+              style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)),
+            ),
+          ],
           const SizedBox(height: 8),
           ClipRRect(
             borderRadius: BorderRadius.circular(4),

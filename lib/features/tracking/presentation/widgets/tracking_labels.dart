@@ -1,3 +1,4 @@
+import '../../domain/season_progress.dart';
 import '../../domain/tracking_item.dart';
 import '../../domain/tracking_models.dart';
 
@@ -8,6 +9,25 @@ abstract final class TrackingLabels {
   /// "Oct 6", or "Oct 6, 2025" outside [now]'s year.
   static String date(DateTime d, DateTime now) =>
       '${_months[d.month - 1]} ${d.day}${d.year == now.year ? '' : ', ${d.year}'}';
+
+  static const _weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+  /// "Fri, Oct 17".
+  static String weekdayDate(DateTime d) => '${_weekdays[d.weekday - 1]}, ${_months[d.month - 1]} ${d.day}';
+
+  /// The trailing text of a season row (SCR-08 §T.5): "watched", "5 of 10", "Not started" or
+  /// "Airing · next Fri, Oct 17".
+  static String season(SeasonProgress p, DateTime now) {
+    if (p.isWatched) return 'watched';
+    if (p.aired == 0) {
+      final air = p.seasonAirDate;
+      return air != null && air.isAfter(now) ? 'Airing · ${date(air, now)}' : 'Not started';
+    }
+    if (p.aired < p.total && p.watched >= p.aired && p.nextAirDate != null) {
+      return 'Airing · next ${weekdayDate(p.nextAirDate!)}';
+    }
+    return p.watched > 0 ? '${p.watched} of ${p.total}' : 'Not started';
+  }
 
   /// "today", "yesterday", "3 days ago", else the date.
   static String relativeDay(DateTime d, DateTime now) {

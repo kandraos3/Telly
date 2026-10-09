@@ -35,6 +35,8 @@ abstract final class Routes {
   static String activity(String id) => '$social/activity/$id'; // SCR-06
   static String title(String mediaType, int id) => '/title/$mediaType/$id'; // SCR-08
   static String profile(String handle) => '/u/$handle'; // SCR-15
+  /// Reserved for #216 (episode page): declared so callers can be written, not registered in the router.
+  static String episode(String mediaType, int id, int season, int episode) => '/title/$mediaType/$id/episode/$season/$episode';
   static String twoToWatch(String handle) => '/u/$handle/two-to-watch'; // SCR-16
   static const cowatch = '/cowatch'; // SCR-16
   static String cowatchWithTitle(int titleId, {String? mediaType, String? friendHandle}) =>

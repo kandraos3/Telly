@@ -84,3 +84,19 @@ final titleTrackingProvider = Provider.family<TrackingItem?, (int, String)>((ref
   }
   return null;
 });
+
+/// One season's episodes for the title page's Seasons list: the cache first, `tmdb-season` when
+/// missing or stale, the cache again when offline. Key: `(titleId, season)`.
+final seasonEpisodesProvider = FutureProvider.family<List<EpisodeInfo>, (int, int)>((ref, key) {
+  return ref.watch(trackingRepositoryProvider).loadSeason(key.$1, key.$2);
+});
+
+/// Friends watching a title now (features/11 §5.4). Offline or failing reads as nobody, so the
+/// row simply hides (SCR-08 §T.10). Key: `(titleId, mediaType)`.
+final titleWatchersProvider = FutureProvider.family<TrackingWatchers, (int, String)>((ref, key) async {
+  try {
+    return await ref.watch(trackingRepositoryProvider).watchers(key.$1, key.$2);
+  } catch (_) {
+    return const TrackingWatchers();
+  }
+});
