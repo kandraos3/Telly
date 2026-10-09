@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Social: Friends, Search & Privacy Mockups</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap">
+<style>
+:root {
+  --page: #EEF0F4; --ink: #0F1117; --ink-2: #4A4E63; --ink-3: #696E87; --rule: #D7DBE5; --card: #FFFFFF; --mark: #4D7800; --rec: #5B3CE0;
+  --f-ui: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-display: "Playfair Display", Georgia, "Times New Roman", serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --page: #050608; --ink: #F2F3F7; --ink-2: #C8CAD8; --ink-3: #7D8198; --rule: #242938; --card: #0D0F15; --mark: #D2FF52; --rec: #A08BFF; color-scheme: dark;
+} }
+:root[data-theme="dark"] { --page: #050608; --ink: #F2F3F7; --ink-2: #C8CAD8; --ink-3: #7D8198; --rule: #242938; --card: #0D0F15; --mark: #D2FF52; --rec: #A08BFF; color-scheme: dark; }
+
+.ph {
+  --bg:#08090C; --sf:#11131A; --ov:#1A1D27; --st:#242938; --gl:rgba(255,255,255,.08); --t1:#FFFFFF; --t2:#C8CAD8; --t3:#7D8198;
+  --lime:#D2FF52; --limeFill:#D2FF52; --onLime:#08090C; --amber:#FFA733; --coral:#FF4B6E; --violet:#7C5CFF; --cyan:#00F0FF;
+}
+.light .ph {
+  --bg:#F6F7F9; --sf:#FFFFFF; --ov:#F0F2F5; --st:#E2E5EC; --gl:rgba(0,0,0,.08); --t1:#0F1117; --t2:#4A4E63; --t3:#696E87;
+  --lime:#4D7800; --limeFill:#D2FF52; --onLime:#0F1117; --amber:#B36200; --coral:#D61F4D; --violet:#5B3CE0; --cyan:#00838F;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--page); color: var(--ink); font: 15px/1.55 var(--f-ui); margin: 0; padding-bottom: 80px; }
+.wrap { max-width: 1480px; margin: 0 auto; padding-inline: 24px; padding-block: 40px; }
+header.top { display: grid; gap: 8px; margin-bottom: 24px; }
+.eyebrow { font: 700 12px/1 var(--f-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+h1 { font: 700 clamp(28px, 4vw, 40px)/1.1 var(--f-display); margin: 0; }
+p { margin: 0; color: var(--ink-2); }
+.toolbar { display: flex; gap: 12px; align-items: center; margin-top: 14px; }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 10px; padding: 3px; background: var(--card); }
+.seg button { font: 700 13px var(--f-ui); color: var(--ink-2); background: none; border: 0; padding: 6px 14px; border-radius: 7px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--page); }
+
+.screens { display: flex; gap: 24px; overflow-x: auto; padding-block: 16px; scroll-snap-type: x mandatory; }
+.device-col { display: flex; flex-direction: column; gap: 10px; flex: 0 0 320px; scroll-snap-align: start; }
+.device-title { font-weight: 700; font-size: 14px; color: var(--ink); }
+.device-desc { font-size: 12px; color: var(--ink-3); line-height: 1.4; }
+
+.frame {
+  width: 320px; height: 640px; border-radius: 36px; border: 6px solid #1C202B; background: var(--bg);
+  box-shadow: 0 16px 36px rgba(0,0,0,0.25); display: flex; flex-direction: column; overflow: hidden; position: relative;
+}
+.light .frame { border-color: #D3D7E0; }
+
+.status-bar { height: 32px; display: flex; justify-content: space-between; align-items: center; padding-inline: 20px; font-size: 11px; font-weight: 700; color: var(--t2); }
+.app-header { height: 48px; display: flex; align-items: center; justify-content: space-between; padding-inline: 16px; border-bottom: 1px solid var(--gl); }
+.app-title { font-size: 17px; font-weight: 800; color: var(--t1); letter-spacing: -0.01em; }
+.icon-btn { width: 34px; height: 34px; border-radius: 50%; background: var(--ov); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--t1); border: 1px solid var(--st); font-size: 14px; }
+.icon-btn.primary { background: var(--lime); color: var(--onLime); border: none; font-weight: bold; }
+
+.content { flex: 1; overflow-y: auto; padding: 14px 16px; display: flex; flex-direction: column; gap: 14px; }
+
+/* Components */
+.search-input-wrap { display: flex; align-items: center; background: var(--sf); border: 1px solid var(--st); border-radius: 12px; padding: 8px 12px; gap: 8px; }
+.search-input { border: none; background: transparent; color: var(--t1); font-size: 13px; outline: none; width: 100%; }
+.search-input::placeholder { color: var(--t3); }
+
+.user-card { display: flex; align-items: center; justify-content: space-between; background: var(--sf); border: 1px solid var(--st); border-radius: 14px; padding: 10px 12px; }
+.user-info { display: flex; align-items: center; gap: 10px; }
+.avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--ov); border: 1px solid var(--st); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; color: var(--lime); overflow: hidden; }
+.user-names { display: flex; flex-direction: column; }
+.name { font-size: 13px; font-weight: 700; color: var(--t1); }
+.handle { font-size: 11px; color: var(--t3); }
+.badge-match { font-size: 10px; font-weight: 700; color: var(--violet); background: rgba(124, 92, 255, 0.15); padding: 2px 6px; border-radius: 6px; display: inline-block; margin-top: 2px; }
+
+.follow-btn { padding: 6px 12px; border-radius: 16px; font-size: 11px; font-weight: 700; cursor: pointer; border: 1px solid var(--st); background: transparent; color: var(--t1); }
+.follow-btn.add { border-color: var(--lime); color: var(--lime); }
+.follow-btn.pending { border-color: var(--amber); color: var(--amber); }
+
+.privacy-card { background: var(--sf); border: 1px solid var(--st); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.radio-opt { display: flex; gap: 10px; cursor: pointer; padding: 6px; border-radius: 8px; }
+.radio-opt.active { background: var(--ov); }
+.radio-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--lime); display: flex; align-items: center; justify-content: center; margin-top: 2px; }
+.radio-dot::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--lime); }
+.radio-dot.inactive { border-color: var(--t3); }
+.radio-dot.inactive::after { display: none; }
+.radio-text { display: flex; flex-direction: column; }
+.radio-title { font-size: 12px; font-weight: 700; color: var(--t1); }
+.radio-desc { font-size: 11px; color: var(--t3); line-height: 1.3; }
+
+.private-gate { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 32px 16px; gap: 12px; background: var(--sf); border: 1px solid var(--st); border-radius: 16px; margin-top: 20px; }
+.lock-icon { font-size: 32px; color: var(--amber); }
+.gate-title { font-size: 14px; font-weight: 700; color: var(--t1); }
+.gate-desc { font-size: 12px; color: var(--t3); max-width: 200px; }
+
+.nav-bar { height: 50px; background: var(--sf); border-top: 1px solid var(--gl); display: flex; justify-content: space-around; align-items: center; }
+.nav-item { font-size: 10px; font-weight: 700; color: var(--t3); display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.nav-item.active { color: var(--lime); }
+</style>
+<script>
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  document.body.classList.toggle('light', t === 'light');
+  document.querySelectorAll('.seg button').forEach(b => {
+    b.setAttribute('aria-pressed', b.textContent.toLowerCase() === t);
+  });
+}
+</script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow">Epic #48 · Decision 0009 Mockups</div>
+    <h1>Social: Friends, Search & Privacy</h1>
+    <p>Visual references for Option 1: Find Friends action in the Social tab, user search, profile privacy gates, and visibility settings.</p>
+    <div class="toolbar">
+      <div class="seg" role="group" aria-label="Theme">
+        <button onclick="setTheme('dark')" aria-pressed="true">Dark</button>
+        <button onclick="setTheme('light')" aria-pressed="false">Light</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="screens">
+    <!-- Screen 1: Social Tab with Search Icon -->
+    <div class="device-col">
+      <div class="device-title">1. Social Tab (Entry Point)</div>
+      <div class="device-desc">Find Friends search icon located in top-right app bar alongside notifications.</div>
+      <div class="frame ph">
+        <div class="status-bar"><span>9:41</span><span>5G</span></div>
+        <div class="app-header">
+          <span class="app-title">Social</span>
+          <div style="display:flex; gap:8px;">
+            <div class="icon-btn" title="Find Friends">🔍</div>
+            <div class="icon-btn">🔔</div>
+          </div>
+        </div>
+        <div class="content">
+          <div style="background:var(--sf); border:1px solid var(--st); border-radius:14px; padding:12px; display:flex; flex-direction:column; gap:8px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <div class="avatar" style="width:28px; height:28px; font-size:12px;">M</div>
+                <span style="font-size:12px; font-weight:700; color:var(--t1);">Maya</span>
+              </div>
+              <span style="font-size:10px; color:var(--t3);">2h ago</span>
+            </div>
+            <div style="font-size:12px; color:var(--t2);">Ranked <b>Severance (S2)</b> into God Tier (#2)</div>
+          </div>
+          <div style="background:var(--sf); border:1px solid var(--st); border-radius:14px; padding:12px; display:flex; flex-direction:column; gap:8px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <div class="avatar" style="width:28px; height:28px; font-size:12px;">J</div>
+                <span style="font-size:12px; font-weight:700; color:var(--t1);">Jordan</span>
+              </div>
+              <span style="font-size:10px; color:var(--t3);">4h ago</span>
+            </div>
+            <div style="font-size:12px; color:var(--t2);">🚨 Spicy Upset: <b>The Bear</b> over <b>Succession</b></div>
+          </div>
+        </div>
+        <div class="nav-bar">
+          <div class="nav-item"><span>Home</span></div>
+          <div class="nav-item"><span>Explore</span></div>
+          <div class="nav-item"><span>Canon</span></div>
+          <div class="nav-item active"><span>Social</span></div>
+          <div class="nav-item"><span>More</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 2: Search Users Screen -->
+    <div class="device-col">
+      <div class="device-title">2. Search Users Screen</div>
+      <div class="device-desc">Real-time search by @handle or name with match badges and follow actions.</div>
+      <div class="frame ph">
+        <div class="status-bar"><span>9:41</span><span>5G</span></div>
+        <div class="app-header">
+          <div class="icon-btn" style="border:none; background:transparent;">←</div>
+          <span class="app-title" style="font-size:15px;">Find Friends</span>
+          <div style="width:34px;"></div>
+        </div>
+        <div class="content">
+          <div class="search-input-wrap">
+            <span>🔍</span>
+            <input class="search-input" value="alex" placeholder="Search by name or @handle...">
+          </div>
+          <div style="font-size:11px; font-weight:700; color:var(--t3); text-transform:uppercase;">Matches</div>
+          <div class="user-card">
+            <div class="user-info">
+              <div class="avatar">A</div>
+              <div class="user-names">
+                <span class="name">Alex Morgan</span>
+                <span class="handle">@alexm</span>
+                <span class="badge-match">88% Taste Match</span>
+              </div>
+            </div>
+            <button class="follow-btn add">+ Follow</button>
+          </div>
+          <div class="user-card">
+            <div class="user-info">
+              <div class="avatar">A</div>
+              <div class="user-names">
+                <span class="name">Alexander Ross</span>
+                <span class="handle">@aross</span>
+                <span class="badge-match">74% Taste Match</span>
+              </div>
+            </div>
+            <button class="follow-btn pending">Requested</button>
+          </div>
+          <div class="user-card">
+            <div class="user-info">
+              <div class="avatar">A</div>
+              <div class="user-names">
+                <span class="name">Alex Chen</span>
+                <span class="handle">@alexchen</span>
+              </div>
+            </div>
+            <button class="follow-btn">Following</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 3: Private Profile Gate -->
+    <div class="device-col">
+      <div class="device-title">3. Friends-Only Profile Gate</div>
+      <div class="device-desc">Shows bio and header, but locks Canon and Taste Match behind approved friendship.</div>
+      <div class="frame ph">
+        <div class="status-bar"><span>9:41</span><span>5G</span></div>
+        <div class="app-header">
+          <div class="icon-btn" style="border:none; background:transparent;">←</div>
+          <span class="app-title" style="font-size:15px;">@aross</span>
+          <div style="width:34px;"></div>
+        </div>
+        <div class="content">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div class="avatar" style="width:52px; height:52px; font-size:20px;">A</div>
+            <div style="display:flex; flex-direction:column; flex:1;">
+              <span class="name" style="font-size:16px;">Alexander Ross</span>
+              <span class="handle">Prestige TV purist & cinephile</span>
+            </div>
+          </div>
+          <div class="private-gate">
+            <div class="lock-icon">🔒</div>
+            <div class="gate-title">This Profile is Friends-Only</div>
+            <div class="gate-desc">@aross shares their Canon and rankings with accepted friends only.</div>
+            <button class="follow-btn pending" style="padding:8px 18px; font-size:12px;">Request Sent</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 4: Privacy Settings -->
+    <div class="device-col">
+      <div class="device-title">4. Privacy & Boundaries Settings</div>
+      <div class="device-desc">Account visibility settings with Public, Friends Only, and Ghost Mode options.</div>
+      <div class="frame ph">
+        <div class="status-bar"><span>9:41</span><span>5G</span></div>
+        <div class="app-header">
+          <div class="icon-btn" style="border:none; background:transparent;">←</div>
+          <span class="app-title" style="font-size:15px;">Privacy & Boundaries</span>
+          <div style="width:34px;"></div>
+        </div>
+        <div class="content">
+          <div style="font-size:11px; font-weight:700; color:var(--t3); text-transform:uppercase;">Account Visibility</div>
+          <div class="privacy-card">
+            <div class="radio-opt active">
+              <div class="radio-dot"></div>
+              <div class="radio-text">
+                <span class="radio-title">Public</span>
+                <span class="radio-desc">Anyone can view your Canon, follow, and compare taste.</span>
+              </div>
+            </div>
+            <div class="radio-opt">
+              <div class="radio-dot inactive"></div>
+              <div class="radio-text">
+                <span class="radio-title">Friends Only (Private)</span>
+                <span class="radio-desc">Requires follow request approval. Only accepted friends see rankings.</span>
+              </div>
+            </div>
+            <div class="radio-opt">
+              <div class="radio-dot inactive"></div>
+              <div class="radio-text">
+                <span class="radio-title">Ghost Mode</span>
+                <span class="radio-desc">Hidden from user search. Only findable via direct referral link.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
