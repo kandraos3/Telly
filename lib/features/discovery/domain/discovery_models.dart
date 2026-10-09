@@ -150,11 +150,10 @@ class UserSearchResult {
 }
 
 
-/// Why a title is recommended (FE-EXPLORE-03), mirroring `reason_kind` from
-/// `get_recommended_titles`.
+/// Why a title is recommended (FE-EXPLORE-03).
 enum RecommendationReason { becauseYouLoved, trending, topRated }
 
-/// A title from `get_recommended_titles` / `get_trending_titles` (FE-EXPLORE-03).
+/// A recommended title as the feed and search cards show it (FE-EXPLORE-03).
 class RecommendedTitle {
   final int titleId;
   final String mediaType;
