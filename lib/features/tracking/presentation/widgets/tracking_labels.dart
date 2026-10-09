@@ -1,4 +1,5 @@
 import '../../domain/season_progress.dart';
+import '../../domain/tracking_group.dart';
 import '../../domain/tracking_item.dart';
 import '../../domain/tracking_models.dart';
 
@@ -71,4 +72,47 @@ abstract final class TrackingLabels {
   /// "2 h 46" or "46 min".
   static String runtime(int minutes) =>
       minutes >= 60 ? '${minutes ~/ 60} h ${(minutes % 60).toString().padLeft(2, '0')}' : '$minutes min';
+
+  /// The amber pill text in *New episodes*: "Season 3 is out" or "E4 is out" (SCR-08 §T.6).
+  static String newBadge(TrackingItem item) {
+    final next = item.nextEpisode?.ref;
+    final place = item.place;
+    if (next == null) return 'New episodes';
+    return place != null && next.season > place.season ? 'Season ${next.season} is out' : 'E${next.episode} is out';
+  }
+
+  /// The meta line of a hub row (SCR-29). Empty in *New episodes*, which shows [newBadge] instead.
+  /// [moviePrefix] is set under the *All* chip so a movie says so.
+  static String hubMeta(TrackingItem item, TrackingGroup? group, DateTime now, {bool moviePrefix = false}) {
+    if (item.isMovie) {
+      final base = item.state == TrackingState.finished
+          ? 'Finished ${date(item.finishedAt ?? item.lastProgressAt, now)}'
+          : [
+              'Started ${relativeDay(item.startedAt, now)}',
+              if (item.runtimeMinutes != null) runtime(item.runtimeMinutes!),
+            ].join(' · ');
+      return moviePrefix ? 'Movie · $base' : base;
+    }
+    switch (group) {
+      case TrackingGroup.newEpisodes:
+        return '';
+      case TrackingGroup.inProgress || TrackingGroup.paused:
+        final next = item.nextEpisode;
+        final left = item.episodesLeft;
+        return [
+          if (next != null) next.name == null ? next.ref.label : "${next.ref.label} '${next.name}'",
+          if (left != null) '$left left',
+        ].join(' · ');
+      case TrackingGroup.caughtUp:
+        final upcoming = [for (final s in item.seasons) if (s.airDate != null && s.airDate!.isAfter(now)) s];
+        final rank = item.rankPosition == null ? 'Ranked' : 'Ranked #${item.rankPosition}';
+        return upcoming.isEmpty
+            ? '$rank · no new season announced'
+            : '$rank · Season ${upcoming.first.number} · ${date(upcoming.first.airDate!, now)}';
+      case TrackingGroup.finishedNotRanked || null:
+        return item.state == TrackingState.finished
+            ? 'Finished · ${date(item.finishedAt ?? item.lastProgressAt, now)}'
+            : 'Up to date · ${date(item.lastProgressAt, now)}';
+    }
+  }
 }

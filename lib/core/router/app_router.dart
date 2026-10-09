@@ -40,6 +40,8 @@ import '../../features/discovery/presentation/screens/explore_discover_screen.da
 import '../../features/discovery/presentation/screens/explore_row_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/more/presentation/screens/more_hub_screen.dart';
+import '../../features/tracking/domain/tracking_hub.dart';
+import '../../features/tracking/presentation/screens/watching_hub_screen.dart';
 import '../../features/title_detail/presentation/screens/show_detail_screen.dart';
 import 'app_shell.dart';
 import 'auth_redirect.dart';
@@ -221,6 +223,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                       builder: (_, __) => const FriendsThisWeekScreen(),
                     ),
                   ],
+                ),
+                GoRoute(
+                  path: 'watching',
+                  parentNavigatorKey: rootNavigatorKey,
+                  builder: (_, state) => WatchingHubScreen(
+                    initialFilter: WatchingFilter.fromQuery(state.uri.queryParameters['filter']),
+                  ),
                 ),
                 GoRoute(
                   path: 'graveyard',

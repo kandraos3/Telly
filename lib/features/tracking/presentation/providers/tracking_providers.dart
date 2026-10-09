@@ -100,3 +100,17 @@ final titleWatchersProvider = FutureProvider.family<TrackingWatchers, (int, Stri
     return const TrackingWatchers();
   }
 });
+
+/// Today, for grouping and "Started yesterday". Overridden in tests and goldens.
+final trackingNowProvider = Provider<DateTime Function()>((ref) => DateTime.now);
+
+/// This ISO week's numbers for the hub's strip (features/11 §8): episodes and time for series,
+/// movies finished and time for movies. Null when the server can't be reached (shown as "—").
+/// Key: `'tv'` or `'movie'`.
+final trackingWeekStatsProvider = FutureProvider.autoDispose.family<TrackingStats?, String>((ref, mediaType) async {
+  try {
+    return await ref.watch(trackingRepositoryProvider).stats(mediaType);
+  } catch (_) {
+    return null;
+  }
+});

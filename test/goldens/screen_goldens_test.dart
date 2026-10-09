@@ -24,7 +24,13 @@ import 'package:telly_app/features/title_detail/domain/title_detail_models.dart'
 import 'package:telly_app/features/title_detail/presentation/screens/show_detail_screen.dart';
 import 'package:telly_app/features/title_detail/data/title_detail_repository.dart';
 import 'package:telly_app/features/tracking/data/tracking_repository.dart';
+import 'package:telly_app/features/tracking/domain/tracking_item.dart';
 import 'package:telly_app/features/tracking/domain/tracking_models.dart';
+import 'package:telly_app/features/tracking/presentation/providers/tracking_providers.dart';
+import 'package:telly_app/features/tracking/presentation/screens/watching_hub_screen.dart';
+import 'package:telly_app/features/profile/data/graveyard_repository.dart';
+import 'package:telly_app/features/profile/domain/dropped_show.dart';
+import '../fakes/fake_graveyard_repository.dart';
 import 'package:telly_app/core/widgets/poster_image.dart';
 import 'package:telly_app/core/widgets/telly_log_fab.dart';
 import 'package:telly_app/features/auth/data/auth_repository.dart';
@@ -134,6 +140,54 @@ class _InMemoryWatchlistRepository implements WatchlistRepository {
   @override
   Stream<List<WatchlistEntry>> watchWatchlist({String? mediaType}) =>
       Stream.value([]);
+}
+
+final _trackingToday = DateTime(2026, 10, 9, 12);
+
+/// One title in every hub group, for the Watching hub and the More tile goldens.
+List<TrackingItem> _goldenTracking() {
+  DateTime ago(int d) => _trackingToday.subtract(Duration(days: d));
+  TrackingItem show(int id, String title,
+          {TrackingState state = TrackingState.watching,
+          int idle = 1,
+          int watched = 12,
+          EpisodeRef? place = const EpisodeRef(1, 8),
+          EpisodeRef? next = const EpisodeRef(1, 9),
+          DateTime? newSince,
+          bool ranked = false,
+          int? rank}) =>
+      TrackingItem(
+        titleId: id,
+        mediaType: 'tv',
+        title: title,
+        state: state,
+        startedAt: ago(90),
+        lastProgressAt: ago(idle),
+        place: place,
+        newEpisodesSince: newSince,
+        isRanked: ranked,
+        rankPosition: rank,
+        airedTotal: 19,
+        watched: watched,
+        nextEpisode: next == null ? null : NextEpisode(ref: next, name: 'Attila'),
+      );
+  return [
+    show(1, 'Severance', newSince: ago(1), place: const EpisodeRef(2, 10), next: const EpisodeRef(3, 1), watched: 19),
+    show(2, 'Shogun', watched: 8),
+    show(3, 'Slow Horses', watched: 3, idle: 3),
+    TrackingItem(
+      titleId: 4,
+      mediaType: 'movie',
+      title: 'Dune: Part Two',
+      state: TrackingState.watching,
+      startedAt: ago(1),
+      lastProgressAt: ago(1),
+      runtimeMinutes: 166,
+    ),
+    show(5, 'The Bear', state: TrackingState.caughtUp, idle: 5, next: null, watched: 19),
+    show(6, 'Andor', state: TrackingState.caughtUp, ranked: true, rank: 6, next: null, watched: 19),
+    show(7, 'Lost', idle: 45, watched: 4),
+  ];
 }
 
 void main() {
@@ -768,11 +822,46 @@ void main() {
         await tester.binding.setSurfaceSize(const Size(393, 852));
         addTearDown(() => tester.binding.setSurfaceSize(null));
         await tester.pumpWidget(ProviderScope(
-          overrides: shellOverrides(),
+          overrides: [
+            ...shellOverrides(),
+            trackingRepositoryProvider.overrideWithValue(FakeTrackingRepository(_goldenTracking())),
+            trackingNowProvider.overrideWithValue(() => _trackingToday),
+          ],
           child: MaterialApp(theme: theme, home: const MoreHubScreen()),
         ));
         await tester.pumpAndSettle();
         await expectLater(find.byType(MoreHubScreen), matchesGoldenFile('goldens/more_${name}_iphone15.png'));
+      });
+
+      testWidgets('Golden: SCR-29 Watching hub ($name) on iPhone 15 Pro size (#231)', (tester) async {
+        await tester.binding.setSurfaceSize(const Size(393, 1500));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        final fake = FakeTrackingRepository(_goldenTracking())..weekStats = const TrackingStats(episodes: 9, minutes: 470);
+        final graveyard = FakeGraveyardRepository()
+          ..shows.addAll([
+            for (var i = 1; i <= 14; i++)
+              DroppedShow(
+                id: 'd$i',
+                userId: 'u1',
+                titleId: 9000 + i,
+                mediaType: 'tv',
+                title: 'Dropped $i',
+                releaseYear: 2020,
+                droppedAtSeason: 1,
+                reason: DropReasonTaxonomy.pacingSlowed,
+                createdAt: DateTime(2026, 10, 3),
+              ),
+          ]);
+        await tester.pumpWidget(ProviderScope(
+          overrides: [
+            trackingRepositoryProvider.overrideWithValue(fake),
+            trackingNowProvider.overrideWithValue(() => _trackingToday),
+            graveyardRepositoryProvider.overrideWithValue(graveyard),
+          ],
+          child: MaterialApp(theme: theme, home: const WatchingHubScreen()),
+        ));
+        await tester.pumpAndSettle();
+        await expectLater(find.byType(WatchingHubScreen), matchesGoldenFile('goldens/watching_hub_${name}_iphone15.png'));
       });
 
       testWidgets('Golden: SCR-23 AchievementsScreen ($name) on iPhone 15 Pro size (#137)', (tester) async {

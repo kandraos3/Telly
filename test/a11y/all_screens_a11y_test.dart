@@ -31,6 +31,11 @@ import 'package:telly_app/features/levels/presentation/screens/header_art_screen
 import 'package:telly_app/features/levels/presentation/screens/rewards_screen.dart';
 import 'package:telly_app/features/levels/presentation/screens/your_level_screen.dart';
 
+import 'package:telly_app/features/tracking/data/tracking_repository.dart';
+import 'package:telly_app/features/tracking/domain/tracking_item.dart';
+import 'package:telly_app/features/tracking/domain/tracking_models.dart';
+import 'package:telly_app/features/tracking/presentation/screens/watching_hub_screen.dart';
+import '../fakes/fake_tracking_repository.dart';
 import '../features/achievements/achievements_fixtures.dart';
 import '../features/challenges/challenges_fixtures.dart';
 import '../features/levels/levels_fixtures.dart';
@@ -507,6 +512,36 @@ void main() {
 
     testWidgets('14f. SCR-22 MoreHubScreen meets guidelines in Light Theme', (tester) async {
       await runA11yAudit(tester, const MoreHubScreen(), theme: TellyTheme.lightTheme);
+    });
+
+    testWidgets('14e2. SCR-29 Watching hub meets guidelines in both themes (#231)', (tester) async {
+      final tracking = FakeTrackingRepository([
+        TrackingItem(
+          titleId: 1,
+          mediaType: 'tv',
+          title: 'Shogun',
+          state: TrackingState.watching,
+          startedAt: DateTime(2026, 8),
+          lastProgressAt: DateTime.now().subtract(const Duration(days: 1)),
+          place: const EpisodeRef(1, 8),
+          nextEpisode: const NextEpisode(ref: EpisodeRef(1, 9), name: 'Crimson Sky'),
+          airedTotal: 10,
+          watched: 8,
+        ),
+        TrackingItem(
+          titleId: 2,
+          mediaType: 'movie',
+          title: 'Dune: Part Two',
+          state: TrackingState.watching,
+          startedAt: DateTime.now().subtract(const Duration(days: 1)),
+          lastProgressAt: DateTime.now().subtract(const Duration(days: 1)),
+          runtimeMinutes: 166,
+        ),
+      ])
+        ..weekStats = const TrackingStats(episodes: 9, minutes: 470);
+      final overrides = [trackingRepositoryProvider.overrideWithValue(tracking)];
+      await runA11yAudit(tester, const WatchingHubScreen(), overrides: overrides);
+      await runA11yAudit(tester, const WatchingHubScreen(), overrides: overrides, theme: TellyTheme.lightTheme);
     });
 
     testWidgets('14g. Floating Log button meets guidelines in both themes (#44; label covered in telly_log_fab_test)', (tester) async {

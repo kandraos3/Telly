@@ -13,6 +13,10 @@ import '../../../achievements/presentation/controllers/achievements_controller.d
 import '../../../achievements/presentation/widgets/medal_showcase_row.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../levels/presentation/widgets/reward_cosmetics.dart';
+import '../../../tracking/domain/tracking_group.dart';
+import '../../../tracking/domain/tracking_item.dart';
+import '../../../tracking/domain/tracking_models.dart';
+import '../../../tracking/presentation/providers/tracking_providers.dart';
 
 /// `SCR-22` More hub (epic #44, decision 0003): everything that is not a daily destination.
 ///
@@ -22,6 +26,7 @@ import '../../../levels/presentation/widgets/reward_cosmetics.dart';
 class MoreHubScreen extends ConsumerWidget {
   final VoidCallback? onProfileTap;
   final VoidCallback? onQueueTap;
+  final VoidCallback? onWatchingTap;
   final VoidCallback? onAchievementsTap;
   final VoidCallback? onChallengesTap;
   final VoidCallback? onLevelTap;
@@ -33,6 +38,7 @@ class MoreHubScreen extends ConsumerWidget {
     super.key,
     this.onProfileTap,
     this.onQueueTap,
+    this.onWatchingTap,
     this.onAchievementsTap,
     this.onChallengesTap,
     this.onLevelTap,
@@ -70,6 +76,8 @@ class MoreHubScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
               _QueueTile(onTap: onQueueTap ?? () => context.push(Routes.queue)),
+              const SizedBox(height: 12),
+              _WatchingTile(onTap: onWatchingTap ?? () => context.push(Routes.watching)),
               const SizedBox(height: 12),
               _TileGrid(tiles: [
                 // Gamification tiles come first, after Queue (features/10 §9.2).
@@ -269,6 +277,92 @@ class _QueueTile extends StatelessWidget {
                   'Your watchlist and custom lists',
                   style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)),
                 ),
+              ],
+            ),
+          ),
+          _chevron(context, size: 18),
+        ],
+      ),
+    );
+  }
+}
+
+/// Watching tile (epic #168, SCR-22): live subtitle and one 6 dp bar per in-progress title.
+class _WatchingTile extends ConsumerWidget {
+  final VoidCallback onTap;
+  const _WatchingTile({required this.onTap});
+
+  /// "2 new episodes", "4 in progress · Severance S2 · E6 next", or the prompt when nothing is tracked.
+  static String subtitle(List<TrackingItem> items, DateTime now) {
+    if (items.isEmpty) return "Track what you're watching";
+    final groups = {for (final i in items) i: i.group(now)};
+    final fresh = groups.values.where((g) => g == TrackingGroup.newEpisodes).length;
+    if (fresh > 0) return '$fresh new episode${fresh == 1 ? '' : 's'}';
+    final active = [for (final e in groups.entries) if (e.value == TrackingGroup.inProgress) e.key];
+    if (active.isEmpty) return 'All caught up';
+    active.sort((a, b) => b.lastProgressAt.compareTo(a.lastProgressAt));
+    final top = active.first;
+    final next = top.nextEpisode?.ref;
+    final tail = next == null ? top.title : '${top.title} S${next.season} · E${next.episode} next';
+    return '${active.length} in progress · $tail';
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final items = ref.watch(trackingProvider).valueOrNull ?? const <TrackingItem>[];
+    final now = ref.watch(trackingNowProvider)();
+    final text = subtitle(items, now);
+    final bars = [
+      for (final i in items)
+        if (!i.isMovie && i.state == TrackingState.watching && i.group(now) == TrackingGroup.inProgress) i,
+    ]..sort((a, b) => b.lastProgressAt.compareTo(a.lastProgressAt));
+    return _HubCard(
+      key: const Key('more_watching_tile'),
+      semanticLabel: 'Watching, $text',
+      onTap: onTap,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: Row(
+        children: [
+          Icon(Icons.play_circle_outline_rounded, size: 24, color: TellyColors.primaryAccentOf(context)),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Watching',
+                  style: TellyTypography.bodyLarge(color: TellyColors.textPrimaryOf(context)).copyWith(fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  text,
+                  key: const Key('more_watching_subtitle'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)),
+                ),
+                if (bars.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    key: const Key('more_watching_bars'),
+                    children: [
+                      for (var i = 0; i < bars.length && i < 6; i++) ...[
+                        if (i > 0) const SizedBox(width: 3),
+                        Expanded(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(3),
+                            child: LinearProgressIndicator(
+                              value: bars[i].progress,
+                              minHeight: 6,
+                              backgroundColor: TellyColors.strokeOf(context),
+                              color: TellyColors.primaryAccentOf(context),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
               ],
             ),
           ),

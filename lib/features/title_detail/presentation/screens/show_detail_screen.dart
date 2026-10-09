@@ -13,11 +13,7 @@ import 'package:telly_app/core/widgets/telly_primary_button.dart';
 import 'package:telly_app/core/widgets/telly_screen_header.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:telly_app/core/services/haptics_service.dart';
-import 'package:telly_app/features/logging/domain/log_request.dart';
 import 'package:telly_app/features/logging/domain/title_search_result.dart';
-import 'package:telly_app/features/profile/domain/dropped_show.dart';
-import 'package:telly_app/features/profile/presentation/controllers/graveyard_controller.dart';
-import 'package:telly_app/features/profile/presentation/widgets/log_dropped_show_sheet.dart';
 import 'package:telly_app/features/tracking/data/tracking_repository.dart';
 import 'package:telly_app/features/tracking/domain/tracking_item.dart';
 import 'package:telly_app/features/tracking/domain/tracking_models.dart';
@@ -25,11 +21,11 @@ import 'package:telly_app/features/tracking/domain/tracking_progress.dart';
 import 'package:telly_app/features/tracking/presentation/providers/tracking_providers.dart';
 import 'package:telly_app/features/tracking/domain/season_progress.dart';
 import 'package:telly_app/features/tracking/presentation/widgets/episode_sheet.dart';
-import 'package:telly_app/features/tracking/presentation/widgets/finish_sheet.dart';
 import 'package:telly_app/features/tracking/presentation/widgets/season_widgets.dart';
 import 'package:telly_app/features/tracking/presentation/widgets/tracking_labels.dart';
 import 'package:telly_app/features/tracking/presentation/widgets/watching_now.dart';
 import 'package:telly_app/features/tracking/presentation/widgets/tracking_header.dart';
+import 'package:telly_app/features/tracking/presentation/widgets/tracking_actions.dart';
 import 'package:telly_app/features/tracking/presentation/widgets/tracking_undo_tray.dart';
 import 'package:telly_app/features/tracking/presentation/widgets/watch_slot.dart';
 import 'package:telly_app/features/tracking/presentation/widgets/watching_cards.dart';
@@ -185,7 +181,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
     ref.listen<TrackingItem?>(titleTrackingProvider((widget.titleId, widget.mediaType)), (prev, next) {
       if (_expectFinish && prev?.state == TrackingState.watching && next != null && next.state != TrackingState.watching) {
         _expectFinish = false;
-        _openFinishSheet(_withRank(next)!);
+        TrackingActions.openFinishSheet(context, _withRank(next)!);
       }
     });
     Widget content;
@@ -378,7 +374,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
           PopupMenuButton<String>(
             key: const Key('tracking_overflow_menu'),
             icon: Icon(Icons.more_vert, color: TellyColors.textPrimaryOf(context)),
-            onSelected: (v) => v == 'drop' ? _onDrop(tracked) : _onStopTracking(tracked),
+            onSelected: (v) => v == 'drop' ? TrackingActions.drop(context, ref, tracked) : TrackingActions.confirmStop(context, ref, tracked),
             itemBuilder: (_) => [
               if (!tracked.isMovie) const PopupMenuItem(value: 'drop', child: Text('Drop it')),
               const PopupMenuItem(value: 'stop', child: Text('Stop tracking')),
@@ -757,7 +753,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
         providerName: first?.name,
         onPlay: first == null ? null : () => _play(title, first.id),
         onFinished: () => _onMovieFinished(item),
-        onRank: () => _onRank(item),
+        onRank: () => TrackingActions.rank(context, item),
       );
     } else {
       card = NextEpisodeCard(
@@ -766,8 +762,8 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
         providerName: first?.name,
         onPlay: first == null ? null : () => _play(title, first.id),
         onWatched: () => _onWatched(item),
-        onUnlogLast: () => _onUnlogLast(item),
-        onRank: () => _onRank(item),
+        onUnlogLast: () => TrackingActions.offerUnlogLast(context, ref, item),
+        onRank: () => TrackingActions.rank(context, item),
       );
     }
     final keyed = KeyedSubtree(key: _nextCardKey, child: card);
@@ -840,7 +836,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
         if (choice == 'again') {
           await _tracking.start(_request(title, rewatch: true));
         } else if (choice == 'stop') {
-          await _onStopTracking(item);
+          await TrackingActions.confirmStop(context, ref, item);
         }
     }
   }
@@ -918,77 +914,6 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
     await _haptic(medium: true);
     _expectFinish = true;
     await _tracking.finish(item);
-  }
-
-  TitleSearchResult _searchResult(TrackingItem item) => TitleSearchResult(
-        id: item.titleId,
-        mediaType: item.mediaType,
-        title: item.title,
-        posterPath: item.posterPath,
-      );
-
-  void _onRank(TrackingItem item) {
-    context.push(Routes.log, extra: LogRequest(title: _searchResult(item), status: FinishSheet.defaultStatus(item)));
-  }
-
-  Future<void> _openFinishSheet(TrackingItem item) async {
-    if (!mounted) return;
-    final result = await FinishSheet.show(context, item);
-    if (result == null || !mounted) return;
-    switch (result.action) {
-      case FinishAction.logAndDuel:
-        context.push(Routes.log, extra: LogRequest(title: _searchResult(item), status: result.status));
-      case FinishAction.reDuel:
-        context.push(Routes.log, extra: _searchResult(item));
-      case FinishAction.later || FinishAction.keepRank:
-        break;
-    }
-  }
-
-  /// features/11 §4.6: the existing drop flow, prefilled from the place; saving stops tracking.
-  Future<void> _onDrop(TrackingItem item) async {
-    final point = item.nextEpisode?.ref ?? item.place;
-    final details = await LogDroppedShowSheet.show(
-      context: context,
-      titleId: item.titleId,
-      title: item.title,
-      releaseYear: 0,
-      initial: DropDetails(season: point?.season ?? 1, episode: point?.episode),
-    );
-    if (details == null || !mounted) return;
-    try {
-      await ref
-          .read(graveyardControllerProvider.notifier)
-          .drop(titleId: item.titleId, mediaType: item.mediaType, details: details);
-      await _tracking.stop(item);
-      if (mounted) context.go(Routes.graveyard);
-    } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Couldn't add it to your Graveyard. Try again.")),
-        );
-      }
-    }
-  }
-
-  Future<void> _onStopTracking(TrackingItem item) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        key: const Key('stop_tracking_dialog'),
-        title: const Text('Stop tracking?'),
-        content: const Text('Your progress is removed. Your rank, if any, stays.'),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
-          TextButton(
-            key: const Key('stop_tracking_confirm'),
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Stop tracking'),
-          ),
-        ],
-      ),
-    );
-    if (confirmed == true && mounted) await _tracking.stop(item);
   }
 
   Widget _buildStreamingNowSection(TitleDetail title) {
@@ -1506,37 +1431,6 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
 
   TrackingItem? get _liveTracked => _withRank(ref.read(titleTrackingProvider((widget.titleId, widget.mediaType))));
 
-  Future<void> _onUnlogLast(TrackingItem item) async {
-    final place = item.place;
-    if (place == null) return;
-    final choice = await TellyFrostedSheet.show<bool>(
-      context: context,
-      builder: (ctx) => ListTile(
-        key: const Key('unlog_last_action'),
-        leading: const Icon(Icons.undo_rounded),
-        title: Text('Un-log ${place.label}'),
-        onTap: () => Navigator.of(ctx).pop(true),
-      ),
-    );
-    if (choice == true && mounted) await _unlog(item, place);
-  }
-
-  /// Marks [episode] and everything after it as not watched; Undo restores the place.
-  Future<void> _unlog(TrackingItem item, EpisodeRef episode) async {
-    final before = item.place;
-    await _haptic();
-    await _tracking.unlog(item, episode);
-    if (!mounted) return;
-    TrackingUndoTray.show(
-      context,
-      message: '${episode.label} marked not watched',
-      onUndo: () {
-        final current = _liveTracked;
-        if (current != null) _tracking.setPlace(current, before);
-      },
-    );
-  }
-
   Future<void> _jumpTo(TrackingItem item, EpisodeRef episode) async {
     final before = item.place;
     await _haptic();
@@ -1598,7 +1492,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
           );
           if (ok != true || !mounted) return;
         }
-        await _unlog(current, episode);
+        await TrackingActions.unlog(context, ref, current, episode);
       case EpisodeAction.rewatched:
         await _tracking.logRewatch(current, episode);
         if (mounted) {
