@@ -10,6 +10,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -307,8 +308,8 @@ void trackingJourneys() {
     await _tap(tester, find.byKey(const Key('title_watch_action')));
     await _waitFor(tester, find.byKey(const Key('where_are_you_sheet')));
     await _tap(tester, find.byKey(const Key('where_partway')));
-    await tester.drag(find.byKey(const ValueKey('episode_wheel_1')),
-        const Offset(0, -216)); // six episodes down
+    final picker = tester.widget<CupertinoPicker>(find.byKey(const ValueKey('episode_wheel_1')));
+    picker.scrollController?.jumpToItem(6); // six episodes down -> S1 · E7
     await _pumpFor(tester, 10);
     expect(find.text('Season 1 · Episode 7'), findsOneWidget);
     await _tap(tester, find.byKey(const Key('start_tracking_button')));
