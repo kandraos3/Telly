@@ -94,6 +94,7 @@ class _LoggingStudioScreenState extends ConsumerState<LoggingStudioScreen> {
     final title = draft.title;
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: TellySubpageAppBar(
         nav: TellyNavKind.close,
         navKey: const Key('logging_cancel'),
