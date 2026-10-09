@@ -32,15 +32,29 @@ The server sets the state on every write from §3's rules. The client recomputes
 ### 2.3 Groups (derived, for the hub and Home)
 Each tracked title falls into exactly one group, checked in this order:
 1. **New episodes**: `new_episodes_since` is set (§4.8).
-2. **In progress**: `WATCHING`, with `last_progress_at` within 30 days.
+2. **In progress**: `WATCHING`, with `last_progress_at` within the pause window (30 days for a series, 7 days for a movie).
 3. **Finished, not ranked**: `CAUGHT_UP` or `FINISHED`, and the title isn't in your canon for its media type.
-4. **Caught up**: `CAUGHT_UP` and ranked. Also `FINISHED` and ranked for 14 days after `finished_at`, after which the title leaves the hub (it stays visible in the hub's *Finished* filter, §9.5).
-5. **Paused**: `WATCHING`, with no progress for 30 days or more.
+4. **Caught up**: series only. `CAUGHT_UP` and ranked, or `FINISHED` and ranked for 14 days after `finished_at`. After that the title leaves the hub (it stays visible in the hub's *Finished* filter, §9.5).
+5. **Paused**: `WATCHING`, with no progress for the pause window or longer.
+
+**Movies** (§2.5) never reach *New episodes* or *Caught up*. A finished movie that's ranked leaves the hub at once, and stays in the *Finished* filter.
 
 ### 2.4 Dual canon
 - Tracking rows carry `media_type` like every other per-title row.
 - Every list, count and stat that shows tracking filters by one media type, except the hub's *All* chip and Home's summary. Those show both, labelled per row ("Movie" in the meta line).
 - Nothing in tracking compares a movie with a series.
+
+### 2.5 Movies
+A movie is tracked with the same row and RPCs as a series, without a place (decision 0010; option A of the movie follow-up on #168, 2026-10-09).
+- **States:** `WATCHING` until you tap **✓ Finished**, then `FINISHED`. There's no `CAUGHT_UP` and no new-episodes check.
+- **Start:** no sheet; tracking starts at once with Undo (§4.1).
+- **Title page:** the *Watching* card (§5.2b) replaces *Streaming now*. There's no seasons section, spoiler guard or drop-off line.
+- **Finish:** **✓ Finished** calls `finish_tracking` and opens the finish sheet with *First-time watch* or *Rewatch* preselected from `is_rewatch` (§4.5).
+- **Paused** after 7 days without finishing (§2.3). A paused movie keeps its **✓ Finished** action.
+- **Rewatch:** *Watch again* on a finished movie sets `is_rewatch`. A ranked movie you're watching again shows **▶ Rewatching** on its Canon row; an unranked one shows **▶ Watching**.
+- **Drop:** movies can't be dropped (features/03); the action is **Stop tracking**.
+- **Stats:** *Movies finished in <year>* on the Canon Stats sheet, and the hub's Movies *This week* strip (§8).
+- **Feed:** `WATCH_STARTED` and `WATCH_FINISHED` work as for series.
 
 ## 3. Progress Model & Formulas
 These are pure functions in Dart (`lib/features/tracking/domain/tracking_progress.dart`), mirrored in SQL where the server needs them (§6.4). Inputs:
@@ -197,6 +211,14 @@ While `WATCHING`, it replaces *Streaming now*. It holds:
 - **▶ <provider>** (the same deep link as *Streaming now*);
 - **✓ Watched E6**.
 
+### 5.2b Movie Watching card
+While a movie is `WATCHING`, it replaces *Streaming now*. It holds:
+- the label "WATCHING" and "Started yesterday" (relative date of `started_at`);
+- the poster thumbnail, the title, and "2 h 46 · on Max" (runtime from `titles.runtime_minutes`, then the provider);
+- **▶ <provider>** (the same deep link as *Streaming now*) and **✓ Finished**.
+
+When the movie is `FINISHED`, the card reads "You finished it · Oct 6". It offers **Rank <title> →** if the movie isn't ranked, and shows its rank and score if it is. *Streaming now* comes back below it.
+
 ### 5.3 Seasons as progress
 - The *Seasons* section shows, per season:
   - a 26 dp progress ring;
@@ -298,7 +320,7 @@ All of these are `SECURITY DEFINER`, `SET search_path = public`. They take `p_cl
 | :--- | :--- |
 | `get_my_tracking()` | The caller's rows joined with `titles` (title, poster, backdrop, status, number of seasons), `tv_seasons` counts, the next episode's `tv_episodes` row when cached, whether the title is in the caller's canon (with rank and score), and the latest aired episode. The client derives groups (§2.3) and progress (§3.4) from it. |
 | `get_title_watchers(p_title_id, p_media_type)` | Up to 20 users the caller has an `accepted` follow of, where `can_view_user` holds, the user isn't `GHOST`, and who track the title in `WATCHING`. Ordered by `last_progress_at` desc. Returns `user_id`, `username`, `display_name`, `avatar_url` and the total count. **No place or state.** |
-| `get_tracking_stats(p_media_type, p_year)` | The caller's §3.6 totals for the year: `episodes` (TV) or `movies_finished` (movie). The hub's *This week* uses `p_year` NULL with the ISO week instead (`episodes`, and `minutes` summed from `tv_episodes.runtime_minutes` where known). |
+| `get_tracking_stats(p_media_type, p_year)` | The caller's §3.6 totals for the year: `episodes` (TV) or `movies_finished` (movie). The hub's *This week* uses `p_year` NULL with the ISO week instead: for TV, `episodes` and `minutes` summed from `tv_episodes.runtime_minutes` where known; for movies, `movies_finished` and `minutes` summed from `titles.runtime_minutes`. |
 
 ### 6.4 Server state recompute
 `_tracking_state(p_user_id, p_title_id, p_media_type)` implements §3.1–§3.3 in SQL and is shared by the RPCs and the job. pgTAP mirrors the Dart vectors in `test/fixtures/tracking_progress_vectors.json`, which both sides must pass.
@@ -329,7 +351,8 @@ All of these are `SECURITY DEFINER`, `SET search_path = public`. They take `p_cl
   - Movies add **Movies finished in <year>**.
   - Values come from `get_tracking_stats`; offline shows "—".
 - **Hub This week strip:**
-  - episodes this ISO week;
+  - Movies chip: movies finished this ISO week and their total runtime ("2 movies · 5 h 12").
+  - All and Series chips: episodes this ISO week;
   - time, as "7 h 50", shown only when every counted episode has a cached runtime, else hidden.
 - **Reserved for later:** Wrapped (SCR-19) can read the same events. No change here.
 
