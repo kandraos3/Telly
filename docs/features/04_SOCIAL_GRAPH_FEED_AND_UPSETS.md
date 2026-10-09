@@ -1,5 +1,7 @@
 # Feature Spec 04: Social Graph, Activity Feed & The "Upset Engine"
 
+> Tracking: epic #48 · Status: approved · Decision: [0009](../decisions/0009-social-friends-search-and-privacy.md)
+
 ## 1. Overview & The Beli Social Hook
 The reason Beli became a viral sensation among Gen Z and millennials—surpassing Yelp—is that dining is inherently social and competitive. People care far more about what their 10 close friends think than what 50,000 anonymous reviewers say.
 
@@ -174,3 +176,38 @@ CREATE TABLE ranking_comments (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 ```
+
+---
+
+## 8. Friends Outside Squads & Public Profile Exploration — epic #48
+
+> Decision: [0009](../decisions/0009-social-friends-search-and-privacy.md) · Mockup: [0048-social-friends.html](../design_system/mockups/0048-social-friends.html) · Screens: `SCR-05`, `SCR-15`, `SCR-28`
+
+### 8.1 The Social Graph Model
+- **Following:** Any user can follow another public user directly. Following displays that user's rankings, upsets, and dropped shows in the follower's `Following` feed.
+- **Friends (Mutual Follows):** When two users follow each other, their relationship tier is upgraded to **Friends**.
+  - Shows mutual friends indicator badge on profiles and search cards.
+  - Enables "Two-to-Watch" co-watching invitations.
+  - Friends bypass the private profile barrier on accounts set to `FRIENDS_ONLY`.
+- **Follow Requests (Private Accounts):** Following a user with `visibility_mode = 'FRIENDS_ONLY'` creates a pending `follow_request`. The button transitions from `+ Follow` to `Requested`. Once approved by the target user, the relationship status becomes `ACCEPTED` / `Following`.
+
+### 8.2 User Search & Discovery (`SCR-28`)
+- **Entry Point:** Search icon (`Icons.search`) in the `SCR-05` Social App Bar routes to `/social/search`.
+- **Search Query:** Debounced (300ms) prefix and substring query across `profiles.handle` and `profiles.display_name`.
+- **Privacy Filtering:** Users with `visibility_mode = 'GHOST'` are strictly excluded from search results unless the current viewer is already an accepted follower.
+- **Card Components:**
+  - Avatar with level/reward frame.
+  - Display name and `@handle`.
+  - Taste match percentage badge (if mutual ratings exist, e.g. `88% Taste Match`).
+  - Inline follow button: `+ Follow` (Phosphor Lime outlined), `Requested` (Amber), or `Following` (Stroke Subtle).
+  - Tapping the card opens Friend Profile (`SCR-15`, `/u/:handle`).
+
+### 8.3 Public vs Private Profile Navigation
+- Tapping any user avatar or username in `SCR-05` (feed card, comment, reaction), `SCR-17` (squad member list), or `SCR-28` (search) opens `/u/:handle`.
+- If the account is `PUBLIC`:
+  - Full Canon, stats, taste comparisons, and unwatched gems are visible.
+- If the account is `FRIENDS_ONLY` and the viewer is not an accepted friend:
+  - Header art, avatar, display name, bio, and pinned medals remain visible.
+  - The Canon, Taste Match dial, and comparisons are replaced by the Private Account Gate:
+    *"This Profile is Friends-Only. @handle shares their Canon and rankings with accepted friends only."*
+  - Follow / Request button remains accessible to request access.

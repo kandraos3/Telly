@@ -33,6 +33,7 @@ This document defines every single screen in the Telly application. For each scr
 25. **`SCR-25`**: Challenges: features/10 §9.5
 26. **`SCR-26`**: Challenge detail: features/10 §9.6
 27. **`SCR-27`**: Your level (with Rewards and Friends this week): features/10 §9.7
+28. **`SCR-28`**: Search Users (Find Friends): `SCR-28` below; features/04 §8.2
 
 ---
 
@@ -47,7 +48,7 @@ Five tabs in the floating bar (component library §2.1), plus the floating Log b
 | Home | `/home` | `SCR-21` Home | none |
 | Explore | `/explore` | `SCR-07` Explore | `/explore/row/:rowId?canon=movie\|tv` (`SCR-07` See all) |
 | Canon | `/canon` | `SCR-14` Canon | none |
-| Social | `/social` | `SCR-05` Feed | `/social/activity/:id` (`SCR-06`) |
+| Social | `/social` | `SCR-05` Feed | `/social/activity/:id` (`SCR-06`), `/social/search` (`SCR-28`) |
 | More | `/more` | `SCR-22` More hub | `/more/queue` (`SCR-13`), `/more/queue/lists`, `/more/queue/list/:id`, `/more/graveyard` (`SCR-18`), `/more/wrapped` (`SCR-19`), `/more/settings` (`SCR-20`), `/more/edit`, `/more/achievements` (`SCR-23`), `/more/challenges` (`SCR-25`), `/more/challenges/:slug` (`SCR-26`), `/more/level`, `/more/level/rewards`, `/more/level/week` (`SCR-27`) |
 
 Unchanged, pushed over the shell: the `/log` flow (`SCR-09` to `SCR-12`), `/title/:mediaType/:id` (`SCR-08`), `/u/:handle` (`SCR-15`), `/cowatch` and `/u/:handle/two-to-watch` (`SCR-16`), `/squads` and `/squads/:id` (`SCR-17`, opened from Social).
@@ -73,7 +74,7 @@ The five tab screens (`SCR-21`, `SCR-07`, `SCR-14`, `SCR-05`, `SCR-22`) share on
 | `SCR-21` Home | Home | Search (opens Explore with the search field focused) |
 | `SCR-07` Explore | Explore | none (the search bar sits directly below) |
 | `SCR-14` Canon | Canon | Stats (sheet), View (sheet; icon shows the current view), Share profile |
-| `SCR-05` Social | Social | My Squads, Search |
+| `SCR-05` Social | Social | My Squads (`/squads`), Search (`/social/search`, `SCR-28`) |
 | `SCR-22` More | More | none |
 
 * **Scroll behavior:** the header scrolls away as the content scrolls down, and any upward scroll snaps it back in full, wherever the content is; there is no need to return to the top. Controls under the header (Social filter tabs and Movies / TV Shows tabs) stay in place.
@@ -287,7 +288,7 @@ The **Social** tab (`/social`). It was the landing tab until epic #44; Home (`SC
 - **Top Navigation:**
   - Left: Minimalist Telly phosphor neon glyph.
   - Center: Feed Segment Dropdown: `Following (Default)` | `My Squads (Roommates, Cinephiles)` | `Global Community`.
-  - Right: Quick Search icon.
+  - Right: Quick Search icon: opens Search Users (`SCR-28`, `/social/search`).
 - **User Actions Available on Each Card:**
   1. `Tap Poster / Title`: Opens Show Detail (`SCR-08`).
   2. `Tap Friend Avatar / Username`: Opens Friend Profile & Taste Match (`SCR-15`).
@@ -712,10 +713,16 @@ The Canon tab opens on your rankings. Your profile card lives in the More hub (`
 ```
 
 - **Pinned medals** (#138, features/10 §4.4): under the name and bio, the friend's pinned medals (small), or their latest unlocks with a "Recent" label. Hidden when they have none or their profile isn't visible.
+- **Privacy Gate (Private / Friends-Only Profiles):** If `visibility_mode = 'FRIENDS_ONLY'` and `follow_status != 'ACCEPTED'`, the Canon, Taste Match dial, breakdown, and unwatched gems are replaced by the Private Profile card (`key: Key('friend_profile_private')`):
+  - Lock icon in Warm Amber.
+  - Heading: "This Profile is Friends-Only".
+  - Subtitle: "@handle shares their Canon and rankings with accepted friends only." (or "Follow request sent. Their canon appears once @handle accepts." when `FollowStatus.pending`).
+  - Follow action button: `+ Follow` (sends follow request) or `Requested` (pending approval).
 - **User Actions:**
-  - `Follow / Unfollow Button`: Updates social graph.
-  - `Compare Tastes Tab`: Shows interactive head-to-head scatter plot of mutual rankings across Movie and Series Canons.
-  - `1-Tap Add Unwatched Gems`: Instantly adds Maya's highest-ranked unwatched titles to viewer's queue.
+  - `Follow / Requested / Following Button`: Outlined pill button in header. Transitions `+ Follow` → `Requested` (if target is private) or `Following` (if target is public). Tapping `Following` unfollows after confirmation.
+  - `Compare Tastes`: Shows interactive head-to-head comparisons across Movie and Series Canons (only if profile is viewable).
+  - `Two-to-Watch Decider`: Opens `/cowatch?friend=@handle` (`SCR-16`) to find shared titles to watch.
+  - `1-Tap Add Unwatched Gems`: Instantly adds friend's highest-ranked unwatched titles to viewer's queue.
 
 ---
 
@@ -845,7 +852,7 @@ The Canon tab opens on your rankings. Your profile card lives in the More hub (`
 - **Sections:**
   - `Profile:` Avatar, Username, Bio, Connected Accounts (Apple, Google).
   - `Subscriptions:` Manage active streaming services.
-  - `Privacy & Social:` Private profile toggle, hide dropped shows from public feed, spoiler protection settings, and **Share achievements in the feed** (default on; features/10 §10, #50).
+  - `Privacy & Social:` Account visibility mode picker (`Public` [default], `Friends Only`, `Ghost Mode`), hide dropped shows from public feed, spoiler protection settings, and **Share achievements in the feed** (default on; features/10 §10, #50).
   - `Notifications:` Upsets from friends, shared finale airings, leaving soon alerts.
   - `Data & Exports:`
     - `Export Canon to CSV / Excel`
@@ -920,3 +927,51 @@ A WHOOP-style hub (`/more`): one place for everything that isn't a daily destina
 - **Future entries** are added by their epics, and only once they ship (no "Soon" placeholders in the app): Invite friends (#51, tile, violet), Telly Pro (#52, list row, amber), and Help & feedback (#118, list row, once a support channel exists).
 - The floating Log button is hidden on this tab.
 - **Offline:** everything works offline except refreshing the avatar. No loading state is needed.
+
+---
+
+### `SCR-28`: Search Users (Find Friends) — epic #48
+
+> Tracking: epic #48 · Status: approved · Decision: [0009](../decisions/0009-social-friends-search-and-privacy.md) · Mockup: [0048-social-friends.html](../design_system/mockups/0048-social-friends.html)
+
+Pushed over the shell from the Social tab header (`/social/search`), using `TellySubpageAppBar` with title "Find Friends".
+
+```
+┌────────────────────────────────────────────────────────┐
+│ [← Back]              Find Friends                     │
+├────────────────────────────────────────────────────────┤
+│  ┌──────────────────────────────────────────────────┐  │
+│  │ 🔍 Search by name or @handle...             [✕]  │  │
+│  └──────────────────────────────────────────────────┘  │
+│                                                        │
+│  MATCHES                                               │
+│  ┌──────────────────────────────────────────────────┐  │
+│  │ (👤) Alex Morgan @alexm         [ + Follow ]     │  │
+│  │      🎯 88% Taste Match                          │  │
+│  └──────────────────────────────────────────────────┘  │
+│  ┌──────────────────────────────────────────────────┐  │
+│  │ (👤) Alexander Ross @aross       [ Requested ]   │  │
+│  │      🎯 74% Taste Match                          │  │
+│  └──────────────────────────────────────────────────┘  │
+│  ┌──────────────────────────────────────────────────┐  │
+│  │ (👤) Alex Chen @alexchen          [ Following ]  │  │
+│  └──────────────────────────────────────────────────┘  │
+└────────────────────────────────────────────────────────┘
+```
+
+- **Search field:** autofocus input with clear button `[✕]`. Debounced (300ms) query against `profiles.handle` and `profiles.display_name`.
+- **Ghost filtering:** users with `visibility_mode = 'GHOST'` are excluded from search results unless the active user already follows them.
+- **Card layout:**
+  - Avatar with level/reward frame.
+  - Display name (Title Small, `textPrimary`) and `@handle` (Caption, `textTertiary`).
+  - Taste match percentage pill (Electric Violet `#7C5CFF`) if mutual scored titles exist.
+  - Inline follow button (`TellyOutlinedButton`):
+    - `+ Follow` (Phosphor Lime outline): sends follow request or accepts instantly depending on target's visibility mode.
+    - `Requested` (Warm Amber outline): pending follow request approval.
+    - `Following` (Stroke Subtle outline, `textPrimary`): active follow.
+- **Navigation:** tapping the user card anywhere outside the follow button pushes `/u/:handle` (`SCR-15`).
+- **States:**
+  - Empty query: "Search for friends by name or @handle to see what they're watching."
+  - Loading: skeleton user rows.
+  - No results: "No users found matching '{query}'."
+  - Offline: "User search requires an internet connection." with Retry button.
