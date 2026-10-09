@@ -9,8 +9,18 @@ import { handleScheduler, monthStart } from "../challenge-scheduler/handler.ts";
 import { platformFromName } from "../_shared/providers.ts";
 import { isAuthenticatedUserRequest, isServiceRoleRequest } from "../_shared/http.ts";
 import { handleTitleRelated, listItemToTitleRow } from "../title-related/handler.ts";
+import { handleSeason, normalizeEpisodes } from "../tmdb-season/handler.ts";
+import { handleTrackingRefresh, MAX_SHOWS_PER_RUN, type RefreshDeps, TIME_BUDGET_MS } from "../tracking-refresh/handler.ts";
 import { genreNames } from "../_shared/genres.ts";
-import { fakeFetch, jsonResponse, MemoryExploreStore, MemoryStore, RecordedCall } from "./fakes.ts";
+import {
+  fakeFetch,
+  jsonResponse,
+  MemoryEpisodeStore,
+  MemoryExploreStore,
+  MemoryStore,
+  MemoryTrackingStore,
+  RecordedCall,
+} from "./fakes.ts";
 
 const req = (path: string, init?: RequestInit) => new Request(`http://edge.local${path}`, init);
 
@@ -515,4 +525,230 @@ Deno.test("only a signed-in user's JWT counts as a user request", () => {
   assertEquals(isAuthenticatedUserRequest(withAuth(`Bearer ${fakeJwt({ role: "authenticated", sub: "u" })}`)), true);
   assertEquals(isAuthenticatedUserRequest(withAuth(`Bearer ${fakeJwt({ role: "anon" })}`)), false);
   assertEquals(isAuthenticatedUserRequest(withAuth()), false);
+});
+
+// ---------------------------------------------------------------------------- watch tracking (#227)
+const seasonPayload = () =>
+  jsonResponse({
+    episodes: [
+      { episode_number: 1, name: "Good News About Hell", overview: "Mark leads.", still_path: "/e1.jpg", air_date: "2022-02-18", runtime: 55 },
+      { episode_number: 2, name: "Half Loop", overview: "", still_path: null, air_date: "not a date", runtime: 0 },
+      { episode_number: 0, name: "A bad row" },
+    ],
+  });
+
+Deno.test("tmdb-season: normalizes episodes, dropping rows without a positive number", () => {
+  const rows = normalizeEpisodes(
+    {
+      episodes: [
+        { episode_number: 1, name: "x".repeat(300), overview: "o", still_path: "/s.jpg", air_date: "2022-02-18", runtime: 55 },
+        { episode_number: 2, overview: "", air_date: "soon", runtime: 0 },
+        { episode_number: -1 },
+        { name: "no number" },
+      ],
+    },
+    95396,
+    1,
+  );
+  assertEquals(rows.length, 2);
+  assertEquals(rows[0], {
+    title_id: 95396,
+    season_number: 1,
+    episode_number: 1,
+    name: "x".repeat(200),
+    overview: "o",
+    still_path: "/s.jpg",
+    air_date: "2022-02-18",
+    runtime_minutes: 55,
+  });
+  assertEquals([rows[1].name, rows[1].overview, rows[1].air_date, rows[1].runtime_minutes], [null, null, null, null]);
+  assertEquals(normalizeEpisodes({}, 1, 1), []);
+});
+
+Deno.test("tmdb-season: a signed-in user's season is fetched, cached and returned", async () => {
+  const calls: RecordedCall[] = [];
+  const store = new MemoryEpisodeStore();
+  const res = await handleSeason(req("/?id=95396&season=1", { headers: userAuth() }), {
+    fetch: fakeFetch({ "/tv/95396/season/1": seasonPayload }, calls),
+    tmdbToken: "t",
+    store,
+  });
+  assertEquals(res.status, 200);
+  const body = await res.json();
+  assertEquals(body.season_number, 1);
+  assertEquals(body.episodes.length, 2);
+  assertEquals(store.rows.map((r) => r.episode_number), [1, 2]);
+  assertEquals(store.rows.every((r) => r.title_id === 95396 && r.season_number === 1), true);
+  assertEquals(calls.length, 1);
+  assertEquals(res.headers.get("Cache-Control"), "private, max-age=3600");
+});
+
+Deno.test("tmdb-season: the service role may fetch a season too", async () => {
+  const res = await handleSeason(req("/?id=1&season=2", { headers: { Authorization: "Bearer srk" } }), {
+    fetch: fakeFetch({ "/tv/1/season/2": seasonPayload }),
+    tmdbToken: "t",
+    store: new MemoryEpisodeStore(),
+    serviceRoleKey: "srk",
+  });
+  assertEquals(res.status, 200);
+});
+
+Deno.test("tmdb-season: rejects bad requests", async () => {
+  const deps = { fetch: fakeFetch({}), tmdbToken: "t", store: new MemoryEpisodeStore(), serviceRoleKey: "srk" };
+  const anon = { Authorization: `Bearer ${fakeJwt({ role: "anon" })}` };
+  assertEquals((await handleSeason(req("/?id=1&season=1", { headers: anon }), deps)).status, 401);
+  assertEquals((await handleSeason(req("/?id=1&season=1"), deps)).status, 401);
+  for (const q of ["id=1&season=0", "id=1&season=-1", "id=1&season=x", "id=1&season=1.5", "id=0&season=1", "season=1"]) {
+    assertEquals((await handleSeason(req(`/?${q}`, { headers: userAuth() }), deps)).status, 400, q);
+  }
+  assertEquals((await handleSeason(req("/?id=1&season=1", { method: "POST", headers: userAuth() }), deps)).status, 405);
+  assertEquals((await handleSeason(req("/?id=1&season=1", { headers: userAuth() }), { ...deps, tmdbToken: undefined })).status, 500);
+  assertEquals((await handleSeason(req("/", { method: "OPTIONS" }), deps)).status, 200);
+});
+
+Deno.test("tmdb-season: TMDB 404, 429 and errors are passed on", async () => {
+  const missing = await handleSeason(req("/?id=1&season=9", { headers: userAuth() }), {
+    fetch: fakeFetch({}),
+    tmdbToken: "t",
+    store: new MemoryEpisodeStore(),
+  });
+  assertEquals(missing.status, 404);
+  const slow = await handleSeason(req("/?id=1&season=1", { headers: userAuth() }), {
+    fetch: fakeFetch({ "/season/": () => new Response("slow", { status: 429 }) }),
+    tmdbToken: "t",
+    store: new MemoryEpisodeStore(),
+  });
+  assertEquals(slow.status, 429);
+  assertEquals(slow.headers.get("Retry-After"), "5");
+  const broken = await handleSeason(req("/?id=1&season=1", { headers: userAuth() }), {
+    fetch: fakeFetch({ "/season/": () => new Response("boom", { status: 500 }) }),
+    tmdbToken: "t",
+    store: new MemoryEpisodeStore(),
+  });
+  assertEquals(broken.status, 502);
+});
+
+const srkPost = () => req("/", { method: "POST", headers: { Authorization: "Bearer srk" } });
+const tvDetails = (id: number) =>
+  jsonResponse({
+    id,
+    name: `Show ${id}`,
+    status: "Returning Series",
+    number_of_seasons: 2,
+    seasons: [
+      { season_number: 1, episode_count: 2, air_date: "2022-01-01" },
+      { season_number: 2, episode_count: 2, air_date: "2025-01-01" },
+    ],
+  });
+const refreshDeps = (over: Partial<RefreshDeps> = {}) => {
+  const catalog = new MemoryStore();
+  const episodes = new MemoryEpisodeStore();
+  const tracking = new MemoryTrackingStore();
+  const deps: RefreshDeps = {
+    fetch: fakeFetch({
+      "/tv/11/season/2": seasonPayload,
+      "/tv/12/season/1": seasonPayload,
+      "/tv/11?": () => tvDetails(11),
+      "/tv/12?": () => tvDetails(12),
+    }),
+    tmdbToken: "t",
+    catalog,
+    episodes,
+    tracking,
+    serviceRoleKey: "srk",
+    now: () => NOW,
+    ...over,
+  };
+  return { catalog, episodes, tracking, deps };
+};
+
+Deno.test("tracking-refresh: service role POST only", async () => {
+  const { deps } = refreshDeps();
+  assertEquals((await handleTrackingRefresh(req("/", { method: "POST" }), deps)).status, 401);
+  assertEquals((await handleTrackingRefresh(req("/", { method: "POST", headers: userAuth() }), deps)).status, 401);
+  assertEquals((await handleTrackingRefresh(req("/", { headers: { Authorization: "Bearer srk" } }), deps)).status, 405);
+  assertEquals((await handleTrackingRefresh(srkPost(), { ...deps, tmdbToken: undefined })).status, 500);
+});
+
+Deno.test("tracking-refresh: refreshes each show and its seasons, then flips new episodes", async () => {
+  const { deps, catalog, episodes, tracking } = refreshDeps();
+  tracking.shows = [11, 12];
+  tracking.seasons = { 11: [2], 12: [1] };
+  tracking.flipped = 3;
+  const res = await handleTrackingRefresh(srkPost(), deps);
+  assertEquals(res.status, 200);
+  assertEquals(await res.json(), {
+    shows: 2,
+    seasons: 2,
+    flipped: 3,
+    rateLimited: false,
+    timedOut: false,
+    includeEnded: false,
+    failures: [],
+  });
+  assertEquals(catalog.titles.map((t) => t.id), [11, 12]);
+  assertEquals(catalog.seasons.length, 4);
+  assertEquals(episodes.rows.length, 4, "two episodes per season, from two seasons");
+  assertEquals(tracking.lastLimit, MAX_SHOWS_PER_RUN);
+  assertEquals(tracking.flipRuns, 1);
+});
+
+Deno.test("tracking-refresh: ended shows are only included on Mondays", async () => {
+  const thursday = refreshDeps(); // NOW is Thursday 2026-10-08
+  await handleTrackingRefresh(srkPost(), thursday.deps);
+  assertEquals(thursday.tracking.lastIncludeEnded, false);
+  const monday = refreshDeps({ now: () => new Date("2026-10-05T05:23:00Z") });
+  const res = await handleTrackingRefresh(srkPost(), monday.deps);
+  assertEquals(monday.tracking.lastIncludeEnded, true);
+  assertEquals((await res.json()).includeEnded, true);
+});
+
+Deno.test("tracking-refresh: a TMDB rate limit stops the fetching but still flips", async () => {
+  const { deps, tracking, episodes } = refreshDeps();
+  tracking.shows = [11, 12];
+  tracking.seasons = { 11: [2], 12: [1] };
+  const limited = {
+    ...deps,
+    fetch: fakeFetch({
+      "/tv/11?": () => tvDetails(11),
+      "/tv/11/season/2": () => new Response("slow", { status: 429 }),
+      "/tv/12?": () => tvDetails(12),
+    }),
+  };
+  const body = await (await handleTrackingRefresh(srkPost(), limited)).json();
+  assertEquals(body.rateLimited, true);
+  assertEquals(body.shows, 1, "the second show is never reached");
+  assertEquals(episodes.rows.length, 0);
+  assertEquals(tracking.flipRuns, 1);
+});
+
+Deno.test("tracking-refresh: a failing show is recorded and the run carries on", async () => {
+  const { deps, tracking } = refreshDeps();
+  tracking.shows = [13, 12];
+  tracking.seasons = { 12: [1] };
+  const body = await (await handleTrackingRefresh(srkPost(), deps)).json();
+  assertEquals(body.failures, ["tv:13 (404)"]);
+  assertEquals(body.shows, 1);
+  assertEquals(body.seasons, 1);
+  assertEquals(tracking.flipRuns, 1);
+});
+
+Deno.test("tracking-refresh: the time budget stops the run cleanly", async () => {
+  let ticks = 0;
+  // Every look at the clock is 60% of the budget later, so the second show starts past it.
+  const clock = () => new Date(NOW.getTime() + ticks++ * (TIME_BUDGET_MS * 0.6));
+  const { deps, tracking } = refreshDeps({ now: clock });
+  tracking.shows = [11, 12];
+  tracking.seasons = { 11: [2], 12: [1] };
+  const body = await (await handleTrackingRefresh(srkPost(), deps)).json();
+  assertEquals(body.timedOut, true);
+  assertEquals(body.shows, 1);
+  assertEquals(tracking.flipRuns, 1);
+});
+
+Deno.test("tracking-refresh: a database failure answers 500", async () => {
+  const { deps, tracking } = refreshDeps();
+  tracking.showsToRefresh = () => Promise.reject(new Error("db down"));
+  const res = await handleTrackingRefresh(srkPost(), deps);
+  assertEquals(res.status, 500);
 });

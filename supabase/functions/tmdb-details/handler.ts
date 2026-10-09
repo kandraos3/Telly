@@ -189,11 +189,12 @@ export function normalizeCollection(raw: Record<string, unknown>, today: string)
   };
 }
 
-type Outcome = { status: number; body: unknown };
+export type Outcome = { status: number; body: unknown };
 
 const now = (deps: DetailsDeps) => (deps.now ?? (() => new Date()))();
 
-async function fetchAndStore(id: number, mediaType: MediaType, deps: DetailsDeps): Promise<Outcome> {
+/** Fetches a title's TMDB details and upserts `titles` + `tv_seasons` (also used by tracking-refresh, #227). */
+export async function fetchAndStore(id: number, mediaType: MediaType, deps: DetailsDeps): Promise<Outcome> {
   const append = mediaType === "tv" ? "credits,aggregate_credits" : "credits";
   const upstream = await deps.fetch(`${TMDB_API_BASE}/${mediaType}/${id}?append_to_response=${append}`, {
     headers: tmdbHeaders(deps.tmdbToken!),

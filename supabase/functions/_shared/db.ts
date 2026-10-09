@@ -100,6 +100,33 @@ export interface CatalogStore {
   staleCollections(maxAgeDays: number, limit: number): Promise<number[]>;
 }
 
+/** One cached TMDB episode (`tv_episodes`, features/11 §6.1). */
+export interface EpisodeRow {
+  title_id: number;
+  season_number: number;
+  episode_number: number;
+  name: string | null;
+  overview: string | null;
+  still_path: string | null;
+  air_date: string | null;
+  runtime_minutes: number | null;
+}
+
+/** The episode cache (#227): written by tmdb-season and tracking-refresh. */
+export interface EpisodeStore {
+  upsertEpisodes(rows: EpisodeRow[]): Promise<void>;
+}
+
+/** What the daily tracking refresh asks the database (#227, features/11 §6.5). */
+export interface TrackingRefreshStore {
+  /** Series someone tracks as caught up or finished, least recently refreshed first. */
+  showsToRefresh(includeEnded: boolean, limit: number): Promise<number[]>;
+  /** The seasons of a show whose episodes should be fetched. */
+  seasonsToRefresh(titleId: number): Promise<number[]>;
+  /** Flips tracked series with a newly aired next episode back to watching; returns how many. */
+  refreshNewEpisodes(): Promise<number>;
+}
+
 export function serviceClient(): SupabaseClient {
   const url = Deno.env.get("SUPABASE_URL");
   const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
@@ -237,6 +264,47 @@ export function supabaseExploreStore(client: SupabaseClient = serviceClient()): 
       const { data, error } = await client.rpc("stale_explore_seeds", { p_max_age_days: maxAgeDays, p_limit: limit });
       check(error);
       return (data ?? []) as ExploreSeedRef[];
+    },
+  };
+}
+
+export function supabaseEpisodeStore(client: SupabaseClient = serviceClient()): EpisodeStore {
+  return {
+    async upsertEpisodes(rows) {
+      if (rows.length === 0) return;
+      const { error } = await client
+        .from("tv_episodes")
+        .upsert(
+          rows.map((r) => ({ ...r, media_type: "tv", fetched_at: new Date().toISOString() })),
+          { onConflict: "title_id,season_number,episode_number" },
+        );
+      if (error) throw new Error(error.message);
+    },
+  };
+}
+
+export function supabaseTrackingRefreshStore(client: SupabaseClient = serviceClient()): TrackingRefreshStore {
+  const check = (error: { message: string } | null) => {
+    if (error) throw new Error(error.message);
+  };
+  return {
+    async showsToRefresh(includeEnded, limit) {
+      const { data, error } = await client.rpc("tracking_shows_to_refresh", {
+        p_include_ended: includeEnded,
+        p_limit: limit,
+      });
+      check(error);
+      return ((data ?? []) as { title_id: number }[]).map((r) => r.title_id);
+    },
+    async seasonsToRefresh(titleId) {
+      const { data, error } = await client.rpc("tracking_seasons_to_refresh", { p_title_id: titleId });
+      check(error);
+      return ((data ?? []) as { season_number: number }[]).map((r) => r.season_number);
+    },
+    async refreshNewEpisodes() {
+      const { data, error } = await client.rpc("refresh_tracking_new_episodes");
+      check(error);
+      return Number(data ?? 0);
     },
   };
 }

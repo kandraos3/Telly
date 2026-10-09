@@ -1,5 +1,16 @@
 // Test doubles for edge-function handlers.
-import type { AvailabilityRow, CatalogStore, CollectionRow, ExploreSeedRef, ExploreStore, SeasonRow, TitleRow } from "../_shared/db.ts";
+import type {
+  AvailabilityRow,
+  CatalogStore,
+  CollectionRow,
+  EpisodeRow,
+  EpisodeStore,
+  ExploreSeedRef,
+  ExploreStore,
+  SeasonRow,
+  TitleRow,
+  TrackingRefreshStore,
+} from "../_shared/db.ts";
 import type { MediaType } from "../_shared/http.ts";
 
 export interface RecordedCall {
@@ -111,5 +122,38 @@ export class MemoryExploreStore implements ExploreStore {
   }
   staleSeeds(_maxAgeDays: number, limit: number) {
     return Promise.resolve(this.stale.slice(0, limit));
+  }
+}
+
+/** In-memory episode cache for tmdb-season and tracking-refresh tests (#227). */
+export class MemoryEpisodeStore implements EpisodeStore {
+  rows: EpisodeRow[] = [];
+
+  upsertEpisodes(rows: EpisodeRow[]) {
+    this.rows.push(...rows);
+    return Promise.resolve();
+  }
+}
+
+/** The database side of tracking-refresh: scripted show and season selection, counted flips. */
+export class MemoryTrackingStore implements TrackingRefreshStore {
+  shows: number[] = [];
+  seasons: Record<number, number[]> = {};
+  flipped = 0;
+  flipRuns = 0;
+  lastIncludeEnded: boolean | null = null;
+  lastLimit = 0;
+
+  showsToRefresh(includeEnded: boolean, limit: number) {
+    this.lastIncludeEnded = includeEnded;
+    this.lastLimit = limit;
+    return Promise.resolve(this.shows.slice(0, limit));
+  }
+  seasonsToRefresh(titleId: number) {
+    return Promise.resolve(this.seasons[titleId] ?? []);
+  }
+  refreshNewEpisodes() {
+    this.flipRuns++;
+    return Promise.resolve(this.flipped);
   }
 }

@@ -327,9 +327,9 @@ All of these are `SECURITY DEFINER`, `SET search_path = public`. They take `p_cl
 
 ### 6.5 Daily refresh job
 - **Edge function `tracking-refresh`** (service role, called by pg_cron through `_invoke_edge_function` at `23 5 * * *`):
-  1. It selects distinct `(title_id)` from `user_tracking` where `media_type = 'tv'` and `state IN ('CAUGHT_UP', 'FINISHED')`. Ended or Canceled shows are included only on Mondays.
-  2. For each title (at most 500 per run, oldest `titles.updated_at` first), it refreshes `titles` and `tv_seasons` through the `tmdb-details` code path. Then it fetches `/tv/{id}/season/{n}` for the season after the place and any season with unaired episodes, and upserts `tv_episodes`.
-  3. It calls `refresh_tracking_new_episodes()` (SQL, service role), which applies §4.8 and returns the count.
+  1. `tracking_shows_to_refresh(include_ended, limit)` selects the distinct series in `user_tracking` with `state IN ('CAUGHT_UP', 'FINISHED')`. Ended or Canceled shows are included only on Mondays.
+  2. For each title (at most 500 per run, oldest `titles.updated_at` first), it refreshes `titles` and `tv_seasons` through the `tmdb-details` code path. Then it fetches `/tv/{id}/season/{n}` for each season in `tracking_seasons_to_refresh(title)` and upserts `tv_episodes`. Those seasons are the latest season, any season with an unaired or undated cached episode, and any season cached only in part. A TMDB 429, or running past a 100 s time budget, stops this step; the next day carries on.
+  3. It always calls `refresh_tracking_new_episodes()` (SQL, service role), which applies §4.8 and returns the count.
 - **Edge function `tmdb-season`** (authenticated, rate-limited like `tmdb-details`): it fetches and caches one season's episodes on demand. The client calls it when a tracked title's page opens and that season's episodes are missing or older than 7 days.
 
 ## 7. Social & Privacy
