@@ -303,14 +303,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/u/:handle',
         parentNavigatorKey: rootNavigatorKey,
-        redirect: (_, state) {
-          final handle = state.pathParameters['handle'];
-          final currentUser = ref.read(authControllerProvider).user;
-          if (handle != null && currentUser != null && currentUser.username?.toLowerCase() == handle.toLowerCase()) {
-            return Routes.canon;
-          }
-          return null;
-        },
         builder: (_, state) => FriendProfileScreen(handle: state.pathParameters['handle']!),
         routes: [
           GoRoute(

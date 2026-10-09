@@ -72,7 +72,10 @@ class MoreHubScreen extends ConsumerWidget {
                 avatarUrl: me?.avatarUrl,
                 userId: me?.id,
                 showcase: showcase,
-                onTap: onProfileTap ?? () => context.go(Routes.canon),
+                onTap: onProfileTap ??
+                    () => handle == null || handle.isEmpty
+                        ? context.go(Routes.canon)
+                        : context.push(Routes.profile(handle)),
               ),
               const SizedBox(height: 16),
               _QueueTile(onTap: onQueueTap ?? () => context.push(Routes.queue)),
