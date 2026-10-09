@@ -50,7 +50,7 @@ Exposed as the SQL view `public.qualifying_rankings (user_id, title_id, media_ty
 - **Computed, not stored:** `weekly_streak(user_id, now default NOW()) → (current_weeks, best_weeks, weeks jsonb)`. `weeks` holds the last 7 weeks, oldest first, as `{week: "2026-W42", starts_on: "2026-10-12", status}` with status `counted | frozen | missed | current`; the running week is `current` until it counts, then `counted`. Being a SQL function over `qualifying_rankings` with `now` as a parameter, it's deterministic and testable with pgTAP. It runs as the caller, so it respects profile visibility (a hidden user reads as zero).
 - **Setting the time zone:** `set_timezone(name)` validates the IANA name (`22023` if unknown). Clients can't write the column directly.
 
-Shown as the lime "▲ N weeks" chip (Achievements summary, Your level, friends' rows) and as the 7-week strip on `SCR-27` (❄ marks a frozen week).
+Shown as the lime "▲ N weeks" chip (Achievements summary, Your level, friends' rows, the Home header) and as the 7-week strip on `SCR-27` (❄ marks a frozen week).
 
 ---
 
@@ -375,7 +375,7 @@ All screens use the shared app bars (screen specs §0.2) and the frosted bottom 
 - **Activity types:** `activity_logs.activity_type` gains `MEDAL_UNLOCKED` (slice 1) and `CHALLENGE_COMPLETED` (slice 2), with metadata for the medal (`achievement_id`, `name`, `tier`, `glyph`, `kind`) or the challenge (id, slug, name, count, best title).
 - **Older apps:** they would render an unknown activity type as a broken ranking card, so `get_activity_feed` leaves medal rows out unless the caller passes `p_include_medals => true`. Apps that have the medal card (#139) pass it.
 - **Feed cards** (Social, `SCR-05`; mockup C3):
-  - **Medal card:** the person ("Maya unlocked Centurion", time and tier), the medal, its rarity (read from `achievement_rarity`), and reactions. No poster or Queue button. Opening it shows the comment thread with "Unlocked Centurion" and the medal. Home's friend previews leave medal posts out.
+  - **Medal card:** the person ("Maya unlocked Centurion", time and tier), the medal, its rarity (read from `achievement_rarity`), and reactions. No poster or Queue button. Opening it shows the comment thread with "Unlocked Centurion" and the medal. Home's Friends line leaves medal posts out.
   - **Challenge card:** the person ("Maya finished Spooktober", "8 of 8"), the medal, "Best of the 8: The Thing (#1, 9.40)", reactions, and **Join** while the challenge is live and you're not in it (looked up with `get_challenge`).
 - **Ordinary rankings** made inside a joined challenge show "Spooktober 2 of 8" under the ranking line (`get_activity_feed.challenge_context`: the poster's visible challenge the ranking counted for, featured first, with the count as of that ranking).
 - **Unknown types:** the app skips feed rows whose type it doesn't know, rather than drawing them as rankings, so future types never show broken cards.
