@@ -23,7 +23,7 @@ Build locally with `bash tool/site/build.sh`, then open `build/site/index.html`.
 
 In order, top to bottom:
 
-1. **Nav bar** (glass, sticky): brand, one link per chapter (`#track`, `#rank`, `#discover`, `#friends`, `#play`), *Support*, and **Get the app** (`#download`). Below 700 px only the brand and *Get the app* show.
+1. **Nav bar** (glass, sticky): brand, one link per chapter (`#track`, `#rank`, `#discover`, `#friends`, `#play`), *Support*, and **Get the app** (`#download`). Below 1000 px the chapter links hide; below 560 px only the brand and *Get the app* show.
 2. **Hero** (§2): eyebrow chip, headline, body, store badges, and the duel card.
 3. **Chapter strip**: five cards in a row (scrolling sideways below 700 px), one per chapter: number, name, one-line summary. Each links to its chapter and uses the chapter's accent for its number.
 4. **Five chapters** (§3), in the order Track, Rank, Discover, Friends, Play.
@@ -44,16 +44,18 @@ The duel card teaches the core idea by doing it once.
 
 **Scores**: the builder computes the example scores with the app's `ScoreCurveCalculator.calculateRoundedScore(rank, total)` for ranks 1 and 2. A tie shows both titles at rank 1 with the rank-1 score. The scores are illustrative and labelled *Example scores in a ranking of {total} shows* (or *films*).
 
-**Posters**: one PNG per duel title from `GeneratedPosterImage`, written to `assets/posters/<slug>.png` at 342 × 513.
+**Posters**: one PNG per duel title from `GeneratedPosterImage` without the drawn title (the card sets the title over it), written to `assets/posters/<slug>.png` at 342 × 513. `<slug>` is the title in lowercase with every run of other characters replaced by `-`.
 
 **States**:
 
 | State | Shows |
 |---|---|
 | Pick (on load) | "Which did you like more?", the media label, two poster buttons with the titles, *vs*, the hint "Tap the one you liked more" and **Too close to call** |
-| Result | "{Winner} takes the higher spot" (or "Called it a tie"), a two-row ranking (rank, title, score in JetBrains Mono, the winner row outlined in Phosphor Lime), one line of explanation, the example-scores label and **Next duel** |
+| Result | "{Winner} takes the higher spot" (or "Called it a tie"), a two-row ranking (rank, poster, title, score in JetBrains Mono, the winner row outlined in Phosphor Lime), the example-scores label and **Next duel** |
 | Next duel | The next pair's Pick state, cycling back to the first after the last |
-| No JavaScript | The Pick state with the explanation line beneath it. The poster buttons are inert. |
+| No JavaScript | The Pick state. The poster buttons are inert. |
+
+In every state, one line under the card explains what a duel does: "That's a duel. A few of these after each watch and every title lands in its exact place, scored from 1.00 to 10.00."
 
 **Behaviour**: `site.js` reads the pairs and scores from a `data-duel` JSON attribute on the card and swaps the card's content in place. The card has `aria-live="polite"` so the result is announced, and focus moves to the result's heading. The pick buttons are real `<button>`s with the title as their accessible name. The hover lift is turned off under `prefers-reduced-motion`. The script loads with `defer`, uses no library and makes no network requests.
 

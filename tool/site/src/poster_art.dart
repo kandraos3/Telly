@@ -56,9 +56,10 @@ class GeneratedPosterImage extends ImageProvider<GeneratedPosterImage> {
 
   @override
   ImageStreamCompleter loadImage(GeneratedPosterImage key, ImageDecoderCallback decode) =>
-      OneFrameImageStreamCompleter(_render().then((image) => ImageInfo(image: image)));
+      OneFrameImageStreamCompleter(render().then((image) => ImageInfo(image: image)));
 
-  Future<ui.Image> _render() {
+  /// Draws the art. The site build also calls this directly for the hero duel's posters.
+  Future<ui.Image> render() {
     // Stable across runs (String.hashCode is not).
     final seed = title.codeUnits.fold<int>(7, (h, c) => (h * 31 + c) & 0x7fffffff);
     final random = math.Random(seed);

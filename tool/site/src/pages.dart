@@ -1,6 +1,9 @@
-// HTML for every page of the Telly website (WEB-03). Styling lives in
-// site/static/site.css and uses only the tokens generated from the app.
-import 'package:telly_app/features/ranking/domain/canon_tier.dart';
+// HTML for every page of the Telly website (WEB-03; landing page: 05_WEBSITE, #254).
+// Styling lives in site/static/site.css and uses only the tokens generated from
+// the app; the hero duel's behaviour lives in site/static/site.js.
+import 'dart:convert';
+
+import 'package:telly_app/features/ranking/domain/score_curve_calculator.dart';
 
 import 'content.dart';
 import 'legal_html.dart';
@@ -24,7 +27,14 @@ class PageContext {
 
 const _e = escapeHtml;
 
-String _layout(PageContext c, {required String title, required String description, required String path, required String body}) {
+String _layout(
+  PageContext c, {
+  required String title,
+  required String description,
+  required String path,
+  required String body,
+  bool script = false,
+}) {
   final s = c.content;
   final canonical = s.url.resolve(path);
   return '''<!doctype html>
@@ -48,7 +58,7 @@ String _layout(PageContext c, {required String title, required String descriptio
 <link rel="apple-touch-icon" href="${c.root}assets/icon.png">
 <link rel="stylesheet" href="${c.root}assets/tokens.css">
 <link rel="stylesheet" href="${c.root}assets/site.css">
-</head>
+${script ? '<script src="${c.root}assets/site.js" defer></script>\n' : ''}</head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
 ${_nav(c)}
@@ -68,7 +78,7 @@ String _nav(PageContext c) => '''<header class="nav">
       <span class="brand__word">telly</span>
     </a>
     <nav class="nav__links" aria-label="Main">
-      <a href="${c.root}#features">Features</a>
+${c.content.chapters.map((ch) => '      <a class="nav__chapter" href="${c.root}#${_e(ch.id)}">${_e(ch.name)}</a>').join('\n')}
       <a href="${c.root}support/">Support</a>
       <a class="nav__cta" href="${c.root}#download">Get the app</a>
     </nav>
@@ -119,29 +129,106 @@ String tierStrip() {
   return '<ul class="tiers" aria-label="Score tiers">\n$chips</ul>';
 }
 
+/// Example scores for ranks 1 and 2 in a ranking of [Duel.total], from the app's own curve.
+(double, double) duelScores(Duel duel) => (
+      ScoreCurveCalculator.calculateRoundedScore(1, duel.total),
+      ScoreCurveCalculator.calculateRoundedScore(2, duel.total),
+    );
+
+String _duelPick(PageContext c, String title, String pick) => '''<button type="button" class="duel__pick" data-pick="$pick">
+          <img src="${c.root}assets/posters/${posterSlug(title)}.png" width="342" height="513" alt="" decoding="async">
+          <span class="duel__title">${_e(title)}</span>
+        </button>''';
+
+/// The hero's playable duel (05_WEBSITE §2): the first pair, rendered so it reads without
+/// JavaScript, plus everything site.js needs in `data-duel`.
+String duelCard(PageContext c) {
+  final duel = c.content.duel;
+  final (first, second) = duelScores(duel);
+  final noun = duel.mediaType == 'tv' ? 'shows' : 'films';
+  final media = duel.mediaType == 'tv' ? 'TV' : 'Movies';
+  final data = jsonEncode({
+    'media': media,
+    'label': 'Example scores in a ranking of ${duel.total} $noun',
+    'scores': [first.toStringAsFixed(2), second.toStringAsFixed(2)],
+    'pairs': [
+      for (final (a, b) in duel.pairs)
+        [
+          for (final t in [a, b]) {'title': t, 'poster': '${c.root}assets/posters/${posterSlug(t)}.png'},
+        ],
+    ],
+  });
+  final (a, b) = duel.pairs.first;
+  return '''<div class="duel" data-duel="${_e(data)}">
+    <div class="duel__card" aria-live="polite">
+      <div class="duel__head">
+        <h2 class="duel__q" tabindex="-1">Which did you like more?</h2>
+        <span class="duel__media">$media · Duel</span>
+      </div>
+      <div class="duel__pair">
+        ${_duelPick(c, a, '0')}
+        <span class="duel__vs" aria-hidden="true">vs</span>
+        ${_duelPick(c, b, '1')}
+      </div>
+      <div class="duel__foot">
+        <span class="duel__hint">Tap the one you liked more</span>
+        <button type="button" class="duel__tie" data-pick="tie">Too close to call</button>
+      </div>
+    </div>
+    <p class="duel__explain">That's a duel. A few of these after each watch and every title lands in its exact place, scored from 1.00 to 10.00.</p>
+  </div>''';
+}
+
+/// What each screenshot shows, for its alt text.
+const sceneAlt = {
+  'home': "Telly Home: tonight's next episode, your moves and a weekly streak",
+  'watching': 'Telly Watching: shows grouped by new episodes, in progress, finished and caught up',
+  'reveal': 'Telly score reveal: The Bear lands at #2 in TV Rankings with 9.61',
+  'canon': 'Telly TV Rankings with a podium for the top three',
+  'explore': 'Telly Explore: picks and rows built from your rankings',
+  'queue': "Telly Queue: saved shows with friends' scores and where they stream",
+  'feed': "Telly Social: a friend's upset ranking with reactions",
+  'taste-match': 'Telly friend profile with an 87% Taste Match',
+  'achievements': 'Telly Achievements: pinned medals and collections in progress',
+  'level': 'Telly Your level: level 12, a six-week streak and weekly quests',
+};
+
+String _number(int i) => (i + 1).toString().padLeft(2, '0');
+
+String chapterSection(PageContext c, Chapter ch, int i) {
+  final points = ch.points.isEmpty ? '' : '<ul class="points">${ch.points.map((p) => '<li>${_e(p)}</li>').join()}</ul>';
+  final cards = ch.cards.isEmpty
+      ? ''
+      : '<ul class="cards">${ch.cards.map((x) => '<li class="card"><h3 class="h3">${_e(x.title)}</h3><p>${_e(x.body)}</p></li>').join()}</ul>';
+  final shots = [
+    for (final (j, id) in ch.screenshots.indexed)
+      _phone(c, id, sceneAlt[id] ?? '${ch.name}: ${c.content.name} app screen', extraClass: j == 0 ? 'phone--lead' : 'phone--second'),
+  ].join('\n  ');
+  return '''<section class="chapter${i.isOdd ? ' chapter--flip' : ''}" id="${_e(ch.id)}" ${_accentStyle(ch.accent)}>
+  <div class="chapter__text">
+    <p class="eyebrow">${_number(i)} · ${_e(ch.name)}</p>
+    <h2 class="h2">${_e(ch.title)}</h2>
+    <p class="lead">${_e(ch.body)}</p>
+    $points
+    $cards
+    ${ch.showTiers ? tierStrip() : ''}
+  </div>
+  <div class="chapter__shots${ch.screenshots.length > 1 ? ' chapter__shots--pair' : ''}">
+  $shots
+  </div>
+</section>''';
+}
+
 String landingPage(PageContext c) {
   final s = c.content;
-  final features = StringBuffer();
-  for (final (i, f) in s.features.indexed) {
-    final points = f.points.isEmpty
-        ? ''
-        : '<ul class="points">${f.points.map((p) => '<li>${_e(p)}</li>').join()}</ul>';
-    features.writeln('''<section class="feature${i.isOdd ? ' feature--flip' : ''}" id="${_e(f.id)}" ${_accentStyle(f.accent)}>
-  <div class="feature__text">
-    <p class="eyebrow">${_e(f.eyebrow)}</p>
-    <h2 class="h2">${_e(f.title)}</h2>
-    <p class="lead">${_e(f.body)}</p>
-    $points
-    ${f.showTiers ? tierStrip() : ''}
-  </div>
-  ${_phone(c, f.screenshot, '${f.title}: ${s.name} app screenshot')}
-</section>''');
-  }
-
-  final gallery = s.gallery
-      .map((g) => '<li class="gallery__item">${_phone(c, g.screenshot, '${g.caption} screen', extraClass: 'phone--small')}'
-          '<p class="gallery__caption">${_e(g.caption)}</p></li>')
-      .join('\n');
+  final strip = [
+    for (final (i, ch) in s.chapters.indexed)
+      '<li><a class="strip__item" href="#${_e(ch.id)}" ${_accentStyle(ch.accent)}>'
+          '<span class="strip__num">${_number(i)}</span>'
+          '<span class="strip__name">${_e(ch.name)}</span>'
+          '<span class="strip__sum">${_e(ch.summary)}</span></a></li>',
+  ].join('\n    ');
+  final chapters = [for (final (i, ch) in s.chapters.indexed) chapterSection(c, ch, i)].join('\n');
   final extras = s.extras
       .map((x) => '<li class="extra"><h3 class="h3">${_e(x.title)}</h3><p>${_e(x.body)}</p></li>')
       .join('\n');
@@ -154,21 +241,18 @@ String landingPage(PageContext c) {
     <p class="lead">${_e(s.heroBody)}</p>
     ${_storeBadges(c)}
   </div>
-  ${_phone(c, s.heroScreenshot, '${s.name} rankings screen: your ranked series with scores', extraClass: 'phone--hero', eager: true)}
+  ${duelCard(c)}
 </section>
 
-<div class="wrap" id="features">
-$features</div>
+<nav class="wrap strip" aria-label="Chapters">
+  <ol class="strip__list">
+    $strip
+  </ol>
+</nav>
 
-<section class="gallery" aria-labelledby="gallery-title">
-  <div class="wrap">
-    <h2 class="h2" id="gallery-title">${_e(s.galleryTitle)}</h2>
-    <p class="lead">${_e(s.galleryBody)}</p>
-  </div>
-  <ul class="gallery__track">
-$gallery
-  </ul>
-</section>
+<div class="wrap">
+$chapters
+</div>
 
 <section class="wrap">
   <ul class="extras">
@@ -183,7 +267,7 @@ $extras
     ${_storeBadges(c)}
   </div>
 </section>''';
-  return _layout(c, title: s.title, description: s.description, path: '', body: body);
+  return _layout(c, title: s.title, description: s.description, path: '', body: body, script: true);
 }
 
 String legalPage(PageContext c, {required String markdown, required String path}) {

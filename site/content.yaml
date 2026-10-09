@@ -1,10 +1,11 @@
-# Copy and structure of the Telly website (WEB-03).
+# Copy and structure of the Telly website.
+# Spec: docs/design_system/05_WEBSITE.md (five chapters and a playable duel, #254).
 #
 # Colors, type and screenshots are NOT set here: they come from the app on every
 # build (lib/core/theme/, tool/site/src/scenes.dart). This file holds words,
 # which screenshot goes where, and links.
 #
-# - `screenshot` must be the id of a scene in tool/site/src/scenes.dart.
+# - `screenshots` must be ids of scenes in tool/site/src/scenes.dart.
 # - `accent` must be a color token from lib/core/theme/telly_colors.dart
 #   (camelCase name, e.g. phosphorLime, neonCoral).
 # - Build locally: bash tool/site/build.sh, then open build/site/index.html.
@@ -16,9 +17,9 @@ site:
   url: https://kandraos3.github.io/Telly/
   title: Telly — Rank every movie and show you watch
   description: >-
-    Telly turns what you watch into personal rankings. Head-to-head duels place
-    every movie and series, friends compare taste, and picking tonight's watch
-    takes seconds.
+    Telly turns what you watch into personal rankings. Track every episode,
+    place every movie and series with quick head-to-head duels, compare taste
+    with friends, and earn medals along the way.
   contact_email: karlandraos@gmail.com
   copyright_holder: Telly
 
@@ -33,113 +34,99 @@ hero:
   headline: Rank what you watch.
   tagline: Your personal TV rankings. Ranked, shared, settled.
   body: >-
-    Star ratings drift. Telly asks one question instead: which did you like
-    more? A few quick duels and every title lands in its exact place, scored
-    from 1.00 to 10.00.
-  screenshot: canon
+    Telly asks one question: which did you like more? Try it with two of the
+    best-rated shows on TV. Every answer puts a title in its exact place, with
+    a score to match.
+  # The playable duel (spec §2). Titles in a pair come from one ranking only.
+  duel:
+    media_type: tv
+    total: 40
+    pairs:
+      - [Breaking Bad, The Sopranos]
+      - [The Wire, Succession]
+      - [Chernobyl, Band of Brothers]
+      - [Fleabag, The Bear]
 
-features:
-  - id: duels
-    eyebrow: Pairwise ranking
-    title: Duels, not stars
+chapters:
+  - id: track
+    name: Track
+    summary: Episodes and tonight's watch
+    title: Always know what's on tonight.
+    accent: electricCyan
+    screenshots: [home, watching]
+    body: >-
+      Home opens on the next episode of whatever you're watching. Tick
+      episodes off as you go, and Telly keeps your place in every show, even
+      the ones you paused months ago.
+    cards:
+      - title: Tonight
+        body: Your next episode, ready to mark watched in one tap.
+      - title: Your moves
+        body: A finished show to rank, a new season, a challenge close to done.
+
+  - id: rank
+    name: Rank
+    summary: Duels, scores and your podium
+    title: Duels, not stars.
     accent: phosphorLime
-    screenshot: duel
+    screenshots: [reveal, canon]
     body: >-
-      Just finished something? Telly pits it against titles already in your
-      rankings. Tap the one you liked more, and binary search finds the right
-      slot in a handful of picks, even with hundreds of titles ranked.
+      Finished something? Pick which you liked more a few times, and binary
+      search finds its exact slot, even with hundreds of titles ranked. Your
+      rank becomes a score from 1.00 to 10.00, so a 9.61 always sits above a
+      9.42.
     points:
-      - Movies only ever duel movies, and series duel series
-      - Can't decide? Call it a tie and move on
-      - Anime sits in your TV rankings, seasons and all
-
-  - id: scores
-    eyebrow: Scores that mean something
-    title: Your rank becomes your score
-    accent: warmAmber
-    screenshot: reveal
-    body: >-
-      Every placement recalculates your rankings. Scores come from rank, so a
-      9.61 is always above a 9.42, and they never pile up at 8 out of 10. Share
-      the reveal straight to your story.
-
-  - id: canon
-    eyebrow: Two rankings
-    title: Movies and TV, in tiers
-    accent: electricViolet
-    screenshot: tiers
-    body: >-
-      Your Movie Rankings and TV Rankings live side by side and are never mixed.
-      Browse them as a ranked list, in tiers from God Tier down, or as a 3×3
-      grid ready to share.
+      - Movies only duel movies, and series only duel series
+      - A podium for your top three in each ranking
+      - Share the score reveal straight to your story
     show_tiers: true
 
-  - id: feed
-    eyebrow: Friends feed
-    title: Upsets worth arguing about
+  - id: discover
+    name: Discover
+    summary: Explore and your queue
+    title: Find the next one without scrolling for an hour.
+    accent: electricViolet
+    screenshots: [explore, queue]
+    body: >-
+      Explore builds rows from your own rankings and your friends' favourites,
+      and hides anything you mark "Not for me". Save anything to your queue, which
+      knows where it's streaming and what's about to leave.
+    cards:
+      - title: Up next
+        body: One pick from your queue for nights you can't decide.
+      - title: Two-to-Watch
+        body: Titles you'll both enjoy, on the services you share.
+
+  - id: friends
+    name: Friends
+    summary: Upsets, Taste Match and squads
+    title: Upsets worth arguing about.
     accent: neonCoral
-    screenshot: feed
+    screenshots: [feed, taste-match]
     body: >-
       See what friends rank the moment they rank it. When someone puts
-      Severance above Succession, Telly flags the upset, and the reactions
-      take care of the rest. Bookmark anything to your queue in one tap.
+      Severance above Succession, Telly flags the upset, and Taste Match shows
+      who really shares your taste.
+    cards:
+      - title: Find your people
+        body: Search by name, and keep your profile public or friends-only.
+      - title: Squads
+        body: One shared ranking for the group chat, the film club or the couch.
 
-  - id: taste-match
-    eyebrow: Taste Match
-    title: Find out who really shares your taste
-    accent: electricViolet
-    screenshot: taste-match
-    body: >-
-      Taste Match compares the order of every title you've both ranked, for
-      movies and series separately. See where you agree, where you clash, and
-      the gems they love that you haven't seen.
-
-  - id: two-to-watch
-    eyebrow: Two-to-Watch
-    title: Settle movie night in seconds
-    accent: phosphorLime
-    screenshot: two-to-watch
-    body: >-
-      Pick who's watching and the mood. Telly suggests titles you'll both
-      enjoy on the services you share, starting with the ones already on both
-      your watchlists. Still split? A 15-second Quick Swipe settles it.
-
-  - id: squads
-    eyebrow: Squads
-    title: Your group's consensus ranking
+  - id: play
+    name: Play
+    summary: Medals, challenges and levels
+    title: Watching, with a scoreboard.
     accent: warmAmber
-    screenshot: squad
+    screenshots: [achievements, level]
     body: >-
-      Start a squad for the group chat, the film club or the couch. Everyone's
-      rankings merge into one leaderboard, and the titles that split you most
-      rise to the top as debates.
-
-  - id: queue
-    eyebrow: Smart Queue
-    title: A watchlist that knows where to stream
-    accent: electricCyan
-    screenshot: queue
-    body: >-
-      Save titles from the feed, a friend's profile or Explore. Your queue
-      shows friends' scores, who recommended it, where it's streaming, and
-      what's about to leave your services.
-
-gallery:
-  title: Straight from the app
-  body: These screens are rendered from the app's own code on every update, so what you see here is what ships.
-  items:
-    - screenshot: canon
-      caption: Your rankings
-    - screenshot: explore
-      caption: Explore
-    - screenshot: title
-      caption: Title pages
-    - screenshot: graveyard
-      caption: TV Graveyard
-    - screenshot: wrapped
-      caption: Story studio
-    - screenshot: reveal
-      caption: Rankings reveal
+      Earn medals for what you watch, finish a director's collection, join a
+      monthly challenge with your squad, and level up every week you keep your
+      streak.
+    points:
+      - Gold, silver, bronze and special medals to pin on your profile
+      - Weekly quests and a table to climb with friends
+      - Rewards that change how your profile and rankings look
 
 extras:
   - title: Bring your history

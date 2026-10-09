@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:telly_app/features/ranking/domain/score_curve_calculator.dart';
 
 import '../../tool/site/src/content.dart';
 import '../../tool/site/src/pages.dart';
@@ -44,16 +46,55 @@ void main() {
   });
 
   group('WEB-03: pages', () {
-    test('landing page has every feature, its screenshot, the tier strip and the store placeholders', () {
+    test('#262: landing page has the chapter nav, the strip and every chapter with its screenshots', () {
       final html = landingPage(ctx());
-      for (final f in content.features) {
-        expect(html, contains('id="${f.id}"'));
-        expect(html, contains('assets/screenshots/${f.screenshot}.png'));
+      for (final (i, ch) in content.chapters.indexed) {
+        expect(html, contains('<section class="chapter${i.isOdd ? ' chapter--flip' : ''}" id="${ch.id}"'));
+        expect(html, contains('<a class="nav__chapter" href="#${ch.id}">${ch.name}</a>'));
+        expect(html, contains('<a class="strip__item" href="#${ch.id}"'));
+        expect(html, contains('0${i + 1} · ${ch.name}'));
+        for (final id in ch.screenshots) {
+          expect(html, contains('assets/screenshots/$id.png'));
+        }
       }
+      expect('phone--second'.allMatches(html), hasLength(content.chapters.length));
       expect(html, contains('God Tier'));
       expect(html, contains('9.20 – 10.00'));
       expect(html, contains('store--soon'));
       expect(html, contains('Coming soon to'));
+      expect(html, isNot(contains('id="features"')), reason: 'the eight-row feature list is gone');
+    });
+
+    test('#263: the hero duel renders the first pair, the explanation and its data for site.js', () {
+      final html = landingPage(ctx());
+      final (a, b) = content.duel.pairs.first;
+      expect(html, contains('<script src="assets/site.js" defer></script>'));
+      expect(html, contains('<span class="duel__title">$a</span>'));
+      expect(html, contains('<span class="duel__title">$b</span>'));
+      expect(html, contains('assets/posters/${posterSlug(a)}.png'));
+      expect(html, contains('Too close to call'));
+      expect(html, contains('A few of these after each watch'));
+
+      final raw = RegExp(r'data-duel="([^"]*)"').firstMatch(html)![1]!;
+      final data = jsonDecode(raw.replaceAll('&quot;', '"').replaceAll('&#39;', "'").replaceAll('&amp;', '&'))
+          as Map<String, dynamic>;
+      expect(data['media'], 'TV');
+      expect(data['label'], 'Example scores in a ranking of ${content.duel.total} shows');
+      expect(data['pairs'], hasLength(content.duel.pairs.length));
+      expect((data['pairs'] as List).first[1], {'title': b, 'poster': 'assets/posters/${posterSlug(b)}.png'});
+      final (first, second) = duelScores(content.duel);
+      expect(data['scores'], [first.toStringAsFixed(2), second.toStringAsFixed(2)]);
+    });
+
+    test('#263: duel scores come from the app score curve, first above second', () {
+      final (first, second) = duelScores(content.duel);
+      expect(first, ScoreCurveCalculator.calculateRoundedScore(1, content.duel.total));
+      expect(second, ScoreCurveCalculator.calculateRoundedScore(2, content.duel.total));
+      expect(first, greaterThan(second));
+    });
+
+    test('only the landing page loads the script', () {
+      expect(supportPage(ctx('../')), isNot(contains('site.js')));
     });
 
     test('a store link switches its badge on', () {

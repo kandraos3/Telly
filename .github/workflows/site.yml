@@ -14,6 +14,7 @@ on:
       - 'tool/site/**'
       - 'test/site/**'
       - 'test/fakes/**'
+      - 'test/features/**/*_fixtures.dart'
       - 'test/helpers/**'
       - 'pubspec.yaml'
       - 'pubspec.lock'
