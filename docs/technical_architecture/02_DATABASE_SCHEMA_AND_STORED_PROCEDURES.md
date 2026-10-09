@@ -36,6 +36,7 @@ We achieve this using **PostgreSQL (via Supabase)** for persistent relational st
 | `visibility_mode_enum` | `PUBLIC`, `FRIENDS_ONLY`, `GHOST` |
 | `report_reason_enum` | `UNMARKED_SPOILER`, `HARASSMENT`, `SPAM`, `INACCURATE_METADATA` |
 | `report_target_enum` | `COMMENT`, `ACTIVITY`, `RANKING`, `USER` |
+| `tracking_state_enum` | `WATCHING`, `CAUGHT_UP`, `FINISHED` (epic #168, [features/11](../features/11_WATCH_TRACKING_AND_EPISODE_PROGRESS.md) §2.2) |
 
 ### 2.2 Tables
 Abbreviations: **PK** primary key, **FK** foreign key, **U** unique. All `updated_at` columns are maintained by the shared `set_updated_at()` trigger.
@@ -49,6 +50,7 @@ Abbreviations: **PK** primary key, **FK** foreign key, **U** unique. All `update
 | `title_related_fetches` | **PK** `(seed_id, seed_media_type)`; **FK** → `titles`; `fetched_at`, `result_count` | When each seed's recommendations were last fetched, including empty results (#177); server-only. |
 | `trending_titles` | **PK** `(media_type, position)`; **FK** `(title_id, media_type)` → `titles`; `fetched_at` | TMDB `/trending/{type}/week` page 1 (#46); written by `title-related`; read-only for clients. |
 | `tv_seasons` | **PK** `id`; **FK** `(title_id, media_type)` → `titles` with `CHECK (media_type = 'tv')`; **U** `(title_id, season_number)` | Season breakdown for `SCR-08`. |
+| `tv_episodes` | **PK** `(title_id, season_number, episode_number)`; **FK** `(title_id, media_type)` → `titles` with `CHECK (media_type = 'tv')`; `name`, `overview`, `still_path`, `air_date`, `runtime_minutes`, `fetched_at`; season and episode ≥ 1 | TMDB episode cache for tracking (#168); written by `tmdb-season` and `tracking-refresh`; read-only for clients. |
 | `streaming_platforms` | **PK** `id` (`netflix`, `max`, `hulu`, `apple_tv_plus`, `disney_plus`, `prime_video`, `crunchyroll`, `paramount_plus`, `criterion`) | Provider catalog. |
 | `title_availability` | **PK** `id`; **FK** `(title_id, media_type)`, `platform_id`; `country_code`, `monetization_type`, `deep_link_url`, `available_until`, `is_leaving_soon`; **U** `(title_id, media_type, platform_id, country_code, monetization_type)` | Streaming availability cache. |
 | `user_streaming_subscriptions` | **PK** `(user_id, platform_id)` | Household services (`SCR-02`). |
@@ -58,13 +60,15 @@ Abbreviations: **PK** primary key, **FK** foreign key, **U** unique. All `update
 | `user_external_accounts` | **PK** `id`; **U** `(user_id, service_name)` | Letterboxd / AniList / MAL links. |
 | `user_dropped_shows` | **PK** `id`; **FK** `(title_id, media_type)`; `dropped_at_season`, `dropped_at_episode`, `reason`, `willing_to_revisit`, `notify_on_acclaim`, `notes`; **U** `(user_id, title_id, media_type)` | TV Graveyard (`SCR-18`). |
 | `user_watchlist` | **PK** `(user_id, title_id, media_type)`; `priority`, `recommended_by_user_id`, `added_at` | Smart Queue (`SCR-13`). |
+| `user_tracking` | **PK** `(user_id, title_id, media_type)`; **FK** → `titles`; `last_season`, `last_episode` (both NULL or both ≥ 1; NULL for movies), `state tracking_state_enum`, `is_rewatch`, `new_episodes_since`, `started_at`, `last_progress_at`, `finished_at`, `updated_at` | Watch tracking: one place per title (#168, features/11 §6.1). Own rows readable; written only by the tracking RPCs. |
+| `user_tracking_events` | **PK** `id`; **FK** `(title_id, media_type)` → `titles`; `user_id`, `kind` (`WATCHED`, `UNWATCHED`, `REWATCHED`, `FINISHED`), `season_number`, `episode_number`, `created_at` | Append-only episode events for tracking stats (features/11 §3.6). Own rows readable; written only by the tracking RPCs. |
 | `user_muted_titles` | **PK** `(user_id, title_id, media_type)` | Spoiler Shield mutes. |
 | `user_dismissed_recommendations` | **PK** `(user_id, title_id, media_type)`; **FK** → `titles`; `dismissed_at`; own rows only | Explore's "Not for me" (#189, decision 0008); excluded by `get_explore_candidates`, not by the feed. |
 | `social_follows` | **PK** `(follower_id, following_id)`; `status follow_status_enum`; `CHECK (follower_id <> following_id)` | The only social-graph table (`friendships` is removed). |
 | `user_blocks` | **PK** `(blocker_id, blocked_id)` | Blocks hide content in both directions. |
 | `taste_matches` | **PK** `(user_a, user_b, media_type)`; `CHECK (user_a < user_b)`; `match_percentage`, `mutual_count` | Cached Taste Match per canon. |
 | `squads` / `squad_members` | `squads`: **PK** `id`, `name`, `description`, `avatar_url`, `created_by`; `squad_members`: **PK** `(squad_id, user_id)`, `role` (`OWNER`/`ADMIN`/`MEMBER`), `joined_at` | Squads (`SCR-17`). |
-| `activity_logs` | **PK** `id`; `user_id`; `activity_type` (`RANKING_CREATED`, `UPSET_ALERT`, `SHOW_DROPPED`, `QUEUE_ADDED`, `COMMENT_POSTED`, `MEDAL_UNLOCKED`, `CHALLENGE_COMPLETED`); `title_id`, `media_type`, `ranking_id`, `target_user_id`, `is_upset`, `upset_delta`, `metadata` JSONB, `created_at` | Feed source. |
+| `activity_logs` | **PK** `id`; `user_id`; `activity_type` (`RANKING_CREATED`, `UPSET_ALERT`, `SHOW_DROPPED`, `QUEUE_ADDED`, `COMMENT_POSTED`, `MEDAL_UNLOCKED`, `CHALLENGE_COMPLETED`, `WATCH_STARTED`, `WATCH_FINISHED` (#168; no episode in `metadata`)); `title_id`, `media_type`, `ranking_id`, `target_user_id`, `is_upset`, `upset_delta`, `metadata` JSONB, `created_at` | Feed source. |
 | `feed_reactions` | **PK** `id`; **FK** `activity_id`; **U** `(activity_id, user_id, reaction_type)` | Reactions. |
 | `comments` | **PK** `id`; **FK** `activity_id`; `user_id`; `body` VARCHAR(500); `contains_spoilers`; `is_hidden` | Spoiler-safe threads (`SCR-06`). |
 | `curated_canons` | *Dropped (#46, decision 0007).* | Editorial collections replaced by Explore's rows. |
@@ -100,10 +104,11 @@ Abbreviations: **PK** primary key, **FK** foreign key, **U** unique. All `update
 | Table | SELECT | INSERT / UPDATE / DELETE |
 | :--- | :--- | :--- |
 | `users` | `can_view_user(id)` | UPDATE own row only |
-| `titles`, `tv_seasons`, `streaming_platforms`, `title_availability`, `curated_canons` | any `authenticated` | `service_role` only |
+| `titles`, `tv_seasons`, `tv_episodes`, `streaming_platforms`, `title_availability`, `curated_canons` | any `authenticated` | `service_role` only |
 | `user_rankings`, `user_dropped_shows`, `activity_logs`, `pairwise_duels` | `can_view_user(user_id)` | own rows only (rankings via RPC) |
 | `user_watchlist`, `user_streaming_subscriptions`, `user_muted_titles`, `user_blocks`, `user_external_accounts` | own rows | own rows |
 | `social_follows` | either party, or `accepted` rows where `can_view_user` holds for both | INSERT only as `follower_id = auth.uid()` (status forced by trigger: `pending` for non-`PUBLIC` targets, else `accepted`); UPDATE status only by `following_id`; DELETE by either party |
+| `user_tracking`, `user_tracking_events` | own rows | none for clients: tracking RPCs only (§3.6) |
 | `comments`, `feed_reactions` | visible when the parent activity is visible | own rows |
 | `squads`, `squad_members` | members only | owner/admin manage membership; users may leave |
 | `reports` | none (back-office only) | INSERT own |
@@ -179,6 +184,24 @@ Each function keeps its logic in `handler.ts` (dependencies injected) with a thi
 | `challenge-scheduler` (POST, service-role bearer) | #143. `schedule_calendar_challenges` for this month and next, then `expire_featured_challenges`; pg_cron `challenge-scheduler-prepare` (25th) and `challenge-scheduler-month-start` (1st) call it through `_invoke_edge_function`. |
 | `title-related` (POST) | #46, features/07 §7.6. Authenticated `{seed_ids ≤ 5, media_type}`: caches TMDB recommendations for seeds missing or older than 14 days. Service-role: refreshes `trending_titles` (older than 6 h) and up to 40 stale seeds from all users' top 5; pg_cron `explore-refresh` every 30 minutes. Upserts minimal `titles` rows with genre names from `_shared/genres.ts`, then writes through `store_title_related` / `store_trending`. Stops at a TMDB 429; logs a 404 seed as an empty fetch. |
 | `streaming-catalog-sync` (POST, service-role bearer) | Refreshes stale availability for watchlisted titles, then `refresh_leaving_soon_flags()`. |
+| `tmdb-season?id=&season=` | #168. Authenticated, rate-limited like `tmdb-details`. TMDB `/tv/{id}/season/{n}` → upserts `tv_episodes` (season 0 refused). |
+| `tracking-refresh` (POST, service-role bearer) | #168, features/11 §6.5. Refreshes `titles`, `tv_seasons` and `tv_episodes` for up to 500 series tracked as `CAUGHT_UP` or `FINISHED` (ended shows only on Mondays), then `refresh_tracking_new_episodes()`. pg_cron `tracking-refresh` at `23 5 * * *` through `_invoke_edge_function`. |
+
+### 3.6 Watch Tracking RPCs (epic #168, [features/11](../features/11_WATCH_TRACKING_AND_EPISODE_PROGRESS.md) §6)
+All write RPCs are `SECURITY DEFINER`, `SET search_path = public`. They take `p_client_mutation_id` (I-5), recompute `state` with `_tracking_state` (§3.1–§3.3 of features/11, shared vectors `test/fixtures/tracking_progress_vectors.json`), set `last_progress_at`, and return the `user_tracking` row.
+
+| RPC | Behaviour |
+| :--- | :--- |
+| `start_tracking(p_title_id, p_media_type, p_last_season, p_last_episode, p_rewatch, p_client_mutation_id)` | Upsert; deletes the caller's `user_watchlist` row; posts `WATCH_STARTED` at most once per title per 30 days. `p_rewatch` on a `FINISHED` row resets the place and sets `is_rewatch`. |
+| `set_tracking_place(p_title_id, p_media_type, p_last_season, p_last_episode, p_client_mutation_id)` | Absolute place (clamped to known episode counts); appends `WATCHED`/`UNWATCHED` events per episode passed (≤ 50); clears `new_episodes_since` on a forward move; entering `FINISHED` sets `finished_at` and posts `WATCH_FINISHED` (30-day throttle); leaving it clears `finished_at`. `P0002` when not tracked. |
+| `log_episode_rewatch(p_title_id, p_season, p_episode, p_client_mutation_id)` | Appends `REWATCHED`. |
+| `finish_tracking(p_title_id, p_media_type, p_client_mutation_id)` | Movie → `FINISHED` + `FINISHED` event + `WATCH_FINISHED`. Series → place = last aired episode, then as `set_tracking_place`. |
+| `stop_tracking(p_title_id, p_media_type, p_client_mutation_id)` | Deletes the row; events are kept. |
+| `revive_dropped_show(p_title_id, p_client_mutation_id)` | Deletes the caller's `user_dropped_shows` row and starts tracking at its drop point. |
+| `get_my_tracking()` | Own rows with title fields, season counts, the next episode's cached row, canon membership (rank, score) and the latest aired episode. |
+| `get_title_watchers(p_title_id, p_media_type) → (user_id, username, display_name, avatar_url, total)` | Up to 20 accepted-follow users visible through `can_view_user`, not `GHOST`, tracking the title in `WATCHING`. Never returns a place or state. |
+| `get_tracking_stats(p_media_type, p_year)` | `episodes` (`WATCHED + REWATCHED − UNWATCHED`, ≥ 0) or `movies_finished` for the year in `users.timezone`; `p_year` NULL → this ISO week with `minutes` from cached runtimes. |
+| `refresh_tracking_new_episodes() → INT` | Service role / pg_cron only. `CAUGHT_UP`/`FINISHED` series whose next episode now exists and has aired → `WATCHING`, `new_episodes_since = now()`. |
 
 ### 3.4 Triggers
 - `on_auth_user_created` (AFTER INSERT ON `auth.users`) → inserts the skeleton `public.users` row.

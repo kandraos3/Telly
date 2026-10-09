@@ -34,6 +34,7 @@ This document defines every single screen in the Telly application. For each scr
 26. **`SCR-26`**: Challenge detail: features/10 §9.6
 27. **`SCR-27`**: Your level (with Rewards and Friends this week): features/10 §9.7
 28. **`SCR-28`**: Search Users (Find Friends): `SCR-28` below; features/04 §8.2
+29. **`SCR-29`**: Watching (tracking hub): `SCR-29` below; [features/11](../features/11_WATCH_TRACKING_AND_EPISODE_PROGRESS.md)
 
 ---
 
@@ -49,7 +50,7 @@ Five tabs in the floating bar (component library §2.1), plus the floating Log b
 | Explore | `/explore` | `SCR-07` Explore | `/explore/row/:rowId?canon=movie\|tv` (`SCR-07` See all) |
 | Canon | `/canon` | `SCR-14` Canon | none |
 | Social | `/social` | `SCR-05` Feed | `/social/activity/:id` (`SCR-06`), `/social/search` (`SCR-28`) |
-| More | `/more` | `SCR-22` More hub | `/more/queue` (`SCR-13`), `/more/queue/lists`, `/more/queue/list/:id`, `/more/graveyard` (`SCR-18`), `/more/wrapped` (`SCR-19`), `/more/settings` (`SCR-20`), `/more/edit`, `/more/achievements` (`SCR-23`), `/more/challenges` (`SCR-25`), `/more/challenges/:slug` (`SCR-26`), `/more/level`, `/more/level/rewards`, `/more/level/week` (`SCR-27`) |
+| More | `/more` | `SCR-22` More hub | `/more/queue` (`SCR-13`), `/more/queue/lists`, `/more/queue/list/:id`, `/more/graveyard` (`SCR-18`), `/more/wrapped` (`SCR-19`), `/more/settings` (`SCR-20`), `/more/edit`, `/more/achievements` (`SCR-23`), `/more/challenges` (`SCR-25`), `/more/challenges/:slug` (`SCR-26`), `/more/level`, `/more/level/rewards`, `/more/level/week` (`SCR-27`), `/more/watching` (`SCR-29`) |
 
 Unchanged, pushed over the shell: the `/log` flow (`SCR-09` to `SCR-12`), `/title/:mediaType/:id` (`SCR-08`), `/u/:handle` (`SCR-15`), `/cowatch` and `/u/:handle/two-to-watch` (`SCR-16`), `/squads` and `/squads/:id` (`SCR-17`, opened from Social).
 
@@ -419,6 +420,61 @@ The **Social** tab (`/social`). It was the landing tab until epic #44; Home (`SC
   - `Re-Duel Button`: Opens Duel Arena to recalibrate position in personal canon.
   - `Seasons Accordion`: Expands episode-by-episode breakdown with individual episode synopses and guest stars.
 
+#### §T Watch tracking — epic #168
+
+> Tracking: epic #168 · Status: approved · Decision: [0010](../decisions/0010-watch-tracking-episode-pointer.md) · Mockup: [0168](mockups/0168-watch-tracking.html) · Behaviour and formulas: [features/11](../features/11_WATCH_TRACKING_AND_EPISODE_PROGRESS.md)
+
+The title page shows where you are in a title you track. Untracked titles look as before, except for the Watch slot (§T.2).
+
+- **§T.1 Header.** While tracked, an eyebrow sits above the title (caption w800, 1.2 letter spacing, uppercase):
+  - "● Watching · S2 · E6 next", "● Up to date" or "● Finished" in the primary accent (`#D2FF52`; light `#4D7800`);
+  - "● New season" or "● New episode" in Warm Amber (`#FFA733`; light `#B36200`).
+  - For a movie it reads "● Watching" or "● Finished".
+  - A 3 dp line runs along the backdrop's bottom edge: `strokeSubtle` track, primary-accent fill at the progress fraction (features/11 §3.4). It's hidden when untracked.
+- **§T.2 Watch slot.** The first quick action (it was *Add to Queue*; the Queue stays in the app bar's bookmark) becomes **Watch**, key `title_watch_action`:
+
+  | State | Icon | Label | Tap |
+  | :--- | :--- | :--- | :--- |
+  | Untracked | `play_circle_outline_rounded` | Start watching | Series: the Where are you? sheet. Movie: start at once, with Undo. |
+  | Watching | `play_circle_filled_rounded` on a lime fill | Watching | Scrolls to the Next episode card. |
+  | Up to date | `check_circle_rounded` on a lime fill | Up to date | Scrolls to the Seasons section. |
+  | Finished | `check_circle_rounded` on a lime fill | Finished | Opens a menu: *Watch again*, *Stop tracking*. |
+
+  - The app bar's ⋯ menu holds *Drop it* (series) and *Stop tracking* while tracked (features/11 §4.6, §4.9).
+- **§T.3 Where are you? sheet** (bottom sheet, component library §6; key `where_are_you_sheet`):
+  - Radio rows *Starting from the beginning* (default) and *I'm partway through*.
+  - Partway shows two wheel pickers, Season and "the last episode you watched", plus a caption line with that episode's name ("S2 · E5 'Trojan's Horse'", or "Season 2 · Episode 5" when not cached).
+  - **Start tracking** is the primary button.
+  - Ranked *Up to date* series preselect partway at the last aired episode (features/11 §10).
+- **§T.4 Next episode card** (key `next_episode_card`). While `WATCHING`, it replaces *Streaming now*. Layout:
+  - Surface, radius 14, a border at 45% primary accent over `strokeSubtle`, 12 dp padding.
+  - Row 1: the "NEXT EPISODE" label (caption w800, `textTertiary`), then "14 of 19" on the right.
+  - Row 2: an 84 × 48 still (radius 8, runtime badge bottom-right), the name "S2 · E6 · Attila" (`labelLarge` w700, one line) and "Aired Feb 21, 2025" (caption, `textTertiary`).
+  - Row 3: **▶ <provider>** (secondary, the same deep link as *Streaming now*) and **✓ Watched E6** (primary, lime fill), equal widths, 48 dp tall. The key `watched_episode_button` is shared with every ✓ E6 button.
+  - No still cached: a `surfaceOverlay` box with the episode number.
+  - Up to date or finished: the card reads "You're caught up". It shows the next season's air date when known ("Season 3 · Mar 2027"), or "No new season announced". It offers **Rank <title> →** when the title isn't ranked.
+- **§T.5 Seasons section.** The header is renamed *Seasons* (it read "SEASONS ACCORDION"). While tracked:
+  - **Season rows** add a 26 dp progress ring to the left: a lime fill, or a lime disc with ✓ when the season is watched. The trailing text is "watched", "5 of 10", "Not started" or "Airing · next Fri, Oct 17".
+  - **Episode rows**, when a season is expanded, are 44 dp tall. Each has a 14 dp tick column (✓ in the primary accent up to your place, ● on the next episode), the number "E6" (`textTertiary`, tabular), and the name.
+    - The next episode's row has a 14% lime tint, radius 8, and a "You're here" caption in the primary accent.
+    - Rows after it blur the name and synopsis (sigma 4), and the first of them carries the caption "Hidden until you get there. Tap to reveal."
+  - **Tap** a row to open the episode sheet (features/11 §4.3, §4.4): still, name, air date, then *↩ Mark as not watched* and *Rewatched it* (watched episodes), or *✓ Watched up to here* (later ones).
+  - Untracked, the section looks as before.
+- **§T.6 New season state.** When `new_episodes_since` is set:
+  - The eyebrow turns amber.
+  - The Next episode card's label row starts with an amber **NEW** pill and reads "Season 3 is out" or "E4 is out".
+  - *Your status* adds "When you catch up we'll offer a re-duel" for ranked titles.
+- **§T.7 Friends and community.**
+  - **Watching now:** under the quick actions while any friend tracks the title in `WATCHING`. It shows stacked 24 dp avatars and "Watching now: Maya, Jordan", up to 3 names, then "and N others". Tap opens a sheet listing them; each opens `/u/:handle`. It never shows episodes.
+  - **Drop-off line:** in *Community survival rate*, "You're past S1 · E4, where 18% of viewers drop it", once your place is after that drop point (features/11 §5.4).
+- **§T.8 Finish sheet** (key `finish_sheet`): features/11 §4.5. Unranked titles get status radios plus **Log and duel →** and **Later**. Ranked titles get **Re-duel →** and **Keep my rank**.
+- **§T.9 Feedback.**
+  - ✓ actions use the light impact haptic and show the Undo toast "S2 · E6 watched · Undo" for 6 seconds.
+  - Starting and finishing use the medium impact haptic.
+- **§T.10 States.**
+  - **Loading:** the Watch slot shows the untracked look until the tracking cache answers, which is local, so less than a frame.
+  - **Offline:** everything works from Drift except *Watching now*, which hides, and episode names that were never cached, which fall back to "Episode 6".
+
 ---
 
 ### `SCR-09`: The Logging Studio & Sentiment Bracket Selector
@@ -623,7 +679,8 @@ Opened from the More hub (`/more/queue`) as a pushed screen with the subpage app
 - **Lists screen** (`/more/queue/lists`):
   - **App bar:** ← Lists, with **+ New list** (key `create_new_list_button`).
   - **Body:** a `TellySegmentedControl` *My lists* / *Friends' lists*, above the existing custom-list cards. Tapping a list opens `/more/queue/list/:id`, which is unchanged.
-- **Planned, not built:** long-press drag to reorder the queue.
+- **Long-press** (rows and the Up next card; epic #168): a menu with **Start watching** (features/11 §4.1: series open the Where are you? sheet; the title leaves the Queue with Undo), **Mark seen** (the same as a swipe right) and **Remove**. This supersedes the mockup's ▶ Start pill, so the trailing provider button stays as it is.
+- **Planned, not built:** long-press drag to reorder the queue (now behind a drag handle, because long-press opens the menu).
 
 ---
 
@@ -658,7 +715,14 @@ The Canon tab opens on your rankings. Your profile card lives in the More hub (`
   - It stays in place when the header scrolls away (§0).
   - A horizontal swipe on the content also switches canon, with the selection haptic, as before.
   - The Movie and TV canons never mix. Each has its own podium, tiers, grid and stats.
-- **Content** (12 dp under the switcher) depends on the view:
+- **Watching strip** (epic #168; features/11; key `canon_watching_strip`): 12 dp under the switcher, in every view.
+  - **Layout:** a 48 dp row on Surface, radius 12, a border at 45% primary accent over `strokeSubtle`, 16 dp gutters.
+  - **Content:** a ▶ icon (primary accent), "Watching 4 series" (or "Watching 1 movie"; `labelLarge` w700), a second line "2 finished, waiting to be ranked" when there are any (caption, `textTertiary`), then a chevron.
+  - **Scope:** it counts only the selected canon's tracked titles in *New episodes*, *In progress* or *Paused*, and the second line counts *Finished, not ranked*.
+  - **Tap** opens `/more/watching?filter=tv` (or `movie`).
+  - **Hidden** when the canon has no tracked titles. Offline it reads from Drift.
+- **Row progress tag** (Ranked view rows, Tiers rows and the podium's meta line): a ranked title you're tracking in `WATCHING` gets a lime outline pill "▶ S2 · E6" (`labelSmall` w800), or an amber "▶ New" when it has new episodes, after its meta. It isn't shown in 3x3.
+- **Content** (12 dp under the switcher, or the strip) depends on the view:
   - **Ranked** (default):
     - **Podium** (key `canon_podium`): ranks #1–#3 as three poster cards in one row, with 16 dp gutters and 10 dp gaps. Columns are 1.25fr / 1fr / 1fr, bottom-aligned.
     - **Card:** Surface, radius 14, glass border. The poster is 170 dp tall for #1 and 132 dp for #2 and #3. A rank tag sits top-left (Phosphor Lime fill `#D2FF52`, `#08090C` text, `labelMedium` w800, radius 6, in both themes). Below the poster, with 8 dp padding, come the title (`labelLarge` w800, one line) and the tier score chip (`CanonTierScoreChip`: an 18% tint of the tier accent, a tier-accent border and `textPrimary` digits, the same chip as Home's friend rows).
@@ -676,6 +740,7 @@ The Canon tab opens on your rankings. Your profile card lives in the More hub (`
   - **Title:** "MOVIE STATS" or "TV STATS" for the selected canon.
   - **Tiles:** the existing stats panel's four tiles: titles ranked, hours watched, top genre, and top director (movies) or top network (TV). Detail lines use the primary accent token, so they're readable in light mode.
   - **Top 3:** a `TellySectionHeader` "TOP 3 SHOWCASE", then the showcase row: your pinned picks for this canon first, then your best-ranked titles that aren't pinned. Pins are edited in Edit profile.
+  - **Tracking tile** (epic #168): a fifth, full-width tile under the four, *Episodes in 2026* (TV) or *Movies finished in 2026* (Movies), from `get_tracking_stats` (features/11 §8). It shows 0 rather than hiding.
   - **Offline:** tiles show "—" except titles ranked, which comes from the local canon (as before).
 
 ---
@@ -831,7 +896,7 @@ The Canon tab opens on your rankings. Your profile card lives in the More hub (`
 
 - **User Inputs:**
   - Tap card to edit drop milestone, reason, or willingness to revisit.
-  - Tap *"Revive Show"* to move back into active "Currently Watching" queue.
+  - Tap **Revive** to start tracking the show again from its drop point. This deletes the Graveyard entry and opens the title page in the Watching state (features/11 §4.7, epic #168).
 
 ---
 
@@ -886,6 +951,12 @@ The landing tab (`/home`). Epic #45 designs its real content (currently-watching
 └────────────────────────────────────────────────────────┘
 ```
 
+- **Currently watching** (epic #168; features/11 §2.3; key `home_currently_watching`). It's first on the page, above *Your canon*, until #45 places it.
+  - **Header:** a `TellySectionHeader` "CURRENTLY WATCHING" with **See all N ›**. Both the header and See all open `/more/watching`.
+  - **Card:** a Surface card with at most **3 rows**. They're chosen from *New episodes*, then *In progress*, newest `last_progress_at` first, with both canons mixed and each row labelled.
+  - **Row:** a 40 × 58 poster, the title, a meta line ("S2 · E6 'Attila'", an amber "Season 3 is out", or "Movie · started yesterday"), a 6 dp progress bar, and a trailing **✓ E6** (or **✓ Finished** for a movie). Tap opens the title.
+  - **Count line** under the card when more exist: "+ 1 caught up · 2 finished and waiting to be ranked" (caption, `textTertiary`).
+  - **Hidden** when nothing is tracked. Offline it reads from Drift.
 - **Your canon:** a section header (`TellySectionHeader`), the shared canon switcher, and the top 3 of the selected canon as the Canon grid's poster tiles (component library §3.4: rank badge and score chip). The switcher shares the Canon tab's selection, and the two canons are never mixed. *See all* opens the Canon tab. Tapping a poster opens the title.
 - **From your friends:** the 3 newest items of the Following feed by other people (the same feed state as the Social tab; your own posts are left out) as compact rows: a 36dp avatar, then "<name> ranked <title> #N" ("dropped", "queued" or "commented on" for other activity types), then a score chip in tabular figures on an 18% tint of its tier accent with a tier-accent border (style guide §2.2; no chip for drops). Tapping a row opens the title. *See all* opens the Social tab.
 - **Empty states:** with no ranked titles in the selected canon, that section becomes a card reading "Log your first title to start your canon" with a Log button. With no activity from other people, the friends section becomes "Find friends in Social", linking to the Social tab.
@@ -922,6 +993,10 @@ A WHOOP-style hub (`/more`): one place for everything that isn't a daily destina
 
 - **Profile card:** avatar 56dp, display name (Title Medium), `@handle · View profile` (Body Medium, `textTertiary`), then your pinned medals (small, features/10 §4.4) once you have any. Opens the Canon tab, which is your public profile.
 - **Queue tile:** first and full width, bookmark icon in the primary accent (`#D2FF52`; light `#4D7800`). Opens `/more/queue`.
+- **Watching tile** (epic #168; key `more_watching_tile`): second, full width, the same layout as Queue, with a ▶ icon in the primary accent.
+  - **Subtitle:** live, e.g. "4 in progress · Severance S2 · E6 next", "2 new episodes", or "Track what you're watching" when empty.
+  - **Progress bars:** below the subtitle, one 6 dp bar per in-progress title (at most 6, equal widths, 3 dp gaps).
+  - **Tap** opens `/more/watching` (`SCR-29`).
 - **Feature tiles:** a 2-column grid (12dp gaps; an odd last tile keeps half the width, on the left), 104dp tall, `surface-raised` with a `stroke-subtle` border and radius 16. Icon (24px) top-left in its semantic accent; label (Body Large w600) and a one-line subtitle (Caption, `textTertiary`) bottom-left. Shipped now, in order: **Achievements** (trophy, Warm Amber `#FFA733`; light `#B36200`; "Medals and your streak", #137), **Challenges** (flag, Electric Cyan `#00F0FF`; light `#00838F`; "Race friends to the finish", #144), **Your level** (bolt, primary accent; "XP, quests and rewards", #146), **Wrapped** (lime), **Graveyard** (Neon Coral `#FF4B6E`; light `#D61F4D`).
 - **Grouped list:** 52dp rows in one rounded card with dividers. Shipped now: **Settings and account** (opens `/more/settings`).
 - **Future entries** are added by their epics, and only once they ship (no "Soon" placeholders in the app): Invite friends (#51, tile, violet), Telly Pro (#52, list row, amber), and Help & feedback (#118, list row, once a support channel exists).
@@ -975,3 +1050,58 @@ Pushed over the shell from the Social tab header (`/social/search`), using `Tell
   - Loading: skeleton user rows.
   - No results: "No users found matching '{query}'."
   - Offline: "User search requires an internet connection." with Retry button.
+
+---
+
+### `SCR-29`: Watching (tracking hub) — epic #168
+
+> Tracking: epic #168 · Status: approved · Decision: [0010](../decisions/0010-watch-tracking-episode-pointer.md) · Mockup: [0168](mockups/0168-watch-tracking.html) · Behaviour: [features/11](../features/11_WATCH_TRACKING_AND_EPISODE_PROGRESS.md)
+
+Everything you're tracking. Pushed at `/more/watching` with the subpage app bar (§0.2), opened from More's Watching tile, Home's *See all* and Canon's Watching strip.
+
+```
+┌────────────────────────────────────────────────────────┐
+│ [←]  Watching                                    [ ⇅ ] │
+│  ( All 8 ) ( Series 6 ) ( Movies 2 ) ( Finished )       │
+├────────────────────────────────────────────────────────┤
+│  THIS WEEK    9 episodes                    7 h 50     │
+│  ━ NEW EPISODES · 2 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━   │
+│  [img] Severance   [Season 3 is out]          [✓ E1]   │
+│  ━ IN PROGRESS · 3 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━   │
+│  [img] Shōgun      S1 · E9 · 2 left ▬▬▬▬▬▬▬▬░  [✓ E9]   │
+│  [img] Dune: Part Two  Movie · yesterday   [✓ Finished]│
+│  ━ FINISHED, NOT RANKED · 2 ━━━━━━━━━━━━━━━━━━━━━━━━   │
+│  [img] The Bear    Up to date · Oct 4         [Rank →] │
+│  ━ CAUGHT UP · 1 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━   │
+│  ━ PAUSED · 1 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━   │
+│  Graveyard: 14 dropped shows                        ›  │
+└────────────────────────────────────────────────────────┘
+```
+
+- **App bar:** ← Watching. **Sort** (`swap_vert_rounded`, key `watching_sort_button`) opens a sheet with *Recent* (default) and *Fewest left*, which apply within each group.
+- **Filter chips** (16 dp gutters, 8 dp gaps; keys `watching_filter_all`, `watching_filter_tv`, `watching_filter_movie`, `watching_filter_finished`):
+  - *All N*, *Series N* and *Movies N* filter by media type and never mix within their counts.
+  - *Finished* lists `FINISHED` titles by `finished_at`, newest first (the history).
+  - A `?filter=` query selects one chip on open.
+- **This week strip:** a Surface card with two figures in `headlineSmall` w800 tabular: *episodes* this ISO week, and *time*. Time only shows when known (features/11 §8). The strip is hidden on the Movies chip.
+- **Groups** in features/11 §2.3 order. Each has a `TellySectionHeader` with a count, and empty groups are omitted.
+- **Row:** 16 dp gutters, a 36 × 52 poster (radius 6), the title (`bodyLarge` w700, one line), and a meta line:
+  - "S2 · E6 'Attila' · 5 left";
+  - "Up to date · Oct 4";
+  - "Ranked #6 · no new season announced";
+  - "Movie · started yesterday";
+  - in *New episodes*, an amber pill instead ("Season 3 is out", "E4 is out").
+  - **Progress bar:** 6 dp, under the meta line, for series in *New episodes*, *In progress* and *Paused*.
+  - **Trailing:**
+    - **✓ E6** (lime fill) in *New episodes*, *In progress* and *Paused*;
+    - **✓ Finished** for movies;
+    - **Rank →** (lime fill) in *Finished, not ranked*;
+    - a "Caught up" outline pill in *Caught up*.
+  - **Tap** opens the title. **Long-press ✓** un-logs the last episode (features/11 §4.3).
+  - **Swipe left:** *Drop it* (series, coral) or *Stop tracking* (movies), each with a confirm.
+- **Footer row:** "Graveyard: N dropped shows ›" opens `/more/graveyard`. It's hidden when N = 0.
+- **States:**
+  - **Loading:** the strip skeleton and 5 skeleton rows (component library §7.1).
+  - **Empty:** `TellyEmptyState`, "Track what you're watching. Start a show from its page or your Queue.", with **Open Queue** and **Explore** buttons.
+  - **Empty filter:** "No movies in progress", with **Show all**.
+  - **Offline:** the list comes from Drift and every action queues. The This week strip shows "—".
