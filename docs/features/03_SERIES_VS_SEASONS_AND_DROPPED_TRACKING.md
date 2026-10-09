@@ -94,6 +94,8 @@ In Telly, dropped shows are **first-class citizens**, logged into a distinct **"
 [ Save to Personal "Graveyard" (Separate from The Canon) ]
 ```
 
+> **Tracking link (epic #168):** dropping a tracked show prefills the drop point from your place, and **Revive** on a dropped show starts tracking again from it. See [features/11](11_WATCH_TRACKING_AND_EPISODE_PROGRESS.md) §4.6–§4.7. Season duels (§2.2) are planned in epic #216.
+
 ### 3.3 The "Would You Revisit?" Indicator
 Each dropped show has a quick binary state:
 - 🚪 **Dead & Buried:** Never going back.

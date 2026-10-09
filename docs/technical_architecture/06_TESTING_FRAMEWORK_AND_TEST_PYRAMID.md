@@ -258,6 +258,15 @@ journey
   2. Join Spooktober from Challenges → rank two films → after sync its medal's unlock moment shows → pull to refresh Social → the challenge feed card shows.
   3. Import a film (no duels), then rank one through duels → Your level shows 10 XP: the import earned nothing.
 
+#### CUJ-06: Track a Series to Its Finale (features/11; #168)
+- **Test Objective**: Tracking works end to end, and finishing leads into ranking with the right status.
+- **Where**: `integration_test/helpers/tracking_journeys.dart`, run on the emulator by `cuj_06_tracking_test.dart` and on the host by `test/integration/tracking_journeys_test.dart`. Tracking goes through the real `TrackingRepository`, Drift `TrackingCache`, offline queue and `SyncEngine`; a fake server applies the rules that pgTAP verifies against Postgres.
+- **Workflow**:
+  1. Open a series from the Queue → **Start watching** → *I'm partway through* at S1 · E7 of 8 → the title leaves the Queue and Home's Currently watching shows "S1 · E8".
+  2. **✓ Watched E8** → **Undo** → the place is S1 · E7 again → **✓ Watched E8** again.
+  3. The show has ended, so the finish sheet opens with *Finished whole series* selected → **Log and duel** → SCR-09 opens with that status → finish the duels → the series is ranked and moves to *Caught up* in the hub.
+  4. Go offline, un-log E8 from the title page, go online → after sync the server row's place is S1 · E7.
+
 #### Explore rows (features/07 §7; #183)
 Not one of the five CUJs, but it runs alongside them on the emulator.
 - **Test Objective**: Explore's hero and rows work in the whole app: navigation through See all to a title and back, and Not for me with Undo.
@@ -531,7 +540,7 @@ flowchart LR
 | Job | Runs when these change |
 | :--- | :--- |
 | Flutter lint, tests & coverage | `lib/`, `test/`, `integration_test/`, Dart files under `tool/`, `assets/`, `pubspec.*`, `analysis_options.yaml`, `dart_test.yaml` |
-| Android emulator E2E (CUJ-01 to CUJ-05) | `lib/`, `integration_test/`, `android/`, `assets/`, `pubspec.*`, `test/fakes/`, `test/helpers/`, `test/features/**/*_fixtures.dart` |
+| Android emulator E2E (CUJ-01 to CUJ-06) | `lib/`, `integration_test/`, `android/`, `assets/`, `pubspec.*`, `test/fakes/`, `test/helpers/`, `test/features/**/*_fixtures.dart` |
 | pgTAP, RLS & concurrency | `supabase/migrations/`, `supabase/tests/`, `supabase/seed.sql`, `supabase/config.toml` |
 | Edge functions (Deno) | `supabase/functions/` |
 | Agent instructions in sync | `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `.agents/`, `.claude/`, `tool/agents/`, `tool/tracker/*.json` |
