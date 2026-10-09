@@ -183,7 +183,7 @@ void main() {
     });
 
     for (final (key, target) in [
-      (const Key('more_profile_card'), Routes.canon),
+      (const Key('more_profile_card'), '/u/jordan'),
       (const Key('more_tile_queue'), Routes.queue),
       (const Key('more_watching_tile'), Routes.watching),
       (const Key('more_tile_achievements'), Routes.achievements),

@@ -695,7 +695,7 @@ Opened from the More hub (`/more/queue`) as a pushed screen with the subpage app
 
 > Tracking: epic #47 · Status: shipped · Decision: [0004](../decisions/0004-canon-podium-and-queue-up-next.md) · Mockup: [0047](mockups/0047-canon-queue-layouts.html)
 
-The Canon tab opens on your rankings. Your profile card lives in the More hub (`SCR-22`), so it isn't repeated here.
+The Canon tab opens on your rankings. Your profile card lives in the More hub (`SCR-22`), so it isn't repeated here. That card opens your own profile (`SCR-15`, `/u/<your handle>`), not this tab.
 
 ```
 ┌────────────────────────────────────────────────────────┐
