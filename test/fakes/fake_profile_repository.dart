@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:telly_app/features/feed/domain/social_models.dart';
 import 'package:telly_app/features/profile/data/profile_repository.dart';
 import 'package:telly_app/features/profile/domain/canon_stats.dart';
+import 'package:telly_app/features/profile/domain/user_search_result.dart';
 import 'package:telly_app/features/ranking/domain/franchise_rollup_service.dart';
 
 /// In-memory [ProfileRepository] for notifier/widget tests (FE-608).
@@ -90,5 +92,43 @@ class FakeProfileRepository implements ProfileRepository {
   Future<void> updatePreferences(Map<String, dynamic> changes) async {
     _write();
     preferences = {...preferences, ...changes};
+  }
+
+  final searchResults = <UserSearchResult>[];
+  final follows = <String, FollowStatus>{};
+
+  @override
+  Future<List<UserSearchResult>> searchUsers(String query, {int limit = 20}) async {
+    await _read();
+    final clean = query.trim().toLowerCase();
+    if (clean.isEmpty) return const [];
+    return searchResults
+        .where((u) =>
+            u.username.toLowerCase().contains(clean) ||
+            u.displayName.toLowerCase().contains(clean))
+        .take(limit)
+        .toList();
+  }
+
+  @override
+  Future<FollowStatus> followUser(String targetUserId) async {
+    _write();
+    final status = follows[targetUserId] ?? FollowStatus.accepted;
+    follows[targetUserId] = status;
+    return status;
+  }
+
+  @override
+  Future<void> unfollowUser(String targetUserId) async {
+    _write();
+    follows.remove(targetUserId);
+  }
+
+  @override
+  Future<FollowStatus> respondToFollowRequest({required String requesterId, required bool approve}) async {
+    _write();
+    final status = approve ? FollowStatus.accepted : FollowStatus.rejected;
+    follows[requesterId] = status;
+    return status;
   }
 }
