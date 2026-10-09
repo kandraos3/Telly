@@ -19,6 +19,7 @@ import '../../features/onboarding/presentation/screens/streaming_setup_screen.da
 import '../../features/profile/presentation/screens/dual_canon_profile_screen.dart';
 import '../../features/profile/presentation/screens/edit_profile_studio_screen.dart';
 import '../../features/profile/presentation/screens/friend_profile_screen.dart';
+import '../../features/profile/presentation/screens/search_users_screen.dart';
 import '../../features/profile/presentation/screens/settings_hub_screen.dart';
 import '../../features/profile/presentation/screens/tv_graveyard_screen.dart';
 import '../../features/achievements/presentation/screens/achievements_screen.dart';
@@ -136,6 +137,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   builder: (_, state) => state.extra is ActivityLog
                       ? CommentThreadScreen(activity: state.extra! as ActivityLog)
                       : const PendingScreen(title: 'Discussion', ticket: 'FE-607'),
+                ),
+                GoRoute(
+                  path: 'search',
+                  parentNavigatorKey: rootNavigatorKey,
+                  builder: (_, __) => const SearchUsersScreen(),
                 ),
               ],
             ),

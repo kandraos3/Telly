@@ -131,8 +131,8 @@ class _ActivityFeedScreenState extends ConsumerState<ActivityFeedScreen> {
             TellyHeaderAction(
               key: const Key('feed_search_button'),
               icon: Icons.search_rounded,
-              tooltip: 'Search',
-              onPressed: () => context.go(Routes.exploreSearch()),
+              tooltip: 'Find Friends',
+              onPressed: () => context.push(Routes.userSearch),
             ),
           ],
         ),

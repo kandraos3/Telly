@@ -6,10 +6,14 @@ import '../../data/profile_repository.dart';
 import '../../domain/user_search_result.dart';
 
 class UserSearchController extends AutoDisposeAsyncNotifier<List<UserSearchResult>> {
+  String _currentQuery = '';
+  String get currentQuery => _currentQuery;
+
   @override
   Future<List<UserSearchResult>> build() async => const [];
 
   Future<void> search(String query) async {
+    _currentQuery = query;
     final clean = query.trim();
     if (clean.isEmpty) {
       state = const AsyncData([]);
