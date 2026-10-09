@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Telly Home Tonight</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap">
+<style>
+/* Layout: a document page; one band of phone frames (populated, scrolled, new user, nothing tracked). Phone frames use Telly's Midnight Cathode tokens. */
+:root {
+  --page: #EEF0F4; --ink: #0F1117; --ink-2: #4A4E63; --ink-3: #696E87; --rule: #D7DBE5; --card: #FFFFFF; --mark: #4D7800;
+  --f-ui: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-display: "Playfair Display", Georgia, "Times New Roman", serif;
+  --bg:#F6F7F9; --sf:#FFFFFF; --ov:#F0F2F5; --st:#E2E5EC; --gl:rgba(0,0,0,.08); --t1:#0F1117; --t2:#4A4E63; --t3:#696E87;
+  --lime:#4D7800; --limeFill:#D2FF52; --onLime:#0F1117; --amber:#B36200; --coral:#D61F4D; --violet:#5B3CE0;
+  --frameBorder:#D3D7E0; --onScrim:#FFFFFF; --onScrim2:#C8CAD8;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --page:#050608; --ink:#F2F3F7; --ink-2:#C8CAD8; --ink-3:#7D8198; --rule:#242938; --card:#0D0F15; --mark:#D2FF52;
+  --bg:#08090C; --sf:#11131A; --ov:#1A1D27; --st:#242938; --gl:rgba(255,255,255,.08); --t1:#FFFFFF; --t2:#C8CAD8; --t3:#7D8198;
+  --lime:#D2FF52; --limeFill:#D2FF52; --onLime:#08090C; --amber:#FFA733; --coral:#FF4B6E; --violet:#7C5CFF; --frameBorder:#1C202B;
+  color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --page:#050608; --ink:#F2F3F7; --ink-2:#C8CAD8; --ink-3:#7D8198; --rule:#242938; --card:#0D0F15; --mark:#D2FF52;
+  --bg:#08090C; --sf:#11131A; --ov:#1A1D27; --st:#242938; --gl:rgba(255,255,255,.08); --t1:#FFFFFF; --t2:#C8CAD8; --t3:#7D8198;
+  --lime:#D2FF52; --limeFill:#D2FF52; --onLime:#08090C; --amber:#FFA733; --coral:#FF4B6E; --violet:#7C5CFF; --frameBorder:#1C202B;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--page); color: var(--ink); font: 15px/1.55 var(--f-ui); margin: 0; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-inline: 16px; padding-block: 40px 80px; display: grid; gap: 48px; }
+header.top { display: grid; gap: 12px; max-width: 72ch; }
+.eyebrow { font: 700 12px/1 var(--f-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+h1 { font: 700 clamp(28px, 4vw, 40px)/1.1 var(--f-display); margin: 0; text-wrap: balance; }
+h2 { font: 700 26px/1.2 var(--f-display); margin: 0; text-wrap: balance; }
+p { margin: 0; color: var(--ink-2); }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 10px; padding: 3px; background: var(--card); width: max-content; }
+.seg button { font: 700 13px var(--f-ui); color: var(--ink-2); background: none; border: 0; padding: 6px 14px; border-radius: 7px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--page); }
+button:focus-visible { outline: 2px solid var(--mark); outline-offset: 2px; }
+section.band { display: grid; gap: 18px; padding-top: 28px; border-top: 1px solid var(--rule); }
+.band-head { display: grid; gap: 8px; max-width: 74ch; }
+.tag { font: 800 11px/1 var(--f-ui); letter-spacing: .1em; text-transform: uppercase; color: var(--mark); }
+.rec { display: inline-block; margin-left: 8px; padding: 2px 7px; border-radius: 6px; border: 1px solid var(--mark); color: var(--mark); font: 800 10px/1.4 var(--f-ui); letter-spacing: .06em; text-transform: uppercase; vertical-align: 5px; }
+ul.changes { margin: 0; padding-left: 20px; display: grid; gap: 6px; color: var(--ink-2); max-width: 78ch; }
+ul.changes b { color: var(--ink); }
+.screens { display: flex; gap: 20px; overflow-x: auto; padding-block: 6px 12px; scroll-snap-type: x mandatory; }
+.col { flex: 0 0 300px; display: grid; gap: 8px; align-content: start; scroll-snap-align: start; }
+.cap { font-weight: 700; font-size: 14px; }
+.capd { font-size: 12px; color: var(--ink-3); line-height: 1.45; }
+
+/* phone */
+.frame { width: 300px; height: 640px; border-radius: 34px; border: 6px solid var(--frameBorder); background: var(--bg); overflow: hidden; display: flex; flex-direction: column; position: relative; color: var(--t1); font-size: 12px; line-height: 1.4; }
+.sb { height: 26px; display: flex; justify-content: space-between; align-items: center; padding-inline: 20px; font-size: 10px; font-weight: 700; color: var(--t2); flex: none; }
+.ab { height: 46px; display: flex; align-items: center; gap: 8px; padding-inline: 14px; flex: none; }
+.ab .t { font-size: 20px; font-weight: 800; flex: 1; letter-spacing: -.01em; }
+.ab .i { width: 30px; height: 30px; border-radius: 50%; background: var(--ov); display: grid; place-items: center; color: var(--t2); font-size: 13px; }
+.ab.scrolled { border-bottom: 1px solid var(--gl); background: var(--sf); }
+.ct { flex: 1; overflow: hidden; padding: 6px 14px 14px; display: flex; flex-direction: column; gap: 14px; }
+.ct.up { justify-content: flex-end; }
+.nav { height: 50px; background: var(--sf); border-top: 1px solid var(--gl); display: flex; justify-content: space-around; align-items: center; flex: none; }
+.nav span { font-size: 9px; font-weight: 700; color: var(--t3); display: grid; justify-items: center; gap: 2px; }
+.nav span::before { content: ""; width: 16px; height: 16px; border-radius: 5px; border: 1.6px solid currentColor; }
+.nav span.on { color: var(--lime); }
+.fab { position: absolute; right: 14px; bottom: 62px; background: var(--limeFill); color: var(--onLime); font-weight: 800; font-size: 12px; padding: 10px 14px; border-radius: 16px; box-shadow: 0 6px 18px rgba(0,0,0,.3); }
+.sh { display: flex; justify-content: space-between; align-items: baseline; font-size: 10px; font-weight: 800; letter-spacing: .1em; color: var(--t3); text-transform: uppercase; }
+.sh a { color: var(--lime); letter-spacing: 0; text-transform: none; font-weight: 700; font-size: 11px; }
+.sec { display: grid; gap: 8px; }
+.poster { border-radius: 6px; flex: none; background: linear-gradient(160deg, var(--p1), var(--p2)); position: relative; }
+.p-sev { --p1:#2B5A73; --p2:#0E1E2B; } .p-bear { --p1:#7A2E1F; --p2:#2A0F0A; } .p-slow { --p1:#4F5B2E; --p2:#171C0C; }
+.p-sho { --p1:#6B1B2A; --p2:#1F0A10; } .p-andor { --p1:#5E5A55; --p2:#1A1918; } .p-dune { --p1:#B5793A; --p2:#3A230E; }
+.p-past { --p1:#3B4C7A; --p2:#121A33; } .p-perf { --p1:#7A6A2E; --p2:#2A230A; } .p-frie { --p1:#2E6B5A; --p2:#0B231C; }
+.card { background: var(--sf); border: 1px solid var(--st); border-radius: 14px; padding: 12px; display: grid; gap: 10px; }
+.card.tight { padding: 4px 12px; gap: 0; }
+.row { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.lrow { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--gl); }
+.lrow:last-child { border-bottom: 0; }
+.grow { flex: 1; min-width: 0; display: grid; gap: 3px; }
+.ttl { font-weight: 700; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.meta { color: var(--t3); font-size: 10.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.meta.amber { color: var(--amber); font-weight: 700; }
+.bar { height: 5px; border-radius: 3px; background: var(--ov); overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--lime); border-radius: 3px; }
+.btn { border-radius: 10px; padding: 9px 10px; font-weight: 800; font-size: 12px; text-align: center; border: 1px solid var(--st); background: var(--ov); color: var(--t1); white-space: nowrap; }
+.btn.pri { background: var(--limeFill); color: var(--onLime); border-color: var(--limeFill); }
+.btn.sm { padding: 6px 10px; font-size: 10.5px; border-radius: 16px; }
+.chip { display: inline-flex; align-items: center; justify-content: center; min-width: 38px; border-radius: 8px; padding: 3px 6px; font-size: 11px; font-weight: 800; font-variant-numeric: tabular-nums; border: 1px solid var(--c); color: var(--c); background: color-mix(in srgb, var(--c) 18%, transparent); }
+.c-god { --c: var(--lime); } .c-pres { --c: var(--violet); } .c-great { --c: var(--amber); }
+.caption { font-size: 10.5px; color: var(--t3); }
+.av { width: 22px; height: 22px; border-radius: 50%; background: var(--ov); border: 1.5px solid var(--sf); display: grid; place-items: center; font-size: 9px; font-weight: 800; color: var(--violet); flex: none; }
+.pill { display: inline-flex; align-items: center; gap: 4px; border-radius: 12px; padding: 3px 8px; font-size: 9.5px; font-weight: 800; border: 1px solid var(--st); color: var(--t2); white-space: nowrap; }
+.pill.on { border-color: var(--lime); color: var(--lime); }
+.pill.amber { border-color: var(--amber); color: var(--amber); }
+.pill.coral { border-color: var(--coral); color: var(--coral); }
+.empty { border: 1px dashed var(--st); border-radius: 14px; padding: 14px; display: grid; gap: 6px; justify-items: start; }
+.empty b { font-size: 12.5px; }
+
+/* A: week strip, friends strip, canon */
+.week { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.week div { background: var(--sf); border: 1px solid var(--st); border-radius: 12px; padding: 8px; display: grid; gap: 2px; }
+.week b { font-size: 16px; font-variant-numeric: tabular-nums; }
+.week span { font-size: 9.5px; color: var(--t3); font-weight: 700; }
+.fstrip { display: flex; gap: 8px; overflow: hidden; }
+.fcard { flex: 0 0 82px; display: grid; gap: 4px; }
+.fcard .poster { width: 82px; height: 112px; }
+.fcard .poster .av { position: absolute; left: 5px; bottom: 5px; }
+.fcard .poster .chip { position: absolute; right: 4px; top: 4px; min-width: 0; font-size: 9.5px; padding: 1px 4px; background: color-mix(in srgb, var(--bg) 70%, transparent); }
+.canon3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.canon3 .poster { height: 112px; }
+.canon3 .poster b { position: absolute; left: 5px; top: 4px; color: #FFFFFF; font-size: 13px; font-weight: 800; text-shadow: 0 1px 4px rgba(0,0,0,.6); }
+.canon3 .poster .chip { position: absolute; right: 4px; bottom: 4px; min-width: 0; font-size: 9.5px; padding: 1px 4px; background: color-mix(in srgb, var(--bg) 70%, transparent); }
+.switch { display: grid; grid-template-columns: 1fr 1fr; background: var(--ov); border-radius: 10px; padding: 3px; font-size: 10.5px; font-weight: 800; text-align: center; }
+.switch span { padding: 5px; border-radius: 8px; color: var(--t3); }
+.switch span.on { background: var(--sf); color: var(--t1); }
+
+/* B: hero + moves */
+.hero { border-radius: 18px; overflow: hidden; position: relative; background: linear-gradient(160deg,#2B5A73,#0E1E2B); min-height: 236px; display: flex; flex-direction: column; justify-content: flex-end; color: var(--onScrim); }
+.hero.queue { background: linear-gradient(160deg,#B5793A,#3A230E); }
+.hero.new { background: linear-gradient(160deg,#2A2F45,#0B0D14); }
+.hero::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 20%, rgba(8,9,12,.92)); }
+.hero > * { position: relative; }
+.hero .in { padding: 14px; display: grid; gap: 6px; }
+.hero .eb { font-size: 9.5px; font-weight: 800; letter-spacing: .12em; color: #D2FF52; text-transform: uppercase; }
+.hero .tt { font: 700 23px/1.1 var(--f-display); }
+.hero .mm { font-size: 11px; color: var(--onScrim2); }
+.hero .prog { height: 3px; background: rgba(255,255,255,.18); }
+.hero .prog i { display: block; height: 100%; width: 62%; background: #D2FF52; }
+.hero .acts { display: flex; gap: 8px; margin-top: 4px; }
+.hero .acts .btn { flex: 1; }
+.hero .btn.pri { background: #D2FF52; color: #08090C; border-color: #D2FF52; }
+.hero .btn.glass { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.2); color: #FFFFFF; }
+.also { display: flex; gap: 6px; overflow: hidden; }
+.also .pill { padding: 5px 9px; font-size: 10px; }
+.also .pill i { width: 14px; height: 20px; border-radius: 3px; display: inline-block; background: linear-gradient(160deg,var(--p1),var(--p2)); }
+.move { display: flex; gap: 10px; align-items: center; background: var(--sf); border: 1px solid var(--st); border-radius: 14px; padding: 10px; }
+.move .ic { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; font-size: 15px; flex: none; background: color-mix(in srgb, var(--c) 16%, transparent); color: var(--c); font-weight: 900; }
+.move .k { font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--c); }
+.faces { display: flex; align-items: center; gap: 8px; background: var(--sf); border: 1px solid var(--st); border-radius: 14px; padding: 10px; }
+.faces .stack { display: flex; }
+.faces .stack .av { margin-left: -6px; width: 26px; height: 26px; }
+.faces .stack .av:first-child { margin-left: 0; }
+
+/* C: rails */
+.gstrip { display: flex; gap: 6px; }
+.gstrip .pill { padding: 5px 9px; font-size: 10.5px; }
+.rail { display: flex; gap: 8px; overflow: hidden; }
+.land { flex: 0 0 168px; display: grid; gap: 5px; }
+.land .art { height: 94px; border-radius: 10px; position: relative; overflow: hidden; background: linear-gradient(135deg,var(--p1),var(--p2)); }
+.land .art::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, rgba(8,9,12,.75)); }
+.land .art .pb { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(255,255,255,.2); z-index: 1; }
+.land .art .pb i { display: block; height: 100%; background: #D2FF52; }
+.land .art .ck { position: absolute; right: 6px; bottom: 9px; z-index: 1; background: #D2FF52; color: #08090C; font-weight: 800; font-size: 10px; padding: 4px 8px; border-radius: 12px; }
+.land .art .ep { position: absolute; left: 8px; bottom: 9px; z-index: 1; color: #FFFFFF; font-weight: 700; font-size: 10px; }
+.pst { flex: 0 0 76px; display: grid; gap: 4px; }
+.pst .poster { width: 76px; height: 110px; }
+.pst .poster .pill { position: absolute; left: 5px; bottom: 5px; background: var(--limeFill); color: var(--onLime); border-color: var(--limeFill); }
+.pst .poster .av { position: absolute; right: 4px; bottom: 4px; }
+.top10 { flex: 0 0 96px; display: flex; align-items: flex-end; }
+.top10 b { font: 700 54px/0.8 var(--f-display); color: var(--st); -webkit-text-stroke: 1.5px var(--t3); margin-right: -12px; z-index: 1; position: relative; }
+.top10 .poster { width: 70px; height: 102px; }
+
+table.cmp { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 13.5px; }
+.tablewrap { overflow-x: auto; }
+table.cmp th, table.cmp td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--rule); }
+table.cmp th { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+table.cmp td:first-child { font-weight: 700; color: var(--ink); width: 18%; }
+table.cmp td { color: var(--ink-2); }
+.qs { display: grid; gap: 10px; max-width: 78ch; }
+.qs li { color: var(--ink-2); }
+.qs b { color: var(--ink); }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <span class="eyebrow">Epic #45 · Stage 2 of 5 · Explore alternatives (#98)</span>
+    <h1>Home: Tonight and your moves</h1>
+    <p>The approved Home layout (option B of three; see decision 0011). A hero card shows what to watch next, followed by up to four one-tap moves and a single friends line. The canon top 3 is no longer on Home. Movies and series stay separate wherever a ranking appears.</p>
+    <p>The example user is in the middle of three series on a Tuesday evening, finished The Bear yesterday, and is on a 6-week streak.</p>
+    <div class="seg" role="group" aria-label="Theme">
+      <button type="button" id="th-system" aria-pressed="true">System</button>
+      <button type="button" id="th-dark" aria-pressed="false">Dark</button>
+      <button type="button" id="th-light" aria-pressed="false">Light</button>
+    </div>
+  </header>
+
+  <!-- ================= B ================= -->
+  <section class="band" id="b">
+    <div class="band-head">
+      <span class="tag">Approved · option B</span>
+      <h2>Tonight: one big "watch this next" card, then your moves</h2>
+      <p>Home answers one question first: what do I watch now? Below that is a short, ranked list of things worth doing, with a single row of friends. Your canon leaves Home (owner's call), since the Canon tab is one tap away.</p>
+      <ul class="changes">
+        <li><b>Hero:</b> your most recent tracked title with its next episode and <b>✓ Watched E6</b>. With nothing tracked it falls back to your Queue's Up next pick, then to "Start your canon" for a new user. Smaller chips underneath switch between the titles you're watching.</li>
+        <li><b>Your moves:</b> up to 4 cards chosen by a small, testable Dart ranker: rank a finished title, a new season is out, your streak needs a ranking by Sunday, a challenge is close to done, a friend ranked something you've also ranked. Each card has one action.</li>
+        <li><b>Friends:</b> one line with faces and the latest thing, which opens Social.</li>
+        <li><b>The catch:</b> the moves ranker is new logic to design and test, and what Home shows changes day to day, which some people find less predictable.</li>
+      </ul>
+    </div>
+    <div class="screens">
+      <div class="col">
+        <div class="frame">
+          <div class="sb"><span>9:41</span><span>●●● 5G</span></div>
+          <div class="ab"><span class="t">Home</span><span class="pill on">🔥 6 wk</span><span class="i">⌕</span></div>
+          <div class="ct">
+            <div class="hero">
+              <div class="in">
+                <span class="eb">Up next · Severance</span>
+                <span class="tt">S2 · E6 "Attila"</span>
+                <span class="mm">52 min · Apple TV+ · 4 left this season</span>
+                <div class="acts"><span class="btn pri">✓ Watched E6</span><span class="btn glass">Details</span></div>
+              </div>
+              <div class="prog"><i></i></div>
+            </div>
+            <div class="also">
+              <span class="pill"><i class="p-slow"></i>Slow Horses · E2</span>
+              <span class="pill amber"><i class="p-sho"></i>Shōgun · S2 new</span>
+              <span class="pill">All 5 ›</span>
+            </div>
+            <div class="sec">
+              <div class="sh">Your moves</div>
+              <div class="move" style="--c:var(--lime)"><span class="ic">★</span><div class="grow"><span class="k">Rank it</span><span class="ttl">You finished The Bear</span><span class="meta">Series · yesterday</span></div><span class="btn sm pri">Log and duel</span></div>
+              <div class="move" style="--c:var(--amber)"><span class="ic">◆</span><div class="grow"><span class="k">Challenge</span><span class="ttl">Heist Month: 4 of 8</span><span class="meta">9 days left · Dune is in your Queue</span></div><span class="btn sm">Open</span></div>
+            </div>
+          </div>
+          <div class="fab">+ Log</div>
+          <div class="nav"><span class="on">Home</span><span>Explore</span><span>Canon</span><span>Social</span><span>More</span></div>
+        </div>
+        <span class="cap">On open</span>
+        <span class="capd">Logging tonight's episode is one tap, at the top. The streak moves into the header as a small chip that opens Your level.</span>
+      </div>
+      <div class="col">
+        <div class="frame">
+          <div class="sb"><span>9:41</span><span>●●● 5G</span></div>
+          <div class="ab scrolled"><span class="t">Home</span><span class="pill on">🔥 6 wk</span><span class="i">⌕</span></div>
+          <div class="ct up">
+            <div class="sec">
+              <div class="sh">Your moves</div>
+              <div class="move" style="--c:var(--lime)"><span class="ic">★</span><div class="grow"><span class="k">Rank it</span><span class="ttl">You finished The Bear</span><span class="meta">Series · yesterday</span></div><span class="btn sm pri">Log and duel</span></div>
+              <div class="move" style="--c:var(--amber)"><span class="ic">◆</span><div class="grow"><span class="k">Challenge</span><span class="ttl">Heist Month: 4 of 8</span><span class="meta">9 days left · Dune is in your Queue</span></div><span class="btn sm">Open</span></div>
+              <div class="move" style="--c:var(--violet)"><span class="ic">≈</span><div class="grow"><span class="k">Compare</span><span class="ttl">Maya ranked Andor #2</span><span class="meta">You have it at #5 · 9.40 vs 9.08</span></div><span class="btn sm">See</span></div>
+              <div class="move" style="--c:var(--lime)"><span class="ic">▶</span><div class="grow"><span class="k">Up next in your Queue</span><span class="ttl">Dune: Part Two</span><span class="meta">Movie · on Max</span></div><span class="btn sm">Watch</span></div>
+            </div>
+            <div class="sec">
+              <div class="sh">Friends <a>Social ›</a></div>
+              <div class="faces"><div class="stack"><span class="av">M</span><span class="av">J</span><span class="av">S</span></div><div class="grow"><span class="ttl">Maya, Jordan and 4 others</span><span class="meta">ranked 9 titles today</span></div><span class="sh"><a>›</a></span></div>
+            </div>
+          </div>
+          <div class="fab">+ Log</div>
+          <div class="nav"><span class="on">Home</span><span>Explore</span><span>Canon</span><span>Social</span><span>More</span></div>
+        </div>
+        <span class="cap">Scrolled to the end</span>
+        <span class="capd">At most 4 moves, then one friends line. The page ends there, so Home stays short.</span>
+      </div>
+      <div class="col">
+        <div class="frame">
+          <div class="sb"><span>9:41</span><span>●●● 5G</span></div>
+          <div class="ab"><span class="t">Home</span><span class="i">⌕</span></div>
+          <div class="ct">
+            <div class="hero new">
+              <div class="in">
+                <span class="eb">Welcome to Telly</span>
+                <span class="tt">Start your canon</span>
+                <span class="mm">Log one movie or show you love. Telly ranks everything after it head to head.</span>
+                <div class="acts"><span class="btn pri">+ Log a title</span></div>
+              </div>
+            </div>
+            <div class="sec">
+              <div class="sh">Your moves</div>
+              <div class="move" style="--c:var(--lime)"><span class="ic">▶</span><div class="grow"><span class="k">Track</span><span class="ttl">Watching a show right now?</span><span class="meta">Track it and log episodes from here</span></div><span class="btn sm">Find it</span></div>
+              <div class="move" style="--c:var(--violet)"><span class="ic">+</span><div class="grow"><span class="k">Friends</span><span class="ttl">Find friends in Social</span><span class="meta">See what they rank</span></div><span class="btn sm">Search</span></div>
+            </div>
+          </div>
+          <div class="fab">+ Log</div>
+          <div class="nav"><span class="on">Home</span><span>Explore</span><span>Canon</span><span>Social</span><span>More</span></div>
+        </div>
+        <span class="cap">New user</span>
+        <span class="capd">The same two parts teach the app: the hero asks for a first log, and the moves suggest tracking and friends.</span>
+      </div>
+      <div class="col">
+        <div class="frame">
+          <div class="sb"><span>9:41</span><span>●●● 5G</span></div>
+          <div class="ab"><span class="t">Home</span><span class="pill on">🔥 6 wk</span><span class="i">⌕</span></div>
+          <div class="ct">
+            <div class="hero queue">
+              <div class="in">
+                <span class="eb">Up next from your Queue</span>
+                <span class="tt">Dune: Part Two</span>
+                <span class="mm">Movie · 2h 46m · on Max</span>
+                <div class="acts"><span class="btn pri">▶ Start watching</span><span class="btn glass">↻ Another</span></div>
+              </div>
+            </div>
+            <div class="sec">
+              <div class="sh">Your moves</div>
+              <div class="move" style="--c:var(--coral)"><span class="ic">!</span><div class="grow"><span class="k">Keep your streak</span><span class="ttl">Rank 1 title by Sunday</span><span class="meta">6 weeks · freeze already used this month</span></div><span class="btn sm pri">+ Log</span></div>
+            </div>
+          </div>
+          <div class="fab">+ Log</div>
+          <div class="nav"><span class="on">Home</span><span>Explore</span><span>Canon</span><span>Social</span><span>More</span></div>
+        </div>
+        <span class="cap">Nothing tracked</span>
+        <span class="capd">The hero falls back to the Queue's Up next pick, with the same ↻ Another as the Queue.</span>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function () {
+  const root = document.documentElement;
+  const ids = { 'th-system': null, 'th-dark': 'dark', 'th-light': 'light' };
+  function apply(id) {
+    const v = ids[id];
+    if (v) root.setAttribute('data-theme', v); else root.removeAttribute('data-theme');
+    for (const k of Object.keys(ids)) document.getElementById(k).setAttribute('aria-pressed', String(k === id));
+  }
+  for (const k of Object.keys(ids)) document.getElementById(k).addEventListener('click', () => apply(k));
+})();
+</script>
+</body>
+</html>
