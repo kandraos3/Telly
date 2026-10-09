@@ -71,7 +71,7 @@ void main() {
 
     test('generateNotionJson formats Notion database schema correctly', () {
       final json = DataExporter.generateNotionJson(items: sampleItems);
-      expect(json['database_title'], equals('Telly Entertainment Canon'));
+      expect(json['database_title'], equals('Telly Rankings'));
       final items = json['items'] as List;
       expect(items.length, equals(3));
 
@@ -84,7 +84,7 @@ void main() {
 
     test('generateNotionMarkdown outputs valid markdown table', () {
       final md = DataExporter.generateNotionMarkdown(items: sampleItems);
-      expect(md, contains('# Telly Entertainment Canon'));
+      expect(md, contains('# Telly Rankings'));
       expect(md, contains('| Rank | Title | Score | Tier | Status | MVP | Date Logged |'));
       expect(md, contains('| #1 | Succession | 10.00 | God Tier | COMPLETED | Jeremy Strong | 2024-05-12 |'));
       expect(md, contains('| - | Westworld, "Delos" | - | Graveyard | DROPPED | Jeffrey Wright | 2023-11-04 |'));

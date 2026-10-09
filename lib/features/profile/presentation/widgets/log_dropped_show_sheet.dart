@@ -149,7 +149,7 @@ class _LogDroppedShowSheetState extends ConsumerState<LogDroppedShowSheet> {
                 ),
               ),
               Text(
-                'Moved out of active canon into dropped tracker',
+                'Moved out of your active rankings into dropped tracker',
                 style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)),
               ),
               const SizedBox(height: 20),

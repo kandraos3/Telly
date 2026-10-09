@@ -57,7 +57,7 @@ class MedalStoryCard extends StatelessWidget {
           ],
           const Spacer(),
           Text(
-            'Rank your own canon on Telly',
+            'Build your own rankings on Telly',
             textAlign: TextAlign.center,
             style: TellyTypography.caption(color: TellyColors.textSecondary),
           ),

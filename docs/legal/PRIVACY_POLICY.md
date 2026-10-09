@@ -22,7 +22,7 @@ Telly ("we", "our", or "us") provides a social television ranking platform via o
 ---
 
 ## 3. Data Sharing & Third Parties
-- **Public Visibility:** By default, your username, display name, and completed TV canon are visible to other users. You can enable **Friends-Only Mode** or **Ghost Mode** in Settings at any time.
+- **Public Visibility:** By default, your username, display name, and completed TV rankings are visible to other users. You can enable **Friends-Only Mode** or **Ghost Mode** in Settings at any time.
 - **Third-Party Services:**
   - **TMDB (The Movie Database):** Show metadata and cast information.
   - **JustWatch:** Streaming availability lookups.

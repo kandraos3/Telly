@@ -47,7 +47,7 @@ graph TD
 
 ### 2.3 Image CDN Optimization
 TMDB delivers raw posters and stills. To maintain 60fps scrolling and avoid downloading 4MB images on mobile networks:
-- **Poster Thumbnails (Feed / Canon):** `https://image.tmdb.org/t/p/w342{poster_path}` (Compressed WebP, ~28 KB)
+- **Poster Thumbnails (Feed / Rankings):** `https://image.tmdb.org/t/p/w342{poster_path}` (Compressed WebP, ~28 KB)
 - **Detail Posters & Share Cards:** `https://image.tmdb.org/t/p/w500{poster_path}` (~65 KB)
 - **Cinematic 16:9 Backdrops:** `https://image.tmdb.org/t/p/w1280{backdrop_path}` (~180 KB)
 

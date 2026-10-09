@@ -1,10 +1,10 @@
 # 📺 Telly — The Beli for Movies, TV & Anime
 
-> **"Your personal screen canon. Ranked, shared, settled."**
+> **"Your personal screen rankings. Ranked, shared, settled."**
 
 **Telly** is a modern, social screen entertainment ranking and discovery mobile application designed to bring the viral, pairwise ranking mechanics of **Beli** to movies, television series, and anime.
 
-By eliminating arbitrary, inflated 1–10 star ratings in favor of **head-to-head pairwise duels**, Telly builds an unshakeable personal **Dual Canon** (segregating the **Movie Canon** from the **Series & Anime Canon** to avoid apples-to-oranges comparisons), calculates real-time friend **Taste Match %**, and eliminates couch paralysis with the **"Two-to-Watch"** co-watching decider.
+By eliminating arbitrary, inflated 1–10 star ratings in favor of **head-to-head pairwise duels**, Telly builds an unshakeable personal set of **Rankings** (segregating the **Movie Rankings** from the **Series & Anime Rankings** to avoid apples-to-oranges comparisons), calculates real-time friend **Taste Match %**, and eliminates couch paralysis with the **"Two-to-Watch"** co-watching decider.
 
 ---
 
@@ -14,7 +14,7 @@ All product specifications, architecture documentation, design systems, and road
 
 | Section | Location | Scope & Contents |
 | :--- | :--- | :--- |
-| 📚 **Feature Specifications** | [`docs/features/`](./docs/features/) | 9 comprehensive feature specs (Onboarding, Duel Engine, Series vs. Seasons, Social Feeds, Taste Match, Profile Canon, Discovery, Anime Integration, Movie Integration). |
+| 📚 **Feature Specifications** | [`docs/features/`](./docs/features/) | 9 comprehensive feature specs (Onboarding, Duel Engine, Series vs. Seasons, Social Feeds, Taste Match, Profile Rankings, Discovery, Anime Integration, Movie Integration). |
 | 🎨 **UI/UX Design System** | [`docs/design_system/`](./docs/design_system/) | Design philosophy (*Midnight Cathode* OLED), component library, screen-by-screen specifications (`SCR-01` to `SCR-20`), and user interaction gesture flows. |
 | 🛠️ **Admin & Adjacent Systems** | [`docs/adjacent_systems/`](./docs/adjacent_systems/) | Social/SMS auth flows, profile customization, settings hierarchy, viral sharing studio (Instagram Story cards), and trust & safety moderation. |
 | ⚙️ **Technical Architecture** | [`docs/technical_architecture/`](./docs/technical_architecture/) | Tech stack (Flutter 3.24+, Supabase, Drift), PostgreSQL schema & stored procs, TMDB/JustWatch APIs, offline sync, DevOps CI/CD, and the **Test Pyramid (70/20/10)**. |

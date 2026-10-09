@@ -21,7 +21,7 @@ All share cards are rendered off-screen at **1080 x 1920 px (3x Retina)** with t
 │  TEMPLATE A: THE TOP 9 CANON (3x3 Grid)                │
 │  • Edge-to-edge 3x3 grid of posters                    │
 │  • User handle @jordan & dynamic average score         │
-│  • Tagline: "My All-Time TV Canon on Telly"            │
+│  • Tagline: "My All-Time TV Rankings on Telly"            │
 │                                                        │
 │  TEMPLATE B: THE CONTROVERSIAL UPSET CARD              │
 │  • Split poster duel: Severance vs Succession          │
@@ -75,7 +75,7 @@ When a user shares a link into WhatsApp, iMessage, Twitter/X, or Slack, Telly se
 ### 4.2 Web Fallback (Unregistered Users)
 If a user taps `https://telly.app/u/jordan` on desktop or without the app installed:
 - Loads a lightweight, mobile-responsive web view.
-- Displays Jordan's Top 10 Canon in high resolution.
+- Displays Jordan's Top 10 Rankings in high resolution.
 - Prompts an interactive hook: *"See your Taste Match with Jordan (Takes 60 seconds)"*.
 - Persistent banner: `[ Download Telly on App Store / Google Play ]`.
 

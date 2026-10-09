@@ -5,7 +5,7 @@ import 'dart:math' as math;
 enum TasteAffinityTier {
   tasteTwins(
     label: 'Taste Twins',
-    description: 'Eerily identical canons. Follow their recommendations blindly.',
+    description: 'Eerily identical rankings. Follow their recommendations blindly.',
     minPercentage: 90,
   ),
   kindredSpirits(

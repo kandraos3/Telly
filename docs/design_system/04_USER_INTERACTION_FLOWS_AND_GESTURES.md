@@ -16,7 +16,7 @@ To make Telly feel fluid and premium like an Apple Design Award winner, gestures
 │  Swipe Right (List)   Queue Item             Mark as Seen / Log Show   │
 │  Swipe Left (List)    Queue Item             Delete or Move to DNF     │
 │  Swipe Up / Down      Duel Arena Card        Choose Winner             │
-│  Drag & Drop (Hold)   Ranked Canon Row       Re-order Canon Slot       │
+│  Drag & Drop (Hold)   Ranked Rankings Row       Re-order Rankings Slot       │
 │  Pan Down             Modal Bottom Sheet     Dismiss / Close Sheet     │
 │  Pull to Refresh      Top of Feed / Queue    Sync Data & Recalculate   │
 └────────────────────────────────────────────────────────────────────────┘
@@ -45,11 +45,11 @@ stateDiagram-v2
     
     DuelArena --> EditorialSheet: Final Slot Determined
     EditorialSheet --> CanonCelebration: Adds Tags, MVP & Hot Take
-    CanonCelebration --> Idle: Commits to Canon & Broadcasts Feed
+    CanonCelebration --> Idle: Commits to Rankings & Broadcasts Feed
 ```
 
 #### Step-by-Step Interaction Detail:
-1. **Trigger:** User taps the floating lime `+ Log` button above the nav bar (component library §2.3; shown on Home, Explore, Canon and Social), or the rank action on a title page (`SCR-08`).
+1. **Trigger:** User taps the floating lime `+ Log` button above the nav bar (component library §2.3; shown on Home, Explore, Rankings and Social), or the rank action on a title page (`SCR-08`).
 2. **Instant Search (`SCR-09`):** Predictive search pulls from TMDB as user types (debounced at 150ms).
 3. **Status Selection:** User selects `Finished Whole Series` (or `Up to Date`, `Season X`, `Dropped`).
 4. **Sentiment Coarse Sort:** User taps one of 4 sentiment buckets (`Masterpiece`, `Loved`, `Liked`, `Meh`).
@@ -59,7 +59,7 @@ stateDiagram-v2
    - User taps the superior show (card expands with glowing Phosphor Lime stroke, other card dismisses).
    - Repeats for 3 to 4 battles until the binary search tree terminates.
 6. **Editorial Tagging (`SCR-11`):** User tags friends they watched with, selects MVP actor, and writes a 280-char micro-review.
-7. **Canon Reveal (`SCR-12`):** Card lands in the exact numerical slot on their canon with haptic vibration and score roll-up.
+7. **Rankings Reveal (`SCR-12`):** Card lands in the exact numerical slot on their canon with haptic vibration and score roll-up.
 
 ---
 
@@ -112,7 +112,7 @@ sequenceDiagram
 
 ---
 
-### Flow 4: Drag & Drop Canon Re-Ordering Flow
+### Flow 4: Drag & Drop Rankings Re-Ordering Flow
 
 ```
 User Holds Item for 300ms

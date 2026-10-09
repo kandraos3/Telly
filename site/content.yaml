@@ -16,7 +16,7 @@ site:
   url: https://kandraos3.github.io/Telly/
   title: Telly — Rank every movie and show you watch
   description: >-
-    Telly turns what you watch into a ranked canon. Head-to-head duels place
+    Telly turns what you watch into personal rankings. Head-to-head duels place
     every movie and series, friends compare taste, and picking tonight's watch
     takes seconds.
   contact_email: karlandraos@gmail.com
@@ -31,7 +31,7 @@ stores:
 hero:
   eyebrow: Movies · Series · Anime
   headline: Rank what you watch.
-  tagline: Your personal TV canon. Ranked, shared, settled.
+  tagline: Your personal TV rankings. Ranked, shared, settled.
   body: >-
     Star ratings drift. Telly asks one question instead: which did you like
     more? A few quick duels and every title lands in its exact place, scored
@@ -46,12 +46,12 @@ features:
     screenshot: duel
     body: >-
       Just finished something? Telly pits it against titles already in your
-      canon. Tap the one you liked more, and binary search finds the right
-      slot in a handful of picks, even in a canon of hundreds.
+      rankings. Tap the one you liked more, and binary search finds the right
+      slot in a handful of picks, even with hundreds of titles ranked.
     points:
       - Movies only ever duel movies, and series duel series
       - Can't decide? Call it a tie and move on
-      - Anime sits in your series canon, seasons and all
+      - Anime sits in your TV rankings, seasons and all
 
   - id: scores
     eyebrow: Scores that mean something
@@ -59,17 +59,17 @@ features:
     accent: warmAmber
     screenshot: reveal
     body: >-
-      Every placement recalculates your canon. Scores come from rank, so a
+      Every placement recalculates your rankings. Scores come from rank, so a
       9.61 is always above a 9.42, and they never pile up at 8 out of 10. Share
       the reveal straight to your story.
 
   - id: canon
-    eyebrow: The dual canon
-    title: Two canons, in tiers
+    eyebrow: Two rankings
+    title: Movies and TV, in tiers
     accent: electricViolet
     screenshot: tiers
     body: >-
-      Your Movie Canon and Series Canon live side by side and are never mixed.
+      Your Movie Rankings and TV Rankings live side by side and are never mixed.
       Browse them as a ranked list, in tiers from God Tier down, or as a 3×3
       grid ready to share.
     show_tiers: true
@@ -106,7 +106,7 @@ features:
 
   - id: squads
     eyebrow: Squads
-    title: Your group's consensus canon
+    title: Your group's consensus ranking
     accent: warmAmber
     screenshot: squad
     body: >-
@@ -129,7 +129,7 @@ gallery:
   body: These screens are rendered from the app's own code on every update, so what you see here is what ships.
   items:
     - screenshot: canon
-      caption: Your canon
+      caption: Your rankings
     - screenshot: explore
       caption: Explore
     - screenshot: title
@@ -139,16 +139,16 @@ gallery:
     - screenshot: wrapped
       caption: Story studio
     - screenshot: reveal
-      caption: Canon reveal
+      caption: Rankings reveal
 
 extras:
   - title: Bring your history
-    body: Import your Letterboxd diary or AniList library and start with a full canon.
+    body: Import your Letterboxd diary or AniList library and start with full rankings.
   - title: Works offline
     body: Rank on the subway. Duels save instantly and sync when you're back online.
   - title: Your data, exportable
-    body: Export your canon to CSV or Letterboxd format whenever you like.
+    body: Export your rankings to CSV or Letterboxd format whenever you like.
 
 cta:
-  title: Your canon is waiting.
+  title: Your rankings are waiting.
   body: Telly is coming soon to iPhone and Android.

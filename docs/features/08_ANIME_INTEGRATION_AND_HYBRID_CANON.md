@@ -46,9 +46,9 @@ sequenceDiagram
     AniList-->>Worker: Returns 142 completed anime with titles, scores, studio
     Worker->>DB: Resolves / links AniList media to Telly catalog
     Worker->>App: Returns "142 Anime Imported!"
-    App->>User: Prompts "Quick 5-Duel Tournament" to anchor Top Anime into your TV Canon
+    App->>User: Prompts "Quick 5-Duel Tournament" to anchor Top Anime into your TV Rankings
     User->>App: Completes 5 duels
-    App->>User: Personal Canon populated with both Western TV & Anime!
+    App->>User: Personal Rankings populated with both Western TV & Anime!
 ```
 
 ### GraphQL Query Schema (AniList Ingestion)

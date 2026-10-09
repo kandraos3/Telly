@@ -58,8 +58,8 @@ Every mathematical algorithm in Telly must pass exhaustive unit tests under extr
    - Validate Bayesian prior blending for low-sample profiles ($N < 10$).
 
 3. **Spearman Rank Correlation ($\rho$) & Taste Match %**:
-   - **Identical Canons**: $R_A = R_B \implies \rho = 1.00 \implies \text{Taste Match} = 100\%$.
-   - **Reversed Canons**: $R_A = \text{reverse}(R_B) \implies \rho = -1.00 \implies \text{Taste Match} = 0\%$.
+   - **Identical Rankings**: $R_A = R_B \implies \rho = 1.00 \implies \text{Taste Match} = 100\%$.
+   - **Reversed Rankings**: $R_A = \text{reverse}(R_B) \implies \rho = -1.00 \implies \text{Taste Match} = 0\%$.
    - **Bayesian Confidence Shrinkage**: Verify that mutual overlap $k=2$ with identical order yields $\le 65\%$ match rather than $100\%$ due to shrinkage prior $k_0 = 5$.
    - **Dual-Canon Isolation**: Assert that movie duels do not impact series correlation and vice versa.
 
@@ -115,7 +115,7 @@ Widget tests verify rendering, user interaction, animation frames, and accessibi
    - **Character Limit Guard**: Input 300 characters in review box $\implies$ assert text is capped at exactly 280 characters with counter indicating `(280/280)`.
 
 4. **Dual-Canon Profile View (`SCR-14`)**:
-   - **Tab Switching**: Tap `[ 🎬 Movie Canon ]` $\implies$ displays movie ranking rows. Tap `[ 📺 Series & Anime ]` $\implies$ switches list without full page reload.
+   - **Tab Switching**: Tap `[ 🎬 Movie Rankings ]` $\implies$ displays movie ranking rows. Tap `[ 📺 Series & Anime ]` $\implies$ switches list without full page reload.
    - **Tier Accordion**: Tap `👑 GOD TIER` header $\implies$ animates accordion collapse/expansion.
 
 ### 3.2 State Management & Riverpod Integration Tests
@@ -205,12 +205,12 @@ journey
     section Seed & Tournament
       Tap 8 Titles: 5: Selection counter hits 8/8
       Run 5 Binary Duels: 5: Card swiper resolves placements
-    section Canon Reveal
-      Celebrate Canon: 5: Gold foil card flip & score animation
+    section Rankings Reveal
+      Celebrate Rankings: 5: Gold foil card flip & score animation
       View Initial Top 5: 5: Scores 9.85 down to 8.60 validated
 ```
 
-#### CUJ-01: Cold-Start Onboarding to Canon Celebration
+#### CUJ-01: Cold-Start Onboarding to Rankings Celebration
 - **Test Objective**: Verify a first-time user can install the app, authenticate, select subscriptions, pick 8 seed titles, finish a 5-duel tournament, and arrive at their calibrated Top 5 leaderboard.
 - **Validation Points**:
   - Auth token persisted in secure enclave.
@@ -225,7 +225,7 @@ journey
   2. Select TMDB result $\rightarrow$ select *"Masterpiece (Top 10%)"*.
   3. Complete 4 head-to-head duels in the Duel Arena (`SCR-10`).
   4. Tag venue (*"Theatrical / IMAX"*) and add 120-char review in `SCR-11`.
-  5. Tap *"Publish to Canon"*.
+  5. Tap *"Publish to Rankings"*.
 - **Validation Points**:
   - Confirms slot reveal animation in `SCR-12`.
   - Verifies *Dune: Part Two* appears at expected rank (e.g. #3) on `SCR-14`.
@@ -297,7 +297,7 @@ To guarantee pixel-perfect adherence to the *Midnight Cathode & Phosphor Neon* d
 
 ### 5.3 Frame-Rate & Memory Leak Profiling
 - **Frame Budget**: 60fps ($16.6\text{ ms/frame}$) and 120fps ($8.33\text{ ms/frame}$ on ProMotion displays).
-- Automated test runs `test_driver/perf_driver.dart` executing a 500-item scroll through the Canon and 20 card swipes:
+- Automated test runs `test_driver/perf_driver.dart` executing a 500-item scroll through the Rankings and 20 card swipes:
   - Fails CI if `missed_frame_build_budget_count > 0`.
   - Fails CI if memory footprint grows unbounded after 50 consecutive duels (detecting image texture retention).
 

@@ -125,7 +125,7 @@ dev_dependencies:
 | Feature / UI Component | Technology / Library | Architectural Role |
 | :--- | :--- | :--- |
 | **Pairwise Duel Arena** | `flutter_card_swiper` + `flutter_animate` | 60fps card drag gestures, spring release, 1.04x winner scaling, and loser dismissal |
-| **Canon Leaderboard** | `Drift` (SQLite) + `ReorderableListView` | Reorder shows with smooth drag-and-drop while executing atomic rank recalculations |
+| **Rankings Leaderboard** | `Drift` (SQLite) + `ReorderableListView` | Reorder shows with smooth drag-and-drop while executing atomic rank recalculations |
 | **Off-Screen Story Cards** | `screenshot` (`RepaintBoundary`) | Paints a 1080x1920 widget tree off-screen, converts to PNG bytes, pipes to Instagram Stories |
 | **1-Tap Streaming Launcher** | `url_launcher` | Evaluates native URI schemes (`nflx://`, `max://`, `https://`) with graceful browser fallback |
 | **Network Image Caching** | `cached_network_image` | Multi-tier LRU cache (RAM 64MB + Disk 250MB) to prevent TMDB poster re-fetching |

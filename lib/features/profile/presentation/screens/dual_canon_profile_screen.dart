@@ -103,7 +103,7 @@ class DualCanonProfileScreen extends ConsumerWidget {
         child: TellyFloatingHeaderScrollView(
           // FE-HEADER-01 tab header; Stats and View open sheets (#47), Settings sits in More (#44).
           header: TellyScreenHeader(
-            title: 'Canon',
+            title: 'Rankings',
             actions: [
               TellyHeaderAction(
                 key: const Key('canon_stats_button'),

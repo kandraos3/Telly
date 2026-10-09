@@ -80,7 +80,7 @@ void main() {
 
     test('progress label follows the spec', () {
       final t = OnboardingTournament(picks(3, 4));
-      expect(t.current!.progressLabel, 'Movie Duel 1 of 3 • Calibrating your Movie Canon');
+      expect(t.current!.progressLabel, 'Movie Duel 1 of 3 • Calibrating your Movie Rankings');
     });
   });
 }

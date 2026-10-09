@@ -199,7 +199,7 @@ void main() {
       expect(find.text('MOVIE STATS'), findsOneWidget);
       expect(tile(tester, 'canon_stat_titles'), contains('3'));
       expect(tile(tester, 'canon_stat_hours'), contains('8h'));
-      expect(tile(tester, 'canon_stat_genre'), allOf(contains('Science Fiction'), contains('67% of your canon')));
+      expect(tile(tester, 'canon_stat_genre'), allOf(contains('Science Fiction'), contains('67% of your rankings')));
       expect(tile(tester, 'canon_stat_creator'), allOf(contains('Top Director'.toUpperCase()), contains('Christopher Nolan'), contains('2 films')));
     });
 
@@ -233,7 +233,7 @@ void main() {
           ),
         ),
       ));
-      expect(tester.widget<Text>(find.text('67% of your canon')).style!.color, TellyColors.lightPhosphorLime);
+      expect(tester.widget<Text>(find.text('67% of your rankings')).style!.color, TellyColors.lightPhosphorLime);
     });
 
     testWidgets('offline falls back to the local title count and dashes', (tester) async {
@@ -251,7 +251,7 @@ void main() {
       await tester.pumpWidget(buildTestableProfileScreen());
       await tester.pumpAndSettle();
 
-      expect(tester.widget<Text>(find.byKey(const Key('screen_header_title'))).data, 'Canon');
+      expect(tester.widget<Text>(find.byKey(const Key('screen_header_title'))).data, 'Rankings');
       expect(find.text('Profile'), findsNothing);
       double x(String key) => tester.getCenter(find.byKey(Key(key))).dx;
       expect(x('canon_stats_button'), lessThan(x('canon_view_button')));

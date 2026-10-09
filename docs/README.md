@@ -1,10 +1,10 @@
 # 📺 Telly — The Beli for Movies, TV & Anime
 
-> **"Your personal screen canon. Ranked, shared, settled."**
+> **"Your personal screen rankings. Ranked, shared, settled."**
 
 **Telly** is a modern, social screen entertainment ranking and discovery mobile application designed to bring the viral, pairwise ranking mechanics of **Beli** to movies, television series, and anime.
 
-By eliminating arbitrary, inflated 1–10 star ratings in favor of **head-to-head pairwise duels**, Telly builds an unshakeable personal **Dual Canon** (segregating the **Movie Canon** from the **Series & Anime Canon** to avoid apples-to-oranges comparisons), calculates real-time friend **Taste Match %**, and eliminates couch paralysis with the **"Two-to-Watch"** co-watching decider.
+By eliminating arbitrary, inflated 1–10 star ratings in favor of **head-to-head pairwise duels**, Telly builds an unshakeable personal set of **Rankings** (segregating the **Movie Rankings** from the **Series & Anime Rankings** to avoid apples-to-oranges comparisons), calculates real-time friend **Taste Match %**, and eliminates couch paralysis with the **"Two-to-Watch"** co-watching decider.
 
 ---
 
@@ -19,10 +19,10 @@ Each feature of the product is specified in an end-to-end, production-ready engi
 | **03** | [**`Series vs. Seasons & DNF Tracking`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/03_SERIES_VS_SEASONS_AND_DROPPED_TRACKING.md) | The *Game of Thrones* & *True Detective* solution: holistic series layer vs season sub-duels, "Ending Impact" modifiers, and the TV Graveyard (drop milestones & reasons). |
 | **04** | [**`Social Graph, Feeds & The Upset Engine`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md) | Friends activity feed, algorithmic detection of spicy upsets and controversial takes, 1-tap queue saving, Squad consensus leaderboards, and reactions. |
 | **05** | [**`Taste Match % & Co-Watch Decider`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/05_TASTE_MATCH_AND_CO_WATCH_DECIDER.md) | Spearman Rank Correlation math with Bayesian shrinkage, "Two-to-Watch" group recommendation engine (shared streaming filters + mutual watchlist scoring), and 15-second mutual swipe mini-game. |
-| **06** | [**`Profile, The Canon & Stats Engine`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/06_PROFILE_THE_CANON_AND_STATS.md) | The personal canon profile, Multi-View (Ranked list, Tier view S/A/B/C/D, 3x3 poster grid), deep director/genre slicers, director affinity radar, and "Telly Wrapped". |
+| **06** | [**`Profile, The Rankings & Stats Engine`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/06_PROFILE_THE_CANON_AND_STATS.md) | The personal rankings profile, Multi-View (Ranked list, Tier view S/A/B/C/D, 3x3 poster grid), deep director/genre slicers, director affinity radar, and "Telly Wrapped". |
 | **07** | [**`Discovery & Streaming Intelligence`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md) | Universal Smart Watchlist, JustWatch streaming availability & app deep-linking, "Leaving Soon" expiration alerts, and Network Battlegrounds (HBO vs Apple TV+ vs Netflix). |
-| **08** | [**`Anime Integration & Hybrid Canon`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/08_ANIME_INTEGRATION_AND_HYBRID_CANON.md) | 1-click AniList / MAL profile import, Franchise Rollup (seasons/cours/movies), TrueSkill ranking confidence ($\sigma$), Studio affinity (MAPPA, Ufotable), and seasonal anime charts. |
-| **09** | [**`Movie Integration & Dual Canon`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md) | First-class movie integration, Dual-Canon segregation architecture (Movie Canon vs Series Canon), 1-click Letterboxd `diary.csv` import, theatrical venue tracking, and "Movie Night" decider. |
+| **08** | [**`Anime Integration & Hybrid Rankings`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/08_ANIME_INTEGRATION_AND_HYBRID_CANON.md) | 1-click AniList / MAL profile import, Franchise Rollup (seasons/cours/movies), TrueSkill ranking confidence ($\sigma$), Studio affinity (MAPPA, Ufotable), and seasonal anime charts. |
+| **09** | [**`Movie Integration & Dual Canon`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/09_MOVIE_INTEGRATION_AND_DUAL_CANON.md) | First-class movie integration, Dual-Canon segregation architecture (Movie Rankings vs Series Rankings), 1-click Letterboxd `diary.csv` import, theatrical venue tracking, and "Movie Night" decider. |
 | **10** | [**`Gamification: Medals, Challenges & Levels`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/10_GAMIFICATION_MEDALS_CHALLENGES_AND_LEVELS.md) | Medals (milestones, TMDB collections, taste, weekly streak), time-boxed and squad challenges run as server data, XP levels with cosmetic rewards, weekly friends tables; only duelled rankings count. |
 | **11** | [**`Watch Tracking & Episode Progress`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/features/11_WATCH_TRACKING_AND_EPISODE_PROGRESS.md) | Currently-watching tracking with one episode place per title, ✓ Watched E6 and Undo, un-logging, new-season detection, the Watching hub, title-page progress and spoiler guard, and the finish → log and duel hand-off. |
 
@@ -35,9 +35,9 @@ The full visual, interaction, and screen specifications are codified in dedicate
 | Design Doc | Module | Scope & Highlights |
 | :---: | :--- | :--- |
 | **DS-01** | [**`Design Philosophy & Style Guide`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/01_DESIGN_PHILOSOPHY_AND_STYLE_GUIDE.md) | *Midnight Cathode & Neon Phosphor* aesthetic, OLED surfaces, Phosphor Lime/Warm Amber color tokens, typography (GT Super Serif + Plus Jakarta Sans), and sensory haptics. |
-| **DS-02** | [**`Component Library & Patterns`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/02_COMPONENT_LIBRARY_AND_PATTERNS.md) | Floating frosted bottom nav, 4 Show Card variants (Canon row, Feed card, Queue item, 3x3 poster), Duel Arena card physics, reaction chips, and modal sheets. |
+| **DS-02** | [**`Component Library & Patterns`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/02_COMPONENT_LIBRARY_AND_PATTERNS.md) | Floating frosted bottom nav, 4 Show Card variants (Rankings row, Feed card, Queue item, 3x3 poster), Duel Arena card physics, reaction chips, and modal sheets. |
 | **DS-03** | [**`Screen-by-Screen Specifications`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) | Exhaustive layout wireframes, inputs, editable elements, action presentations, and transitions across all 20 screens (`SCR-01` through `SCR-20`). |
-| **DS-04** | [**`User Interaction Flows & Gestures`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/04_USER_INTERACTION_FLOWS_AND_GESTURES.md) | Master gesture conventions, end-to-end Mermaid state machines & sequence diagrams for Logging, Co-Watching, Drag-and-Drop Canon editing, and TV Graveyard DNF logging. |
+| **DS-04** | [**`User Interaction Flows & Gestures`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/04_USER_INTERACTION_FLOWS_AND_GESTURES.md) | Master gesture conventions, end-to-end Mermaid state machines & sequence diagrams for Logging, Co-Watching, Drag-and-Drop Rankings editing, and TV Graveyard DNF logging. |
 
 ---
 

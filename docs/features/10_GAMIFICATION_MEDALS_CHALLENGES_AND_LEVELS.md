@@ -32,7 +32,7 @@ Every count in this spec is over **qualifying rankings**: rows in `user_rankings
 Consequences:
 - **Imports never count.** Letterboxd and AniList imports create rankings without duels. At most one imported title per canon can slip through as "first in canon"; that's accepted.
 - **Re-ranking can't farm.** Deleting a title and ranking it again yields the same XP reference (§6), so no new XP.
-- **Canons stay separate.** A duel never pairs a film with a show, so qualification is always within one canon.
+- **Rankings stay separate.** A duel never pairs a film with a show, so qualification is always within one canon.
 
 Exposed as the SQL view `public.qualifying_rankings (user_id, title_id, media_type, created_at)`, which is RLS-safe through `security_invoker`.
 
@@ -150,9 +150,9 @@ Levels come from total XP, which is earned and never spent.
 |---|---|---|
 | 5 | Lime profile frame | A 2px primary-accent ring around the avatar on the More card, friend profiles and every feed card (both themes). Others see it too: the app looks up who wears it in batches as avatars appear (`user_reward_choices` is readable through `can_view_user`). |
 | 10 | "Noir" card style | Wrapped (`SCR-19`) and the rank-reveal and medal share cards render in greyscale |
-| 15 | Gold podium tags | Your Canon podium's #1–#3 tags use the God-tier gradient instead of lime (`SCR-14`, your own profile only) |
+| 15 | Gold podium tags | Your Rankings podium's #1–#3 tags use the God-tier gradient instead of lime (`SCR-14`, your own profile only) |
 | 20 | Alternate app icons | **Not built yet ([#154](https://github.com/kandraos3/Telly/issues/154)).** The reward stays on the track and unlocks at level 20, but its row reads "Coming soon" and can't be equipped. When built: Settings → App icon (platform alternate icons). |
-| 30 | Custom canon header art | A still (TMDB backdrop) from one of your God-tier titles (9.20+), chosen at `/more/level/rewards/header-art`. It shows as a 132 dp banner above your Canon and at the top of your profile for anyone who can see it. Stored on the `header_art` choice row (`title_id`, `media_type`); `set_header_art` checks level and God tier, `header_art(p_user)` reads it through `can_view_user`. |
+| 30 | Custom canon header art | A still (TMDB backdrop) from one of your God-tier titles (9.20+), chosen at `/more/level/rewards/header-art`. It shows as a 132 dp banner above your Rankings and at the top of your profile for anyone who can see it. Stored on the `header_art` choice row (`title_id`, `media_type`); `set_header_art` checks level and God tier, `header_art(p_user)` reads it through `can_view_user`. |
 
 Every reward is cosmetic. Nothing that's needed to use Telly is ever locked (decision 0005). A future Telly Pro (#52) must not move these behind a paywall without a new decision.
 
@@ -318,7 +318,7 @@ All screens use the shared app bars (screen specs §0.2) and the frosted bottom 
   - an "Achievement unlocked" chip;
   - the large medal;
   - the name in the display font;
-  - one personal line ("The Return of the King came in at #2 in your canon"). Slice 1 lines come from the medal: "You've ranked 10 films.", "4 weeks in a row with at least one ranking.", "You've called 5 upsets against the crowd.", and so on;
+  - one personal line ("The Return of the King came in at #2 in your rankings"). Slice 1 lines come from the medal: "You've ranked 10 films.", "4 weeks in a row with at least one ranking.", "You've called 5 upsets against the crowd.", and so on;
   - rarity and friends;
   - **Pin to profile** (primary; "Pinned to profile" once pinned; when all three slots are taken it opens the medal sheet's replace chooser), **Share card**, and **Done**.
 - **Haptics:** a medium impact on show.

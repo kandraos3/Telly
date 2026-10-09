@@ -380,7 +380,7 @@ class _FeedActivityCardState extends State<FeedActivityCard> {
       );
     }
 
-    final canonName = activity.mediaType == 'movie' ? 'Movie Canon' : 'Series Canon';
+    final canonName = activity.mediaType == 'movie' ? 'Movie Rankings' : 'TV Rankings';
     final rankText = activity.rankPosition != null ? 'at #${activity.rankPosition}' : '';
     return Text(
       'Ranked ${activity.titleName} $rankText in $canonName',

@@ -318,14 +318,14 @@ class _HeroCopy {
       case HomeHeroMode.newUser:
         return const _HeroCopy(
           eyebrow: 'WELCOME TO TELLY',
-          title: 'Start your canon',
+          title: 'Start your rankings',
           meta: 'Log one movie or show you love. Telly ranks everything after it head to head.',
         );
       case HomeHeroMode.explore:
         return const _HeroCopy(
           eyebrow: 'NOTHING ON TONIGHT',
           title: 'Find your next watch',
-          meta: 'Explore has picks from your canon',
+          meta: 'Explore has picks from your rankings',
         );
     }
   }

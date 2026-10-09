@@ -29,7 +29,7 @@ lib/
     │   └── presentation/             # DuelArenaScreen, SentimentSheet, RevealModal
     │
     ├── canon/                        # Personal Leaderboard & Multi-Views
-    │   ├── data/                     # Local Canon SQLite cache
+    │   ├── data/                     # Local Rankings SQLite cache
     │   └── presentation/             # RankedListTab, TierViewTab, GridTab
     │
     ├── social_feed/                  # Timeline, Upsets, Reactions & Comments
@@ -217,4 +217,4 @@ class StoryCardRenderer {
 
 - **Impeller Engine:** Pre-compiles all shaders at build time to completely eliminate runtime jank / shader compilation stutter.
 - **Image RAM Ceiling:** `CachedNetworkImage` memory cache is strictly capped at **64 MB** in RAM; older images are flushed to disk to prevent out-of-memory (OOM) crashes on older mobile devices.
-- **List Virtualization:** Canon lists of 300+ shows use `ListView.builder` with `itemExtent: 88.0` for constant-time layout measurement.
+- **List Virtualization:** Rankings lists of 300+ shows use `ListView.builder` with `itemExtent: 88.0` for constant-time layout measurement.

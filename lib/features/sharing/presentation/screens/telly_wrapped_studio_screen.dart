@@ -30,8 +30,8 @@ class _TellyWrappedStudioScreenState extends ConsumerState<TellyWrappedStudioScr
   int _currentPage = 0;
 
   final List<String> _templateTitles = [
-    'Top 9 Movie Canon',
-    'Top 9 Series Canon',
+    'Top 9 Movie Rankings',
+    'Top 9 TV Rankings',
     'Spiciest Upset Take',
     'Director Affinity',
   ];
@@ -159,7 +159,7 @@ class _TellyWrappedStudioScreenState extends ConsumerState<TellyWrappedStudioScr
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'TELLY CANON',
+                'TELLY RANKINGS',
                 style: TellyTypography.caption(color: TellyColors.primaryAccentOf(context)).copyWith(
                   fontWeight: FontWeight.w900,
                   letterSpacing: 1.5,
@@ -191,7 +191,7 @@ class _TellyWrappedStudioScreenState extends ConsumerState<TellyWrappedStudioScr
 
     return Column(
       children: [
-        _buildCardHeader('2026 Film Canon'),
+        _buildCardHeader('2026 Film Rankings'),
         const Spacer(),
         Padding(
           padding: const EdgeInsets.all(12),
@@ -250,7 +250,7 @@ class _TellyWrappedStudioScreenState extends ConsumerState<TellyWrappedStudioScr
 
     return Column(
       children: [
-        _buildCardHeader('All-Time Series Canon'),
+        _buildCardHeader('All-Time TV Rankings'),
         const Spacer(),
         Padding(
           padding: const EdgeInsets.all(12),

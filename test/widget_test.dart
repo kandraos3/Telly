@@ -95,7 +95,7 @@ void main() {
       final c = await launch(tester, FakeAuthRepository(signedInUserId: 'u1', profile: onboarded));
       for (final (tab, path, screen) in [
         ('explore', Routes.explore, ExploreDiscoverScreen),
-        ('canon', Routes.canon, DualCanonProfileScreen),
+        ('rankings', Routes.canon, DualCanonProfileScreen),
         ('social', Routes.social, ActivityFeedScreen),
         ('more', Routes.more, MoreHubScreen),
         ('home', Routes.home, HomeScreen),
@@ -116,12 +116,12 @@ void main() {
       expect(tester.state(find.byType(ActivityFeedScreen)), same(feedState));
     });
 
-    testWidgets('the Log button shows on Home, Explore, Canon and Social but not on More', (tester) async {
+    testWidgets('the Log button shows on Home, Explore, Rankings and Social but not on More', (tester) async {
       await launch(tester, FakeAuthRepository(signedInUserId: 'u1', profile: onboarded));
       for (final (tab, shown) in [
         ('home', true),
         ('explore', true),
-        ('canon', true),
+        ('rankings', true),
         ('social', true),
         ('more', false),
       ]) {

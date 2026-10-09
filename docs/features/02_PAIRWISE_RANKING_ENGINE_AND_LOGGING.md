@@ -10,8 +10,8 @@ Through binary search insertion, any newly logged film or series can be placed w
 
 ### 1.1 Segregated Dual-Canon Architecture
 To preserve mathematical sorting integrity and prevent the cognitive friction of comparing a 2-hour movie against an 80-hour television epic:
-- **Movie Canon**: All feature films, anime films, and documentaries duel exclusively against movies.
-- **Series & Anime Canon**: All serialized television, limited series, and anime seasons duel exclusively against series.
+- **Movie Rankings**: All feature films, anime films, and documentaries duel exclusively against movies.
+- **Series & Anime Rankings**: All serialized television, limited series, and anime seasons duel exclusively against series.
 - Cross-medium duels are prohibited in core ranking tournaments (available only in optional novelty friend battles).
 
 ---
@@ -46,7 +46,7 @@ Step 4: Editorial Metadata & Context
         • Universal: Vibe tags, Who watched with, MVP Character/Actor, 280-char review
           │
           ▼
-Step 5: Canon Placement & Dynamic Score Assignment
+Step 5: Rankings Placement & Dynamic Score Assignment
         • Celebratory slot reveal (e.g., "#7 of 94 Movies • Score: 9.24")
         • Immediate feed broadcast to friends
 ```
@@ -175,7 +175,7 @@ Once the rank is established, the user is presented with the **Editorial Details
 
 ## 6. Database Contracts & PostgreSQL RPC
 
-### 6.1 RPC: Insert Title and Rebalance Specific Media Canon
+### 6.1 RPC: Insert Title and Rebalance Specific Media Rankings
 Ranking insertion is executed server-side by `insert_user_ranking_atomic`, isolated by `media_type` (`'movie'` / `'tv'`). The normative signature, locking, re-rank, scoring and idempotency rules live in [**Spec 02 §3.2**](../technical_architecture/02_DATABASE_SCHEMA_AND_STORED_PROCEDURES.md). The executable SQL lives in `supabase/migrations/`.
 
 Contract summary:
@@ -194,7 +194,7 @@ Every show holds an internal variance rating ($\sigma \in [0.1, 1.5]$):
 - **Decay with Duels:** Each consecutive head-to-head battle won or lost against adjacent neighbors reduces $\sigma$ by $0.25$:
   $$\sigma_{\text{new}} = \max\left(0.15, \sigma_{\text{old}} \times 0.75\right)$$
 - **Locked State:** When $\sigma < 0.50$, the ranking is marked **🔒 Locked (High Confidence)**.
-- **Provisional State:** When $\sigma \ge 0.50$, the show displays a `[ ⚡ Calibrate ]` pill in the user's Canon. Tapping it initiates 2 targeted duels against immediate rank neighbors to solidify its place.
+- **Provisional State:** When $\sigma \ge 0.50$, the show displays a `[ ⚡ Calibrate ]` pill in the user's Rankings. Tapping it initiates 2 targeted duels against immediate rank neighbors to solidify its place.
 
 ### 7.2 Per-Show Duel Reset ("Start Fresh on This Show")
 If a user rewatches a series years later and realizes their opinion has fundamentally shifted:
@@ -204,4 +204,4 @@ If a user rewatches a series years later and realizes their opinion has fundamen
 ### 7.3 Boundary Cases
 - **Very First Show Logged ($N=0$):** Automatically assigned Rank #1, Score 10.00, and $\sigma = 0.50$ without any duels.
 - **Second Show Logged ($N=1$):** Exactly 1 duel: *"Do you like Show B more or less than Show A?"*
-- **"I changed my mind later":** A user can drag-and-drop any show in their Canon list to manually adjust position with real-time score updates.
+- **"I changed my mind later":** A user can drag-and-drop any show in their Rankings list to manually adjust position with real-time score updates.

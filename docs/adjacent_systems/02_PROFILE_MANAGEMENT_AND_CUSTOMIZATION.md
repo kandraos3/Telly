@@ -74,7 +74,7 @@ Badges are awarded algorithmically to celebrate dedication to the medium:
 │                   ACHIEVEMENT BADGES                   │
 ├────────────────────────────────────────────────────────┤
 │  👑 CENTURION          Logged 100+ Completed Series    │
-│  🍷 PRESTIGE PURIST    >60% of Canon rated 8.5+ is HBO │
+│  🍷 PRESTIGE PURIST    >60% of Rankings rated 8.5+ is HBO │
 │  ⚡ BINGE DEMON        Completed an 8-ep show in <24h  │
 │  🔪 CONTROVERSIAL      Logged 5+ Spicy Upsets          │
 │  🎯 TASTE TWIN         Found a friend with >92% Match  │
@@ -98,7 +98,7 @@ Not everyone wants their entire social graph to know every show they binge or ab
 │                                                        │
 │  ACCOUNT VISIBILITY                                    │
 │  (•) Public                                            │
-│      Anyone can see your Canon, follow, & compare.     │
+│      Anyone can see your Rankings, follow, & compare.     │
 │  ( ) Friends Only (Private)                            │
 │      Requires follow request approval. Only accepted   │
 │      friends can see your rankings and taste match.    │

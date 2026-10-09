@@ -55,7 +55,7 @@ class CanonStatsPanel extends StatelessWidget {
         key: const Key('canon_stat_genre'),
         label: 'Top Genre',
         value: genre?.name ?? '—',
-        detail: genre?.percent == null ? null : '${genre!.percent}% of your canon',
+        detail: genre?.percent == null ? null : '${genre!.percent}% of your rankings',
       ),
       _StatTile(
         key: const Key('canon_stat_creator'),

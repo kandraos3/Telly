@@ -16,8 +16,8 @@ Modern screen entertainment is experiencing a golden age of volume, but a crisis
 **Beli** revolutionized restaurant discovery by eliminating arbitrary star ratings. Instead of asking *"Is this burger a 4 or 5 stars?"*, Beli uses **head-to-head pairwise comparisons** (*"Did you like this restaurant better than Carbone or Joe's Pizza?"*). This creates a strictly ordered, personal leaderboard that eliminates scale drift and calculates dynamic decimal scores (e.g., 9.2 vs 8.6). Paired with a vibrant social graph and Taste Match %, Beli turned food tracking into an addictive lifestyle habit.
 
 **Telly** brings this exact paradigm to all screen entertainment through a **Dual-Canon Architecture**:
-1. **The Movie Canon**: A pristine, strictly ordered ranking of all feature films, anime films, and documentaries.
-2. **The Series & Anime Canon**: A dedicated leaderboard for serialized television, limited series, and anime seasons.
+1. **The Movie Rankings**: A pristine, strictly ordered ranking of all feature films, anime films, and documentaries.
+2. **The Series & Anime Rankings**: A dedicated leaderboard for serialized television, limited series, and anime seasons.
 3. **Segregated Pairwise Duels**: Movies battle movies; series battle series. This eliminates the cognitive friction of comparing an 80-hour epic (*The Sopranos*) against a 2-hour cinematic masterpiece (*The Godfather*), while allowing users to seed their profile with 1-click **Letterboxd (`diary.csv`)** and **AniList/MAL** sync.
 4. **Unified Social Graph & Taste Match**: Friends compare taste across movies, series, or unified blended taste scores, with real-time "Movie Night vs. TV Binge" resolution.
 
@@ -36,7 +36,7 @@ Modern screen entertainment is experiencing a golden age of volume, but a crisis
 | **Queue** | Utilitarian, functional | Clean; instantly understood concept. | Hard to trademark; sounds cold and administrative. | Pass |
 
 ### 2.2 Brand Persona: Telly
-- **Tagline**: *"Your personal TV canon. Ranked, shared, settled."*
+- **Tagline**: *"Your personal TV rankings. Ranked, shared, settled."*
 - **Tone**: Editorial yet casual, witty, visually vibrant, cinephile-friendly without being snobbish.
 - **Color Palette**:
   - *Midnight Cathode* (`#0A0B10`): Deep OLED dark background mimicking a cinematic home theater.
@@ -109,8 +109,8 @@ Comparing a 2-hour self-contained film (*The Godfather* or *Spirited Away*) dire
 
 **Telly's Dual-Canon Solution**:
 - **Segregated Duels by Default**:
-  - **Movies Duel Movies**: When logging a film, comparisons are strictly drawn against other ranked movies in the user's **Movie Canon**.
-  - **Series Duel Series**: When logging a TV show or anime season, comparisons are strictly drawn against other ranked series in the **Series & Anime Canon**.
+  - **Movies Duel Movies**: When logging a film, comparisons are strictly drawn against other ranked movies in the user's **Movie Rankings**.
+  - **Series Duel Series**: When logging a TV show or anime season, comparisons are strictly drawn against other ranked series in the **Series & Anime Rankings**.
 - **Unified Profile, Segregated Leaderboards**: The profile features a seamless two-segmented controller: `[ 🎬 Movies ] [ 📺 Series & Anime ] [ ⚡ Blended (Optional) ]`.
 - **Movie-Specific Logging Nuances**: Movies record director, runtime (minutes), theatrical vs. home viewing venue, and rewatch count.
 
@@ -124,7 +124,7 @@ Comparing a 2-hour self-contained film (*The Godfather* or *Spirited Away*) dire
                      └─────────────┬────────────┘
          ┌─────────────────┬───────┴─────────┬──────────────────┐
          ▼                 ▼                 ▼                  ▼
-   1. The Canon     2. Social Graph    3. Discovery &     4. Smart Queue
+   1. The Rankings     2. Social Graph    3. Discovery &     4. Smart Queue
    (Ranking Engine)  (Taste Matching)   Co-Watching        & Streaming
    • Pairwise Duels • Friend Feed      • 2-to-Watch Duel  • Universal Queue
    • Tier Lists     • Taste Match %    • Streaming Filter • Release Alerts
@@ -145,8 +145,8 @@ Comparing a 2-hour self-contained film (*The Godfather* or *Spirited Away*) dire
   - *MVP Character / Actor*: Highlight the standout performance.
   - *Short Review / Hot Take*: 280-character micro-review.
 - **Pairwise Duel**: Clean full-screen card swipe or tap interface strictly segregated by canon:
-  - *Movie vs Movie*: Compares against movies in the user's Movie Canon.
-  - *Series vs Series*: Compares against shows in the user's Series Canon.
+  - *Movie vs Movie*: Compares against movies in the user's Movie Rankings.
+  - *Series vs Series*: Compares against shows in the user's Series Rankings.
 
 ### 4.2 The Social Graph & Taste Match %
 - **Taste Match % Algorithm**:
@@ -175,9 +175,9 @@ One of the highest-friction moments in entertainment is two people sitting on a 
      - Weighted by Taste Match compatibility.
   6. **Quick-Draw Vibe Check (Optional)**: A rapid 15-second simultaneous card swipe on 5 candidates; first mutual right-swipe wins the night.
 
-### 4.4 Profile & "The Canon"
+### 4.4 Profile & "The Rankings"
 - **Dual-Canon Leaderboard**:
-  - Top tab switcher: `[ 🎬 Movie Canon ] [ 📺 Series & Anime ] [ ⚡ Blended ]`.
+  - Top tab switcher: `[ 🎬 Movie Rankings ] [ 📺 Series & Anime ] [ ⚡ Blended ]`.
   - Top 10 Showcase Banner: Customizable poster art showcasing user's all-time Top 10 films or series.
 - **Tier Categorization**:
   - **God Tier / S-Tier** (9.2 – 10.0)
@@ -222,7 +222,7 @@ The mobile application utilizes a 5-tab persistent bottom navigation bar:
 │  TAB 2: DISCOVER   Trending, network rankings, curation│
 │  TAB 3: [ + ] LOG  Quick duel & logging modal          │
 │  TAB 4: QUEUE      Watchlist, Up-to-Date, DNF list     │
-│  TAB 5: PROFILE    The Canon, Tier lists, Stats, Match │
+│  TAB 5: PROFILE    The Rankings, Tier lists, Stats, Match │
 │                                                        │
 ├────────────────────────────────────────────────────────┤
 │  [ 🏠 Feed ] [ 🧭 Explore ] [ ➕ ] [ 📑 Queue ] [ 👤 Profile ]│

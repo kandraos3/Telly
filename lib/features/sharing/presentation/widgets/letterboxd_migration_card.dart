@@ -73,7 +73,7 @@ class LetterboxdMigrationCard extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: Icon(Icons.arrow_forward, size: 14, color: TellyColors.textTertiaryOf(context)),
                   ),
-                  TellyNeonBadge.winner(label: 'TELLY CANON'),
+                  TellyNeonBadge.winner(label: 'TELLY RANKINGS'),
                 ],
               ),
               const SizedBox(height: 12),

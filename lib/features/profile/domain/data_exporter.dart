@@ -130,7 +130,7 @@ class DataExporter {
     final list = items ?? [];
     return {
       'schema': 'https://api.notion.com/v1',
-      'database_title': 'Telly Entertainment Canon',
+      'database_title': 'Telly Rankings',
       'items': list.map((item) {
         return {
           'properties': {
@@ -166,7 +166,7 @@ class DataExporter {
   static String generateNotionMarkdown({List<ExportRankingItem>? items}) {
     final list = items ?? [];
     final buffer = StringBuffer();
-    buffer.writeln('# Telly Entertainment Canon');
+    buffer.writeln('# Telly Rankings');
     buffer.writeln('| Rank | Title | Score | Tier | Status | MVP | Date Logged |');
     buffer.writeln('| :--- | :--- | :--- | :--- | :--- | :--- | :--- |');
 

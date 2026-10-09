@@ -104,7 +104,7 @@ void main() {
       await tester.tap(find.byKey(const Key('share_story_button')));
       await tester.pumpAndSettle();
       final story = stories.sharedReveals.single;
-      expect((story.title, story.rank, story.total, story.canonLabel), ('The Bear', 1, 2, 'Series Canon'));
+      expect((story.title, story.rank, story.total, story.canonLabel), ('The Bear', 1, 2, 'TV Rankings'));
       expect(story.leaderboard.where((e) => e.isNew).single.title, 'The Bear');
 
       final canon = await db.localRankingDao.getRankingsByCanon('tv');

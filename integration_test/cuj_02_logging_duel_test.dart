@@ -61,7 +61,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    for (final tab in ['home', 'explore', 'canon', 'social']) {
+    for (final tab in ['home', 'explore', 'rankings', 'social']) {
       await tester.tap(find.byKey(Key('nav_tab_$tab')));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('log_fab'))); // the one tap

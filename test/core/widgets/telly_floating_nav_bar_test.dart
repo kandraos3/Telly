@@ -62,7 +62,7 @@ void main() {
 
     testWidgets('shows five equal destinations and no centre action', (tester) async {
       await pumpBar(tester);
-      final tabs = ['home', 'explore', 'canon', 'social', 'more'];
+      final tabs = ['home', 'explore', 'rankings', 'social', 'more'];
       final widths = [for (final t in tabs) tester.getSize(find.byKey(Key('nav_tab_$t'))).width];
       for (final w in widths) {
         expect(w, closeTo(widths.first, 0.01));
@@ -91,14 +91,14 @@ void main() {
     testWidgets('active and inactive colours follow the light theme', (tester) async {
       await pumpBar(tester, index: 4, theme: TellyTheme.light);
       expect(iconOf(tester, 'more').color, TellyColors.lightTextPrimary);
-      expect(iconOf(tester, 'canon').color, TellyColors.lightTextTertiary);
+      expect(iconOf(tester, 'rankings').color, TellyColors.lightTextTertiary);
       final dot = tester.widget<Container>(find.byKey(const Key('nav_active_dot')));
       expect((dot.decoration! as BoxDecoration).color, TellyColors.lightPhosphorLime);
     });
 
     testWidgets('tabs report branch indices 0..4', (tester) async {
       final events = await pumpBar(tester);
-      for (final tab in ['home', 'explore', 'canon', 'social', 'more']) {
+      for (final tab in ['home', 'explore', 'rankings', 'social', 'more']) {
         await tester.tap(find.byKey(Key('nav_tab_$tab')));
       }
       expect(events, [0, 1, 2, 3, 4]);

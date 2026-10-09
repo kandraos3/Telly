@@ -15,7 +15,7 @@ Unlike restaurants (which maintain relatively stable menus or chefs), television
 ```
 ┌────────────────────────────────────────────────────────┐
 │                   PRIMARY LAYER                        │
-│            Overall Series Ranking (The Canon)          │
+│            Overall Series Ranking (The Rankings)          │
 │            • Evaluates the show holistically           │
 │            • Accounts for total emotional impact       │
 └───────────────────────────┬────────────────────────────┘
@@ -29,7 +29,7 @@ Unlike restaurants (which maintain relatively stable menus or chefs), television
 └────────────────────────────────────────────────────────┘
 ```
 
-### 2.1 The Holistic Series Canon (Default View)
+### 2.1 The Holistic Series Rankings (Default View)
 On the user’s primary profile and global leaderboards, shows are evaluated as complete entities. 
 - When evaluating *Game of Thrones*, the user decides whether the highs of Seasons 1–4 outweigh the lows of Season 8 in their personal pairwise duels.
 
@@ -91,7 +91,7 @@ In Telly, dropped shows are **first-class citizens**, logged into a distinct **"
 [ Optional Hot Take: "Lost the mystery after park exit" ]
          │
          ▼
-[ Save to Personal "Graveyard" (Separate from The Canon) ]
+[ Save to Personal "Graveyard" (Separate from The Rankings) ]
 ```
 
 > **Tracking link (epic #168):** dropping a tracked show prefills the drop point from your place, and **Revive** on a dropped show starts tracking again from it. See [features/11](11_WATCH_TRACKING_AND_EPISODE_PROGRESS.md) §4.6–§4.7. Season duels (§2.2) are planned in epic #216.

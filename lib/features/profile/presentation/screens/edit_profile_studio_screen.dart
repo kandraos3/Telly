@@ -243,7 +243,7 @@ class _EditProfileFormState extends ConsumerState<_EditProfileForm> {
   }
 
   static const _visibilityModes = [
-    ('PUBLIC', 'Public', 'Anyone can see your Canon, follow, & compare taste.'),
+    ('PUBLIC', 'Public', 'Anyone can see your rankings, follow, & compare taste.'),
     ('FRIENDS_ONLY', 'Friends Only (Private)', 'Requires follow approval to view your ratings & taste match.'),
     ('GHOST', 'Ghost Mode', 'Hidden from global search. Direct link only.'),
   ];
@@ -277,7 +277,7 @@ class _EditProfileFormState extends ConsumerState<_EditProfileForm> {
                   key: const Key('showcase_picker_empty'),
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
                   child: Text(
-                    'Rank a few titles first — your showcase comes from your canon.',
+                    'Rank a few titles first — your showcase comes from your rankings.',
                     style: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(ctx)),
                   ),
                 )

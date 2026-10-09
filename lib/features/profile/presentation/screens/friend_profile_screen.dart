@@ -296,8 +296,8 @@ class _PrivateGate extends ConsumerWidget {
 
     final isPending = followStatus == FollowStatus.pending;
     final text = isPending
-        ? 'Follow request sent. Their canon appears once @$handle accepts.'
-        : '@$handle shares their canon with friends only. Follow to request access.';
+        ? 'Follow request sent. Their rankings appear once @$handle accepts.'
+        : '@$handle shares their rankings with friends only. Follow to request access.';
 
     return Container(
       width: double.infinity,

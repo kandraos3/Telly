@@ -5,7 +5,7 @@ enum CanonType {
   /// Feature films, anime movies, and documentaries.
   movie(
     dbValue: 'movie',
-    displayName: 'Movie Canon',
+    displayName: 'Movie Rankings',
     shortLabel: 'Movies',
     emoji: '🎬',
   ),
@@ -13,7 +13,7 @@ enum CanonType {
   /// Serialized television, limited series, and anime series.
   series(
     dbValue: 'tv',
-    displayName: 'Series & Anime Canon',
+    displayName: 'Series & Anime Rankings',
     shortLabel: 'Series & Anime',
     emoji: '📺',
   );

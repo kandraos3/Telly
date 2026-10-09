@@ -1,6 +1,6 @@
 # Telly UI/UX Design System: 01 — Philosophy, Style Guide & Foundations
 
-> **Brand Identity:** *Telly — Your Personal TV Canon. Ranked, Shared, Settled.*  
+> **Brand Identity:** *Telly — Your Personal TV Rankings. Ranked, Shared, Settled.*  
 > **Aesthetic Theme:** *Midnight Cathode & Neon Phosphor (Cinematic Tactility meets Social Playfulness)*
 
 ---
@@ -168,7 +168,7 @@ Every primary interaction is wired to native sensory feedback engines:
 | User Action | iOS Haptic Pattern | Android Haptic Pattern | Sensory Meaning |
 | :--- | :--- | :--- | :--- |
 | **Tap Winner in Duel** | `UIImpactFeedbackGenerator(style: .medium)` | `CLOCK_TICK` | Solid, tactile physical confirmation |
-| **Complete Duel & Canon Reveal**| `UINotificationFeedbackGenerator(.success)` | `CONFIRM` | Celebratory double-pulse |
+| **Complete Duel & Rankings Reveal**| `UINotificationFeedbackGenerator(.success)` | `CONFIRM` | Celebratory double-pulse |
 | **Trigger Upset Alert** | `UIImpactFeedbackGenerator(style: .heavy)` | `LONG_PRESS` | High-impact alert / spicy take |
 | **1-Tap Save to Watchlist** | `UIImpactFeedbackGenerator(style: .light)` | `KEYBOARD_TAP` | Effortless, frictionless bookmark |
 | **Drag & Drop Rank Adjust** | `UISelectionFeedbackGenerator()` | `TICK` on each slot crossed | Precision spatial adjustment |
@@ -184,7 +184,7 @@ Every primary interaction is wired to native sensory feedback engines:
   - 🧭 **Explore / Discover:** Precision compass icon.
   - ➕ **Duel / Log:** Plus icon housed inside a glowing phosphor-lime rounded hexagon.
   - 📑 **Queue / Watchlist:** Staggered bookmark deck.
-  - 👤 **The Canon / Profile:** Film reel layered over user silhouette.
+  - 👤 **The Rankings / Profile:** Film reel layered over user silhouette.
   - ⚡ **Upsets:** Jagged lightning bolt in Neon Coral (`#FF4B6E`).
   - 🎯 **Taste Match:** Intersecting concentric circles in Electric Violet (`#7C5CFF`).
   - 👑 **God Tier:** Crown icon in Warm Amber (`#FFA733`).
