@@ -204,3 +204,4 @@ $$;
 
 REVOKE ALL ON FUNCTION public.search_users(TEXT, INT) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.search_users(TEXT, INT) TO authenticated;
+

@@ -2,7 +2,7 @@
 BEGIN;
 CREATE EXTENSION IF NOT EXISTS pgtap WITH SCHEMA extensions;
 
-SELECT plan(13);
+SELECT plan(14);
 
 -- Setup test users
 INSERT INTO auth.users (id, email) VALUES
@@ -118,13 +118,23 @@ SELECT results_eq(
     'updating user_profile_settings syncs visibility_mode to users table'
 );
 
--- Test 13: Bob cannot modify Alice settings
-SELECT throws_ok(
-    $$ UPDATE public.user_profile_settings SET hide_binge_velocity = true WHERE user_id = '10000000-0000-0000-0000-000000000001' $$,
-    NULL,
-    NULL,
+-- Test 13: Bob cannot update Alice settings (RLS USING clause filters it out)
+UPDATE public.user_profile_settings SET hide_binge_velocity = true WHERE user_id = '10000000-0000-0000-0000-000000000001';
+
+SELECT is(
+    (SELECT hide_binge_velocity FROM public.user_profile_settings WHERE user_id = '10000000-0000-0000-0000-000000000001'),
+    false,
     'RLS prevents modifying other users profile settings'
+);
+
+-- Test 14: Bob cannot insert profile settings for Alice (RLS WITH CHECK throws 42501)
+SELECT throws_ok(
+    $$ INSERT INTO public.user_profile_settings (user_id, visibility_mode) VALUES ('10000000-0000-0000-0000-000000000001', 'GHOST') $$,
+    '42501',
+    NULL,
+    'RLS prevents inserting profile settings for other users'
 );
 
 SELECT * FROM finish();
 ROLLBACK;
+
