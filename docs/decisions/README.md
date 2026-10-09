@@ -38,3 +38,4 @@ What changes, what we give up, what follow-up work this creates.
 | [0007](0007-explore-hero-rows-and-client-ranker.md) | Explore leads with a hero pick and shaped rows; curated canons removed; the server gathers candidates and a Dart `ExploreRanker` ranks them | Accepted |
 | [0008](0008-explore-dismissals-own-table.md) | Explore's "Not for me" stores dismissals in their own table, not as Spoiler Shield mutes | Accepted |
 | [0009](0009-social-friends-search-and-privacy.md) | Social friends search in the Social tab; public/private/ghost visibility modes in Profile Settings | Accepted |
+| [0010](0010-watch-tracking-episode-pointer.md) | Watch tracking: one episode pointer per title, woven through the title page, with a Watching hub in More; episode and season ratings split to #216 | Accepted |

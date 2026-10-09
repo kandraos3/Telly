@@ -1,0 +1,704 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Telly Watch Tracking Options</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap">
+<style>
+/* Layout: a document page; bands of phone frames that walk through the title page's tracking states, then the button label study and the other touchpoints. Phone frames use Telly's Midnight Cathode tokens. */
+:root {
+  --page: #EEF0F4; --ink: #0F1117; --ink-2: #4A4E63; --ink-3: #696E87; --rule: #D7DBE5; --card: #FFFFFF; --mark: #4D7800;
+  --f-ui: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-display: "Playfair Display", Georgia, "Times New Roman", serif;
+  --bg:#F6F7F9; --sf:#FFFFFF; --ov:#F0F2F5; --st:#E2E5EC; --gl:rgba(0,0,0,.08); --t1:#0F1117; --t2:#4A4E63; --t3:#696E87;
+  --lime:#4D7800; --limeFill:#D2FF52; --onLime:#0F1117; --amber:#B36200; --coral:#D61F4D; --violet:#5B3CE0;
+  --frameBorder:#D3D7E0; --scrim:#08090C; --onScrim:#FFFFFF; --onScrim2:#C8CAD8; --scrimLime:#D2FF52;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --page:#050608; --ink:#F2F3F7; --ink-2:#C8CAD8; --ink-3:#7D8198; --rule:#242938; --card:#0D0F15; --mark:#D2FF52;
+  --bg:#08090C; --sf:#11131A; --ov:#1A1D27; --st:#242938; --gl:rgba(255,255,255,.08); --t1:#FFFFFF; --t2:#C8CAD8; --t3:#7D8198;
+  --lime:#D2FF52; --limeFill:#D2FF52; --onLime:#08090C; --amber:#FFA733; --coral:#FF4B6E; --violet:#7C5CFF; --frameBorder:#1C202B;
+  color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --page:#050608; --ink:#F2F3F7; --ink-2:#C8CAD8; --ink-3:#7D8198; --rule:#242938; --card:#0D0F15; --mark:#D2FF52;
+  --bg:#08090C; --sf:#11131A; --ov:#1A1D27; --st:#242938; --gl:rgba(255,255,255,.08); --t1:#FFFFFF; --t2:#C8CAD8; --t3:#7D8198;
+  --lime:#D2FF52; --limeFill:#D2FF52; --onLime:#08090C; --amber:#FFA733; --coral:#FF4B6E; --violet:#7C5CFF; --frameBorder:#1C202B;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--page); color: var(--ink); font: 15px/1.55 var(--f-ui); }
+.wrap { max-width: 1180px; margin: 0 auto; padding-inline: 16px; padding-block: 40px 80px; display: grid; gap: 48px; }
+header.top { display: grid; gap: 10px; max-width: 70ch; }
+.eyebrow { font: 700 12px/1 var(--f-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+h1 { font: 700 clamp(28px, 4vw, 40px)/1.1 var(--f-display); margin: 0; text-wrap: balance; }
+h2 { font: 700 26px/1.2 var(--f-display); margin: 0; text-wrap: balance; }
+h3 { font: 800 15px/1.3 var(--f-ui); margin: 0; }
+p { margin: 0; color: var(--ink-2); }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 10px; padding: 3px; background: var(--card); width: max-content; }
+.seg button { font: 700 13px var(--f-ui); color: var(--ink-2); background: none; border: 0; padding: 6px 14px; border-radius: 7px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--page); }
+button:focus-visible { outline: 2px solid var(--mark); outline-offset: 2px; }
+
+section.band { display: grid; gap: 18px; padding-top: 28px; border-top: 1px solid var(--rule); }
+.band-head { display: grid; gap: 8px; max-width: 72ch; }
+.tag { font: 800 11px/1 var(--f-ui); letter-spacing: .1em; text-transform: uppercase; color: var(--mark); }
+.rec { display: inline-block; margin-left: 6px; padding: 2px 7px; border-radius: 6px; border: 1px solid var(--mark); color: var(--mark); font-size: 10px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; vertical-align: 2px; }
+ul.changes { margin: 0; padding-left: 20px; display: grid; gap: 6px; color: var(--ink-2); max-width: 78ch; }
+ul.changes b { color: var(--ink); }
+
+.screens { display: flex; gap: 20px; overflow-x: auto; padding-block: 6px 12px; scroll-snap-type: x mandatory; }
+.col { flex: 0 0 300px; display: grid; gap: 8px; align-content: start; scroll-snap-align: start; }
+.cap { font-weight: 700; font-size: 14px; }
+.capd { font-size: 12px; color: var(--ink-3); line-height: 1.45; }
+
+/* phone */
+.frame { width: 300px; height: 620px; border-radius: 34px; border: 6px solid var(--frameBorder); background: var(--bg); overflow: hidden; display: flex; flex-direction: column; position: relative; color: var(--t1); font-size: 12px; }
+.sb { height: 28px; display: flex; justify-content: space-between; align-items: center; padding-inline: 20px; font-size: 10px; font-weight: 700; color: var(--t2); flex: none; }
+.ab { height: 44px; display: flex; align-items: center; gap: 10px; padding-inline: 14px; border-bottom: 1px solid var(--gl); flex: none; }
+.ab .t { font-size: 16px; font-weight: 800; flex: 1; }
+.ab .i { color: var(--t2); font-size: 14px; }
+.ct { flex: 1; overflow: hidden; padding: 12px 14px; display: flex; flex-direction: column; gap: 12px; }
+.ct.flush { padding-top: 0; }
+.nav { height: 48px; background: var(--sf); border-top: 1px solid var(--gl); display: flex; justify-content: space-around; align-items: center; flex: none; }
+.nav span { font-size: 9px; font-weight: 700; color: var(--t3); }
+.nav span.on { color: var(--lime); }
+.sh { display: flex; justify-content: space-between; align-items: baseline; font-size: 10px; font-weight: 800; letter-spacing: .1em; color: var(--t3); text-transform: uppercase; }
+.sh a { color: var(--lime); letter-spacing: 0; text-transform: none; font-weight: 700; }
+.poster { border-radius: 6px; flex: none; background: linear-gradient(160deg, var(--p1), var(--p2)); }
+.p-sev { --p1:#2B5A73; --p2:#0E1E2B; } .p-bear { --p1:#7A2E1F; --p2:#2A0F0A; } .p-slow { --p1:#4F5B2E; --p2:#171C0C; }
+.p-sho { --p1:#6B1B2A; --p2:#1F0A10; } .p-andor { --p1:#5E5A55; --p2:#1A1918; } .p-dune { --p1:#B5793A; --p2:#3A230E; }
+
+/* title page parts */
+.backdrop { position: relative; height: 150px; margin-inline: -14px; background: linear-gradient(160deg,#2B5A73,#0E1E2B); flex: none; }
+.backdrop.sho { background: linear-gradient(160deg,#6B1B2A,#1F0A10); }
+.backdrop::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 30%, var(--bg)); }
+.backdrop .top { position: absolute; top: 8px; left: 12px; right: 12px; display: flex; justify-content: space-between; z-index: 1; }
+.fro { width: 30px; height: 30px; border-radius: 50%; background: rgba(8,9,12,.55); color: #FFFFFF; display: grid; place-items: center; font-size: 13px; }
+.backdrop .prog { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--st); z-index: 1; }
+.backdrop .prog i { display: block; height: 100%; background: var(--lime); }
+.hm { display: flex; gap: 10px; margin-top: -44px; position: relative; z-index: 1; }
+.hm .poster { width: 62px; height: 92px; border: 1px solid var(--gl); }
+.hm .tt { font-family: var(--f-display); font-size: 21px; font-weight: 700; line-height: 1.1; }
+.hm .eb { font-size: 9.5px; font-weight: 800; letter-spacing: .1em; color: var(--lime); text-transform: uppercase; margin-bottom: 2px; }
+.qa { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.qa div { display: grid; justify-items: center; gap: 3px; font-size: 9.5px; font-weight: 700; color: var(--t2); text-align: center; }
+.qa div span { width: 38px; height: 38px; border-radius: 12px; background: var(--ov); border: 1px solid var(--st); display: grid; place-items: center; font-size: 14px; color: var(--t1); }
+.qa div.on { color: var(--lime); }
+.qa div.on span { background: var(--limeFill); border-color: var(--limeFill); color: var(--onLime); }
+.card { background: var(--sf); border: 1px solid var(--st); border-radius: 14px; padding: 12px; display: grid; gap: 10px; }
+.card.hl { border-color: color-mix(in srgb, var(--lime) 45%, var(--st)); }
+.row { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.grow { flex: 1; min-width: 0; }
+.ttl { font-weight: 700; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.meta { color: var(--t3); font-size: 10.5px; }
+.big { font-size: 20px; font-weight: 800; letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
+.lbl { font-size: 9.5px; font-weight: 800; letter-spacing: .1em; color: var(--t3); text-transform: uppercase; }
+.bar { height: 6px; border-radius: 3px; background: var(--ov); overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--lime); border-radius: 3px; }
+.segbar { display: flex; gap: 3px; }
+.segbar i { flex: var(--n); height: 6px; border-radius: 3px; background: var(--ov); position: relative; overflow: hidden; }
+.segbar i.done { background: var(--lime); }
+.segbar i.part::before { content: ""; position: absolute; inset: 0; width: var(--p); background: var(--lime); }
+.still { width: 84px; height: 48px; border-radius: 8px; background: linear-gradient(135deg,#355E66,#10232A); flex: none; position: relative; }
+.still::after { content: "52m"; position: absolute; right: 4px; bottom: 3px; font-size: 8.5px; font-weight: 800; color: #FFFFFF; background: rgba(8,9,12,.6); padding: 0 4px; border-radius: 4px; }
+.btn { border-radius: 10px; padding: 9px 10px; font-weight: 800; font-size: 12px; text-align: center; border: 1px solid var(--st); background: var(--ov); color: var(--t1); }
+.btn.pri { background: var(--limeFill); color: var(--onLime); border: 0; }
+.btn.sm { padding: 6px 10px; font-size: 11px; border-radius: 16px; white-space: nowrap; }
+.btn.ghost { background: transparent; }
+.pill { display: inline-flex; align-items: center; gap: 4px; border-radius: 12px; padding: 3px 8px; font-size: 9.5px; font-weight: 800; border: 1px solid var(--st); color: var(--t2); white-space: nowrap; }
+.pill.on { border-color: var(--lime); color: var(--lime); }
+.pill.amber { border-color: var(--amber); color: var(--amber); }
+.season { display: flex; align-items: center; gap: 8px; padding: 9px 0; border-bottom: 1px solid var(--gl); }
+.season:last-child { border-bottom: 0; }
+.ring { width: 26px; height: 26px; border-radius: 50%; flex: none; background: conic-gradient(var(--lime) var(--p), var(--ov) 0); display: grid; place-items: center; }
+.ring::after { content: ""; width: 18px; height: 18px; border-radius: 50%; background: var(--sf); }
+.ring.full::after { content: "✓"; color: var(--onLime); background: var(--limeFill); font-size: 10px; font-weight: 900; display: grid; place-items: center; }
+.ep { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--gl); font-size: 11px; }
+.ep:last-child { border-bottom: 0; }
+.ep .n { color: var(--t3); width: 22px; font-variant-numeric: tabular-nums; flex: none; }
+.ep .tk { width: 14px; color: var(--lime); font-weight: 900; flex: none; }
+.ep.here { background: color-mix(in srgb, var(--limeFill) 14%, transparent); margin-inline: -12px; padding-inline: 12px; border-radius: 8px; border-bottom-color: transparent; }
+.ep .blur { filter: blur(3.5px); color: var(--t3); user-select: none; }
+.spoil { font-size: 9.5px; color: var(--t3); }
+.friends { display: flex; align-items: center; gap: 6px; }
+.av { width: 24px; height: 24px; border-radius: 50%; background: var(--ov); border: 1.5px solid var(--sf); display: grid; place-items: center; font-size: 10px; font-weight: 800; color: var(--violet); margin-left: -8px; }
+.av:first-child { margin-left: 0; }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; background: var(--sf); border-top: 1px solid var(--st); border-radius: 20px 20px 0 0; padding: 10px 16px 18px; display: grid; gap: 10px; box-shadow: 0 -12px 30px rgba(0,0,0,.35); }
+.grab { width: 36px; height: 4px; border-radius: 2px; background: var(--st); justify-self: center; }
+.dimmer { position: absolute; inset: 0; background: rgba(0,0,0,.5); }
+.radio { display: flex; gap: 8px; align-items: center; padding: 9px; border-radius: 10px; border: 1px solid var(--st); font-size: 11.5px; font-weight: 700; }
+.radio.on { border-color: var(--lime); }
+.dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--t3); flex: none; }
+.radio.on .dot { border-color: var(--lime); box-shadow: inset 0 0 0 3px var(--sf), inset 0 0 0 8px var(--lime); }
+.wheel { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.wheel div { background: var(--ov); border-radius: 10px; padding: 6px 0; text-align: center; font-variant-numeric: tabular-nums; display: grid; gap: 2px; }
+.wheel span { font-size: 11px; color: var(--t3); }
+.wheel b { font-size: 14px; color: var(--t1); padding: 3px 0; border-block: 1px solid var(--st); }
+.toast { position: absolute; left: 12px; right: 12px; bottom: 60px; background: var(--t1); color: var(--bg); border-radius: 12px; padding: 10px 12px; display: flex; justify-content: space-between; font-size: 11.5px; font-weight: 700; }
+.toast b { color: var(--limeFill); }
+:root[data-theme="light"] .toast b { color: var(--limeFill); }
+
+/* label study */
+.labels { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; }
+.lab { background: var(--card); border: 1px solid var(--rule); border-radius: 14px; padding: 16px; display: grid; gap: 12px; align-content: start; min-width: 0; }
+.lab.pick { border-color: var(--mark); }
+.demo { background: var(--bg); border-radius: 12px; padding: 12px; display: grid; gap: 10px; color: var(--t1); font-size: 12px; }
+.lab p { font-size: 13.5px; }
+.lab .no { text-decoration: line-through; color: var(--ink-3); }
+
+table { border-collapse: collapse; width: 100%; min-width: 620px; font-size: 14px; }
+.tbl { overflow-x: auto; border: 1px solid var(--rule); border-radius: 12px; background: var(--card); }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
+tr:last-child td { border-bottom: 0; }
+td:first-child { font-weight: 700; white-space: nowrap; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow">Epic #168 · Decision 0010 · Approved mockup</div>
+    <h1>Tracking on the title page</h1>
+    <p>Option A (the episode pointer), reworked so tracking runs through the whole title page instead of sitting in one card, with its own Tracking hub, a Canon presence and a shorter Home card. The +1 button is gone. All titles, friends and numbers are example content.</p>
+    <div class="seg" role="group" aria-label="Theme">
+      <button type="button" id="th-dark" onclick="setTheme('dark')">Dark</button>
+      <button type="button" id="th-light" onclick="setTheme('light')">Light</button>
+    </div>
+  </header>
+
+  <section class="band">
+    <div class="band-head">
+      <div class="tag">What changed since round 1</div>
+      <ul class="changes">
+        <li><b>The page knows where you are.</b> While you watch, the header says "Watching · S2 · E6 next" and the backdrop carries a thin progress line.</li>
+        <li><b>Start watching joins the action row.</b> Add to Queue becomes a single Watch slot that moves Queue → Watching → Finished.</li>
+        <li><b>Next episode replaces Streaming now.</b> One card holds the episode's still, name and runtime, <i>▶ Watch on Apple TV+</i> and <i>✓ Watched E6</i>.</li>
+        <li><b>Seasons become your progress.</b> Each season shows a ring and its state. Inside a season, episodes before yours are ticked, yours is marked <i>You're here</i>, and later synopses are blurred to avoid spoilers. Tapping any episode moves your place there.</li>
+        <li><b>Friends and the community join in.</b> "Watching now: Maya, Jordan" (no episode numbers), and the survival rate tells you if you're past the episode where most people drop it.</li>
+        <li><b>A Tracking hub.</b> A new Watching screen opened from a tile in More (under Queue) and from Home's See all. Home now shows a 3-row summary only.</li>
+        <li><b>The Canon shows it.</b> A Watching strip above the podium for the selected canon, a progress tag on ranked rows you're still watching, and an Episodes this year stat.</li>
+        <li><b>Caught up is its own state.</b> When you're up to date on an airing show, the page shows when the next episode or season arrives.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="band-head">
+      <div class="tag">Title page (SCR-08) · from first visit to finale</div>
+      <h2>One page, five states</h2>
+    </div>
+    <div class="screens">
+
+      <!-- 1. Not started -->
+      <div class="col">
+        <div class="frame">
+          <div class="sb"><span>20:05</span><span>●●● 90%</span></div>
+          <div class="ct flush">
+            <div class="backdrop"><div class="top"><span class="fro">←</span><span class="fro">⋯</span></div></div>
+            <div class="hm"><div class="poster p-sev"></div><div class="grow" style="align-self:end"><div class="tt">Severance</div><div class="meta">Apple TV+ · 2 seasons · 2022–</div></div></div>
+            <div class="qa">
+              <div><span>▶</span>Start watching</div>
+              <div><span>🏆</span>Rank</div>
+              <div><span>👥</span>Co-Watch</div>
+              <div><span>↗</span>Share</div>
+            </div>
+            <div class="meta" style="font-size:11.5px;color:var(--t2)">Mark Scout leads a team at Lumon Industries, whose employees have had their memories surgically divided between work and personal lives.</div>
+            <div class="card">
+              <div class="lbl">Streaming now</div>
+              <div class="btn pri">▶ Watch on Apple TV+</div>
+            </div>
+            <div class="friends"><span class="av">M</span><span class="av">J</span><span class="av">C</span><span class="meta">Maya, Jordan and 12 friends ranked this</span></div>
+          </div>
+        </div>
+        <div class="cap">1 · Not started</div>
+        <div class="capd">Start watching sits first in the action row. If the title is in your Queue, the slot reads <i>In Queue</i> and Start watching moves into its menu.</div>
+      </div>
+
+      <!-- 2. Where are you sheet -->
+      <div class="col">
+        <div class="frame">
+          <div class="sb"><span>20:05</span><span>●●● 90%</span></div>
+          <div class="ct flush">
+            <div class="backdrop"><div class="top"><span class="fro">←</span><span class="fro">⋯</span></div></div>
+            <div class="hm"><div class="poster p-sev"></div><div class="grow" style="align-self:end"><div class="tt">Severance</div></div></div>
+          </div>
+          <div class="dimmer"></div>
+          <div class="sheet">
+            <div class="grab"></div>
+            <div style="font-size:16px;font-weight:800">Where are you?</div>
+            <div class="radio"><span class="dot"></span>Starting from the beginning</div>
+            <div class="radio on"><span class="dot"></span>I'm partway through</div>
+            <div class="meta">The last episode you watched</div>
+            <div class="wheel">
+              <div><span>Season 1</span><b>Season 2</b><span>&nbsp;</span></div>
+              <div><span>Episode 4</span><b>Episode 5</b><span>Episode 6</span></div>
+            </div>
+            <div class="meta">S2 · E5 "Trojan's Horse"</div>
+            <div class="btn pri">Start tracking</div>
+          </div>
+        </div>
+        <div class="cap">2 · Start watching</div>
+        <div class="capd">One question, then you're tracking. Starting removes the title from the Queue (with an undo).</div>
+      </div>
+
+      <!-- 3. Watching -->
+      <div class="col">
+        <div class="frame">
+          <div class="sb"><span>21:40</span><span>●●● 82%</span></div>
+          <div class="ct flush">
+            <div class="backdrop"><div class="top"><span class="fro">←</span><span class="fro">⋯</span></div><div class="prog"><i style="width:74%"></i></div></div>
+            <div class="hm"><div class="poster p-sev"></div><div class="grow" style="align-self:end"><div class="eb">● Watching · S2 · E6 next</div><div class="tt">Severance</div></div></div>
+            <div class="qa">
+              <div class="on"><span>▶</span>Watching</div>
+              <div><span>🏆</span>Rank</div>
+              <div><span>👥</span>Co-Watch</div>
+              <div><span>↗</span>Share</div>
+            </div>
+            <div class="card hl">
+              <div class="row"><div class="lbl grow">Next episode</div><span class="meta">14 of 19</span></div>
+              <div class="row"><div class="still"></div><div class="grow"><div class="ttl">S2 · E6 · Attila</div><div class="meta">Aired Feb 21, 2025</div></div></div>
+              <div class="row"><div class="btn grow">▶ Apple TV+</div><div class="btn pri grow">✓ Watched E6</div></div>
+            </div>
+            <div class="friends"><span class="av">M</span><span class="av">J</span><span class="meta">Watching now: Maya, Jordan</span></div>
+            <div class="card" style="gap:4px">
+              <div class="lbl">Your progress</div>
+              <div class="segbar"><i class="done" style="--n:9"></i><i class="part" style="--n:10;--p:50%"></i></div>
+              <div class="meta">S1 done · S2 5 of 10 · You're past S1 · E4, where 18% of viewers drop it</div>
+            </div>
+          </div>
+        </div>
+        <div class="cap">3 · Watching</div>
+        <div class="capd">The Next episode card replaces Streaming now. Tapping ✓ moves your place on and shows the following episode, with an undo toast.</div>
+      </div>
+
+      <!-- 4. Seasons expanded -->
+      <div class="col">
+        <div class="frame">
+          <div class="sb"><span>21:41</span><span>●●● 82%</span></div>
+          <div class="ab"><span class="i">←</span><span class="t">Severance</span><span class="pill on">S2 · E6 next</span></div>
+          <div class="ct">
+            <div class="lbl">Seasons</div>
+            <div class="card" style="gap:0;padding-block:4px">
+              <div class="season"><span class="ring full"></span><div class="grow"><b>Season 1</b><div class="meta">9 episodes · watched</div></div><span class="meta">›</span></div>
+              <div class="season"><span class="ring" style="--p:50%"></span><div class="grow"><b>Season 2</b><div class="meta">5 of 10</div></div><span class="meta">⌄</span></div>
+              <div class="ep"><span class="tk">✓</span><span class="n">E4</span><span class="grow">Woe's Hollow</span></div>
+              <div class="ep"><span class="tk">✓</span><span class="n">E5</span><span class="grow">Trojan's Horse</span></div>
+              <div class="ep here"><span class="tk">●</span><span class="n">E6</span><span class="grow"><b>Attila</b><div class="meta" style="color:var(--lime)">You're here</div></span></div>
+              <div class="ep"><span class="tk"></span><span class="n">E7</span><span class="grow"><span class="blur">Chikhai Bardo</span></span></div>
+              <div class="ep"><span class="tk"></span><span class="n">E8</span><span class="grow"><span class="blur">Sweet Vitriol</span></span></div>
+              <div class="ep"><span class="tk"></span><span class="n">E9</span><span class="grow"><span class="blur">The After Hours</span></span></div>
+              <div class="season"><span class="ring" style="--p:0%"></span><div class="grow"><b>Season 3</b><div class="meta">Announced</div></div></div>
+            </div>
+            <div class="spoil">Names and synopses after your place stay blurred. Tap to reveal one.</div>
+          </div>
+          <div class="toast"><span>Moved to S2 · E6</span><b>Undo</b></div>
+        </div>
+        <div class="cap">4 · Seasons = your progress</div>
+        <div class="capd">Still the pointer model (one place per series), not a checklist. Tapping E8 moves your place to E8, which counts everything before it as watched.</div>
+      </div>
+
+      <!-- 5. Caught up -->
+      <div class="col">
+        <div class="frame">
+          <div class="sb"><span>22:31</span><span>●●● 80%</span></div>
+          <div class="ct flush">
+            <div class="backdrop"><div class="top"><span class="fro">←</span><span class="fro">⋯</span></div><div class="prog"><i style="width:100%"></i></div></div>
+            <div class="hm"><div class="poster p-sev"></div><div class="grow" style="align-self:end"><div class="eb">● Up to date</div><div class="tt">Severance</div></div></div>
+            <div class="qa">
+              <div class="on"><span>✓</span>Up to date</div>
+              <div><span>🏆</span>Rank</div>
+              <div><span>👥</span>Co-Watch</div>
+              <div><span>↗</span>Share</div>
+            </div>
+            <div class="card hl">
+              <div class="lbl">You're caught up</div>
+              <div class="row"><div class="grow"><div class="big">Season 3</div><div class="meta">Announced · no date yet. We'll tell you when it lands.</div></div></div>
+              <div class="btn pri">Rank Severance →</div>
+            </div>
+            <div class="card" style="gap:6px">
+              <div class="lbl">Your status</div>
+              <div class="meta">Not ranked yet. Ranking it as Up to date lets you re-duel when Season 3 ends.</div>
+            </div>
+          </div>
+        </div>
+        <div class="cap">5 · Caught up or finished</div>
+        <div class="capd">Marking the last aired episode lands here and opens the Log and duel sheet once (round 1). A finished series shows <i>Finished</i> and its rank. Movies skip states 2 and 4.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="band-head">
+      <div class="tag">The episode button</div>
+      <h2>Replacing +1</h2>
+      <p>The button should say what you did, name the episode so you can't mark the wrong one, and fit in a Home row.</p>
+    </div>
+    <div class="labels">
+      <div class="lab pick">
+        <h3>"✓ Watched E6" <span class="rec">Recommended</span></h3>
+        <div class="demo">
+          <div class="btn pri">✓ Watched E6</div>
+          <div class="row"><div class="poster p-sev" style="width:30px;height:44px"></div><div class="grow"><div class="ttl">Severance</div><div class="meta">S2 · E6 next</div></div><div class="btn sm pri">✓ E6</div></div>
+        </div>
+        <p>Past tense, the episode named. Home rows use the short form <b>✓ E6</b>. The episode name stays in the card above.</p>
+      </div>
+      <div class="lab">
+        <h3>"Mark E6 as watched"</h3>
+        <div class="demo">
+          <div class="btn pri">Mark E6 as watched</div>
+          <div class="row"><div class="poster p-sev" style="width:30px;height:44px"></div><div class="grow"><div class="ttl">Severance</div><div class="meta">S2 · E6 next</div></div><div class="btn sm pri">Mark</div></div>
+        </div>
+        <p>Clearest for first-time users, but too long for Home rows, which lose the episode number.</p>
+      </div>
+      <div class="lab">
+        <h3>"Done · next episode"</h3>
+        <div class="demo">
+          <div class="btn pri">Done · next episode →</div>
+          <div class="row"><div class="poster p-sev" style="width:30px;height:44px"></div><div class="grow"><div class="ttl">Severance</div><div class="meta">S2 · E6 next</div></div><div class="btn sm pri">Next →</div></div>
+        </div>
+        <p>Feels like moving forward, but "Next" reads like it plays something. It doesn't say which episode.</p>
+      </div>
+      <div class="lab">
+        <h3 class="no">"+1"</h3>
+        <div class="demo"><div class="btn pri">+1</div></div>
+        <p>Short, but it reads like a like or a vote. It doesn't say what it counts.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="band-head">
+      <div class="tag">Other places it shows up</div>
+      <h2>Home, More and the Queue</h2>
+    </div>
+    <div class="screens">
+      <div class="col">
+        <div class="frame">
+          <div class="sb"><span>21:40</span><span>●●● 82%</span></div>
+          <div class="ab"><span class="t">Home</span><span class="i">⚲</span></div>
+          <div class="ct">
+            <div class="sh">Currently watching <a>See all 6 ›</a></div>
+            <div class="card">
+              <div class="row"><div class="poster p-sev" style="width:40px;height:58px"></div><div class="grow"><div class="ttl">Severance</div><div class="meta">S2 · E6 "Attila"</div><div class="bar" style="margin-top:6px"><i style="width:74%"></i></div></div><div class="btn sm pri">✓ E6</div></div>
+              <div class="row"><div class="poster p-sho" style="width:40px;height:58px"></div><div class="grow"><div class="ttl">Shōgun</div><div class="meta">S1 · E9 · 2 left</div><div class="bar" style="margin-top:6px"><i style="width:80%"></i></div></div><div class="btn sm pri">✓ E9</div></div>
+              <div class="row"><div class="poster p-dune" style="width:40px;height:58px"></div><div class="grow"><div class="ttl">Dune: Part Two</div><div class="meta">Movie · started yesterday</div></div><div class="btn sm">✓ Finished</div></div>
+            </div>
+            <div class="meta">+ 1 caught up · 2 finished and waiting to be ranked</div>
+            <div class="sh">From your friends <a>See all</a></div>
+            <div class="meta">…</div>
+          </div>
+          <div class="toast"><span>Severance · S2 · E6 watched</span><b>Undo</b></div>
+          <div class="nav"><span class="on">Home</span><span>Explore</span><span>Canon</span><span>Social</span><span>More</span></div>
+        </div>
+        <div class="cap">Home: a short summary (#45)</div>
+        <div class="capd">At most 3 rows: the titles you touched most recently, in progress first. A one-line count covers the rest. Section header and See all open the Tracking hub.</div>
+      </div>
+
+      <div class="col">
+        <div class="frame">
+          <div class="sb"><span>21:40</span><span>●●● 82%</span></div>
+          <div class="ab"><span class="t">More</span></div>
+          <div class="ct">
+            <div class="card"><div class="row"><span class="av" style="width:40px;height:40px;font-size:15px;color:var(--lime)">Y</span><div class="grow"><b>Your name</b><div class="meta">@handle · View profile</div></div><span class="meta">›</span></div></div>
+            <div class="card"><div class="row"><span style="color:var(--lime);font-size:16px">🔖</span><div class="grow"><b>Queue</b><div class="meta">Your watchlist and custom lists</div></div><span class="meta">›</span></div></div>
+            <div class="card hl"><div class="row"><span style="color:var(--lime);font-size:16px">▶</span><div class="grow"><b>Watching</b><div class="meta">4 in progress · Severance S2 · E6 next</div></div><span class="meta">›</span></div>
+              <div class="segbar"><i class="part" style="--n:1;--p:74%"></i><i class="part" style="--n:1;--p:80%"></i><i class="part" style="--n:1;--p:30%"></i><i class="part" style="--n:1;--p:45%"></i></div>
+            </div>
+            <div class="row" style="gap:10px;align-items:stretch">
+              <div class="card grow" style="height:84px;align-content:space-between"><span style="color:var(--amber)">🏆</span><div><b>Achievements</b><div class="meta">Medals and streak</div></div></div>
+              <div class="card grow" style="height:84px;align-content:space-between"><span style="color:var(--coral)">🪦</span><div><b>Graveyard</b><div class="meta">Dropped and DNF</div></div></div>
+            </div>
+          </div>
+          <div class="nav"><span>Home</span><span>Explore</span><span>Canon</span><span>Social</span><span class="on">More</span></div>
+        </div>
+        <div class="cap">More hub (SCR-22)</div>
+        <div class="capd">A full-width Watching tile right after Queue: the two "what to watch" places sit together. Its subtitle is live, with one small bar per title in progress.</div>
+      </div>
+      <div class="col">
+        <div class="frame">
+          <div class="sb"><span>20:05</span><span>●●● 90%</span></div>
+          <div class="ab"><span class="i">←</span><span class="t">Queue</span><span class="i">☷</span></div>
+          <div class="ct">
+            <div class="row"><div class="poster p-bear" style="width:40px;height:58px"></div><div class="grow"><div class="ttl">The Bear</div><div class="meta">3 seasons · ★ 8.60</div></div><div class="btn sm">▶ Start</div></div>
+            <div class="row"><div class="poster p-slow" style="width:40px;height:58px"></div><div class="grow"><div class="ttl">Slow Horses</div><div class="meta">4 seasons · ★ 8.94</div></div><div class="btn sm">▶ Start</div></div>
+            <div class="meta">Swipe right is still "Seen it" and opens the Log flow (SCR-13). Start watching is the new row action.</div>
+          </div>
+        </div>
+        <div class="cap">Queue rows (SCR-13)</div>
+        <div class="capd">Start opens the Where are you? sheet, then the title leaves the Queue for Currently watching.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="band-head">
+      <div class="tag">New screen · /more/watching</div>
+      <h2>The Tracking hub and the Canon</h2>
+      <p>Everything you're tracking lives on one page, opened from More and from Home's See all. The Canon shows only what belongs to the canon you're looking at, so movies and series never mix.</p>
+    </div>
+    <div class="screens">
+      <div class="col">
+        <div class="frame">
+          <div class="sb"><span>21:40</span><span>●●● 82%</span></div>
+          <div class="ab"><span class="i">←</span><span class="t">Watching</span><span class="i">⇅</span></div>
+          <div class="ct">
+            <div class="row" style="gap:6px"><span class="pill on">All 8</span><span class="pill">Series 6</span><span class="pill">Movies 2</span></div>
+            <div class="card" style="gap:2px;padding-block:10px">
+              <div class="row"><div class="grow"><div class="lbl">This week</div><div class="big">9 episodes</div></div><div style="text-align:right"><div class="lbl">Time</div><div class="big">7 h 50</div></div></div>
+            </div>
+            <div class="sh">In progress · 4</div>
+            <div class="row"><div class="poster p-sev" style="width:36px;height:52px"></div><div class="grow"><div class="ttl">Severance</div><div class="meta">S2 · E6 "Attila" · 5 left</div><div class="bar" style="margin-top:5px"><i style="width:74%"></i></div></div><div class="btn sm pri">✓ E6</div></div>
+            <div class="row"><div class="poster p-sho" style="width:36px;height:52px"></div><div class="grow"><div class="ttl">Shōgun</div><div class="meta">S1 · E9 · 2 left</div><div class="bar" style="margin-top:5px"><i style="width:80%"></i></div></div><div class="btn sm pri">✓ E9</div></div>
+            <div class="row"><div class="poster p-dune" style="width:36px;height:52px"></div><div class="grow"><div class="ttl">Dune: Part Two</div><div class="meta">Movie · started yesterday</div></div><div class="btn sm">✓ Finished</div></div>
+            <div class="sh">Finished, not ranked · 2</div>
+            <div class="row"><div class="poster p-bear" style="width:36px;height:52px"></div><div class="grow"><div class="ttl">The Bear</div><div class="meta">Up to date · Oct 4</div></div><div class="btn sm pri">Rank →</div></div>
+            <div class="sh">Caught up · 1</div>
+            <div class="row"><div class="poster p-andor" style="width:36px;height:52px"></div><div class="grow"><div class="ttl">Andor</div><div class="meta">Ranked #6 · no new season announced</div></div><span class="pill on">Caught up</span></div>
+          </div>
+        </div>
+        <div class="cap">Tracking hub (new screen)</div>
+        <div class="capd">Groups in this order: In progress, Finished not ranked, Caught up, Paused (no progress for 30 days). A last row links to the Graveyard. ⇅ sorts by recent or by fewest episodes left.</div>
+      </div>
+
+      <div class="col">
+        <div class="frame">
+          <div class="sb"><span>21:40</span><span>●●● 82%</span></div>
+          <div class="ab"><span class="t">Canon</span><span class="i">▥ ☰ ⇪</span></div>
+          <div class="ct">
+            <div class="segp" style="display:flex;background:var(--ov);border-radius:10px;padding:3px;gap:3px"><span style="flex:1;text-align:center;padding:6px;font-weight:800;font-size:11px;color:var(--t3)">Movies 142</span><span style="flex:1;text-align:center;padding:6px;border-radius:8px;font-weight:800;font-size:11px;background:var(--sf);border:1px solid var(--st)">TV Shows 94</span></div>
+            <div class="card hl" style="padding:9px 12px;gap:6px">
+              <div class="row"><span style="color:var(--lime)">▶</span><div class="grow"><b>Watching 4 series</b><div class="meta">2 finished, waiting to be ranked</div></div><span class="meta">›</span></div>
+            </div>
+            <div class="row" style="align-items:end;gap:8px">
+              <div class="grow" style="flex:1.25"><div class="poster p-slow" style="height:120px"></div><div class="ttl" style="margin-top:4px">Slow Horses</div></div>
+              <div class="grow"><div class="poster p-sho" style="height:96px"></div><div class="ttl" style="margin-top:4px">The Wire</div></div>
+              <div class="grow"><div class="poster p-bear" style="height:96px"></div><div class="ttl" style="margin-top:4px">Succession</div></div>
+            </div>
+            <div class="row"><span class="meta" style="width:22px">#04</span><div class="poster p-sev" style="width:30px;height:44px"></div><div class="grow"><div class="ttl">Severance</div><div class="row" style="gap:6px"><span class="meta">Apple TV+</span><span class="pill on">▶ S2 · E6</span></div></div><span class="pill amber">9.31</span></div>
+            <div class="row"><span class="meta" style="width:22px">#05</span><div class="poster p-andor" style="width:30px;height:44px"></div><div class="grow"><div class="ttl">Andor</div><span class="meta">Disney+</span></div><span class="pill amber">9.20</span></div>
+            <div class="row"><span class="meta" style="width:22px">#06</span><div class="poster p-dune" style="width:30px;height:44px"></div><div class="grow"><div class="ttl">The Leftovers</div><span class="meta">Max</span></div><span class="pill amber">9.11</span></div>
+          </div>
+          <div class="nav"><span>Home</span><span>Explore</span><span class="on">Canon</span><span>Social</span><span>More</span></div>
+        </div>
+        <div class="cap">Canon (SCR-14) · TV Shows</div>
+        <div class="capd">A slim Watching strip sits above the podium, counting only this canon's titles, and opens the hub filtered to it. It's hidden when you track nothing in this canon. A ranked series you're still watching gets a lime ▶ S2 · E6 tag on its row.</div>
+      </div>
+
+      <div class="col">
+        <div class="frame">
+          <div class="sb"><span>21:40</span><span>●●● 82%</span></div>
+          <div class="ab"><span class="t">Canon</span><span class="i">▥ ☰ ⇪</span></div>
+          <div class="ct"></div>
+          <div class="dimmer"></div>
+          <div class="sheet">
+            <div class="grab"></div>
+            <div class="lbl">TV stats</div>
+            <div class="row" style="gap:8px;align-items:stretch">
+              <div class="card grow" style="gap:2px"><div class="lbl">Ranked</div><div class="big">94</div></div>
+              <div class="card grow" style="gap:2px"><div class="lbl">Hours</div><div class="big">1,204</div></div>
+            </div>
+            <div class="row" style="gap:8px;align-items:stretch">
+              <div class="card grow" style="gap:2px"><div class="lbl">Top network</div><div class="big" style="font-size:15px">HBO</div></div>
+              <div class="card grow hl" style="gap:2px"><div class="lbl">Episodes in 2026</div><div class="big">312</div><div class="meta" style="color:var(--lime)">New: from tracking</div></div>
+            </div>
+            <div class="lbl">Top 3 showcase</div>
+            <div class="row" style="gap:8px"><div class="poster p-slow grow" style="height:60px"></div><div class="poster p-sho grow" style="height:60px"></div><div class="poster p-bear grow" style="height:60px"></div></div>
+          </div>
+        </div>
+        <div class="cap">Canon Stats sheet</div>
+        <div class="capd">TV stats gain an Episodes this year tile, counted from tracking; Movies gain Movies finished this year. It's a fifth tile below the existing four (the mock leaves one out for space).</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="r3">
+    <div class="band-head">
+      <div class="tag">Round 3 · mistakes, new seasons, reactions</div>
+      <h2>Un-logging, new seasons, and rating what you watched</h2>
+    </div>
+    <div class="screens">
+
+      <!-- Un-log -->
+      <div class="col">
+        <div class="frame">
+          <div class="sb"><span>21:44</span><span>●●● 82%</span></div>
+          <div class="ab"><span class="i">←</span><span class="t">Severance</span><span class="pill on">S2 · E7 next</span></div>
+          <div class="ct">
+            <div class="lbl">Season 2</div>
+            <div class="card" style="gap:0;padding-block:4px">
+              <div class="ep"><span class="tk">✓</span><span class="n">E5</span><span class="grow">Trojan's Horse</span></div>
+              <div class="ep"><span class="tk">✓</span><span class="n">E6</span><span class="grow">Attila</span></div>
+              <div class="ep here"><span class="tk">●</span><span class="n">E7</span><span class="grow"><b>Chikhai Bardo</b></span></div>
+            </div>
+          </div>
+          <div class="dimmer"></div>
+          <div class="sheet">
+            <div class="grab"></div>
+            <div class="row"><div class="still"></div><div class="grow"><div class="ttl">S2 · E6 · Attila</div><div class="meta">Watched tonight, 21:40</div></div></div>
+            <div class="btn">↩ Mark as not watched</div>
+            <div class="meta">Your place goes back to E6. Nothing else changes.</div>
+            <div class="btn ghost">Rewatched it (doesn't move your place)</div>
+          </div>
+        </div>
+        <div class="cap">Un-log an episode</div>
+        <div class="capd">Beyond the Undo toast, tap any ticked episode. "Mark as not watched" moves your place back to that episode. For an earlier one (say E3) it asks first: "E3 to E6 will count as not watched." Long-press ✓ E6 on Home or the hub does the same for the last one.</div>
+      </div>
+
+      <!-- New season: title page -->
+      <div class="col">
+        <div class="frame">
+          <div class="sb"><span>19:02</span><span>●●● 95%</span></div>
+          <div class="ct flush">
+            <div class="backdrop"><div class="top"><span class="fro">←</span><span class="fro">⋯</span></div><div class="prog"><i style="width:69%"></i></div></div>
+            <div class="hm"><div class="poster p-sev"></div><div class="grow" style="align-self:end"><div class="eb" style="color:var(--amber)">● New season</div><div class="tt">Severance</div></div></div>
+            <div class="card hl">
+              <div class="row"><span class="pill amber">NEW</span><div class="lbl grow">Season 3 is out</div><span class="meta">Oct 10</span></div>
+              <div class="row"><div class="still"></div><div class="grow"><div class="ttl">S3 · E1 · Hello, Ms. Cobel</div><div class="meta">1 of 10 aired · new episodes Fridays</div></div></div>
+              <div class="row"><div class="btn grow">▶ Apple TV+</div><div class="btn pri grow">✓ Watched E1</div></div>
+            </div>
+            <div class="card" style="gap:6px">
+              <div class="lbl">Your status</div>
+              <div class="row"><span class="pill amber">#04 · 9.31</span><span class="meta grow">Ranked as Up to date after S2</span></div>
+              <div class="meta">When you catch up on Season 3 we'll offer a re-duel.</div>
+            </div>
+          </div>
+        </div>
+        <div class="cap">A new season drops</div>
+        <div class="capd">Telly checks tracked shows that are caught up or finished once a day. When a new episode airs, the title goes back to In progress with your place at S3 · E1. Shows that only had a new episode mid-season just get "E4 is out".</div>
+      </div>
+
+      <!-- New season: hub/home -->
+      <div class="col">
+        <div class="frame">
+          <div class="sb"><span>19:02</span><span>●●● 95%</span></div>
+          <div class="ab"><span class="i">←</span><span class="t">Watching</span><span class="i">⇅</span></div>
+          <div class="ct">
+            <div class="sh">New episodes · 2</div>
+            <div class="row"><div class="poster p-sev" style="width:36px;height:52px"></div><div class="grow"><div class="ttl">Severance</div><div class="row" style="gap:6px"><span class="pill amber">Season 3 is out</span></div></div><div class="btn sm pri">✓ E1</div></div>
+            <div class="row"><div class="poster p-slow" style="width:36px;height:52px"></div><div class="grow"><div class="ttl">Slow Horses</div><div class="row" style="gap:6px"><span class="pill amber">E4 is out</span></div></div><div class="btn sm pri">✓ E4</div></div>
+            <div class="sh">In progress · 3</div>
+            <div class="row"><div class="poster p-sho" style="width:36px;height:52px"></div><div class="grow"><div class="ttl">Shōgun</div><div class="meta">S1 · E9 · 2 left</div></div><div class="btn sm pri">✓ E9</div></div>
+            <div class="sh">Caught up · 1</div>
+            <div class="row"><div class="poster p-andor" style="width:36px;height:52px"></div><div class="grow"><div class="ttl">Andor</div><div class="meta">Series ended</div></div><span class="pill on">Finished</span></div>
+            <div class="sh">Coming up</div>
+            <div class="row"><div class="poster p-bear" style="width:36px;height:52px"></div><div class="grow"><div class="ttl">The Bear</div><div class="meta">Season 5 · Jun 2027</div></div><span class="pill">Caught up</span></div>
+          </div>
+        </div>
+        <div class="cap">Tracking hub with new episodes</div>
+        <div class="capd">New episodes become the first group, in Warm Amber. Home's summary puts them first too. A push notification is a separate, optional piece of work (filed as its own issue).</div>
+      </div>
+
+      <!-- Episode reaction -->
+      <div class="col">
+        <div class="frame">
+          <div class="sb"><span>21:40</span><span>●●● 82%</span></div>
+          <div class="ab"><span class="t">Home</span><span class="i">⚲</span></div>
+          <div class="ct">
+            <div class="sh">Currently watching <a>See all 6 ›</a></div>
+            <div class="card">
+              <div class="row"><div class="poster p-sev" style="width:40px;height:58px"></div><div class="grow"><div class="ttl">Severance</div><div class="meta">S2 · E7 next</div></div><div class="btn sm pri">✓ E7</div></div>
+              <div class="row"><div class="poster p-sho" style="width:40px;height:58px"></div><div class="grow"><div class="ttl">Shōgun</div><div class="meta">S1 · E9 · 2 left</div></div><div class="btn sm pri">✓ E9</div></div>
+            </div>
+          </div>
+          <div class="sheet" style="box-shadow:0 -8px 24px rgba(0,0,0,.3)">
+            <div class="row"><div class="grow"><b>S2 · E6 watched</b><div class="meta">How was it? (optional)</div></div><span class="meta" style="color:var(--lime);font-weight:800">Undo</span></div>
+            <div class="row" style="justify-content:space-between">
+              <span class="btn sm">🔥 Peak</span><span class="btn sm">👍 Good</span><span class="btn sm">😐 Meh</span><span class="btn sm">👎 Weak</span>
+            </div>
+            <div class="btn ghost" style="padding:6px">✎ Add a take</div>
+          </div>
+          <div class="nav"><span class="on">Home</span><span>Explore</span><span>Canon</span><span>Social</span><span>More</span></div>
+        </div>
+        <div class="cap">Reacting to an episode</div>
+        <div class="capd">The Undo toast grows into a small, skippable tray: one tap reaction, or a short take. It goes away after 6 seconds, so it never slows down marking. Your reactions show on the episode row.</div>
+      </div>
+
+      <!-- Episode detail with gated takes -->
+      <div class="col">
+        <div class="frame">
+          <div class="sb"><span>21:46</span><span>●●● 82%</span></div>
+          <div class="ab"><span class="i">←</span><span class="t">S2 · E6 · Attila</span></div>
+          <div class="ct">
+            <div class="still" style="width:100%;height:120px;border-radius:12px"></div>
+            <div class="row" style="gap:6px"><span class="pill on">🔥 Your pick: Peak</span><span class="meta">Friends: 🔥 4 · 👍 2</span></div>
+            <div class="lbl">Friends' takes</div>
+            <div class="card" style="gap:6px">
+              <div class="row"><span class="av">M</span><div class="grow"><b>Maya</b> <span class="meta">🔥 · watched Oct 3</span><div style="font-size:11.5px">That cold open. Best episode of the season so far.</div></div></div>
+            </div>
+            <div class="card" style="gap:6px">
+              <div class="row"><span class="av">J</span><div class="grow"><b>Jordan</b> <span class="meta">👍 · on S2 · E9</span><div class="blur" style="font-size:11.5px;filter:blur(4px)">Knowing what happens in E8 makes this so much worse.</div><div class="spoil">Mentions later episodes · tap to reveal</div></div></div>
+            </div>
+            <div class="btn">✎ Add your take</div>
+          </div>
+        </div>
+        <div class="cap">Episode page: takes stay spoiler-safe</div>
+        <div class="capd">You only see takes on episodes you've reached. A take written by someone further ahead is blurred until you tap it. Reached from an episode row on the title page.</div>
+      </div>
+
+      <!-- Season finish -->
+      <div class="col">
+        <div class="frame">
+          <div class="sb"><span>22:31</span><span>●●● 80%</span></div>
+          <div class="ab"><span class="i">←</span><span class="t">Severance</span></div>
+          <div class="ct"></div>
+          <div class="dimmer"></div>
+          <div class="sheet">
+            <div class="grab"></div>
+            <div style="font-size:16px;font-weight:800">Season 2 done</div>
+            <div class="meta">Where does it sit next to Season 1?</div>
+            <div class="row" style="gap:8px">
+              <div class="card grow" style="text-align:center;gap:4px"><div class="poster p-sev" style="height:70px"></div><b>Season 1</b></div>
+              <div class="meta" style="font-weight:800">vs</div>
+              <div class="card grow hl" style="text-align:center;gap:4px"><div class="poster p-sev" style="height:70px;filter:hue-rotate(40deg)"></div><b>Season 2</b></div>
+            </div>
+            <div class="row" style="gap:6px;flex-wrap:wrap"><span class="pill">🎯 Flawless finale</span><span class="pill on">✅ Satisfying</span><span class="pill">📉 Fumbled</span></div>
+            <div class="btn pri">Save season ranking</div>
+            <div class="btn ghost" style="padding:6px">✎ Add a season take · Skip</div>
+          </div>
+        </div>
+        <div class="cap">Finishing a season: a season duel</div>
+        <div class="capd">Seasons get ranked the Telly way (pairwise, features/03 §2.2), not with stars, with an optional take and finale tag. Ranking seasons never touches your series canon.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="band-head"><h2>What the title page needs</h2></div>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Part</th><th>Needs</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td>Next episode card</td><td>Episode name, still, runtime, air date</td><td>A cached TMDB season fetch, loaded when you open a tracked title. Falls back to "Episode 6".</td></tr>
+          <tr><td>Seasons with progress</td><td>The pointer + <code>tv_seasons.episode_count</code></td><td>No per-episode rows. Ticks are worked out from your place.</td></tr>
+          <tr><td>Spoiler blur</td><td>The pointer</td><td>Uses the same rule as Spoiler Shield: reveal on tap.</td></tr>
+          <tr><td>Watching now</td><td>Friends' tracked titles, no episodes</td><td>Respects each friend's privacy mode (Ghost shows nothing).</td></tr>
+          <tr><td>Drop-off line</td><td>Existing survival data (<code>user_dropped_shows</code>)</td><td>Shown only once you're past the most common drop point.</td></tr>
+          <tr><td>Caught up</td><td>Next episode or season air date</td><td>From TMDB. "We'll tell you" depends on notifications (filed separately if wanted).</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<script>
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  document.getElementById('th-dark').setAttribute('aria-pressed', t === 'dark');
+  document.getElementById('th-light').setAttribute('aria-pressed', t === 'light');
+  try { localStorage.setItem('telly-theme', t); } catch (e) {}
+}
+(function () {
+  var saved = null;
+  try { saved = localStorage.getItem('telly-theme'); } catch (e) {}
+  if (saved) { setTheme(saved); return; }
+  var t = document.documentElement.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  document.getElementById('th-dark').setAttribute('aria-pressed', t === 'dark');
+  document.getElementById('th-light').setAttribute('aria-pressed', t === 'light');
+})();
+</script>
+</body>
+</html>
