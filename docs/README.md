@@ -38,6 +38,7 @@ The full visual, interaction, and screen specifications are codified in dedicate
 | **DS-02** | [**`Component Library & Patterns`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/02_COMPONENT_LIBRARY_AND_PATTERNS.md) | Floating frosted bottom nav, 4 Show Card variants (Rankings row, Feed card, Queue item, 3x3 poster), Duel Arena card physics, reaction chips, and modal sheets. |
 | **DS-03** | [**`Screen-by-Screen Specifications`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md) | Exhaustive layout wireframes, inputs, editable elements, action presentations, and transitions across all 20 screens (`SCR-01` through `SCR-20`). |
 | **DS-04** | [**`User Interaction Flows & Gestures`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/04_USER_INTERACTION_FLOWS_AND_GESTURES.md) | Master gesture conventions, end-to-end Mermaid state machines & sequence diagrams for Logging, Co-Watching, Drag-and-Drop Rankings editing, and TV Graveyard DNF logging. |
+| **DS-05** | [**`Public Website`**](file:///c:/Users/karla/Desktop/SeriesBeli/docs/design_system/05_WEBSITE.md) | The public site built from the app: five-chapter landing page (Track, Rank, Discover, Friends, Play), playable hero duel, screenshot scenes, `site/content.yaml` structure and build checks. |
 
 ---
 
