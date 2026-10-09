@@ -1,4 +1,4 @@
-// site/content.yaml, parsed and validated (WEB-03).
+// site/content.yaml, parsed and validated (WEB-03; chapters and duel: 05_WEBSITE, #254).
 import 'package:yaml/yaml.dart';
 
 class SiteContentError implements Exception {
@@ -14,33 +14,59 @@ class StoreLinks {
   const StoreLinks({this.appStore, this.playStore});
 }
 
-class Feature {
+/// One section of the landing page (05_WEBSITE §3).
+class Chapter {
   final String id;
-  final String eyebrow;
+
+  /// Short name for the nav and the chapter strip ("Track").
+  final String name;
+
+  /// One line for the chapter strip.
+  final String summary;
   final String title;
   final String body;
   final String accent;
-  final String screenshot;
+
+  /// One or two scene ids; the first is the lead.
+  final List<String> screenshots;
   final List<String> points;
+  final List<Extra> cards;
   final bool showTiers;
 
-  const Feature({
+  const Chapter({
     required this.id,
-    required this.eyebrow,
+    required this.name,
+    required this.summary,
     required this.title,
     required this.body,
     required this.accent,
-    required this.screenshot,
+    required this.screenshots,
     this.points = const [],
+    this.cards = const [],
     this.showTiers = false,
   });
 }
 
-class GalleryItem {
-  final String screenshot;
-  final String caption;
-  const GalleryItem(this.screenshot, this.caption);
+/// The hero's playable duel (05_WEBSITE §2): pairs of highly rated titles from one ranking.
+class Duel {
+  /// `tv` or `movie`: a pair never mixes the two rankings.
+  final String mediaType;
+
+  /// Size of the example ranking the scores are computed for.
+  final int total;
+  final List<(String, String)> pairs;
+
+  const Duel({required this.mediaType, required this.total, required this.pairs});
+
+  /// Every title in the pairs, in order, once.
+  List<String> get titles => [
+        for (final (a, b) in pairs) ...[a, b],
+      ].fold(<String>[], (all, t) => all.contains(t) ? all : (all..add(t)));
 }
+
+/// File-name stem for a title's generated poster (`assets/posters/<slug>.png`).
+String posterSlug(String title) =>
+    title.toLowerCase().replaceAll(RegExp('[^a-z0-9]+'), '-').replaceAll(RegExp(r'^-+|-+$'), '');
 
 class Extra {
   final String title;
@@ -60,11 +86,8 @@ class SiteContent {
   final String heroHeadline;
   final String heroTagline;
   final String heroBody;
-  final String heroScreenshot;
-  final List<Feature> features;
-  final String galleryTitle;
-  final String galleryBody;
-  final List<GalleryItem> gallery;
+  final Duel duel;
+  final List<Chapter> chapters;
   final List<Extra> extras;
   final String ctaTitle;
   final String ctaBody;
@@ -81,25 +104,18 @@ class SiteContent {
     required this.heroHeadline,
     required this.heroTagline,
     required this.heroBody,
-    required this.heroScreenshot,
-    required this.features,
-    required this.galleryTitle,
-    required this.galleryBody,
-    required this.gallery,
+    required this.duel,
+    required this.chapters,
     required this.extras,
     required this.ctaTitle,
     required this.ctaBody,
   });
 
   /// Every screenshot id the page uses.
-  Set<String> get screenshots => {
-        heroScreenshot,
-        for (final f in features) f.screenshot,
-        for (final g in gallery) g.screenshot,
-      };
+  Set<String> get screenshots => {for (final c in chapters) ...c.screenshots};
 
   /// Every color token name the page uses.
-  Set<String> get accents => {for (final f in features) f.accent};
+  Set<String> get accents => {for (final c in chapters) c.accent};
 
   /// Path part of [url] (`/Telly/`), used to build site-root links.
   String get basePath => url.path.endsWith('/') ? url.path : '${url.path}/';
@@ -110,7 +126,6 @@ SiteContent parseSiteContent(String yamlSource) {
   final site = _map(root['site'], 'site');
   final stores = root['stores'] == null ? const <String, Object?>{} : _map(root['stores'], 'stores');
   final hero = _map(root['hero'], 'hero');
-  final gallery = _map(root['gallery'], 'gallery');
   final cta = _map(root['cta'], 'cta');
 
   final url = Uri.tryParse(_str(site, 'url', 'site'));
@@ -122,25 +137,38 @@ SiteContent parseSiteContent(String yamlSource) {
     throw SiteContentError('site.contact_email "$email" is not an email address');
   }
 
-  final features = [
-    for (final (i, raw) in _list(root['features'], 'features').indexed)
+  final chapters = [
+    for (final (i, raw) in _list(root['chapters'], 'chapters').indexed)
       () {
-        final f = _map(raw, 'features[$i]');
-        final where = 'features[$i]';
-        return Feature(
-          id: _str(f, 'id', where),
-          eyebrow: _str(f, 'eyebrow', where),
-          title: _str(f, 'title', where),
-          body: _str(f, 'body', where),
-          accent: _str(f, 'accent', where),
-          screenshot: _str(f, 'screenshot', where),
-          points: [for (final p in f['points'] == null ? const [] : _list(f['points'], '$where.points')) '$p'],
-          showTiers: f['show_tiers'] == true,
+        final c = _map(raw, 'chapters[$i]');
+        final where = 'chapters[$i]';
+        final id = _str(c, 'id', where);
+        if (!RegExp(r'^[a-z][a-z0-9-]*$').hasMatch(id)) throw SiteContentError('$where.id "$id" must be a lowercase anchor');
+        final shots = [for (final s in _list(c['screenshots'], '$where.screenshots')) '$s'];
+        if (shots.isEmpty || shots.length > 2) throw SiteContentError('$where.screenshots needs one or two scene ids');
+        return Chapter(
+          id: id,
+          name: _str(c, 'name', where),
+          summary: _str(c, 'summary', where),
+          title: _str(c, 'title', where),
+          body: _str(c, 'body', where),
+          accent: _str(c, 'accent', where),
+          screenshots: shots,
+          points: [for (final p in c['points'] == null ? const [] : _list(c['points'], '$where.points')) '$p'],
+          cards: [
+            for (final (j, card) in (c['cards'] == null ? const [] : _list(c['cards'], '$where.cards')).indexed)
+              () {
+                final m = _map(card, '$where.cards[$j]');
+                return Extra(_str(m, 'title', '$where.cards[$j]'), _str(m, 'body', '$where.cards[$j]'));
+              }(),
+          ],
+          showTiers: c['show_tiers'] == true,
         );
       }(),
   ];
-  final ids = features.map((f) => f.id).toList();
-  if (ids.toSet().length != ids.length) throw SiteContentError('feature ids must be unique');
+  if (chapters.isEmpty) throw SiteContentError('chapters needs at least one chapter');
+  final ids = chapters.map((c) => c.id).toList();
+  if (ids.toSet().length != ids.length) throw SiteContentError('chapter ids must be unique');
 
   return SiteContent(
     name: _str(site, 'name', 'site'),
@@ -157,17 +185,8 @@ SiteContent parseSiteContent(String yamlSource) {
     heroHeadline: _str(hero, 'headline', 'hero'),
     heroTagline: _str(hero, 'tagline', 'hero'),
     heroBody: _str(hero, 'body', 'hero'),
-    heroScreenshot: _str(hero, 'screenshot', 'hero'),
-    features: features,
-    galleryTitle: _str(gallery, 'title', 'gallery'),
-    galleryBody: _str(gallery, 'body', 'gallery'),
-    gallery: [
-      for (final (i, raw) in _list(gallery['items'], 'gallery.items').indexed)
-        () {
-          final g = _map(raw, 'gallery.items[$i]');
-          return GalleryItem(_str(g, 'screenshot', 'gallery.items[$i]'), _str(g, 'caption', 'gallery.items[$i]'));
-        }(),
-    ],
+    duel: _duel(_map(hero['duel'], 'hero.duel')),
+    chapters: chapters,
     extras: [
       for (final (i, raw) in (root['extras'] == null ? const [] : _list(root['extras'], 'extras')).indexed)
         () {
@@ -193,6 +212,25 @@ void validateAgainstApp(SiteContent content, {required Set<String> screenshots, 
   if (unknown.isNotEmpty) {
     throw SiteContentError('unknown accent ${unknown.join(', ')}; use a color token from telly_colors.dart');
   }
+}
+
+Duel _duel(Map<String, Object?> d) {
+  final mediaType = _str(d, 'media_type', 'hero.duel');
+  if (mediaType != 'tv' && mediaType != 'movie') throw SiteContentError('hero.duel.media_type must be tv or movie');
+  final total = d['total'];
+  if (total is! int || total < 2) throw SiteContentError('hero.duel.total must be a whole number of 2 or more');
+  final pairs = [
+    for (final (i, raw) in _list(d['pairs'], 'hero.duel.pairs').indexed)
+      () {
+        final pair = [for (final t in _list(raw, 'hero.duel.pairs[$i]')) '$t'.trim()];
+        if (pair.length != 2 || pair.any((t) => t.isEmpty) || pair[0] == pair[1]) {
+          throw SiteContentError('hero.duel.pairs[$i] must be two different titles');
+        }
+        return (pair[0], pair[1]);
+      }(),
+  ];
+  if (pairs.isEmpty) throw SiteContentError('hero.duel.pairs needs at least one pair');
+  return Duel(mediaType: mediaType, total: total, pairs: pairs);
 }
 
 String? _storeUrl(Object? value, String key) {

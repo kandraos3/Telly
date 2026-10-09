@@ -1,6 +1,8 @@
 // The screens shown on the website (WEB-02), each with fixture data that reads
 // like a real user's. Add a Scene here and reference its id from
 // site/content.yaml to put a new screen on the site.
+import 'dart:math';
+
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,8 +11,12 @@ import 'package:telly_app/core/database/database.dart';
 import 'package:telly_app/core/database/database_provider.dart';
 import 'package:telly_app/core/services/haptics_service.dart';
 import 'package:telly_app/core/widgets/poster_image.dart';
+import 'package:telly_app/features/achievements/data/achievements_repository.dart';
+import 'package:telly_app/features/achievements/presentation/screens/achievements_screen.dart';
 import 'package:telly_app/features/auth/data/auth_repository.dart';
 import 'package:telly_app/features/auth/domain/user_profile.dart';
+import 'package:telly_app/features/challenges/domain/challenge.dart';
+import 'package:telly_app/features/challenges/presentation/controllers/challenges_controller.dart';
 import 'package:telly_app/features/cowatch/data/co_watch_repository.dart';
 import 'package:telly_app/features/cowatch/domain/two_to_watch_engine.dart';
 import 'package:telly_app/features/cowatch/presentation/screens/two_to_watch_screen.dart';
@@ -21,6 +27,11 @@ import 'package:telly_app/features/discovery/presentation/screens/explore_discov
 import 'package:telly_app/features/feed/data/social_repository.dart';
 import 'package:telly_app/features/feed/domain/social_models.dart';
 import 'package:telly_app/features/feed/presentation/screens/activity_feed_screen.dart';
+import 'package:telly_app/features/home/presentation/providers/home_providers.dart';
+import 'package:telly_app/features/home/presentation/screens/home_screen.dart';
+import 'package:telly_app/features/levels/data/levels_repository.dart';
+import 'package:telly_app/features/levels/presentation/controllers/levels_controller.dart';
+import 'package:telly_app/features/levels/presentation/screens/your_level_screen.dart';
 import 'package:telly_app/features/logging/data/title_repository.dart';
 import 'package:telly_app/features/logging/domain/watch_status.dart';
 import 'package:telly_app/features/profile/data/graveyard_repository.dart';
@@ -49,13 +60,22 @@ import 'package:telly_app/features/squads/domain/squad_models.dart';
 import 'package:telly_app/features/squads/presentation/screens/squad_hub_screen.dart';
 import 'package:telly_app/features/title_detail/domain/title_detail_models.dart';
 import 'package:telly_app/features/title_detail/presentation/screens/show_detail_screen.dart';
+import 'package:telly_app/features/tracking/data/tracking_repository.dart';
+import 'package:telly_app/features/tracking/domain/tracking_item.dart';
+import 'package:telly_app/features/tracking/domain/tracking_models.dart';
+import 'package:telly_app/features/tracking/presentation/providers/tracking_providers.dart';
+import 'package:telly_app/features/tracking/presentation/screens/watching_hub_screen.dart';
 
+import '../../../test/features/achievements/achievements_fixtures.dart';
+import '../../../test/features/home/home_fixtures.dart' show SeededChallenges, SeededLevel, SeededQueue, homeNow;
+import '../../../test/features/levels/levels_fixtures.dart';
 import '../../../test/fakes/fake_auth_repository.dart';
 import '../../../test/fakes/fake_co_watch_repository.dart';
 import '../../../test/fakes/fake_graveyard_repository.dart';
 import '../../../test/fakes/fake_profile_repository.dart';
 import '../../../test/fakes/fake_social_repository.dart';
 import '../../../test/fakes/fake_title_repository.dart';
+import '../../../test/fakes/fake_tracking_repository.dart';
 import '../../../test/fakes/fake_watchlist_repository.dart';
 import 'poster_art.dart';
 import 'scene_harness.dart';
@@ -508,6 +528,79 @@ List<Override> baseOverrides(AppDatabase db) => [
       hapticsEnabledProvider.overrideWith((ref) => false),
     ];
 
+/// What the signed-in user is watching (#254): Home's Tonight hero and the Watching hub.
+TrackingItem _tracked(
+  int id,
+  String title, {
+  TrackingState state = TrackingState.watching,
+  int idle = 1,
+  EpisodeRef? place,
+  EpisodeRef? next,
+  String? episodeName,
+  int? aired,
+  int? watched,
+  DateTime? newSince,
+  DateTime? finishedAt,
+  bool ranked = false,
+  int? rank,
+}) =>
+    TrackingItem(
+      titleId: 9000 + id,
+      mediaType: 'tv',
+      title: title,
+      posterPath: posterPathFor(title),
+      backdropPath: backdropPathFor(title),
+      state: state,
+      startedAt: homeNow.subtract(const Duration(days: 60)),
+      lastProgressAt: homeNow.subtract(Duration(days: idle)),
+      place: place,
+      newEpisodesSince: newSince,
+      finishedAt: finishedAt,
+      isRanked: ranked,
+      rankPosition: rank,
+      airedTotal: aired,
+      watched: watched,
+      nextEpisode: next == null ? null : NextEpisode(ref: next, name: episodeName),
+    );
+
+final siteTracking = [
+  _tracked(1, 'Severance', place: const EpisodeRef(2, 6), next: const EpisodeRef(2, 7), episodeName: 'Chikhai Bardo',
+      aired: 19, watched: 15),
+  _tracked(2, 'Shogun', idle: 2, place: const EpisodeRef(1, 7), next: const EpisodeRef(1, 8), episodeName: 'The Abyss of Life',
+      aired: 10, watched: 7),
+  _tracked(3, 'Slow Horses', idle: 3, place: const EpisodeRef(4, 2), next: const EpisodeRef(4, 3), aired: 24, watched: 20,
+      newSince: homeNow.subtract(const Duration(days: 1))),
+  _tracked(4, 'Andor', state: TrackingState.finished, idle: 1, finishedAt: homeNow.subtract(const Duration(days: 1)),
+      aired: 24, watched: 24),
+  _tracked(5, 'The Bear', state: TrackingState.caughtUp, idle: 6, aired: 38, watched: 38, ranked: true, rank: 2),
+];
+
+final _siteChallenges = ChallengesOverview(
+  featured: Challenge(
+    id: 'spooky-season',
+    slug: 'spooky-season',
+    name: 'Spooky Season',
+    startsAt: DateTime(2026, 10, 1),
+    endsAt: DateTime(2026, 10, 31),
+    target: 5,
+    joined: true,
+    myProgress: 4,
+  ),
+);
+
+/// Tracking, level and challenges on top of [baseOverrides], for Home and the Watching hub.
+List<Override> trackingSceneOverrides(AppDatabase db) => [
+      ...baseOverrides(db),
+      trackingRepositoryProvider.overrideWithValue(
+        FakeTrackingRepository(siteTracking)..weekStats = const TrackingStats(episodes: 9, moviesFinished: 2, minutes: 9 * 50 + 2 * 130),
+      ),
+      trackingNowProvider.overrideWithValue(() => homeNow),
+      homeRandomProvider.overrideWithValue(Random(4)),
+      userWatchlistProvider.overrideWith(() => SeededQueue(queueItems)),
+      yourLevelControllerProvider.overrideWith(() => SeededLevel(sampleLevel())),
+      challengesControllerProvider.overrideWith(() => SeededChallenges(_siteChallenges)),
+    ];
+
 Future<void> tapText(WidgetTester tester, String text) async {
   await tester.tap(find.text(text).first);
   await tester.pumpAndSettle();
@@ -521,6 +614,25 @@ Future<void> scrollBy(WidgetTester tester, double dy) async {
 // --- Scenes ---------------------------------------------------------------
 
 final siteScenes = <Scene>[
+  Scene(id: 'home', tab: 0, build: () => const HomeScreen(), overrides: trackingSceneOverrides),
+  Scene(id: 'watching', build: () => const WatchingHubScreen(), overrides: trackingSceneOverrides),
+  Scene(
+    id: 'achievements',
+    build: () => const AchievementsScreen(),
+    overrides: (db) => [
+      ...baseOverrides(db),
+      achievementsRepositoryProvider.overrideWithValue(FakeAchievementsRepository(withCollections())),
+    ],
+  ),
+  Scene(
+    id: 'level',
+    build: () => const YourLevelScreen(),
+    overrides: (db) => [
+      ...baseOverrides(db),
+      levelsRepositoryProvider.overrideWithValue(FakeLevelsRepository()),
+      weeklyTableSquadsProvider.overrideWith((ref) async => const []),
+    ],
+  ),
   Scene(
     id: 'duel',
     seed: (db) => seedLocalCanon(db, 'tv', seriesCanon.skip(2).toList(), baseId: 1002),

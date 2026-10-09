@@ -13,8 +13,18 @@ const posterPathPrefix = '/site/';
 
 String posterPathFor(String title) => '$posterPathPrefix${Uri.encodeComponent(title)}';
 
+/// Backdrop paths (`/site-backdrop/<Title>`) get the same art without the title, so text laid
+/// over a backdrop (Home's Tonight hero) doesn't sit on top of a second title.
+const backdropPathPrefix = '/site-backdrop/';
+
+String backdropPathFor(String title) => '$backdropPathPrefix${Uri.encodeComponent(title)}';
+
 /// The art for a `PosterImage` URL, for `posterArtProvider`.
 ImageProvider posterArtFor(String url) {
+  final backdrop = url.indexOf(backdropPathPrefix);
+  if (backdrop >= 0) {
+    return GeneratedPosterImage(Uri.decodeComponent(url.substring(backdrop + backdropPathPrefix.length)), showTitle: false);
+  }
   final index = url.indexOf(posterPathPrefix);
   final title = index < 0 ? url : Uri.decodeComponent(url.substring(index + posterPathPrefix.length));
   return GeneratedPosterImage(title);
@@ -33,7 +43,10 @@ const _palette = [
 @immutable
 class GeneratedPosterImage extends ImageProvider<GeneratedPosterImage> {
   final String title;
-  const GeneratedPosterImage(this.title);
+
+  /// False for backdrops: the same art, no title.
+  final bool showTitle;
+  const GeneratedPosterImage(this.title, {this.showTitle = true});
 
   static const width = 342;
   static const height = 513;
@@ -43,9 +56,10 @@ class GeneratedPosterImage extends ImageProvider<GeneratedPosterImage> {
 
   @override
   ImageStreamCompleter loadImage(GeneratedPosterImage key, ImageDecoderCallback decode) =>
-      OneFrameImageStreamCompleter(_render().then((image) => ImageInfo(image: image)));
+      OneFrameImageStreamCompleter(render().then((image) => ImageInfo(image: image)));
 
-  Future<ui.Image> _render() {
+  /// Draws the art. The site build also calls this directly for the hero duel's posters.
+  Future<ui.Image> render() {
     // Stable across runs (String.hashCode is not).
     final seed = title.codeUnits.fold<int>(7, (h, c) => (h * 31 + c) & 0x7fffffff);
     final random = math.Random(seed);
@@ -86,6 +100,8 @@ class GeneratedPosterImage extends ImageProvider<GeneratedPosterImage> {
         ]),
     );
 
+    if (!showTitle) return recorder.endRecording().toImage(width, height);
+
     final paragraph = (ui.ParagraphBuilder(ui.ParagraphStyle(
       fontFamily: 'PlayfairDisplay_700',
       fontSize: title.length > 14 ? 40 : 50,
@@ -104,8 +120,8 @@ class GeneratedPosterImage extends ImageProvider<GeneratedPosterImage> {
   }
 
   @override
-  bool operator ==(Object other) => other is GeneratedPosterImage && other.title == title;
+  bool operator ==(Object other) => other is GeneratedPosterImage && other.title == title && other.showTitle == showTitle;
 
   @override
-  int get hashCode => title.hashCode;
+  int get hashCode => Object.hash(title, showTitle);
 }

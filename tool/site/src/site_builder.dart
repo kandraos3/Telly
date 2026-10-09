@@ -82,6 +82,7 @@ void buildSite({String genDir = 'build/site_gen', String outDir = 'build/site', 
   if (!tokensFile.existsSync() || !shotsDir.existsSync()) {
     throw SiteBuildError('$genDir is missing; run `flutter test tool/site/generate_site_test.dart` first');
   }
+  final postersDir = Directory('$genDir/posters');
 
   final content = parseSiteContent(File('site/content.yaml').readAsStringSync());
   final colors = parseColorTokens(File('lib/core/theme/telly_colors.dart').readAsStringSync());
@@ -90,6 +91,13 @@ void buildSite({String genDir = 'build/site_gen', String outDir = 'build/site', 
       if (f.path.endsWith('.png')) f.uri.pathSegments.last.replaceAll('.png', ''),
   };
   validateAgainstApp(content, screenshots: screenshots, colorTokens: {for (final c in colors) c.name});
+  final missingPosters = [
+    for (final t in content.duel.titles)
+      if (!File('${postersDir.path}/${posterSlug(t)}.png').existsSync()) t,
+  ];
+  if (missingPosters.isNotEmpty) {
+    throw SiteBuildError('no generated poster for ${missingPosters.join(', ')}; rerun generate_site_test.dart');
+  }
 
   final themeColor = colors.firstWhere((c) => c.name == 'backgroundPrimary').css;
   final ctx = PageContext(content: content, root: '', themeColor: themeColor, year: year ?? DateTime.now().year);
@@ -121,12 +129,15 @@ void buildSite({String genDir = 'build/site_gen', String outDir = 'build/site', 
     for (final MapEntry(key: path, value: html) in pages.entries) path: utf8.encode(html),
     'assets/tokens.css': utf8.encode(tokensCss),
     'assets/site.css': utf8.encode(siteCss),
+    'assets/site.js': File('site/static/site.js').readAsBytesSync(),
     'assets/icon.png': File('assets/brand/icon_1024.png').readAsBytesSync(),
     for (final f in Directory('$genDir/fonts').listSync().whereType<File>())
       'assets/fonts/${f.uri.pathSegments.last}': f.readAsBytesSync(),
     for (final id in content.screenshots) 'assets/screenshots/$id.png': File('${shotsDir.path}/$id.png').readAsBytesSync(),
+    for (final t in content.duel.titles)
+      'assets/posters/${posterSlug(t)}.png': File('${postersDir.path}/${posterSlug(t)}.png').readAsBytesSync(),
     for (final f in Directory('site/static').listSync(recursive: true).whereType<File>())
-      if (!f.path.endsWith('site.css'))
+      if (!f.path.endsWith('site.css') && !f.path.endsWith('site.js'))
         f.path.replaceAll(r'\', '/').replaceFirst('site/static/', ''): f.readAsBytesSync(),
     '.nojekyll': const [],
   };
