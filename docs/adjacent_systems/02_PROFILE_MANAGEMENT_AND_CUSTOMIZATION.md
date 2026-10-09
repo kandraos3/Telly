@@ -1,6 +1,6 @@
 # Adjacent Systems Spec 02: Profile Customization, Showcase & Privacy Controls
 
-> Tracking: epic #48 · Status: approved · Decision: [0009](../decisions/0009-social-friends-search-and-privacy.md)
+> Tracking: epic #48 · Status: shipped · Decision: [0009](../decisions/0009-social-friends-search-and-privacy.md)
 
 ## 1. Overview & Identity Customization
 A user's profile on **Telly** is their cinematic resume. Users care deeply about curating their digital identity: their all-time Top 3, their signature aesthetic, their hot-take quote, and their network loyalty badges.

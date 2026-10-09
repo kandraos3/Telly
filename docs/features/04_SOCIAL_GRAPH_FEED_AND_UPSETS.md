@@ -1,6 +1,6 @@
 # Feature Spec 04: Social Graph, Activity Feed & The "Upset Engine"
 
-> Tracking: epic #48 · Status: approved · Decision: [0009](../decisions/0009-social-friends-search-and-privacy.md)
+> Tracking: epic #48 · Status: shipped · Decision: [0009](../decisions/0009-social-friends-search-and-privacy.md)
 
 ## 1. Overview & The Beli Social Hook
 The reason Beli became a viral sensation among Gen Z and millennials—surpassing Yelp—is that dining is inherently social and competitive. People care far more about what their 10 close friends think than what 50,000 anonymous reviewers say.
