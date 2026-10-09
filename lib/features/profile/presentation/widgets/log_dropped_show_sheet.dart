@@ -16,6 +16,9 @@ class LogDroppedShowSheet extends ConsumerStatefulWidget {
   final String? posterUrl;
   final ValueChanged<DropDetails> onSaved;
 
+  /// Prefills the drop point, e.g. from the user's place while tracking (features/11 §4.6).
+  final DropDetails? initial;
+
   const LogDroppedShowSheet({
     super.key,
     required this.titleId,
@@ -23,6 +26,7 @@ class LogDroppedShowSheet extends ConsumerStatefulWidget {
     required this.releaseYear,
     this.posterUrl,
     required this.onSaved,
+    this.initial,
   });
 
   static Future<DropDetails?> show({
@@ -31,6 +35,7 @@ class LogDroppedShowSheet extends ConsumerStatefulWidget {
     required String title,
     required int releaseYear,
     String? posterUrl,
+    DropDetails? initial,
   }) {
     return showModalBottomSheet<DropDetails>(
       context: context,
@@ -41,6 +46,7 @@ class LogDroppedShowSheet extends ConsumerStatefulWidget {
         title: title,
         releaseYear: releaseYear,
         posterUrl: posterUrl,
+        initial: initial,
         onSaved: (details) => Navigator.of(ctx).pop(details),
       ),
     );
@@ -52,6 +58,17 @@ class LogDroppedShowSheet extends ConsumerStatefulWidget {
 
 class _LogDroppedShowSheetState extends ConsumerState<LogDroppedShowSheet> {
   final TextEditingController _notesController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    final initial = widget.initial;
+    if (initial != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) ref.read(dropFormProvider.notifier).set(initial);
+      });
+    }
+  }
 
   DropDetails get _form => ref.watch(dropFormProvider);
   DropFormController get _edit => ref.read(dropFormProvider.notifier);

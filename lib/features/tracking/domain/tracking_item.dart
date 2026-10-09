@@ -143,6 +143,9 @@ class TrackingItem {
     NextEpisode? nextEpisode,
     bool clearNextEpisode = false,
     bool? pending,
+    bool? isRanked,
+    int? rankPosition,
+    double? score,
   }) =>
       TrackingItem(
         titleId: titleId,
@@ -164,9 +167,9 @@ class TrackingItem {
         airedTotal: airedTotal,
         nextEpisode: clearNextEpisode ? null : (nextEpisode ?? this.nextEpisode),
         lastAired: lastAired,
-        isRanked: isRanked,
-        rankPosition: rankPosition,
-        score: score,
+        isRanked: isRanked ?? this.isRanked,
+        rankPosition: rankPosition ?? this.rankPosition,
+        score: score ?? this.score,
         pending: pending ?? this.pending,
       );
 

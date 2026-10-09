@@ -445,7 +445,7 @@ The title page shows where you are in a title you track. Untracked titles look a
   - Radio rows *Starting from the beginning* (default) and *I'm partway through*.
   - Partway shows two wheel pickers, Season and "the last episode you watched", plus a caption line with that episode's name ("S2 · E5 'Trojan's Horse'", or "Season 2 · Episode 5" when not cached).
   - **Start tracking** is the primary button.
-  - Ranked *Up to date* series preselect partway at the last aired episode (features/11 §10).
+  - A ranked series preselects partway at its last aired episode (features/11 §10). The title page doesn't know the ranking's watch status, so every ranked series gets the preset; the user can switch to the beginning.
 - **§T.4 Next episode card** (key `next_episode_card`). While `WATCHING`, it replaces *Streaming now*. Layout:
   - Surface, radius 14, a border at 45% primary accent over `strokeSubtle`, 12 dp padding.
   - Row 1: the "NEXT EPISODE" label (caption w800, `textTertiary`), then "14 of 19" on the right.

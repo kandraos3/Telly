@@ -22,6 +22,9 @@ import 'package:telly_app/features/ranking/presentation/screens/slot_reveal_moda
 import 'package:telly_app/features/ranking/presentation/widgets/duel_arena_card.dart';
 import 'package:telly_app/features/title_detail/domain/title_detail_models.dart';
 import 'package:telly_app/features/title_detail/presentation/screens/show_detail_screen.dart';
+import 'package:telly_app/features/title_detail/data/title_detail_repository.dart';
+import 'package:telly_app/features/tracking/data/tracking_repository.dart';
+import 'package:telly_app/features/tracking/domain/tracking_models.dart';
 import 'package:telly_app/core/widgets/poster_image.dart';
 import 'package:telly_app/core/widgets/telly_log_fab.dart';
 import 'package:telly_app/features/auth/data/auth_repository.dart';
@@ -42,6 +45,8 @@ import 'package:telly_app/features/profile/presentation/controllers/profile_cont
 import 'package:telly_app/features/profile/presentation/screens/dual_canon_profile_screen.dart';
 
 import '../fakes/fake_auth_repository.dart';
+import '../fakes/fake_tracking_repository.dart';
+import '../helpers/tracking_harness.dart';
 import '../fakes/fake_social_repository.dart';
 import '../features/achievements/achievements_fixtures.dart';
 import '../features/challenges/challenges_fixtures.dart';
@@ -298,6 +303,7 @@ void main() {
         ProviderScope(
           overrides: [
             watchlistRepositoryProvider.overrideWithValue(_InMemoryWatchlistRepository()),
+            trackingRepositoryProvider.overrideWithValue(FakeTrackingRepository()),
           ],
           child: MaterialApp(
             theme: TellyTheme.darkTheme,
@@ -316,6 +322,109 @@ void main() {
         matchesGoldenFile('goldens/show_detail_iphone15.png'),
       );
     });
+
+    // -------------------------------------------------------------------------
+    // 3b. SCR-08 §T watch tracking (#229): Watching card and the movie card, both themes
+    // -------------------------------------------------------------------------
+    for (final dark in [true, false]) {
+      final mode = dark ? 'dark' : 'light';
+
+      testWidgets('Golden: SCR-08 title page while Watching, $mode', (tester) async {
+        await tester.binding.setSurfaceSize(const Size(393, 852));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        final db = AppDatabase.inMemory();
+        addTearDown(db.close);
+        final repo = trackingRepositoryFor(db);
+        final seasons = [
+          SeasonInfo(number: 1, episodeCount: 9, airDate: DateTime(2022, 2, 18)),
+          SeasonInfo(number: 2, episodeCount: 10, airDate: DateTime(2025, 1, 17)),
+          SeasonInfo(number: 3, episodeCount: 10, airDate: DateTime(2027, 3, 1)),
+        ];
+        await repo.start(TrackingStartRequest(
+          titleId: 1396,
+          mediaType: 'tv',
+          title: 'Severance',
+          titleStatus: 'Returning Series',
+          seasons: seasons,
+          place: const EpisodeRef(2, 5),
+        ));
+        const title = TitleDetail(
+          id: 1396,
+          mediaType: 'tv',
+          title: 'Severance',
+          status: 'Returning Series',
+          overview: 'Mark leads a team of office workers whose memories have been surgically divided.',
+          network: 'Apple TV+',
+          numberOfSeasons: 3,
+          communityScore: 9.34,
+          availabilities: [TitleAvailabilityDetail(platformId: 'apple_tv_plus')],
+          seasons: [
+            TitleSeasonDetail(seasonNumber: 1, name: 'Season 1', episodeCount: 9, airDate: '2022-02-18'),
+            TitleSeasonDetail(seasonNumber: 2, name: 'Season 2', episodeCount: 10, airDate: '2025-01-17'),
+            TitleSeasonDetail(seasonNumber: 3, name: 'Season 3', episodeCount: 10, airDate: '2027-03-01'),
+          ],
+        );
+        await tester.pumpWidget(ProviderScope(
+          overrides: [
+            ...trackingOverrides(db),
+            titleDetailRepositoryProvider.overrideWithValue(FakeTitleDetailRepository([title])),
+            watchlistRepositoryProvider.overrideWithValue(_InMemoryWatchlistRepository()),
+          ],
+          child: MaterialApp(
+            theme: dark ? TellyTheme.darkTheme : TellyTheme.lightTheme,
+            home: const ShowDetailScreen(titleId: 1396, mediaType: 'tv', initialTitle: title),
+          ),
+        ));
+        await settle(tester);
+
+        await expectLater(
+          find.byType(ShowDetailScreen),
+          matchesGoldenFile('goldens/title_watching_${mode}_iphone15.png'),
+        );
+        await unmountTree(tester);
+      });
+
+      testWidgets('Golden: SCR-08 movie Watching card, $mode', (tester) async {
+        await tester.binding.setSurfaceSize(const Size(393, 852));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        final db = AppDatabase.inMemory();
+        addTearDown(db.close);
+        await trackingRepositoryFor(db).start(const TrackingStartRequest(
+          titleId: 693134,
+          mediaType: 'movie',
+          title: 'Dune: Part Two',
+          runtimeMinutes: 166,
+        ));
+        final title = TitleDetail(
+          id: 693134,
+          mediaType: 'movie',
+          title: 'Dune: Part Two',
+          network: 'Legendary',
+          runtimeMinutes: 166,
+          releaseDate: DateTime(2024, 2, 27),
+          communityScore: 8.9,
+          availabilities: const [TitleAvailabilityDetail(platformId: 'max')],
+        );
+        await tester.pumpWidget(ProviderScope(
+          overrides: [
+            ...trackingOverrides(db),
+            titleDetailRepositoryProvider.overrideWithValue(FakeTitleDetailRepository([title])),
+            watchlistRepositoryProvider.overrideWithValue(_InMemoryWatchlistRepository()),
+          ],
+          child: MaterialApp(
+            theme: dark ? TellyTheme.darkTheme : TellyTheme.lightTheme,
+            home: ShowDetailScreen(titleId: 693134, mediaType: 'movie', initialTitle: title),
+          ),
+        ));
+        await settle(tester);
+
+        await expectLater(
+          find.byType(ShowDetailScreen),
+          matchesGoldenFile('goldens/title_movie_watching_${mode}_iphone15.png'),
+        );
+        await unmountTree(tester);
+      });
+    }
 
     // -------------------------------------------------------------------------
     // 4. SCR-10 Duel Arena Card

@@ -8,10 +8,27 @@ import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/theme/telly_typography.dart';
 import 'package:telly_app/core/widgets/poster_image.dart';
 import 'package:telly_app/core/widgets/telly_neon_badge.dart';
+import 'package:telly_app/core/widgets/telly_frosted_sheet.dart';
 import 'package:telly_app/core/widgets/telly_primary_button.dart';
 import 'package:telly_app/core/widgets/telly_screen_header.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:telly_app/core/services/haptics_service.dart';
+import 'package:telly_app/features/logging/domain/log_request.dart';
 import 'package:telly_app/features/logging/domain/title_search_result.dart';
+import 'package:telly_app/features/profile/domain/dropped_show.dart';
+import 'package:telly_app/features/profile/presentation/controllers/graveyard_controller.dart';
+import 'package:telly_app/features/profile/presentation/widgets/log_dropped_show_sheet.dart';
+import 'package:telly_app/features/tracking/data/tracking_repository.dart';
+import 'package:telly_app/features/tracking/domain/tracking_item.dart';
+import 'package:telly_app/features/tracking/domain/tracking_models.dart';
+import 'package:telly_app/features/tracking/domain/tracking_progress.dart';
+import 'package:telly_app/features/tracking/presentation/providers/tracking_providers.dart';
+import 'package:telly_app/features/tracking/presentation/widgets/finish_sheet.dart';
+import 'package:telly_app/features/tracking/presentation/widgets/tracking_header.dart';
+import 'package:telly_app/features/tracking/presentation/widgets/tracking_undo_tray.dart';
+import 'package:telly_app/features/tracking/presentation/widgets/watch_slot.dart';
+import 'package:telly_app/features/tracking/presentation/widgets/watching_cards.dart';
+import 'package:telly_app/features/tracking/presentation/widgets/where_are_you_sheet.dart';
 import 'package:telly_app/features/onboarding/data/top_50_seeds.dart';
 import 'package:telly_app/features/queue/data/watchlist_repository.dart';
 import 'package:telly_app/features/ranking/domain/canon_tier.dart';
@@ -48,6 +65,22 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
   final _pageTitleKey = GlobalKey();
   bool _showBarTitle = false;
   bool _barTitleCheckScheduled = false;
+
+  /// Watch tracking (#229): scroll targets, and whether the user just moved the place, which is
+  /// what lets the finish sheet open once for that transition (features/11 §4.5).
+  final _nextCardKey = GlobalKey();
+  final _seasonsKey = GlobalKey();
+  bool _expectFinish = false;
+
+  /// The caller's rank for this title, which the finish sheet shows (the page knows it, the
+  /// tracking cache only learns it on sync).
+  MyTitleRanking? _myRanking;
+
+  TrackingItem? _withRank(TrackingItem? item) {
+    final rank = _myRanking;
+    if (item == null || rank == null || item.isRanked) return item;
+    return item.copyWith(isRanked: true, rankPosition: rank.rankPosition, score: rank.calculatedScore);
+  }
 
   /// Scroll notifications fire before the new layout, so the title is measured after the frame.
   bool _onScroll(ScrollNotification n) {
@@ -141,6 +174,12 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<TrackingItem?>(titleTrackingProvider((widget.titleId, widget.mediaType)), (prev, next) {
+      if (_expectFinish && prev?.state == TrackingState.watching && next != null && next.state != TrackingState.watching) {
+        _expectFinish = false;
+        _openFinishSheet(_withRank(next)!);
+      }
+    });
     Widget content;
     if (widget.initialTitle != null) {
       content = _buildScaffold(widget.initialTitle!);
@@ -196,6 +235,8 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
   }
 
   Widget _buildScaffold(TitleDetail title) {
+    _myRanking = title.socialSummary?.myRanking;
+    final tracked = _withRank(ref.watch(titleTrackingProvider((title.id, title.mediaType))));
     final canvasColor = Theme.of(context).brightness == Brightness.light
         ? TellyColors.lightBackgroundPrimary
         : TellyColors.backgroundCanvasOled;
@@ -206,7 +247,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
         child: CustomScrollView(
           slivers: [
             // 1. 16:9 Backdrop with Gradient Fade and Top Actions
-            _buildBackdropAppBar(title),
+            _buildBackdropAppBar(title, tracked),
 
             // 2. Main Content Body
             SliverToBoxAdapter(
@@ -224,11 +265,11 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                     ),
 
                     // Title, Poster & Meta
-                    _buildHeaderMeta(title),
+                    _buildHeaderMeta(title, tracked),
                     const SizedBox(height: 16),
 
                     // Quick Action Hub (Queue, Rank/Duel, Co-Watch, Share)
-                    _buildQuickActionHub(title),
+                    _buildQuickActionHub(title, tracked),
                     const SizedBox(height: 24),
 
                     // Overview / Synopsis
@@ -242,8 +283,8 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                       const SizedBox(height: 24),
                     ],
 
-                    // STREAMING NOW section
-                    _buildStreamingNowSection(title),
+                    // NEXT EPISODE / WATCHING card while tracked, else STREAMING NOW
+                    _buildWatchingBlock(title, tracked),
                     const SizedBox(height: 24),
 
                     // YOUR STATUS section (Ranked vs Unranked)
@@ -259,7 +300,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
 
                     // SEASONS ACCORDION (TV Series only; omitted for Movies)
                     if (title.isTv && title.seasons.isNotEmpty) ...[
-                      _buildSeasonsAccordion(title.seasons),
+                      KeyedSubtree(key: _seasonsKey, child: _buildSeasonsAccordion(title.seasons)),
                       const SizedBox(height: 28),
                     ],
 
@@ -298,7 +339,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
     );
   }
 
-  Widget _buildBackdropAppBar(TitleDetail title) {
+  Widget _buildBackdropAppBar(TitleDetail title, TrackingItem? tracked) {
     final canvasColor = Theme.of(context).brightness == Brightness.light
         ? TellyColors.lightBackgroundPrimary
         : TellyColors.backgroundCanvasOled;
@@ -324,6 +365,16 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
         ),
       ),
       actions: [
+        if (tracked != null)
+          PopupMenuButton<String>(
+            key: const Key('tracking_overflow_menu'),
+            icon: Icon(Icons.more_vert, color: TellyColors.textPrimaryOf(context)),
+            onSelected: (v) => v == 'drop' ? _onDrop(tracked) : _onStopTracking(tracked),
+            itemBuilder: (_) => [
+              if (!tracked.isMovie) const PopupMenuItem(value: 'drop', child: Text('Drop it')),
+              const PopupMenuItem(value: 'stop', child: Text('Stop tracking')),
+            ],
+          ),
         IconButton(
           icon: Icon(
             _isBookmarked ? Icons.bookmark : Icons.bookmark_border,
@@ -368,13 +419,15 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                 ),
               ),
             ),
+            if (tracked != null && !tracked.isMovie)
+              Positioned(left: 0, right: 0, bottom: 0, child: TrackingProgressLine(fraction: tracked.progress)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildHeaderMeta(TitleDetail title) {
+  Widget _buildHeaderMeta(TitleDetail title, TrackingItem? tracked) {
     final communityScore = title.communityScore ?? 8.0;
     final tier = CanonTier.fromScore(communityScore);
 
@@ -406,6 +459,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (tracked != null) TrackingEyebrow(item: tracked),
               Text(
                 title.title,
                 key: _pageTitleKey,
@@ -431,8 +485,10 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                 ),
               ],
               const SizedBox(height: 10),
-              // Community Score with CanonTier Badge
-              Row(
+              // Community Score with CanonTier Badge (wraps: "PRESTIGE" overflowed a row at 393 dp)
+              Wrap(
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 6,
                 children: [
                   Text(
                     '★ ${communityScore.toStringAsFixed(2)}',
@@ -440,14 +496,12 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                       color: TellyColors.warmAmberOf(context),
                     ).copyWith(fontWeight: FontWeight.w800),
                   ),
-                  const SizedBox(width: 8),
                   TellyNeonBadge(
                     label: '${tier.emoji} ${tier.label.toUpperCase()}',
                     variant: tier == CanonTier.god
                         ? TellyBadgeVariant.godTier
                         : TellyBadgeVariant.tasteMatch,
                   ),
-                  const SizedBox(width: 6),
                   Semantics(
                     button: true,
                     label: 'Score and tier explanation',
@@ -563,19 +617,14 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
     return parts.join(' • ');
   }
 
-  Widget _buildQuickActionHub(TitleDetail title) {
+  Widget _buildQuickActionHub(TitleDetail title, TrackingItem? tracked) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // 1. Queue / Watchlist Toggle
-          _buildQuickActionButton(
-            icon: _isBookmarked ? Icons.playlist_add_check_rounded : Icons.playlist_add_rounded,
-            label: _isBookmarked ? 'In Queue' : 'Add to Queue',
-            accentColor: _isBookmarked ? TellyColors.primaryAccentOf(context) : TellyColors.textSecondaryOf(context),
-            onTap: () => _toggleBookmark(title),
-          ),
+          // 1. Watch slot (the Queue toggle lives on the app bar bookmark; SCR-08 §T.2)
+          WatchSlot(item: tracked, onTap: () => _onWatchSlot(title, tracked)),
           // 2. Rank / Re-Duel
           _buildQuickActionButton(
             icon: Icons.emoji_events_outlined,
@@ -662,10 +711,10 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
   );
 }
 
-  Widget _buildStreamingNowSection(TitleDetail title) {
-    // Live availability first (BE-DETAIL-01); cached `title_availability` rows otherwise.
+  /// Where the title streams (live availability first, BE-DETAIL-01; cached rows otherwise).
+  List<({String id, String name})> _streamingProviders(TitleDetail title) {
     final live = ref.watch(titleStreamingProvider((title.id, title.mediaType))).valueOrNull ?? const [];
-    final providers = live.isNotEmpty
+    return live.isNotEmpty
         ? [
             for (final p in live)
               // "Streaming now" means watchable without buying or renting.
@@ -673,6 +722,267 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                 (id: p.platformId, name: p.platformName),
           ]
         : [for (final a in title.availabilities) (id: a.platformId, name: _platformName(a.platformId))];
+  }
+
+  void _play(TitleDetail title, String providerId) {
+    StreamingDeepLinkFactory.launchPlayback(
+      providerId: providerId,
+      externalShowId: '${title.id}',
+      showSlug: title.title.toLowerCase().replaceAll(' ', '-'),
+    );
+  }
+
+  // --- Watch tracking (#229; SCR-08 §T, features/11 §4) ---
+
+  /// The Next episode / Movie Watching card in place of *Streaming now* (§T.4, §T.4b).
+  Widget _buildWatchingBlock(TitleDetail title, TrackingItem? item) {
+    if (item == null) return _buildStreamingNowSection(title);
+    final providers = _streamingProviders(title);
+    final first = providers.isEmpty ? null : providers.first;
+    final now = DateTime.now();
+    final Widget card;
+    if (item.isMovie) {
+      card = MovieWatchingCard(
+        item: item,
+        now: now,
+        providerName: first?.name,
+        onPlay: first == null ? null : () => _play(title, first.id),
+        onFinished: () => _onMovieFinished(item),
+        onRank: () => _onRank(item),
+      );
+    } else {
+      card = NextEpisodeCard(
+        item: item,
+        now: now,
+        providerName: first?.name,
+        onPlay: first == null ? null : () => _play(title, first.id),
+        onWatched: () => _onWatched(item),
+        onRank: () => _onRank(item),
+      );
+    }
+    final keyed = KeyedSubtree(key: _nextCardKey, child: card);
+    if (item.state == TrackingState.watching) return keyed;
+    return Column(children: [keyed, const SizedBox(height: 24), _buildStreamingNowSection(title)]);
+  }
+
+  TrackingController get _tracking => ref.read(trackingProvider.notifier);
+
+  Future<void> _haptic({bool medium = false}) async {
+    if (!ref.read(hapticsEnabledProvider)) return;
+    medium ? await HapticsService.mediumImpact() : await HapticsService.lightImpact();
+  }
+
+  TrackingStartRequest _request(TitleDetail title, {EpisodeRef? place, bool rewatch = false}) => TrackingStartRequest(
+        titleId: title.id,
+        mediaType: title.mediaType,
+        title: title.title,
+        posterPath: title.posterPath,
+        backdropPath: title.backdropPath,
+        titleStatus: title.status,
+        runtimeMinutes: title.runtimeMinutes,
+        seasons: [
+          for (final s in title.seasons)
+            if (s.seasonNumber >= 1)
+              SeasonInfo(
+                number: s.seasonNumber,
+                episodeCount: s.episodeCount,
+                airDate: s.airDate == null ? null : DateTime.tryParse(s.airDate!),
+              ),
+        ],
+        place: place,
+        rewatch: rewatch,
+      );
+
+  void _scrollTo(GlobalKey key) {
+    final ctx = key.currentContext;
+    if (ctx != null) Scrollable.ensureVisible(ctx, duration: const Duration(milliseconds: 300), alignment: 0.1);
+  }
+
+  Future<void> _onWatchSlot(TitleDetail title, TrackingItem? item) async {
+    if (item == null) return _startWatching(title);
+    switch (item.state) {
+      case TrackingState.watching:
+        _scrollTo(_nextCardKey);
+      case TrackingState.caughtUp:
+        _scrollTo(_seasonsKey.currentContext != null ? _seasonsKey : _nextCardKey);
+      case TrackingState.finished:
+        final choice = await TellyFrostedSheet.show<String>(
+          context: context,
+          builder: (ctx) => Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                key: const Key('watch_again_action'),
+                leading: const Icon(Icons.replay_rounded),
+                title: const Text('Watch again'),
+                onTap: () => Navigator.of(ctx).pop('again'),
+              ),
+              ListTile(
+                key: const Key('stop_tracking_action'),
+                leading: const Icon(Icons.stop_circle_outlined),
+                title: const Text('Stop tracking'),
+                onTap: () => Navigator.of(ctx).pop('stop'),
+              ),
+            ],
+          ),
+        );
+        if (!mounted) return;
+        if (choice == 'again') {
+          await _tracking.start(_request(title, rewatch: true));
+        } else if (choice == 'stop') {
+          await _onStopTracking(item);
+        }
+    }
+  }
+
+  /// Starting leaves the Queue; Undo puts the title back and stops tracking (§4.1, §4.10).
+  Future<void> _startWatching(TitleDetail title) async {
+    var request = _request(title);
+    if (title.isTv && request.seasons.isNotEmpty) {
+      EpisodeRef? preset;
+      if (title.socialSummary?.myRanking != null) {
+        // A ranked series is usually one you are up to date on: preset the place there (§10).
+        preset = TrackingProgress.lastAired(
+          ShowSchedule(seasons: request.seasons, status: title.status),
+          DateTime.now(),
+        );
+      }
+      final result = await WhereAreYouSheet.show(
+        context,
+        titleId: title.id,
+        seasons: request.seasons,
+        initialPlace: preset,
+      );
+      if (result == null || !mounted) return;
+      request = _request(title, place: result.place);
+    }
+    final wasQueued = _isBookmarked;
+    final started = await _tracking.start(request);
+    await _haptic(medium: true);
+    if (!mounted) return;
+    if (wasQueued) {
+      await ref.read(watchlistRepositoryProvider).remove(titleId: title.id, mediaType: title.mediaType);
+      if (mounted) setState(() => _isBookmarked = false);
+    }
+    if (!mounted) return;
+    TrackingUndoTray.show(
+      context,
+      message: 'Watching ${title.title}',
+      onUndo: () async {
+        await _tracking.stop(started);
+        if (wasQueued) {
+          await ref.read(watchlistRepositoryProvider).add(
+                titleId: title.id,
+                mediaType: title.mediaType,
+                title: title.title,
+                posterPath: title.posterPath,
+              );
+          if (mounted) setState(() => _isBookmarked = true);
+        }
+      },
+    );
+  }
+
+  Future<void> _onWatched(TrackingItem item) async {
+    final next = item.nextEpisode?.ref;
+    if (next == null) return;
+    await _haptic();
+    _expectFinish = true;
+    final before = await _tracking.markNext(item);
+    if (before == null) {
+      _expectFinish = false;
+      return;
+    }
+    if (!mounted) return;
+    TrackingUndoTray.show(
+      context,
+      message: '${next.label} watched',
+      onUndo: () {
+        _expectFinish = false;
+        _tracking.undo(before);
+      },
+    );
+  }
+
+  Future<void> _onMovieFinished(TrackingItem item) async {
+    await _haptic(medium: true);
+    _expectFinish = true;
+    await _tracking.finish(item);
+  }
+
+  TitleSearchResult _searchResult(TrackingItem item) => TitleSearchResult(
+        id: item.titleId,
+        mediaType: item.mediaType,
+        title: item.title,
+        posterPath: item.posterPath,
+      );
+
+  void _onRank(TrackingItem item) {
+    context.push(Routes.log, extra: LogRequest(title: _searchResult(item), status: FinishSheet.defaultStatus(item)));
+  }
+
+  Future<void> _openFinishSheet(TrackingItem item) async {
+    if (!mounted) return;
+    final result = await FinishSheet.show(context, item);
+    if (result == null || !mounted) return;
+    switch (result.action) {
+      case FinishAction.logAndDuel:
+        context.push(Routes.log, extra: LogRequest(title: _searchResult(item), status: result.status));
+      case FinishAction.reDuel:
+        context.push(Routes.log, extra: _searchResult(item));
+      case FinishAction.later || FinishAction.keepRank:
+        break;
+    }
+  }
+
+  /// features/11 §4.6: the existing drop flow, prefilled from the place; saving stops tracking.
+  Future<void> _onDrop(TrackingItem item) async {
+    final point = item.nextEpisode?.ref ?? item.place;
+    final details = await LogDroppedShowSheet.show(
+      context: context,
+      titleId: item.titleId,
+      title: item.title,
+      releaseYear: 0,
+      initial: DropDetails(season: point?.season ?? 1, episode: point?.episode),
+    );
+    if (details == null || !mounted) return;
+    try {
+      await ref
+          .read(graveyardControllerProvider.notifier)
+          .drop(titleId: item.titleId, mediaType: item.mediaType, details: details);
+      await _tracking.stop(item);
+      if (mounted) context.go(Routes.graveyard);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Couldn't add it to your Graveyard. Try again.")),
+        );
+      }
+    }
+  }
+
+  Future<void> _onStopTracking(TrackingItem item) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        key: const Key('stop_tracking_dialog'),
+        title: const Text('Stop tracking?'),
+        content: const Text('Your progress is removed. Your rank, if any, stays.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
+          TextButton(
+            key: const Key('stop_tracking_confirm'),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Stop tracking'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) await _tracking.stop(item);
+  }
+
+  Widget _buildStreamingNowSection(TitleDetail title) {
+    final providers = _streamingProviders(title);
 
     return Container(
       padding: const EdgeInsets.all(16),

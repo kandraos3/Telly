@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 
 /// Hosts [screen] at `/` inside a GoRouter; any other location renders `route:<location>`
 /// so tests can assert where a screen navigates without building the destination.
-Widget routerHarness(Widget screen, {List<Override> overrides = const []}) {
+Widget routerHarness(Widget screen, {List<Override> overrides = const [], ThemeData? theme}) {
   Widget stub(BuildContext _, GoRouterState state) => Scaffold(body: Text('route:${state.uri}'));
   final router = GoRouter(
     routes: [
@@ -15,5 +15,5 @@ Widget routerHarness(Widget screen, {List<Override> overrides = const []}) {
       GoRoute(path: '/:a/:b/:c/:d', builder: stub),
     ],
   );
-  return ProviderScope(overrides: overrides, child: MaterialApp.router(routerConfig: router));
+  return ProviderScope(overrides: overrides, child: MaterialApp.router(routerConfig: router, theme: theme));
 }

@@ -12,6 +12,9 @@ class TitleDetail {
   final int? runtimeMinutes;
   final String? network;
   final String? director;
+
+  /// TMDB `status` of a series ("Ended", "Returning Series"), used by watch tracking.
+  final String? status;
   final int? numberOfSeasons;
   final int? numberOfEpisodes;
   final double? communityScore;
@@ -31,6 +34,7 @@ class TitleDetail {
     this.runtimeMinutes,
     this.network,
     this.director,
+    this.status,
     this.numberOfSeasons,
     this.numberOfEpisodes,
     this.communityScore,
@@ -69,6 +73,7 @@ class TitleDetail {
       runtimeMinutes: (titleRow['runtime_minutes'] as num?)?.toInt(),
       network: titleRow['original_network']?.toString(),
       director: titleRow['director']?.toString(),
+      status: titleRow['status']?.toString(),
       numberOfSeasons: (titleRow['number_of_seasons'] as num?)?.toInt(),
       numberOfEpisodes: (titleRow['number_of_episodes'] as num?)?.toInt(),
       communityScore:
