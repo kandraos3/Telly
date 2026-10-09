@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../tracking/presentation/widgets/canon_tracking.dart';
 
 import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
@@ -157,6 +158,7 @@ class _PodiumCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     CanonTierScoreChip(score: entry.calculatedScore),
+                    CanonProgressTagFor(titleId: entry.id, mediaType: entry.mediaType, padding: const EdgeInsets.only(top: 6)),
                   ],
                 ),
               ),

@@ -10,6 +10,7 @@ import '../../features/cowatch/presentation/screens/two_to_watch_screen.dart';
 import '../../features/feed/domain/social_models.dart';
 import '../../features/feed/presentation/screens/activity_feed_screen.dart';
 import '../../features/feed/presentation/screens/comment_thread_screen.dart';
+import '../../features/logging/domain/log_request.dart';
 import '../../features/logging/domain/title_search_result.dart';
 import '../../features/logging/presentation/screens/log_flow_screens.dart';
 import '../../features/logging/presentation/screens/logging_studio_screen.dart';
@@ -39,6 +40,8 @@ import '../../features/discovery/presentation/screens/explore_discover_screen.da
 import '../../features/discovery/presentation/screens/explore_row_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/more/presentation/screens/more_hub_screen.dart';
+import '../../features/tracking/domain/tracking_hub.dart';
+import '../../features/tracking/presentation/screens/watching_hub_screen.dart';
 import '../../features/title_detail/presentation/screens/show_detail_screen.dart';
 import 'app_shell.dart';
 import 'auth_redirect.dart';
@@ -222,6 +225,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   ],
                 ),
                 GoRoute(
+                  path: 'watching',
+                  parentNavigatorKey: rootNavigatorKey,
+                  builder: (_, state) => WatchingHubScreen(
+                    initialFilter: WatchingFilter.fromQuery(state.uri.queryParameters['filter']),
+                  ),
+                ),
+                GoRoute(
                   path: 'graveyard',
                   parentNavigatorKey: rootNavigatorKey,
                   builder: (_, __) => const TvGraveyardScreen(),
@@ -240,9 +250,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // Logging flow (full-screen; SCR-09 → SCR-10 → SCR-11 sheet → SCR-12)
       GoRoute(
         path: Routes.log,
-        builder: (_, state) => LoggingStudioScreen(
-          initialTitle: state.extra is TitleSearchResult ? state.extra! as TitleSearchResult : null,
-        ),
+        builder: (_, state) {
+          final extra = state.extra;
+          return LoggingStudioScreen(
+            initialTitle: extra is LogRequest
+                ? extra.title
+                : extra is TitleSearchResult
+                    ? extra
+                    : null,
+            initialStatus: extra is LogRequest ? extra.status : null,
+          );
+        },
         routes: [
           GoRoute(path: 'duel', builder: (_, __) => const LogDuelScreen()),
           GoRoute(path: 'reveal', builder: (_, __) => const LogRevealScreen()),

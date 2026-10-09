@@ -7,6 +7,7 @@ import 'package:telly_app/core/theme/telly_typography.dart';
 import 'package:telly_app/core/widgets/telly_screen_header.dart';
 import 'package:telly_app/features/profile/domain/dropped_show.dart';
 import 'package:telly_app/features/profile/presentation/controllers/graveyard_controller.dart';
+import 'package:telly_app/features/tracking/presentation/widgets/tracking_actions.dart';
 
 /// SCR-18: The TV Graveyard (Dropped / DNF Tracker Screen) (FE-307).
 ///
@@ -85,14 +86,14 @@ class TvGraveyardScreen extends ConsumerWidget {
             else if (droppedShows.isEmpty)
               _buildEmptyState(context)
             else
-              ...droppedShows.map((show) => _buildDroppedCard(context, show)),
+              ...droppedShows.map((show) => _buildDroppedCard(context, ref, show)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildDroppedCard(BuildContext context, DroppedShow show) {
+  Widget _buildDroppedCard(BuildContext context, WidgetRef ref, DroppedShow show) {
     final reasonIcon = DropReasonTaxonomy.getReasonIcon(show.reason);
 
     return InkWell(
@@ -223,6 +224,23 @@ class TvGraveyardScreen extends ConsumerWidget {
                 ],
               ),
             ],
+
+            // Start tracking again from the drop point (epic #168; features/11 §4.7).
+            const SizedBox(height: 10),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                key: Key('graveyard_revive_${show.id}'),
+                onPressed: () => TrackingActions.revive(context, ref, show),
+                icon: const Icon(Icons.play_circle_outline_rounded, size: 18),
+                label: const Text('Revive'),
+                style: TextButton.styleFrom(
+                  foregroundColor: TellyColors.primaryAccentOf(context),
+                  minimumSize: const Size(48, 44),
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                ),
+              ),
+            ),
           ],
         ),
       ),

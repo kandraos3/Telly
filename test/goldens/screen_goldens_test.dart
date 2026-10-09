@@ -22,6 +22,15 @@ import 'package:telly_app/features/ranking/presentation/screens/slot_reveal_moda
 import 'package:telly_app/features/ranking/presentation/widgets/duel_arena_card.dart';
 import 'package:telly_app/features/title_detail/domain/title_detail_models.dart';
 import 'package:telly_app/features/title_detail/presentation/screens/show_detail_screen.dart';
+import 'package:telly_app/features/title_detail/data/title_detail_repository.dart';
+import 'package:telly_app/features/tracking/data/tracking_repository.dart';
+import 'package:telly_app/features/tracking/domain/tracking_item.dart';
+import 'package:telly_app/features/tracking/domain/tracking_models.dart';
+import 'package:telly_app/features/tracking/presentation/providers/tracking_providers.dart';
+import 'package:telly_app/features/tracking/presentation/screens/watching_hub_screen.dart';
+import 'package:telly_app/features/profile/data/graveyard_repository.dart';
+import 'package:telly_app/features/profile/domain/dropped_show.dart';
+import '../fakes/fake_graveyard_repository.dart';
 import 'package:telly_app/core/widgets/poster_image.dart';
 import 'package:telly_app/core/widgets/telly_log_fab.dart';
 import 'package:telly_app/features/auth/data/auth_repository.dart';
@@ -42,6 +51,8 @@ import 'package:telly_app/features/profile/presentation/controllers/profile_cont
 import 'package:telly_app/features/profile/presentation/screens/dual_canon_profile_screen.dart';
 
 import '../fakes/fake_auth_repository.dart';
+import '../fakes/fake_tracking_repository.dart';
+import '../helpers/tracking_harness.dart';
 import '../fakes/fake_social_repository.dart';
 import '../features/achievements/achievements_fixtures.dart';
 import '../features/challenges/challenges_fixtures.dart';
@@ -129,6 +140,70 @@ class _InMemoryWatchlistRepository implements WatchlistRepository {
   @override
   Stream<List<WatchlistEntry>> watchWatchlist({String? mediaType}) =>
       Stream.value([]);
+}
+
+final _trackingToday = DateTime(2026, 10, 9, 12);
+
+/// Severance (id 110492) is on its way through season 2: its Canon rows get the progress tag.
+List<TrackingItem> _goldenCanonTracking() => [
+      TrackingItem(
+        titleId: 110492,
+        mediaType: 'tv',
+        title: 'Severance',
+        state: TrackingState.watching,
+        startedAt: _trackingToday.subtract(const Duration(days: 60)),
+        lastProgressAt: _trackingToday.subtract(const Duration(days: 1)),
+        place: const EpisodeRef(2, 5),
+        nextEpisode: const NextEpisode(ref: EpisodeRef(2, 6)),
+        airedTotal: 19,
+        watched: 14,
+      ),
+    ];
+
+/// One title in every hub group, for the Watching hub and the More tile goldens.
+List<TrackingItem> _goldenTracking() {
+  DateTime ago(int d) => _trackingToday.subtract(Duration(days: d));
+  TrackingItem show(int id, String title,
+          {TrackingState state = TrackingState.watching,
+          int idle = 1,
+          int watched = 12,
+          EpisodeRef? place = const EpisodeRef(1, 8),
+          EpisodeRef? next = const EpisodeRef(1, 9),
+          DateTime? newSince,
+          bool ranked = false,
+          int? rank}) =>
+      TrackingItem(
+        titleId: id,
+        mediaType: 'tv',
+        title: title,
+        state: state,
+        startedAt: ago(90),
+        lastProgressAt: ago(idle),
+        place: place,
+        newEpisodesSince: newSince,
+        isRanked: ranked,
+        rankPosition: rank,
+        airedTotal: 19,
+        watched: watched,
+        nextEpisode: next == null ? null : NextEpisode(ref: next, name: 'Attila'),
+      );
+  return [
+    show(1, 'Severance', newSince: ago(1), place: const EpisodeRef(2, 10), next: const EpisodeRef(3, 1), watched: 19),
+    show(2, 'Shogun', watched: 8),
+    show(3, 'Slow Horses', watched: 3, idle: 3),
+    TrackingItem(
+      titleId: 4,
+      mediaType: 'movie',
+      title: 'Dune: Part Two',
+      state: TrackingState.watching,
+      startedAt: ago(1),
+      lastProgressAt: ago(1),
+      runtimeMinutes: 166,
+    ),
+    show(5, 'The Bear', state: TrackingState.caughtUp, idle: 5, next: null, watched: 19),
+    show(6, 'Andor', state: TrackingState.caughtUp, ranked: true, rank: 6, next: null, watched: 19),
+    show(7, 'Lost', idle: 45, watched: 4),
+  ];
 }
 
 void main() {
@@ -298,6 +373,7 @@ void main() {
         ProviderScope(
           overrides: [
             watchlistRepositoryProvider.overrideWithValue(_InMemoryWatchlistRepository()),
+            trackingRepositoryProvider.overrideWithValue(FakeTrackingRepository()),
           ],
           child: MaterialApp(
             theme: TellyTheme.darkTheme,
@@ -316,6 +392,161 @@ void main() {
         matchesGoldenFile('goldens/show_detail_iphone15.png'),
       );
     });
+
+    // -------------------------------------------------------------------------
+    // 3b. SCR-08 §T watch tracking (#229): Watching card and the movie card, both themes
+    // -------------------------------------------------------------------------
+    for (final dark in [true, false]) {
+      final mode = dark ? 'dark' : 'light';
+
+      testWidgets('Golden: SCR-08 title page while Watching, $mode', (tester) async {
+        await tester.binding.setSurfaceSize(const Size(393, 852));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        final db = AppDatabase.inMemory();
+        addTearDown(db.close);
+        final repo = trackingRepositoryFor(db);
+        final seasons = [
+          SeasonInfo(number: 1, episodeCount: 9, airDate: DateTime(2022, 2, 18)),
+          SeasonInfo(number: 2, episodeCount: 10, airDate: DateTime(2025, 1, 17)),
+          SeasonInfo(number: 3, episodeCount: 10, airDate: DateTime(2027, 3, 1)),
+        ];
+        await repo.start(TrackingStartRequest(
+          titleId: 1396,
+          mediaType: 'tv',
+          title: 'Severance',
+          titleStatus: 'Returning Series',
+          seasons: seasons,
+          place: const EpisodeRef(2, 5),
+        ));
+        const title = TitleDetail(
+          id: 1396,
+          mediaType: 'tv',
+          title: 'Severance',
+          status: 'Returning Series',
+          overview: 'Mark leads a team of office workers whose memories have been surgically divided.',
+          network: 'Apple TV+',
+          numberOfSeasons: 3,
+          communityScore: 9.34,
+          availabilities: [TitleAvailabilityDetail(platformId: 'apple_tv_plus')],
+          seasons: [
+            TitleSeasonDetail(seasonNumber: 1, name: 'Season 1', episodeCount: 9, airDate: '2022-02-18'),
+            TitleSeasonDetail(seasonNumber: 2, name: 'Season 2', episodeCount: 10, airDate: '2025-01-17'),
+            TitleSeasonDetail(seasonNumber: 3, name: 'Season 3', episodeCount: 10, airDate: '2027-03-01'),
+          ],
+        );
+        await tester.pumpWidget(ProviderScope(
+          overrides: [
+            ...trackingOverrides(db),
+            titleDetailRepositoryProvider.overrideWithValue(FakeTitleDetailRepository([title])),
+            watchlistRepositoryProvider.overrideWithValue(_InMemoryWatchlistRepository()),
+          ],
+          child: MaterialApp(
+            theme: dark ? TellyTheme.darkTheme : TellyTheme.lightTheme,
+            home: const ShowDetailScreen(titleId: 1396, mediaType: 'tv', initialTitle: title),
+          ),
+        ));
+        await settle(tester);
+
+        await expectLater(
+          find.byType(ShowDetailScreen),
+          matchesGoldenFile('goldens/title_watching_${mode}_iphone15.png'),
+        );
+        await unmountTree(tester);
+      });
+
+      testWidgets('Golden: SCR-08 seasons expanded with the spoiler guard, $mode', (tester) async {
+        await tester.binding.setSurfaceSize(const Size(393, 2000));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        final db = AppDatabase.inMemory();
+        addTearDown(db.close);
+        await trackingRepositoryFor(db).start(TrackingStartRequest(
+          titleId: 1396,
+          mediaType: 'tv',
+          title: 'Severance',
+          titleStatus: 'Returning Series',
+          seasons: [
+            SeasonInfo(number: 1, episodeCount: 9, airDate: DateTime(2022, 2, 18)),
+            SeasonInfo(number: 2, episodeCount: 10, airDate: DateTime(2025, 1, 17)),
+            SeasonInfo(number: 3, episodeCount: 10, airDate: DateTime(2027, 3, 1)),
+          ],
+          place: const EpisodeRef(2, 2),
+        ));
+        const title = TitleDetail(
+          id: 1396,
+          mediaType: 'tv',
+          title: 'Severance',
+          status: 'Returning Series',
+          network: 'Apple TV+',
+          communityScore: 9.34,
+          seasons: [
+            TitleSeasonDetail(seasonNumber: 1, name: 'Season 1', episodeCount: 9, airDate: '2022-02-18'),
+            TitleSeasonDetail(seasonNumber: 2, name: 'Season 2', episodeCount: 10, airDate: '2025-01-17'),
+            TitleSeasonDetail(seasonNumber: 3, name: 'Season 3', episodeCount: 10, airDate: '2027-03-01'),
+          ],
+        );
+        await tester.pumpWidget(ProviderScope(
+          overrides: [
+            ...trackingOverrides(db),
+            titleDetailRepositoryProvider.overrideWithValue(FakeTitleDetailRepository([title])),
+            watchlistRepositoryProvider.overrideWithValue(_InMemoryWatchlistRepository()),
+          ],
+          child: MaterialApp(
+            theme: dark ? TellyTheme.darkTheme : TellyTheme.lightTheme,
+            home: const ShowDetailScreen(titleId: 1396, mediaType: 'tv', initialTitle: title),
+          ),
+        ));
+        await settle(tester);
+        await tester.tap(find.text('Season 2'));
+        await settle(tester);
+
+        await expectLater(
+          find.byType(ShowDetailScreen),
+          matchesGoldenFile('goldens/title_seasons_${mode}_iphone15.png'),
+        );
+        await unmountTree(tester);
+      });
+
+      testWidgets('Golden: SCR-08 movie Watching card, $mode', (tester) async {
+        await tester.binding.setSurfaceSize(const Size(393, 852));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        final db = AppDatabase.inMemory();
+        addTearDown(db.close);
+        await trackingRepositoryFor(db).start(const TrackingStartRequest(
+          titleId: 693134,
+          mediaType: 'movie',
+          title: 'Dune: Part Two',
+          runtimeMinutes: 166,
+        ));
+        final title = TitleDetail(
+          id: 693134,
+          mediaType: 'movie',
+          title: 'Dune: Part Two',
+          network: 'Legendary',
+          runtimeMinutes: 166,
+          releaseDate: DateTime(2024, 2, 27),
+          communityScore: 8.9,
+          availabilities: const [TitleAvailabilityDetail(platformId: 'max')],
+        );
+        await tester.pumpWidget(ProviderScope(
+          overrides: [
+            ...trackingOverrides(db),
+            titleDetailRepositoryProvider.overrideWithValue(FakeTitleDetailRepository([title])),
+            watchlistRepositoryProvider.overrideWithValue(_InMemoryWatchlistRepository()),
+          ],
+          child: MaterialApp(
+            theme: dark ? TellyTheme.darkTheme : TellyTheme.lightTheme,
+            home: ShowDetailScreen(titleId: 693134, mediaType: 'movie', initialTitle: title),
+          ),
+        ));
+        await settle(tester);
+
+        await expectLater(
+          find.byType(ShowDetailScreen),
+          matchesGoldenFile('goldens/title_movie_watching_${mode}_iphone15.png'),
+        );
+        await unmountTree(tester);
+      });
+    }
 
     // -------------------------------------------------------------------------
     // 4. SCR-10 Duel Arena Card
@@ -447,13 +678,17 @@ void main() {
       ];
 
       await tester.pumpWidget(
-        MaterialApp(
-          theme: TellyTheme.darkTheme,
-          home: Scaffold(
-            backgroundColor: TellyColors.backgroundCanvasOled,
-            body: SingleChildScrollView(
-              child: RankedCanonList(
+        ProviderScope(
+          // Severance is being watched: its row carries the "▶ S2 · E6" tag (epic #168).
+          overrides: [trackingRepositoryProvider.overrideWithValue(FakeTrackingRepository(_goldenCanonTracking()))],
+          child: MaterialApp(
+            theme: TellyTheme.darkTheme,
+            home: Scaffold(
+              backgroundColor: TellyColors.backgroundCanvasOled,
+              body: SingleChildScrollView(
+                child: RankedCanonList(
                 entries: entries,
+              ),
               ),
             ),
           ),
@@ -499,14 +734,18 @@ void main() {
       ];
 
       await tester.pumpWidget(
-        MaterialApp(
-          theme: TellyTheme.darkTheme,
-          home: Scaffold(
-            backgroundColor: TellyColors.backgroundCanvasOled,
-            body: SingleChildScrollView(
-              child: TierViewList(
+        ProviderScope(
+          // Severance is being watched: its row carries the "▶ S2 · E6" tag (epic #168).
+          overrides: [trackingRepositoryProvider.overrideWithValue(FakeTrackingRepository(_goldenCanonTracking()))],
+          child: MaterialApp(
+            theme: TellyTheme.darkTheme,
+            home: Scaffold(
+              backgroundColor: TellyColors.backgroundCanvasOled,
+              body: SingleChildScrollView(
+                child: TierViewList(
                 entries: entries,
                 onTapEntry: (_) {},
+              ),
               ),
             ),
           ),
@@ -596,7 +835,12 @@ void main() {
         await tester.binding.setSurfaceSize(const Size(393, 852));
         addTearDown(() => tester.binding.setSurfaceSize(null));
         await tester.pumpWidget(ProviderScope(
-          overrides: shellOverrides(),
+          overrides: [
+            ...shellOverrides(),
+            // Currently watching leads the page (epic #168).
+            trackingRepositoryProvider.overrideWithValue(FakeTrackingRepository(_goldenTracking())),
+            trackingNowProvider.overrideWithValue(() => _trackingToday),
+          ],
           child: MaterialApp(theme: theme, home: const HomeScreen()),
         ));
         await tester.pumpAndSettle();
@@ -607,11 +851,46 @@ void main() {
         await tester.binding.setSurfaceSize(const Size(393, 852));
         addTearDown(() => tester.binding.setSurfaceSize(null));
         await tester.pumpWidget(ProviderScope(
-          overrides: shellOverrides(),
+          overrides: [
+            ...shellOverrides(),
+            trackingRepositoryProvider.overrideWithValue(FakeTrackingRepository(_goldenTracking())),
+            trackingNowProvider.overrideWithValue(() => _trackingToday),
+          ],
           child: MaterialApp(theme: theme, home: const MoreHubScreen()),
         ));
         await tester.pumpAndSettle();
         await expectLater(find.byType(MoreHubScreen), matchesGoldenFile('goldens/more_${name}_iphone15.png'));
+      });
+
+      testWidgets('Golden: SCR-29 Watching hub ($name) on iPhone 15 Pro size (#231)', (tester) async {
+        await tester.binding.setSurfaceSize(const Size(393, 1500));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        final fake = FakeTrackingRepository(_goldenTracking())..weekStats = const TrackingStats(episodes: 9, minutes: 470);
+        final graveyard = FakeGraveyardRepository()
+          ..shows.addAll([
+            for (var i = 1; i <= 14; i++)
+              DroppedShow(
+                id: 'd$i',
+                userId: 'u1',
+                titleId: 9000 + i,
+                mediaType: 'tv',
+                title: 'Dropped $i',
+                releaseYear: 2020,
+                droppedAtSeason: 1,
+                reason: DropReasonTaxonomy.pacingSlowed,
+                createdAt: DateTime(2026, 10, 3),
+              ),
+          ]);
+        await tester.pumpWidget(ProviderScope(
+          overrides: [
+            trackingRepositoryProvider.overrideWithValue(fake),
+            trackingNowProvider.overrideWithValue(() => _trackingToday),
+            graveyardRepositoryProvider.overrideWithValue(graveyard),
+          ],
+          child: MaterialApp(theme: theme, home: const WatchingHubScreen()),
+        ));
+        await tester.pumpAndSettle();
+        await expectLater(find.byType(WatchingHubScreen), matchesGoldenFile('goldens/watching_hub_${name}_iphone15.png'));
       });
 
       testWidgets('Golden: SCR-23 AchievementsScreen ($name) on iPhone 15 Pro size (#137)', (tester) async {

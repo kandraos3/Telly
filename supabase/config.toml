@@ -48,6 +48,13 @@ verify_jwt = true
 [functions.challenge-scheduler]
 verify_jwt = true
 
+[functions.tracking-refresh]
+verify_jwt = true
+
+# #227: also trusts the authenticated role claim for user requests.
+[functions.tmdb-season]
+verify_jwt = true
+
 [functions.streaming-catalog-sync]
 verify_jwt = true
 

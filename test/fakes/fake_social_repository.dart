@@ -10,6 +10,7 @@ ActivityLog fakeActivity(
   String title = 'Severance',
   bool upset = false,
   int minutesAgo = 0,
+  ActivityType? type,
   Set<FeedFilter> visibleIn = const {FeedFilter.following, FeedFilter.global},
 }) =>
     ActivityLog(
@@ -17,7 +18,7 @@ ActivityLog fakeActivity(
       userId: userId,
       username: username,
       userDisplayName: username[0].toUpperCase() + username.substring(1),
-      activityType: upset ? ActivityType.upsetAlert : ActivityType.rankingCreated,
+      activityType: type ?? (upset ? ActivityType.upsetAlert : ActivityType.rankingCreated),
       titleId: titleId,
       titleName: title,
       mediaType: 'tv',

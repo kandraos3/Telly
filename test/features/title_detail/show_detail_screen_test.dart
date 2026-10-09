@@ -12,6 +12,9 @@ import 'package:telly_app/features/title_detail/presentation/screens/show_detail
 import 'package:telly_app/features/title_detail/presentation/widgets/title_cast_section.dart';
 import 'package:telly_app/features/title_detail/presentation/widgets/title_duel_record_section.dart';
 
+import 'package:telly_app/features/tracking/data/tracking_repository.dart';
+
+import '../../fakes/fake_tracking_repository.dart';
 import '../../helpers/router_harness.dart';
 
 class InMemoryWatchlistRepository implements WatchlistRepository {
@@ -150,6 +153,7 @@ void main() {
     return ProviderScope(
       overrides: [
         posterNetworkImagesProvider.overrideWithValue(false),
+        trackingRepositoryProvider.overrideWithValue(FakeTrackingRepository()),
         titleDetailRepositoryProvider.overrideWithValue(detailRepo),
         titleCreditsProvider.overrideWith((ref, _) async => credits),
         titleStreamingProvider.overrideWith((ref, _) async => streaming),
@@ -195,7 +199,7 @@ void main() {
       expect(find.text('Maya'), findsOneWidget);
 
       // Seasons Accordion
-      expect(find.text('SEASONS ACCORDION'), findsOneWidget);
+      expect(find.text('SEASONS'), findsOneWidget);
       expect(find.text('Season 1'), findsOneWidget);
       expect(find.text('Season 2'), findsOneWidget);
       expect(find.text('9 Episodes'), findsOneWidget);
@@ -307,7 +311,7 @@ void main() {
       expect(find.text('+ Log & Add to Canon'), findsOneWidget);
 
       // Dual-Canon Invariant: Movies must NEVER have seasons accordion
-      expect(find.text('SEASONS ACCORDION'), findsNothing);
+      expect(find.text('SEASONS'), findsNothing);
       expect(find.text('COMMUNITY SURVIVAL RATE'), findsNothing);
     });
 
@@ -404,12 +408,13 @@ void main() {
       expect(find.text('Mark Scout leads a team at Lumon Industries.'), findsNothing);
     });
 
-    testWidgets('FE-DETAIL-01: renders Add to Queue label and score explanation dialog', (tester) async {
+    testWidgets('FE-DETAIL-01: renders the Watch slot and score explanation dialog', (tester) async {
       await tester.pumpWidget(createTestWidget(title: testTvShow));
       await tester.pumpAndSettle();
 
-      // Check quick action queue button label
-      expect(find.text('Add to Queue'), findsOneWidget);
+      // The first quick action is the Watch slot (#229); the Queue toggle is the app bar bookmark.
+      expect(find.text('Start watching'), findsOneWidget);
+      expect(find.text('Add to Queue'), findsNothing);
       expect(find.text('+ Queue'), findsNothing);
 
       // Check score info button

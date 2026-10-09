@@ -6,6 +6,8 @@ import 'package:telly_app/core/database/database_provider.dart';
 import 'package:telly_app/features/profile/data/graveyard_repository.dart';
 import 'package:telly_app/core/widgets/telly_primary_button.dart';
 import 'package:telly_app/features/logging/data/title_repository.dart';
+import 'package:telly_app/features/logging/domain/title_search_result.dart';
+import 'package:telly_app/features/logging/domain/watch_status.dart';
 import 'package:telly_app/features/logging/presentation/controllers/logging_session_controller.dart';
 import 'package:telly_app/features/logging/presentation/screens/logging_studio_screen.dart';
 
@@ -149,6 +151,47 @@ void main() {
       await tester.tap(find.byKey(const Key('star_4')));
       await tester.pumpAndSettle();
       expect(container.read(loggingSessionProvider).duelRequest!.broadcast, isFalse);
+    });
+
+    testWidgets('a LogRequest preselects its title and a valid status (features/11 §9.6)', (tester) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(routerHarness(
+        const LoggingStudioScreen(
+          initialTitle: TitleSearchResult(id: 136315, mediaType: 'tv', title: 'The Bear'),
+          initialStatus: WatchStatus.upToDate,
+        ),
+        overrides: [
+          titleRepositoryProvider.overrideWithValue(repo),
+          graveyardRepositoryProvider.overrideWithValue(graveyard),
+          databaseProvider.overrideWithValue(db),
+        ],
+      ));
+      await tester.pumpAndSettle();
+      final session = ProviderScope.containerOf(tester.element(find.byType(LoggingStudioScreen)));
+      expect(session.read(loggingSessionProvider).title!.title, 'The Bear');
+      expect(session.read(loggingSessionProvider).status, WatchStatus.upToDate);
+    });
+
+    testWidgets('a status that does not fit the media type is ignored', (tester) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(routerHarness(
+        const LoggingStudioScreen(
+          initialTitle: TitleSearchResult(id: 27205, mediaType: 'movie', title: 'Inception'),
+          initialStatus: WatchStatus.upToDate,
+        ),
+        overrides: [
+          titleRepositoryProvider.overrideWithValue(repo),
+          graveyardRepositoryProvider.overrideWithValue(graveyard),
+          databaseProvider.overrideWithValue(db),
+        ],
+      ));
+      await tester.pumpAndSettle();
+      final session = ProviderScope.containerOf(tester.element(find.byType(LoggingStudioScreen)));
+      expect(session.read(loggingSessionProvider).status, WatchStatus.firstTime, reason: 'the movie default stays');
     });
 
     testWidgets('a movie selection shows movie statuses only', (tester) async {

@@ -91,6 +91,8 @@ class SupabaseSocialRepository implements SocialRepository {
       'p_include_medals': true,
       // ...and challenge cards (#144).
       'p_include_challenges': true,
+      // ...and "started watching" / "finished" rows (#168).
+      'p_include_tracking': true,
     }) as List;
     // Rows of a type this app doesn't know are skipped rather than drawn as rankings (#144).
     final items = [

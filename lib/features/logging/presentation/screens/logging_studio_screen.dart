@@ -24,7 +24,10 @@ class LoggingStudioScreen extends ConsumerStatefulWidget {
   /// Pre-selects a title, e.g. "Reset Duels for This Show" (features/02 §7.2).
   final TitleSearchResult? initialTitle;
 
-  const LoggingStudioScreen({super.key, this.initialTitle});
+  /// Preselected with [initialTitle] when valid for its media type (features/11 §9.6).
+  final WatchStatus? initialStatus;
+
+  const LoggingStudioScreen({super.key, this.initialTitle, this.initialStatus});
 
   @override
   ConsumerState<LoggingStudioScreen> createState() => _LoggingStudioScreenState();
@@ -39,7 +42,10 @@ class _LoggingStudioScreenState extends ConsumerState<LoggingStudioScreen> {
     final initial = widget.initialTitle;
     if (initial != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) ref.read(loggingSessionProvider.notifier).selectTitle(initial);
+        if (!mounted) return;
+        final session = ref.read(loggingSessionProvider.notifier)..selectTitle(initial);
+        final status = widget.initialStatus;
+        if (status != null) session.setStatus(status);
       });
     }
   }
@@ -88,6 +94,7 @@ class _LoggingStudioScreenState extends ConsumerState<LoggingStudioScreen> {
     final title = draft.title;
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: TellySubpageAppBar(
         nav: TellyNavKind.close,
         navKey: const Key('logging_cancel'),

@@ -35,6 +35,8 @@ abstract final class Routes {
   static String activity(String id) => '$social/activity/$id'; // SCR-06
   static String title(String mediaType, int id) => '/title/$mediaType/$id'; // SCR-08
   static String profile(String handle) => '/u/$handle'; // SCR-15
+  /// Reserved for #216 (episode page): declared so callers can be written, not registered in the router.
+  static String episode(String mediaType, int id, int season, int episode) => '/title/$mediaType/$id/episode/$season/$episode';
   static String twoToWatch(String handle) => '/u/$handle/two-to-watch'; // SCR-16
   static const cowatch = '/cowatch'; // SCR-16
   static String cowatchWithTitle(int titleId, {String? mediaType, String? friendHandle}) =>
@@ -54,6 +56,8 @@ abstract final class Routes {
   static const levelRewards = '$level/rewards'; // SCR-27 Rewards
   static const levelHeaderArt = '$levelRewards/header-art'; // SCR-27 header art picker (#148)
   static const levelWeek = '$level/week'; // SCR-27 Friends this week
+  static const watching = '$more/watching'; // SCR-29 (#168)
+  static String watchingFiltered(String filter) => '$watching?filter=$filter'; // filter: tv | movie | finished
   static const graveyard = '$more/graveyard'; // SCR-18
   static const wrapped = '$more/wrapped'; // SCR-19
   static const settings = '$more/settings'; // SCR-20

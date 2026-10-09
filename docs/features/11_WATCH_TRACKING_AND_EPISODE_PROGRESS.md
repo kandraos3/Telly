@@ -166,7 +166,7 @@ The **finish sheet** opens when a write takes a series to `CAUGHT_UP` or `FINISH
 - Movies can't be dropped (features/03): for movies the action is **Stop tracking**.
 
 ### 4.7 Revive
-- On SCR-18, **Revive** on a dropped show starts tracking with the place set to the drop point.
+- On SCR-18, **Revive** on a dropped show starts tracking with the place set to the drop point. A drop that recorded a season but no episode resumes at the start of that season, so the place is the last episode of the season before (nothing for season 1).
 - It deletes the `user_dropped_shows` row in the same server call, and posts no activity.
 
 ### 4.8 New episodes
@@ -304,7 +304,7 @@ CREATE TABLE public.tv_episodes (
   - `tv_episodes`: SELECT for any authenticated user; writes by `service_role` only.
 
 ### 6.2 Write RPCs
-All of these are `SECURITY DEFINER`, `SET search_path = public`. They take `p_client_mutation_id` and are no-ops on replay (I-5, `applied_mutations`). They recompute `state` (§3.3), set `last_progress_at`, and return the row.
+All of these are `SECURITY DEFINER`, `SET search_path = public`. They take `p_client_mutation_id` and are no-ops on replay (I-5, `applied_mutations`). They recompute `state` (§3.3), set `last_progress_at`, and return the row (`stop_tracking` returns nothing, because the row is gone).
 
 | RPC | Behaviour |
 | :--- | :--- |
@@ -318,7 +318,7 @@ All of these are `SECURITY DEFINER`, `SET search_path = public`. They take `p_cl
 ### 6.3 Read RPCs
 | RPC | Behaviour |
 | :--- | :--- |
-| `get_my_tracking()` | The caller's rows joined with `titles` (title, poster, backdrop, status, number of seasons), `tv_seasons` counts, the next episode's `tv_episodes` row when cached, whether the title is in the caller's canon (with rank and score), and the latest aired episode. The client derives groups (§2.3) and progress (§3.4) from it. |
+| `get_my_tracking()` | One JSON document `{today, items[]}`. Each item has the tracking row, the title's display fields, whether it is in the caller's canon (with rank and score) and, for series, the seasons, `watched`, `aired_total`, the next episode (with its cached name, still, air date and runtime) and the latest aired episode. The client derives groups (§2.3) and the progress bar (§3.4) from it. |
 | `get_title_watchers(p_title_id, p_media_type)` | Up to 20 users the caller has an `accepted` follow of, where `can_view_user` holds, the user isn't `GHOST`, and who track the title in `WATCHING`. Ordered by `last_progress_at` desc. Returns `user_id`, `username`, `display_name`, `avatar_url` and the total count. **No place or state.** |
 | `get_tracking_stats(p_media_type, p_year)` | The caller's §3.6 totals for the year: `episodes` (TV) or `movies_finished` (movie). The hub's *This week* uses `p_year` NULL with the ISO week instead: for TV, `episodes` and `minutes` summed from `tv_episodes.runtime_minutes` where known; for movies, `movies_finished` and `minutes` summed from `titles.runtime_minutes`. |
 
@@ -327,9 +327,9 @@ All of these are `SECURITY DEFINER`, `SET search_path = public`. They take `p_cl
 
 ### 6.5 Daily refresh job
 - **Edge function `tracking-refresh`** (service role, called by pg_cron through `_invoke_edge_function` at `23 5 * * *`):
-  1. It selects distinct `(title_id)` from `user_tracking` where `media_type = 'tv'` and `state IN ('CAUGHT_UP', 'FINISHED')`. Ended or Canceled shows are included only on Mondays.
-  2. For each title (at most 500 per run, oldest `titles.updated_at` first), it refreshes `titles` and `tv_seasons` through the `tmdb-details` code path. Then it fetches `/tv/{id}/season/{n}` for the season after the place and any season with unaired episodes, and upserts `tv_episodes`.
-  3. It calls `refresh_tracking_new_episodes()` (SQL, service role), which applies §4.8 and returns the count.
+  1. `tracking_shows_to_refresh(include_ended, limit)` selects the distinct series in `user_tracking` with `state IN ('CAUGHT_UP', 'FINISHED')`. Ended or Canceled shows are included only on Mondays.
+  2. For each title (at most 500 per run, oldest `titles.updated_at` first), it refreshes `titles` and `tv_seasons` through the `tmdb-details` code path. Then it fetches `/tv/{id}/season/{n}` for each season in `tracking_seasons_to_refresh(title)` and upserts `tv_episodes`. Those seasons are the latest season, any season with an unaired or undated cached episode, and any season cached only in part. A TMDB 429, or running past a 100 s time budget, stops this step; the next day carries on.
+  3. It always calls `refresh_tracking_new_episodes()` (SQL, service role), which applies §4.8 and returns the count.
 - **Edge function `tmdb-season`** (authenticated, rate-limited like `tmdb-details`): it fetches and caches one season's episodes on demand. The client calls it when a tracked title's page opens and that season's episodes are missing or older than 7 days.
 
 ## 7. Social & Privacy
@@ -342,7 +342,7 @@ All of these are `SECURITY DEFINER`, `SET search_path = public`. They take `p_cl
 ### 7.2 Feed events
 - `WATCH_STARTED`: "Maya started watching Severance". Posted at most once per title per 30 days per user.
 - `WATCH_FINISHED`: "Maya finished Shōgun". Posted at most once per title per 30 days.
-- Both use the existing feed card layout with no score chip, and respect the account's visibility mode like every activity.
+- Both use the existing feed card layout with no score chip, and respect the account's visibility mode like every activity. Older apps never receive them: `get_activity_feed` needs `p_include_tracking => true`, like medals and challenges.
 - **Home's friend strip (SCR-21):** "started watching" and "finished" join the existing verbs.
 
 ## 8. Stats

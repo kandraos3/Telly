@@ -13,11 +13,18 @@ class CanonStatsPanel extends StatelessWidget {
   final bool isMovie;
   final int localTitleCount;
 
+  /// "Episodes in 2026" / "Movies finished in 2026" (epic #168, features/11 §8). The value is
+  /// null while loading or offline and shows "—"; the tile is left out when [trackingLabel] is null.
+  final String? trackingLabel;
+  final String? trackingValue;
+
   const CanonStatsPanel({
     super.key,
     required this.stats,
     required this.isMovie,
     required this.localTitleCount,
+    this.trackingLabel,
+    this.trackingValue,
   });
 
   static String formatHours(CanonStats s) {
@@ -72,6 +79,13 @@ class CanonStatsPanel extends StatelessWidget {
           children: [
             Row(children: [Expanded(child: tiles[0]), Expanded(child: tiles[1])]),
             Row(children: [Expanded(child: tiles[2]), Expanded(child: tiles[3])]),
+            if (trackingLabel != null)
+              Row(children: [
+                Expanded(
+                  child: _StatTile(key: const Key('canon_stat_tracking'), label: trackingLabel!, value: trackingValue ?? '—'),
+                ),
+                const Expanded(child: SizedBox.shrink()),
+              ]),
           ],
         ),
       ),

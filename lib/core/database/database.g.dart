@@ -53,6 +53,30 @@ class ExploreCacheDaoManager {
       $$ExploreCacheTableTableManager(_db.attachedDatabase, _db.exploreCache);
 }
 
+mixin _$TrackingCacheDaoMixin on DatabaseAccessor<AppDatabase> {
+  $TrackingCacheTable get trackingCache => attachedDatabase.trackingCache;
+  TrackingCacheDaoManager get managers => TrackingCacheDaoManager(this);
+}
+
+class TrackingCacheDaoManager {
+  final _$TrackingCacheDaoMixin _db;
+  TrackingCacheDaoManager(this._db);
+  $$TrackingCacheTableTableManager get trackingCache =>
+      $$TrackingCacheTableTableManager(_db.attachedDatabase, _db.trackingCache);
+}
+
+mixin _$EpisodeCacheDaoMixin on DatabaseAccessor<AppDatabase> {
+  $EpisodeCacheTable get episodeCache => attachedDatabase.episodeCache;
+  EpisodeCacheDaoManager get managers => EpisodeCacheDaoManager(this);
+}
+
+class EpisodeCacheDaoManager {
+  final _$EpisodeCacheDaoMixin _db;
+  EpisodeCacheDaoManager(this._db);
+  $$EpisodeCacheTableTableManager get episodeCache =>
+      $$EpisodeCacheTableTableManager(_db.attachedDatabase, _db.episodeCache);
+}
+
 class $CachedTitlesTable extends CachedTitles
     with TableInfo<$CachedTitlesTable, CachedTitle> {
   @override
@@ -2443,6 +2467,1405 @@ class ExploreCacheCompanion extends UpdateCompanion<ExploreCacheData> {
   }
 }
 
+class $TrackingCacheTable extends TrackingCache
+    with TableInfo<$TrackingCacheTable, TrackingCacheData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $TrackingCacheTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _titleIdMeta =
+      const VerificationMeta('titleId');
+  @override
+  late final GeneratedColumn<int> titleId = GeneratedColumn<int>(
+      'title_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _mediaTypeMeta =
+      const VerificationMeta('mediaType');
+  @override
+  late final GeneratedColumn<String> mediaType = GeneratedColumn<String>(
+      'media_type', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+      'title', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _posterPathMeta =
+      const VerificationMeta('posterPath');
+  @override
+  late final GeneratedColumn<String> posterPath = GeneratedColumn<String>(
+      'poster_path', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _backdropPathMeta =
+      const VerificationMeta('backdropPath');
+  @override
+  late final GeneratedColumn<String> backdropPath = GeneratedColumn<String>(
+      'backdrop_path', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _titleStatusMeta =
+      const VerificationMeta('titleStatus');
+  @override
+  late final GeneratedColumn<String> titleStatus = GeneratedColumn<String>(
+      'title_status', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _runtimeMinutesMeta =
+      const VerificationMeta('runtimeMinutes');
+  @override
+  late final GeneratedColumn<int> runtimeMinutes = GeneratedColumn<int>(
+      'runtime_minutes', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _lastSeasonMeta =
+      const VerificationMeta('lastSeason');
+  @override
+  late final GeneratedColumn<int> lastSeason = GeneratedColumn<int>(
+      'last_season', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _lastEpisodeMeta =
+      const VerificationMeta('lastEpisode');
+  @override
+  late final GeneratedColumn<int> lastEpisode = GeneratedColumn<int>(
+      'last_episode', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _stateMeta = const VerificationMeta('state');
+  @override
+  late final GeneratedColumn<String> state = GeneratedColumn<String>(
+      'state', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('WATCHING'));
+  static const VerificationMeta _isRewatchMeta =
+      const VerificationMeta('isRewatch');
+  @override
+  late final GeneratedColumn<bool> isRewatch = GeneratedColumn<bool>(
+      'is_rewatch', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("is_rewatch" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _newEpisodesSinceMeta =
+      const VerificationMeta('newEpisodesSince');
+  @override
+  late final GeneratedColumn<DateTime> newEpisodesSince =
+      GeneratedColumn<DateTime>('new_episodes_since', aliasedName, true,
+          type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _startedAtMeta =
+      const VerificationMeta('startedAt');
+  @override
+  late final GeneratedColumn<DateTime> startedAt = GeneratedColumn<DateTime>(
+      'started_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  static const VerificationMeta _lastProgressAtMeta =
+      const VerificationMeta('lastProgressAt');
+  @override
+  late final GeneratedColumn<DateTime> lastProgressAt =
+      GeneratedColumn<DateTime>('last_progress_at', aliasedName, false,
+          type: DriftSqlType.dateTime,
+          requiredDuringInsert: false,
+          defaultValue: currentDateAndTime);
+  static const VerificationMeta _finishedAtMeta =
+      const VerificationMeta('finishedAt');
+  @override
+  late final GeneratedColumn<DateTime> finishedAt = GeneratedColumn<DateTime>(
+      'finished_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _seasonsMeta =
+      const VerificationMeta('seasons');
+  @override
+  late final GeneratedColumn<String> seasons = GeneratedColumn<String>(
+      'seasons', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _watchedMeta =
+      const VerificationMeta('watched');
+  @override
+  late final GeneratedColumn<int> watched = GeneratedColumn<int>(
+      'watched', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _airedTotalMeta =
+      const VerificationMeta('airedTotal');
+  @override
+  late final GeneratedColumn<int> airedTotal = GeneratedColumn<int>(
+      'aired_total', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _nextEpisodeMeta =
+      const VerificationMeta('nextEpisode');
+  @override
+  late final GeneratedColumn<String> nextEpisode = GeneratedColumn<String>(
+      'next_episode', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _lastAiredMeta =
+      const VerificationMeta('lastAired');
+  @override
+  late final GeneratedColumn<String> lastAired = GeneratedColumn<String>(
+      'last_aired', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _rankedMeta = const VerificationMeta('ranked');
+  @override
+  late final GeneratedColumn<bool> ranked = GeneratedColumn<bool>(
+      'ranked', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("ranked" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _rankPositionMeta =
+      const VerificationMeta('rankPosition');
+  @override
+  late final GeneratedColumn<int> rankPosition = GeneratedColumn<int>(
+      'rank_position', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _scoreMeta = const VerificationMeta('score');
+  @override
+  late final GeneratedColumn<double> score = GeneratedColumn<double>(
+      'score', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _syncStatusMeta =
+      const VerificationMeta('syncStatus');
+  @override
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+      'sync_status', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('SYNCED'));
+  @override
+  List<GeneratedColumn> get $columns => [
+        titleId,
+        mediaType,
+        title,
+        posterPath,
+        backdropPath,
+        titleStatus,
+        runtimeMinutes,
+        lastSeason,
+        lastEpisode,
+        state,
+        isRewatch,
+        newEpisodesSince,
+        startedAt,
+        lastProgressAt,
+        finishedAt,
+        seasons,
+        watched,
+        airedTotal,
+        nextEpisode,
+        lastAired,
+        ranked,
+        rankPosition,
+        score,
+        syncStatus
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'tracking_cache';
+  @override
+  VerificationContext validateIntegrity(Insertable<TrackingCacheData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('title_id')) {
+      context.handle(_titleIdMeta,
+          titleId.isAcceptableOrUnknown(data['title_id']!, _titleIdMeta));
+    } else if (isInserting) {
+      context.missing(_titleIdMeta);
+    }
+    if (data.containsKey('media_type')) {
+      context.handle(_mediaTypeMeta,
+          mediaType.isAcceptableOrUnknown(data['media_type']!, _mediaTypeMeta));
+    } else if (isInserting) {
+      context.missing(_mediaTypeMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+          _titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('poster_path')) {
+      context.handle(
+          _posterPathMeta,
+          posterPath.isAcceptableOrUnknown(
+              data['poster_path']!, _posterPathMeta));
+    }
+    if (data.containsKey('backdrop_path')) {
+      context.handle(
+          _backdropPathMeta,
+          backdropPath.isAcceptableOrUnknown(
+              data['backdrop_path']!, _backdropPathMeta));
+    }
+    if (data.containsKey('title_status')) {
+      context.handle(
+          _titleStatusMeta,
+          titleStatus.isAcceptableOrUnknown(
+              data['title_status']!, _titleStatusMeta));
+    }
+    if (data.containsKey('runtime_minutes')) {
+      context.handle(
+          _runtimeMinutesMeta,
+          runtimeMinutes.isAcceptableOrUnknown(
+              data['runtime_minutes']!, _runtimeMinutesMeta));
+    }
+    if (data.containsKey('last_season')) {
+      context.handle(
+          _lastSeasonMeta,
+          lastSeason.isAcceptableOrUnknown(
+              data['last_season']!, _lastSeasonMeta));
+    }
+    if (data.containsKey('last_episode')) {
+      context.handle(
+          _lastEpisodeMeta,
+          lastEpisode.isAcceptableOrUnknown(
+              data['last_episode']!, _lastEpisodeMeta));
+    }
+    if (data.containsKey('state')) {
+      context.handle(
+          _stateMeta, state.isAcceptableOrUnknown(data['state']!, _stateMeta));
+    }
+    if (data.containsKey('is_rewatch')) {
+      context.handle(_isRewatchMeta,
+          isRewatch.isAcceptableOrUnknown(data['is_rewatch']!, _isRewatchMeta));
+    }
+    if (data.containsKey('new_episodes_since')) {
+      context.handle(
+          _newEpisodesSinceMeta,
+          newEpisodesSince.isAcceptableOrUnknown(
+              data['new_episodes_since']!, _newEpisodesSinceMeta));
+    }
+    if (data.containsKey('started_at')) {
+      context.handle(_startedAtMeta,
+          startedAt.isAcceptableOrUnknown(data['started_at']!, _startedAtMeta));
+    }
+    if (data.containsKey('last_progress_at')) {
+      context.handle(
+          _lastProgressAtMeta,
+          lastProgressAt.isAcceptableOrUnknown(
+              data['last_progress_at']!, _lastProgressAtMeta));
+    }
+    if (data.containsKey('finished_at')) {
+      context.handle(
+          _finishedAtMeta,
+          finishedAt.isAcceptableOrUnknown(
+              data['finished_at']!, _finishedAtMeta));
+    }
+    if (data.containsKey('seasons')) {
+      context.handle(_seasonsMeta,
+          seasons.isAcceptableOrUnknown(data['seasons']!, _seasonsMeta));
+    }
+    if (data.containsKey('watched')) {
+      context.handle(_watchedMeta,
+          watched.isAcceptableOrUnknown(data['watched']!, _watchedMeta));
+    }
+    if (data.containsKey('aired_total')) {
+      context.handle(
+          _airedTotalMeta,
+          airedTotal.isAcceptableOrUnknown(
+              data['aired_total']!, _airedTotalMeta));
+    }
+    if (data.containsKey('next_episode')) {
+      context.handle(
+          _nextEpisodeMeta,
+          nextEpisode.isAcceptableOrUnknown(
+              data['next_episode']!, _nextEpisodeMeta));
+    }
+    if (data.containsKey('last_aired')) {
+      context.handle(_lastAiredMeta,
+          lastAired.isAcceptableOrUnknown(data['last_aired']!, _lastAiredMeta));
+    }
+    if (data.containsKey('ranked')) {
+      context.handle(_rankedMeta,
+          ranked.isAcceptableOrUnknown(data['ranked']!, _rankedMeta));
+    }
+    if (data.containsKey('rank_position')) {
+      context.handle(
+          _rankPositionMeta,
+          rankPosition.isAcceptableOrUnknown(
+              data['rank_position']!, _rankPositionMeta));
+    }
+    if (data.containsKey('score')) {
+      context.handle(
+          _scoreMeta, score.isAcceptableOrUnknown(data['score']!, _scoreMeta));
+    }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+          _syncStatusMeta,
+          syncStatus.isAcceptableOrUnknown(
+              data['sync_status']!, _syncStatusMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {titleId, mediaType};
+  @override
+  TrackingCacheData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return TrackingCacheData(
+      titleId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}title_id'])!,
+      mediaType: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}media_type'])!,
+      title: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
+      posterPath: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}poster_path']),
+      backdropPath: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}backdrop_path']),
+      titleStatus: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}title_status']),
+      runtimeMinutes: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}runtime_minutes']),
+      lastSeason: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}last_season']),
+      lastEpisode: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}last_episode']),
+      state: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}state'])!,
+      isRewatch: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_rewatch'])!,
+      newEpisodesSince: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime, data['${effectivePrefix}new_episodes_since']),
+      startedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}started_at'])!,
+      lastProgressAt: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime, data['${effectivePrefix}last_progress_at'])!,
+      finishedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}finished_at']),
+      seasons: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}seasons']),
+      watched: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}watched']),
+      airedTotal: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}aired_total']),
+      nextEpisode: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}next_episode']),
+      lastAired: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}last_aired']),
+      ranked: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}ranked'])!,
+      rankPosition: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}rank_position']),
+      score: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}score']),
+      syncStatus: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}sync_status'])!,
+    );
+  }
+
+  @override
+  $TrackingCacheTable createAlias(String alias) {
+    return $TrackingCacheTable(attachedDatabase, alias);
+  }
+}
+
+class TrackingCacheData extends DataClass
+    implements Insertable<TrackingCacheData> {
+  final int titleId;
+  final String mediaType;
+  final String title;
+  final String? posterPath;
+  final String? backdropPath;
+  final String? titleStatus;
+  final int? runtimeMinutes;
+  final int? lastSeason;
+  final int? lastEpisode;
+  final String state;
+  final bool isRewatch;
+  final DateTime? newEpisodesSince;
+  final DateTime startedAt;
+  final DateTime lastProgressAt;
+  final DateTime? finishedAt;
+  final String? seasons;
+  final int? watched;
+  final int? airedTotal;
+  final String? nextEpisode;
+  final String? lastAired;
+  final bool ranked;
+  final int? rankPosition;
+  final double? score;
+  final String syncStatus;
+  const TrackingCacheData(
+      {required this.titleId,
+      required this.mediaType,
+      required this.title,
+      this.posterPath,
+      this.backdropPath,
+      this.titleStatus,
+      this.runtimeMinutes,
+      this.lastSeason,
+      this.lastEpisode,
+      required this.state,
+      required this.isRewatch,
+      this.newEpisodesSince,
+      required this.startedAt,
+      required this.lastProgressAt,
+      this.finishedAt,
+      this.seasons,
+      this.watched,
+      this.airedTotal,
+      this.nextEpisode,
+      this.lastAired,
+      required this.ranked,
+      this.rankPosition,
+      this.score,
+      required this.syncStatus});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['title_id'] = Variable<int>(titleId);
+    map['media_type'] = Variable<String>(mediaType);
+    map['title'] = Variable<String>(title);
+    if (!nullToAbsent || posterPath != null) {
+      map['poster_path'] = Variable<String>(posterPath);
+    }
+    if (!nullToAbsent || backdropPath != null) {
+      map['backdrop_path'] = Variable<String>(backdropPath);
+    }
+    if (!nullToAbsent || titleStatus != null) {
+      map['title_status'] = Variable<String>(titleStatus);
+    }
+    if (!nullToAbsent || runtimeMinutes != null) {
+      map['runtime_minutes'] = Variable<int>(runtimeMinutes);
+    }
+    if (!nullToAbsent || lastSeason != null) {
+      map['last_season'] = Variable<int>(lastSeason);
+    }
+    if (!nullToAbsent || lastEpisode != null) {
+      map['last_episode'] = Variable<int>(lastEpisode);
+    }
+    map['state'] = Variable<String>(state);
+    map['is_rewatch'] = Variable<bool>(isRewatch);
+    if (!nullToAbsent || newEpisodesSince != null) {
+      map['new_episodes_since'] = Variable<DateTime>(newEpisodesSince);
+    }
+    map['started_at'] = Variable<DateTime>(startedAt);
+    map['last_progress_at'] = Variable<DateTime>(lastProgressAt);
+    if (!nullToAbsent || finishedAt != null) {
+      map['finished_at'] = Variable<DateTime>(finishedAt);
+    }
+    if (!nullToAbsent || seasons != null) {
+      map['seasons'] = Variable<String>(seasons);
+    }
+    if (!nullToAbsent || watched != null) {
+      map['watched'] = Variable<int>(watched);
+    }
+    if (!nullToAbsent || airedTotal != null) {
+      map['aired_total'] = Variable<int>(airedTotal);
+    }
+    if (!nullToAbsent || nextEpisode != null) {
+      map['next_episode'] = Variable<String>(nextEpisode);
+    }
+    if (!nullToAbsent || lastAired != null) {
+      map['last_aired'] = Variable<String>(lastAired);
+    }
+    map['ranked'] = Variable<bool>(ranked);
+    if (!nullToAbsent || rankPosition != null) {
+      map['rank_position'] = Variable<int>(rankPosition);
+    }
+    if (!nullToAbsent || score != null) {
+      map['score'] = Variable<double>(score);
+    }
+    map['sync_status'] = Variable<String>(syncStatus);
+    return map;
+  }
+
+  TrackingCacheCompanion toCompanion(bool nullToAbsent) {
+    return TrackingCacheCompanion(
+      titleId: Value(titleId),
+      mediaType: Value(mediaType),
+      title: Value(title),
+      posterPath: posterPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(posterPath),
+      backdropPath: backdropPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(backdropPath),
+      titleStatus: titleStatus == null && nullToAbsent
+          ? const Value.absent()
+          : Value(titleStatus),
+      runtimeMinutes: runtimeMinutes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(runtimeMinutes),
+      lastSeason: lastSeason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastSeason),
+      lastEpisode: lastEpisode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastEpisode),
+      state: Value(state),
+      isRewatch: Value(isRewatch),
+      newEpisodesSince: newEpisodesSince == null && nullToAbsent
+          ? const Value.absent()
+          : Value(newEpisodesSince),
+      startedAt: Value(startedAt),
+      lastProgressAt: Value(lastProgressAt),
+      finishedAt: finishedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(finishedAt),
+      seasons: seasons == null && nullToAbsent
+          ? const Value.absent()
+          : Value(seasons),
+      watched: watched == null && nullToAbsent
+          ? const Value.absent()
+          : Value(watched),
+      airedTotal: airedTotal == null && nullToAbsent
+          ? const Value.absent()
+          : Value(airedTotal),
+      nextEpisode: nextEpisode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(nextEpisode),
+      lastAired: lastAired == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastAired),
+      ranked: Value(ranked),
+      rankPosition: rankPosition == null && nullToAbsent
+          ? const Value.absent()
+          : Value(rankPosition),
+      score:
+          score == null && nullToAbsent ? const Value.absent() : Value(score),
+      syncStatus: Value(syncStatus),
+    );
+  }
+
+  factory TrackingCacheData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return TrackingCacheData(
+      titleId: serializer.fromJson<int>(json['titleId']),
+      mediaType: serializer.fromJson<String>(json['mediaType']),
+      title: serializer.fromJson<String>(json['title']),
+      posterPath: serializer.fromJson<String?>(json['posterPath']),
+      backdropPath: serializer.fromJson<String?>(json['backdropPath']),
+      titleStatus: serializer.fromJson<String?>(json['titleStatus']),
+      runtimeMinutes: serializer.fromJson<int?>(json['runtimeMinutes']),
+      lastSeason: serializer.fromJson<int?>(json['lastSeason']),
+      lastEpisode: serializer.fromJson<int?>(json['lastEpisode']),
+      state: serializer.fromJson<String>(json['state']),
+      isRewatch: serializer.fromJson<bool>(json['isRewatch']),
+      newEpisodesSince:
+          serializer.fromJson<DateTime?>(json['newEpisodesSince']),
+      startedAt: serializer.fromJson<DateTime>(json['startedAt']),
+      lastProgressAt: serializer.fromJson<DateTime>(json['lastProgressAt']),
+      finishedAt: serializer.fromJson<DateTime?>(json['finishedAt']),
+      seasons: serializer.fromJson<String?>(json['seasons']),
+      watched: serializer.fromJson<int?>(json['watched']),
+      airedTotal: serializer.fromJson<int?>(json['airedTotal']),
+      nextEpisode: serializer.fromJson<String?>(json['nextEpisode']),
+      lastAired: serializer.fromJson<String?>(json['lastAired']),
+      ranked: serializer.fromJson<bool>(json['ranked']),
+      rankPosition: serializer.fromJson<int?>(json['rankPosition']),
+      score: serializer.fromJson<double?>(json['score']),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'titleId': serializer.toJson<int>(titleId),
+      'mediaType': serializer.toJson<String>(mediaType),
+      'title': serializer.toJson<String>(title),
+      'posterPath': serializer.toJson<String?>(posterPath),
+      'backdropPath': serializer.toJson<String?>(backdropPath),
+      'titleStatus': serializer.toJson<String?>(titleStatus),
+      'runtimeMinutes': serializer.toJson<int?>(runtimeMinutes),
+      'lastSeason': serializer.toJson<int?>(lastSeason),
+      'lastEpisode': serializer.toJson<int?>(lastEpisode),
+      'state': serializer.toJson<String>(state),
+      'isRewatch': serializer.toJson<bool>(isRewatch),
+      'newEpisodesSince': serializer.toJson<DateTime?>(newEpisodesSince),
+      'startedAt': serializer.toJson<DateTime>(startedAt),
+      'lastProgressAt': serializer.toJson<DateTime>(lastProgressAt),
+      'finishedAt': serializer.toJson<DateTime?>(finishedAt),
+      'seasons': serializer.toJson<String?>(seasons),
+      'watched': serializer.toJson<int?>(watched),
+      'airedTotal': serializer.toJson<int?>(airedTotal),
+      'nextEpisode': serializer.toJson<String?>(nextEpisode),
+      'lastAired': serializer.toJson<String?>(lastAired),
+      'ranked': serializer.toJson<bool>(ranked),
+      'rankPosition': serializer.toJson<int?>(rankPosition),
+      'score': serializer.toJson<double?>(score),
+      'syncStatus': serializer.toJson<String>(syncStatus),
+    };
+  }
+
+  TrackingCacheData copyWith(
+          {int? titleId,
+          String? mediaType,
+          String? title,
+          Value<String?> posterPath = const Value.absent(),
+          Value<String?> backdropPath = const Value.absent(),
+          Value<String?> titleStatus = const Value.absent(),
+          Value<int?> runtimeMinutes = const Value.absent(),
+          Value<int?> lastSeason = const Value.absent(),
+          Value<int?> lastEpisode = const Value.absent(),
+          String? state,
+          bool? isRewatch,
+          Value<DateTime?> newEpisodesSince = const Value.absent(),
+          DateTime? startedAt,
+          DateTime? lastProgressAt,
+          Value<DateTime?> finishedAt = const Value.absent(),
+          Value<String?> seasons = const Value.absent(),
+          Value<int?> watched = const Value.absent(),
+          Value<int?> airedTotal = const Value.absent(),
+          Value<String?> nextEpisode = const Value.absent(),
+          Value<String?> lastAired = const Value.absent(),
+          bool? ranked,
+          Value<int?> rankPosition = const Value.absent(),
+          Value<double?> score = const Value.absent(),
+          String? syncStatus}) =>
+      TrackingCacheData(
+        titleId: titleId ?? this.titleId,
+        mediaType: mediaType ?? this.mediaType,
+        title: title ?? this.title,
+        posterPath: posterPath.present ? posterPath.value : this.posterPath,
+        backdropPath:
+            backdropPath.present ? backdropPath.value : this.backdropPath,
+        titleStatus: titleStatus.present ? titleStatus.value : this.titleStatus,
+        runtimeMinutes:
+            runtimeMinutes.present ? runtimeMinutes.value : this.runtimeMinutes,
+        lastSeason: lastSeason.present ? lastSeason.value : this.lastSeason,
+        lastEpisode: lastEpisode.present ? lastEpisode.value : this.lastEpisode,
+        state: state ?? this.state,
+        isRewatch: isRewatch ?? this.isRewatch,
+        newEpisodesSince: newEpisodesSince.present
+            ? newEpisodesSince.value
+            : this.newEpisodesSince,
+        startedAt: startedAt ?? this.startedAt,
+        lastProgressAt: lastProgressAt ?? this.lastProgressAt,
+        finishedAt: finishedAt.present ? finishedAt.value : this.finishedAt,
+        seasons: seasons.present ? seasons.value : this.seasons,
+        watched: watched.present ? watched.value : this.watched,
+        airedTotal: airedTotal.present ? airedTotal.value : this.airedTotal,
+        nextEpisode: nextEpisode.present ? nextEpisode.value : this.nextEpisode,
+        lastAired: lastAired.present ? lastAired.value : this.lastAired,
+        ranked: ranked ?? this.ranked,
+        rankPosition:
+            rankPosition.present ? rankPosition.value : this.rankPosition,
+        score: score.present ? score.value : this.score,
+        syncStatus: syncStatus ?? this.syncStatus,
+      );
+  TrackingCacheData copyWithCompanion(TrackingCacheCompanion data) {
+    return TrackingCacheData(
+      titleId: data.titleId.present ? data.titleId.value : this.titleId,
+      mediaType: data.mediaType.present ? data.mediaType.value : this.mediaType,
+      title: data.title.present ? data.title.value : this.title,
+      posterPath:
+          data.posterPath.present ? data.posterPath.value : this.posterPath,
+      backdropPath: data.backdropPath.present
+          ? data.backdropPath.value
+          : this.backdropPath,
+      titleStatus:
+          data.titleStatus.present ? data.titleStatus.value : this.titleStatus,
+      runtimeMinutes: data.runtimeMinutes.present
+          ? data.runtimeMinutes.value
+          : this.runtimeMinutes,
+      lastSeason:
+          data.lastSeason.present ? data.lastSeason.value : this.lastSeason,
+      lastEpisode:
+          data.lastEpisode.present ? data.lastEpisode.value : this.lastEpisode,
+      state: data.state.present ? data.state.value : this.state,
+      isRewatch: data.isRewatch.present ? data.isRewatch.value : this.isRewatch,
+      newEpisodesSince: data.newEpisodesSince.present
+          ? data.newEpisodesSince.value
+          : this.newEpisodesSince,
+      startedAt: data.startedAt.present ? data.startedAt.value : this.startedAt,
+      lastProgressAt: data.lastProgressAt.present
+          ? data.lastProgressAt.value
+          : this.lastProgressAt,
+      finishedAt:
+          data.finishedAt.present ? data.finishedAt.value : this.finishedAt,
+      seasons: data.seasons.present ? data.seasons.value : this.seasons,
+      watched: data.watched.present ? data.watched.value : this.watched,
+      airedTotal:
+          data.airedTotal.present ? data.airedTotal.value : this.airedTotal,
+      nextEpisode:
+          data.nextEpisode.present ? data.nextEpisode.value : this.nextEpisode,
+      lastAired: data.lastAired.present ? data.lastAired.value : this.lastAired,
+      ranked: data.ranked.present ? data.ranked.value : this.ranked,
+      rankPosition: data.rankPosition.present
+          ? data.rankPosition.value
+          : this.rankPosition,
+      score: data.score.present ? data.score.value : this.score,
+      syncStatus:
+          data.syncStatus.present ? data.syncStatus.value : this.syncStatus,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TrackingCacheData(')
+          ..write('titleId: $titleId, ')
+          ..write('mediaType: $mediaType, ')
+          ..write('title: $title, ')
+          ..write('posterPath: $posterPath, ')
+          ..write('backdropPath: $backdropPath, ')
+          ..write('titleStatus: $titleStatus, ')
+          ..write('runtimeMinutes: $runtimeMinutes, ')
+          ..write('lastSeason: $lastSeason, ')
+          ..write('lastEpisode: $lastEpisode, ')
+          ..write('state: $state, ')
+          ..write('isRewatch: $isRewatch, ')
+          ..write('newEpisodesSince: $newEpisodesSince, ')
+          ..write('startedAt: $startedAt, ')
+          ..write('lastProgressAt: $lastProgressAt, ')
+          ..write('finishedAt: $finishedAt, ')
+          ..write('seasons: $seasons, ')
+          ..write('watched: $watched, ')
+          ..write('airedTotal: $airedTotal, ')
+          ..write('nextEpisode: $nextEpisode, ')
+          ..write('lastAired: $lastAired, ')
+          ..write('ranked: $ranked, ')
+          ..write('rankPosition: $rankPosition, ')
+          ..write('score: $score, ')
+          ..write('syncStatus: $syncStatus')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hashAll([
+        titleId,
+        mediaType,
+        title,
+        posterPath,
+        backdropPath,
+        titleStatus,
+        runtimeMinutes,
+        lastSeason,
+        lastEpisode,
+        state,
+        isRewatch,
+        newEpisodesSince,
+        startedAt,
+        lastProgressAt,
+        finishedAt,
+        seasons,
+        watched,
+        airedTotal,
+        nextEpisode,
+        lastAired,
+        ranked,
+        rankPosition,
+        score,
+        syncStatus
+      ]);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TrackingCacheData &&
+          other.titleId == this.titleId &&
+          other.mediaType == this.mediaType &&
+          other.title == this.title &&
+          other.posterPath == this.posterPath &&
+          other.backdropPath == this.backdropPath &&
+          other.titleStatus == this.titleStatus &&
+          other.runtimeMinutes == this.runtimeMinutes &&
+          other.lastSeason == this.lastSeason &&
+          other.lastEpisode == this.lastEpisode &&
+          other.state == this.state &&
+          other.isRewatch == this.isRewatch &&
+          other.newEpisodesSince == this.newEpisodesSince &&
+          other.startedAt == this.startedAt &&
+          other.lastProgressAt == this.lastProgressAt &&
+          other.finishedAt == this.finishedAt &&
+          other.seasons == this.seasons &&
+          other.watched == this.watched &&
+          other.airedTotal == this.airedTotal &&
+          other.nextEpisode == this.nextEpisode &&
+          other.lastAired == this.lastAired &&
+          other.ranked == this.ranked &&
+          other.rankPosition == this.rankPosition &&
+          other.score == this.score &&
+          other.syncStatus == this.syncStatus);
+}
+
+class TrackingCacheCompanion extends UpdateCompanion<TrackingCacheData> {
+  final Value<int> titleId;
+  final Value<String> mediaType;
+  final Value<String> title;
+  final Value<String?> posterPath;
+  final Value<String?> backdropPath;
+  final Value<String?> titleStatus;
+  final Value<int?> runtimeMinutes;
+  final Value<int?> lastSeason;
+  final Value<int?> lastEpisode;
+  final Value<String> state;
+  final Value<bool> isRewatch;
+  final Value<DateTime?> newEpisodesSince;
+  final Value<DateTime> startedAt;
+  final Value<DateTime> lastProgressAt;
+  final Value<DateTime?> finishedAt;
+  final Value<String?> seasons;
+  final Value<int?> watched;
+  final Value<int?> airedTotal;
+  final Value<String?> nextEpisode;
+  final Value<String?> lastAired;
+  final Value<bool> ranked;
+  final Value<int?> rankPosition;
+  final Value<double?> score;
+  final Value<String> syncStatus;
+  final Value<int> rowid;
+  const TrackingCacheCompanion({
+    this.titleId = const Value.absent(),
+    this.mediaType = const Value.absent(),
+    this.title = const Value.absent(),
+    this.posterPath = const Value.absent(),
+    this.backdropPath = const Value.absent(),
+    this.titleStatus = const Value.absent(),
+    this.runtimeMinutes = const Value.absent(),
+    this.lastSeason = const Value.absent(),
+    this.lastEpisode = const Value.absent(),
+    this.state = const Value.absent(),
+    this.isRewatch = const Value.absent(),
+    this.newEpisodesSince = const Value.absent(),
+    this.startedAt = const Value.absent(),
+    this.lastProgressAt = const Value.absent(),
+    this.finishedAt = const Value.absent(),
+    this.seasons = const Value.absent(),
+    this.watched = const Value.absent(),
+    this.airedTotal = const Value.absent(),
+    this.nextEpisode = const Value.absent(),
+    this.lastAired = const Value.absent(),
+    this.ranked = const Value.absent(),
+    this.rankPosition = const Value.absent(),
+    this.score = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  TrackingCacheCompanion.insert({
+    required int titleId,
+    required String mediaType,
+    required String title,
+    this.posterPath = const Value.absent(),
+    this.backdropPath = const Value.absent(),
+    this.titleStatus = const Value.absent(),
+    this.runtimeMinutes = const Value.absent(),
+    this.lastSeason = const Value.absent(),
+    this.lastEpisode = const Value.absent(),
+    this.state = const Value.absent(),
+    this.isRewatch = const Value.absent(),
+    this.newEpisodesSince = const Value.absent(),
+    this.startedAt = const Value.absent(),
+    this.lastProgressAt = const Value.absent(),
+    this.finishedAt = const Value.absent(),
+    this.seasons = const Value.absent(),
+    this.watched = const Value.absent(),
+    this.airedTotal = const Value.absent(),
+    this.nextEpisode = const Value.absent(),
+    this.lastAired = const Value.absent(),
+    this.ranked = const Value.absent(),
+    this.rankPosition = const Value.absent(),
+    this.score = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : titleId = Value(titleId),
+        mediaType = Value(mediaType),
+        title = Value(title);
+  static Insertable<TrackingCacheData> custom({
+    Expression<int>? titleId,
+    Expression<String>? mediaType,
+    Expression<String>? title,
+    Expression<String>? posterPath,
+    Expression<String>? backdropPath,
+    Expression<String>? titleStatus,
+    Expression<int>? runtimeMinutes,
+    Expression<int>? lastSeason,
+    Expression<int>? lastEpisode,
+    Expression<String>? state,
+    Expression<bool>? isRewatch,
+    Expression<DateTime>? newEpisodesSince,
+    Expression<DateTime>? startedAt,
+    Expression<DateTime>? lastProgressAt,
+    Expression<DateTime>? finishedAt,
+    Expression<String>? seasons,
+    Expression<int>? watched,
+    Expression<int>? airedTotal,
+    Expression<String>? nextEpisode,
+    Expression<String>? lastAired,
+    Expression<bool>? ranked,
+    Expression<int>? rankPosition,
+    Expression<double>? score,
+    Expression<String>? syncStatus,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (titleId != null) 'title_id': titleId,
+      if (mediaType != null) 'media_type': mediaType,
+      if (title != null) 'title': title,
+      if (posterPath != null) 'poster_path': posterPath,
+      if (backdropPath != null) 'backdrop_path': backdropPath,
+      if (titleStatus != null) 'title_status': titleStatus,
+      if (runtimeMinutes != null) 'runtime_minutes': runtimeMinutes,
+      if (lastSeason != null) 'last_season': lastSeason,
+      if (lastEpisode != null) 'last_episode': lastEpisode,
+      if (state != null) 'state': state,
+      if (isRewatch != null) 'is_rewatch': isRewatch,
+      if (newEpisodesSince != null) 'new_episodes_since': newEpisodesSince,
+      if (startedAt != null) 'started_at': startedAt,
+      if (lastProgressAt != null) 'last_progress_at': lastProgressAt,
+      if (finishedAt != null) 'finished_at': finishedAt,
+      if (seasons != null) 'seasons': seasons,
+      if (watched != null) 'watched': watched,
+      if (airedTotal != null) 'aired_total': airedTotal,
+      if (nextEpisode != null) 'next_episode': nextEpisode,
+      if (lastAired != null) 'last_aired': lastAired,
+      if (ranked != null) 'ranked': ranked,
+      if (rankPosition != null) 'rank_position': rankPosition,
+      if (score != null) 'score': score,
+      if (syncStatus != null) 'sync_status': syncStatus,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  TrackingCacheCompanion copyWith(
+      {Value<int>? titleId,
+      Value<String>? mediaType,
+      Value<String>? title,
+      Value<String?>? posterPath,
+      Value<String?>? backdropPath,
+      Value<String?>? titleStatus,
+      Value<int?>? runtimeMinutes,
+      Value<int?>? lastSeason,
+      Value<int?>? lastEpisode,
+      Value<String>? state,
+      Value<bool>? isRewatch,
+      Value<DateTime?>? newEpisodesSince,
+      Value<DateTime>? startedAt,
+      Value<DateTime>? lastProgressAt,
+      Value<DateTime?>? finishedAt,
+      Value<String?>? seasons,
+      Value<int?>? watched,
+      Value<int?>? airedTotal,
+      Value<String?>? nextEpisode,
+      Value<String?>? lastAired,
+      Value<bool>? ranked,
+      Value<int?>? rankPosition,
+      Value<double?>? score,
+      Value<String>? syncStatus,
+      Value<int>? rowid}) {
+    return TrackingCacheCompanion(
+      titleId: titleId ?? this.titleId,
+      mediaType: mediaType ?? this.mediaType,
+      title: title ?? this.title,
+      posterPath: posterPath ?? this.posterPath,
+      backdropPath: backdropPath ?? this.backdropPath,
+      titleStatus: titleStatus ?? this.titleStatus,
+      runtimeMinutes: runtimeMinutes ?? this.runtimeMinutes,
+      lastSeason: lastSeason ?? this.lastSeason,
+      lastEpisode: lastEpisode ?? this.lastEpisode,
+      state: state ?? this.state,
+      isRewatch: isRewatch ?? this.isRewatch,
+      newEpisodesSince: newEpisodesSince ?? this.newEpisodesSince,
+      startedAt: startedAt ?? this.startedAt,
+      lastProgressAt: lastProgressAt ?? this.lastProgressAt,
+      finishedAt: finishedAt ?? this.finishedAt,
+      seasons: seasons ?? this.seasons,
+      watched: watched ?? this.watched,
+      airedTotal: airedTotal ?? this.airedTotal,
+      nextEpisode: nextEpisode ?? this.nextEpisode,
+      lastAired: lastAired ?? this.lastAired,
+      ranked: ranked ?? this.ranked,
+      rankPosition: rankPosition ?? this.rankPosition,
+      score: score ?? this.score,
+      syncStatus: syncStatus ?? this.syncStatus,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (titleId.present) {
+      map['title_id'] = Variable<int>(titleId.value);
+    }
+    if (mediaType.present) {
+      map['media_type'] = Variable<String>(mediaType.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (posterPath.present) {
+      map['poster_path'] = Variable<String>(posterPath.value);
+    }
+    if (backdropPath.present) {
+      map['backdrop_path'] = Variable<String>(backdropPath.value);
+    }
+    if (titleStatus.present) {
+      map['title_status'] = Variable<String>(titleStatus.value);
+    }
+    if (runtimeMinutes.present) {
+      map['runtime_minutes'] = Variable<int>(runtimeMinutes.value);
+    }
+    if (lastSeason.present) {
+      map['last_season'] = Variable<int>(lastSeason.value);
+    }
+    if (lastEpisode.present) {
+      map['last_episode'] = Variable<int>(lastEpisode.value);
+    }
+    if (state.present) {
+      map['state'] = Variable<String>(state.value);
+    }
+    if (isRewatch.present) {
+      map['is_rewatch'] = Variable<bool>(isRewatch.value);
+    }
+    if (newEpisodesSince.present) {
+      map['new_episodes_since'] = Variable<DateTime>(newEpisodesSince.value);
+    }
+    if (startedAt.present) {
+      map['started_at'] = Variable<DateTime>(startedAt.value);
+    }
+    if (lastProgressAt.present) {
+      map['last_progress_at'] = Variable<DateTime>(lastProgressAt.value);
+    }
+    if (finishedAt.present) {
+      map['finished_at'] = Variable<DateTime>(finishedAt.value);
+    }
+    if (seasons.present) {
+      map['seasons'] = Variable<String>(seasons.value);
+    }
+    if (watched.present) {
+      map['watched'] = Variable<int>(watched.value);
+    }
+    if (airedTotal.present) {
+      map['aired_total'] = Variable<int>(airedTotal.value);
+    }
+    if (nextEpisode.present) {
+      map['next_episode'] = Variable<String>(nextEpisode.value);
+    }
+    if (lastAired.present) {
+      map['last_aired'] = Variable<String>(lastAired.value);
+    }
+    if (ranked.present) {
+      map['ranked'] = Variable<bool>(ranked.value);
+    }
+    if (rankPosition.present) {
+      map['rank_position'] = Variable<int>(rankPosition.value);
+    }
+    if (score.present) {
+      map['score'] = Variable<double>(score.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TrackingCacheCompanion(')
+          ..write('titleId: $titleId, ')
+          ..write('mediaType: $mediaType, ')
+          ..write('title: $title, ')
+          ..write('posterPath: $posterPath, ')
+          ..write('backdropPath: $backdropPath, ')
+          ..write('titleStatus: $titleStatus, ')
+          ..write('runtimeMinutes: $runtimeMinutes, ')
+          ..write('lastSeason: $lastSeason, ')
+          ..write('lastEpisode: $lastEpisode, ')
+          ..write('state: $state, ')
+          ..write('isRewatch: $isRewatch, ')
+          ..write('newEpisodesSince: $newEpisodesSince, ')
+          ..write('startedAt: $startedAt, ')
+          ..write('lastProgressAt: $lastProgressAt, ')
+          ..write('finishedAt: $finishedAt, ')
+          ..write('seasons: $seasons, ')
+          ..write('watched: $watched, ')
+          ..write('airedTotal: $airedTotal, ')
+          ..write('nextEpisode: $nextEpisode, ')
+          ..write('lastAired: $lastAired, ')
+          ..write('ranked: $ranked, ')
+          ..write('rankPosition: $rankPosition, ')
+          ..write('score: $score, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $EpisodeCacheTable extends EpisodeCache
+    with TableInfo<$EpisodeCacheTable, EpisodeCacheData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $EpisodeCacheTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _titleIdMeta =
+      const VerificationMeta('titleId');
+  @override
+  late final GeneratedColumn<int> titleId = GeneratedColumn<int>(
+      'title_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _seasonNumberMeta =
+      const VerificationMeta('seasonNumber');
+  @override
+  late final GeneratedColumn<int> seasonNumber = GeneratedColumn<int>(
+      'season_number', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _jsonMeta = const VerificationMeta('json');
+  @override
+  late final GeneratedColumn<String> json = GeneratedColumn<String>(
+      'json', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _fetchedAtMeta =
+      const VerificationMeta('fetchedAt');
+  @override
+  late final GeneratedColumn<DateTime> fetchedAt = GeneratedColumn<DateTime>(
+      'fetched_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [titleId, seasonNumber, json, fetchedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'episode_cache';
+  @override
+  VerificationContext validateIntegrity(Insertable<EpisodeCacheData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('title_id')) {
+      context.handle(_titleIdMeta,
+          titleId.isAcceptableOrUnknown(data['title_id']!, _titleIdMeta));
+    } else if (isInserting) {
+      context.missing(_titleIdMeta);
+    }
+    if (data.containsKey('season_number')) {
+      context.handle(
+          _seasonNumberMeta,
+          seasonNumber.isAcceptableOrUnknown(
+              data['season_number']!, _seasonNumberMeta));
+    } else if (isInserting) {
+      context.missing(_seasonNumberMeta);
+    }
+    if (data.containsKey('json')) {
+      context.handle(
+          _jsonMeta, json.isAcceptableOrUnknown(data['json']!, _jsonMeta));
+    } else if (isInserting) {
+      context.missing(_jsonMeta);
+    }
+    if (data.containsKey('fetched_at')) {
+      context.handle(_fetchedAtMeta,
+          fetchedAt.isAcceptableOrUnknown(data['fetched_at']!, _fetchedAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {titleId, seasonNumber};
+  @override
+  EpisodeCacheData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return EpisodeCacheData(
+      titleId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}title_id'])!,
+      seasonNumber: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}season_number'])!,
+      json: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}json'])!,
+      fetchedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}fetched_at'])!,
+    );
+  }
+
+  @override
+  $EpisodeCacheTable createAlias(String alias) {
+    return $EpisodeCacheTable(attachedDatabase, alias);
+  }
+}
+
+class EpisodeCacheData extends DataClass
+    implements Insertable<EpisodeCacheData> {
+  final int titleId;
+  final int seasonNumber;
+  final String json;
+  final DateTime fetchedAt;
+  const EpisodeCacheData(
+      {required this.titleId,
+      required this.seasonNumber,
+      required this.json,
+      required this.fetchedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['title_id'] = Variable<int>(titleId);
+    map['season_number'] = Variable<int>(seasonNumber);
+    map['json'] = Variable<String>(json);
+    map['fetched_at'] = Variable<DateTime>(fetchedAt);
+    return map;
+  }
+
+  EpisodeCacheCompanion toCompanion(bool nullToAbsent) {
+    return EpisodeCacheCompanion(
+      titleId: Value(titleId),
+      seasonNumber: Value(seasonNumber),
+      json: Value(json),
+      fetchedAt: Value(fetchedAt),
+    );
+  }
+
+  factory EpisodeCacheData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return EpisodeCacheData(
+      titleId: serializer.fromJson<int>(json['titleId']),
+      seasonNumber: serializer.fromJson<int>(json['seasonNumber']),
+      json: serializer.fromJson<String>(json['json']),
+      fetchedAt: serializer.fromJson<DateTime>(json['fetchedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'titleId': serializer.toJson<int>(titleId),
+      'seasonNumber': serializer.toJson<int>(seasonNumber),
+      'json': serializer.toJson<String>(json),
+      'fetchedAt': serializer.toJson<DateTime>(fetchedAt),
+    };
+  }
+
+  EpisodeCacheData copyWith(
+          {int? titleId,
+          int? seasonNumber,
+          String? json,
+          DateTime? fetchedAt}) =>
+      EpisodeCacheData(
+        titleId: titleId ?? this.titleId,
+        seasonNumber: seasonNumber ?? this.seasonNumber,
+        json: json ?? this.json,
+        fetchedAt: fetchedAt ?? this.fetchedAt,
+      );
+  EpisodeCacheData copyWithCompanion(EpisodeCacheCompanion data) {
+    return EpisodeCacheData(
+      titleId: data.titleId.present ? data.titleId.value : this.titleId,
+      seasonNumber: data.seasonNumber.present
+          ? data.seasonNumber.value
+          : this.seasonNumber,
+      json: data.json.present ? data.json.value : this.json,
+      fetchedAt: data.fetchedAt.present ? data.fetchedAt.value : this.fetchedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('EpisodeCacheData(')
+          ..write('titleId: $titleId, ')
+          ..write('seasonNumber: $seasonNumber, ')
+          ..write('json: $json, ')
+          ..write('fetchedAt: $fetchedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(titleId, seasonNumber, json, fetchedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is EpisodeCacheData &&
+          other.titleId == this.titleId &&
+          other.seasonNumber == this.seasonNumber &&
+          other.json == this.json &&
+          other.fetchedAt == this.fetchedAt);
+}
+
+class EpisodeCacheCompanion extends UpdateCompanion<EpisodeCacheData> {
+  final Value<int> titleId;
+  final Value<int> seasonNumber;
+  final Value<String> json;
+  final Value<DateTime> fetchedAt;
+  final Value<int> rowid;
+  const EpisodeCacheCompanion({
+    this.titleId = const Value.absent(),
+    this.seasonNumber = const Value.absent(),
+    this.json = const Value.absent(),
+    this.fetchedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  EpisodeCacheCompanion.insert({
+    required int titleId,
+    required int seasonNumber,
+    required String json,
+    this.fetchedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : titleId = Value(titleId),
+        seasonNumber = Value(seasonNumber),
+        json = Value(json);
+  static Insertable<EpisodeCacheData> custom({
+    Expression<int>? titleId,
+    Expression<int>? seasonNumber,
+    Expression<String>? json,
+    Expression<DateTime>? fetchedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (titleId != null) 'title_id': titleId,
+      if (seasonNumber != null) 'season_number': seasonNumber,
+      if (json != null) 'json': json,
+      if (fetchedAt != null) 'fetched_at': fetchedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  EpisodeCacheCompanion copyWith(
+      {Value<int>? titleId,
+      Value<int>? seasonNumber,
+      Value<String>? json,
+      Value<DateTime>? fetchedAt,
+      Value<int>? rowid}) {
+    return EpisodeCacheCompanion(
+      titleId: titleId ?? this.titleId,
+      seasonNumber: seasonNumber ?? this.seasonNumber,
+      json: json ?? this.json,
+      fetchedAt: fetchedAt ?? this.fetchedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (titleId.present) {
+      map['title_id'] = Variable<int>(titleId.value);
+    }
+    if (seasonNumber.present) {
+      map['season_number'] = Variable<int>(seasonNumber.value);
+    }
+    if (json.present) {
+      map['json'] = Variable<String>(json.value);
+    }
+    if (fetchedAt.present) {
+      map['fetched_at'] = Variable<DateTime>(fetchedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('EpisodeCacheCompanion(')
+          ..write('titleId: $titleId, ')
+          ..write('seasonNumber: $seasonNumber, ')
+          ..write('json: $json, ')
+          ..write('fetchedAt: $fetchedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2454,6 +3877,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $GamificationCacheTable gamificationCache =
       $GamificationCacheTable(this);
   late final $ExploreCacheTable exploreCache = $ExploreCacheTable(this);
+  late final $TrackingCacheTable trackingCache = $TrackingCacheTable(this);
+  late final $EpisodeCacheTable episodeCache = $EpisodeCacheTable(this);
   late final LocalRankingDao localRankingDao =
       LocalRankingDao(this as AppDatabase);
   late final LocalTitleDao localTitleDao = LocalTitleDao(this as AppDatabase);
@@ -2461,6 +3886,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       PendingMutationDao(this as AppDatabase);
   late final ExploreCacheDao exploreCacheDao =
       ExploreCacheDao(this as AppDatabase);
+  late final TrackingCacheDao trackingCacheDao =
+      TrackingCacheDao(this as AppDatabase);
+  late final EpisodeCacheDao episodeCacheDao =
+      EpisodeCacheDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2471,7 +3900,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         pendingMutations,
         watchlistCache,
         gamificationCache,
-        exploreCache
+        exploreCache,
+        trackingCache,
+        episodeCache
       ];
 }
 
@@ -3729,6 +5160,639 @@ typedef $$ExploreCacheTableProcessedTableManager = ProcessedTableManager<
     ),
     ExploreCacheData,
     PrefetchHooks Function()>;
+typedef $$TrackingCacheTableCreateCompanionBuilder = TrackingCacheCompanion
+    Function({
+  required int titleId,
+  required String mediaType,
+  required String title,
+  Value<String?> posterPath,
+  Value<String?> backdropPath,
+  Value<String?> titleStatus,
+  Value<int?> runtimeMinutes,
+  Value<int?> lastSeason,
+  Value<int?> lastEpisode,
+  Value<String> state,
+  Value<bool> isRewatch,
+  Value<DateTime?> newEpisodesSince,
+  Value<DateTime> startedAt,
+  Value<DateTime> lastProgressAt,
+  Value<DateTime?> finishedAt,
+  Value<String?> seasons,
+  Value<int?> watched,
+  Value<int?> airedTotal,
+  Value<String?> nextEpisode,
+  Value<String?> lastAired,
+  Value<bool> ranked,
+  Value<int?> rankPosition,
+  Value<double?> score,
+  Value<String> syncStatus,
+  Value<int> rowid,
+});
+typedef $$TrackingCacheTableUpdateCompanionBuilder = TrackingCacheCompanion
+    Function({
+  Value<int> titleId,
+  Value<String> mediaType,
+  Value<String> title,
+  Value<String?> posterPath,
+  Value<String?> backdropPath,
+  Value<String?> titleStatus,
+  Value<int?> runtimeMinutes,
+  Value<int?> lastSeason,
+  Value<int?> lastEpisode,
+  Value<String> state,
+  Value<bool> isRewatch,
+  Value<DateTime?> newEpisodesSince,
+  Value<DateTime> startedAt,
+  Value<DateTime> lastProgressAt,
+  Value<DateTime?> finishedAt,
+  Value<String?> seasons,
+  Value<int?> watched,
+  Value<int?> airedTotal,
+  Value<String?> nextEpisode,
+  Value<String?> lastAired,
+  Value<bool> ranked,
+  Value<int?> rankPosition,
+  Value<double?> score,
+  Value<String> syncStatus,
+  Value<int> rowid,
+});
+
+class $$TrackingCacheTableFilterComposer
+    extends Composer<_$AppDatabase, $TrackingCacheTable> {
+  $$TrackingCacheTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get titleId => $composableBuilder(
+      column: $table.titleId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get mediaType => $composableBuilder(
+      column: $table.mediaType, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get title => $composableBuilder(
+      column: $table.title, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get posterPath => $composableBuilder(
+      column: $table.posterPath, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get backdropPath => $composableBuilder(
+      column: $table.backdropPath, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get titleStatus => $composableBuilder(
+      column: $table.titleStatus, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get runtimeMinutes => $composableBuilder(
+      column: $table.runtimeMinutes,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get lastSeason => $composableBuilder(
+      column: $table.lastSeason, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get lastEpisode => $composableBuilder(
+      column: $table.lastEpisode, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get state => $composableBuilder(
+      column: $table.state, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isRewatch => $composableBuilder(
+      column: $table.isRewatch, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get newEpisodesSince => $composableBuilder(
+      column: $table.newEpisodesSince,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get startedAt => $composableBuilder(
+      column: $table.startedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get lastProgressAt => $composableBuilder(
+      column: $table.lastProgressAt,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get finishedAt => $composableBuilder(
+      column: $table.finishedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get seasons => $composableBuilder(
+      column: $table.seasons, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get watched => $composableBuilder(
+      column: $table.watched, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get airedTotal => $composableBuilder(
+      column: $table.airedTotal, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get nextEpisode => $composableBuilder(
+      column: $table.nextEpisode, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get lastAired => $composableBuilder(
+      column: $table.lastAired, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get ranked => $composableBuilder(
+      column: $table.ranked, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get rankPosition => $composableBuilder(
+      column: $table.rankPosition, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get score => $composableBuilder(
+      column: $table.score, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+      column: $table.syncStatus, builder: (column) => ColumnFilters(column));
+}
+
+class $$TrackingCacheTableOrderingComposer
+    extends Composer<_$AppDatabase, $TrackingCacheTable> {
+  $$TrackingCacheTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get titleId => $composableBuilder(
+      column: $table.titleId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get mediaType => $composableBuilder(
+      column: $table.mediaType, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get title => $composableBuilder(
+      column: $table.title, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get posterPath => $composableBuilder(
+      column: $table.posterPath, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get backdropPath => $composableBuilder(
+      column: $table.backdropPath,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get titleStatus => $composableBuilder(
+      column: $table.titleStatus, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get runtimeMinutes => $composableBuilder(
+      column: $table.runtimeMinutes,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get lastSeason => $composableBuilder(
+      column: $table.lastSeason, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get lastEpisode => $composableBuilder(
+      column: $table.lastEpisode, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get state => $composableBuilder(
+      column: $table.state, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isRewatch => $composableBuilder(
+      column: $table.isRewatch, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get newEpisodesSince => $composableBuilder(
+      column: $table.newEpisodesSince,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get startedAt => $composableBuilder(
+      column: $table.startedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get lastProgressAt => $composableBuilder(
+      column: $table.lastProgressAt,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get finishedAt => $composableBuilder(
+      column: $table.finishedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get seasons => $composableBuilder(
+      column: $table.seasons, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get watched => $composableBuilder(
+      column: $table.watched, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get airedTotal => $composableBuilder(
+      column: $table.airedTotal, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get nextEpisode => $composableBuilder(
+      column: $table.nextEpisode, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get lastAired => $composableBuilder(
+      column: $table.lastAired, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get ranked => $composableBuilder(
+      column: $table.ranked, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get rankPosition => $composableBuilder(
+      column: $table.rankPosition,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get score => $composableBuilder(
+      column: $table.score, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+      column: $table.syncStatus, builder: (column) => ColumnOrderings(column));
+}
+
+class $$TrackingCacheTableAnnotationComposer
+    extends Composer<_$AppDatabase, $TrackingCacheTable> {
+  $$TrackingCacheTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get titleId =>
+      $composableBuilder(column: $table.titleId, builder: (column) => column);
+
+  GeneratedColumn<String> get mediaType =>
+      $composableBuilder(column: $table.mediaType, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get posterPath => $composableBuilder(
+      column: $table.posterPath, builder: (column) => column);
+
+  GeneratedColumn<String> get backdropPath => $composableBuilder(
+      column: $table.backdropPath, builder: (column) => column);
+
+  GeneratedColumn<String> get titleStatus => $composableBuilder(
+      column: $table.titleStatus, builder: (column) => column);
+
+  GeneratedColumn<int> get runtimeMinutes => $composableBuilder(
+      column: $table.runtimeMinutes, builder: (column) => column);
+
+  GeneratedColumn<int> get lastSeason => $composableBuilder(
+      column: $table.lastSeason, builder: (column) => column);
+
+  GeneratedColumn<int> get lastEpisode => $composableBuilder(
+      column: $table.lastEpisode, builder: (column) => column);
+
+  GeneratedColumn<String> get state =>
+      $composableBuilder(column: $table.state, builder: (column) => column);
+
+  GeneratedColumn<bool> get isRewatch =>
+      $composableBuilder(column: $table.isRewatch, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get newEpisodesSince => $composableBuilder(
+      column: $table.newEpisodesSince, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get startedAt =>
+      $composableBuilder(column: $table.startedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastProgressAt => $composableBuilder(
+      column: $table.lastProgressAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get finishedAt => $composableBuilder(
+      column: $table.finishedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get seasons =>
+      $composableBuilder(column: $table.seasons, builder: (column) => column);
+
+  GeneratedColumn<int> get watched =>
+      $composableBuilder(column: $table.watched, builder: (column) => column);
+
+  GeneratedColumn<int> get airedTotal => $composableBuilder(
+      column: $table.airedTotal, builder: (column) => column);
+
+  GeneratedColumn<String> get nextEpisode => $composableBuilder(
+      column: $table.nextEpisode, builder: (column) => column);
+
+  GeneratedColumn<String> get lastAired =>
+      $composableBuilder(column: $table.lastAired, builder: (column) => column);
+
+  GeneratedColumn<bool> get ranked =>
+      $composableBuilder(column: $table.ranked, builder: (column) => column);
+
+  GeneratedColumn<int> get rankPosition => $composableBuilder(
+      column: $table.rankPosition, builder: (column) => column);
+
+  GeneratedColumn<double> get score =>
+      $composableBuilder(column: $table.score, builder: (column) => column);
+
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+      column: $table.syncStatus, builder: (column) => column);
+}
+
+class $$TrackingCacheTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $TrackingCacheTable,
+    TrackingCacheData,
+    $$TrackingCacheTableFilterComposer,
+    $$TrackingCacheTableOrderingComposer,
+    $$TrackingCacheTableAnnotationComposer,
+    $$TrackingCacheTableCreateCompanionBuilder,
+    $$TrackingCacheTableUpdateCompanionBuilder,
+    (
+      TrackingCacheData,
+      BaseReferences<_$AppDatabase, $TrackingCacheTable, TrackingCacheData>
+    ),
+    TrackingCacheData,
+    PrefetchHooks Function()> {
+  $$TrackingCacheTableTableManager(_$AppDatabase db, $TrackingCacheTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$TrackingCacheTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$TrackingCacheTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$TrackingCacheTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> titleId = const Value.absent(),
+            Value<String> mediaType = const Value.absent(),
+            Value<String> title = const Value.absent(),
+            Value<String?> posterPath = const Value.absent(),
+            Value<String?> backdropPath = const Value.absent(),
+            Value<String?> titleStatus = const Value.absent(),
+            Value<int?> runtimeMinutes = const Value.absent(),
+            Value<int?> lastSeason = const Value.absent(),
+            Value<int?> lastEpisode = const Value.absent(),
+            Value<String> state = const Value.absent(),
+            Value<bool> isRewatch = const Value.absent(),
+            Value<DateTime?> newEpisodesSince = const Value.absent(),
+            Value<DateTime> startedAt = const Value.absent(),
+            Value<DateTime> lastProgressAt = const Value.absent(),
+            Value<DateTime?> finishedAt = const Value.absent(),
+            Value<String?> seasons = const Value.absent(),
+            Value<int?> watched = const Value.absent(),
+            Value<int?> airedTotal = const Value.absent(),
+            Value<String?> nextEpisode = const Value.absent(),
+            Value<String?> lastAired = const Value.absent(),
+            Value<bool> ranked = const Value.absent(),
+            Value<int?> rankPosition = const Value.absent(),
+            Value<double?> score = const Value.absent(),
+            Value<String> syncStatus = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              TrackingCacheCompanion(
+            titleId: titleId,
+            mediaType: mediaType,
+            title: title,
+            posterPath: posterPath,
+            backdropPath: backdropPath,
+            titleStatus: titleStatus,
+            runtimeMinutes: runtimeMinutes,
+            lastSeason: lastSeason,
+            lastEpisode: lastEpisode,
+            state: state,
+            isRewatch: isRewatch,
+            newEpisodesSince: newEpisodesSince,
+            startedAt: startedAt,
+            lastProgressAt: lastProgressAt,
+            finishedAt: finishedAt,
+            seasons: seasons,
+            watched: watched,
+            airedTotal: airedTotal,
+            nextEpisode: nextEpisode,
+            lastAired: lastAired,
+            ranked: ranked,
+            rankPosition: rankPosition,
+            score: score,
+            syncStatus: syncStatus,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required int titleId,
+            required String mediaType,
+            required String title,
+            Value<String?> posterPath = const Value.absent(),
+            Value<String?> backdropPath = const Value.absent(),
+            Value<String?> titleStatus = const Value.absent(),
+            Value<int?> runtimeMinutes = const Value.absent(),
+            Value<int?> lastSeason = const Value.absent(),
+            Value<int?> lastEpisode = const Value.absent(),
+            Value<String> state = const Value.absent(),
+            Value<bool> isRewatch = const Value.absent(),
+            Value<DateTime?> newEpisodesSince = const Value.absent(),
+            Value<DateTime> startedAt = const Value.absent(),
+            Value<DateTime> lastProgressAt = const Value.absent(),
+            Value<DateTime?> finishedAt = const Value.absent(),
+            Value<String?> seasons = const Value.absent(),
+            Value<int?> watched = const Value.absent(),
+            Value<int?> airedTotal = const Value.absent(),
+            Value<String?> nextEpisode = const Value.absent(),
+            Value<String?> lastAired = const Value.absent(),
+            Value<bool> ranked = const Value.absent(),
+            Value<int?> rankPosition = const Value.absent(),
+            Value<double?> score = const Value.absent(),
+            Value<String> syncStatus = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              TrackingCacheCompanion.insert(
+            titleId: titleId,
+            mediaType: mediaType,
+            title: title,
+            posterPath: posterPath,
+            backdropPath: backdropPath,
+            titleStatus: titleStatus,
+            runtimeMinutes: runtimeMinutes,
+            lastSeason: lastSeason,
+            lastEpisode: lastEpisode,
+            state: state,
+            isRewatch: isRewatch,
+            newEpisodesSince: newEpisodesSince,
+            startedAt: startedAt,
+            lastProgressAt: lastProgressAt,
+            finishedAt: finishedAt,
+            seasons: seasons,
+            watched: watched,
+            airedTotal: airedTotal,
+            nextEpisode: nextEpisode,
+            lastAired: lastAired,
+            ranked: ranked,
+            rankPosition: rankPosition,
+            score: score,
+            syncStatus: syncStatus,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable<$TrackingCacheTable, TrackingCacheData>(table),
+                    BaseReferences<_$AppDatabase, $TrackingCacheTable,
+                        TrackingCacheData>(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$TrackingCacheTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $TrackingCacheTable,
+    TrackingCacheData,
+    $$TrackingCacheTableFilterComposer,
+    $$TrackingCacheTableOrderingComposer,
+    $$TrackingCacheTableAnnotationComposer,
+    $$TrackingCacheTableCreateCompanionBuilder,
+    $$TrackingCacheTableUpdateCompanionBuilder,
+    (
+      TrackingCacheData,
+      BaseReferences<_$AppDatabase, $TrackingCacheTable, TrackingCacheData>
+    ),
+    TrackingCacheData,
+    PrefetchHooks Function()>;
+typedef $$EpisodeCacheTableCreateCompanionBuilder = EpisodeCacheCompanion
+    Function({
+  required int titleId,
+  required int seasonNumber,
+  required String json,
+  Value<DateTime> fetchedAt,
+  Value<int> rowid,
+});
+typedef $$EpisodeCacheTableUpdateCompanionBuilder = EpisodeCacheCompanion
+    Function({
+  Value<int> titleId,
+  Value<int> seasonNumber,
+  Value<String> json,
+  Value<DateTime> fetchedAt,
+  Value<int> rowid,
+});
+
+class $$EpisodeCacheTableFilterComposer
+    extends Composer<_$AppDatabase, $EpisodeCacheTable> {
+  $$EpisodeCacheTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get titleId => $composableBuilder(
+      column: $table.titleId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get seasonNumber => $composableBuilder(
+      column: $table.seasonNumber, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get json => $composableBuilder(
+      column: $table.json, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get fetchedAt => $composableBuilder(
+      column: $table.fetchedAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$EpisodeCacheTableOrderingComposer
+    extends Composer<_$AppDatabase, $EpisodeCacheTable> {
+  $$EpisodeCacheTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get titleId => $composableBuilder(
+      column: $table.titleId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get seasonNumber => $composableBuilder(
+      column: $table.seasonNumber,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get json => $composableBuilder(
+      column: $table.json, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get fetchedAt => $composableBuilder(
+      column: $table.fetchedAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$EpisodeCacheTableAnnotationComposer
+    extends Composer<_$AppDatabase, $EpisodeCacheTable> {
+  $$EpisodeCacheTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get titleId =>
+      $composableBuilder(column: $table.titleId, builder: (column) => column);
+
+  GeneratedColumn<int> get seasonNumber => $composableBuilder(
+      column: $table.seasonNumber, builder: (column) => column);
+
+  GeneratedColumn<String> get json =>
+      $composableBuilder(column: $table.json, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get fetchedAt =>
+      $composableBuilder(column: $table.fetchedAt, builder: (column) => column);
+}
+
+class $$EpisodeCacheTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $EpisodeCacheTable,
+    EpisodeCacheData,
+    $$EpisodeCacheTableFilterComposer,
+    $$EpisodeCacheTableOrderingComposer,
+    $$EpisodeCacheTableAnnotationComposer,
+    $$EpisodeCacheTableCreateCompanionBuilder,
+    $$EpisodeCacheTableUpdateCompanionBuilder,
+    (
+      EpisodeCacheData,
+      BaseReferences<_$AppDatabase, $EpisodeCacheTable, EpisodeCacheData>
+    ),
+    EpisodeCacheData,
+    PrefetchHooks Function()> {
+  $$EpisodeCacheTableTableManager(_$AppDatabase db, $EpisodeCacheTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$EpisodeCacheTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$EpisodeCacheTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$EpisodeCacheTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> titleId = const Value.absent(),
+            Value<int> seasonNumber = const Value.absent(),
+            Value<String> json = const Value.absent(),
+            Value<DateTime> fetchedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              EpisodeCacheCompanion(
+            titleId: titleId,
+            seasonNumber: seasonNumber,
+            json: json,
+            fetchedAt: fetchedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required int titleId,
+            required int seasonNumber,
+            required String json,
+            Value<DateTime> fetchedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              EpisodeCacheCompanion.insert(
+            titleId: titleId,
+            seasonNumber: seasonNumber,
+            json: json,
+            fetchedAt: fetchedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable<$EpisodeCacheTable, EpisodeCacheData>(table),
+                    BaseReferences<_$AppDatabase, $EpisodeCacheTable,
+                        EpisodeCacheData>(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$EpisodeCacheTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $EpisodeCacheTable,
+    EpisodeCacheData,
+    $$EpisodeCacheTableFilterComposer,
+    $$EpisodeCacheTableOrderingComposer,
+    $$EpisodeCacheTableAnnotationComposer,
+    $$EpisodeCacheTableCreateCompanionBuilder,
+    $$EpisodeCacheTableUpdateCompanionBuilder,
+    (
+      EpisodeCacheData,
+      BaseReferences<_$AppDatabase, $EpisodeCacheTable, EpisodeCacheData>
+    ),
+    EpisodeCacheData,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -3745,4 +5809,8 @@ class $AppDatabaseManager {
       $$GamificationCacheTableTableManager(_db, _db.gamificationCache);
   $$ExploreCacheTableTableManager get exploreCache =>
       $$ExploreCacheTableTableManager(_db, _db.exploreCache);
+  $$TrackingCacheTableTableManager get trackingCache =>
+      $$TrackingCacheTableTableManager(_db, _db.trackingCache);
+  $$EpisodeCacheTableTableManager get episodeCache =>
+      $$EpisodeCacheTableTableManager(_db, _db.episodeCache);
 }

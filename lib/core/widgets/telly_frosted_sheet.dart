@@ -52,11 +52,15 @@ class TellyFrostedSheet extends StatelessWidget {
                   const SizedBox(height: 12),
                 ],
                 // A transparent Material keeps ListTile ink visible above the frosted fill.
-                Material(
-                  type: MaterialType.transparency,
-                  child: Padding(
-                    padding: padding,
-                    child: child,
+                Flexible(
+                  child: SingleChildScrollView(
+                    child: Material(
+                      type: MaterialType.transparency,
+                      child: Padding(
+                        padding: padding,
+                        child: child,
+                      ),
+                    ),
                   ),
                 ),
               ],

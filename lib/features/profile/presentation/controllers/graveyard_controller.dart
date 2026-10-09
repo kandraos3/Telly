@@ -42,6 +42,10 @@ class GraveyardController extends AsyncNotifier<List<DroppedShow>> {
     state = AsyncData([for (final s in state.valueOrNull ?? const <DroppedShow>[]) if (s.id != show.id) s]);
   }
 
+  /// Forgets [show] locally. Revive deletes the server row in its own call (features/11 §4.7).
+  void forget(DroppedShow show) =>
+      state = AsyncData([for (final s in state.valueOrNull ?? const <DroppedShow>[]) if (s.id != show.id) s]);
+
   void _replace(DroppedShow from, DroppedShow to) =>
       state = AsyncData([for (final s in state.valueOrNull ?? const <DroppedShow>[]) s.id == from.id ? to : s]);
 }

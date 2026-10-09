@@ -21,6 +21,9 @@ import 'package:telly_app/features/queue/domain/streaming_models.dart';
 import 'package:telly_app/features/queue/domain/up_next_picker.dart';
 import 'package:telly_app/features/queue/presentation/widgets/queue_row.dart';
 import 'package:telly_app/features/queue/presentation/widgets/up_next_card.dart';
+import 'package:telly_app/features/title_detail/data/title_detail_repository.dart';
+import 'package:telly_app/features/title_detail/domain/title_detail_models.dart';
+import 'package:telly_app/features/tracking/presentation/widgets/tracking_actions.dart';
 
 /// Provider for user's universal watchlist items (FE-609).
 /// Backed by Drift [WatchlistCache] + Supabase `user_watchlist` and [StreamingAvailabilityRepository].
@@ -454,7 +457,75 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
         setState(() => _swiped.add(_swipeKey(item)));
         direction == DismissDirection.startToEnd ? _markSeen(item) : _remove(item);
       },
-      child: child,
+      // Long-press opens the row actions (epic #168).
+      child: GestureDetector(behavior: HitTestBehavior.translucent, onLongPress: () => _openActions(item), child: child),
+    );
+  }
+
+  /// Long-press on a row or the Up next card: Start watching, Mark seen, Remove (SCR-13).
+  Future<void> _openActions(WatchlistItem item) async {
+    final choice = await TellyFrostedSheet.show<String>(
+      context: context,
+      builder: (ctx) => Column(
+        key: const Key('queue_actions_sheet'),
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text(item.title, style: TellyTypography.titleMedium(color: TellyColors.textPrimaryOf(ctx)).copyWith(fontWeight: FontWeight.w800)),
+          ),
+          for (final (key, icon, label, value) in [
+            ('queue_action_start', Icons.play_circle_outline_rounded, 'Start watching', 'start'),
+            ('queue_action_seen', Icons.check_rounded, 'Mark seen', 'seen'),
+            ('queue_action_remove', Icons.delete_outline, 'Remove', 'remove'),
+          ])
+            ListTile(
+              key: Key(key),
+              contentPadding: EdgeInsets.zero,
+              leading: Icon(icon),
+              title: Text(label),
+              onTap: () => Navigator.of(ctx).pop(value),
+            ),
+        ],
+      ),
+    );
+    if (!mounted || choice == null) return;
+    switch (choice) {
+      case 'start':
+        await _startWatching(item);
+      case 'seen':
+        setState(() => _swiped.add(_swipeKey(item)));
+        _markSeen(item);
+      case 'remove':
+        setState(() => _swiped.add(_swipeKey(item)));
+        _remove(item);
+    }
+  }
+
+  /// Start watching from the Queue (features/11 §4.1): the title page's flow, fed from the cached
+  /// detail. A series we can't describe offline opens its page instead.
+  Future<void> _startWatching(WatchlistItem item) async {
+    TitleDetail? detail;
+    try {
+      detail = await ref.read(titleDetailRepositoryProvider).fetchTitleDetail(id: item.showId, mediaType: item.mediaType);
+    } catch (_) {}
+    if (!mounted) return;
+    if (detail == null && item.mediaType == 'tv') {
+      context.push(Routes.title(item.mediaType, item.showId));
+      return;
+    }
+    final title = detail ?? TitleDetail(id: item.showId, mediaType: item.mediaType, title: item.title, posterPath: item.posterPath);
+    await TrackingActions.startWatching(
+      context,
+      ref,
+      title,
+      wasQueued: true,
+      // Leaving the Queue hides the row at once; Undo brings it back.
+      onQueueChanged: (inQueue) {
+        if (!mounted) return;
+        setState(() => inQueue ? _swiped.remove(_swipeKey(item)) : _swiped.add(_swipeKey(item)));
+      },
     );
   }
 

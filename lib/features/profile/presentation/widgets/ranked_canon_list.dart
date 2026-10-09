@@ -3,6 +3,7 @@ import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
 import '../../../../core/widgets/poster_image.dart';
 import '../../../ranking/domain/franchise_rollup_service.dart';
+import '../../../tracking/presentation/widgets/canon_tracking.dart';
 
 /// Mode 1: Ranked Canon List with mathematical tournament calibration.
 /// Conforms to:
@@ -140,6 +141,8 @@ class RankedCanonList extends StatelessWidget {
                           style: TellyTypography.caption(color: TellyColors.textTertiaryOf(context)),
                         ),
                       ],
+                      // "▶ S2 · E6" while you are watching it (epic #168).
+                      CanonProgressTagFor(titleId: item.id, mediaType: item.mediaType),
                     ],
                   ),
                 ),

@@ -11,7 +11,14 @@ import 'package:telly_app/features/queue/data/streaming_availability_service.dar
 import 'package:telly_app/features/queue/domain/streaming_models.dart';
 import 'package:telly_app/features/queue/presentation/screens/smart_queue_screen.dart';
 
+import 'package:telly_app/core/database/database.dart';
+import 'package:telly_app/features/queue/data/watchlist_repository.dart';
+import 'package:telly_app/features/title_detail/data/title_detail_repository.dart';
+import 'package:telly_app/features/title_detail/domain/title_detail_models.dart';
+
+import '../../fakes/fake_watchlist_repository.dart';
 import '../../helpers/real_fonts.dart';
+import '../../helpers/tracking_harness.dart';
 import '../../helpers/router_harness.dart';
 
 /// Always the first choice: the Up next pick is the first title in sort order, and ↻
@@ -167,6 +174,114 @@ void main() {
       await tester.tap(find.byKey(const Key('queue_lists_button')));
       await tester.pumpAndSettle();
       expect(find.text('route:${Routes.queueLists}'), findsOneWidget);
+    });
+  });
+
+  group('#232: SCR-13 long-press menu', () {
+    late AppDatabase db;
+    late FakeWatchlistRepository queue;
+    setUp(() {
+      db = AppDatabase.inMemory();
+      queue = FakeWatchlistRepository();
+    });
+    tearDown(() => db.close());
+
+    const detail = TitleDetail(
+      id: 101,
+      mediaType: 'tv',
+      title: 'Slow Horses',
+      status: 'Returning Series',
+      seasons: [
+        TitleSeasonDetail(seasonNumber: 1, name: 'Season 1', episodeCount: 6, airDate: '2022-04-01'),
+        TitleSeasonDetail(seasonNumber: 2, name: 'Season 2', episodeCount: 6, airDate: '2022-12-02'),
+        TitleSeasonDetail(seasonNumber: 3, name: 'Season 3', episodeCount: 6, airDate: '2027-03-01'),
+      ],
+    );
+
+    Future<void> pumpQueue(WidgetTester tester, {bool offline = false}) async {
+      tester.view.physicalSize = const Size(900, 1800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(routerHarness(
+        const SmartQueueScreen(),
+        overrides: [
+          ...queueOverrides(watchlist: _MemoryWatchlist(testWatchlist)),
+          ...trackingOverrides(db),
+          watchlistRepositoryProvider.overrideWithValue(queue),
+          titleDetailRepositoryProvider.overrideWithValue(offline ? FakeTitleDetailRepository() : FakeTitleDetailRepository([detail])),
+        ],
+      ));
+      await settle(tester);
+      await tester.tap(find.byKey(const Key('queue_series_tab')));
+      await settle(tester);
+    }
+
+    testWidgets('long-press on a row offers Start watching, Mark seen and Remove', (tester) async {
+      await pumpQueue(tester);
+      await tester.longPress(find.byKey(const ValueKey('queue_row_103')));
+      await settle(tester);
+      expect(find.byKey(const Key('queue_actions_sheet')), findsOneWidget);
+      expect(find.text('Start watching'), findsOneWidget);
+      expect(find.text('Mark seen'), findsOneWidget);
+      expect(find.text('Remove'), findsOneWidget);
+      await unmountTree(tester);
+    });
+
+    testWidgets('the Up next card has the same menu', (tester) async {
+      await pumpQueue(tester);
+      await tester.longPress(find.byKey(const Key('queue_up_next_card')));
+      await settle(tester);
+      expect(find.byKey(const Key('queue_actions_sheet')), findsOneWidget);
+      await unmountTree(tester);
+    });
+
+    testWidgets('Mark seen and Remove do what the swipes do', (tester) async {
+      await pumpQueue(tester);
+      await tester.longPress(find.byKey(const ValueKey('queue_row_103')));
+      await settle(tester);
+      await tester.tap(find.byKey(const Key('queue_action_remove')));
+      await settle(tester);
+      expect(find.byKey(const ValueKey('queue_row_103')), findsNothing);
+      expect(find.text('Removed "Fargo" from queue'), findsOneWidget);
+      await unmountTree(tester);
+    });
+
+    testWidgets('Start watching asks where you are, starts tracking, and the title leaves the Queue with Undo',
+        (tester) async {
+      await queue.add(titleId: 101, mediaType: 'tv', title: 'Slow Horses');
+      await pumpQueue(tester);
+      // 101 is the Up next pick (first in sort order); long-press its card.
+      await tester.longPress(find.byKey(const Key('queue_up_next_card')));
+      await settle(tester);
+      await tester.tap(find.byKey(const Key('queue_action_start')));
+      await settle(tester);
+      expect(find.byKey(const Key('where_are_you_sheet')), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('start_tracking_button')));
+      await settle(tester);
+
+      final tracked = await trackingRepositoryFor(db).getOne(101, 'tv');
+      expect(tracked, isNotNull);
+      expect(tracked!.place, isNull, reason: 'from the beginning');
+      expect(await queue.isInWatchlist(101, 'tv'), isFalse);
+      expect(find.text('Watching Slow Horses'), findsOneWidget);
+
+      await tester.tap(find.text('Undo'));
+      await settle(tester);
+      expect(await trackingRepositoryFor(db).getOne(101, 'tv'), isNull);
+      expect(await queue.isInWatchlist(101, 'tv'), isTrue);
+      await unmountTree(tester);
+    });
+
+    testWidgets('a series that cannot be described offline opens its page instead', (tester) async {
+      await pumpQueue(tester, offline: true);
+      await tester.longPress(find.byKey(const Key('queue_up_next_card')));
+      await settle(tester);
+      await tester.tap(find.byKey(const Key('queue_action_start')));
+      await settle(tester);
+      expect(find.text('route:${Routes.title('tv', 101)}'), findsOneWidget);
+      expect(await trackingRepositoryFor(db).getOne(101, 'tv'), isNull);
+      await unmountTree(tester);
     });
   });
 

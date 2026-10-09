@@ -233,7 +233,7 @@ class _FeedActivityCardState extends State<FeedActivityCard> {
                             const SizedBox(height: 6),
                             Row(
                               children: [
-                                if (activity.calculatedScore != null)
+                                if (activity.calculatedScore != null && !activity.isWatchEvent)
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                     decoration: BoxDecoration(
@@ -258,7 +258,7 @@ class _FeedActivityCardState extends State<FeedActivityCard> {
                                       ],
                                     ),
                                   ),
-                                if (activity.culturalTier != null) ...[
+                                if (activity.culturalTier != null && !activity.isWatchEvent) ...[
                                   const SizedBox(width: 6),
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -364,6 +364,18 @@ class _FeedActivityCardState extends State<FeedActivityCard> {
         'Dropped at S${activity.droppedSeason ?? 1}:E${activity.droppedEpisode ?? 1} • Reason: “${activity.dropReason ?? 'Lost interest'}”',
         style: TellyTypography.bodyMedium(
           color: TellyColors.neonCoralOf(context),
+        ).copyWith(fontWeight: FontWeight.w600),
+      );
+    }
+
+    if (activity.isWatchEvent) {
+      return Text(
+        activity.activityType == ActivityType.watchStarted
+            ? 'Started watching ${activity.titleName}'
+            : 'Finished ${activity.titleName}',
+        key: const Key('feed_watch_headline'),
+        style: TellyTypography.bodyMedium(
+          color: TellyColors.textPrimaryOf(context),
         ).copyWith(fontWeight: FontWeight.w600),
       );
     }
