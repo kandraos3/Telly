@@ -1017,7 +1017,7 @@ A `TellySectionHeader` reading "YOUR MOVES", then **at most 4** move cards. The 
 
 | Move | Shows when | Kicker · title · meta | Button | Accent |
 |---|---|---|---|---|
-| `rankFinished` | a tracked title in *Finished, not ranked* that was finished in the last 14 days | RANK IT · "You finished The Bear" · "Series · yesterday" | **Log and duel** (lime): opens Log with the watch status prefilled, as the finish sheet does (features/11 §4.5) | lime |
+| `rankFinished` | a tracked title in *Finished, not ranked* that was finished in the last 14 days | RANK IT · "You finished The Bear" · "Series · yesterday" ("You're caught up on <title>" for a series you're caught up on) | **Log and duel** (lime): opens Log with the watch status prefilled, as the finish sheet does (features/11 §4.5) | lime |
 | `newEpisodes` | a *New episodes* title other than the hero's | NEW EPISODES · "Shōgun: Season 2 is out" · "You're caught up on S1" | **Resume**: opens the title | amber |
 | `streakAtRisk` | `currentWeeks ≥ 1`, the running week is still `current` (not counted), and it's Thursday or later | KEEP YOUR STREAK · "Rank 1 title by Sunday" · "Your 6-week streak needs one ranking this week" | **+ Log** (lime) | amber Thursday and Friday; coral `#FF4B6E` Saturday and Sunday |
 | `challenge` | a joined, unfinished challenge that ends within 3 days or is at least 75% done | CHALLENGE · "Heist Month: 4 of 8" · "9 days left" ("Ends tomorrow", "Ends today") | **Open**: opens the challenge | amber |
@@ -1050,7 +1050,7 @@ A `TellySectionHeader` reading "YOUR MOVES", then **at most 4** move cards. The 
 A `TellySectionHeader` reading "FRIENDS" with **Social ›**, then one Surface card:
 - up to 3 overlapping 26 dp avatars, for the most recent distinct friends;
 - a title: "Maya, Jordan and 4 others", "Maya and Jordan", or "Maya";
-- a meta line: "ranked 9 titles today", counting today's `rankingCreated` and `upsetAlert` items from friends in the loaded Following feed. With none today, it shows the newest item's sentence instead ("Maya started watching Severance · 2h"), using the verbs Home uses today (features/04, features/11 §7.2).
+- a meta line: "ranked 9 titles today", counting today's `rankingCreated` and `upsetAlert` items from friends in the loaded Following feed. With none today, the line shows only the newest friend, and the meta is the rest of their sentence ("started watching Severance · 2h"), using the verbs Home uses today (features/04, features/11 §7.2).
 
 Your own posts, medal posts and challenge posts are left out. Tapping the card opens Social. The line is hidden when you follow nobody (the `findFriends` move covers that) or when the feed has nothing from friends.
 
