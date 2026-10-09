@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/network/supabase_providers.dart';
+import '../../feed/domain/social_models.dart';
 import '../../ranking/domain/franchise_rollup_service.dart';
 import '../domain/canon_stats.dart';
+import '../domain/user_search_result.dart';
 
 /// What anyone allowed to see a profile can read (`public.users`, RLS `can_view_user`).
 class PublicProfile {
@@ -84,6 +86,18 @@ abstract interface class ProfileRepository {
 
   /// Shallow-merges [changes] into `users.preferences`.
   Future<void> updatePreferences(Map<String, dynamic> changes);
+
+  /// Searches users by username or display name with privacy filtering (`SCR-28`).
+  Future<List<UserSearchResult>> searchUsers(String query, {int limit = 20});
+
+  /// Follows [targetUserId]. Returns the resulting status (`accepted` or `pending`).
+  Future<FollowStatus> followUser(String targetUserId);
+
+  /// Unfollows or cancels pending request to [targetUserId].
+  Future<void> unfollowUser(String targetUserId);
+
+  /// Approves or rejects a pending follow request from [requesterId].
+  Future<FollowStatus> respondToFollowRequest({required String requesterId, required bool approve});
 }
 
 class SupabaseProfileRepository implements ProfileRepository {
@@ -195,6 +209,40 @@ class SupabaseProfileRepository implements ProfileRepository {
   Future<void> updatePreferences(Map<String, dynamic> changes) async {
     final merged = {...await fetchPreferences(), ...changes};
     await _client.from('users').update({'preferences': merged}).eq('id', _me);
+  }
+
+  @override
+  Future<List<UserSearchResult>> searchUsers(String query, {int limit = 20}) async {
+    final clean = query.trim();
+    if (clean.isEmpty) return const [];
+    final rows = await _client.rpc('search_users', params: {
+      'p_query': clean,
+      'p_limit': limit,
+    }) as List;
+    return rows.map((r) => UserSearchResult.fromJson(r as Map<String, dynamic>)).toList();
+  }
+
+  @override
+  Future<FollowStatus> followUser(String targetUserId) async {
+    final row = await _client
+        .from('social_follows')
+        .insert({'follower_id': _me, 'following_id': targetUserId})
+        .select('status')
+        .single();
+    return FollowStatus.fromString(row['status'] as String);
+  }
+
+  @override
+  Future<void> unfollowUser(String targetUserId) =>
+      _client.from('social_follows').delete().eq('follower_id', _me).eq('following_id', targetUserId);
+
+  @override
+  Future<FollowStatus> respondToFollowRequest({required String requesterId, required bool approve}) async {
+    final statusStr = await _client.rpc('respond_to_follow_request', params: {
+      'p_requester_id': requesterId,
+      'p_approve': approve,
+    }) as String;
+    return FollowStatus.fromString(statusStr);
   }
 }
 
