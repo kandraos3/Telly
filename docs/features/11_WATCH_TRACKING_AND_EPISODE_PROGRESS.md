@@ -318,7 +318,7 @@ All of these are `SECURITY DEFINER`, `SET search_path = public`. They take `p_cl
 ### 6.3 Read RPCs
 | RPC | Behaviour |
 | :--- | :--- |
-| `get_my_tracking()` | The caller's rows joined with `titles` (title, poster, backdrop, status, number of seasons), `tv_seasons` counts, the next episode's `tv_episodes` row when cached, whether the title is in the caller's canon (with rank and score), and the latest aired episode. The client derives groups (§2.3) and progress (§3.4) from it. |
+| `get_my_tracking()` | One JSON document `{today, items[]}`. Each item has the tracking row, the title's display fields, whether it is in the caller's canon (with rank and score) and, for series, the seasons, `watched`, `aired_total`, the next episode (with its cached name, still, air date and runtime) and the latest aired episode. The client derives groups (§2.3) and the progress bar (§3.4) from it. |
 | `get_title_watchers(p_title_id, p_media_type)` | Up to 20 users the caller has an `accepted` follow of, where `can_view_user` holds, the user isn't `GHOST`, and who track the title in `WATCHING`. Ordered by `last_progress_at` desc. Returns `user_id`, `username`, `display_name`, `avatar_url` and the total count. **No place or state.** |
 | `get_tracking_stats(p_media_type, p_year)` | The caller's §3.6 totals for the year: `episodes` (TV) or `movies_finished` (movie). The hub's *This week* uses `p_year` NULL with the ISO week instead: for TV, `episodes` and `minutes` summed from `tv_episodes.runtime_minutes` where known; for movies, `movies_finished` and `minutes` summed from `titles.runtime_minutes`. |
 
@@ -342,7 +342,7 @@ All of these are `SECURITY DEFINER`, `SET search_path = public`. They take `p_cl
 ### 7.2 Feed events
 - `WATCH_STARTED`: "Maya started watching Severance". Posted at most once per title per 30 days per user.
 - `WATCH_FINISHED`: "Maya finished Shōgun". Posted at most once per title per 30 days.
-- Both use the existing feed card layout with no score chip, and respect the account's visibility mode like every activity.
+- Both use the existing feed card layout with no score chip, and respect the account's visibility mode like every activity. Older apps never receive them: `get_activity_feed` needs `p_include_tracking => true`, like medals and challenges.
 - **Home's friend strip (SCR-21):** "started watching" and "finished" join the existing verbs.
 
 ## 8. Stats
