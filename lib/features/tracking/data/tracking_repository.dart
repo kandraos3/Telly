@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
@@ -120,17 +121,60 @@ class LocalFirstTrackingRepository implements TrackingRepository {
 
   // --- reads ---
 
+  /// The caller's canon is in Drift too, so a title ranked on this device is ranked here at once,
+  /// without waiting for the next `get_my_tracking` (features/11 §2.3). Either table changing
+  /// re-emits.
   @override
-  Stream<List<TrackingItem>> watchAll() => _cache.watchAll().map((rows) => rows.map(_fromRow).toList());
+  Stream<List<TrackingItem>> watchAll() {
+    late final StreamController<List<TrackingItem>> controller;
+    StreamSubscription<List<TrackingCacheData>>? rowsSub;
+    StreamSubscription<List<LocalRanking>>? ranksSub;
+    List<TrackingCacheData>? rows;
+    Map<(int, String), LocalRanking>? ranks;
+    void emit() {
+      final r = rows, k = ranks;
+      if (r != null && k != null && !controller.isClosed) {
+        controller.add([for (final row in r) _fromRow(row, rank: k[(row.titleId, row.mediaType)])]);
+      }
+    }
+
+    controller = StreamController<List<TrackingItem>>(
+      onListen: () {
+        rowsSub = _cache.watchAll().listen((v) {
+          rows = v;
+          emit();
+        }, onError: controller.addError);
+        ranksSub = _db.localRankingDao.watchAll().listen((v) {
+          ranks = {for (final k in v) (k.showId, k.mediaType): k};
+          emit();
+        }, onError: controller.addError);
+      },
+      // Not awaited: Drift finishes a cancel on a later timer, and nothing here depends on it.
+      onCancel: () {
+        unawaited(rowsSub?.cancel());
+        unawaited(ranksSub?.cancel());
+      },
+    );
+    return controller.stream;
+  }
 
   @override
   Stream<TrackingItem?> watchOne(int titleId, String mediaType) =>
-      _cache.watchOne(titleId, mediaType).map((row) => row == null ? null : _fromRow(row));
+      watchAll().map((all) {
+        for (final i in all) {
+          if (i.titleId == titleId && i.mediaType == mediaType) return i;
+        }
+        return null;
+      });
 
   @override
   Future<TrackingItem?> getOne(int titleId, String mediaType) async {
     final row = await _cache.getOne(titleId, mediaType);
-    return row == null ? null : _fromRow(row);
+    if (row == null) return null;
+    final rank = await (_db.select(_db.localRankings)
+          ..where((t) => t.showId.equals(titleId) & t.mediaType.equals(mediaType)))
+        .getSingleOrNull();
+    return _fromRow(row, rank: rank);
   }
 
   @override
@@ -421,7 +465,8 @@ class LocalFirstTrackingRepository implements TrackingRepository {
           ),
       ];
 
-  TrackingItem _fromRow(TrackingCacheData r) {
+  /// [rank] is the local canon's row for the title, which decides *ranked* over the server's flag.
+  TrackingItem _fromRow(TrackingCacheData r, {LocalRanking? rank}) {
     final seasons = r.seasons == null ? const [] : jsonDecode(r.seasons!) as List;
     final next = r.nextEpisode == null ? null : jsonDecode(r.nextEpisode!) as Map<String, dynamic>;
     final last = r.lastAired == null ? null : jsonDecode(r.lastAired!) as Map<String, dynamic>;
@@ -452,9 +497,9 @@ class LocalFirstTrackingRepository implements TrackingRepository {
       airedTotal: r.airedTotal,
       nextEpisode: next == null ? null : NextEpisode.fromJson(next),
       lastAired: last == null ? null : EpisodeRef(last['season'] as int, last['episode'] as int),
-      isRanked: r.ranked,
-      rankPosition: r.rankPosition,
-      score: r.score,
+      isRanked: r.ranked || rank != null,
+      rankPosition: rank?.rankPosition ?? r.rankPosition,
+      score: rank?.calculatedScore ?? r.score,
       pending: r.syncStatus == 'PENDING',
     );
   }

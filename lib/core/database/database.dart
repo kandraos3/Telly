@@ -198,6 +198,9 @@ class LocalRankingDao extends DatabaseAccessor<AppDatabase> with _$LocalRankingD
         .watch();
   }
 
+  /// Both canons, live. Tracking reads it to know which titles are ranked (features/11 §2.3).
+  Stream<List<LocalRanking>> watchAll() => select(localRankings).watch();
+
   /// Query snapshot of current canon rankings.
   Future<List<LocalRanking>> getRankingsByCanon(String mediaType) {
     return (select(localRankings)

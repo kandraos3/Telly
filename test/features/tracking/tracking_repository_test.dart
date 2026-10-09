@@ -62,6 +62,55 @@ void main() {
   });
   tearDown(() => db.close());
 
+  group('ranked on this device', () {
+    Future<void> rank(int id, String media, {int position = 4, double score = 9.31}) =>
+        db.localRankingDao.upsertRanking(LocalRankingsCompanion.insert(
+          showId: id,
+          mediaType: media,
+          title: 'Ended Show',
+          rankPosition: position,
+          calculatedScore: score,
+        ));
+
+    test('a title in the local canon reads as ranked at once, before any sync', () async {
+      await repo.start(show());
+      expect((await repo.getOne(100, 'tv'))!.isRanked, isFalse);
+
+      await rank(100, 'tv');
+
+      final item = (await repo.getOne(100, 'tv'))!;
+      expect([item.isRanked, item.rankPosition, item.score], [true, 4, 9.31]);
+    });
+
+    test('the other canon does not count: tv 100 is not movie 100', () async {
+      await repo.start(show());
+      await rank(100, 'movie');
+      expect((await repo.getOne(100, 'tv'))!.isRanked, isFalse);
+    });
+
+    test('watching follows a ranking made later, and a removal', () async {
+      await repo.start(show());
+      final seen = <bool>[];
+      final sub = repo.watchAll().listen((items) => seen.add(items.single.isRanked));
+      await pumpEventQueue();
+      await rank(100, 'tv');
+      await pumpEventQueue();
+      await db.localRankingDao.deleteRanking(100, 'tv');
+      await pumpEventQueue();
+      await sub.cancel();
+      expect(seen.first, isFalse);
+      expect(seen, contains(true));
+      expect(seen.last, isFalse);
+    });
+
+    test('watchOne selects one title from the same stream', () async {
+      await repo.start(show());
+      final first = await repo.watchOne(100, 'tv').first;
+      expect(first!.title, 'Ended Show');
+      expect(await repo.watchOne(999, 'tv').first, isNull);
+    });
+  });
+
   group('start', () {
     test('from the beginning: cached at once, queued, and the Queue entry goes', () async {
       await db.into(db.watchlistCache).insert(WatchlistCacheCompanion.insert(titleId: 100, mediaType: 'tv', title: 'Ended Show'));
