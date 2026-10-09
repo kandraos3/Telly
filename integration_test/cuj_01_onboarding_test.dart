@@ -89,7 +89,7 @@ void main() {
 
     // 6. Lands on Home inside the five-tab shell, with Log one tap away (#44, decision 0003)
     expect(find.byType(HomeScreen), findsOneWidget);
-    for (final tab in ['home', 'explore', 'canon', 'social', 'more']) {
+    for (final tab in ['home', 'explore', 'rankings', 'social', 'more']) {
       expect(find.byKey(Key('nav_tab_$tab')), findsOneWidget, reason: tab);
     }
     expect(find.byKey(const Key('log_fab')), findsOneWidget);

@@ -3,7 +3,7 @@
 ## 1. Overview & Value Proposition
 The onboarding flow solves the fundamental "cold-start" friction in entertainment and ranking apps. If a user downloads an app and is immediately faced with an empty list or forced to manually rate 50 shows one by one, drop-off exceeds 70%.
 
-**The Goal:** Guide a new user from app launch to having a **calibrated Top 5–10 Personal Canon**, a calculated Taste Match with invited friends, and their streaming subscriptions synced in **under 90 seconds**.
+**The Goal:** Guide a new user from app launch to having a **calibrated Top 5–10 Personal Rankings**, a calculated Taste Match with invited friends, and their streaming subscriptions synced in **under 90 seconds**.
 
 ---
 
@@ -25,7 +25,7 @@ The onboarding flow solves the fundamental "cold-start" friction in entertainmen
 4. The Rapid Onboarding Tournament (5-7 quick pairwise battles)
       │
       ▼
-5. Instant Canon Reveal (Your Initial Top 10 + Dynamic Scores)
+5. Instant Rankings Reveal (Your Initial Top 10 + Dynamic Scores)
       │
       ▼
 6. Friend Sync & Referral Taste Match Duel (Immediate Social Hook)
@@ -38,7 +38,7 @@ The onboarding flow solves the fundamental "cold-start" friction in entertainmen
 
 #### Screen 1: Welcome & Value Hook
 - **Hero Visual:** Looping ambient video reel of iconic prestige TV scenes with subtle phosphor lime accent lines.
-- **Copy:** *"Stop asking what to watch. Rank your canon, compare with friends, settle the debate."*
+- **Copy:** *"Stop asking what to watch. Rank your rankings, compare with friends, settle the debate."*
 - **Actions:**
   - `Continue with Apple` (Primary on iOS)
   - `Continue with Google` (Primary on Android)
@@ -69,25 +69,25 @@ The onboarding flow solves the fundamental "cold-start" friction in entertainmen
 
 #### Screen 4: The 60-Second Onboarding Tournament (Dual-Canon Calibration)
 Instead of dropping the user into a complex sorting flow, the app runs a streamlined **Segregated Tournament Sort**:
-- **Segregated Duels by Canon**:
+- **Segregated Duels by Rankings**:
   - If a user selects both movies and TV/anime, onboarding runs short 3-duel mini-brackets for each medium (`Movie vs Movie` and `Series vs Series`), maintaining the fundamental rule that 2-hour films never battle 80-hour television seasons.
 - **Duel Screen UI:**
   - Split-screen comparison card:
     - Top Card: Candidate A (Poster art, title, release year, runtime/network badge, media pill).
     - Bottom Card: Candidate B (Poster art, title, release year, runtime/network badge, media pill).
     - Center Divider: Glowing neon VS badge.
-  - Progress indicator at top: `Movie Duel 2 of 3 • Calibrating your Movie Canon`.
+  - Progress indicator at top: `Movie Duel 2 of 3 • Calibrating your Movie Rankings`.
   - Tap card = Winner. Gentle haptic bump (`HapticFeedback.selectionClick()`).
   - Slide up/down gesture also allowed.
   - Option to tap *"Too different / Hard to say"* (picks an alternate pair without penalizing the sort).
 - **Behind the Scenes:** The selected titles are sorted into their respective canons using lightweight Merge Sort / Binary Insertion tournaments requiring only 5 to 7 pairwise decisions total.
 
-#### Screen 5: The "Dual Canons Unveiled" Celebration
+#### Screen 5: The "Your Rankings, Unveiled" Celebration
 - **Animation:** Confetti burst + celebratory card flip showing the user's newly established **Initial Top 5 Leaderboards** with a segmented toggle: `[ 🎬 Top Movies ] [ 📺 Top Series & Anime ]`.
 - **Display:**
   - #1 title in each canon highlighted with gold foil border and dynamic score (e.g. `9.85`).
   - #2 - #5 ranked with scores descending naturally (`9.42`, `9.10`, `8.85`, `8.60`).
-- **Shareable Action:** *"Share your Starter Canons to Instagram Story"* (Generates 9:16 aesthetic asset).
+- **Shareable Action:** *"Share your Starter Rankings to Instagram Story"* (Generates 9:16 aesthetic asset).
 - **CTA:** `Finish & Find Friends →`.
 
 #### Screen 6: Friend Connect & Referral Duel
@@ -154,7 +154,7 @@ class TournamentDuel {
 }
 ```
 
-### 4.2 API Endpoint: Ingest Onboarding Canon
+### 4.2 API Endpoint: Ingest Onboarding Rankings
 - **Method:** `POST /api/v1/onboarding/complete`
 - **Headers:** `Authorization: Bearer <JWT>`
 - **Request Payload:**
@@ -203,5 +203,5 @@ class TournamentDuel {
 
 ## 5. Edge Cases & Fallbacks
 1. **User only picks 1–3 shows:** Show a motivational sheet: *"Pick at least 5 shows so we can calibrate your taste! Think of your favorite comedy, comfort watch, or classic drama."*
-2. **User skips onboarding:** If a user insists on skipping, seed profile with 0 rankings, but place an unobtrusive persistent pill on the Feed: *"⚡ Calibrate your TV Canon (3 mins)"*.
+2. **User skips onboarding:** If a user insists on skipping, seed profile with 0 rankings, but place an unobtrusive persistent pill on the Feed: *"⚡ Calibrate your TV Rankings (3 mins)"*.
 3. **No network connection during tournament:** Duel queue is kept entirely in local client state (`SharedPreferences` or SQLite); upon network recovery, the final batch is flushed to Supabase.

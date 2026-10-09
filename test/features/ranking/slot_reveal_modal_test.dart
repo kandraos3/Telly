@@ -40,7 +40,7 @@ void main() {
       expect(find.byKey(const Key('canon_updated_headline')), findsOneWidget);
       expect(find.text('INTERSTELLAR'), findsOneWidget);
       expect(
-        find.text('Rank: #4 of 48 Titles in your Movie Canon'),
+        find.text('Rank: #4 of 48 Titles in your Movie Rankings'),
         findsOneWidget,
       );
 
@@ -100,7 +100,7 @@ void main() {
       expect(find.byKey(const Key('slot_reveal_tier_badge')), findsOneWidget);
       expect(find.text('👑 GOD TIER'), findsOneWidget);
       expect(
-        find.text('Rank: #1 of 20 Shows in your Series Canon'),
+        find.text('Rank: #1 of 20 Shows in your TV Rankings'),
         findsOneWidget,
       );
     });

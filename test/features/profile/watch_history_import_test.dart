@@ -123,7 +123,7 @@ void main() {
       await tapImport(tester, 'settings_import_letterboxd');
       await tapImport(tester, 'settings_import_letterboxd');
 
-      expect(find.text("Added 0 titles from Letterboxd · 2 already in your canon · 1 couldn't be matched"), findsOneWidget);
+      expect(find.text("Added 0 titles from Letterboxd · 2 already in your rankings · 1 couldn't be matched"), findsOneWidget);
       expect(await RankingRepository(db).getCanon('movie'), hasLength(2));
     });
 

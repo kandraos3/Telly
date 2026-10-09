@@ -68,7 +68,7 @@ class SeedGridScreen extends ConsumerWidget {
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            'Select at least $minimum to calibrate your Movie and Series canons in a few quick duels.',
+                            'Select at least $minimum to calibrate your Movie and TV rankings in a few quick duels.',
                             style: TellyTypography.bodyMedium(color: TellyColors.textPrimaryOf(context))
                                 .copyWith(fontWeight: FontWeight.w600),
                           ),
@@ -312,7 +312,7 @@ class SeedGridScreen extends ConsumerWidget {
                     Padding(
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Text(
-                        '${selection.imported} imported titles are already in your canons',
+                        '${selection.imported} imported titles are already in your rankings',
                         key: const Key('imported_count_text'),
                         style: TellyTypography.caption(color: TellyColors.phosphorLime),
                       ),

@@ -208,7 +208,7 @@ void socialFriendsJourneys() {
     // Verify private lock gate is active and conceals Canon & Two-to-Watch
     expect(find.byKey(const Key('friend_profile_private')), findsOneWidget);
     expect(find.text('This Profile is Friends-Only'), findsOneWidget);
-    expect(find.textContaining('Follow request sent. Their canon appears once @aross accepts.'), findsOneWidget);
+    expect(find.textContaining('Follow request sent. Their rankings appear once @aross accepts.'), findsOneWidget);
     expect(find.textContaining('Two-to-Watch with @aross'), findsNothing);
 
     // Now simulate Ross approving the request

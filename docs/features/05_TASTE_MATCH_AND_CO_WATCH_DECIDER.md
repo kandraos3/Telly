@@ -14,8 +14,8 @@ Two of the greatest frustrations in entertainment consumption are:
 ## 2. Taste Match %: Mathematical Foundation
 
 ```
-User A's Canon                 User B's Canon
-[ 🎬 Movie Canon ]             [ 🎬 Movie Canon ]
+User A's Rankings                 User B's Rankings
+[ 🎬 Movie Rankings ]             [ 🎬 Movie Rankings ]
 1. Interstellar                 1. Oppenheimer
 2. Parasite                     2. Interstellar
 3. Spirited Away                3. Parasite

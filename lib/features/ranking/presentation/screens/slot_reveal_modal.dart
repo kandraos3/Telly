@@ -163,7 +163,7 @@ class _SlotRevealModalState extends ConsumerState<SlotRevealModal>
 
   @override
   Widget build(BuildContext context) {
-    final canonLabel = _isMovie ? 'Movie Canon' : 'Series Canon';
+    final canonLabel = _isMovie ? 'Movie Rankings' : 'TV Rankings';
     final mediaUnit = _isMovie ? 'Titles' : 'Shows';
 
     return Scaffold(
@@ -196,7 +196,7 @@ class _SlotRevealModalState extends ConsumerState<SlotRevealModal>
                         child: Column(
                           children: [
                             Text(
-                              '🎉 CANON UPDATED!',
+                              '🎉 RANKINGS UPDATED!',
                               key: const Key('canon_updated_headline'),
                               style: TellyTypography.titleLarge(color: TellyColors.textPrimaryOf(context)).copyWith(
                                 letterSpacing: 2.0,
@@ -402,10 +402,10 @@ class _SlotRevealModalState extends ConsumerState<SlotRevealModal>
                 opacity: _fadeAnimation,
                 child: Column(
                   children: [
-                    // Primary Action: View in My Canon
+                    // Primary Action: View in My Rankings
                     TellyPrimaryButton(
                       key: const Key('view_in_canon_button'),
-                      label: 'VIEW IN MY CANON PROFILE',
+                      label: 'VIEW IN MY RANKINGS',
                       onPressed: widget.onViewInCanon,
                     ),
 

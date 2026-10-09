@@ -18,7 +18,7 @@ class DuelArenaScreen extends ConsumerStatefulWidget {
   final VoidCallback? onCancel;
   final ValueChanged<DuelComplete>? onDuelComplete;
 
-  /// Replaces `DUEL X OF Y` (e.g. `Movie Duel 2 of 3 • Calibrating your Movie Canon`).
+  /// Replaces `DUEL X OF Y` (e.g. `Movie Duel 2 of 3 • Calibrating your Movie Rankings`).
   final String Function(DuelActive active)? progressLabel;
   final String tieLabel;
 
@@ -305,7 +305,7 @@ class _DuelArenaScreenState extends ConsumerState<DuelArenaScreen> with SingleTi
                       key: const Key('candidate_card_a'),
                       showId: candidate.showId,
                       title: candidate.title,
-                      subtitle: candidate.mediaType == 'movie' ? 'Movie Canon Candidate' : 'Series Canon Candidate',
+                      subtitle: candidate.mediaType == 'movie' ? 'Movie Candidate' : 'TV Candidate',
                       posterPath: candidate.posterPath,
                       actionPrompt: 'TAP OR SWIPE UP TO PICK',
                       isWinner: candidateWon,

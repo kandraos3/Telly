@@ -20,7 +20,7 @@ Rather than a traditional opaque bottom bar anchored to the screen bottom, Telly
 - **Items:** five equal-width destinations, no centre action:
   1. `Home` (house icon): `SCR-21`
   2. `Explore` (compass icon): `SCR-07`
-  3. `Canon` (bar-chart / film strip icon): `SCR-14`
+  3. `Rankings` (bar-chart / film strip icon): `SCR-14`
   4. `Social` (two-people icon): `SCR-05`
   5. `More` (2×2 grid icon): `SCR-22`
 - **Item anatomy:** 22px stroke icon, 11px label (Caption) under it, 4px dot under the label. Each item is at least 48 × 56 dp.
@@ -35,7 +35,7 @@ Rather than a traditional opaque bottom bar anchored to the screen bottom, Telly
 │                                          └──────────┘  │
 │   ┌────────────────────────────────────────────────┐   │
 │   │  [⌂]     [◎]      [▥]      [👥]      [▦]      │   │
-│   │  Home   Explore   Canon   Social    More      │   │
+│   │  Home   Explore   Rankings   Social    More      │   │
 │   └────────────────────────────────────────────────┘   │
 └────────────────────────────────────────────────────────┘
 ```
@@ -52,7 +52,7 @@ The single entry point to the Log flow (`SCR-09`) from the tabs. It replaces the
 - **Shape:** extended pill, 52px tall, horizontal padding 20px, radius `999px`. A `+` glyph (20px, stroke 2.4) followed by the label `Log` (Body Large, w700).
 - **Colour:** fill Phosphor Lime `#D2FF52` with Void `#08090C` glyph and label in **both** themes (dark text on lime passes AAA). Halo: `0 0 20px rgba(210, 255, 82, 0.35)` in dark mode, none in light mode.
 - **Position:** bottom-right, 20px from the right edge and 16px above the nav bar's top edge. Content scrolls behind it; the visible area still ends at the nav bar, not above the button. Each tab's scrolling content ends with extra space equal to the button's height plus the 16px gap, so the last row can scroll clear of it.
-- **Visibility:** shown on Home, Explore, Canon and Social. Hidden on More and on every pushed screen (title pages keep their own rank action). It never collapses on scroll.
+- **Visibility:** shown on Home, Explore, Rankings and Social. Hidden on More and on every pushed screen (title pages keep their own rank action). It never collapses on scroll.
 - **Behaviour:** tap opens `/log` (`SCR-09`) with a medium haptic. Semantics label: "Log a title".
 
 ---
@@ -61,7 +61,7 @@ The single entry point to the Log flow (`SCR-09`) from the tabs. It replaces the
 
 The show card is the fundamental atomic unit of Telly, appearing in 4 distinct visual variants:
 
-### 3.1 Variant A: The Canon List Row (Profile & Leaderboard)
+### 3.1 Variant A: The Rankings List Row (Profile & Leaderboard)
 - **Dimensions:** Full screen width minus 32px padding, 84px height.
 - **Layout:**
   - `Left:` Numeric Rank Badge (e.g., `#01` in tabular bold).
@@ -205,7 +205,7 @@ The Duel screen is a distraction-free, full-screen battleground.
 ### 5.5 Section Switchers — `FE-UI-01`
 Two levels of switcher, each with one look everywhere (`lib/core/widgets/`):
 - **Segmented control** (`TellySegmentedControl`): switches a screen's sections. Feed (Following / Squads / Global), Queue Lists (My lists / Friends' lists), Squad hub (Consensus / Watchlist / Debates). Surface `#11131A` track, radius 12, 4px inset; the selected segment lifts onto Overlay `#1A1D27` with a glass border and a Phosphor Lime label (`#233B00` on the light theme). Labels are Plus Jakarta Sans `labelMedium` w800; 48dp targets; selection-click haptic.
-- **Canon switcher** (`TellyCanonSwitcher`), compact since epic #47 (decision [0004](../decisions/0004-canon-podium-and-queue-up-next.md)). Movies | TV Shows, Movies always on the left. Used on Canon, Queue and the Squad hub, with the same look everywhere.
+- **Rankings switcher** (`TellyCanonSwitcher`), compact since epic #47 (decision [0004](../decisions/0004-canon-podium-and-queue-up-next.md)). Movies | TV Shows, Movies always on the left. Used on Rankings, Queue and the Squad hub, with the same look everywhere.
   - **Track:** Surface, radius 14, 4 dp inset, glass border, 48 dp min height.
   - **Selected half:** lifts onto Overlay `#1A1D27` (light `#F0F2F5`) with a glass border and radius 10. Its label is `textPrimary`, and its count is in the segmented control's accent label colour (`#D2FF52`; light `#233B00`, which keeps AA contrast on Overlay).
   - **Unselected half:** label and count in `textTertiary`.
@@ -214,7 +214,7 @@ Two levels of switcher, each with one look everywhere (`lib/core/widgets/`):
   - **Behaviour:** selection-click haptic. It can be expanded to share a row (Queue puts the Filter chip beside it).
 
 ### 5.6 Section Header — `FE-UI-01`
-`TellySectionHeader`: a 10 × 2 rule, the label in caption w800 caps with 1.5 letter spacing in `textTertiary`, then a hairline glass rule to the edge, with an optional trailing count. Announced as a heading. Used for "TOP 3 SHOWCASE" (Canon's Stats sheet), the Queue's "THEN" rows and list groups, and the Squad screens.
+`TellySectionHeader`: a 10 × 2 rule, the label in caption w800 caps with 1.5 letter spacing in `textTertiary`, then a hairline glass rule to the edge, with an optional trailing count. Announced as a heading. Used for "TOP 3 SHOWCASE" (Rankings's Stats sheet), the Queue's "THEN" rows and list groups, and the Squad screens.
 
 ### 5.7 Avatars — `FE-UI-01`
 `TellyAvatar` shows the person's photo or their initial in the primary accent on Overlay. `TellyAvatarStack` overlaps up to 4 (step = 1.4 × radius, canvas-coloured ring) and ends with a "+N" chip for the rest.
@@ -242,8 +242,8 @@ All modal dialogs in Telly use an **iOS-native Pan-Down Bottom Sheet** pattern:
 - **Empty Watchlist:** An illustrated dark TV screen glowing in neon:
   *"Your queue is empty. Explore friends' God Tiers or discover trending shows."*
   `[ Explore Discover Feed → ]`
-- **Empty Canon (New User):**
-  *"You haven't ranked any shows yet. Complete a 60-second tournament to build your canon."*
+- **Empty Rankings (New User):**
+  *"You haven't ranked any shows yet. Complete a 60-second tournament to build your rankings."*
   `[ Start Quick Tournament → ]`
 
 ### 7.3 Offline & Error State

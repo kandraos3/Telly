@@ -32,7 +32,7 @@ The Settings hub in **Telly** provides centralized control over account security
 │  DATA & STORAGE                                        │
 │  • Offline Cache Size & Synced Data                    │
 │  • Clear Cached Backdrops & Artwork                    │
-│  • Export Canon (CSV / Notion / Letterboxd)            │
+│  • Export Rankings (CSV / Notion / Letterboxd)            │
 │                                                        │
 │  ABOUT & SUPPORT                                       │
 │  • Version 1.0.0 (Build 412)                           │
@@ -66,7 +66,7 @@ The Settings hub in **Telly** provides centralized control over account security
 │                                                        │
 │  ━ DATA & EXPORTS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
 │  💾 Storage & Offline Sync                (42 MB)    > │
-│  📤 Export My TV Canon                               > │
+│  📤 Export My TV Rankings                               > │
 │                                                        │
 │  ━ LEGAL & SESSION ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
 │  📜 Terms & Privacy                                  > │
@@ -130,7 +130,7 @@ Users can toggle individual push notification categories to maintain high signal
 ├────────────────────────────────────────────────────────┤
 │                                                        │
 │  LOCAL STORAGE BREAKDOWN                               │
-│  • Offline TV Canon Database:       4.2 MB             │
+│  • Offline TV Rankings Database:       4.2 MB             │
 │  • Cached Show Posters & Artwork:  38.1 MB             │
 │  • Total Disk Space Used:          42.3 MB             │
 │                                                        │

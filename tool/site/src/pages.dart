@@ -154,7 +154,7 @@ String landingPage(PageContext c) {
     <p class="lead">${_e(s.heroBody)}</p>
     ${_storeBadges(c)}
   </div>
-  ${_phone(c, s.heroScreenshot, '${s.name} canon screen: your ranked series with scores', extraClass: 'phone--hero', eager: true)}
+  ${_phone(c, s.heroScreenshot, '${s.name} rankings screen: your ranked series with scores', extraClass: 'phone--hero', eager: true)}
 </section>
 
 <div class="wrap" id="features">
@@ -214,7 +214,7 @@ String supportPage(PageContext c) {
   <h2>Delete your account</h2>
   <p>In the app, open <strong>Settings → Delete Account…</strong>. Your account is deactivated straight away and permanently deleted after 30 days. If you can't sign in any more, email <a href="mailto:$mail">$mail</a> from the address on your account and we'll delete it for you.</p>
   <h2>Export your data</h2>
-  <p>Open <strong>Settings → Data &amp; Exports</strong> to download your canon as CSV, or your movies in Letterboxd format.</p>
+  <p>Open <strong>Settings → Data &amp; Exports</strong> to download your rankings as CSV, or your movies in Letterboxd format.</p>
   <h2>Legal</h2>
   <ul>
     <li><a href="${c.root}privacy/">Privacy Policy</a></li>
@@ -232,7 +232,7 @@ String notFoundPage(PageContext c) => _layout(
       body: '''<section class="wrap prose notfound">
   <p class="eyebrow">404</p>
   <h1 class="h1 h1--page">This page got dropped.</h1>
-  <p class="lead">It isn't in our canon any more.</p>
+  <p class="lead">It isn't in our rankings any more.</p>
   <p><a class="button" href="${c.root}">Back to the home page</a></p>
 </section>''',
     );

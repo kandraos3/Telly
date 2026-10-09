@@ -195,7 +195,7 @@ class OnboardingTournamentController extends AutoDisposeNotifier<OnboardingTourn
       }
       state = const OnboardingTournamentState(duel: DuelResolving(), done: true);
     } catch (e) {
-      state = OnboardingTournamentState(duel: DuelFailed(e), error: "Couldn't save your starter canons.");
+      state = OnboardingTournamentState(duel: DuelFailed(e), error: "Couldn't save your starter rankings.");
     }
   }
 }

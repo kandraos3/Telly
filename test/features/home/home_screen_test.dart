@@ -267,7 +267,7 @@ void main() {
 
     testWidgets('a new user is asked to log a first title', (tester) async {
       await pumpHome(tester, canon: const ProfileCanonState());
-      expect(tester.widget<Text>(find.byKey(const Key('home_hero_title'))).data, 'Start your canon');
+      expect(tester.widget<Text>(find.byKey(const Key('home_hero_title'))).data, 'Start your rankings');
       await tester.tap(find.byKey(const Key('home_hero_primary')));
       await tester.pumpAndSettle();
       expect(find.text('route:${Routes.log}'), findsOneWidget);

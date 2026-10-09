@@ -28,7 +28,7 @@ class RankedCanonList extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 40),
           child: Text(
-            'No ranked titles in this Canon yet.\nTap "+" to start ranking!',
+            'No ranked titles here yet.\nTap "+" to start ranking!',
             textAlign: TextAlign.center,
             style: TellyTypography.bodyMedium(color: TellyColors.textTertiary),
           ),

@@ -8,7 +8,7 @@ Historically, viewers have been forced into unnatural platform fragmentation:
 - **TV Time / Trakt / AniList:** Utility-focused TV and anime calendars with minimal social virality or movie integration.
 
 **The Telly Solution:**
-A unified platform that elegantly houses **The Movie Canon** and **The Series & Anime Canon** under one roof. By segregating head-to-head duels by default (movies battle movies; series battle series), users avoid the cognitive fatigue of comparing a 90-minute film to an 86-hour epic, while enjoying a cohesive social feed, shared streaming intelligence, and joint co-watching tools.
+A unified platform that elegantly houses **The Movie Rankings** and **The Series & Anime Rankings** under one roof. By segregating head-to-head duels by default (movies battle movies; series battle series), users avoid the cognitive fatigue of comparing a 90-minute film to an 86-hour epic, while enjoying a cohesive social feed, shared streaming intelligence, and joint co-watching tools.
 
 ---
 
@@ -33,15 +33,15 @@ A unified platform that elegantly houses **The Movie Canon** and **The Series & 
 │  #04  DUNE: PART TWO (2024) • Dir. Villeneuve   9.45  │
 │  #05  PULP FICTION (1994) • Dir. Tarantino       9.30  │
 │                                                        │
-│  [ ⚡ View Unified Master Canon (Movies + TV Blended) ]│
+│  [ ⚡ View Unified Master Rankings (Movies + TV Blended) ]│
 └────────────────────────────────────────────────────────┘
 ```
 
-### 2.1 Why Segregated Canons Work
+### 2.1 Why Segregated Rankings Work
 1. **Psychological Purity:** Evaluating *The Godfather* against *The Sopranos* head-to-head causes cognitive paralysis. A movie is evaluated on economy of storytelling, pacing, cinematography, and ending resolution over 120 minutes. A series is evaluated on multi-year character arcs and season pacing.
 2. **Independent Leaderboards:**
-   - **Movie Canon:** Ranks 1 to $N_{\text{movies}}$ with its own percentile score curve ($0.0 - 10.0$).
-   - **Series Canon:** Ranks 1 to $N_{\text{series}}$ with its own percentile score curve ($0.0 - 10.0$).
+   - **Movie Rankings:** Ranks 1 to $N_{\text{movies}}$ with its own percentile score curve ($0.0 - 10.0$).
+   - **Series Rankings:** Ranks 1 to $N_{\text{series}}$ with its own percentile score curve ($0.0 - 10.0$).
 3. **Unified Master Mode (Optional Toggle):**
    - For users who want a single master list of their favorite screen media, Telly computes a normalized composite ranking by interleaving items based on their calculated percentile scores.
 
@@ -61,7 +61,7 @@ A unified platform that elegantly houses **The Movie Canon** and **The Series & 
   • Viewing Type: First Time | Rewatch (Log #2)
                  │
                  ▼
-[ Step 2: Sentiment Bracket (Movie Canon) ]
+[ Step 2: Sentiment Bracket (Movie Rankings) ]
   • Masterpiece (Top 10%) | Loved It | Liked It | Meh | Regret
                  │
                  ▼
@@ -107,9 +107,9 @@ sequenceDiagram
     Worker->>TMDB: Batch resolves movie titles & release years to TMDB Movie IDs
     Worker->>DB: Ingests 250 watched movies with watch dates & ratings
     Worker->>App: Returns "250 Movies Imported Successfully!"
-    App->>User: Prompts 5 Quick Anchor Duels to calibrate their Movie Canon
+    App->>User: Prompts 5 Quick Anchor Duels to calibrate their Movie Rankings
     User->>App: Completes 5 duels
-    App->>User: 🎉 Complete Movie Canon Generated!
+    App->>User: 🎉 Complete Movie Rankings Generated!
 ```
 
 ---
@@ -153,7 +153,7 @@ $$\text{Score}(m) = w_1 \cdot \text{InBothWatchlists}(m) + w_2 \cdot \text{Taste
 
 ## 6. Profile Cinema Analytics & Director Affinity
 
-In the Profile Tab (`SCR-14`), tapping **Stats** on the Movie Canon displays dedicated cinema analytics:
+In the Profile Tab (`SCR-14`), tapping **Stats** on the Movie Rankings displays dedicated cinema analytics:
 
 ```
 ┌────────────────────────────────────────────────────────┐

@@ -43,7 +43,7 @@ In television, this dynamic is amplified tenfold. Everyone has a strong opinion 
 ```
 
 ### 2.1 Feed Item Types
-1. **The Milestone Entry:** A user finishes a series and places it in their Canon.
+1. **The Milestone Entry:** A user finishes a series and places it in their Rankings.
 2. **The Upset Alert:** A user places a controversial show above a cultural consensus titan.
 3. **The DNF (Dropped) Drop:** A user gives up on a show and explains why.
 4. **The Finale Reaction:** Immediate hot-take following a season or series finale broadcast.
@@ -205,9 +205,9 @@ CREATE TABLE ranking_comments (
 ### 8.3 Public vs Private Profile Navigation
 - Tapping any user avatar or username in `SCR-05` (feed card, comment, reaction), `SCR-17` (squad member list), or `SCR-28` (search) opens `/u/:handle`.
 - If the account is `PUBLIC`:
-  - Full Canon, stats, taste comparisons, and unwatched gems are visible.
+  - Full Rankings, stats, taste comparisons, and unwatched gems are visible.
 - If the account is `FRIENDS_ONLY` and the viewer is not an accepted friend:
   - Header art, avatar, display name, bio, and pinned medals remain visible.
-  - The Canon, Taste Match dial, and comparisons are replaced by the Private Account Gate:
-    *"This Profile is Friends-Only. @handle shares their Canon and rankings with accepted friends only."*
+  - The Rankings, Taste Match dial, and comparisons are replaced by the Private Account Gate:
+    *"This Profile is Friends-Only. @handle shares their Rankings and rankings with accepted friends only."*
   - Follow / Request button remains accessible to request access.

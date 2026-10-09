@@ -28,7 +28,7 @@ class TellyFloatingNavBar extends StatelessWidget {
   static const defaultItems = [
     TellyNavItem(Icons.home_rounded, 'Home'),
     TellyNavItem(Icons.explore_outlined, 'Explore'),
-    TellyNavItem(Icons.movie_filter_outlined, 'Canon'),
+    TellyNavItem(Icons.movie_filter_outlined, 'Rankings'),
     TellyNavItem(Icons.people_outline_rounded, 'Social'),
     TellyNavItem(Icons.grid_view_rounded, 'More'),
   ];

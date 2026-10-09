@@ -187,7 +187,7 @@ class _TierDistributionCard extends StatelessWidget {
     return _SectionCard(
       key: const Key('title_tier_distribution'),
       icon: Icons.bar_chart_rounded,
-      heading: 'CANON TIER DISTRIBUTION',
+      heading: 'RANKING TIER DISTRIBUTION',
       child: Column(
         children: [
           ClipRRect(

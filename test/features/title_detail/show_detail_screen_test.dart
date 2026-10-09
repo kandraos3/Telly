@@ -189,7 +189,7 @@ void main() {
 
       // Your Status (Ranked State)
       expect(find.text('YOUR STATUS'), findsOneWidget);
-      expect(find.text('Ranked #2 in Your TV Canon'), findsOneWidget);
+      expect(find.text('Ranked #2 in Your TV Rankings'), findsOneWidget);
       expect(find.text('Calculated Score: 9.72 / 10.0'), findsOneWidget);
       expect(find.text('Re-Duel / Change Rank'), findsOneWidget);
 
@@ -308,7 +308,7 @@ void main() {
 
       // Unranked Status
       expect(find.text('You have not ranked this movie yet.'), findsOneWidget);
-      expect(find.text('+ Log & Add to Canon'), findsOneWidget);
+      expect(find.text('+ Log & Add to Rankings'), findsOneWidget);
 
       // Dual-Canon Invariant: Movies must NEVER have seasons accordion
       expect(find.text('SEASONS'), findsNothing);

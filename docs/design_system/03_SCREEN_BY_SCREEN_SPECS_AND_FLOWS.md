@@ -9,7 +9,7 @@ This document defines every single screen in the Telly application. For each scr
 1. **`SCR-01`**: Onboarding Splash & Auth
 2. **`SCR-02`**: Streaming Subscriptions Household Setup
 3. **`SCR-03`**: Show Recognition Seed Grid
-4. **`SCR-04`**: Onboarding Duel Tournament & Canon Unveiling
+4. **`SCR-04`**: Onboarding Duel Tournament & Rankings Unveiling
 5. **`SCR-05`**: Social / Activity Feed (Following / Squads / Global)
 6. **`SCR-06`**: Post Detail & Spoiler-Safe Comment Thread
 7. **`SCR-07`**: Explore & Discover Hub
@@ -17,9 +17,9 @@ This document defines every single screen in the Telly application. For each scr
 9. **`SCR-09`**: The Logging Studio & Sentiment Bracket Selector
 10. **`SCR-10`**: The Binary Duel Arena
 11. **`SCR-11`**: Editorial Tags, MVP Character & Review Sheet
-12. **`SCR-12`**: Canon Slot Reveal & Score Confirmation
+12. **`SCR-12`**: Rankings Slot Reveal & Score Confirmation
 13. **`SCR-13`**: Smart Queue (Universal Watchlist)
-14. **`SCR-14`**: Canon: The Personal Dual-Canon (Ranked podium, Tiers, 3x3)
+14. **`SCR-14`**: Rankings: Your Movie and TV Rankings (Ranked podium, Tiers, 3x3)
 15. **`SCR-15`**: Friend Profile & Taste Match Comparison
 16. **`SCR-16`**: "Two-to-Watch" Co-Watching Decider
 17. **`SCR-17`**: Squads Hub & Consensus Leaderboard
@@ -48,7 +48,7 @@ Five tabs in the floating bar (component library §2.1), plus the floating Log b
 | :--- | :--- | :--- | :--- |
 | Home | `/home` | `SCR-21` Home | none |
 | Explore | `/explore` | `SCR-07` Explore | `/explore/row/:rowId?canon=movie\|tv` (`SCR-07` See all) |
-| Canon | `/canon` | `SCR-14` Canon | none |
+| Rankings | `/canon` | `SCR-14` Rankings | none |
 | Social | `/social` | `SCR-05` Feed | `/social/activity/:id` (`SCR-06`), `/social/search` (`SCR-28`) |
 | More | `/more` | `SCR-22` More hub | `/more/queue` (`SCR-13`), `/more/queue/lists`, `/more/queue/list/:id`, `/more/graveyard` (`SCR-18`), `/more/wrapped` (`SCR-19`), `/more/settings` (`SCR-20`), `/more/edit`, `/more/achievements` (`SCR-23`), `/more/challenges` (`SCR-25`), `/more/challenges/:slug` (`SCR-26`), `/more/level`, `/more/level/rewards`, `/more/level/week` (`SCR-27`), `/more/watching` (`SCR-29`) |
 
@@ -56,7 +56,7 @@ Unchanged, pushed over the shell: the `/log` flow (`SCR-09` to `SCR-12`), `/titl
 
 **Redirects** (old links in shares, notifications and password-reset mails keep working): `/feed` → `/social`, `/feed/activity/:id` → `/social/activity/:id`, `/queue` → `/more/queue`, `/queue/list/:id` → `/more/queue/list/:id`, `/canon/{settings,edit,graveyard,wrapped}` → `/more/{…}`.
 
-### §0 Shared Tab Header (Home, Explore, Canon, Social, More) — `FE-HEADER-01`
+### §0 Shared Tab Header (Home, Explore, Rankings, Social, More) — `FE-HEADER-01`
 
 The five tab screens (`SCR-21`, `SCR-07`, `SCR-14`, `SCR-05`, `SCR-22`) share one header, `TellyScreenHeader`:
 
@@ -74,7 +74,7 @@ The five tab screens (`SCR-21`, `SCR-07`, `SCR-14`, `SCR-05`, `SCR-22`) share on
 | :--- | :--- | :--- |
 | `SCR-21` Home | Home | Streak chip (opens Your level; hidden at 0 weeks), Search (opens Explore with the search field focused) |
 | `SCR-07` Explore | Explore | none (the search bar sits directly below) |
-| `SCR-14` Canon | Canon | Stats (sheet), View (sheet; icon shows the current view), Share profile |
+| `SCR-14` Rankings | Rankings | Stats (sheet), View (sheet; icon shows the current view), Share profile |
 | `SCR-05` Social | Social | My Squads (`/squads`), Search (`/social/search`, `SCR-28`) |
 | `SCR-22` More | More | none |
 
@@ -94,7 +94,7 @@ Every screen opened on top of the tabs uses `TellySubpageAppBar`, the same desig
 ```
 
 * **Title:** sentence case, no emoji, left-aligned: Plus Jakarta Sans 20 / ExtraBold (w800) / −0.3, `textPrimary`, announced as a heading. Names people typed (squads, lists) are shown as typed, never upper-cased. An optional second line (`labelMedium`, `textSecondary`) carries a count or context ("5 members").
-* **Leading:** one back arrow (`arrow_back_rounded`, "Back") for screens you drill into, one close (`close_rounded`, "Close") for tasks you dismiss, in `textPrimary`. Full-screen flows without an app bar (Duel arena, Canon reveal) use the same close button, on the left.
+* **Leading:** one back arrow (`arrow_back_rounded`, "Back") for screens you drill into, one close (`close_rounded`, "Close") for tasks you dismiss, in `textPrimary`. Full-screen flows without an app bar (Duel arena, Rankings reveal) use the same close button, on the left.
 * **Actions:** the same muted 48 dp icons as the tab header. At most one accented action per screen, its primary one (Save on Edit profile, Follow on a friend's profile). Destructive actions (Delete list, Delete / Leave squad) live in a muted ⋮ menu, never as a bare coloured icon.
 * **Scroll behavior:** fixed. Only the five tab headers hide on scroll, so Back / Close is always one tap away.
 * **Theme default:** `TellyTheme`'s `AppBarTheme` uses the same title style, left alignment and canvas background, so an app bar that sets nothing still matches.
@@ -107,7 +107,7 @@ Every screen opened on top of the tabs uses `TellySubpageAppBar`, the same desig
 | `SCR-13` Lists | ← | Lists | New list (+) |
 | `SCR-09` Log a show | ✕ | Log a show | none |
 | `SCR-10` Duel arena | ✕ | "Duel 2 of 4", centred (progress) | none |
-| `SCR-12` Canon reveal | ✕ | none | none |
+| `SCR-12` Rankings reveal | ✕ | none | none |
 | `SCR-15` Friend profile | ← | @handle | Follow (accent) or Edit Profile |
 | `SCR-16` Two-to-Watch | ✕ | Two-to-Watch | none |
 | `SCR-17` My Squads / Squad | ← | My Squads / squad name + "N members" | My Squads: New squad (+). Squad: Invite, ⋮ (Delete / Leave) |
@@ -126,7 +126,7 @@ Every screen opened on top of the tabs uses `TellySubpageAppBar`, the same desig
 ┌────────────────────────────────────────────────────────┐
 │                                                        │
 │                     [ 📺 TELLY ]                       │
-│              Your Personal TV Canon.                   │
+│              Your Personal TV Rankings.                   │
 │               Ranked, Shared, Settled.                 │
 │                                                        │
 │  [ Ambient cinematic montage video with dark overlay ] │
@@ -236,13 +236,13 @@ Every screen opened on top of the tabs uses `TellySubpageAppBar`, the same desig
   - Media filter pills: Filters grid between All, Movies, Series, and Anime.
   - Search icon in header: Opens instantaneous search sheet to query any movie or show from TMDB or AniList.
   - 1-Click Import Buttons:
-    - Letterboxd: Uploads `diary.csv` or imports public profile to pre-seed the Movie Canon.
-    - AniList / MyAnimeList: Connects via GraphQL to ingest completed anime lists into the Series & Anime Canon.
+    - Letterboxd: Uploads `diary.csv` or imports public profile to pre-seed the Movie Rankings.
+    - AniList / MyAnimeList: Connects via GraphQL to ingest completed anime lists into the Series & Anime Rankings.
 - **Dynamic Elements:** Bottom button is disabled (`#242938`) with counter text until 8 titles are selected; upon 8th selection, button flashes in Phosphor Lime with medium haptic pulse and text: *"Start Ranking Duels (5 Battles) →"*.
 
 ---
 
-### `SCR-04`: Onboarding Duel Tournament & Starter Canon Reveal
+### `SCR-04`: Onboarding Duel Tournament & Starter Rankings Reveal
 
 - **Visual Layout:** Fullscreen Duel Arena (see `SCR-10`). Runs 5–7 pairwise binary comparison battles between the selected shows.
 - **After Final Duel:** Immediate transition to the **Celebration Screen**:
@@ -400,7 +400,7 @@ The **Social** tab (`/social`). It was the landing tab until epic #44; Home (`SC
 │  [ ▶ Watch Season 2 on Apple TV+ (App Launch) ]        │
 │                                                        │
 │  YOUR STATUS:                                          │
-│  [ ⭐ Ranked #2 in Your Canon (Score: 9.72) ]          │
+│  [ ⭐ Ranked #2 in Your Rankings (Score: 9.72) ]          │
 │  [ 🔄 Re-Duel / Change Rank ]                          │
 │                                                        │
 │  ━ FRIENDS WHO RANKED THIS (14) ━━━━━━━━━━━━━━━━━━━━━  │
@@ -499,7 +499,7 @@ The title page shows where you are in a title you track. Untracked titles look a
 │  ( ) Dropped / Stopped Watching                        │
 │                                                        │
 │  2. INITIAL SENTIMENT BRACKET                          │
-│  Where does this roughly belong in your taste canon?   │
+│  Where does this roughly belong in your taste rankings?   │
 │                                                        │
 │  ┌──────────────────────────────────────────────────┐  │
 │  │ 👑 Masterpiece / Top 10%                         │  │
@@ -550,7 +550,7 @@ The title page shows where you are in a title you track. Untracked titles look a
 ┌────────────────────────────────────────────────────────┐
 │ [←]               DETAILS & NOTES             [Skip]   │
 ├────────────────────────────────────────────────────────┤
-│  INTERSTELLAR • Placed at #1 in Your Movie Canon!      │
+│  INTERSTELLAR • Placed at #1 in Your Movie Rankings!      │
 │                                                        │
 │  VIEWING VENUE (Movies Only)                           │
 │  [ Theatrical / IMAX [✓] ] [ Home Streaming ] [ Flight ]│
@@ -590,16 +590,16 @@ The title page shows where you are in a title you track. Untracked titles look a
   - Multi-select vibe tag chips (max 3 selectable; tapping 4th deselects oldest).
   - Character dropdown: Populated dynamically with primary cast members from TMDB credits.
   - Micro-review text area: Character counter with auto-trim at 280 characters.
-- **Action:** `Publish to Canon & Broadcast Feed` commits database transaction, triggers celebratory haptics, and routes to `SCR-12`.
+- **Action:** `Publish to Rankings & Broadcast Feed` commits database transaction, triggers celebratory haptics, and routes to `SCR-12`.
 
 ---
 
-### `SCR-12`: Canon Slot Reveal & Score Confirmation
+### `SCR-12`: Rankings Slot Reveal & Score Confirmation
 
 ```
 ┌────────────────────────────────────────────────────────┐
 │                                                        │
-│                 🎉 CANON UPDATED!                      │
+│                 🎉 RANKINGS UPDATED!                   │
 │                                                        │
 │  ┌──────────────────────────────────────────────────┐  │
 │  │ ┌──────────┐  THE BEAR                           │  │
@@ -615,7 +615,7 @@ The title page shows where you are in a title you track. Untracked titles look a
 │  │  [📸 Share to Instagram Story]                   │  │
 │  └──────────────────────────────────────────────────┘  │
 │  ┌──────────────────────────────────────────────────┐  │
-│  │  [ View on My Canon Profile ]                    │  │
+│  │  [ VIEW IN MY RANKINGS ]                           │  │
 │  └──────────────────────────────────────────────────┘  │
 └────────────────────────────────────────────────────────┘
 ```
@@ -691,15 +691,15 @@ Opened from the More hub (`/more/queue`) as a pushed screen with the subpage app
 
 ---
 
-### `SCR-14`: Canon (The Personal Dual-Canon)
+### `SCR-14`: Rankings (your Movie and TV rankings; internally the "Dual-Canon")
 
 > Tracking: epic #47 · Status: shipped · Decision: [0004](../decisions/0004-canon-podium-and-queue-up-next.md) · Mockup: [0047](mockups/0047-canon-queue-layouts.html)
 
-The Canon tab opens on your rankings. Your profile card lives in the More hub (`SCR-22`), so it isn't repeated here. That card opens your own profile (`SCR-15`, `/u/<your handle>`), not this tab.
+The Rankings tab opens on your rankings. Your profile card lives in the More hub (`SCR-22`), so it isn't repeated here. That card opens your own profile (`SCR-15`, `/u/<your handle>`), not this tab.
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│  Canon                              [ ▥ ] [ ☰ ] [ ⇪ ]  │  Stats · View · Share
+│  Rankings                              [ ▥ ] [ ☰ ] [ ⇪ ]  │  Stats · View · Share
 │  [   Movies 142   |   TV Shows 94   ]                   │
 ├────────────────────────────────────────────────────────┤
 │  ┌──────────┐ ┌────────┐ ┌────────┐                    │  Ranked view only:
@@ -714,7 +714,7 @@ The Canon tab opens on your rankings. Your profile card lives in the More hub (`
 └────────────────────────────────────────────────────────┘
 ```
 
-- **Header** (§0): Canon, with three actions in this order:
+- **Header** (§0): Rankings, with three actions in this order:
   - **Stats** (`insights_rounded`, tooltip "Stats", key `canon_stats_button`) opens the Stats sheet.
   - **View** (key `canon_view_button`, tooltip "View: Ranked", "View: Tiers" or "View: 3x3") opens the View sheet. Its icon is the current view's icon: `format_list_numbered_rounded` (Ranked), `view_agenda_rounded` (Tiers) or `grid_view_rounded` (3x3).
   - **Share profile** (key `profile_share_button`), unchanged.
@@ -767,7 +767,7 @@ The Canon tab opens on your rankings. Your profile card lives in the More hub (`
 │  │ Based on 58 mutually ranked titles               │  │
 │  └──────────────────────────────────────────────────┘  │
 │                                                        │
-│  [ Compare Tastes ]      [ View Maya's Canons (210) ]  │
+│  [ Compare Tastes ]      [ View Maya's Rankings (210) ]  │
 │                                                        │
 │  🤝 BIGGEST AGREEMENTS                                 │
 │  • Interstellar (You: #1 • Maya: #2)                   │
@@ -785,14 +785,14 @@ The Canon tab opens on your rankings. Your profile card lives in the More hub (`
 ```
 
 - **Pinned medals** (#138, features/10 §4.4): under the name and bio, the friend's pinned medals (small), or their latest unlocks with a "Recent" label. Hidden when they have none or their profile isn't visible.
-- **Privacy Gate (Private / Friends-Only Profiles):** If `visibility_mode = 'FRIENDS_ONLY'` and `follow_status != 'ACCEPTED'`, the Canon, Taste Match dial, breakdown, and unwatched gems are replaced by the Private Profile card (`key: Key('friend_profile_private')`):
+- **Privacy Gate (Private / Friends-Only Profiles):** If `visibility_mode = 'FRIENDS_ONLY'` and `follow_status != 'ACCEPTED'`, the Rankings, Taste Match dial, breakdown, and unwatched gems are replaced by the Private Profile card (`key: Key('friend_profile_private')`):
   - Lock icon in Warm Amber.
   - Heading: "This Profile is Friends-Only".
-  - Subtitle: "@handle shares their Canon and rankings with accepted friends only." (or "Follow request sent. Their canon appears once @handle accepts." when `FollowStatus.pending`).
+  - Subtitle: "@handle shares their rankings with accepted friends only." (or "Follow request sent. Their rankings appear once @handle accepts." when `FollowStatus.pending`).
   - Follow action button: `+ Follow` (sends follow request) or `Requested` (pending approval).
 - **User Actions:**
   - `Follow / Requested / Following Button`: Outlined pill button in header. Transitions `+ Follow` → `Requested` (if target is private) or `Following` (if target is public). Tapping `Following` unfollows after confirmation.
-  - `Compare Tastes`: Shows interactive head-to-head comparisons across Movie and Series Canons (only if profile is viewable).
+  - `Compare Tastes`: Shows interactive head-to-head comparisons across Movie and Series Rankings (only if profile is viewable).
   - `Two-to-Watch Decider`: Opens `/cowatch?friend=@handle` (`SCR-16`) to find shared titles to watch.
   - `1-Tap Add Unwatched Gems`: Instantly adds friend's highest-ranked unwatched titles to viewer's queue.
 
@@ -867,10 +867,10 @@ The Canon tab opens on your rankings. Your profile card lives in the More hub (`
 └────────────────────────────────────────────────────────┘
 ```
 
-- **Hero card** (as the Canon's profile card): monogram (56 px, as on SCR-17a), name, description, an avatar stack with "Jordan and 4 others"; tapping it opens a frosted members sheet (avatar, name, @handle, OWNER / ADMIN badge; a row opens the profile). Below a hairline: Members, Ranked together and Debates (coral when any) for the canon shown. Counts only, no derived score.
+- **Hero card** (as the Rankings's profile card): monogram (56 px, as on SCR-17a), name, description, an avatar stack with "Jordan and 4 others"; tapping it opens a frosted members sheet (avatar, name, @handle, OWNER / ADMIN badge; a row opens the profile). Below a hairline: Members, Ranked together and Debates (coral when any) for the canon shown. Counts only, no derived score.
 - **Section tabs:** the shared segmented control (§5.5): Consensus | Watchlist | Debates.
-- **Canon switcher:** the shared Movies | TV Shows switcher, Movies first, without counts (a canon's size is known only once loaded). Hidden on Watchlist, which spans both canons.
-- **Consensus:** "SQUAD TOP 3" poster cards (the Canon's Top 3 Showcase, #1 in the accent), the biggest debate, then "THE RANKING" from #4 in the Canon's ranked-row style: rank, poster, title, the member who ranks it highest (🏆) and lowest (↓), "Ranked by N of M", Borda points in the accent. Every title opens SCR-08.
+- **Rankings switcher:** the shared Movies | TV Shows switcher, Movies first, without counts (a canon's size is known only once loaded). Hidden on Watchlist, which spans both canons.
+- **Consensus:** "SQUAD TOP 3" poster cards (the Rankings's Top 3 Showcase, #1 in the accent), the biggest debate, then "THE RANKING" from #4 in the Rankings's ranked-row style: rank, poster, title, the member who ranks it highest (🏆) and lowest (↓), "Ranked by N of M", Borda points in the accent. Every title opens SCR-08.
 - **Watchlist:** "WANT TO WATCH (N)" Queue-style cards: poster, title, type, a progress bar of members who queued it and "N of M want to watch"; an EVERYONE badge and accent border when all members did.
 - **Debates:** "DEBATES (N)": coral cards (Feed upset styling) with poster, title as typed, "A #4 vs B #68" and the gap in ranks.
 - **Empty states** (shared §7.2): no rankings → "Nothing ranked together yet" with **Rank a title** (SCR-09); no shared picks; no debates.
@@ -927,7 +927,7 @@ The Canon tab opens on your rankings. Your profile card lives in the More hub (`
   - `Privacy & Social:` Account visibility mode picker (`Public` [default], `Friends Only`, `Ghost Mode`), hide dropped shows from public feed, spoiler protection settings, and **Share achievements in the feed** (default on; features/10 §10, #50).
   - `Notifications:` Upsets from friends, shared finale airings, leaving soon alerts.
   - `Data & Exports:`
-    - `Export Canon to CSV / Excel`
+    - `Export Rankings to CSV / Excel`
     - `Export to Notion Template`
     - `Export to Letterboxd Format`
     - `Delete Account & Purge Data`
@@ -938,7 +938,7 @@ The Canon tab opens on your rankings. Your profile card lives in the More hub (`
 
 > Tracking: epic #45 · Status: shipped · Decision [0011](../decisions/0011-home-tonight-hero-and-moves.md) · Mockup [0045-home-tonight-moves.html](mockups/0045-home-tonight-moves.html)
 
-The landing tab (`/home`). Its first job is to answer "what do I watch now?", and its second is to offer a few things worth doing. It has three parts, always in this order: the **Tonight** hero, **Your moves** and the **Friends line**. Nothing else is on Home. Your canon lives in the Canon tab and the full feed in Social.
+The landing tab (`/home`). Its first job is to answer "what do I watch now?", and its second is to offer a few things worth doing. It has three parts, always in this order: the **Tonight** hero, **Your moves** and the **Friends line**. Nothing else is on Home. Your rankings lives in the Rankings tab and the full feed in Social.
 
 ```
 ┌────────────────────────────────────────────────────────┐
@@ -987,8 +987,8 @@ The hero shows the first mode that applies (`HomeHeroPicker`, §21.5):
 |---|---|---|---|
 | **Watching** | a tracked title is in *New episodes* or *In progress* (features/11 §2.3) | "UP NEXT · SEVERANCE" · `S2 · E6 "Attila"` (`S2 · E6` without a cached name) · runtime ("52 min") and "N left this season", when known | **✓ Watched E6** · **Details** |
 | **Queue** | none of the above, and the Queue isn't empty | "UP NEXT FROM YOUR QUEUE" · title · "Movie · 2 h 46 · on Max" or "Series · 3 seasons · on Max" (the provider only when known) | **▶ Start watching** · **↻ Another** (hidden with one title) |
-| **New user** | no ranking in either canon, nothing tracked, and an empty Queue | "WELCOME TO TELLY" · "Start your canon" · "Log one movie or show you love. Telly ranks everything after it head to head." | **+ Log a title** |
-| **Explore** | everything else (you have rankings, nothing is tracked, the Queue is empty) | "NOTHING ON TONIGHT" · "Find your next watch" · "Explore has picks from your canon" | **Open Explore** |
+| **New user** | no ranking in either canon, nothing tracked, and an empty Queue | "WELCOME TO TELLY" · "Start your rankings" · "Log one movie or show you love. Telly ranks everything after it head to head." | **+ Log a title** |
+| **Explore** | everything else (you have rankings, nothing is tracked, the Queue is empty) | "NOTHING ON TONIGHT" · "Find your next watch" · "Explore has picks from your rankings" | **Open Explore** |
 
 - **Watching mode:**
   - **Which title:** the newest `last_progress_at` across both groups, with ties going to *New episodes*. Both canons are eligible.
@@ -1122,7 +1122,7 @@ A WHOOP-style hub (`/more`): one place for everything that isn't a daily destina
 └────────────────────────────────────────────────────────┘
 ```
 
-- **Profile card:** avatar 56dp, display name (Title Medium), `@handle · View profile` (Body Medium, `textTertiary`), then your pinned medals (small, features/10 §4.4) once you have any. Opens the Canon tab, which is your public profile.
+- **Profile card:** avatar 56dp, display name (Title Medium), `@handle · View profile` (Body Medium, `textTertiary`), then your pinned medals (small, features/10 §4.4) once you have any. Opens the Rankings tab, which is your public profile.
 - **Queue tile:** first and full width, bookmark icon in the primary accent (`#D2FF52`; light `#4D7800`). Opens `/more/queue`.
 - **Watching tile** (epic #168; key `more_watching_tile`): second, full width, the same layout as Queue, with a ▶ icon in the primary accent.
   - **Subtitle:** live, e.g. "4 in progress · Severance S2 · E6 next", "2 new episodes", or "Track what you're watching" when empty.
@@ -1188,7 +1188,7 @@ Pushed over the shell from the Social tab header (`/social/search`), using `Tell
 
 > Tracking: epic #168 · Status: approved · Decision: [0010](../decisions/0010-watch-tracking-episode-pointer.md) · Mockup: [0168](mockups/0168-watch-tracking.html) · Behaviour: [features/11](../features/11_WATCH_TRACKING_AND_EPISODE_PROGRESS.md)
 
-Everything you're tracking. Pushed at `/more/watching` with the subpage app bar (§0.2), opened from More's Watching tile, Home's *See all* and Canon's Watching strip.
+Everything you're tracking. Pushed at `/more/watching` with the subpage app bar (§0.2), opened from More's Watching tile, Home's *See all* and Rankings's Watching strip.
 
 ```
 ┌────────────────────────────────────────────────────────┐

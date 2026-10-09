@@ -5,7 +5,7 @@
 ## 1. Overview & Scope
 Tracking lets people follow what they are **watching now**, before they rank it. A series keeps **one place**: the last episode you watched. One tap moves it on. Finishing a title leads into the Log and duel flow (features/02). Tracking is separate from the canon: it never changes a rank or a score.
 
-**In scope:** start, progress, un-log, rewatch, finish, drop and revive; new episodes of shows you're caught up on; the Watching hub; tracking on the title page, Home, More, Queue, Canon and Graveyard; offline use; a friends-only "watching now" signal and two feed events.
+**In scope:** start, progress, un-log, rewatch, finish, drop and revive; new episodes of shows you're caught up on; the Watching hub; tracking on the title page, Home, More, Queue, Rankings and Graveyard; offline use; a friends-only "watching now" signal and two feed events.
 
 **Out of scope:**
 - Episode reactions, takes and season duels: epic #216. This spec reserves their hooks (§5.3, §9.4).
@@ -33,7 +33,7 @@ The server sets the state on every write from §3's rules. The client recomputes
 Each tracked title falls into exactly one group, checked in this order:
 1. **New episodes**: `new_episodes_since` is set (§4.8).
 2. **In progress**: `WATCHING`, with `last_progress_at` within the pause window (30 days for a series, 7 days for a movie).
-3. **Finished, not ranked**: `CAUGHT_UP` or `FINISHED`, and the title isn't in your canon for its media type.
+3. **Finished, not ranked**: `CAUGHT_UP` or `FINISHED`, and the title isn't in your rankings for its media type.
 4. **Caught up**: series only. `CAUGHT_UP` and ranked, or `FINISHED` and ranked for 14 days after `finished_at`. After that the title leaves the hub (it stays visible in the hub's *Finished* filter, §9.5).
 5. **Paused**: `WATCHING`, with no progress for the pause window or longer.
 
@@ -51,9 +51,9 @@ A movie is tracked with the same row and RPCs as a series, without a place (deci
 - **Title page:** the *Watching* card (§5.2b) replaces *Streaming now*. There's no seasons section, spoiler guard or drop-off line.
 - **Finish:** **✓ Finished** calls `finish_tracking` and opens the finish sheet with *First-time watch* or *Rewatch* preselected from `is_rewatch` (§4.5).
 - **Paused** after 7 days without finishing (§2.3). A paused movie keeps its **✓ Finished** action.
-- **Rewatch:** *Watch again* on a finished movie sets `is_rewatch`. A ranked movie you're watching again shows **▶ Rewatching** on its Canon row; an unranked one shows **▶ Watching**.
+- **Rewatch:** *Watch again* on a finished movie sets `is_rewatch`. A ranked movie you're watching again shows **▶ Rewatching** on its Rankings row; an unranked one shows **▶ Watching**.
 - **Drop:** movies can't be dropped (features/03); the action is **Stop tracking**.
-- **Stats:** *Movies finished in <year>* on the Canon Stats sheet, and the hub's Movies *This week* strip (§8).
+- **Stats:** *Movies finished in <year>* on the Ranking Stats sheet, and the hub's Movies *This week* strip (§8).
 - **Feed:** `WATCH_STARTED` and `WATCH_FINISHED` work as for series.
 
 ## 3. Progress Model & Formulas
@@ -124,7 +124,7 @@ Each write also appends **episode events**, which stats count (§8):
 - **Finished title:** starting again offers **Watch again**, which resets the place to NULL and sets `is_rewatch = true`. Events count as normal.
 
 ### 4.2 Mark the next episode watched
-- The button reads **✓ Watched E6**. Hub rows and Canon row actions use the short form **✓ E6**; Home's hero uses the full label (SCR-21 §21.2).
+- The button reads **✓ Watched E6**. Hub rows and Rankings row actions use the short form **✓ E6**; Home's hero uses the full label (SCR-21 §21.2).
 - If the next episode is in another season than your place, it reads **✓ Watched S3 · E1** (short form **✓ S3E1**).
 - Tapping it:
   - moves the place forward (§3.5) with the light impact haptic;
@@ -346,7 +346,7 @@ All of these are `SECURITY DEFINER`, `SET search_path = public`. They take `p_cl
 - **Home's Friends line (SCR-21 §21.4):** "started watching" and "finished" join the existing verbs.
 
 ## 8. Stats
-- **Canon Stats sheet (SCR-14):**
+- **Ranking Stats sheet (SCR-14):**
   - TV adds **Episodes in <year>**.
   - Movies add **Movies finished in <year>**.
   - Values come from `get_tracking_stats`; offline shows "—".
@@ -391,7 +391,7 @@ All of these are `SECURITY DEFINER`, `SET search_path = public`. They take `p_cl
 | Route | Screen |
 | :--- | :--- |
 | `/more/watching` | SCR-29 Watching hub. |
-| `/more/watching?filter=tv\|movie\|finished` | The same, opened with a filter chip selected (from Canon's strip). |
+| `/more/watching?filter=tv\|movie\|finished` | The same, opened with a filter chip selected (from Rankings's strip). |
 
 ### 9.6 Log prefill
 - `/log` accepts a `LogRequest` extra: a `TitleSearchResult` plus an optional `WatchStatus`.
@@ -420,7 +420,7 @@ All of these are `SECURITY DEFINER`, `SET search_path = public`. They take `p_cl
   - the episode sheet (un-log, rewatch, jump confirm);
   - the finish sheet (unranked and ranked);
   - the hub groups and empty and offline states;
-  - the Home hero and chips (SCR-21), More tile and Canon strip and row tag;
+  - the Home hero and chips (SCR-21), More tile and Rankings strip and row tag;
   - both themes.
 - **Provider:** optimistic update then replay; undo nets zero; offline queue order.
 - **pgTAP:**

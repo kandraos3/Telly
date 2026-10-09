@@ -144,12 +144,12 @@ class OnboardingDuel {
     required this.planned,
   });
 
-  /// `Movie Duel 2 of 3 • Calibrating your Movie Canon` (features/01 Screen 4).
+  /// `Movie Duel 2 of 3 • Calibrating your Movie Rankings` (features/01 Screen 4).
   String get progressLabel => label(mediaType, number, planned);
 
   static String label(String mediaType, int number, int planned) => mediaType == 'movie'
-      ? 'Movie Duel $number of $planned • Calibrating your Movie Canon'
-      : 'Series Duel $number of $planned • Calibrating your Series Canon';
+      ? 'Movie Duel $number of $planned • Calibrating your Movie Rankings'
+      : 'Series Duel $number of $planned • Calibrating your TV Rankings';
 }
 
 class _CanonSort {

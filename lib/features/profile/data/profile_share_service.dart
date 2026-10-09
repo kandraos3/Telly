@@ -47,7 +47,7 @@ class ProfileShareService {
     List<String> topSeries = const [],
   }) {
     return _share(ShareParams(
-      subject: 'My canon on Telly',
+      subject: 'My rankings on Telly',
       text: caption(
         handle: handle,
         displayName: displayName,

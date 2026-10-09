@@ -53,7 +53,7 @@ class TvGraveyardScreen extends ConsumerWidget {
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'Shows you abandoned and why (${droppedShows.length} Total). Dropped shows do not affect active canon percentiles.',
+                      'Shows you abandoned and why (${droppedShows.length} Total). Dropped shows do not affect active ranking percentiles.',
                       style: TellyTypography.bodyMedium(color: TellyColors.textPrimaryOf(context))
                           .copyWith(fontSize: 13.0, fontWeight: FontWeight.w700),
                     ),

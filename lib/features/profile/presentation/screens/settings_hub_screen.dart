@@ -316,8 +316,8 @@ class SettingsHubScreen extends ConsumerWidget {
           _Card(children: [
             _Tile(
               key: const Key('settings_export_csv'),
-              title: 'Export My Canon (CSV)',
-              subtitle: 'Both canons, shared as a spreadsheet',
+              title: 'Export My Rankings (CSV)',
+              subtitle: 'Both rankings, shared as a spreadsheet',
               trailing: Icon(Icons.ios_share, color: TellyColors.primaryAccentOf(context), size: 20),
               onTap: () => _guard(context, () => ref.read(canonExportServiceProvider).exportCsv()),
             ),
@@ -593,7 +593,7 @@ class _ImportSummary extends StatelessWidget {
   Widget build(BuildContext context) {
     final lines = [
       'Added ${result.added} ${result.added == 1 ? 'title' : 'titles'} from ${source.label}',
-      if (result.alreadyRanked > 0) '${result.alreadyRanked} already in your canon',
+      if (result.alreadyRanked > 0) '${result.alreadyRanked} already in your rankings',
       if (result.unmatched.isNotEmpty) "${result.unmatched.length} couldn't be matched",
     ];
     return Container(
@@ -623,7 +623,7 @@ class _ImportSummary extends StatelessWidget {
           ),
           if (result.added > 0)
             Text(
-              'New titles sit at the bottom of your canon. Duel them to place them properly.',
+              'New titles sit at the bottom of your rankings. Duel them to place them properly.',
               style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)),
             ),
           if (result.unmatched.isNotEmpty)

@@ -572,7 +572,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Telly grades are dynamic percentile scores (1.00–10.00) calculated from head-to-head tournament duels across the community and your personal canon.',
+                'Telly grades are dynamic percentile scores (1.00–10.00) calculated from head-to-head tournament duels across the community and your personal rankings.',
                 style: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(ctx)),
               ),
               const SizedBox(height: 14),
@@ -964,7 +964,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Ranked #${myRanking.rankPosition} in Your ${title.isMovie ? 'Movie' : 'TV'} Canon',
+                        'Ranked #${myRanking.rankPosition} in Your ${title.isMovie ? 'Movie' : 'TV'} Rankings',
                         style: TellyTypography.titleMedium(
                           color: TellyColors.textPrimaryOf(context),
                         ).copyWith(fontWeight: FontWeight.w800),
@@ -1012,7 +1012,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
             ),
             const SizedBox(height: 12),
             TellyPrimaryButton(
-              label: '+ Log & Add to Canon',
+              label: '+ Log & Add to Rankings',
               onPressed: () => _onReDuel(title),
             ),
           ],
@@ -1130,7 +1130,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'FRIEND CANON DIVERGENCE',
+                  'FRIEND RANKING DIVERGENCE',
                   style: TellyTypography.caption(
                     color: TellyColors.neonCoralOf(context),
                   ).copyWith(fontWeight: FontWeight.w800, fontSize: 11),
@@ -1184,7 +1184,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
         ),
         const SizedBox(height: 4),
         Text(
-          'Frequently paired together in community Top 10 Canons',
+          'Frequently paired together in community Top 10 lists',
           style: TellyTypography.caption(color: TellyColors.textSecondaryOf(context)),
         ),
         const SizedBox(height: 12),

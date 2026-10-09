@@ -52,7 +52,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    expect(find.text('Movie Duel 1 of 3 • Calibrating your Movie Canon'), findsOneWidget);
+    expect(find.text('Movie Duel 1 of 3 • Calibrating your Movie Rankings'), findsOneWidget);
     expect(find.text('Too different / Hard to say'), findsOneWidget);
 
     var duels = 0;

@@ -69,7 +69,7 @@ class SquadsListScreen extends ConsumerWidget {
                 icon: Icons.groups_2_outlined,
                 title: 'No squads yet',
                 message: 'Squads rank together: roommates, a book club, the group chat. '
-                    'Create one to start a consensus canon.',
+                    'Create one to start a consensus ranking.',
                 actionLabel: 'Create a squad',
                 actionIcon: Icons.group_add_rounded,
                 actionKey: const Key('create_squad_empty_button'),

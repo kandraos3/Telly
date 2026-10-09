@@ -222,7 +222,7 @@ class _ExploreDiscoverScreenState extends ConsumerState<ExploreDiscoverScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            '${net.titleCount} Titles in Canon',
+                            '${net.titleCount} Titles Ranked',
                             style: TellyTypography.caption(
                               color: TellyColors.textTertiary,
                             ),

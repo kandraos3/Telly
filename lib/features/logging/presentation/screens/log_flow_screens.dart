@@ -98,8 +98,8 @@ class LogRevealScreen extends ConsumerWidget {
       await ref.read(storyShareServiceProvider).shareRankReveal(RevealStory(
             title: commit.candidate.title,
             canonLabel: CanonType.fromMediaType(commit.candidate.mediaType) == CanonType.movie
-                ? 'Movie Canon'
-                : 'Series Canon',
+                ? 'Movie Rankings'
+                : 'TV Rankings',
             rank: commit.rank,
             total: commit.total,
             score: commit.score,

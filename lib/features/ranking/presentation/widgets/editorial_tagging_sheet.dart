@@ -221,7 +221,7 @@ class _EditorialTaggingSheetState extends ConsumerState<EditorialTaggingSheet> {
                   ),
                 ),
                 TextSpan(
-                  text: 'in Your ${_isMovie ? 'Movie' : 'Series'} Canon!',
+                  text: 'in Your ${_isMovie ? 'Movie' : 'Series'} Rankings!',
                   style: TellyTypography.labelSmall(color: TellyColors.textTertiaryOf(context)),
                 ),
               ],

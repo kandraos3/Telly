@@ -1,6 +1,6 @@
-# Feature Spec 06: Profile, "The Canon", Stats & "Telly Wrapped"
+# Feature Spec 06: Profile, "The Rankings", Stats & "Telly Wrapped"
 
-> Tracking: epic #47 (Canon layout, §2–§3) · Status: shipped · Decision: [0004](../decisions/0004-canon-podium-and-queue-up-next.md)
+> Tracking: epic #47 (Rankings layout, §2–§3) · Status: shipped · Decision: [0004](../decisions/0004-canon-podium-and-queue-up-next.md)
 
 ## 1. Overview & Identity Signaling
 On Beli, a user's profile is their culinary identity card. On **Telly**, a user's profile is their **Cultural Identity Across Screen Entertainment**. 
@@ -8,7 +8,7 @@ On Beli, a user's profile is their culinary identity card. On **Telly**, a user'
 People define themselves by what they cherish—whether they are a cinema purist, an HBO prestige snob, an anime connoisseur, an obscure indie film enthusiast, or a sitcom comfort-watcher.
 
 **Key Components:**
-1. **The Dual Canon (Profile Hero):** A seamless segmented switcher toggling between **Movie Canon** and **Series & Anime Canon** (with an optional blended view).
+1. **Your Rankings (Profile Hero):** A seamless segmented switcher toggling between **Movie Rankings** and **Series & Anime Rankings** (with an optional blended view).
 2. **Multi-View System:** Toggle between *Numeric Rank*, *Tier List (S/A/B/C/D)*, and *3x3 Poster Grid*.
 3. **Deep Filter Slicers:** Filter by Director, Network/Studio, Streaming Service, Genre, Runtime, and Decade.
 4. **Analytics & Radar Charts:** Director affinity, network loyalty, theatrical vs streaming ratio, binge velocity, and genre balance.
@@ -16,13 +16,13 @@ People define themselves by what they cherish—whether they are a cinema purist
 
 ---
 
-## 2. Canon Tab Layout & Wireframe
+## 2. Rankings Tab Layout & Wireframe
 
-The Canon tab (`SCR-14`) opens on your rankings. Your identity (avatar, name, bio, counts) lives on the profile card in the More hub (`SCR-22`). Your stats and Top 3 showcase are one tap away in the header's Stats sheet. The exact layout, sizes and states are in screen spec `SCR-14`; the approved mockup is [0047](../design_system/mockups/0047-canon-queue-layouts.html).
+The Rankings tab (`SCR-14`) opens on your rankings. Your identity (avatar, name, bio, counts) lives on the profile card in the More hub (`SCR-22`). Your stats and Top 3 showcase are one tap away in the header's Stats sheet. The exact layout, sizes and states are in screen spec `SCR-14`; the approved mockup is [0047](../design_system/mockups/0047-canon-queue-layouts.html).
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│  Canon                              [ ▥ ] [ ☰ ] [ ⇪ ]  │  Stats · View · Share
+│  Rankings                              [ ▥ ] [ ☰ ] [ ⇪ ]  │  Stats · View · Share
 │  [   Movies 142   |   TV Shows 94   ]                   │
 ├────────────────────────────────────────────────────────┤
 │  ┌──────────┐ ┌────────┐ ┌────────┐                    │
@@ -44,11 +44,11 @@ The Canon tab (`SCR-14`) opens on your rankings. Your identity (avatar, name, bi
 
 The view is chosen in the header's View sheet. It persists while the app runs, and it's the same for both canons.
 
-### 3.1 View A: The Ranked Canon (Default)
+### 3.1 View A: The Ranked Rankings (Default)
 - **Podium:** ranks #1–#3 lead as three large poster cards. The list continues from #4 as rows. The podium appears in this view only.
 - Segregated leaderboards:
-  - When *Movie Canon* is selected: lists all feature films #1 to #N with runtime, director, venue, and score.
-  - When *Series & Anime Canon* is selected: lists all series #1 to #M with season counts, network, and score.
+  - When *Movie Rankings* is selected: lists all feature films #1 to #N with runtime, director, venue, and score.
+  - When *Series & Anime Rankings* is selected: lists all series #1 to #M with season counts, network, and score.
 - Displays poster thumbnail, release year, director/network badge, and user's short hot take.
 - Supports smooth drag-and-drop re-ordering (with live recalculation of scores).
 

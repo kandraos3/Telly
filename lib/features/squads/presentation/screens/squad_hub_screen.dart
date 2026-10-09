@@ -329,7 +329,7 @@ class _Hub extends ConsumerWidget {
           key: const Key('squad_consensus_empty'),
           icon: Icons.leaderboard_outlined,
           title: 'Nothing ranked together yet',
-          message: 'Once members rank a ${_canonNoun(hub.mediaType)}, the squad’s consensus canon appears here.',
+          message: 'Once members rank a ${_canonNoun(hub.mediaType)}, the squad’s consensus ranking appears here.',
           actionLabel: 'Rank a title',
           actionIcon: Icons.add_rounded,
           onAction: () => context.push(Routes.log),
@@ -394,7 +394,7 @@ class _Hub extends ConsumerWidget {
           key: Key('squad_debates_empty'),
           icon: Icons.local_fire_department_outlined,
           title: 'No debates yet',
-          message: 'No big disagreements in this canon. Yet.',
+          message: 'No big disagreements in this ranking. Yet.',
         ),
       ];
     }

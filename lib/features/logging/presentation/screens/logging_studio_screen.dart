@@ -386,7 +386,7 @@ class _BroadcastToggle extends StatelessWidget {
       side: BorderSide(color: TellyColors.strokeStrongOf(context), width: 1.5),
       title: Text('Broadcast to Feed', style: TellyTypography.bodyLarge(color: TellyColors.textPrimaryOf(context))),
       subtitle: Text(
-        value ? 'Friends will see this log in their feed.' : 'Private: ranked in your canon, hidden from the feed.',
+        value ? 'Friends will see this log in their feed.' : 'Private: added to your rankings, hidden from the feed.',
         style: TellyTypography.caption(color: TellyColors.textPrimaryOf(context)).copyWith(fontWeight: FontWeight.w600),
       ),
     );

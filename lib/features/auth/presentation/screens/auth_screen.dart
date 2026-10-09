@@ -48,7 +48,7 @@ class AuthScreen extends ConsumerWidget {
                   const SizedBox(height: 24),
                   Center(
                     child: Text(
-                      'Your Personal TV Canon.\nRanked, Shared, Settled.',
+                      'Your Personal TV Rankings.\nRanked, Shared, Settled.',
                       textAlign: TextAlign.center,
                       style: TellyTypography.displayXL().copyWith(
                         fontSize: 20,
@@ -307,7 +307,7 @@ class _EmailAuthSheetState extends ConsumerState<EmailAuthSheet> {
           const SizedBox(height: 8),
           Text(
             _isSignUp
-                ? 'Join Telly to build and share your personal TV canon.'
+                ? 'Join Telly to build and share your personal TV rankings.'
                 : 'Welcome back. Enter your credentials to continue.',
             style: TellyTypography.bodyMedium(color: TellyColors.textSecondary),
           ),

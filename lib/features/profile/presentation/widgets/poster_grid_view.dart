@@ -23,7 +23,7 @@ class PosterGridView extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 40),
           child: Text(
-            'No titles ranked in this Canon yet.',
+            'No titles ranked here yet.',
             style: TellyTypography.bodyMedium(color: TellyColors.textTertiary),
           ),
         ),

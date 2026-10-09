@@ -119,7 +119,7 @@ class _StarterCanonRevealState extends ConsumerState<StarterCanonReveal> with Si
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text('Your Dual Canons, Unveiled', style: TellyTypography.displayXL(color: TellyColors.textPrimaryOf(context)), textAlign: TextAlign.center),
+                  Text('Your Rankings, Unveiled', style: TellyTypography.displayXL(color: TellyColors.textPrimaryOf(context)), textAlign: TextAlign.center),
                   const SizedBox(height: 16),
                   Row(
                     children: [
@@ -142,7 +142,7 @@ class _StarterCanonRevealState extends ConsumerState<StarterCanonReveal> with Si
                   Expanded(
                     child: top.isEmpty
                         ? Center(
-                            child: Text('Nothing ranked in this canon yet.', style: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context))),
+                            child: Text('Nothing ranked in this list yet.', style: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context))),
                           )
                         : ListView(
                             children: [for (final e in top) _RevealRow(entry: e)],

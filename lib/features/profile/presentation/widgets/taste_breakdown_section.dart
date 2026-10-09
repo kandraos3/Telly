@@ -37,7 +37,7 @@ class DualTasteMatchBreakdown extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'CANON TASTE BREAKDOWN',
+                'RANKINGS TASTE BREAKDOWN',
                 style: TellyTypography.labelSmall(
                   color: TellyColors.textTertiaryOf(context),
                 ).copyWith(fontWeight: FontWeight.w700, letterSpacing: 1.0),
@@ -145,7 +145,7 @@ class DualTasteMatchBreakdown extends StatelessWidget {
         ),
         content: Text(
           'Telly uses the Spearman Rank Correlation coefficient (ρ) combined with Bayesian confidence shrinkage (k₀ = 5).\n\n'
-          'Movie and Series Canons are computed independently to prevent short-form features from skewing long-form TV alignments.',
+          'Movie and TV rankings are computed independently to prevent short-form features from skewing long-form TV alignments.',
           style: TellyTypography.bodyMedium(color: TellyColors.textSecondaryOf(context)),
         ),
         actions: [
