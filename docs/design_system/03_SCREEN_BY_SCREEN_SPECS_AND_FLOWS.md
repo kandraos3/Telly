@@ -1061,14 +1061,15 @@ Your own posts, medal posts and challenge posts are left out. Tapping the card o
   - `profileCanonProvider`, for whether you have rankings and for your rank and score in comparisons;
   - `yourLevelControllerProvider`, for the streak;
   - `challengesControllerProvider`;
-  - `feedControllerProvider(FeedFilter.following)`, plus whether you follow anyone.
+  - `feedControllerProvider(FeedFilter.following)`. The app has no follow count, so "you follow nobody" means no one but you appears in that feed. Until the feed answers, Home assumes you follow someone, so the find-friends move doesn't flash in.
 
   There's no backend change.
 - **Pure Dart**, in `lib/features/home/domain/`, with plain inputs and `now` passed in so the weekday rules can be tested:
   - `HomeHeroPicker.pick(...) → HomeHero`: the mode, plus the tracked item or the Queue pick;
   - `HomeMovesRanker.rank(...) → List<HomeMove>`: the tables in §21.3;
   - `FriendsLine.from(feed, me, now)`.
-- **`homeStateProvider`** derives one `HomeState` from the sources, so widgets hold no logic. A source that's loading or has failed counts as empty.
+- **`homeStateProvider`** (`lib/features/home/presentation/providers/home_providers.dart`) derives one `HomeState` from the sources, so widgets hold no logic. A source that's loading or has failed counts as empty. The hero follows the data at once. The moves are frozen once shown and re-derive on `refresh()` and whenever a source answers for the first time, so late data (level, challenges, feed) still fills in without re-sorting what's on screen.
+- **The Queue pick** is `homeQueuePickProvider`: an `UpNextPicker` under the key `home`, over the whole Queue (movie and series ids are folded into one key, `HomeQueueKey`), kept for the app session.
 - **Removed:**
   - `HomeCurrentlyWatching`;
   - Home's `_CanonSection` and `_FriendsSection`;
