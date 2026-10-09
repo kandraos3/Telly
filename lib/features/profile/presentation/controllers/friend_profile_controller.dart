@@ -115,11 +115,17 @@ class FriendProfileController extends AutoDisposeFamilyAsyncNotifier<FriendProfi
     final profiles = ref.watch(profileRepositoryProvider);
     final profile = await profiles.fetchByHandle(arg);
     if (profile == null) throw ProfileNotFound(arg);
-    final follow = await ref.watch(socialRepositoryProvider).getFollowStatus(profile.id);
-    if (!profile.canView) return FriendProfileData(profile: profile, followStatus: follow);
-
     final me = ref.watch(authRepositoryProvider).currentUserId;
     final isSelf = me != null && profile.id == me;
+    final follow = await ref.watch(socialRepositoryProvider).getFollowStatus(profile.id);
+    final canView = profile.canView &&
+        (profile.visibility != 'FRIENDS_ONLY' || follow == FollowStatus.accepted || isSelf);
+    if (!canView) {
+      return FriendProfileData(
+        profile: profile.copyWith(canView: false),
+        followStatus: follow,
+      );
+    }
 
     final rankings = ref.watch(rankingRepositoryProvider);
     final mine = {

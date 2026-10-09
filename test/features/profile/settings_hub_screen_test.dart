@@ -94,6 +94,27 @@ void main() {
     });
   });
 
+  group('epic #48 / Task #207: Account visibility in SCR-20 Settings', () {
+    testWidgets('shows visibility dropdown and updates profile when changed', (tester) async {
+      await pump(tester);
+      final dropdown = find.byKey(const Key('settings_visibility'));
+      expect(dropdown, findsOneWidget);
+
+      expect(find.text('Public'), findsOneWidget);
+
+      await tester.tap(dropdown);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Friends Only'), findsWidgets);
+      expect(find.text('Ghost Mode'), findsOneWidget);
+
+      await tester.tap(find.text('Friends Only').last);
+      await tester.pumpAndSettle();
+
+      expect(profiles.updates.last, {'visibility_mode': 'FRIENDS_ONLY'});
+    });
+  });
+
   group('FE-505 / FE-608: SCR-20 Settings', () {
     testWidgets('notification toggles persist to users.preferences with spec defaults', (tester) async {
       await pump(tester);

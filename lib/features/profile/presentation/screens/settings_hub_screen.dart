@@ -458,13 +458,13 @@ class _VisibilityTile extends ConsumerWidget {
   final String current;
   const _VisibilityTile({required this.current});
 
-  static const _labels = {'PUBLIC': 'Public', 'FRIENDS_ONLY': 'Friends only', 'GHOST': 'Ghost'};
+  static const _labels = {'PUBLIC': 'Public', 'FRIENDS_ONLY': 'Friends Only', 'GHOST': 'Ghost Mode'};
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return _Tile(
-      title: 'Privacy & Ghost Mode',
-      subtitle: 'Who can see your canon',
+      title: 'Account Visibility',
+      subtitle: 'Public, Friends Only, or Ghost Mode',
       trailing: DropdownButton<String>(
         key: const Key('settings_visibility'),
         value: current,

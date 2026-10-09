@@ -48,6 +48,27 @@ class PublicProfile {
         ],
         canView: (j['can_view'] as bool?) ?? true,
       );
+
+  PublicProfile copyWith({
+    String? id,
+    String? username,
+    String? displayName,
+    String? avatarUrl,
+    String? bio,
+    String? visibility,
+    List<({int titleId, String mediaType})>? pinnedShowcase,
+    bool? canView,
+  }) =>
+      PublicProfile(
+        id: id ?? this.id,
+        username: username ?? this.username,
+        displayName: displayName ?? this.displayName,
+        avatarUrl: avatarUrl ?? this.avatarUrl,
+        bio: bio ?? this.bio,
+        visibility: visibility ?? this.visibility,
+        pinnedShowcase: pinnedShowcase ?? this.pinnedShowcase,
+        canView: canView ?? this.canView,
+      );
 }
 
 /// Per-canon Spearman match from `calculate_taste_match_rpc` (features/05 §2).
@@ -184,6 +205,13 @@ class SupabaseProfileRepository implements ProfileRepository {
     };
     if (changes.isEmpty) return;
     await _client.from('users').update(changes).eq('id', _me);
+    if (visibility != null) {
+      await _client.from('user_profile_settings').upsert({
+        'user_id': _me,
+        'visibility_mode': visibility,
+        'updated_at': DateTime.now().toUtc().toIso8601String(),
+      });
+    }
   }
 
   @override
