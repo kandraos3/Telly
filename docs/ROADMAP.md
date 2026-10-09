@@ -9,7 +9,6 @@ _Updated 2026-10-09. Change this page when the direction changes, not for status
 - **Launch setup**: remaining human-only console, secrets and store tasks ([#43](https://github.com/kandraos3/Telly/issues/43))
 
 ## Next
-- **Home tab** ([#45](https://github.com/kandraos3/Telly/issues/45))
 - **Light-mode lime contrast** ([#54](https://github.com/kandraos3/Telly/issues/54))
 - **Push notifications** ([#42](https://github.com/kandraos3/Telly/issues/42))
 - **Apple & Google sign-in** ([#3](https://github.com/kandraos3/Telly/issues/3))
@@ -24,6 +23,7 @@ _Updated 2026-10-09. Change this page when the direction changes, not for status
 - **Smart "Up next" pick** for the Queue, replacing the random pick (idea, [#124](https://github.com/kandraos3/Telly/issues/124))
 
 ## Recently shipped
+- **Home tab**: a Tonight hero with your next episode and one-tap logging (falling back to your Queue pick, then a welcome or an Explore nudge), up to four ranked moves (rank what you finished, new seasons, keep your streak, challenges close to done, friends' rankings you can compare, your Queue pick), one friends line and a streak chip in the header. The canon top 3 and friend rows left Home ([#45](https://github.com/kandraos3/Telly/issues/45), [decision 0011](decisions/0011-home-tonight-hero-and-moves.md), [SCR-21](design_system/03_SCREEN_BY_SCREEN_SPECS_AND_FLOWS.md))
 - **Watch tracking**: currently watching on Home with episode progress, a Watching hub (`SCR-29`), start flow from Queue and title pages, episode sheet and spoiler guard, and finishing into the log and duel flow ([#168](https://github.com/kandraos3/Telly/issues/168), [decision 0010](decisions/0010-watch-tracking-episode-pointer.md), [features/11](features/11_WATCH_TRACKING_AND_EPISODE_PROGRESS.md))
 - **Friends outside squads & public profiles**: discover and follow users via `@handle` and display name search (`SCR-28`), send follow requests, and view profiles with taste comparison dials. Added account privacy controls (`PUBLIC`, `FRIENDS_ONLY`, `GHOST`) in settings (`SCR-20`) and locked private profile gates (`SCR-15`) ([#48](https://github.com/kandraos3/Telly/issues/48), [decision 0009](decisions/0009-social-friends-search-and-privacy.md), [features/04](features/04_SOCIAL_GRAPH_FEED_AND_UPSETS.md), [adjacent/02](adjacent_systems/02_PROFILE_MANAGEMENT_AND_CUSTOMIZATION.md))
 - **Explore rows + recommendation engine**: a hero pick and Netflix-style rows (Trending now, Top picks, Because you ranked *X*, Your friends are watching, Leaving your services soon, Something different), each with a See all grid. The server gathers candidates from TMDB recommendations of your top titles, trending lists and friends; a documented, unit-tested ranker on the device scores them by taste, seeds, friends, quality and your services. Curated canons are gone, and Not for me hides a pick with Undo ([#46](https://github.com/kandraos3/Telly/issues/46), decisions [0007](decisions/0007-explore-hero-rows-and-client-ranker.md) and [0008](decisions/0008-explore-dismissals-own-table.md), [features/07 §7](features/07_DISCOVERY_AND_STREAMING_INTELLIGENCE.md#7-explore-rows--recommendation-engine))
