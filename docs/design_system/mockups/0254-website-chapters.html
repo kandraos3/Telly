@@ -1,0 +1,538 @@
+<title>Telly Website Chapters</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: the approved website design (epic #254, decision 0013). One browser frame with a live mock of the site,
+   switchable between desktop and phone width. The hero duel is playable. */
+:root {
+  /* review sheet (theme-aware) */
+  --page: #EEF0F4; --ink: #0F1117; --ink-2: #4A4E63; --ink-3: #696E87; --rule: #D7DBE5; --card: #FFFFFF; --mark: #4D7800;
+  --chrome: #DDE1E9; --plus: #047857; --minus: #C2283F;
+  --f-ui: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-display: "Playfair Display", Georgia, "Times New Roman", serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+
+  /* the website itself is dark only (Midnight Cathode, style guide §2.1) */
+  --s-bg: #08090C; --s-sf: #11131A; --s-ov: #1A1D27; --s-st: #242938; --s-gl: rgba(255,255,255,.08);
+  --s-t1: #FFFFFF; --s-t2: #C8CAD8; --s-t3: #7D8198;
+  --s-lime: #D2FF52; --s-on-lime: #08090C; --s-amber: #FFA733; --s-coral: #FF4B6E; --s-violet: #7C5CFF; --s-cyan: #38BDF8; --s-green: #34D399;
+  --s-bezel: #1B1D24; --s-shadow: rgba(0,0,0,.55);
+  --s-glow-lime: rgba(210,255,82,.14); --s-glow-violet: rgba(124,92,255,.18); --s-glow-amber: rgba(255,167,51,.14); --s-glow-coral: rgba(255,75,110,.14);
+  --tier-god: linear-gradient(90deg, #FFE066, #FFA733);
+  --tier-prestige: linear-gradient(90deg, #A78BFA, #7C5CFF);
+  --tier-great: linear-gradient(90deg, #34D399, #059669);
+  --tier-good: linear-gradient(90deg, #38BDF8, #0284C7);
+  --tier-mid: linear-gradient(90deg, #94A3B8, #64748B);
+  --medal-gold: linear-gradient(160deg, #FFE066, #FFA733);
+  --medal-silver: linear-gradient(160deg, #E5E7EB, #94A3B8);
+  --medal-bronze: linear-gradient(160deg, #F5B78A, #B8693A);
+  --medal-special: linear-gradient(160deg, #A78BFA, #7C5CFF);
+  /* illustrative poster art */
+  --p1: linear-gradient(165deg, #3A6A9A, #0E1A2B 75%);
+  --p2: linear-gradient(165deg, #A4542A, #24110A 75%);
+  --p3: linear-gradient(165deg, #7E2C40, #1A0A10 75%);
+  --p4: linear-gradient(165deg, #3F7A4F, #0C1A10 75%);
+  --p5: linear-gradient(165deg, #8E7A2A, #1E190A 75%);
+  --p6: linear-gradient(165deg, #6A3F96, #140C20 75%);
+  --p7: linear-gradient(165deg, #2A7E7E, #0A1C1C 75%);
+  --p8: linear-gradient(165deg, #9A4A2A, #3A1A0A 45%, #120806);
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --page: #050608; --ink: #F2F3F7; --ink-2: #C8CAD8; --ink-3: #7D8198; --rule: #242938; --card: #0D0F15; --mark: #D2FF52;
+  --chrome: #1A1D27; --plus: #34D399; --minus: #F87171; color-scheme: dark } }
+:root[data-theme="dark"] { --page: #050608; --ink: #F2F3F7; --ink-2: #C8CAD8; --ink-3: #7D8198; --rule: #242938; --card: #0D0F15; --mark: #D2FF52;
+  --chrome: #1A1D27; --plus: #34D399; --minus: #F87171; color-scheme: dark }
+
+* { box-sizing: border-box }
+body { background: var(--page); color: var(--ink); font: 15px/1.55 var(--f-ui); margin: 0 }
+.wrap { max-width: 1320px; margin: 0 auto; padding-inline: 24px; padding-block: 40px 80px }
+@media (max-width: 600px) { .wrap { padding-inline: 16px } }
+header.top { display: grid; gap: 12px; max-width: 78ch }
+.eyebrow { font: 700 12px/1 var(--f-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3) }
+h1 { font: 700 clamp(30px, 4vw, 46px)/1.08 var(--f-display); margin: 0; letter-spacing: -.02em; text-wrap: balance }
+h2 { font: 700 28px/1.2 var(--f-display); margin: 0; letter-spacing: -.01em; text-wrap: balance }
+h3 { font: 800 16px/1.3 var(--f-ui); margin: 0 }
+p { margin: 0; color: var(--ink-2) }
+.gap { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 26px }
+.gapcard { background: var(--card); border: 1px solid var(--rule); border-radius: 14px; padding: 16px 18px; display: grid; gap: 10px; align-content: start }
+.gapcard ul { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px }
+.gapcard li { font: 600 12.5px/1 var(--f-ui); padding: 7px 10px; border-radius: 999px; border: 1px solid var(--rule); color: var(--ink-2) }
+.gapcard.missing li { border-style: dashed; color: var(--ink) }
+.toolbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center;
+  margin-top: 30px; padding-block: 10px; background: var(--page) }
+.toolbar label { font: 700 12px var(--f-ui); color: var(--ink-3); letter-spacing: .06em; text-transform: uppercase }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 10px; padding: 3px; background: var(--card) }
+.seg button { font: 700 13px var(--f-ui); color: var(--ink-2); background: none; border: 0; padding: 8px 14px; border-radius: 7px; cursor: pointer; min-height: 36px }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--page) }
+button:focus-visible, a:focus-visible { outline: 2px solid var(--mark); outline-offset: 2px }
+section.dir { margin-top: 56px; display: grid; gap: 16px }
+.dir-head { display: grid; gap: 8px; max-width: 88ch }
+.dir-head .tag { display: inline-flex; align-items: center; gap: 10px; flex-wrap: wrap }
+.letter { font: 800 13px/1 var(--f-ui); padding: 6px 9px; border-radius: 6px; background: var(--ink); color: var(--page) }
+.recpill { font: 800 11px/1 var(--f-ui); letter-spacing: .08em; text-transform: uppercase; padding: 6px 9px; border-radius: 6px; border: 1.5px solid var(--mark); color: var(--mark) }
+.pros { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 6px 28px; margin: 4px 0 0; padding: 0; list-style: none; font-size: 14px; color: var(--ink-2) }
+.pros li { padding-left: 16px; position: relative }
+.pros li::before { content: ""; position: absolute; left: 2px; top: .62em; width: 6px; height: 6px; border-radius: 50% }
+.pros .plus::before { background: var(--plus) } .pros .minus::before { background: var(--minus) }
+
+/* browser frame */
+.browser { border: 1px solid var(--rule); border-radius: 14px; overflow: hidden; background: var(--chrome) }
+.browser .bar { display: flex; align-items: center; gap: 12px; padding: 9px 14px; font: 600 12px var(--f-mono); color: var(--ink-3) }
+.browser .dots { display: flex; gap: 6px } .browser .dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--rule) }
+.browser .url { flex: 1; min-width: 0; padding: 5px 12px; border-radius: 7px; background: var(--card); overflow: hidden; white-space: nowrap; text-overflow: ellipsis }
+.viewport { max-height: 860px; overflow: auto; background: var(--s-bg); display: flex; justify-content: center; overscroll-behavior: contain }
+.stack { display: grid; gap: 16px }
+
+/* ================= the mock website ================= */
+.site { container: site / inline-size; width: 1180px; flex: none; background: var(--s-bg); color: var(--s-t2); font: 400 17px/1.6 var(--f-ui); overflow: hidden }
+.site b, .site strong { color: var(--s-t1) }
+.s-wrap { padding-inline: 56px }
+.s-nav { display: flex; align-items: center; justify-content: space-between; padding-block: 22px; border-bottom: 1px solid var(--s-gl) }
+.s-brand { display: flex; align-items: center; gap: 10px; font: 800 22px/1 var(--f-ui); color: var(--s-t1); letter-spacing: -.03em }
+.s-brand i { width: 30px; height: 30px; border-radius: 9px; background: var(--s-lime); display: grid; place-items: center; color: var(--s-on-lime); font: 800 15px/1 var(--f-display); font-style: normal }
+.s-links { display: flex; gap: 26px; align-items: center; font: 600 14px var(--f-ui); color: var(--s-t2) }
+.s-cta { padding: 10px 16px; border-radius: 999px; background: var(--s-lime); color: var(--s-on-lime) }
+.s-chip { display: inline-block; font: 700 12px/1 var(--f-ui); letter-spacing: .1em; text-transform: uppercase; padding: 8px 12px; border-radius: 999px; border: 1px solid var(--s-gl); color: var(--s-t2); background: var(--s-sf) }
+.s-h1 { font: 800 76px/1 var(--f-display); color: var(--s-t1); letter-spacing: -.035em; margin: 18px 0 0; text-wrap: balance }
+.s-h1 em { font-style: italic; color: var(--s-lime) }
+.s-h2 { font: 800 46px/1.05 var(--f-display); color: var(--s-t1); letter-spacing: -.025em; margin: 0; text-wrap: balance }
+.s-h3 { font: 800 18px/1.3 var(--f-ui); color: var(--s-t1); margin: 0 }
+.s-lead { font-size: 19px; line-height: 1.6; color: var(--s-t2); max-width: 46ch; margin: 0 }
+.s-ey { font: 700 13px/1 var(--f-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--accent, var(--s-lime)) }
+.s-stores { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px }
+.s-store { display: flex; align-items: center; gap: 10px; padding: 10px 18px; border-radius: 14px; border: 1px solid var(--s-gl); background: var(--s-sf); color: var(--s-t1); font: 700 15px/1.15 var(--f-ui) }
+.s-store small { display: block; font: 600 11px var(--f-ui); color: var(--s-t3) }
+.s-store svg { width: 22px; height: 22px }
+.s-points { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none }
+.s-points li { padding-left: 22px; position: relative; font-size: 16px }
+.s-points li::before { content: ""; position: absolute; left: 2px; top: .55em; width: 8px; height: 8px; border-radius: 3px; background: var(--accent, var(--s-lime)) }
+.s-card { background: var(--s-sf); border: 1px solid var(--s-gl); border-radius: 20px; padding: 22px; display: grid; gap: 8px; align-content: start }
+.s-card p { margin: 0; font-size: 15px; line-height: 1.55 }
+.s-tiers { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none }
+.s-tiers li { display: flex; align-items: center; gap: 8px; padding: 6px 12px 6px 6px; border-radius: 999px; background: var(--s-sf); border: 1px solid var(--s-gl); font: 700 13px var(--f-ui); color: var(--s-t1) }
+.s-tiers li i { width: 18px; height: 18px; border-radius: 50% }
+.s-tiers small { font: 500 12px var(--f-mono); color: var(--s-t3) }
+.s-footer { border-top: 1px solid var(--s-gl); padding-block: 36px 44px; display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; font-size: 13px; color: var(--s-t3) }
+.s-footer nav { display: flex; gap: 18px; flex-wrap: wrap }
+.s-extras { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px }
+.s-final { margin-block: 90px 70px; padding: 64px; border-radius: 32px; text-align: center; display: grid; justify-items: center; gap: 12px;
+  background: radial-gradient(70% 90% at 50% 0%, var(--s-glow-lime), transparent 70%), var(--s-sf); border: 1px solid var(--s-gl) }
+.s-final .s-stores { justify-content: center }
+
+/* ---------- phone (300 x 620 design px) ---------- */
+.ph { width: 300px; height: 620px; border-radius: 40px; border: 8px solid var(--s-bezel); background: var(--s-bg); position: relative; overflow: hidden; flex: none;
+  color: var(--s-t1); font: 500 12px/1.35 var(--f-ui); text-align: left; box-shadow: 0 40px 80px -30px var(--s-shadow), 0 0 0 1px var(--s-gl) }
+.ph .sb { height: 32px; display: flex; justify-content: space-between; align-items: center; padding: 6px 22px 0; font: 700 11px var(--f-ui) }
+.ph .scr { position: absolute; inset: 32px 0 60px; padding: 6px 14px; display: grid; gap: 10px; align-content: start; overflow: hidden }
+.ph .hd { display: flex; align-items: center; justify-content: space-between; gap: 8px }
+.ph .hd h5 { font: 800 21px/1.1 var(--f-ui); letter-spacing: -.02em; margin: 0 }
+.ph .ib { width: 30px; height: 30px; border-radius: 10px; border: 1px solid var(--s-gl); background: var(--s-sf) }
+.ph .tb { position: absolute; left: 0; right: 0; bottom: 0; height: 60px; background: var(--s-sf); border-top: 1px solid var(--s-gl);
+  display: grid; grid-template-columns: repeat(5, 1fr); align-items: center; text-align: center; font: 700 8.5px var(--f-ui); color: var(--s-t3); padding-bottom: 6px }
+.ph .tb span.on { color: var(--s-lime) }
+.ph .tb i { display: block; width: 15px; height: 15px; margin: 0 auto 4px; border-radius: 5px; border: 1.6px solid currentColor }
+.ph .fab { position: absolute; right: 14px; bottom: 72px; width: 46px; height: 46px; border-radius: 16px; background: var(--s-lime); color: var(--s-on-lime);
+  display: grid; place-items: center; font: 800 24px/1 var(--f-ui); box-shadow: 0 10px 24px -6px var(--s-glow-lime) }
+.ph .ey { font: 800 9.5px/1 var(--f-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--s-t3) }
+.ph .sec { font: 800 13px/1 var(--f-ui); margin-top: 4px; display: flex; justify-content: space-between; align-items: baseline }
+.ph .sec small { font: 600 10px var(--f-ui); color: var(--s-t3) }
+.ph .mut { color: var(--s-t3); font-size: 10.5px }
+.ph .mono { font-family: var(--f-mono); font-weight: 700; font-variant-numeric: tabular-nums }
+.ph .btn { border-radius: 12px; padding: 9px 12px; font: 800 11.5px/1 var(--f-ui); text-align: center }
+.ph .btn.lime { background: var(--s-lime); color: var(--s-on-lime) }
+.ph .btn.ghost { border: 1px solid var(--s-gl); background: var(--s-sf); color: var(--s-t2) }
+.ph .card { background: var(--s-sf); border: 1px solid var(--s-gl); border-radius: 14px; padding: 10px; display: grid; gap: 6px }
+.ph .bar { height: 6px; border-radius: 4px; background: var(--s-st); overflow: hidden } .ph .bar i { display: block; height: 100%; border-radius: 4px; background: var(--c, var(--s-lime)) }
+.ph .av { width: 22px; height: 22px; border-radius: 50%; display: inline-grid; place-items: center; font: 800 9.5px var(--f-ui); color: var(--s-on-lime); background: var(--c, var(--s-cyan)); flex: none }
+.ph .row { display: flex; gap: 8px; align-items: center }
+.ph .pill { font: 800 8.5px/1 var(--f-ui); letter-spacing: .08em; text-transform: uppercase; padding: 4px 6px; border-radius: 6px }
+.ph .seg2 { display: grid; grid-template-columns: 1fr 1fr; padding: 3px; border-radius: 10px; background: var(--s-sf); border: 1px solid var(--s-gl); font: 700 10.5px var(--f-ui); text-align: center; color: var(--s-t3) }
+.ph .seg2 span { padding: 5px; border-radius: 7px } .ph .seg2 .on { background: var(--s-ov); color: var(--s-t1) }
+.poster { border-radius: 9px; position: relative; overflow: hidden; display: flex; align-items: flex-end; padding: 7px; flex: none; box-shadow: inset 0 0 0 1px var(--s-gl) }
+.poster b { font: 700 11px/1.1 var(--f-display); color: var(--s-t1); text-wrap: balance }
+.prow { display: flex; gap: 7px }
+.hex { width: 58px; height: 64px; clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); display: grid; place-items: center; font: 800 16px var(--f-display); color: var(--s-bg) }
+.hex.locked { background: var(--s-ov); color: var(--s-t3) }
+.hexgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 6px; justify-items: center; text-align: center }
+.hexgrid div > span { display: block; font: 700 9.5px/1.2 var(--f-ui); color: var(--s-t2); margin-top: 4px }
+
+/* phone cluster (hero A) */
+.cluster { position: relative; height: 660px; display: flex; justify-content: center; align-items: center }
+.cluster .ph { position: absolute }
+.cluster .ph:nth-child(1) { transform: translateX(-190px) rotate(-7deg) scale(.86); opacity: .9 }
+.cluster .ph:nth-child(2) { transform: translateX(190px) rotate(7deg) scale(.86); opacity: .9 }
+.cluster .ph:nth-child(3) { z-index: 2 }
+.cluster::before { content: ""; position: absolute; inset: 10% 5%; background: radial-gradient(closest-side, var(--s-glow-lime), transparent); }
+
+/* ---------- Direction A: five chapters ---------- */
+.a-hero { display: grid; grid-template-columns: 1fr 1.05fr; gap: 24px; align-items: center; padding-block: 70px 40px }
+.a-steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-block: 10px 30px; padding: 0; list-style: none }
+.a-steps li { border: 1px solid var(--s-gl); border-radius: 16px; padding: 14px 16px; background: var(--s-sf); display: grid; gap: 4px }
+.a-steps li b { font: 800 16px var(--f-ui) } .a-steps li span { font-size: 13px; color: var(--s-t3) }
+.a-steps li small { font: 700 12px var(--f-mono); color: var(--accent) }
+.a-ch { display: grid; grid-template-columns: 1fr 1.1fr; gap: 56px; align-items: center; padding-block: 90px; border-top: 1px solid var(--s-gl) }
+.a-ch.flip .a-vis { order: -1 }
+.a-text { display: grid; gap: 18px; align-content: start }
+.a-vis { display: flex; justify-content: center; gap: 22px; align-items: center; position: relative }
+.a-vis::before { content: ""; position: absolute; inset: 0 10%; background: radial-gradient(closest-side, var(--glow), transparent); }
+.a-vis .ph { position: relative }
+.a-vis .ph + .ph { margin-top: 70px }
+.a-mini { display: grid; grid-template-columns: 1fr 1fr; gap: 12px }
+
+/* ---------- Direction B: playable duel + bento ---------- */
+.b-hero { padding-block: 64px 30px; display: grid; grid-template-columns: .9fr 1.1fr; gap: 40px; align-items: center }
+.duelbox { background: radial-gradient(80% 70% at 50% 0%, var(--s-glow-lime), transparent 70%), var(--s-sf); border: 1px solid var(--s-gl); border-radius: 28px; padding: 26px; display: grid; gap: 16px; min-height: 470px; align-content: start }
+.duelbox .q { display: flex; justify-content: space-between; align-items: baseline; gap: 12px }
+.duelbox .q b { font: 800 22px var(--f-display) }
+.duelbox .q span { font: 700 12px var(--f-mono); color: var(--s-t3) }
+.pair { display: grid; grid-template-columns: 1fr auto 1fr; gap: 14px; align-items: center }
+.pick { all: unset; cursor: pointer; border-radius: 18px; aspect-ratio: 2 / 3; display: flex; align-items: flex-end; padding: 16px; position: relative; overflow: hidden;
+  box-shadow: inset 0 0 0 1px var(--s-gl); transition: transform .18s ease, box-shadow .18s ease }
+.pick:hover { transform: translateY(-4px) rotate(-.6deg); box-shadow: inset 0 0 0 2px var(--s-lime) }
+.pick:focus-visible { outline: 3px solid var(--s-lime); outline-offset: 3px }
+.pick b { font: 800 24px/1.05 var(--f-display); color: var(--s-t1) }
+.pick small { position: absolute; top: 12px; left: 12px; font: 700 11px var(--f-mono); color: var(--s-t1); background: var(--s-shadow); padding: 4px 7px; border-radius: 6px }
+.vs { font: 800 14px var(--f-mono); color: var(--s-t3) }
+.duelfoot { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 13px; color: var(--s-t3) }
+.duelfoot button { all: unset; cursor: pointer; font: 700 13px var(--f-ui); color: var(--s-t2); padding: 8px 12px; border-radius: 10px; border: 1px solid var(--s-gl) }
+.duelfoot button:focus-visible { outline: 2px solid var(--s-lime) }
+.result { display: grid; gap: 6px }
+.result .score { font: 700 64px/1 var(--f-mono); color: var(--s-lime); letter-spacing: -.04em }
+.rlist { margin: 6px 0 0; padding: 0; list-style: none; display: grid; gap: 4px; font-size: 14px }
+.rlist li { display: grid; grid-template-columns: 30px 1fr auto; gap: 10px; padding: 7px 10px; border-radius: 10px; align-items: center }
+.rlist li .mono { font-family: var(--f-mono); font-variant-numeric: tabular-nums; color: var(--s-t3) }
+.rlist li.new { background: var(--s-ov); box-shadow: inset 0 0 0 1px var(--s-lime) } .rlist li.new b { color: var(--s-lime) }
+.bento { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 330px; gap: 18px; padding-block: 40px 20px }
+.tile { background: var(--s-sf); border: 1px solid var(--s-gl); border-radius: 24px; padding: 24px 24px 0; overflow: hidden; display: grid; grid-template-rows: auto 1fr; gap: 14px; position: relative }
+.tile .t { display: grid; gap: 6px } .tile p { margin: 0; font-size: 14.5px; line-height: 1.5 }
+.tile .crop { display: flex; justify-content: center; align-items: flex-start; overflow: hidden }
+.tile.wide { grid-column: span 2 } .tile.tall { grid-row: span 2 }
+.tile.wide { grid-template-columns: 1fr auto; grid-template-rows: 1fr; padding-bottom: 0 }
+.tile .crop .ph { transform-origin: top center }
+.b-band { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border: 1px solid var(--s-gl); border-radius: 20px; overflow: hidden; margin-top: 20px }
+.b-band div { padding: 20px; border-right: 1px solid var(--s-gl); display: grid; gap: 4px } .b-band div:last-child { border-right: 0 }
+.b-band b { font: 800 15px var(--f-ui) } .b-band span { font-size: 13.5px }
+
+/* ---------- Direction C: hub + feature pages ---------- */
+.c-hero { padding-block: 70px 50px; display: grid; grid-template-columns: 1.1fr .9fr; gap: 30px; align-items: center }
+.c-pillars { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; padding-bottom: 30px }
+.c-pillar { border-radius: 22px; border: 1px solid var(--s-gl); background: linear-gradient(180deg, var(--glow), transparent 60%), var(--s-sf); padding: 20px; display: grid; gap: 10px; align-content: start; min-height: 260px }
+.c-pillar p { margin: 0; font-size: 14px; line-height: 1.5 }
+.c-pillar .more { font: 700 13px var(--f-ui); color: var(--accent); margin-top: auto }
+.c-sub { padding-block: 26px 0; font: 600 14px var(--f-ui); color: var(--s-t3) }
+.c-sub b { color: var(--s-amber) }
+.c-feat { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; padding-block: 50px }
+
+/* ---------- phone-width site (container queries) ---------- */
+@container site (max-width: 700px) {
+  .s-wrap { padding-inline: 16px }
+  .s-links a:not(.s-cta) { display: none }
+  .s-h1 { font-size: 46px } .s-h2 { font-size: 32px } .s-lead { font-size: 16.5px }
+  .a-hero, .a-ch, .b-hero, .c-hero, .c-feat { grid-template-columns: 1fr; gap: 28px; padding-block: 44px }
+  .a-ch.flip .a-vis { order: 0 }
+  .cluster { height: 560px; zoom: .82 }
+  .cluster .ph:nth-child(1) { transform: translateX(-120px) rotate(-7deg) scale(.8) }
+  .cluster .ph:nth-child(2) { transform: translateX(120px) rotate(7deg) scale(.8) }
+  .a-steps { display: flex; overflow-x: auto; padding-bottom: 6px } .a-steps li { flex: 0 0 150px }
+  .a-vis { zoom: .8 } .a-vis .ph + .ph { display: none }
+  .a-mini, .s-extras { grid-template-columns: 1fr }
+  .bento { grid-template-columns: 1fr; grid-auto-rows: 300px } .tile.wide { grid-column: auto; grid-template-columns: 1fr; grid-template-rows: auto 1fr } .tile.tall { grid-row: auto }
+  .tile.wide .crop .ph { transform: scale(.7) }
+  .b-band { grid-template-columns: 1fr 1fr } .b-band div:nth-child(2) { border-right: 0 } .b-band div:nth-child(-n+2) { border-bottom: 1px solid var(--s-gl) }
+  .pick b { font-size: 18px } .duelbox { padding: 18px; min-height: 0 }
+  .c-pillars { grid-template-columns: 1fr } .c-pillar { min-height: 0 }
+  .s-final { padding: 36px 20px; margin-block: 50px }
+  .s-final .s-h2 { font-size: 30px }
+}
+
+/* decisions */
+.decisions { margin-top: 70px; display: grid; gap: 16px }
+.dgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px }
+.dcard { background: var(--card); border: 1px solid var(--rule); border-radius: 14px; padding: 18px 20px; display: grid; gap: 10px; align-content: start }
+.dcard ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; color: var(--ink-2); font-size: 14px }
+.dcard .rec { font-size: 13.5px; color: var(--ink); border-top: 1px solid var(--rule); padding-top: 10px }
+.dcard .rec b { color: var(--mark) }
+.plan { background: var(--card); border: 1px solid var(--rule); border-radius: 14px; padding: 20px 22px; display: grid; gap: 10px; max-width: 92ch }
+.plan ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; color: var(--ink-2) }
+@media (prefers-reduced-motion: reduce) { .pick { transition: none } .pick:hover { transform: none } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <span class="eyebrow">Epic #254 · Approved mockup · Decision 0013</span>
+    <h1>Telly website: five chapters with a playable duel</h1>
+    <p>The owner chose direction A (five chapters: Track, Rank, Discover, Friends, Play) with a playable duel between two highly rated shows as the hero. The mock uses example content and simplified screens. The real site renders its screenshots from the app's own widgets, and the spec (<code>docs/design_system/05_WEBSITE.md</code>) wins where they differ.</p>
+  </header>
+
+  <div class="toolbar" role="group" aria-label="Preview controls">
+    <label for="vp-desktop">Site width</label>
+    <div class="seg" id="vp">
+      <button id="vp-desktop" type="button" data-vp="desktop" aria-pressed="true">Desktop</button>
+      <button id="vp-phone" type="button" data-vp="phone" aria-pressed="false">Phone</button>
+    </div>
+    <label for="th-auto">Sheet theme</label>
+    <div class="seg" id="th">
+      <button id="th-auto" type="button" data-th="" aria-pressed="true">Auto</button>
+      <button id="th-light" type="button" data-th="light" aria-pressed="false">Light</button>
+      <button id="th-dark" type="button" data-th="dark" aria-pressed="false">Dark</button>
+    </div>
+  </div>
+
+  <!-- ===================== A ===================== -->
+  <section class="dir" id="a">
+    <div class="browser"><div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">kandraos3.github.io/Telly/</span></div>
+    <div class="viewport"><div class="site">
+      <div class="s-wrap">
+        <nav class="s-nav"><span class="s-brand"><i>t</i>telly</span><span class="s-links"><a>Track</a><a>Rank</a><a>Discover</a><a>Friends</a><a>Play</a><a class="s-cta">Get the app</a></span></nav>
+        <div class="a-hero">
+          <div>
+            <span class="s-chip">Movies · Series · Anime</span>
+            <h1 class="s-h1">Rank what you <em>watch.</em></h1>
+            <p class="s-lead" style="margin-top:20px">Telly asks one question: which did you like more? Try it with two of the best-rated shows on TV. Every answer puts a title in its exact place, with a score to match.</p>
+            <div data-stores></div>
+          </div>
+          <div class="duelbox" id="duel" aria-live="polite"></div>
+        </div>
+        <ol class="a-steps">
+          <li style="--accent:var(--s-cyan)"><small>01</small><b>Track</b><span>Episodes and tonight's watch</span></li>
+          <li style="--accent:var(--s-lime)"><small>02</small><b>Rank</b><span>Duels, scores, podium</span></li>
+          <li style="--accent:var(--s-violet)"><small>03</small><b>Discover</b><span>Explore and your queue</span></li>
+          <li style="--accent:var(--s-coral)"><small>04</small><b>Friends</b><span>Upsets, Taste Match, squads</span></li>
+          <li style="--accent:var(--s-amber)"><small>05</small><b>Play</b><span>Medals, challenges, levels</span></li>
+        </ol>
+
+        <section class="a-ch" style="--accent:var(--s-cyan);--glow:var(--s-glow-violet)">
+          <div class="a-text">
+            <span class="s-ey">01 · Track</span>
+            <h2 class="s-h2">Always know what's on tonight.</h2>
+            <p class="s-lead">Home opens on the next episode of whatever you're watching. Tick episodes off as you go, and Telly keeps your place in every show.</p>
+            <div class="a-mini">
+              <div class="s-card"><span class="s-h3">Tonight</span><p>Your next episode, ready to mark watched.</p></div>
+              <div class="s-card"><span class="s-h3">Episode progress</span><p>Seasons, caught-up shows and what's new.</p></div>
+            </div>
+          </div>
+          <div class="a-vis"><div data-phone="watching"></div><div data-phone="home"></div></div>
+        </section>
+
+        <section class="a-ch flip" style="--accent:var(--s-lime);--glow:var(--s-glow-lime)">
+          <div class="a-text">
+            <span class="s-ey">02 · Rank</span>
+            <h2 class="s-h2">Duels, not stars.</h2>
+            <p class="s-lead">Finished something? Pick which you liked more, a few times. Binary search finds its exact place, and your rank becomes a score from 1.00 to 10.00.</p>
+            <ul class="s-points"><li>Movies only duel movies; series only duel series</li><li>A podium for your top three in each ranking</li><li>Share the score reveal straight to your story</li></ul>
+            <ul class="s-tiers" data-tiers></ul>
+          </div>
+          <div class="a-vis"><div data-phone="duel"></div><div data-phone="reveal"></div></div>
+        </section>
+
+        <section class="a-ch" style="--accent:var(--s-violet);--glow:var(--s-glow-violet)">
+          <div class="a-text">
+            <span class="s-ey">03 · Discover</span>
+            <h2 class="s-h2">Find the next one without scrolling for an hour.</h2>
+            <p class="s-lead">Explore builds rows from your own rankings and your friends' favourites. Save anything to your queue, which knows where it's streaming.</p>
+            <div class="a-mini">
+              <div class="s-card"><span class="s-h3">Up next</span><p>One pick from your queue when you can't decide.</p></div>
+              <div class="s-card"><span class="s-h3">Two-to-Watch</span><p>Titles you'll both enjoy, on the services you share.</p></div>
+            </div>
+          </div>
+          <div class="a-vis"><div data-phone="explore"></div><div data-phone="queue"></div></div>
+        </section>
+
+        <section class="a-ch flip" style="--accent:var(--s-coral);--glow:var(--s-glow-coral)">
+          <div class="a-text">
+            <span class="s-ey">04 · Friends</span>
+            <h2 class="s-h2">Upsets worth arguing about.</h2>
+            <p class="s-lead">See what friends rank as they rank it. Telly flags the upsets, Taste Match shows who really shares your taste, and squads merge everyone into one leaderboard.</p>
+            <div class="a-mini">
+              <div class="s-card"><span class="s-h3">Find friends</span><p>Search by name. Keep your profile public or friends-only.</p></div>
+              <div class="s-card"><span class="s-h3">Squads</span><p>A shared ranking for the group chat or film club.</p></div>
+            </div>
+          </div>
+          <div class="a-vis"><div data-phone="feed"></div><div data-phone="taste"></div></div>
+        </section>
+
+        <section class="a-ch" style="--accent:var(--s-amber);--glow:var(--s-glow-amber)">
+          <div class="a-text">
+            <span class="s-ey">05 · Play</span>
+            <h2 class="s-h2">Watching, with a scoreboard.</h2>
+            <p class="s-lead">Earn medals for what you've watched, finish collections, join monthly challenges with your squad, and level up every week you keep your streak.</p>
+            <ul class="s-points"><li>Gold, silver, bronze and special medals</li><li>Weekly quests and a friends' table</li><li>Rewards that unlock custom header art</li></ul>
+          </div>
+          <div class="a-vis"><div data-phone="medals"></div><div data-phone="level"></div></div>
+        </section>
+
+        <div class="s-extras" data-extras></div>
+        <div class="s-final"><h2 class="s-h2">Your rankings are waiting.</h2><p class="s-lead">Telly is coming soon to iPhone and Android.</p><div data-stores></div></div>
+        <footer class="s-footer"><span>© 2026 Telly · Uses the TMDB API but is not endorsed or certified by TMDB.</span><nav><a>Privacy</a><a>Terms</a><a>Support</a></nav></footer>
+      </div>
+    </div></div></div>
+  </section>
+
+</div>
+
+<script>
+(() => {
+  const P = (t, i, w, h, extra = '') => `<div class="poster" style="background:var(--p${i});width:${w}px;height:${h}px;${extra}"><b>${t}</b></div>`;
+  const tabs = on => `<div class="tb">${['Home','Explore','Rankings','Social','More'].map(t => `<span class="${t === on ? 'on' : ''}"><i></i>${t}</span>`).join('')}</div><div class="fab" aria-hidden="true">+</div>`;
+  const frame = (body, tab, fab = true) => `<div class="ph" role="img" aria-label="Telly app screen"><div class="sb"><span>9:41</span><span>●●● ▮</span></div><div class="scr">${body}</div>${tab === null ? '' : tabs(tab)}</div>`;
+  const S = {
+    home: () => frame(`
+      <div class="ey">Thursday · Tonight</div>
+      <div class="card" style="background:var(--p1);padding:14px;gap:8px;height:190px;align-content:end;border:0">
+        <span class="pill" style="background:var(--s-shadow);color:var(--s-t1);justify-self:start">Continue watching</span>
+        <b style="font:800 26px/1 var(--f-display)">Severance</b>
+        <span style="color:var(--s-t2);font-size:11px">Season 2 · Episode 7 · 52 min</span>
+        <div class="btn lime">Mark E7 watched</div>
+      </div>
+      <div class="sec">Your moves</div>
+      <div class="prow">
+        <div class="card" style="flex:1"><b>Rank The Bear</b><span class="mut">Finished yesterday</span></div>
+        <div class="card" style="flex:1"><b>Shōgun</b><span class="mut">4 episodes left</span></div>
+      </div>
+      <div class="card"><div class="row"><b style="flex:1">October challenge</b><span class="mono" style="color:var(--s-amber)">3/5</span></div><div class="bar" style="--c:var(--s-amber)"><i style="width:60%"></i></div></div>
+      <div class="sec">Friends</div>
+      <div class="row"><span class="av" style="--c:var(--s-cyan)">M</span><span><b>Maya</b> ranked Dune: Part Two <span class="mono" style="color:var(--s-lime)">9.40</span></span></div>`, 'Home'),
+    duel: () => frame(`
+      <div class="ey" style="text-align:center">Duel 2 of 3 · TV</div>
+      <div style="text-align:center;font:800 22px/1.1 var(--f-display)">Which did you like more?</div>
+      <div class="prow" style="justify-content:center;align-items:center;gap:8px;margin-top:6px">
+        ${P('Severance', 1, 118, 178, 'box-shadow:inset 0 0 0 2px var(--s-lime)')}<span class="mono" style="color:var(--s-t3)">vs</span>${P('The Bear', 2, 118, 178)}
+      </div>
+      <div class="row" style="justify-content:center;gap:5px"><span class="av" style="width:8px;height:8px;--c:var(--s-lime)"></span><span class="av" style="width:8px;height:8px;--c:var(--s-lime)"></span><span class="av" style="width:8px;height:8px;--c:var(--s-st)"></span></div>
+      <div class="btn ghost">Too close to call</div>
+      <div class="card"><span class="mut">Placing</span><b>Severance</b><span class="mut">Somewhere between #1 and #6 in TV Rankings</span></div>`, null),
+    reveal: () => frame(`
+      <div style="display:grid;justify-items:center;gap:8px;text-align:center;margin-top:16px">
+        ${P('Severance', 1, 120, 180)}
+        <span class="ey">Lands at #2 in TV Rankings</span>
+        <span class="mono" style="font-size:54px;line-height:1;color:var(--s-lime);letter-spacing:-.04em">9.41</span>
+        <span class="pill" style="background:var(--tier-god);color:var(--s-on-lime)">God Tier</span>
+      </div>
+      <div class="card" style="gap:4px">
+        <div class="row"><span class="mono mut">#1</span><span style="flex:1">The Wire</span><span class="mono">9.84</span></div>
+        <div class="row" style="color:var(--s-lime)"><span class="mono">#2</span><b style="flex:1;color:var(--s-lime)">Severance</b><span class="mono">9.41</span></div>
+        <div class="row"><span class="mono mut">#3</span><span style="flex:1">Succession</span><span class="mono">9.30</span></div>
+      </div>
+      <div class="btn lime">Share to story</div>`, null),
+    podium: () => frame(`
+      <div class="hd"><h5>Rankings</h5><span class="ib"></span></div>
+      <div class="seg2"><span>Movies 84</span><span class="on">TV 61</span></div>
+      <div class="prow" style="align-items:flex-end;justify-content:center;gap:8px;margin-top:8px">
+        <div style="display:grid;gap:4px;justify-items:center">${P('Severance', 1, 76, 112)}<span class="mono" style="color:var(--s-t2)">#2 · 9.41</span></div>
+        <div style="display:grid;gap:4px;justify-items:center"><span class="pill" style="background:var(--tier-god);color:var(--s-on-lime)">#1</span>${P('The Wire', 5, 92, 138, 'box-shadow:0 0 0 2px var(--s-amber)')}<span class="mono" style="color:var(--s-amber)">9.84</span></div>
+        <div style="display:grid;gap:4px;justify-items:center">${P('Succession', 3, 76, 104)}<span class="mono" style="color:var(--s-t2)">#3 · 9.30</span></div>
+      </div>
+      ${[['Breaking Bad', 4, '9.12'], ['Fleabag', 6, '8.88'], ['The Bear', 2, '8.71'], ['Shōgun', 7, '8.40']].map(([t, i, s], k) => `
+      <div class="row" style="padding:4px 0;border-bottom:1px solid var(--s-gl)"><span class="mono mut" style="width:20px">${k + 4}</span>${P('', i, 26, 38, 'padding:0')}<b style="flex:1">${t}</b><span class="mono">${s}</span></div>`).join('')}`, 'Rankings'),
+    watching: () => frame(`
+      <div class="card" style="background:var(--p7);height:150px;border:0;align-content:end;padding:14px"><b style="font:800 26px/1 var(--f-display)">Shōgun</b><span style="color:var(--s-t2);font-size:11px">FX · 2024 · Drama</span></div>
+      <div class="row"><b style="flex:1">Season 1</b><span class="mono mut">6 of 10</span></div>
+      <div class="bar"><i style="width:60%"></i></div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px">
+        ${Array.from({ length: 10 }, (_, k) => `<div class="card" style="padding:7px 0;text-align:center;font:700 10.5px var(--f-mono);${k < 6 ? 'background:var(--s-ov);color:var(--s-lime)' : k === 6 ? 'box-shadow:inset 0 0 0 1.5px var(--s-lime)' : 'color:var(--s-t3)'}">E${k + 1}</div>`).join('')}
+      </div>
+      <div class="btn lime">Watched E7</div>
+      <div class="card"><div class="row"><span class="pill" style="background:var(--s-glow-violet);color:var(--s-violet)">New</span><b style="flex:1">Severance S2 is out</b></div><span class="mut">You're caught up on Season 1</span></div>`, 'Home'),
+    explore: () => frame(`
+      <div class="hd"><h5>Explore</h5><span class="ib"></span></div>
+      <div class="card" style="background:var(--p8);height:140px;border:0;align-content:end;padding:12px"><span class="ey" style="color:var(--s-t2)">Because you ranked The Bear</span><b style="font:800 22px/1 var(--f-display)">Beef</b></div>
+      ${[['Your friends love', [3, 6, 4, 5]], ['Popular in your rankings', [7, 1, 2, 8]], ['Leaving your services soon', [5, 3, 6, 4]]].map(([h, ps]) => `
+      <div class="sec">${h}<small>See all</small></div><div class="prow">${ps.map(i => P('', i, 60, 90)).join('')}</div>`).join('')}`, 'Explore'),
+    queue: () => frame(`
+      <div class="hd"><h5>Queue</h5><span class="ib"></span></div>
+      <div class="card" style="grid-template-columns:auto 1fr;gap:12px;align-items:center">${P('The Leftovers', 3, 70, 104)}<div style="display:grid;gap:5px"><span class="ey" style="color:var(--s-lime)">Up next</span><b style="font-size:15px">The Leftovers</b><span class="mut">On Max · Jordan ranked it 9.12</span><div class="btn lime">Watch tonight</div></div></div>
+      ${[['Past Lives', 6, 'Netflix', ''], ['Mr. Robot', 4, 'Prime Video', 'Leaving in 5 days'], ['Blue Eye Samurai', 7, 'Netflix', ''], ['Arcane', 2, 'Netflix', '']].map(([t, i, s, w]) => `
+      <div class="row" style="padding:3px 0">${P('', i, 30, 44, 'padding:0')}<div style="flex:1;display:grid"><b>${t}</b><span class="mut">${s}${w ? ` · <span style="color:var(--s-coral)">${w}</span>` : ''}</span></div></div>`).join('')}`, 'More'),
+    feed: () => frame(`
+      <div class="hd"><h5>Social</h5><span class="ib"></span></div>
+      <div class="card" style="box-shadow:inset 0 0 0 1px var(--s-coral)"><div class="row"><span class="av" style="--c:var(--s-cyan)">M</span><b style="flex:1">Maya</b><span class="pill" style="background:var(--s-glow-coral);color:var(--s-coral)">Upset</span></div>
+        <span>Put <b>Severance</b> above <b>Succession</b></span><div class="prow">${P('Severance', 1, 70, 96)}${P('Succession', 3, 70, 96)}</div><span class="mut">12 reactions · 4 replies</span></div>
+      <div class="card"><div class="row"><span class="av" style="--c:var(--s-amber)">J</span><span style="flex:1"><b>Jordan</b> unlocked <b>Century</b></span><div class="hex" style="background:var(--medal-silver);width:30px;height:34px;font-size:10px">C</div></div></div>
+      <div class="card"><div class="row"><span class="av" style="--c:var(--s-green)">S</span><span style="flex:1"><b>Sam</b> ranked Past Lives</span><span class="mono" style="color:var(--s-lime)">8.95</span></div></div>`, 'Social'),
+    taste: () => frame(`
+      <div class="hd"><h5>Taste Match</h5><span class="ib"></span></div>
+      <div style="display:grid;justify-items:center;gap:6px;margin:6px 0">
+        <div style="width:130px;height:130px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--s-violet) 0 87%, var(--s-st) 87% 100%)"><div style="width:106px;height:106px;border-radius:50%;background:var(--s-bg);display:grid;place-items:center"><span class="mono" style="font-size:32px;color:var(--s-violet)">87%</span></div></div>
+        <b>You and Jordan · Series</b><span class="mut">Based on 42 titles you've both ranked</span>
+      </div>
+      <div class="card"><span class="ey" style="color:var(--s-green)">You agree</span><span>The Wire · Fleabag · The Bear</span></div>
+      <div class="card"><span class="ey" style="color:var(--s-coral)">You clash</span><span><b>Lost</b>: you #31, Jordan #2</span></div>
+      <div class="card"><span class="ey" style="color:var(--s-violet)">Gems they love</span><span>Mr. Robot · Halt and Catch Fire</span></div>`, 'Social'),
+    medals: () => frame(`
+      <div class="hd"><h5>Achievements</h5></div>
+      <div class="seg2"><span class="on">Medals</span><span>Level</span></div>
+      <div class="hexgrid">
+        ${[['gold', 'D', 'First Duel'], ['silver', 'C', 'Century'], ['special', 'F', 'Founding Viewer'], ['bronze', 'N', 'Night Owl'], ['gold', 'S', 'Series Finisher'], ['locked', '?', 'Festival Run'], ['bronze', 'A', 'Anime Arc'], ['locked', '?', 'Upset Maker'], ['locked', '?', 'Squad Goals']].map(([t, g, n]) => `<div><div class="hex ${t === 'locked' ? 'locked' : ''}" style="${t === 'locked' ? '' : `background:var(--medal-${t})`};${t === 'special' ? 'color:var(--s-t1)' : ''}">${g}</div><span>${n}</span></div>`).join('')}
+      </div>
+      <div class="card"><div class="row"><b style="flex:1">Christopher Nolan</b><span class="mono mut">6 / 12</span></div><div class="bar" style="--c:var(--s-amber)"><i style="width:50%"></i></div><span class="mut">Still to watch: Memento, Tenet…</span></div>`, 'More'),
+    level: () => frame(`
+      <div class="hd"><h5>Your level</h5></div>
+      <div class="card" style="gap:8px"><div class="row"><span class="mono" style="font-size:34px;color:var(--s-amber);line-height:1">14</span><div style="flex:1;display:grid;gap:4px"><b>Level 14</b><span class="mut mono">2,340 / 3,000 XP</span></div></div><div class="bar" style="--c:var(--s-amber)"><i style="width:78%"></i></div></div>
+      <div class="card"><div class="row"><b style="flex:1">6-week streak</b><span class="pill" style="background:var(--s-glow-amber);color:var(--s-amber)">On fire</span></div><div class="row" style="gap:4px">${Array.from({ length: 8 }, (_, k) => `<span style="flex:1;height:6px;border-radius:3px;background:${k < 6 ? 'var(--s-amber)' : 'var(--s-st)'}"></span>`).join('')}</div></div>
+      <div class="sec">This week's quests</div>
+      ${[['Rank 3 titles', '2/3', 66], ['React to a friend', 'Done', 100], ['Finish a season', '0/1', 0]].map(([q, p, w]) => `<div class="card" style="padding:8px 10px"><div class="row"><span style="flex:1">${q}</span><span class="mono" style="color:${w === 100 ? 'var(--s-lime)' : 'var(--s-t3)'}">${p}</span></div><div class="bar"><i style="width:${w}%"></i></div></div>`).join('')}
+      <div class="sec">Friends this week</div>
+      <div class="row"><span class="mono mut">1</span><span class="av" style="--c:var(--s-cyan)">M</span><span style="flex:1">Maya</span><span class="mono">640 XP</span></div>`, 'More'),
+    challenges: () => frame(`
+      <div class="hd"><h5>Challenges</h5></div>
+      <div class="card" style="background:linear-gradient(160deg,var(--s-glow-coral),transparent),var(--s-sf);gap:8px"><span class="ey" style="color:var(--s-coral)">October · ends in 22 days</span><b style="font:800 20px/1.1 var(--f-display)">Rank five horror films</b><div class="prow">${[3, 8, 4].map(i => P('', i, 44, 64)).join('')}<div class="poster" style="width:44px;height:64px;background:var(--s-ov)"></div><div class="poster" style="width:44px;height:64px;background:var(--s-ov)"></div></div><div class="row"><div class="bar" style="flex:1;--c:var(--s-coral)"><i style="width:60%"></i></div><span class="mono">3/5</span></div></div>
+      <div class="card"><span class="ey" style="color:var(--s-violet)">Squad · The Couch</span><b>Finish one Studio Ghibli film each</b><div class="row">${['M', 'J', 'S', 'A'].map((a, k) => `<span class="av" style="--c:${k < 3 ? 'var(--s-lime)' : 'var(--s-st)'}">${a}</span>`).join('')}<span class="mut" style="flex:1;text-align:right">3 of 4 done</span></div></div>
+      <div class="card"><span class="ey">Completed</span><b>September: Rank 10 debuts</b><span class="mut">+250 XP · Bronze medal</span></div>`, 'More'),
+  };
+  document.querySelectorAll('[data-phone]').forEach(el => { el.outerHTML = S[el.dataset.phone](); });
+
+  const stores = `<div class="s-stores">
+    <span class="s-store"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span><small>Coming soon to</small>App Store</span></span>
+    <span class="s-store"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg><span><small>Coming soon to</small>Google Play</span></span></div>`;
+  document.querySelectorAll('[data-stores]').forEach(el => { el.outerHTML = stores; });
+  document.querySelectorAll('[data-tiers]').forEach(el => {
+    el.innerHTML = [['god', 'God', '9.20+'], ['prestige', 'Prestige', '8.50'], ['great', 'Great', '7.80'], ['good', 'Good', '7.00'], ['mid', 'Mid', '5.50']]
+      .map(([k, n, r]) => `<li><i style="background:var(--tier-${k})"></i>${n} <small>${r}</small></li>`).join('');
+  });
+  document.querySelectorAll('[data-extras]').forEach(el => {
+    el.innerHTML = [['Bring your history', 'Import your Letterboxd diary or AniList library and start with full rankings.'], ['Works offline', 'Duels save instantly and sync when you are back online.'], ['Your data, exportable', 'Export your rankings to CSV or Letterboxd format any time.']]
+      .map(([t, b]) => `<div class="s-card"><span class="s-h3">${t}</span><p>${b}</p></div>`).join('');
+  });
+
+  // Playable duel: one pick between two highly rated shows; the winner takes the higher spot.
+  const pairs = [[['Breaking Bad', 4], ['The Sopranos', 3]], [['The Wire', 5], ['Succession', 6]], [['Chernobyl', 7], ['Band of Brothers', 2]]];
+  const box = document.getElementById('duel');
+  let n = 0;
+  const draw = () => {
+    const [a, b] = pairs[n % pairs.length];
+    box.innerHTML = `<div class="q"><b>Which did you like more?</b><span>TV · DUEL</span></div>
+      <div class="pair">
+        <button class="pick" id="pick-a" style="background:var(--p${a[1]})"><b>${a[0]}</b></button>
+        <span class="vs">vs</span>
+        <button class="pick" id="pick-b" style="background:var(--p${b[1]})"><b>${b[0]}</b></button>
+      </div>
+      <div class="duelfoot"><span>Tap the one you liked more</span><button type="button" id="pick-tie">Too close to call</button></div>`;
+    box.querySelector('#pick-a').onclick = () => result(a, b, false);
+    box.querySelector('#pick-b').onclick = () => result(b, a, false);
+    box.querySelector('#pick-tie').onclick = () => result(a, b, true);
+  };
+  const result = (win, lose, tie) => {
+    box.innerHTML = `<div class="result"><span class="s-ey">${tie ? 'Called it a tie' : `${win[0]} takes the higher spot`}</span>
+      <ol class="rlist"><li class="new"><span class="mono">#1</span><b>${win[0]}</b><span class="mono">9.92</span></li><li${tie ? ' class="new"' : ''}><span class="mono">#${tie ? 1 : 2}</span><b>${lose[0]}</b><span class="mono">${tie ? '9.92' : '9.84'}</span></li></ol>
+      <p style="margin:8px 0 0;font-size:15px">That's a duel. A few of these after each watch and every title lands in its exact place, scored from 1.00 to 10.00.</p></div>
+      <div class="duelfoot"><span>Example scores in a ranking of 40 shows</span><button type="button" id="pick-again">Next duel</button></div>`;
+    box.querySelector('#pick-again').onclick = () => { n++; draw(); };
+  };
+  draw();
+
+  // Preview width and fit-to-frame zoom.
+  let vp = 'desktop';
+  const fit = () => document.querySelectorAll('.viewport').forEach(v => {
+    const site = v.querySelector('.site'); const w = vp === 'desktop' ? 1180 : 390;
+    site.style.width = w + 'px'; site.style.zoom = Math.min(1, (v.clientWidth - (vp === 'phone' ? 32 : 0)) / w);
+  });
+  document.querySelectorAll('#vp button').forEach(b => b.addEventListener('click', () => {
+    vp = b.dataset.vp; document.querySelectorAll('#vp button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); fit();
+  }));
+  document.querySelectorAll('#th button').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.th) document.documentElement.dataset.theme = b.dataset.th; else delete document.documentElement.dataset.theme;
+    document.querySelectorAll('#th button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  }));
+  addEventListener('resize', fit); fit();
+})();
+</script>

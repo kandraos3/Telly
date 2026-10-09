@@ -41,3 +41,4 @@ What changes, what we give up, what follow-up work this creates.
 | [0010](0010-watch-tracking-episode-pointer.md) | Watch tracking: one episode pointer per title, woven through the title page, with a Watching hub in More; episode and season ratings split to #216 | Accepted |
 | [0011](0011-home-tonight-hero-and-moves.md) | Home leads with a "Tonight" hero (next episode, else Queue pick) and up to four ranked moves; the canon top 3 leaves Home | Accepted |
 | [0012](0012-rankings-replaces-canon-in-the-ui.md) | "Rankings" replaces "Canon" in all user-facing text; "Canon" stays as an internal code and spec term | Accepted |
+| [0013](0013-website-five-chapters-with-playable-duel.md) | The website tells the app's story in five chapters (Track, Rank, Discover, Friends, Play) and opens with a playable duel | Accepted |
