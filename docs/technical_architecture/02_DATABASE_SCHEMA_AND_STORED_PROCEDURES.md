@@ -188,7 +188,7 @@ Each function keeps its logic in `handler.ts` (dependencies injected) with a thi
 | `tracking-refresh` (POST, service-role bearer) | #168, features/11 §6.5. Refreshes `titles`, `tv_seasons` and `tv_episodes` for up to 500 series tracked as `CAUGHT_UP` or `FINISHED` (ended shows only on Mondays), then `refresh_tracking_new_episodes()`. pg_cron `tracking-refresh` at `23 5 * * *` through `_invoke_edge_function`. |
 
 ### 3.6 Watch Tracking RPCs (epic #168, [features/11](../features/11_WATCH_TRACKING_AND_EPISODE_PROGRESS.md) §6)
-All write RPCs are `SECURITY DEFINER`, `SET search_path = public`. They take `p_client_mutation_id` (I-5), recompute `state` with `_tracking_state` (§3.1–§3.3 of features/11, shared vectors `test/fixtures/tracking_progress_vectors.json`), set `last_progress_at`, and return the `user_tracking` row.
+All write RPCs are `SECURITY DEFINER`, `SET search_path = public`. They take `p_client_mutation_id` (I-5), recompute `state` with `_tracking_state` (§3.1–§3.3 of features/11, shared vectors `test/fixtures/tracking_progress_vectors.json`), set `last_progress_at`, and return the `user_tracking` row (`stop_tracking` returns nothing). Internal helpers (`_tracking_move`, `_tracking_start`, `_episode_aired`, …) are not granted to clients.
 
 | RPC | Behaviour |
 | :--- | :--- |

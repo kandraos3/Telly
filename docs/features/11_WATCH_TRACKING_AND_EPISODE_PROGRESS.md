@@ -166,7 +166,7 @@ The **finish sheet** opens when a write takes a series to `CAUGHT_UP` or `FINISH
 - Movies can't be dropped (features/03): for movies the action is **Stop tracking**.
 
 ### 4.7 Revive
-- On SCR-18, **Revive** on a dropped show starts tracking with the place set to the drop point.
+- On SCR-18, **Revive** on a dropped show starts tracking with the place set to the drop point. A drop that recorded a season but no episode resumes at the start of that season, so the place is the last episode of the season before (nothing for season 1).
 - It deletes the `user_dropped_shows` row in the same server call, and posts no activity.
 
 ### 4.8 New episodes
@@ -304,7 +304,7 @@ CREATE TABLE public.tv_episodes (
   - `tv_episodes`: SELECT for any authenticated user; writes by `service_role` only.
 
 ### 6.2 Write RPCs
-All of these are `SECURITY DEFINER`, `SET search_path = public`. They take `p_client_mutation_id` and are no-ops on replay (I-5, `applied_mutations`). They recompute `state` (§3.3), set `last_progress_at`, and return the row.
+All of these are `SECURITY DEFINER`, `SET search_path = public`. They take `p_client_mutation_id` and are no-ops on replay (I-5, `applied_mutations`). They recompute `state` (§3.3), set `last_progress_at`, and return the row (`stop_tracking` returns nothing, because the row is gone).
 
 | RPC | Behaviour |
 | :--- | :--- |
