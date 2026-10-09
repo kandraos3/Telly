@@ -121,6 +121,7 @@ class WatchingRow extends StatelessWidget {
     required this.onRank,
     this.onUnlogLast,
     this.moviePrefix = false,
+    this.compact = false,
   });
 
   final TrackingItem item;
@@ -136,11 +137,14 @@ class WatchingRow extends StatelessWidget {
   final VoidCallback? onUnlogLast;
   final bool moviePrefix;
 
+  /// Home's version: a 40 × 58 poster and a shorter meta line (SCR-21).
+  final bool compact;
+
   bool get _hasBar => !item.isMovie && (group == TrackingGroup.newEpisodes || group == TrackingGroup.inProgress || group == TrackingGroup.paused);
 
   @override
   Widget build(BuildContext context) {
-    final meta = TrackingLabels.hubMeta(item, group, now, moviePrefix: moviePrefix);
+    final meta = TrackingLabels.hubMeta(item, group, now, moviePrefix: moviePrefix, compact: compact);
     final amber = TellyColors.warmAmberOf(context);
     return Semantics(
       container: true,
@@ -154,8 +158,8 @@ class WatchingRow extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(6),
                 child: SizedBox(
-                  width: 36,
-                  height: 52,
+                  width: compact ? 40 : 36,
+                  height: compact ? 58 : 52,
                   child: PosterImage(posterPath: item.posterPath, fallback: ColoredBox(color: TellyColors.cardOf(context))),
                 ),
               ),

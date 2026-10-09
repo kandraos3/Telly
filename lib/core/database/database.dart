@@ -334,15 +334,24 @@ class TrackingCacheDao extends DatabaseAccessor<AppDatabase> with _$TrackingCach
   /// Replaces the cache with [rows], except titles in [keep] (they have mutations still pending,
   /// so the local copy is newer than the server's). Rows not in [rows] and not in [keep] are
   /// deleted: they were stopped on another device.
+  ///
+  /// A row that turned PENDING after [keep] was worked out (the user acted while the server call
+  /// was in flight) is kept too, so a refresh never undoes a change that is still being queued.
   Future<void> replaceSynced(List<TrackingCacheCompanion> rows, Set<(int, String)> keep) =>
       transaction(() async {
         final incoming = {for (final r in rows) (r.titleId.value, r.mediaType.value)};
-        for (final existing in await getAll()) {
-          final key = (existing.titleId, existing.mediaType);
-          if (!incoming.contains(key) && !keep.contains(key)) await remove(existing.titleId, existing.mediaType);
+        final existing = await getAll();
+        final protected = {
+          ...keep,
+          for (final e in existing)
+            if (e.syncStatus == 'PENDING') (e.titleId, e.mediaType),
+        };
+        for (final e in existing) {
+          final key = (e.titleId, e.mediaType);
+          if (!incoming.contains(key) && !protected.contains(key)) await remove(e.titleId, e.mediaType);
         }
         for (final r in rows) {
-          if (!keep.contains((r.titleId.value, r.mediaType.value))) await upsert(r);
+          if (!protected.contains((r.titleId.value, r.mediaType.value))) await upsert(r);
         }
       });
 

@@ -78,6 +78,7 @@ void main() {
         'p_limit': 1,
         'p_include_medals': true, // #139: this app renders medal cards
         'p_include_challenges': true, // #144: and challenge cards
+        'p_include_tracking': true, // #168: and started / finished watching
       });
       expect(page.hasMore, isTrue, reason: 'a full page may have more');
 

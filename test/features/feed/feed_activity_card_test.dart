@@ -57,6 +57,41 @@ void main() {
       expect(find.text('“Hans Zimmer score vibrating in IMAX was religious.”'), findsOneWidget);
     });
 
+    testWidgets('#168: "started watching" and "finished" read as such and carry no score chip', (tester) async {
+      for (final (type, headline) in [
+        (ActivityType.watchStarted, 'Started watching Dune: Part Two'),
+        (ActivityType.watchFinished, 'Finished Dune: Part Two'),
+      ]) {
+        final watch = ActivityLog(
+          id: 'w-${type.name}',
+          userId: 'u1',
+          username: 'alex',
+          userDisplayName: 'Alex Rivera',
+          activityType: type,
+          titleId: 201,
+          titleName: 'Dune: Part Two',
+          mediaType: 'movie',
+          // The server sends no score for these; even if a ranking exists, the card must not show it.
+          calculatedScore: 9.42,
+          culturalTier: 'God Tier',
+          createdAt: DateTime.now().subtract(const Duration(hours: 1)),
+        );
+        await tester.pumpWidget(buildTestableWidget(FeedActivityCard(activity: watch)));
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('feed_watch_headline')), findsOneWidget);
+        expect(find.text(headline), findsOneWidget);
+        expect(find.text('9.42'), findsNothing);
+        expect(find.text('God Tier'), findsNothing);
+        expect(find.textContaining('Ranked Dune'), findsNothing);
+      }
+    });
+
+    test('#168: the new activity types parse, and old apps\' unknown types still skip', () {
+      expect(ActivityType.fromString('WATCH_STARTED'), ActivityType.watchStarted);
+      expect(ActivityType.fromString('WATCH_FINISHED'), ActivityType.watchFinished);
+      expect(ActivityType.fromString('SOMETHING_ELSE'), ActivityType.unknown);
+    });
+
     testWidgets('FE-FEED-01: the compact bookmark toggles state and calls back', (tester) async {
       bool? toggledState;
 

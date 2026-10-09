@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../tracking/presentation/providers/tracking_providers.dart';
+import '../../../tracking/presentation/widgets/canon_tracking.dart';
 import '../../../../core/theme/telly_colors.dart';
 import '../../../../core/theme/telly_typography.dart';
 import '../../../ranking/domain/canon_tier.dart';
@@ -96,8 +99,13 @@ class TierViewList extends StatelessWidget {
               final item = items[index];
               return Material(
                 color: Colors.transparent,
-                child: ListTile(
+                child: Consumer(builder: (context, ref, _) {
+                  final watching = CanonProgressTagFor.taggable(ref.watch(titleTrackingProvider((item.id, item.mediaType))));
+                  return ListTile(
                   dense: true,
+                  subtitle: watching == null
+                      ? null
+                      : Align(alignment: Alignment.centerLeft, child: CanonProgressTag(item: watching)),
                   onTap: () => onTapEntry?.call(item),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
                   leading: Text(
@@ -116,7 +124,8 @@ class TierViewList extends StatelessWidget {
                     item.calculatedScore.toStringAsFixed(2),
                     style: TellyTypography.scoreMono(color: accentColor),
                   ),
-                ),
+                  );
+                }),
               );
             },
           ),

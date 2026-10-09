@@ -19,6 +19,7 @@ import '../../../profile/presentation/controllers/profile_controller.dart';
 import '../../../profile/presentation/widgets/poster_grid_view.dart';
 import '../../../ranking/domain/canon_type.dart';
 import '../../../ranking/presentation/widgets/canon_tier_style.dart';
+import '../../../tracking/presentation/widgets/home_currently_watching.dart';
 
 /// `SCR-21` Home (epic #44): the landing tab. Interim content built only from data the app already has —
 /// the top of the selected canon and the newest Following activity — until epic #45 designs the real Home.
@@ -51,6 +52,8 @@ class HomeScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Currently watching (epic #168) leads the page; it takes no space when empty.
+              HomeCurrentlyWatching(),
               _CanonSection(),
               SizedBox(height: 24),
               _FriendsSection(),
@@ -239,6 +242,8 @@ class _FriendRow extends StatelessWidget {
       ActivityType.commentPosted => 'commented on ${a.titleName}',
       ActivityType.medalUnlocked => 'unlocked ${a.medal?.name ?? 'a medal'}',
       ActivityType.challengeCompleted => 'finished ${a.challenge?.name ?? 'a challenge'}',
+      ActivityType.watchStarted => 'started watching ${a.titleName}',
+      ActivityType.watchFinished => 'finished ${a.titleName}',
       ActivityType.unknown => 'did something new',
     };
   }
@@ -246,7 +251,7 @@ class _FriendRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final score = activity.calculatedScore;
-    final showScore = score != null && activity.activityType != ActivityType.showDropped;
+    final showScore = score != null && activity.activityType != ActivityType.showDropped && !activity.isWatchEvent;
     final name = activity.userDisplayName.isEmpty ? '@${activity.username}' : activity.userDisplayName;
     final sentence = describe(activity);
 

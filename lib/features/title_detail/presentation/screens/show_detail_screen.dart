@@ -14,7 +14,6 @@ import 'package:telly_app/core/widgets/telly_screen_header.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:telly_app/core/services/haptics_service.dart';
 import 'package:telly_app/features/logging/domain/title_search_result.dart';
-import 'package:telly_app/features/tracking/data/tracking_repository.dart';
 import 'package:telly_app/features/tracking/domain/tracking_item.dart';
 import 'package:telly_app/features/tracking/domain/tracking_models.dart';
 import 'package:telly_app/features/tracking/domain/tracking_progress.dart';
@@ -29,7 +28,6 @@ import 'package:telly_app/features/tracking/presentation/widgets/tracking_action
 import 'package:telly_app/features/tracking/presentation/widgets/tracking_undo_tray.dart';
 import 'package:telly_app/features/tracking/presentation/widgets/watch_slot.dart';
 import 'package:telly_app/features/tracking/presentation/widgets/watching_cards.dart';
-import 'package:telly_app/features/tracking/presentation/widgets/where_are_you_sheet.dart';
 import 'package:telly_app/features/onboarding/data/top_50_seeds.dart';
 import 'package:telly_app/features/queue/data/watchlist_repository.dart';
 import 'package:telly_app/features/ranking/domain/canon_tier.dart';
@@ -778,27 +776,6 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
     medium ? await HapticsService.mediumImpact() : await HapticsService.lightImpact();
   }
 
-  TrackingStartRequest _request(TitleDetail title, {EpisodeRef? place, bool rewatch = false}) => TrackingStartRequest(
-        titleId: title.id,
-        mediaType: title.mediaType,
-        title: title.title,
-        posterPath: title.posterPath,
-        backdropPath: title.backdropPath,
-        titleStatus: title.status,
-        runtimeMinutes: title.runtimeMinutes,
-        seasons: [
-          for (final s in title.seasons)
-            if (s.seasonNumber >= 1)
-              SeasonInfo(
-                number: s.seasonNumber,
-                episodeCount: s.episodeCount,
-                airDate: s.airDate == null ? null : DateTime.tryParse(s.airDate!),
-              ),
-        ],
-        place: place,
-        rewatch: rewatch,
-      );
-
   void _scrollTo(GlobalKey key) {
     final ctx = key.currentContext;
     if (ctx != null) Scrollable.ensureVisible(ctx, duration: const Duration(milliseconds: 300), alignment: 0.1);
@@ -834,7 +811,7 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
         );
         if (!mounted) return;
         if (choice == 'again') {
-          await _tracking.start(_request(title, rewatch: true));
+          await _tracking.start(TrackingActions.requestFromDetail(title, rewatch: true));
         } else if (choice == 'stop') {
           await TrackingActions.confirmStop(context, ref, item);
         }
@@ -842,52 +819,16 @@ class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
   }
 
   /// Starting leaves the Queue; Undo puts the title back and stops tracking (§4.1, §4.10).
-  Future<void> _startWatching(TitleDetail title) async {
-    var request = _request(title);
-    if (title.isTv && request.seasons.isNotEmpty) {
-      EpisodeRef? preset;
-      if (title.socialSummary?.myRanking != null) {
-        // A ranked series is usually one you are up to date on: preset the place there (§10).
-        preset = TrackingProgress.lastAired(
-          ShowSchedule(seasons: request.seasons, status: title.status),
-          DateTime.now(),
-        );
-      }
-      final result = await WhereAreYouSheet.show(
+  Future<void> _startWatching(TitleDetail title) => TrackingActions.startWatching(
         context,
-        titleId: title.id,
-        seasons: request.seasons,
-        initialPlace: preset,
+        ref,
+        title,
+        wasQueued: _isBookmarked,
+        ranked: title.socialSummary?.myRanking != null,
+        onQueueChanged: (inQueue) {
+          if (mounted) setState(() => _isBookmarked = inQueue);
+        },
       );
-      if (result == null || !mounted) return;
-      request = _request(title, place: result.place);
-    }
-    final wasQueued = _isBookmarked;
-    final started = await _tracking.start(request);
-    await _haptic(medium: true);
-    if (!mounted) return;
-    if (wasQueued) {
-      await ref.read(watchlistRepositoryProvider).remove(titleId: title.id, mediaType: title.mediaType);
-      if (mounted) setState(() => _isBookmarked = false);
-    }
-    if (!mounted) return;
-    TrackingUndoTray.show(
-      context,
-      message: 'Watching ${title.title}',
-      onUndo: () async {
-        await _tracking.stop(started);
-        if (wasQueued) {
-          await ref.read(watchlistRepositoryProvider).add(
-                titleId: title.id,
-                mediaType: title.mediaType,
-                title: title.title,
-                posterPath: title.posterPath,
-              );
-          if (mounted) setState(() => _isBookmarked = true);
-        }
-      },
-    );
-  }
 
   Future<void> _onWatched(TrackingItem item) async {
     final next = item.nextEpisode?.ref;

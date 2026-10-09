@@ -18,9 +18,14 @@ import 'package:telly_app/features/ranking/domain/canon_tier.dart';
 import 'package:telly_app/features/ranking/domain/canon_type.dart';
 import 'package:telly_app/features/ranking/domain/franchise_rollup_service.dart';
 import 'package:telly_app/features/ranking/presentation/widgets/canon_tier_style.dart';
+import 'package:telly_app/features/tracking/data/tracking_repository.dart';
+import 'package:telly_app/features/tracking/domain/tracking_item.dart';
+import 'package:telly_app/features/tracking/domain/tracking_models.dart';
+import 'package:telly_app/features/tracking/presentation/providers/tracking_providers.dart';
 
 import '../../fakes/fake_auth_repository.dart';
 import '../../fakes/fake_social_repository.dart';
+import '../../fakes/fake_tracking_repository.dart';
 
 /// Fixed canon state for screen tests.
 class _SeededCanon extends ProfileCanonNotifier {
@@ -60,6 +65,32 @@ final _series = [
   _entry(12, 'The Bear', 'tv', 2, 9.00),
 ];
 
+final _now = DateTime(2026, 10, 9, 12);
+var _trackedId = 1000;
+
+TrackingItem _tracked(
+  String title, {
+  int idle = 1,
+  TrackingState state = TrackingState.watching,
+  DateTime? newSince,
+  bool ranked = false,
+  EpisodeRef next = const EpisodeRef(2, 6),
+}) =>
+    TrackingItem(
+      titleId: _trackedId++,
+      mediaType: 'tv',
+      title: title,
+      state: state,
+      startedAt: _now.subtract(const Duration(days: 90)),
+      lastProgressAt: _now.subtract(Duration(days: idle)),
+      place: const EpisodeRef(2, 5),
+      newEpisodesSince: newSince,
+      isRanked: ranked,
+      airedTotal: 19,
+      watched: 14,
+      nextEpisode: state == TrackingState.watching ? NextEpisode(ref: next, name: 'Attila') : null,
+    );
+
 void main() {
   late ProviderContainer container;
 
@@ -68,6 +99,7 @@ void main() {
     ProfileCanonState? canon,
     SocialRepository? social,
     ThemeData? theme,
+    List<TrackingItem> tracking = const [],
   }) async {
     tester.view.physicalSize = const Size(390, 1400);
     tester.view.devicePixelRatio = 1;
@@ -81,6 +113,8 @@ void main() {
     ]);
     container = ProviderContainer(overrides: [
       hapticsEnabledProvider.overrideWith((ref) => false),
+      trackingRepositoryProvider.overrideWithValue(FakeTrackingRepository(tracking)),
+      trackingNowProvider.overrideWithValue(() => _now),
       authRepositoryProvider.overrideWithValue(FakeAuthRepository(
         signedInUserId: 'u-me',
         profile: UserProfile(
@@ -164,6 +198,106 @@ void main() {
       await tester.tap(find.byKey(const Key('grid_poster_2')));
       await tester.pumpAndSettle();
       expect(find.text('route:${Routes.title('movie', 2)}'), findsOneWidget);
+    });
+  });
+
+  group('#232: SCR-21 Home — currently watching', () {
+    testWidgets('is hidden when nothing is tracked', (tester) async {
+      await pumpHome(tester);
+      expect(find.byKey(const Key('home_currently_watching')), findsNothing);
+      expect(find.text('YOUR CANON'), findsOneWidget, reason: 'the canon section is where it always was');
+    });
+
+    testWidgets('leads the page, above Your canon', (tester) async {
+      await pumpHome(tester, tracking: [_tracked('Shogun')]);
+      expect(find.text('CURRENTLY WATCHING'), findsOneWidget);
+      expect(tester.getTopLeft(find.byKey(const Key('home_currently_watching'))).dy,
+          lessThan(tester.getTopLeft(find.text('YOUR CANON')).dy));
+    });
+
+    testWidgets('shows at most three rows: New episodes first, then In progress, newest first', (tester) async {
+      final fresh = _tracked('Fresh', idle: 6, newSince: _now);
+      await pumpHome(tester, tracking: [
+        _tracked('Older', idle: 5),
+        _tracked('Newest', idle: 1),
+        fresh,
+        _tracked('Middle', idle: 3),
+        _tracked('Paused', idle: 40),
+      ]);
+      final titles = tester.widgetList<Text>(find.descendant(of: find.byKey(const Key('home_currently_watching')), matching: find.byType(Text)));
+      final order = [for (final t in titles) t.data].where((t) => ['Fresh', 'Newest', 'Middle', 'Older', 'Paused'].contains(t)).toList();
+      expect(order, ['Fresh', 'Newest', 'Middle'], reason: 'Older and Paused are left out');
+      expect(find.text('Season 3 is out'), findsNothing, reason: 'the new-season badge only shows for a real new season');
+      expect(find.text('E6 is out'), findsOneWidget);
+    });
+
+    testWidgets('rows read like the hub, with a bar and ✓ E6, and a movie says so', (tester) async {
+      final film = TrackingItem(
+        titleId: 5000,
+        mediaType: 'movie',
+        title: 'Dune: Part Two',
+        state: TrackingState.watching,
+        startedAt: _now.subtract(const Duration(days: 1)),
+        lastProgressAt: _now.subtract(const Duration(days: 1)),
+      );
+      final show = _tracked('Shogun');
+      await pumpHome(tester, tracking: [show, film]);
+      expect(find.text("S2 · E6 'Attila'"), findsOneWidget);
+      expect(find.text('✓ E6'), findsOneWidget);
+      expect(find.byKey(const Key('hub_progress_bar')), findsOneWidget);
+      expect(find.text('Movie · started yesterday'), findsOneWidget);
+      expect(find.text('✓ Finished'), findsOneWidget);
+    });
+
+    testWidgets('the count line mentions caught up and finished-waiting titles; See all counts the hub', (tester) async {
+      await pumpHome(tester, tracking: [
+        _tracked('Shogun'),
+        _tracked('Andor', state: TrackingState.caughtUp, ranked: true),
+        _tracked('The Bear', state: TrackingState.caughtUp),
+        _tracked('Fargo', state: TrackingState.finished),
+      ]);
+      expect(find.text('+ 1 caught up · 2 finished and waiting to be ranked'), findsOneWidget);
+      expect(find.text('See all 4 ›'), findsOneWidget);
+    });
+
+    testWidgets('no count line when there is nothing else', (tester) async {
+      await pumpHome(tester, tracking: [_tracked('Shogun')]);
+      expect(find.byKey(const Key('home_watching_count')), findsNothing);
+    });
+
+    testWidgets('the header and See all open the Watching hub; a row opens its title', (tester) async {
+      final show = _tracked('Shogun');
+      await pumpHome(tester, tracking: [show]);
+      await tester.tap(find.byKey(const Key('home_watching_see_all')));
+      await tester.pumpAndSettle();
+      expect(find.text('route:${Routes.watching}'), findsOneWidget);
+    });
+
+    testWidgets('tapping the header text also opens the hub', (tester) async {
+      await pumpHome(tester, tracking: [_tracked('Shogun')]);
+      await tester.tap(find.text('CURRENTLY WATCHING'));
+      await tester.pumpAndSettle();
+      expect(find.text('route:${Routes.watching}'), findsOneWidget);
+    });
+
+    testWidgets('a row opens its title', (tester) async {
+      final show = _tracked('Shogun');
+      await pumpHome(tester, tracking: [show]);
+      await tester.tap(find.text('Shogun'));
+      await tester.pumpAndSettle();
+      expect(find.text('route:${Routes.title('tv', show.titleId)}'), findsOneWidget);
+    });
+  });
+
+  group('#232: SCR-21 Home — friend verbs', () {
+    testWidgets('"started watching" and "finished" show without a score chip', (tester) async {
+      await pumpHome(tester, social: FakeSocialRepository(feed: [
+        fakeActivity('w1', username: 'maya', title: 'Severance', type: ActivityType.watchStarted, minutesAgo: 1),
+        fakeActivity('w2', username: 'sam', title: 'Shogun', type: ActivityType.watchFinished, minutesAgo: 2),
+      ]));
+      expect(find.textContaining('started watching Severance', findRichText: true), findsOneWidget);
+      expect(find.textContaining('finished Shogun', findRichText: true), findsOneWidget);
+      expect(find.byKey(const Key('home_score_chip')), findsNothing);
     });
   });
 

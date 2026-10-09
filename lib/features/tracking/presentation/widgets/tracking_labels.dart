@@ -82,8 +82,11 @@ abstract final class TrackingLabels {
   }
 
   /// The meta line of a hub row (SCR-29). Empty in *New episodes*, which shows [newBadge] instead.
-  /// [moviePrefix] is set under the *All* chip so a movie says so.
-  static String hubMeta(TrackingItem item, TrackingGroup? group, DateTime now, {bool moviePrefix = false}) {
+  /// [moviePrefix] is set under the *All* chip so a movie says so. [compact] is Home's shorter line.
+  static String hubMeta(TrackingItem item, TrackingGroup? group, DateTime now, {bool moviePrefix = false, bool compact = false}) {
+    if (item.isMovie && compact) {
+      return 'Movie · started ${relativeDay(item.startedAt, now)}';
+    }
     if (item.isMovie) {
       final base = item.state == TrackingState.finished
           ? 'Finished ${date(item.finishedAt ?? item.lastProgressAt, now)}'
@@ -101,7 +104,7 @@ abstract final class TrackingLabels {
         final left = item.episodesLeft;
         return [
           if (next != null) next.name == null ? next.ref.label : "${next.ref.label} '${next.name}'",
-          if (left != null) '$left left',
+          if (left != null && !compact) '$left left',
         ].join(' · ');
       case TrackingGroup.caughtUp:
         final upcoming = [for (final s in item.seasons) if (s.airDate != null && s.airDate!.isAfter(now)) s];

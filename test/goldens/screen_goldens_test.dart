@@ -144,6 +144,22 @@ class _InMemoryWatchlistRepository implements WatchlistRepository {
 
 final _trackingToday = DateTime(2026, 10, 9, 12);
 
+/// Severance (id 110492) is on its way through season 2: its Canon rows get the progress tag.
+List<TrackingItem> _goldenCanonTracking() => [
+      TrackingItem(
+        titleId: 110492,
+        mediaType: 'tv',
+        title: 'Severance',
+        state: TrackingState.watching,
+        startedAt: _trackingToday.subtract(const Duration(days: 60)),
+        lastProgressAt: _trackingToday.subtract(const Duration(days: 1)),
+        place: const EpisodeRef(2, 5),
+        nextEpisode: const NextEpisode(ref: EpisodeRef(2, 6)),
+        airedTotal: 19,
+        watched: 14,
+      ),
+    ];
+
 /// One title in every hub group, for the Watching hub and the More tile goldens.
 List<TrackingItem> _goldenTracking() {
   DateTime ago(int d) => _trackingToday.subtract(Duration(days: d));
@@ -662,13 +678,17 @@ void main() {
       ];
 
       await tester.pumpWidget(
-        MaterialApp(
-          theme: TellyTheme.darkTheme,
-          home: Scaffold(
-            backgroundColor: TellyColors.backgroundCanvasOled,
-            body: SingleChildScrollView(
-              child: RankedCanonList(
+        ProviderScope(
+          // Severance is being watched: its row carries the "▶ S2 · E6" tag (epic #168).
+          overrides: [trackingRepositoryProvider.overrideWithValue(FakeTrackingRepository(_goldenCanonTracking()))],
+          child: MaterialApp(
+            theme: TellyTheme.darkTheme,
+            home: Scaffold(
+              backgroundColor: TellyColors.backgroundCanvasOled,
+              body: SingleChildScrollView(
+                child: RankedCanonList(
                 entries: entries,
+              ),
               ),
             ),
           ),
@@ -714,14 +734,18 @@ void main() {
       ];
 
       await tester.pumpWidget(
-        MaterialApp(
-          theme: TellyTheme.darkTheme,
-          home: Scaffold(
-            backgroundColor: TellyColors.backgroundCanvasOled,
-            body: SingleChildScrollView(
-              child: TierViewList(
+        ProviderScope(
+          // Severance is being watched: its row carries the "▶ S2 · E6" tag (epic #168).
+          overrides: [trackingRepositoryProvider.overrideWithValue(FakeTrackingRepository(_goldenCanonTracking()))],
+          child: MaterialApp(
+            theme: TellyTheme.darkTheme,
+            home: Scaffold(
+              backgroundColor: TellyColors.backgroundCanvasOled,
+              body: SingleChildScrollView(
+                child: TierViewList(
                 entries: entries,
                 onTapEntry: (_) {},
+              ),
               ),
             ),
           ),
@@ -811,7 +835,12 @@ void main() {
         await tester.binding.setSurfaceSize(const Size(393, 852));
         addTearDown(() => tester.binding.setSurfaceSize(null));
         await tester.pumpWidget(ProviderScope(
-          overrides: shellOverrides(),
+          overrides: [
+            ...shellOverrides(),
+            // Currently watching leads the page (epic #168).
+            trackingRepositoryProvider.overrideWithValue(FakeTrackingRepository(_goldenTracking())),
+            trackingNowProvider.overrideWithValue(() => _trackingToday),
+          ],
           child: MaterialApp(theme: theme, home: const HomeScreen()),
         ));
         await tester.pumpAndSettle();

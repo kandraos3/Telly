@@ -57,6 +57,10 @@ enum ActivityType {
   medalUnlocked,
   challengeCompleted,
 
+  /// Watch tracking (#168; features/11 §7.2): no score, no rank.
+  watchStarted,
+  watchFinished,
+
   /// A type this app doesn't know yet; the feed skips these rows (#144).
   unknown;
 
@@ -76,6 +80,10 @@ enum ActivityType {
         return ActivityType.medalUnlocked;
       case 'CHALLENGE_COMPLETED':
         return ActivityType.challengeCompleted;
+      case 'WATCH_STARTED':
+        return ActivityType.watchStarted;
+      case 'WATCH_FINISHED':
+        return ActivityType.watchFinished;
       default:
         return ActivityType.unknown;
     }
@@ -423,6 +431,9 @@ class ActivityLog {
       createdAt: createdAt,
     );
   }
+
+  /// "Started watching" or "finished": a watch tracking event, which never shows a score (features/11 §7.2).
+  bool get isWatchEvent => activityType == ActivityType.watchStarted || activityType == ActivityType.watchFinished;
 
   /// Human-friendly relative timestamp (e.g. "2h ago", "Just now").
   String get relativeTime {

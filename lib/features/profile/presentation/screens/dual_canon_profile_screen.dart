@@ -19,6 +19,8 @@ import '../../../ranking/domain/franchise_rollup_service.dart';
 import '../../data/profile_share_service.dart';
 import '../controllers/edit_profile_controller.dart';
 import '../controllers/profile_controller.dart';
+import '../../../tracking/presentation/providers/tracking_providers.dart';
+import '../../../tracking/presentation/widgets/canon_tracking.dart';
 import '../widgets/canon_podium.dart';
 import '../widgets/canon_stats_panel.dart';
 import '../widgets/poster_grid_view.dart';
@@ -142,6 +144,9 @@ class DualCanonProfileScreen extends ConsumerWidget {
                     ref.read(selectedCanonProvider.notifier).select(mediaType == 'movie' ? CanonType.movie : CanonType.series);
                   },
                 ),
+
+                // Watching strip (epic #168): the selected canon's tracked titles, in every view.
+                CanonWatchingStrip(mediaType: selectedCanon == CanonType.movie ? 'movie' : 'tv'),
 
                 const SizedBox(height: 12),
 
@@ -278,6 +283,8 @@ class DualCanonProfileScreen extends ConsumerWidget {
           final canon = ref.watch(selectedCanonProvider);
           final isMovie = canon == CanonType.movie;
           final entries = ref.watch(profileCanonProvider).entriesFor(canon, rollupAnime: ref.watch(franchiseRollupProvider));
+          final year = ref.watch(trackingNowProvider)().year;
+          final yearStats = ref.watch(trackingYearStatsProvider((isMovie ? 'movie' : 'tv', year))).valueOrNull;
           return Column(
             key: const Key('canon_stats_sheet'),
             mainAxisSize: MainAxisSize.min,
@@ -291,6 +298,8 @@ class DualCanonProfileScreen extends ConsumerWidget {
                 stats: ref.watch(canonStatsProvider(canon)).valueOrNull,
                 isMovie: isMovie,
                 localTitleCount: entries.length,
+                trackingLabel: isMovie ? 'Movies finished in $year' : 'Episodes in $year',
+                trackingValue: (isMovie ? yearStats?.moviesFinished : yearStats?.episodes)?.toString(),
               ),
               const SizedBox(height: 16),
               // Carries its own "TOP 3 SHOWCASE" section header.

@@ -91,6 +91,20 @@ void main() {
     });
   });
 
+  test('replaceSynced keeps a row that turned pending after the keep set was worked out', () async {
+    final dao = db.trackingCacheDao;
+    await dao.upsert(row(1, season: 1, episode: 1));
+    // The user acts while hydrate is in flight: the row is PENDING but not in the caller's keep set.
+    await dao.upsert(row(1, season: 1, episode: 5, sync: 'PENDING'));
+    await dao.upsert(row(2, sync: 'PENDING'));
+
+    await dao.replaceSynced([row(1, season: 1, episode: 2)], const {});
+
+    final one = (await dao.getOne(1, 'tv'))!;
+    expect([one.lastSeason, one.lastEpisode], [1, 5], reason: 'the newer local copy wins');
+    expect(await dao.getOne(2, 'tv'), isNotNull, reason: 'and a pending title missing from the server stays');
+  });
+
   group('EpisodeCacheDao', () {
     test('keeps one JSON document per season and overwrites it', () async {
       final dao = db.episodeCacheDao;

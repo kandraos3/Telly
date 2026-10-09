@@ -101,6 +101,16 @@ final titleWatchersProvider = FutureProvider.family<TrackingWatchers, (int, Stri
   }
 });
 
+/// Episodes (series) or movies finished (movies) in a year, for the Canon Stats sheet (features/11
+/// §8). Null offline, shown as "—". Key: `(mediaType, year)`.
+final trackingYearStatsProvider = FutureProvider.autoDispose.family<TrackingStats?, (String, int)>((ref, key) async {
+  try {
+    return await ref.watch(trackingRepositoryProvider).stats(key.$1, year: key.$2);
+  } catch (_) {
+    return null;
+  }
+});
+
 /// Today, for grouping and "Started yesterday". Overridden in tests and goldens.
 final trackingNowProvider = Provider<DateTime Function()>((ref) => DateTime.now);
 
