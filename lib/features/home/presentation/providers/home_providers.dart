@@ -115,12 +115,13 @@ class HomeController extends Notifier<HomeState> {
     // The app has no follow count, so "follows nobody" is "no friend appears in the Following feed". Until the
     // feed answers, assume somebody does, so the find-friends move doesn't flash in.
     final followsAnyone = feed.hasValue ? activity.any((a) => a.userId != me) : true;
-    final queuePick = queue.isEmpty ? null : queue.firstWhere((i) => HomeQueueKey.of(i) == pickKey, orElse: () => queue.first);
+    final queuePick =
+        queue.isEmpty ? null : queue.firstWhere((i) => HomeQueueKey.of(i) == pickKey, orElse: () => queue.first);
     final joined = _joined(challenges.valueOrNull);
 
-    final answered = [tracking, queueAsync, level, challenges, feed]
-            .fold<int>(0, (mask, v) => (mask << 1) | (pending(v) ? 0 : 1)) |
-        (canon.isLoading ? 0 : 1 << 5);
+    final answered =
+        [tracking, queueAsync, level, challenges, feed].fold<int>(0, (mask, v) => (mask << 1) | (pending(v) ? 0 : 1)) |
+            (canon.isLoading ? 0 : 1 << 5);
     if (!movesLoading && (_frozen == null || _refreshRequested || answered != _answered)) {
       _frozen = HomeMovesRanker.rank(
         now: now,

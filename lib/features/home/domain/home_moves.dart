@@ -145,7 +145,8 @@ abstract final class HomeMovesRanker {
           priority: 90,
           recency: at,
           kicker: 'RANK IT',
-          title: item.state == TrackingState.caughtUp ? "You're caught up on ${item.title}" : 'You finished ${item.title}',
+          title:
+              item.state == TrackingState.caughtUp ? "You're caught up on ${item.title}" : 'You finished ${item.title}',
           meta: '$canon · ${_when(at, now)}',
           buttonLabel: 'Log and duel',
           accent: HomeMoveAccent.lime,

@@ -1012,7 +1012,7 @@ The hero shows the first mode that applies (`HomeHeroPicker`, §21.5):
 #### 21.3 Your moves (key `home_moves`)
 A `TellySectionHeader` reading "YOUR MOVES", then **at most 4** move cards. The section is hidden when there are none.
 - **Card:** Surface, 1 dp stroke, radius 14, 10 dp padding.
-- **Contents:** a 34 dp icon tile (radius 10, the move's accent at 16% with the glyph in that accent), then a kicker (9 sp, uppercase, accent), a title (12.5 sp, bold) and a meta line, then one small trailing button.
+- **Contents:** a 34 dp icon tile (radius 10, the move's accent at 16% with the glyph in that accent), then a kicker (9 sp, uppercase, accent), a title (12.5 sp, bold, one line) and a meta line (up to two lines), then one small trailing button.
 - Tapping anywhere on the card does what its button does.
 
 | Move | Shows when | Kicker · title · meta | Button | Accent |

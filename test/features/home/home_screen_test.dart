@@ -7,7 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:telly_app/core/router/routes.dart';
 import 'package:telly_app/core/services/haptics_service.dart';
-import 'package:telly_app/core/theme/telly_colors.dart';
 import 'package:telly_app/core/theme/telly_theme.dart';
 import 'package:telly_app/features/auth/data/auth_repository.dart';
 import 'package:telly_app/features/auth/domain/user_profile.dart';
@@ -17,14 +16,12 @@ import 'package:telly_app/features/challenges/domain/challenge.dart';
 import 'package:telly_app/features/challenges/presentation/controllers/challenges_controller.dart';
 import 'package:telly_app/features/home/presentation/providers/home_providers.dart';
 import 'package:telly_app/features/home/presentation/screens/home_screen.dart';
+import 'package:telly_app/features/levels/domain/level_models.dart';
 import 'package:telly_app/features/levels/presentation/controllers/levels_controller.dart';
 import 'package:telly_app/features/queue/domain/streaming_models.dart';
 import 'package:telly_app/features/queue/presentation/screens/smart_queue_screen.dart';
 import 'package:telly_app/features/profile/presentation/controllers/profile_controller.dart';
-import 'package:telly_app/features/ranking/domain/canon_tier.dart';
-import 'package:telly_app/features/ranking/domain/canon_type.dart';
 import 'package:telly_app/features/ranking/domain/franchise_rollup_service.dart';
-import 'package:telly_app/features/ranking/presentation/widgets/canon_tier_style.dart';
 import 'package:telly_app/features/tracking/data/tracking_repository.dart';
 import 'package:telly_app/features/tracking/domain/tracking_item.dart';
 import 'package:telly_app/features/tracking/domain/tracking_models.dart';
@@ -34,7 +31,7 @@ import '../../fakes/fake_auth_repository.dart';
 import '../../fakes/fake_social_repository.dart';
 import '../../fakes/fake_tracking_repository.dart';
 import '../levels/levels_fixtures.dart';
-import 'home_fixtures.dart' show SeededChallenges, SeededLevel, SeededQueue, queued;
+import 'home_fixtures.dart' show SeededChallenges, SeededLevel, SeededQueue, challenge, friendActivity, queued;
 
 /// Fixed canon state for screen tests.
 class _SeededCanon extends ProfileCanonNotifier {
@@ -110,6 +107,8 @@ void main() {
     ThemeData? theme,
     List<TrackingItem> tracking = const [],
     List<WatchlistItem> queue = const [],
+    YourLevel? level,
+    ChallengesOverview overview = const ChallengesOverview(),
   }) async {
     tester.view.physicalSize = const Size(390, 1400);
     tester.view.devicePixelRatio = 1;
@@ -127,8 +126,8 @@ void main() {
       trackingNowProvider.overrideWithValue(() => _now),
       homeRandomProvider.overrideWithValue(Random(4)),
       userWatchlistProvider.overrideWith(() => SeededQueue(queue)),
-      yourLevelControllerProvider.overrideWith(() => SeededLevel(sampleLevel(streak: 0))),
-      challengesControllerProvider.overrideWith(() => SeededChallenges(const ChallengesOverview())),
+      yourLevelControllerProvider.overrideWith(() => SeededLevel(level ?? sampleLevel(streak: 0))),
+      challengesControllerProvider.overrideWith(() => SeededChallenges(overview)),
       authRepositoryProvider.overrideWithValue(FakeAuthRepository(
         signedInUserId: 'u-me',
         profile: UserProfile(
@@ -161,60 +160,6 @@ void main() {
     await tester.pump();
   }
 
-  group('#115: SCR-21 Home — your canon', () {
-    testWidgets('shows the header with Search and the top 3 of the movie canon', (tester) async {
-      await pumpHome(tester);
-      expect(find.text('Home'), findsOneWidget);
-      expect(find.byKey(const Key('home_search_button')), findsOneWidget);
-      expect(find.text('YOUR CANON'), findsOneWidget);
-      for (final id in [1, 2, 3]) {
-        expect(find.byKey(Key('grid_poster_$id')), findsOneWidget);
-      }
-      expect(find.byKey(const Key('grid_poster_4')), findsNothing);
-      expect(find.byKey(const Key('grid_poster_11')), findsNothing);
-    });
-
-    testWidgets('the toggle switches to the series canon only (never mixed)', (tester) async {
-      await pumpHome(tester);
-      await tester.tap(find.byKey(const Key('home_canon_series')));
-      await tester.pump();
-      expect(container.read(selectedCanonProvider), CanonType.series);
-      expect(find.byKey(const Key('grid_poster_11')), findsOneWidget);
-      expect(find.byKey(const Key('grid_poster_12')), findsOneWidget);
-      for (final id in [1, 2, 3]) {
-        expect(find.byKey(Key('grid_poster_$id')), findsNothing);
-      }
-    });
-
-    testWidgets('an empty canon offers "Log your first title" with a Log button', (tester) async {
-      await pumpHome(tester, canon: ProfileCanonState(series: _series));
-      expect(find.text('Log your first title to start your canon'), findsOneWidget);
-      await tester.tap(find.byKey(const Key('home_canon_empty_log')));
-      await tester.pumpAndSettle();
-      expect(find.text('route:${Routes.log}'), findsOneWidget);
-    });
-
-    testWidgets('shows skeleton tiles while the canon loads', (tester) async {
-      await pumpHome(tester, canon: const ProfileCanonState(isLoading: true));
-      expect(find.byKey(const Key('home_canon_loading')), findsOneWidget);
-      expect(find.byKey(const Key('home_canon_empty')), findsNothing);
-    });
-
-    testWidgets('See all opens the Canon tab', (tester) async {
-      await pumpHome(tester);
-      await tester.tap(find.byKey(const Key('home_canon_see_all')));
-      await tester.pumpAndSettle();
-      expect(find.text('route:${Routes.canon}'), findsOneWidget);
-    });
-
-    testWidgets('a poster opens its title', (tester) async {
-      await pumpHome(tester);
-      await tester.tap(find.byKey(const Key('grid_poster_2')));
-      await tester.pumpAndSettle();
-      expect(find.text('route:${Routes.title('movie', 2)}'), findsOneWidget);
-    });
-  });
-
   group('#242: SCR-21 Home — Tonight hero', () {
     testWidgets('leads the page with the next episode and the one-tap button', (tester) async {
       await pumpHome(tester, tracking: [_tracked('Shogun')]);
@@ -223,7 +168,6 @@ void main() {
       expect(find.descendant(of: find.byKey(const Key('home_hero_primary')), matching: find.text('✓ Watched E6')), findsOneWidget);
       expect(find.byKey(const Key('home_hero_details')), findsOneWidget);
       expect(find.byKey(const Key('home_hero_progress')), findsOneWidget, reason: 'a series carries a progress line');
-      expect(tester.getTopLeft(find.byKey(const Key('home_hero'))).dy, lessThan(tester.getTopLeft(find.text('YOUR CANON')).dy));
       expect(tester.getSize(find.byKey(const Key('home_hero'))).height, greaterThanOrEqualTo(236));
     });
 
@@ -346,6 +290,7 @@ void main() {
         child: MaterialApp(theme: TellyTheme.dark, home: const HomeScreen()),
       ));
       expect(find.byKey(const Key('home_hero_loading')), findsOneWidget);
+      expect(find.byKey(const Key('home_moves_loading')), findsOneWidget);
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('home_hero_loading')), findsNothing);
       expect(find.byKey(const Key('home_hero')), findsOneWidget);
@@ -359,113 +304,188 @@ void main() {
     });
   });
 
-  group('#232: SCR-21 Home — friend verbs', () {
-    testWidgets('"started watching" and "finished" show without a score chip', (tester) async {
-      await pumpHome(tester, social: FakeSocialRepository(feed: [
-        fakeActivity('w1', username: 'maya', title: 'Severance', type: ActivityType.watchStarted, minutesAgo: 1),
-        fakeActivity('w2', username: 'sam', title: 'Shogun', type: ActivityType.watchFinished, minutesAgo: 2),
-      ]));
-      expect(find.textContaining('started watching Severance', findRichText: true), findsOneWidget);
-      expect(find.textContaining('finished Shogun', findRichText: true), findsOneWidget);
-      expect(find.byKey(const Key('home_score_chip')), findsNothing);
+  group('#243: SCR-21 Home — header', () {
+    testWidgets('shows the title, Search and no canon or feed sections', (tester) async {
+      await pumpHome(tester);
+      expect(find.text('Home'), findsOneWidget);
+      expect(find.byKey(const Key('home_search_button')), findsOneWidget);
+      expect(find.text('YOUR CANON'), findsNothing);
+      expect(find.text('FROM YOUR FRIENDS'), findsNothing);
+      expect(find.byKey(const Key('home_canon_movies')), findsNothing);
+    });
+
+    testWidgets('Search opens Explore with the search field focused', (tester) async {
+      await pumpHome(tester);
+      await tester.tap(find.byKey(const Key('home_search_button')));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('route:${Routes.explore}'), findsOneWidget);
+    });
+
+    testWidgets('the streak chip shows the weeks and opens Your level; it is hidden at 0', (tester) async {
+      await pumpHome(tester, level: sampleLevel(streak: 6));
+      expect(find.text('▲ 6 weeks'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('home_streak_chip')));
+      await tester.pumpAndSettle();
+      expect(find.text('route:${Routes.level}'), findsOneWidget);
+    });
+
+    testWidgets('no streak chip without a streak', (tester) async {
+      await pumpHome(tester, level: sampleLevel(streak: 0));
+      expect(find.byKey(const Key('home_streak_chip')), findsNothing);
+    });
+
+    testWidgets('a single week reads singular', (tester) async {
+      await pumpHome(tester, level: sampleLevel(streak: 1));
+      expect(find.text('▲ 1 week'), findsOneWidget);
     });
   });
 
-  group('#115: SCR-21 Home — from your friends', () {
-    testWidgets('shows the 3 newest Following items as compact rows', (tester) async {
-      await pumpHome(tester);
-      expect(find.text('FROM YOUR FRIENDS'), findsOneWidget);
-      expect(find.byKey(const Key('home_friend_row_a1')), findsOneWidget);
-      expect(find.byKey(const Key('home_friend_row_a2')), findsOneWidget);
-      expect(find.byKey(const Key('home_friend_row_a3')), findsOneWidget);
-      expect(find.byKey(const Key('home_friend_row_a4')), findsNothing);
-      expect(find.textContaining('ranked The Bear #2', findRichText: true), findsOneWidget);
-    });
+  group('#243: SCR-21 Home — Your moves', () {
+    final finished = TrackingItem(
+      titleId: 77,
+      mediaType: 'tv',
+      title: 'The Bear',
+      state: TrackingState.finished,
+      startedAt: _now.subtract(const Duration(days: 30)),
+      lastProgressAt: _now.subtract(const Duration(days: 1)),
+      finishedAt: _now.subtract(const Duration(days: 1)),
+    );
 
-    testWidgets('score chips use the tier colour and tabular figures', (tester) async {
-      await pumpHome(tester);
-      final chip = tester.widget<Container>(
-          find.descendant(of: find.byKey(const Key('home_score_chip')).first, matching: find.byType(Container)).first);
-      final tier = CanonTier.fromScore(9.72);
-      expect((chip.decoration! as BoxDecoration).border!.top.color, tier.accent);
-      expect(find.text('9.72'), findsNWidgets(3));
-    });
-
-    testWidgets('a row opens its title; See all opens Social', (tester) async {
-      await pumpHome(tester);
-      await tester.tap(find.byKey(const Key('home_friend_row_a1')));
+    testWidgets('a finished title offers Log and duel, which opens Log', (tester) async {
+      await pumpHome(tester, tracking: [_tracked('Shogun'), finished]);
+      expect(find.text('YOUR MOVES'), findsOneWidget);
+      expect(find.text('RANK IT'), findsOneWidget);
+      expect(find.text('You finished The Bear'), findsOneWidget);
+      expect(find.text('Series · yesterday'), findsOneWidget);
+      await tester.tap(find.text('Log and duel'));
       await tester.pumpAndSettle();
-      expect(find.text('route:${Routes.title('tv', 110492)}'), findsOneWidget);
+      expect(find.text('route:${Routes.log}'), findsOneWidget);
     });
 
-    testWidgets('See all opens the Social feed', (tester) async {
+    testWidgets('tapping the card does what its button does', (tester) async {
+      await pumpHome(tester, tracking: [_tracked('Shogun'), finished]);
+      await tester.tap(find.text('You finished The Bear'));
+      await tester.pumpAndSettle();
+      expect(find.text('route:${Routes.log}'), findsOneWidget);
+    });
+
+    testWidgets('the hero is not repeated as a move, and a quiet Home has no moves section', (tester) async {
+      await pumpHome(tester, tracking: [_tracked('Shogun')]);
+      expect(find.byKey(const Key('home_moves')), findsNothing);
+    });
+
+    testWidgets('a challenge close to done opens its page', (tester) async {
+      await pumpHome(
+        tester,
+        tracking: [_tracked('Shogun')],
+        overview: ChallengesOverview(yours: [challenge(slug: 'heist-month', name: 'Heist Month', progress: 7)]),
+      );
+      expect(find.text('Heist Month: 7 of 8'), findsOneWidget);
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+      expect(find.text('route:${Routes.challenge('heist-month')}'), findsOneWidget);
+    });
+
+    testWidgets('a new user is offered tracking and friends', (tester) async {
+      await pumpHome(tester, canon: const ProfileCanonState(), social: FakeSocialRepository());
+      expect(find.text('Watching a show right now?'), findsOneWidget);
+      expect(find.text('Find friends in Social'), findsOneWidget);
+      await tester.tap(find.text('Search'));
+      await tester.pumpAndSettle();
+      expect(find.text('route:${Routes.userSearch}'), findsOneWidget);
+    });
+
+    testWidgets('Find it opens Explore search', (tester) async {
+      await pumpHome(tester, canon: const ProfileCanonState(), social: FakeSocialRepository());
+      await tester.tap(find.text('Find it'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('route:${Routes.explore}'), findsOneWidget);
+    });
+
+    testWidgets('shows at most four moves', (tester) async {
+      final done = [
+        for (var i = 0; i < 4; i++)
+          TrackingItem(
+            titleId: 90 + i,
+            mediaType: 'tv',
+            title: 'Done $i',
+            state: TrackingState.finished,
+            startedAt: _now.subtract(const Duration(days: 30)),
+            lastProgressAt: _now.subtract(Duration(days: i + 1)),
+            finishedAt: _now.subtract(Duration(days: i + 1)),
+          ),
+      ];
+      await pumpHome(
+        tester,
+        tracking: [_tracked('Shogun'), ...done],
+        overview: ChallengesOverview(yours: [challenge(progress: 7)]),
+        queue: [queued('Dune', id: 3)],
+        social: FakeSocialRepository(),
+      );
+      final cards = find.byWidgetPredicate((w) => w.key is ValueKey<String> && (w.key as ValueKey<String>).value.startsWith('home_move_'));
+      expect(cards, findsNWidgets(4));
+    });
+
+    testWidgets('renders with light tokens', (tester) async {
+      await pumpHome(tester, tracking: [_tracked('Shogun'), finished], theme: TellyTheme.light);
+      expect(find.text('You finished The Bear'), findsOneWidget);
+    });
+  });
+
+  group('#243: SCR-21 Home — Friends line', () {
+    testWidgets('names the friends and counts today\'s rankings', (tester) async {
+      await pumpHome(tester, social: FakeSocialRepository(feed: [
+        friendActivity('Maya', userId: 'a', titleId: 1),
+        friendActivity('Jordan', userId: 'b', titleId: 2),
+        friendActivity('Sam', userId: 'c', titleId: 3),
+        friendActivity('Lee', userId: 'd', titleId: 4),
+      ]));
+      expect(find.text('FRIENDS'), findsOneWidget);
+      expect(tester.widget<Text>(find.byKey(const Key('home_friends_title'))).data, 'Maya, Jordan and 2 others');
+      expect(tester.widget<Text>(find.byKey(const Key('home_friends_meta'))).data, 'ranked 4 titles today');
+    });
+
+    testWidgets('without rankings today it shows the newest item', (tester) async {
+      await pumpHome(tester, social: FakeSocialRepository(feed: [
+        friendActivity('Maya', type: ActivityType.watchStarted, title: 'Severance', rank: null, age: const Duration(hours: 2)),
+      ]));
+      expect(tester.widget<Text>(find.byKey(const Key('home_friends_title'))).data, 'Maya');
+      expect(tester.widget<Text>(find.byKey(const Key('home_friends_meta'))).data, 'started watching Severance · 2h');
+    });
+
+    testWidgets('the card and Social › open the Social tab', (tester) async {
       await pumpHome(tester);
-      await tester.ensureVisible(find.byKey(const Key('home_friends_see_all')));
+      await tester.tap(find.byKey(const Key('home_friends_card')));
+      await tester.pumpAndSettle();
+      expect(find.text('route:${Routes.social}'), findsOneWidget);
+    });
+
+    testWidgets('Social › opens the Social tab', (tester) async {
+      await pumpHome(tester);
       await tester.tap(find.byKey(const Key('home_friends_see_all')));
       await tester.pumpAndSettle();
       expect(find.text('route:${Routes.social}'), findsOneWidget);
     });
 
-    testWidgets('leaves out my own activity (#121)', (tester) async {
-      await pumpHome(
-        tester,
-        social: FakeSocialRepository(feed: [
-          fakeActivity('mine', userId: 'u-me', username: 'me', title: 'Dr. STONE', minutesAgo: 0),
-          fakeActivity('a1', username: 'maya', title: 'The Bear', minutesAgo: 1),
-          fakeActivity('a2', username: 'jordan', title: 'Severance', minutesAgo: 2),
-          fakeActivity('a3', username: 'sam', title: 'Shogun', minutesAgo: 3),
-        ]),
-      );
-      expect(find.byKey(const Key('home_friend_row_mine')), findsNothing);
-      for (final id in ['a1', 'a2', 'a3']) {
-        expect(find.byKey(Key('home_friend_row_$id')), findsOneWidget, reason: id);
-      }
+    testWidgets('is hidden when only you posted', (tester) async {
+      await pumpHome(tester, social: FakeSocialRepository(feed: [friendActivity('Me', userId: 'u-me')]));
+      expect(find.byKey(const Key('home_friends_line')), findsNothing);
     });
 
-    testWidgets('only my own activity shows the "Find friends in Social" empty state (#121)', (tester) async {
-      await pumpHome(
-        tester,
-        social: FakeSocialRepository(feed: [fakeActivity('mine', userId: 'u-me', username: 'me')]),
-      );
-      expect(find.byKey(const Key('home_friend_row_mine')), findsNothing);
-      expect(find.text('Find friends in Social'), findsOneWidget);
-    });
-
-    testWidgets('no friends activity offers "Find friends in Social"', (tester) async {
+    testWidgets('is hidden when the feed is empty', (tester) async {
       await pumpHome(tester, social: FakeSocialRepository());
-      expect(find.text('Find friends in Social'), findsOneWidget);
-      await tester.tap(find.byKey(const Key('home_friends_empty_action')));
-      await tester.pumpAndSettle();
-      expect(find.text('route:${Routes.social}'), findsOneWidget);
+      expect(find.byKey(const Key('home_friends_line')), findsNothing);
     });
 
-    testWidgets('shows skeleton rows while the feed loads', (tester) async {
-      await pumpHome(tester, social: _StuckSocialRepository());
-      expect(find.byKey(const Key('home_friends_loading')), findsOneWidget);
-    });
-
-    testWidgets('offline with nothing loaded hides the section; the canon still shows', (tester) async {
+    testWidgets('is hidden offline with nothing loaded', (tester) async {
       await pumpHome(tester, social: _StuckSocialRepository(fail: true));
-      expect(find.byKey(const Key('home_friends_hidden')), findsOneWidget);
-      expect(find.text('FROM YOUR FRIENDS'), findsNothing);
-      expect(find.byKey(const Key('grid_poster_1')), findsOneWidget);
-    });
-
-    testWidgets('rows are labelled, tappable buttons', (tester) async {
-      final handle = tester.ensureSemantics();
-      await pumpHome(tester);
-      expect(
-        tester.getSemantics(find.bySemanticsLabel('Maya ranked The Bear #2, score 9.72')),
-        isSemantics(label: 'Maya ranked The Bear #2, score 9.72', isButton: true, hasTapAction: true),
-      );
-      handle.dispose();
+      expect(find.byKey(const Key('home_friends_line')), findsNothing);
+      expect(find.byKey(const Key('home_hero')), findsOneWidget, reason: 'the rest of Home still shows');
     });
 
     testWidgets('renders with light tokens', (tester) async {
-      await pumpHome(tester, theme: TellyTheme.light);
-      final row = tester.widget<Material>(find.byKey(const Key('home_friend_row_a1')));
-      expect(row.color, TellyColors.lightBackgroundSurface);
-      expect((row.shape! as RoundedRectangleBorder).side.color, TellyColors.lightStrokeSubtle);
+      await pumpHome(tester, theme: TellyTheme.light, social: FakeSocialRepository(feed: [friendActivity('Maya')]));
+      expect(find.byKey(const Key('home_friends_line')), findsOneWidget);
     });
   });
 }

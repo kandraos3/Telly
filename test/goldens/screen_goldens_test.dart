@@ -55,7 +55,7 @@ import '../fakes/fake_tracking_repository.dart';
 import '../helpers/tracking_harness.dart';
 import '../fakes/fake_social_repository.dart';
 import '../features/achievements/achievements_fixtures.dart';
-import '../features/home/home_fixtures.dart' show SeededChallenges, SeededLevel, SeededQueue;
+import '../features/home/home_fixtures.dart' show SeededChallenges, SeededLevel, SeededQueue, queued;
 import '../features/challenges/challenges_fixtures.dart';
 import '../features/levels/levels_fixtures.dart';
 import 'package:telly_app/features/levels/data/levels_repository.dart';
@@ -76,6 +76,21 @@ import 'package:telly_app/features/discovery/presentation/controllers/explore_ro
 import 'package:telly_app/features/discovery/presentation/screens/explore_discover_screen.dart';
 
 final _exploreToday = DateTime(2026, 10, 8, 12);
+
+/// A challenge close to done, for the populated Home golden.
+final _homeGoldenChallenge = Challenge(
+  id: 'heist-month',
+  slug: 'heist-month',
+  name: 'Heist Month',
+  startsAt: DateTime(2026, 9, 20),
+  endsAt: DateTime(2026, 10, 20),
+  target: 8,
+  joined: true,
+  myProgress: 7,
+);
+
+/// Home's Queue pick in the populated golden.
+final homeGoldenQueueFilm = queued('Dune: Part Two', id: 3, provider: 'Max');
 
 class TolerantGoldenComparator extends LocalFileComparator {
   TolerantGoldenComparator(super.testFile, {this.tolerance = 0.50});
@@ -847,9 +862,11 @@ void main() {
             // The Tonight hero leads the page (epic #45).
             trackingRepositoryProvider.overrideWithValue(FakeTrackingRepository(_goldenTracking())),
             trackingNowProvider.overrideWithValue(() => _trackingToday),
-            userWatchlistProvider.overrideWith(() => SeededQueue(const [])),
-            yourLevelControllerProvider.overrideWith(() => SeededLevel(sampleLevel(streak: 0))),
-            challengesControllerProvider.overrideWith(() => SeededChallenges(const ChallengesOverview())),
+            userWatchlistProvider.overrideWith(() => SeededQueue([homeGoldenQueueFilm])),
+            yourLevelControllerProvider.overrideWith(() => SeededLevel(sampleLevel(streak: 6))),
+            challengesControllerProvider.overrideWith(
+              () => SeededChallenges(ChallengesOverview(yours: [_homeGoldenChallenge])),
+            ),
           ],
           child: MaterialApp(theme: theme, home: const HomeScreen()),
         ));
