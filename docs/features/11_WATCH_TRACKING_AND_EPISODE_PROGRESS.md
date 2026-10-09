@@ -1,6 +1,6 @@
 # Feature Spec 11: Watch Tracking & Episode Progress
 
-> Tracking: epic #168 · Status: approved · Decision: [0010](../decisions/0010-watch-tracking-episode-pointer.md) · Mockup: [0168](../design_system/mockups/0168-watch-tracking.html) · Tasks: #224–#233
+> Tracking: epic #168 · Status: shipped · Decision: [0010](../decisions/0010-watch-tracking-episode-pointer.md) · Mockup: [0168](../design_system/mockups/0168-watch-tracking.html) · Tasks: #224–#233
 
 ## 1. Overview & Scope
 Tracking lets people follow what they are **watching now**, before they rank it. A series keeps **one place**: the last episode you watched. One tap moves it on. Finishing a title leads into the Log and duel flow (features/02). Tracking is separate from the canon: it never changes a rank or a score.
