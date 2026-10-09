@@ -45,7 +45,7 @@ class FriendProfileScreen extends ConsumerWidget {
         title: '@$handle',
         onNav: () => context.canPop() ? context.pop() : context.go(Routes.home),
         actions: [
-          if (data != null)
+          if (data != null && data.profile.canView)
             _FollowButton(handle: handle, status: data.followStatus, isSelf: isSelf),
         ],
       ),
@@ -113,8 +113,18 @@ class _FollowButton extends ConsumerWidget {
             }
           },
           style: OutlinedButton.styleFrom(
-            foregroundColor: following ? TellyColors.textPrimaryOf(context) : TellyColors.primaryAccentOf(context),
-            side: BorderSide(color: following ? TellyColors.strokeStrongOf(context) : TellyColors.primaryAccentOf(context)),
+            foregroundColor: following
+                ? TellyColors.textPrimaryOf(context)
+                : (status == FollowStatus.pending
+                    ? TellyColors.warmAmberOf(context)
+                    : TellyColors.primaryAccentOf(context)),
+            side: BorderSide(
+              color: following
+                  ? TellyColors.strokeStrongOf(context)
+                  : (status == FollowStatus.pending
+                      ? TellyColors.warmAmberOf(context)
+                      : TellyColors.primaryAccentOf(context)),
+            ),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
             minimumSize: Size.zero,
@@ -185,11 +195,10 @@ class _Body extends ConsumerWidget {
           ),
           const SizedBox(height: 24),
           if (!profile.canView)
-            _Message(
+            _PrivateGate(
               key: const Key('friend_profile_private'),
-              text: data.followStatus == FollowStatus.pending
-                  ? 'Follow request sent. Their canon appears once @$handle accepts.'
-                  : '@$handle shares their canon with friends only. Follow to request access.',
+              handle: handle,
+              followStatus: data.followStatus,
             )
           else ...[
             TasteMatchDial(
@@ -262,6 +271,64 @@ class _Message extends StatelessWidget {
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _PrivateGate extends ConsumerWidget {
+  final String handle;
+  final FollowStatus? followStatus;
+
+  const _PrivateGate({
+    super.key,
+    required this.handle,
+    required this.followStatus,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final warmAmber = TellyColors.warmAmberOf(context);
+    final cardColor = TellyColors.cardOf(context);
+    final strokeColor = TellyColors.strokeSubtleOf(context);
+    final textPrimary = TellyColors.textPrimaryOf(context);
+    final textTertiary = TellyColors.textTertiaryOf(context);
+
+    final isPending = followStatus == FollowStatus.pending;
+    final text = isPending
+        ? 'Follow request sent. Their canon appears once @$handle accepts.'
+        : '@$handle shares their canon with friends only. Follow to request access.';
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: strokeColor),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.lock_rounded, size: 40, color: warmAmber),
+          const SizedBox(height: 16),
+          Text(
+            'This Profile is Friends-Only',
+            textAlign: TextAlign.center,
+            style: TellyTypography.headlineSmall(color: textPrimary),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            text,
+            textAlign: TextAlign.center,
+            style: TellyTypography.bodyMedium(color: textTertiary).copyWith(fontWeight: FontWeight.w500),
+          ),
+          const SizedBox(height: 20),
+          _FollowButton(
+            handle: handle,
+            status: followStatus,
+          ),
+        ],
       ),
     );
   }

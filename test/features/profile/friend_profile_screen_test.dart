@@ -152,12 +152,23 @@ void main() {
       social.privateUsers.add('u-pat');
       await pump(tester, handle: 'private_pat');
       expect(find.byKey(const Key('friend_profile_private')), findsOneWidget);
+      expect(find.text('This Profile is Friends-Only'), findsOneWidget);
+      expect(find.text('+ Follow'), findsOneWidget);
       expect(find.textContaining('Two-to-Watch'), findsNothing);
 
       await tester.tap(find.byKey(const Key('follow_button')));
       await tester.pumpAndSettle();
       expect(find.text('Requested'), findsOneWidget);
       expect(find.textContaining('Follow request sent'), findsOneWidget);
+    });
+
+    testWidgets('following a public user transitions + Follow to Following', (tester) async {
+      await pump(tester, handle: 'maya');
+      expect(find.text('+ Follow'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('follow_button')));
+      await tester.pumpAndSettle();
+      expect(find.text('Following'), findsOneWidget);
+      expect(social.follows.containsKey('u-maya'), isTrue);
     });
 
     testWidgets('an unknown handle renders not-found', (tester) async {
