@@ -168,6 +168,17 @@ class LocalRankings extends Table {
 }
 ```
 
+### 3.2 Pending mutation kinds
+The write-ahead log (`PendingMutations`) is replayed in strict FIFO order by the sync engine, each row calling one server RPC with its `client_mutation_id` so a replay is a no-op (I-5). The kinds, in `MutationKind`:
+
+| Kind | Server call |
+| :--- | :--- |
+| `log_title`, `move`, `delete`, `duels`, `editorial` | Ranking RPCs and the editorial update (TA-02 §3.2). |
+| `watchlist_add`, `watchlist_remove` | `user_watchlist` upsert and delete. |
+| `tracking_start`, `tracking_place`, `tracking_rewatch`, `tracking_finish`, `tracking_stop`, `tracking_revive` | `start_tracking`, `set_tracking_place`, `log_episode_rewatch`, `finish_tracking`, `stop_tracking`, `revive_dropped_show` (TA-02 §3.6, features/11 §9.2). Payloads carry **absolute places**, so replays converge on the last write; an Undo is just another `tracking_place` with the earlier place. |
+
+Watch tracking also keeps two Drift caches (schema version 5): `TrackingCache` (one row per tracked title, mirroring `get_my_tracking`) and `EpisodeCache` (one JSON document per season, refetched after 7 days). On reconnect, `get_my_tracking` replaces every `TrackingCache` row that has no pending mutation; rows with pending mutations keep their local copy until they are acknowledged.
+
 ---
 
 ## 4. Off-Screen 1080x1920 Story Card Pipeline

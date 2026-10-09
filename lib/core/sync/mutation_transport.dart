@@ -87,6 +87,47 @@ class SupabaseMutationTransport implements MutationTransport {
             .eq('user_id', userId)
             .eq('title_id', p['title_id'] as Object)
             .eq('media_type', p['media_type'] as Object);
+      case MutationKind.trackingStart:
+        await _client.rpc('start_tracking', params: {
+          'p_title_id': p['title_id'],
+          'p_media_type': p['media_type'],
+          'p_last_season': p['last_season'],
+          'p_last_episode': p['last_episode'],
+          'p_rewatch': p['rewatch'] ?? false,
+          'p_client_mutation_id': m.id,
+        });
+      case MutationKind.trackingPlace:
+        await _client.rpc('set_tracking_place', params: {
+          'p_title_id': p['title_id'],
+          'p_media_type': p['media_type'],
+          'p_last_season': p['last_season'],
+          'p_last_episode': p['last_episode'],
+          'p_client_mutation_id': m.id,
+        });
+      case MutationKind.trackingRewatch:
+        await _client.rpc('log_episode_rewatch', params: {
+          'p_title_id': p['title_id'],
+          'p_season': p['season'],
+          'p_episode': p['episode'],
+          'p_client_mutation_id': m.id,
+        });
+      case MutationKind.trackingFinish:
+        await _client.rpc('finish_tracking', params: {
+          'p_title_id': p['title_id'],
+          'p_media_type': p['media_type'],
+          'p_client_mutation_id': m.id,
+        });
+      case MutationKind.trackingStop:
+        await _client.rpc('stop_tracking', params: {
+          'p_title_id': p['title_id'],
+          'p_media_type': p['media_type'],
+          'p_client_mutation_id': m.id,
+        });
+      case MutationKind.trackingRevive:
+        await _client.rpc('revive_dropped_show', params: {
+          'p_title_id': p['title_id'],
+          'p_client_mutation_id': m.id,
+        });
       default:
         throw UnsupportedError('Unknown mutation kind ${m.kind}');
     }

@@ -84,6 +84,25 @@ abstract final class MutationKind {
 
   /// DELETE from `user_watchlist` (FE-609).
   static const watchlistRemove = 'watchlist_remove';
+
+  /// Watch tracking (#168, features/11 §9.2). Payloads carry absolute places, so replays converge.
+  /// `start_tracking`.
+  static const trackingStart = 'tracking_start';
+
+  /// `set_tracking_place`.
+  static const trackingPlace = 'tracking_place';
+
+  /// `log_episode_rewatch`.
+  static const trackingRewatch = 'tracking_rewatch';
+
+  /// `finish_tracking`.
+  static const trackingFinish = 'tracking_finish';
+
+  /// `stop_tracking`.
+  static const trackingStop = 'tracking_stop';
+
+  /// `revive_dropped_show`.
+  static const trackingRevive = 'tracking_revive';
 }
 
 class WatchlistCache extends Table {
@@ -118,6 +137,51 @@ class ExploreCache extends Table {
 
   @override
   Set<Column> get primaryKey => {mediaType};
+}
+
+/// The caller's tracked titles (features/11 §9.2): one row per title, mirroring
+/// `get_my_tracking`. Writes land here first (0 ms UI) and are replayed by the sync engine.
+/// `seasons`, `nextEpisode` and `lastAired` hold the server's JSON for that part of the item.
+class TrackingCache extends Table {
+  IntColumn get titleId => integer()();
+  TextColumn get mediaType => text()(); // 'movie' or 'tv' (Dual-Canon Partition)
+  TextColumn get title => text()();
+  TextColumn get posterPath => text().nullable()();
+  TextColumn get backdropPath => text().nullable()();
+  TextColumn get titleStatus => text().nullable()(); // TMDB status: 'Ended', 'Returning Series', ...
+  IntColumn get runtimeMinutes => integer().nullable()();
+  IntColumn get lastSeason => integer().nullable()();
+  IntColumn get lastEpisode => integer().nullable()();
+  TextColumn get state => text().withDefault(const Constant('WATCHING'))(); // tracking_state_enum
+  BoolColumn get isRewatch => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get newEpisodesSince => dateTime().nullable()();
+  DateTimeColumn get startedAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get lastProgressAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get finishedAt => dateTime().nullable()();
+  TextColumn get seasons => text().nullable()(); // JSON [{number, episode_count, air_date}]
+  IntColumn get watched => integer().nullable()();
+  IntColumn get airedTotal => integer().nullable()();
+  TextColumn get nextEpisode => text().nullable()(); // JSON {season, episode, name, still_path, ...}
+  TextColumn get lastAired => text().nullable()(); // JSON {season, episode}
+  BoolColumn get ranked => boolean().withDefault(const Constant(false))();
+  IntColumn get rankPosition => integer().nullable()();
+  RealColumn get score => real().nullable()();
+  TextColumn get syncStatus => text().withDefault(const Constant('SYNCED'))(); // 'SYNCED', 'PENDING'
+
+  @override
+  Set<Column> get primaryKey => {titleId, mediaType};
+}
+
+/// One season's episodes from `tmdb-season`, one JSON document per season (features/11 §9.2).
+/// Refetched when older than 7 days.
+class EpisodeCache extends Table {
+  IntColumn get titleId => integer()();
+  IntColumn get seasonNumber => integer()();
+  TextColumn get json => text()();
+  DateTimeColumn get fetchedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column> get primaryKey => {titleId, seasonNumber};
 }
 
 // --- DAOS ---
@@ -243,17 +307,99 @@ class ExploreCacheDao extends DatabaseAccessor<AppDatabase> with _$ExploreCacheD
       .insertOnConflictUpdate(ExploreCacheCompanion.insert(mediaType: mediaType, json: json, savedAt: Value(savedAt)));
 }
 
+@DriftAccessor(tables: [TrackingCache])
+class TrackingCacheDao extends DatabaseAccessor<AppDatabase> with _$TrackingCacheDaoMixin {
+  TrackingCacheDao(super.db);
+
+  Stream<List<TrackingCacheData>> watchAll() =>
+      (select(trackingCache)..orderBy([(t) => OrderingTerm.desc(t.lastProgressAt)])).watch();
+
+  Future<List<TrackingCacheData>> getAll() =>
+      (select(trackingCache)..orderBy([(t) => OrderingTerm.desc(t.lastProgressAt)])).get();
+
+  Stream<TrackingCacheData?> watchOne(int titleId, String mediaType) => (select(trackingCache)
+        ..where((t) => t.titleId.equals(titleId) & t.mediaType.equals(mediaType)))
+      .watchSingleOrNull();
+
+  Future<TrackingCacheData?> getOne(int titleId, String mediaType) => (select(trackingCache)
+        ..where((t) => t.titleId.equals(titleId) & t.mediaType.equals(mediaType)))
+      .getSingleOrNull();
+
+  Future<void> upsert(TrackingCacheCompanion entry) => into(trackingCache).insertOnConflictUpdate(entry);
+
+  Future<int> remove(int titleId, String mediaType) => (delete(trackingCache)
+        ..where((t) => t.titleId.equals(titleId) & t.mediaType.equals(mediaType)))
+      .go();
+
+  /// Replaces the cache with [rows], except titles in [keep] (they have mutations still pending,
+  /// so the local copy is newer than the server's). Rows not in [rows] and not in [keep] are
+  /// deleted: they were stopped on another device.
+  Future<void> replaceSynced(List<TrackingCacheCompanion> rows, Set<(int, String)> keep) =>
+      transaction(() async {
+        final incoming = {for (final r in rows) (r.titleId.value, r.mediaType.value)};
+        for (final existing in await getAll()) {
+          final key = (existing.titleId, existing.mediaType);
+          if (!incoming.contains(key) && !keep.contains(key)) await remove(existing.titleId, existing.mediaType);
+        }
+        for (final r in rows) {
+          if (!keep.contains((r.titleId.value, r.mediaType.value))) await upsert(r);
+        }
+      });
+
+  Future<void> markSynced(int titleId, String mediaType) => (update(trackingCache)
+        ..where((t) => t.titleId.equals(titleId) & t.mediaType.equals(mediaType)))
+      .write(const TrackingCacheCompanion(syncStatus: Value('SYNCED')));
+}
+
+@DriftAccessor(tables: [EpisodeCache])
+class EpisodeCacheDao extends DatabaseAccessor<AppDatabase> with _$EpisodeCacheDaoMixin {
+  EpisodeCacheDao(super.db);
+
+  Future<EpisodeCacheData?> read(int titleId, int seasonNumber) => (select(episodeCache)
+        ..where((t) => t.titleId.equals(titleId) & t.seasonNumber.equals(seasonNumber)))
+      .getSingleOrNull();
+
+  Future<List<EpisodeCacheData>> readTitle(int titleId) =>
+      (select(episodeCache)..where((t) => t.titleId.equals(titleId))).get();
+
+  Future<void> write(int titleId, int seasonNumber, String json, DateTime fetchedAt) =>
+      into(episodeCache).insertOnConflictUpdate(
+        EpisodeCacheCompanion.insert(
+          titleId: titleId,
+          seasonNumber: seasonNumber,
+          json: json,
+          fetchedAt: Value(fetchedAt),
+        ),
+      );
+}
+
 // --- MASTER DATABASE ---
 
 @DriftDatabase(
-  tables: [CachedTitles, LocalRankings, PendingMutations, WatchlistCache, GamificationCache, ExploreCache],
-  daos: [LocalRankingDao, LocalTitleDao, PendingMutationDao, ExploreCacheDao],
+  tables: [
+    CachedTitles,
+    LocalRankings,
+    PendingMutations,
+    WatchlistCache,
+    GamificationCache,
+    ExploreCache,
+    TrackingCache,
+    EpisodeCache,
+  ],
+  daos: [
+    LocalRankingDao,
+    LocalTitleDao,
+    PendingMutationDao,
+    ExploreCacheDao,
+    TrackingCacheDao,
+    EpisodeCacheDao,
+  ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -263,6 +409,10 @@ class AppDatabase extends _$AppDatabase {
             if (from < 2) await _migrateV1ToV2(m);
             if (from < 3) await m.createTable(gamificationCache);
             if (from < 4) await m.createTable(exploreCache);
+            if (from < 5) {
+              await m.createTable(trackingCache);
+              await m.createTable(episodeCache);
+            }
           } catch (e, stack) {
             await SentryService().captureException(
               e,
@@ -307,6 +457,8 @@ class AppDatabase extends _$AppDatabase {
       await delete(pendingMutations).go();
       await delete(cachedTitles).go();
       await delete(gamificationCache).go();
+      await delete(trackingCache).go();
+      await delete(episodeCache).go();
     });
   }
 

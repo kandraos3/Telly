@@ -127,6 +127,7 @@ class SyncEngine extends AsyncNotifier<SyncStatus> {
           .write(const LocalRankingsCompanion(syncStatus: Value('SYNCED')));
       await (db.update(db.watchlistCache)..where((t) => t.titleId.equals(titleId) & t.mediaType.equals(mediaType)))
           .write(const WatchlistCacheCompanion(syncStatus: Value('SYNCED')));
+      await db.trackingCacheDao.markSynced(titleId, mediaType);
     });
   }
 }
