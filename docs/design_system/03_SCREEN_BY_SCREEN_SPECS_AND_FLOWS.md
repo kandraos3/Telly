@@ -936,7 +936,7 @@ The Canon tab opens on your rankings. Your profile card lives in the More hub (`
 
 ### `SCR-21`: Home
 
-> Tracking: epic #45 · Status: approved · Decision [0011](../decisions/0011-home-tonight-hero-and-moves.md) · Mockup [0045-home-tonight-moves.html](mockups/0045-home-tonight-moves.html)
+> Tracking: epic #45 · Status: shipped · Decision [0011](../decisions/0011-home-tonight-hero-and-moves.md) · Mockup [0045-home-tonight-moves.html](mockups/0045-home-tonight-moves.html)
 
 The landing tab (`/home`). Its first job is to answer "what do I watch now?", and its second is to offer a few things worth doing. It has three parts, always in this order: the **Tonight** hero, **Your moves** and the **Friends line**. Nothing else is on Home. Your canon lives in the Canon tab and the full feed in Social.
 
