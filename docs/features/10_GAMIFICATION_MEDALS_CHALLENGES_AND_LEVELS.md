@@ -349,6 +349,7 @@ All screens use the shared app bars (screen specs §0.2) and the frosted bottom 
 - **This week's quests:** three rows with checks, progress and XP chips. They reset on Monday.
 - **Streak strip** (#146): counted weeks filled in the primary accent with a check, a used freeze as ❄ on cyan, missed weeks outlined, and the running week labelled "Now"; the others are labelled by ISO week ("W41").
 - **Analytics** are detected in the app by comparing a load with what it last saw (kept in `gamification_cache`), and never on the first load: `level_up`, `quest_completed`, `streak_extended`.
+- **Fresh on every visit:** Home reads the level from launch (for its streak chip and moves, SCR-21), so opening this screen reads it again. Pull to refresh still works.
 - **Offline:** the last snapshot from `gamification_cache`, read-only, with the offline banner.
 - **Links:** **Rewards** (`/more/level/rewards`, mockup B2) and **Friends this week** (`/more/level/week`, mockup B3).
   - **Rewards:** the track by level (unlocked rows outlined in lime, locked rows with XP to go and a lock), an Equip / Equipped toggle on unlocked rows (one per kind; tapping Equipped unequips), and the XP rules table. Header art's row says **Choose** (or **Change**) and opens its picker: your God-tier stills, the current one checked, and Remove. The app icon row says **Coming soon** (#154). Equipping sends `reward_equipped`; a failed change shows a snackbar and leaves the row as it was.

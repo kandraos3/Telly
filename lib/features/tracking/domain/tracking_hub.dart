@@ -69,26 +69,6 @@ class TrackingHub {
     ];
   }
 
-  /// Home's *Currently watching* rows (SCR-21): *New episodes*, then *In progress*, newest
-  /// progress first, both canons mixed.
-  List<TrackingItem> homeRows({int limit = 3}) {
-    List<TrackingItem> of(TrackingGroup g) =>
-        (_grouped.entries.where((e) => e.value == g).map((e) => e.key).toList()
-          ..sort((a, b) => b.lastProgressAt.compareTo(a.lastProgressAt)));
-    return [...of(TrackingGroup.newEpisodes), ...of(TrackingGroup.inProgress)].take(limit).toList();
-  }
-
-  /// "+ 1 caught up · 2 finished and waiting to be ranked", or null when there is nothing to add.
-  String? homeCountLine() {
-    final caught = _grouped.values.where((g) => g == TrackingGroup.caughtUp).length;
-    final waiting = _grouped.values.where((g) => g == TrackingGroup.finishedNotRanked).length;
-    final parts = [
-      if (caught > 0) '$caught caught up',
-      if (waiting > 0) '$waiting finished and waiting to be ranked',
-    ];
-    return parts.isEmpty ? null : '+ ${parts.join(' · ')}';
-  }
-
   /// `FINISHED` titles by `finished_at`, newest first.
   List<TrackingItem> finishedHistory() {
     final done = items.where((i) => i.state == TrackingState.finished).toList()

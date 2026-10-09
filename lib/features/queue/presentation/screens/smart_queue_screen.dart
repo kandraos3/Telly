@@ -21,8 +21,6 @@ import 'package:telly_app/features/queue/domain/streaming_models.dart';
 import 'package:telly_app/features/queue/domain/up_next_picker.dart';
 import 'package:telly_app/features/queue/presentation/widgets/queue_row.dart';
 import 'package:telly_app/features/queue/presentation/widgets/up_next_card.dart';
-import 'package:telly_app/features/title_detail/data/title_detail_repository.dart';
-import 'package:telly_app/features/title_detail/domain/title_detail_models.dart';
 import 'package:telly_app/features/tracking/presentation/widgets/tracking_actions.dart';
 
 /// Provider for user's universal watchlist items (FE-609).
@@ -506,21 +504,10 @@ class _SmartQueueScreenState extends ConsumerState<SmartQueueScreen> with Single
   /// Start watching from the Queue (features/11 §4.1): the title page's flow, fed from the cached
   /// detail. A series we can't describe offline opens its page instead.
   Future<void> _startWatching(WatchlistItem item) async {
-    TitleDetail? detail;
-    try {
-      detail = await ref.read(titleDetailRepositoryProvider).fetchTitleDetail(id: item.showId, mediaType: item.mediaType);
-    } catch (_) {}
-    if (!mounted) return;
-    if (detail == null && item.mediaType == 'tv') {
-      context.push(Routes.title(item.mediaType, item.showId));
-      return;
-    }
-    final title = detail ?? TitleDetail(id: item.showId, mediaType: item.mediaType, title: item.title, posterPath: item.posterPath);
-    await TrackingActions.startWatching(
+    await TrackingActions.startFromQueue(
       context,
       ref,
-      title,
-      wasQueued: true,
+      item,
       // Leaving the Queue hides the row at once; Undo brings it back.
       onQueueChanged: (inQueue) {
         if (!mounted) return;

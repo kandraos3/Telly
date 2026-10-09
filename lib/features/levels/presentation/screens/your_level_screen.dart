@@ -16,14 +16,31 @@ import '../widgets/level_widgets.dart';
 /// `SCR-27` Your level (`/more/level`, features/10 §9.7, mockup B1; #146): the level ring and
 /// bar, the weekly streak with its 7-week strip, this week's quests, and links to Rewards and
 /// Friends this week. "?" explains how XP is earned.
-class YourLevelScreen extends ConsumerWidget {
+class YourLevelScreen extends ConsumerStatefulWidget {
   const YourLevelScreen({super.key});
 
   static Future<void> showRules(BuildContext context) =>
       TellyFrostedSheet.show<void>(context: context, builder: (_) => const XpRulesTable());
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<YourLevelScreen> createState() => _YourLevelScreenState();
+}
+
+class _YourLevelScreenState extends ConsumerState<YourLevelScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Home keeps the level alive from launch, so XP earned since then needs a fresh read on every visit. The first
+    // read of a session is already fresh.
+    if (ref.exists(yourLevelControllerProvider)) {
+      Future.microtask(() {
+        if (mounted) ref.invalidate(yourLevelControllerProvider);
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final async = ref.watch(yourLevelControllerProvider);
     final data = async.valueOrNull;
     return Scaffold(
@@ -35,7 +52,7 @@ class YourLevelScreen extends ConsumerWidget {
             key: const Key('level_rules'),
             icon: Icons.help_outline_rounded,
             tooltip: 'How XP works',
-            onPressed: () => showRules(context),
+            onPressed: () => YourLevelScreen.showRules(context),
           ),
         ],
       ),

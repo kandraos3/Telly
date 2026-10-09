@@ -263,8 +263,8 @@ journey
 - **Where**: `integration_test/helpers/tracking_journeys.dart`, run on the emulator by `cuj_06_tracking_test.dart` and on the host by `test/integration/tracking_journeys_test.dart`. Tracking goes through the real `TrackingRepository`, Drift `TrackingCache`, offline queue and `SyncEngine`; a fake server applies the rules that pgTAP verifies against Postgres.
 - **Workflow**:
   1. Open a series from the Queue → **Start watching** → *I'm partway through* at S1 · E7 of 8 → the title leaves the Queue and Home's Tonight hero shows "S1 · E8".
-  2. **✓ Watched E8** → **Undo** → the place is S1 · E7 again → **✓ Watched E8** again.
-  3. The show has ended, so the finish sheet opens with *Finished whole series* selected → **Log and duel** → SCR-09 opens with that status → finish the duels → the series is ranked and moves to *Caught up* in the hub.
+  2. On Home, tap **✓ Watched E8** on the Tonight hero. The show has ended, so the finish sheet opens → **Later** → **Undo** → the place is S1 · E7 again and the hero reads **✓ Watched E8** again.
+  3. **✓ Watched E8** from the hero again → the finish sheet opens with *Finished whole series* selected → **Later**. Home now offers a **Rank it** move for the series → its **Log and duel** opens SCR-09 with that status → finish the duels → the series is ranked and moves to *Caught up* in the hub.
   4. Go offline, un-log E8 from the title page, go online → after sync the server row's place is S1 · E7.
 
 #### Explore rows (features/07 §7; #183)

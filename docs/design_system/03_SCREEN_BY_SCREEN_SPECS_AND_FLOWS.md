@@ -985,19 +985,20 @@ The hero shows the first mode that applies (`HomeHeroPicker`, §21.5):
 
 | Mode | When | Eyebrow · title · meta | Buttons |
 |---|---|---|---|
-| **Watching** | a tracked title is in *New episodes* or *In progress* (features/11 §2.3) | "UP NEXT · SEVERANCE" · `S2 · E6 "Attila"` ("Episode 6" without a cached name) · runtime, first streaming provider, "N left this season" | **✓ Watched E6** · **Details** |
-| **Queue** | none of the above, and the Queue isn't empty | "UP NEXT FROM YOUR QUEUE" · title · "Movie · 2h 46m · on Max" or "Series · 3 seasons · on Max" | **▶ Start watching** · **↻ Another** (hidden with one title) |
+| **Watching** | a tracked title is in *New episodes* or *In progress* (features/11 §2.3) | "UP NEXT · SEVERANCE" · `S2 · E6 "Attila"` (`S2 · E6` without a cached name) · runtime ("52 min") and "N left this season", when known | **✓ Watched E6** · **Details** |
+| **Queue** | none of the above, and the Queue isn't empty | "UP NEXT FROM YOUR QUEUE" · title · "Movie · 2 h 46 · on Max" or "Series · 3 seasons · on Max" (the provider only when known) | **▶ Start watching** · **↻ Another** (hidden with one title) |
 | **New user** | no ranking in either canon, nothing tracked, and an empty Queue | "WELCOME TO TELLY" · "Start your canon" · "Log one movie or show you love. Telly ranks everything after it head to head." | **+ Log a title** |
 | **Explore** | everything else (you have rankings, nothing is tracked, the Queue is empty) | "NOTHING ON TONIGHT" · "Find your next watch" · "Explore has picks from your canon" | **Open Explore** |
 
 - **Watching mode:**
   - **Which title:** the newest `last_progress_at` across both groups, with ties going to *New episodes*. Both canons are eligible.
-  - **New episodes:** the eyebrow reads "SEASON 3 IS OUT" or "E4 IS OUT" (features/11 §4.8) in amber `#FFA733`.
+  - **New episodes:** the eyebrow reads "SEVERANCE · SEASON 3 IS OUT" or "SEVERANCE · E4 IS OUT" (features/11 §4.8) in amber `#FFA733`. It names the show because the title line is the episode.
   - **Movie:** the eyebrow reads "WATCHING · MOVIE", the meta reads "Started yesterday", and the primary button is **✓ Finished**.
   - **Progress line:** 3 dp along the bottom, lime on white at 18%. It shows the share of released episodes before your place (features/11 §3.4). Movies have none.
   - **✓ Watched E6** runs the same action as the title page (features/11 §4.2): the Undo toast, the finish sheet after the last episode (§4.5), and a long press that offers *Un-log S2 · E5* (§4.3). **✓ Finished** runs the movie finish (§2.5).
   - The hero then picks again, so it can move on to the next episode or another title.
-  - **Details** opens the title.
+  - **Details** opens the title. So does a tap anywhere else on the card: the text lets taps through to the art.
+  - The Undo toast from **✓ Watched** (and from ↻-less actions on this card) floats above the Log button, so Undo isn't covered.
 - **Queue mode:**
   - **The pool** is the whole Queue: movies and series together, ignoring the Queue's filters.
   - **The pick** is random and kept for the app session. ↻ re-rolls it. It uses `UpNextPicker` under its own key, `home`, so it's separate from the Queue screen's picks.
@@ -1012,12 +1013,12 @@ The hero shows the first mode that applies (`HomeHeroPicker`, §21.5):
 #### 21.3 Your moves (key `home_moves`)
 A `TellySectionHeader` reading "YOUR MOVES", then **at most 4** move cards. The section is hidden when there are none.
 - **Card:** Surface, 1 dp stroke, radius 14, 10 dp padding.
-- **Contents:** a 34 dp icon tile (radius 10, the move's accent at 16% with the glyph in that accent), then a kicker (9 sp, uppercase, accent), a title (12.5 sp, bold) and a meta line, then one small trailing button.
+- **Contents:** a 34 dp icon tile (radius 10, the move's accent at 16% with the glyph in that accent), then a kicker (9 sp, uppercase, accent), a title (12.5 sp, bold, one line) and a meta line (up to two lines), then one small trailing button.
 - Tapping anywhere on the card does what its button does.
 
 | Move | Shows when | Kicker · title · meta | Button | Accent |
 |---|---|---|---|---|
-| `rankFinished` | a tracked title in *Finished, not ranked* that was finished in the last 14 days | RANK IT · "You finished The Bear" · "Series · yesterday" | **Log and duel** (lime): opens Log with the watch status prefilled, as the finish sheet does (features/11 §4.5) | lime |
+| `rankFinished` | a tracked title in *Finished, not ranked* that was finished in the last 14 days | RANK IT · "You finished The Bear" · "Series · yesterday" ("You're caught up on <title>" for a series you're caught up on) | **Log and duel** (lime): opens Log with the watch status prefilled, as the finish sheet does (features/11 §4.5) | lime |
 | `newEpisodes` | a *New episodes* title other than the hero's | NEW EPISODES · "Shōgun: Season 2 is out" · "You're caught up on S1" | **Resume**: opens the title | amber |
 | `streakAtRisk` | `currentWeeks ≥ 1`, the running week is still `current` (not counted), and it's Thursday or later | KEEP YOUR STREAK · "Rank 1 title by Sunday" · "Your 6-week streak needs one ranking this week" | **+ Log** (lime) | amber Thursday and Friday; coral `#FF4B6E` Saturday and Sunday |
 | `challenge` | a joined, unfinished challenge that ends within 3 days or is at least 75% done | CHALLENGE · "Heist Month: 4 of 8" · "9 days left" ("Ends tomorrow", "Ends today") | **Open**: opens the challenge | amber |
@@ -1050,7 +1051,7 @@ A `TellySectionHeader` reading "YOUR MOVES", then **at most 4** move cards. The 
 A `TellySectionHeader` reading "FRIENDS" with **Social ›**, then one Surface card:
 - up to 3 overlapping 26 dp avatars, for the most recent distinct friends;
 - a title: "Maya, Jordan and 4 others", "Maya and Jordan", or "Maya";
-- a meta line: "ranked 9 titles today", counting today's `rankingCreated` and `upsetAlert` items from friends in the loaded Following feed. With none today, it shows the newest item's sentence instead ("Maya started watching Severance · 2h"), using the verbs Home uses today (features/04, features/11 §7.2).
+- a meta line: "ranked 9 titles today", counting today's `rankingCreated` and `upsetAlert` items from friends in the loaded Following feed. With none today, the line shows only the newest friend, and the meta is the rest of their sentence ("started watching Severance · 2h"), using the verbs Home uses today (features/04, features/11 §7.2).
 
 Your own posts, medal posts and challenge posts are left out. Tapping the card opens Social. The line is hidden when you follow nobody (the `findFriends` move covers that) or when the feed has nothing from friends.
 
@@ -1061,14 +1062,15 @@ Your own posts, medal posts and challenge posts are left out. Tapping the card o
   - `profileCanonProvider`, for whether you have rankings and for your rank and score in comparisons;
   - `yourLevelControllerProvider`, for the streak;
   - `challengesControllerProvider`;
-  - `feedControllerProvider(FeedFilter.following)`, plus whether you follow anyone.
+  - `feedControllerProvider(FeedFilter.following)`. The app has no follow count, so "you follow nobody" means no one but you appears in that feed. Until the feed answers, Home assumes you follow someone, so the find-friends move doesn't flash in.
 
   There's no backend change.
 - **Pure Dart**, in `lib/features/home/domain/`, with plain inputs and `now` passed in so the weekday rules can be tested:
   - `HomeHeroPicker.pick(...) → HomeHero`: the mode, plus the tracked item or the Queue pick;
   - `HomeMovesRanker.rank(...) → List<HomeMove>`: the tables in §21.3;
   - `FriendsLine.from(feed, me, now)`.
-- **`homeStateProvider`** derives one `HomeState` from the sources, so widgets hold no logic. A source that's loading or has failed counts as empty.
+- **`homeStateProvider`** (`lib/features/home/presentation/providers/home_providers.dart`) derives one `HomeState` from the sources, so widgets hold no logic. A source that's loading or has failed counts as empty. The hero follows the data at once. The moves are frozen once shown and re-derive on `refresh()` (which first reads the level and challenges again, so a streak you just kept drops its move) and whenever a source answers for the first time, so late data (level, challenges, feed) still fills in without re-sorting what's on screen.
+- **The Queue pick** is `homeQueuePickProvider`: an `UpNextPicker` under the key `home`, over the whole Queue (movie and series ids are folded into one key, `HomeQueueKey`), kept for the app session.
 - **Removed:**
   - `HomeCurrentlyWatching`;
   - Home's `_CanonSection` and `_FriendsSection`;
