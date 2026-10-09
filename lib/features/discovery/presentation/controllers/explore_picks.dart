@@ -49,7 +49,7 @@ Future<ExploreRows?> _rows(Ref ref, String mediaType) async {
 }
 
 /// My best picks across both canons (the hero, then Top picks), alternating movie and series:
-/// the Home feed's recommendation cards (#182) take them from here, not get_recommended_titles.
+/// the Home feed's recommendation cards (#182) take them from here.
 final explorePicksProvider = FutureProvider<List<RecommendedTitle>>((ref) async {
   List<RecommendedTitle> picks(ExploreRows? rows) => rows == null
       ? const []
