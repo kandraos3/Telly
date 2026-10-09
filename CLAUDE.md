@@ -71,13 +71,14 @@ Every agent operates as a senior pair programmer and autonomous software enginee
 - **A behaviour change updates its spec in the same commit.** Spec and code must never disagree. Record non-obvious product or architecture choices in [`docs/decisions/`](file:///c:/Users/karla/Desktop/SeriesBeli/docs/decisions/).
 - Deferred or discovered work becomes a new issue, never a silent TODO.
 
-### Rule 6: One Branch and One Pull Request per Issue
+### Rule 6: One Branch and One Pull Request per Issue (or Epic)
 - **`main` is protected.** Nothing is pushed to it directly. A pull request merges only when the `CI passed` and `PR title` checks pass. Full rules: [`docs/process/WORKFLOW.md`](file:///c:/Users/karla/Desktop/SeriesBeli/docs/process/WORKFLOW.md) §6.
-- Start each issue on a fresh branch from an up-to-date `main`, named `<type>/<N>-<slug>`:
+- **For standalone issues (bugs, chores, single tasks):** Start each issue on a fresh branch from an up-to-date `main`, named `<type>/<N>-<slug>`:
   ```bash
   git switch main && git pull --ff-only && git switch -c fix/152-edge-jwt
   ```
-- **One issue per branch, one pull request per issue.** An epic's tasks each get their own PR; an epic never gets one PR.
+  Open one pull request for this issue.
+- **For epics (Integration Branches):** Start a single integration branch for the entire epic from an up-to-date `main`, named `epic/<N>-<slug>` (where N is the epic's Implement stage issue number). For every task issue inside that epic, commit directly to this epic branch using the task issue number in the commit message. Once all tasks are complete, open **one pull request for the entire epic**.
 - Commit on the branch as often as useful (`<type>(<scope>): <description>`). PRs are squash-merged, so the **PR title** becomes the one atomic commit on `main`: `<type>(<scope>): <concise description>`, with no `(#N)` (GitHub appends the PR number). Examples:
   - `feat(explore): add "Because you ranked X" carousel rows`
   - `fix(theme): raise lime contrast on light-mode canon rows`
