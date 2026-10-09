@@ -14,8 +14,6 @@ INSERT INTO auth.users (id, email) VALUES
     ('f3700000-0000-0000-0000-00000000000e', 'e@reads.dev'),
     ('f3700000-0000-0000-0000-00000000000f', 'f@reads.dev'),
     ('f3700000-0000-0000-0000-000000000010', 'g@reads.dev');
-UPDATE public.users SET visibility_mode = 'FRIENDS_ONLY' WHERE id = 'f3700000-0000-0000-0000-00000000000c';
-UPDATE public.users SET visibility_mode = 'GHOST' WHERE id = 'f3700000-0000-0000-0000-00000000000d';
 UPDATE public.users SET timezone = 'America/New_York' WHERE id = 'f3700000-0000-0000-0000-00000000000a';
 
 INSERT INTO public.social_follows (follower_id, following_id, status)
@@ -24,9 +22,9 @@ FROM unnest(ARRAY[
     'f3700000-0000-0000-0000-00000000000b', 'f3700000-0000-0000-0000-00000000000c',
     'f3700000-0000-0000-0000-00000000000d', 'f3700000-0000-0000-0000-00000000000e',
     'f3700000-0000-0000-0000-000000000010']::UUID[]) AS u;
--- The insert trigger sets pending for non-public targets; accept them.
-UPDATE public.social_follows SET status = 'accepted'
-WHERE follower_id = 'f3700000-0000-0000-0000-00000000000a';
+-- Follow while everyone is public (the insert trigger refuses ghosts), then change modes.
+UPDATE public.users SET visibility_mode = 'FRIENDS_ONLY' WHERE id = 'f3700000-0000-0000-0000-00000000000c';
+UPDATE public.users SET visibility_mode = 'GHOST' WHERE id = 'f3700000-0000-0000-0000-00000000000d';
 INSERT INTO public.user_blocks (blocker_id, blocked_id)
 VALUES ('f3700000-0000-0000-0000-00000000000e', 'f3700000-0000-0000-0000-00000000000a');
 
